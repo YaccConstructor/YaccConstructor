@@ -13,6 +13,14 @@ open Set
 open System
 open Log
 
+// debug = true - печатается трасса. Иначе нет.
+let debug = false
+
+//interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
+let interacive = true
+
+let start_time = ref System.DateTime.UtcNow                                   
+
 type Symb = 
      |Term of char
      |NTerm of char
@@ -48,14 +56,12 @@ let items =
 
 let Q = Set.union_all (Set.of_list[Item('S',[NTerm('E');Dot(' ',1)])]::items)
 
-
 let getText a (x,y,z)= 
     match a 
     with 
     |Term(t) -> if x = 0 then ' ' else t 
     |NTerm(t)-> if y = 0 then ' ' else t
     |Dot(t,i)  -> if z = 0 then ' ' else t 
-    
     
 //запоминалка. Используем для запоминания результатов ф-ий parse и climb   
 let memoize (f: 'a ->'b) =
@@ -69,6 +75,9 @@ fun a ->
     in
     t.Add(a,res);
     res    
+       
+do start_time := System.DateTime.UtcNow;
+   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.UtcNow
     
 let closure = 
     memoize(fun q -> 
@@ -126,7 +135,7 @@ let rec prev dlst =
 let closure_set = 
     let t = System.Collections.Generic.Dictionary<item,Set<item>>()
     in
-    Set.map (fun x -> t.Add(x,closure (Set.add  x empty)))Q;
+    Set.iter (fun x -> t.Add(x,closure (Set.add  x empty)))Q;
     t
 
 let goto_set = 
@@ -138,75 +147,84 @@ let goto_set =
     in
     let t = System.Collections.Generic.Dictionary<(item*char),Set<item>>() 
     in
-    List.map (fun x-> (Set.map (fun y-> t.Add((y,x),(make_goto (add y empty)) x)))Q) lex_list;
+    List.iter (fun x-> (Set.iter (fun y-> t.Add((y,x),(make_goto (add y empty)) x)))Q) lex_list;
     t  
-           
+//это предпросчёт goto. сам анализатор тогда работает быстрее. (closure - очень дорогая операция)           
 let goto (q,x) = union_all (Set.map (fun y -> goto_set.[(y,x)])q )
                        
 let ItNext (Item(a,lst)) = Item(a,next lst)
 let ItPrev (Item(a,lst)) = Item(a,prev lst)
-                 
+   
+let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
+   
+do printfn "End time: %A Total: %A" System.DateTime.UtcNow (System.DateTime.UtcNow - (!start_time))
+
 let rec climb =
     memoize (fun (q,x,i) -> 
-    //print_climb_1 i x q;
+    if debug then print_climb_1 i x q;
     if q = empty
     then empty
     else
     let gt =  goto (q,x)
     in
-    //print_climb_2 gt;
+    if debug then print_climb_2 gt;
     let new_q = parse (gt,i)
     in 
-    let union_from_Some set = Set.map (fun (Some(x)) -> x)(Set.filter ((<>)None)(of_list set))
-    in                        
-    //print_climb_3 new_q;
+    if debug then print_climb_3 new_q;
     if Set.exists (fun x->x = (Item('S',[NTerm('E');Dot(' ',1)]),[]))new_q
     then new_q
     else    
     Set.union_all
-    [ union_from_Some[for x1 in new_q -> 
-                          if Set.exists (fun (Item(ch,lst) as y) -> 
-                                             (ItNext y) = (fst x1)
-                                             &&(function Dot(_)::tl-> false
-                                                        |[]        -> false
-                                                        | _        -> true)lst
-                                          )q
-                           then Some((ItPrev (fst x1)),snd x1)
-                           else None]
+    [Set.filter (fun x1-> 
+                   Set.exists (fun (Item(ch,lst) as y) -> 
+                                   (ItNext y) = (fst x1)
+                                   &&(function Dot(_)::tl-> false
+                                              |[]        -> false
+                                              | _        -> true)lst
+                               )q)new_q
+     |>Set.map (fun x1->((ItPrev (fst x1)),snd x1))                      
+    
     ;
     Set.union_all(
     union_from_Some[for (Item(a,hd::tl),str) in new_q -> 
-                        if getText hd (1,1,1)=x && not(a='S')&&(function Dot(_)::tl->true                                                             
-                                                                        | _        -> false)tl
+                        if getText hd (1,1,1)=x &&(a<>'S')&&(function Dot(_)::tl->true | _ -> false)tl
                         then Some(climb (q, a, str))
                         else None])
     ])                
 
 and parse = 
     memoize (fun (q,i) -> 
-    //print_parse q i;
-    let m_fun lst = union_all (of_list (List.map (fun (Some(x)) -> x)(List.filter((<>)None) lst)))
-    in                
+    if debug  then print_parse q i;    
     union_all
         [map (fun x -> (x,i))(Set.filter (fun(Item(a,lst))-> (List.hd (List.rev lst)) = Dot(' ',1))q)
          ;if i = [] then empty else climb (q,  (List.hd i), (List.tl i))
-         ;m_fun [for (Item(a,lst)) in Q -> match lst 
-                                           with
-                                           | NTerm('`')::[]->Some (climb (q, a, i))
-                                           | _             ->None]
+         ;union_from_Some[for (Item(a,lst)) in Q -> match lst 
+                                                    with
+                                                    | NTerm('`')::[]->Some (climb (q, a, i))
+                                                    | _             ->None]|> union_all 
          ])
-         
-// БАГА!!!!         
-let p =  System.DateTime.UtcNow        
-let c = parse (items.Head, 
-//ниже - правильная строка 09.12.2008 разобрал за 1мин.45сек.(уже 20 сек.) (И это вместо нескольких десятков минут!!!)
-//  ['a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')'] 
-//ниже - правильная строка 09.12.2008 разобрал за примерно 45мин.
-['a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')']  
-//ниже - неправильная строка
-//['a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'a';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';'+';'(';'a';'*';'a';'*';'(';'a';'+';'a';')';'*';'+';'a';'*';'a';'*';'(';'a';'+';'a';')';')']  
- )
-//незабудь исправить багу!!
-//сейчас ему пофиг, на то, какого типа параметр Х в climb. Это неверно!!!!
+                 
+let res str = 
+    start_time:=System.DateTime.UtcNow;
+    printfn "Start time: %A" System.DateTime.UtcNow;
+    not(parse (items.Head,Seq.to_list str)=empty)
+ 
+let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
+
+let test_str2 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
+
+let test_str3 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
      
-do print_any p ;Console.WriteLine("\n Result ::: \n");print_any(c);print_any(System.DateTime.UtcNow);(Console.ReadLine();())        
+do let str = 
+       if interacive
+       then 
+        (Console.WriteLine("Insert string:"); 
+        Console.ReadLine())
+       else
+        test_str2 
+   in     
+   let r = res(str) in
+   printfn "Result : %A" r;
+   Console.WriteLine();
+   printfn "End time: %A Total: %A" System.DateTime.UtcNow (System.DateTime.UtcNow - (!start_time));   
+   Console.ReadLine()|>ignore

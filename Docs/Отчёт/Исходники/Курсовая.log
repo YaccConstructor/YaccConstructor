@@ -1,0 +1,290 @@
+This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2008.12.16)  24 DEC 2008 17:19
+entering extended mode
+**G:/курсовая/Курсовая.tex
+(G:/курсовая/Курсовая.tex
+LaTeX2e <2005/12/01>
+Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
+rman, ngerman, german-x-2008-06-18, ngerman-x-2008-06-18, french, loaded.
+("C:\Program Files\MiKTeX 2.7\tex\latex\base\article.cls"
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+("C:\Program Files\MiKTeX 2.7\tex\latex\base\size12.clo"
+File: size12.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+("C:\Program Files\MiKTeX 2.7\tex\latex\base\inputenc.sty"
+Package: inputenc 2006/05/05 v1.1b Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+("C:\Program Files\MiKTeX 2.7\tex\latex\cyrillic\cp1251.def"
+File: cp1251.def 1999/11/16 v1.0d Input encoding file
+))
+("C:\Program Files\MiKTeX 2.7\tex\generic\babel\babel.sty"
+Package: babel 2008/07/06 v3.8l The Babel package
+
+*************************************
+* Local config file bblopts.cfg used
+*
+("C:\Program Files\MiKTeX 2.7\tex\latex\00miktex\bblopts.cfg"
+File: bblopts.cfg 2006/07/31 v1.0 MiKTeX 'babel' configuration
+)
+("C:\Program Files\MiKTeX 2.7\tex\generic\babel\english.ldf"
+Language: english 2005/03/30 v3.3o English support from the babel system
+
+("C:\Program Files\MiKTeX 2.7\tex\generic\babel\babel.def"
+File: babel.def 2008/07/06 v3.8l Babel common definitions
+\babel@savecnt=\count87
+\U@D=\dimen103
+)
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+)
+("C:\Program Files\MiKTeX 2.7\tex\generic\babel\russianb.ldf"
+Language: russianb 2008/03/21 v1.1r Russian support from the babel system
+
+
+Package babel Warning: No hyphenation patterns were loaded for
+(babel)                the language `Russian'
+(babel)                I will use the patterns loaded for \language=0 instead.
+
+\l@russian = a dialect from \language0
+("C:\Program Files\MiKTeX 2.7\tex\latex\cyrillic\t2aenc.def"
+File: t2aenc.def 2005/09/27 v1.0i Cyrillic encoding definition file
+)
+Package babel Info: Making " an active character on input line 199.
+))
+("C:\Program Files\MiKTeX 2.7\tex\latex\graphics\graphicx.sty"
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX 2.7\tex\latex\graphics\keyval.sty"
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks16
+)
+("C:\Program Files\MiKTeX 2.7\tex\latex\graphics\graphics.sty"
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX 2.7\tex\latex\graphics\trig.sty"
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+("C:\Program Files\MiKTeX 2.7\tex\latex\00miktex\graphics.cfg"
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+("C:\Program Files\MiKTeX 2.7\tex\latex\pdftex-def\pdftex.def"
+File: pdftex.def 2008/09/08 v0.04l Graphics/color for pdfTeX
+\Gread@gobject=\count88
+))
+\Gin@req@height=\dimen104
+\Gin@req@width=\dimen105
+) (Курсовая.aux
+LaTeX Font Info:    Try loading font information for T2A+cmr on input line 3.
+("C:\Program Files\MiKTeX 2.7\tex\latex\cyrillic\t2acmr.fd"
+File: t2acmr.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
+))
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+
+("C:\Program Files\MiKTeX 2.7\tex\context\base\supp-pdf.tex"
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count89
+\scratchdimen=\dimen106
+\scratchbox=\box26
+\nofMPsegments=\count90
+\nofMParguments=\count91
+\everyMPshowfont=\toks17
+\MPscratchCnt=\count92
+\MPscratchDim=\dimen107
+\MPnumerator=\count93
+\everyMPtoPDFconversion=\toks18
+)
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 27.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 27.
+ [1
+
+{C:/ProgramData/MiKTeX/2.7/pdftex/config/pdftex.map}] (Курсовая.toc
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 6.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 6.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 6.
+)
+\tf@toc=\write3
+
+[2
+
+]
+Underfull \hbox (badness 2521) in paragraph at lines 34--35
+\T2A/cmr/m/n/12 свободную грамматику. Необходимо существенно преобразовать его 
+спецификацию, которая
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 36--38
+[] \T2A/cmr/m/n/12 При поддержке нескольких диалектов языка необходима возможно
+сть лјгкой
+ []
+
+
+Underfull \hbox (badness 2302) in paragraph at lines 41--42
+\T2A/cmr/m/n/12 Анализатор, построенный с помощью данного алгоритма, в результа
+те разбора строит не
+ []
+
+
+Underfull \hbox (badness 3407) in paragraph at lines 43--44
+[] \T2A/cmr/m/n/12 Стоит отметить, что по производительности такой анализатор, 
+являясь некоторой
+ []
+
+
+Underfull \hbox (badness 2512) in paragraph at lines 43--44
+\T2A/cmr/m/n/12 надстройкой над LR-анализатором, незначительно ему уступает. 
+На сегодняшний день в
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 48.
+("C:\Program Files\MiKTeX 2.7\tex\latex\base\omscmr.fd"
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 48.
+
+Underfull \hbox (badness 2213) in paragraph at lines 50--51
+[]\T2A/cmr/m/n/12 В рамках .NET есть возможность легко комбинировать функционал
+ьный и объектно
+ []
+
+[3
+
+]
+Underfull \hbox (badness 1831) in paragraph at lines 69--70
+ \T2A/cmr/m/n/12 Планируется расширить представление конструкциями для расширен
+ных регулярных
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 71--72
+[] \T2A/cmr/m/n/12 Так как для реализации GLR-алгоритма требуется построение LR
+(k) таблицы
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 71--72
+\T2A/cmr/m/n/12 и предварительный анализ и преобразоване грамматики [[]],наприм
+ер удаление циклов
+ []
+
+LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 72.
+
+("C:\Program Files\MiKTeX 2.7\tex\latex\cyrillic\t2acmtt.fd"
+File: t2acmtt.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
+)
+Underfull \hbox (badness 2547) in paragraph at lines 82--83
+\T2A/cmr/m/n/12 на платформе .NET и реализации его на функциональном языке прог
+раммирования F#.
+ []
+
+
+Underfull \hbox (badness 7326) in paragraph at lines 86--87
+[] \T2A/cmr/m/n/12 Предпочтительным алгоритмам анализа является алгоритм разбор
+а произвольной
+ []
+
+
+Underfull \hbox (badness 1242) in paragraph at lines 88--89
+[] \T2A/cmr/m/n/12 Так как язык программирования F# является функциональным, то
+ особый интерес
+ []
+
+[4] [5]
+Underfull \hbox (badness 3029) in paragraph at lines 143--144
+[] \T2A/cmr/m/n/12 Используя рекурсивно-восходящий алгоритм можно получить экви
+валент алгоритму
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 165--166
+[] \T2A/cmr/m/n/12 Дополнительного ускорения можно добиться заранее вычислив фу
+нкцию go-to.
+ []
+
+
+Underfull \hbox (badness 1642) in paragraph at lines 165--166
+\T2A/cmr/m/n/12 Действительно, построение замыкания (clo-sure), необходимое для
+ вычисления функции go-to
+ []
+
+
+Underfull \hbox (badness 4981) in paragraph at lines 172--173
+[] \T2A/cmr/m/n/12 Для того, чтобы построить табличный LR анализатор необходимо
+ преобразовать
+ []
+
+[6]
+Underfull \hbox (badness 1365) in paragraph at lines 174--175
+\T2A/cmr/m/n/12 анализатора, без преобразований входной грамматики [[]]. Для эт
+ого нужно переопределить
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 183--184
+[]\T2A/cmr/m/it/12 Чемоданов И.С. \T2A/cmr/m/n/12 Генератор синтаксических анал
+изаторов для решения задач
+ []
+
+[7] (Курсовая.aux) ) 
+Here is how much of TeX's memory you used:
+ 1774 strings out of 95304
+ 20854 string characters out of 1183069
+ 74409 words of memory out of 1500000
+ 4976 multiletter control sequences out of 110000
+ 15363 words of font info for 37 fonts, out of 3000000 for 5000
+ 14 hyphenation exceptions out of 8191
+ 25i,6n,24p,750b,259s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi60
+0\lati1200.pk> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt
+1200.pk> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1440.p
+k> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk> <C:
+\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1728.pk> <C:\Progr
+amData\MiKTeX\2.7\fonts\pk\ljfour\unknown\unknown\dpi600\larm1200.pk> <C:\Progr
+amData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\lasl1200.pk> <C:\ProgramData
+\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1440.pk> <C:\ProgramData\MiKTe
+X\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm2074.pk><C:/Program Files/MiKTeX 2.7
+/fonts/type1/bluesky/cm/cmex10.pfb><C:/Program Files/MiKTeX 2.7/fonts/type1/blu
+esky/cm/cmmi12.pfb><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr12.pf
+b><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr8.pfb><C:/Program File
+s/MiKTeX 2.7/fonts/type1/bluesky/cm/cmsy10.pfb>
+Output written on Курсовая.pdf (7 pages, 181508 bytes).
+PDF statistics:
+ 478 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLR", "IL\GLR.fsproj", "{D1437F9E-B01E-48AF-912E-4AF72AC36C89}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test_runner", "Test_runner\Test_runner.fsproj", "{CEC4AFFD-81A9-49D7-973F-A3F31AD1FB21}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Pasrser", "Pasrser\Pasrser.fsproj", "{B576830C-4A4C-4E00-BE7C-E7731232C96F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1437F9E-B01E-48AF-912E-4AF72AC36C89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1437F9E-B01E-48AF-912E-4AF72AC36C89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1437F9E-B01E-48AF-912E-4AF72AC36C89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1437F9E-B01E-48AF-912E-4AF72AC36C89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEC4AFFD-81A9-49D7-973F-A3F31AD1FB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEC4AFFD-81A9-49D7-973F-A3F31AD1FB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEC4AFFD-81A9-49D7-973F-A3F31AD1FB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEC4AFFD-81A9-49D7-973F-A3F31AD1FB21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B576830C-4A4C-4E00-BE7C-E7731232C96F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B576830C-4A4C-4E00-BE7C-E7731232C96F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B576830C-4A4C-4E00-BE7C-E7731232C96F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B576830C-4A4C-4E00-BE7C-E7731232C96F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

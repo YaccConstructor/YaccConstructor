@@ -13,7 +13,7 @@ open System
 open Log
 
 // debug = true - печатается трасса. Иначе нет.
-let debug = true
+let debug = false
 
 //interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
 let interacive = false
@@ -49,11 +49,14 @@ let next_set =
         List.map (fun lst -> (List.map (fun (i,j,s)->(if j+1 = (List.length lst) then ((i,j),(i,-1)) else ((i,j),(i,j+1))))) lst) _items
     
 let get,_next,_print = 
-    let _lex_list = ref   (Seq.to_list "a+a*a**(a+a)$")
-                         //(Seq.to_list "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))$")
+    let _lex_list = ref   //(Seq.to_list "a+a*a**(a+a)$")
+                         (Seq.to_list //"a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))$")
                                       //"a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))$")
+                                      "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a+*(a+a))$")
     in
-    let get () =  List.hd !_lex_list
+    let l = List.length !_lex_list
+    in
+    let get i =  List.nth !_lex_list (l-i)
     in
     let next () = _lex_list := if !_lex_list = [] 
                               then []
@@ -194,7 +197,7 @@ do printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (
 
 let rec climb =
     memoize (fun (q,x,i) -> 
-    if debug then print_climb_1 (_print()) x q;
+    if debug then print_climb_1 i x q;
     if q = empty
     then empty
     else
@@ -204,22 +207,22 @@ let rec climb =
     let new_q = parse (gt,i)
     in 
     if debug then print_climb_3 new_q;
-    if Set.exists (fun x->x = (Item('S',[NTerm('E');Dot(' ',1)])))new_q
+    if Set.exists (fun x->x = (Item('S',[NTerm('E');Dot(' ',1)]),1))new_q
     then new_q
     else    
     Set.union_all                            
     [Set.filter (fun x1-> 
                    Set.exists (fun (Item(ch,lst) as y) -> 
-                                   (ItNext y) = x1
+                                   (ItNext y) = fst x1
                                    &&(function Dot(_)::tl-> false
                                               |[]        -> false
                                               | _        -> true)lst
                                )q)new_q
-     |>Set.map (fun x1->((ItPrev (x1))))                      
+     |>Set.map (fun x1->((ItPrev (fst x1),snd x1)))                      
     
     ;
     Set.union_all(
-    union_from_Some[for (Item(a,hd::tl)) in new_q -> 
+    union_from_Some[for (Item(a,hd::tl),i) in new_q -> 
                         if getText hd (1,1,1)=x && (a<>'S')&&(function Dot(_)::tl->true | _ -> false)tl
                         then Some(climb (q,a,i))
                         else None])
@@ -227,10 +230,10 @@ let rec climb =
 
 and parse = 
     memoize (fun (q,i) -> 
-    if debug  then print_parse q (_print());    
+    if debug  then print_parse q i;    
     union_all
-        [map (fun x -> x )(Set.filter (fun(Item(a,lst)) -> (List.hd (List.rev lst)) = Dot(' ',1))q)
-         ;if (let p = get()in p = '$') then empty else (let x = get () in _next();climb (q,  (*(List.hd i)*)x,i-1))
+        [map (fun x -> (x,i) )(Set.filter (fun(Item(a,lst)) -> (List.hd (List.rev lst)) = Dot(' ',1))q)
+         ;if (let p = get(i)in p = '$') then empty else (let x = get (i) in (*_next()*)climb (q,  (*(List.hd i)*)x,i-1))
          ;union_from_Some[for (Item(a,lst)) in Q -> match lst 
                                                     with
                                                     | NTerm('`')::[]->Some (climb (q, a,i))

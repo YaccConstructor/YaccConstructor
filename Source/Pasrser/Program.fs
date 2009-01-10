@@ -6,7 +6,6 @@
 
 //Как видно, грамматика неоднознаная.
 
-
 #light "off"
 
 open Set
@@ -14,16 +13,16 @@ open System
 open Log
 
 // debug = true - печатается трасса. Иначе нет.
-let debug = false
+let debug = true
 
 //interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
-let interacive = true
+let interacive = false
 
-let start_time = ref System.DateTime.UtcNow                                   
+let start_time = ref System.DateTime.Now                                   
 
 type Symb = 
-     |Term of char
-     |NTerm of char
+     |STerm of char
+     |SNTerm of char
      
 type ISymb  = 
      |Term of char
@@ -35,6 +34,37 @@ type rule = Rule of  char *(Symb list)
 type item = Item of char*(ISymb list)
 
 let lex_list = ['E';'a';'+';'*';' ';'S';')';'(']
+
+let rules = [Rule('S',[SNTerm('E')]);Rule('E',[SNTerm('E');STerm('+');SNTerm('E')]);Rule('E',[SNTerm('E');STerm('*');SNTerm('E')]);
+             Rule('E',[STerm('a')]);Rule('E',[STerm('(');SNTerm('E');STerm('(')])] 
+             
+// item = (item_num,dot_pos,left_hand_part)             
+let _items = 
+        let i,j =ref 0 ,ref 0 in    
+        List.map (fun (Rule(e,lst))->i:=!i+1;j:=0;(!i,!j,e)::(List.map (fun x -> j:=!j+1;(!i,!j,e))) lst)rules
+        
+let rules_map = let i = ref 0 in List.map (fun x -> i:=!i+1;(i,x)) rules
+
+let next_set =                
+        List.map (fun lst -> (List.map (fun (i,j,s)->(if j+1 = (List.length lst) then ((i,j),(i,-1)) else ((i,j),(i,j+1))))) lst) _items
+    
+let get,_next,_print = 
+    let _lex_list = ref   (Seq.to_list "a+a*a**(a+a)$")
+                         //(Seq.to_list "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))$")
+                                      //"a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))+a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))$")
+    in
+    let get () =  List.hd !_lex_list
+    in
+    let next () = _lex_list := if !_lex_list = [] 
+                              then []
+                              else List.tl !_lex_list                               
+    in    
+    let _print ()= !_lex_list
+    in
+    get,next,_print           
+     
+do print_any  (_items);
+   print_any  (next_set)
 
 let items = 
     [Set.of_list[Item('S',[Dot('E',0)])]
@@ -55,7 +85,8 @@ let items =
     ]
 
 let Q = Set.union_all (Set.of_list[Item('S',[NTerm('E');Dot(' ',1)])]::items)
-
+let Q1 = Set.of_list (List.concat _items)
+           
 let getText a (x,y,z)= 
     match a 
     with 
@@ -68,16 +99,18 @@ let memoize (f: 'a ->'b) =
 let t = new System.Collections.Generic.Dictionary<'a,'b>() 
 in
 fun a ->    
+    let l = List.length (_print())
+    in
     if t.ContainsKey(a)
-    then t.[a]
+    then t.[(a)]
     else 
     let res = f a 
     in
-    t.Add(a,res);
+    t.Add((a),res);
     res    
        
-do start_time := System.DateTime.UtcNow;
-   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.UtcNow
+do start_time := System.DateTime.Now;
+   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now
     
 let closure = 
     memoize(fun q -> 
@@ -150,18 +183,18 @@ let goto_set =
     List.iter (fun x-> (Set.iter (fun y-> t.Add((y,x),(make_goto (add y empty)) x)))Q) lex_list;
     t  
 //это предпросчёт goto. сам анализатор тогда работает быстрее. (closure - очень дорогая операция)           
-let goto (q,x) = union_all (Set.map (fun y -> goto_set.[(y,x)])q )
+let goto (q,x) = try union_all (Set.map (fun y -> goto_set.[(y,x)])q ) with _ -> empty
                        
 let ItNext (Item(a,lst)) = Item(a,next lst)
 let ItPrev (Item(a,lst)) = Item(a,prev lst)
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
-do printfn "End time: %A Total: %A" System.DateTime.UtcNow (System.DateTime.UtcNow - (!start_time))
+do printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))
 
 let rec climb =
     memoize (fun (q,x,i) -> 
-    if debug then print_climb_1 i x q;
+    if debug then print_climb_1 (_print()) x q;
     if q = empty
     then empty
     else
@@ -171,43 +204,43 @@ let rec climb =
     let new_q = parse (gt,i)
     in 
     if debug then print_climb_3 new_q;
-    if Set.exists (fun x->x = (Item('S',[NTerm('E');Dot(' ',1)]),[]))new_q
+    if Set.exists (fun x->x = (Item('S',[NTerm('E');Dot(' ',1)])))new_q
     then new_q
     else    
-    Set.union_all
+    Set.union_all                            
     [Set.filter (fun x1-> 
                    Set.exists (fun (Item(ch,lst) as y) -> 
-                                   (ItNext y) = (fst x1)
+                                   (ItNext y) = x1
                                    &&(function Dot(_)::tl-> false
                                               |[]        -> false
                                               | _        -> true)lst
                                )q)new_q
-     |>Set.map (fun x1->((ItPrev (fst x1)),snd x1))                      
+     |>Set.map (fun x1->((ItPrev (x1))))                      
     
     ;
     Set.union_all(
-    union_from_Some[for (Item(a,hd::tl),str) in new_q -> 
-                        if getText hd (1,1,1)=x &&(a<>'S')&&(function Dot(_)::tl->true | _ -> false)tl
-                        then Some(climb (q, a, str))
+    union_from_Some[for (Item(a,hd::tl)) in new_q -> 
+                        if getText hd (1,1,1)=x && (a<>'S')&&(function Dot(_)::tl->true | _ -> false)tl
+                        then Some(climb (q,a,i))
                         else None])
     ])                
 
 and parse = 
     memoize (fun (q,i) -> 
-    if debug  then print_parse q i;    
+    if debug  then print_parse q (_print());    
     union_all
-        [map (fun x -> (x,i))(Set.filter (fun(Item(a,lst))-> (List.hd (List.rev lst)) = Dot(' ',1))q)
-         ;if i = [] then empty else climb (q,  (List.hd i), (List.tl i))
+        [map (fun x -> x )(Set.filter (fun(Item(a,lst)) -> (List.hd (List.rev lst)) = Dot(' ',1))q)
+         ;if (let p = get()in p = '$') then empty else (let x = get () in _next();climb (q,  (*(List.hd i)*)x,i-1))
          ;union_from_Some[for (Item(a,lst)) in Q -> match lst 
                                                     with
-                                                    | NTerm('`')::[]->Some (climb (q, a, i))
+                                                    | NTerm('`')::[]->Some (climb (q, a,i))
                                                     | _             ->None]|> union_all 
          ])
                  
 let res str = 
-    start_time:=System.DateTime.UtcNow;
-    printfn "Start time: %A" System.DateTime.UtcNow;
-    not(parse (items.Head,Seq.to_list str)=empty)
+    start_time:=System.DateTime.Now;
+    printfn "Start time: %A" System.DateTime.Now;
+    not(parse (items.Head,( List.length (_print ())))=empty)
  
 let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
 
@@ -221,10 +254,10 @@ do let str =
         (Console.WriteLine("Insert string:"); 
         Console.ReadLine())
        else
-        test_str2 
+        test_str1 
    in     
    let r = res(str) in
    printfn "Result : %A" r;
    Console.WriteLine();
-   printfn "End time: %A Total: %A" System.DateTime.UtcNow (System.DateTime.UtcNow - (!start_time));   
+   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));   
    Console.ReadLine()|>ignore

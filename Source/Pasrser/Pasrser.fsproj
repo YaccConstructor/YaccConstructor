@@ -39,6 +39,14 @@
   <ItemGroup>
     <Compile Include="LogPrinter.fs" />
     <Compile Include="Program.fs" />
+    <Compile Include="FinitAutomata.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IL\GLR.fsproj">
+      <Name>GLR</Name>
+      <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

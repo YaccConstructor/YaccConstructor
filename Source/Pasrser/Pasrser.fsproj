@@ -38,8 +38,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogPrinter.fs" />
-    <Compile Include="Program.fs" />
     <Compile Include="FinitAutomata.fs" />
+    <Compile Include="PreCalculations.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IL\GLR.fsproj">

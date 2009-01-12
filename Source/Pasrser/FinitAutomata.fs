@@ -1,6 +1,6 @@
 ﻿#light "off"
 
-module FinitAutomaton
+module FinitAutomata
 
 open IL.Production
 open IL.Source
@@ -38,7 +38,7 @@ let states rules = List.fold_left (fun set (a,b,c) -> Set.union set (of_list[a;c
      
 let exists_e_elt:(int list ref) = ref []
 
-let e_closure rules =    
+let e_closure (rules,s,f) =    
     let rec closure stt = 
         if List.exists ((=)stt) (!exists_e_elt)
         then (!exists_e_elt)
@@ -49,10 +49,14 @@ let e_closure rules =
               List.concat (List.map (fun (a,b,c)-> closure c)
               lst))
      in   
-     Set.fold_left (fun lst x -> let flg = ref false 
-                                 in 
-                                 let new_lst= List.map (fun y -> if empty = intersect x y then union x y else (flg:=true ;y)) lst
-                                 in
-                                 if !flg then x::new_lst else new_lst) [] (Set.map (fun x -> of_list(closure x)) (states rules))
-
-                                 
+     let get_rpart stt = of_list(List.map (fun (a,b,c)-> (b,c))(List.filter(fun (a,b,c)-> a=stt && b<>None)rules))
+     in 
+     let unfiltr_rules = union_all(Set.map (fun x -> Set.map (fun (b,c)-> (x,b,c))(union_all(Set.map get_rpart (of_list(closure x))))) (states rules))
+     in
+     let rsymbols = Set.map (fun (a,b,c)->c) unfiltr_rules
+     in
+     (Set.filter (fun (a,b,c)->a=s||Set.exists ((=)c) rsymbols)unfiltr_rules,s,f)
+     
+let FA_rules rule = (e_closure(create_NFA rule))
+    
+    

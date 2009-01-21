@@ -7,11 +7,12 @@ open IL.Production
 open IL.Rule
 open IL.Source
 open Set
+open IL
 open Log
 
 type item<'a> = Item of int*string*(int*'a option*int)*int*int 
 
-let lex_list = []//['E';'a';'+';'*';' ';'S';')';'(']
+let lex_list:(Production.t<char,char> list)= []//['E';'a';'+';'*';' ';'S';')';'(']
 //(prod_num,(item_num,rec_symb,next_num),s,f)
 let rules = []
 let items =
@@ -56,7 +57,7 @@ let prevItem (Item(prod_num,rl_name,(item_num,rec_symb,next_num),s,f)) =
     try Set.filter (fun (Item(a,b,(c,d,e),s,f))-> item_num=e&&a=prod_num)items with _-> empty
         
 let closure_set = 
-    let t = System.Collections.Generic.Dictionary<(item<'a>),Set<(item<'a>)>>()
+    let t = System.Collections.Generic.Dictionary<(item<Production.t<'a,'b>>),Set<(item<Production.t<'a,'b>>)>>()
     in
     Set.iter (fun x -> t.Add(x,closure (Set.add  x empty)))items;
     t
@@ -65,9 +66,9 @@ let goto_set =
     let make_goto q x =  
         let cl = union_all (Set.map (fun x -> closure_set.[x]) q)
         in 
-        union_all(Set.map (nextItem) (Set.filter (fun (Item(a,b,(c,d,e),s,f)) -> (x = d)) cl))
+        union_all(Set.map (nextItem) (Set.filter (fun (Item(a,b,(c,d,e),s,f)) -> (Some(x) = d)) cl))
     in
-    let t = System.Collections.Generic.Dictionary<(item<'a>*char),Set<item<'a>>>() 
+    let t = System.Collections.Generic.Dictionary<(item<Production.t<'a,'b>>*Production.t<'a,'b>),Set<item<Production.t<'a,'b>>>>() 
     in
     List.iter (fun x-> (Set.iter (fun y-> t.Add((y,x),(make_goto (add y empty)) x)))items) lex_list;
     t  

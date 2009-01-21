@@ -7,6 +7,7 @@
 //Как видно, грамматика неоднознаная.
 
 #light "off"
+#nowarn "40"
 
 open Set
 open System
@@ -21,7 +22,7 @@ let debug = false
 //interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
 let interacive = false
 
-let _end,m_start = (PLiteral("$",(1,1)),"S")
+let _end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 
 let start_time = ref System.DateTime.Now                                   
              
@@ -61,17 +62,17 @@ do printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (
 
 let rec climb =
     memoize (fun (q,x,i) -> 
-    if debug then print_climb_1 i x q;
+    if debug then print_climb_1 i ' ' q;
     if q = empty
     then empty
     else
     let gt =  goto (q,x)
     in
-    if debug then print_climb_2 gt;
+    if debug then print_climb_2 gt;    
     let new_q = parse (gt,i)
     in 
     if debug then print_climb_3 new_q;
-    if Set.exists (fun x->x = m_start)new_q
+    if Set.exists (fun (x,x2)->(function (Item( _ , _ , (_ , Some(y) , _) , _ , _))->y=m_start|_->false) x) new_q
     then new_q
     else    
     Set.union_all                            
@@ -85,7 +86,7 @@ let rec climb =
     ;
     Set.union_all(
     union_from_Some[for ((Item(a,b,(c,d,e),s,f)),i) in new_q -> 
-                        if _getText ac_s (1,1)=x && (b<>"S")&&c=s
+                        if getText d = x && (b<>"S")&&c=s
                         then Some(climb (q,l_p,i))
                         else None])
     ])                
@@ -95,7 +96,7 @@ and parse =
     if debug  then print_parse q i;    
     union_all
         [map (fun x -> (x,i) )(Set.filter (fun(Item(a,b,(c,d,e),s,f)) -> (e=f))q)
-         ;if (get(i)= _end) then empty else  climb(q,get(i),i-1)
+         ;if (get(i)= _end) then empty else  climb(q,getText(get(i)),i-1)
          ;union_from_Some[for (Item(a,b,(c,d,e),s,f)) in items -> if d = None 
                                                                   then Some (climb (q,b,i))
                                                                   else None]|> union_all 

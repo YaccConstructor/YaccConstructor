@@ -9,67 +9,140 @@ open IL.Source
 open Set
 open IL
 open Log
+open Grammar
+open Grammar.Item
+open Grammar.Symbol
 
-type item<'a> = Item of int*string*(int*'a option*int)*int*int 
+let lex_list:(Production.t<char,char> list)= [PLiteral("a",(1,1))]
 
-let lex_list:(Production.t<char,char> list)= []//['E';'a';'+';'*';' ';'S';')';'(']
-//(prod_num,(item_num,rec_symb,next_num),s,f)
-let rules = []
+let production1 = PSeq([{omit=false;
+                         rule= PToken("E",(1,1));
+                         binding = None;
+                         checker = None}],None)
+let production2 = PSeq([{omit=false;
+                         rule= PToken("E",(1,1));
+                         binding = None;
+                         checker = None};
+                         {omit=false;
+                         rule= PLiteral("+",(1,1));
+                         binding = None;
+                         checker = None};
+                         {omit=false;
+                         rule= PToken("E",(1,1));
+                         binding = None;
+                         checker = None}],None)
+let production3 = PSeq([{omit=false;
+                         rule= PLiteral("(",(1,1));
+                         binding = None;
+                         checker = None};
+                         {omit=false;
+                         rule= PToken("E",(1,1));
+                         binding = None;
+                         checker = None};
+                         {omit=false;
+                         rule= PLiteral(")",(1,1));
+                         binding = None;
+                         checker = None}],None)
+let production4 = PSeq([{omit=false;
+                         rule= PLiteral("a",(1,1));
+                         binding = None;
+                         checker = None}],None)
+                         
+let rules = 
+    [ {name = "S";
+       args = [];
+       body = production1;
+       _public = true; 
+       metaArgs = []};
+       {name = "E";
+       args = [];
+       body = production2;
+       _public = true; 
+       metaArgs = []};
+       {name = "E";
+       args = [];
+       body = production3;
+       _public = true; 
+       metaArgs = []};
+       {name = "E";
+       args = [];
+       body = production4;
+       _public = true; 
+       metaArgs = []}
+     ] 
+
 let items =
     let rules_map  = List.zip ([0..(List.length rules)])rules
     in
-    union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in  Set.map (fun x -> Item(i,rl.name,x,s,f)) itm)rules_map)
+    union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in
+                                      Set.map (fun (a,b,c) -> {prod_num = i;
+                                                               prod_name = rl.name;
+                                                               item_num = a;
+                                                               symb = (if c = f
+                                                                       then None 
+                                                                       else 
+                                                                          (match b 
+                                                                           with 
+                                                                             Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
+                                                                           | Some(PRef(s,e))             -> Some(Nonterminal(s))));
+                                                               next_num = if c = f then None else Some c;
+                                                               s =s;
+                                                               f=f                                                                                          
+                                                              })itm)rules_map)
 
 let getText a = 
     match a 
     with 
-    |PToken(x) -> toString x  
-    | _       -> "" 
+    |Some(Terminal(x))     ->  toString x  
+    | _                    -> "" 
 
 let closure q= 
-    ( 
-    let ex = new System.Collections.Generic.KeyNotFoundException()
-    in
     let rec cl i q = 
-        if i = Set.count q 
-        then q
-        else
-         let next_cl f = cl (i+1) (union_all [q;filter f items])
-         in 
-         next_cl (fun x -> 
-                      let el_for_cl = (List.nth (Set.to_list q) i)
-                      in  
-                      match x 
-                      with 
-                      | Item(prod_num,rl_name,(item_num,rec_symb,next_num),s,f) -> 
-                                                       (fun (Item(prod_num2,rl_name2,(item_num2,Some(t),next_num2),s2,f2)) -> 
-                                                        try(rl_name = (getText t) && 
-                                                            item_num=s)
-                                                        with ex -> false)                                                           
-                                                        el_for_cl                                           
+    if i = Set.count q 
+    then q
+    else
+    let next_cl f = cl (i+1) (union_all [q;filter f items])
+    in 
+    next_cl (fun x -> 
+             let el_for_cl = (List.nth (Set.to_list q) i)
+             in 
+             (fun y -> 
+                            try(x.prod_name = (getText y.symb) && x.item_num=x.s)
+                            with ex -> false) el_for_cl                                           
                   )
     in
-    cl 0 q)
+    cl 0 q
 
-let nextItem (Item(prod_num,rl_name,(item_num,rec_symb,next_num),s,f)) = 
-    try Set.filter (fun (Item(a,b,(c,d,e),s,f))-> next_num=c&&a=prod_num)items with _-> empty
-let prevItem (Item(prod_num,rl_name,(item_num,rec_symb,next_num),s,f)) = 
-    try Set.filter (fun (Item(a,b,(c,d,e),s,f))-> item_num=e&&a=prod_num)items with _-> empty
+let nextItem item = 
+    if item.next_num = None
+    then failwith "error"
+    else List.find (fun x -> item.next_num=Some(x.item_num)&&item.prod_num=x.prod_num) (to_list items)
+    
+let prevItem item = List.find (fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num)(to_list items)
         
 let closure_set = 
-    let t = System.Collections.Generic.Dictionary<(item<Production.t<'a,'b>>),Set<(item<Production.t<'a,'b>>)>>()
+    let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in
     Set.iter (fun x -> t.Add(x,closure (Set.add  x empty)))items;
     t
 
 let goto_set = 
+    let eql (PToken(x)|PLiteral(x)) (Some(Terminal(y)|Nonterminal(y))) = x=y
+    in 
     let make_goto q x =  
         let cl = union_all (Set.map (fun x -> closure_set.[x]) q)
         in 
-        union_all(Set.map (nextItem) (Set.filter (fun (Item(a,b,(c,d,e),s,f)) -> (Some(x) = d)) cl))
+        (Set.map (nextItem) (Set.filter (fun item -> (eql x item.symb)) cl))
     in
-    let t = System.Collections.Generic.Dictionary<(item<Production.t<'a,'b>>*Production.t<'a,'b>),Set<item<Production.t<'a,'b>>>>() 
+    let t = System.Collections.Generic.Dictionary<(Item.t<'a>*string),Set<Item.t<'a>>>() 
     in
-    List.iter (fun x-> (Set.iter (fun y-> t.Add((y,x),(make_goto (add y empty)) x)))items) lex_list;
+    let m_toString x = 
+    match x 
+    with
+    | PToken(y)|PLiteral(y) -> toString y
+    | PRef (y,z) -> toString y
+    | _ -> ""
+    in
+    List.iter (fun x-> (Set.iter (fun y-> t.Add((y,m_toString x),(make_goto (add y empty)) x)))items) lex_list;
     t  
      

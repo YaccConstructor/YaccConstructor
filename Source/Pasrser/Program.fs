@@ -15,6 +15,8 @@ open Log
 open PreCalculation
 open IL.Production
 open IL.Source
+open Grammar.Item
+open Grammar.Symbol
 
 // debug = true - печатается трасса. Иначе нет.
 let debug = false
@@ -22,7 +24,7 @@ let debug = false
 //interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
 let interacive = false
 
-let _end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
+let _end,m_start = (Terminal(("$",(1,1))),PToken("S",(1,1)))
 
 let start_time = ref System.DateTime.Now                                   
              
@@ -72,22 +74,21 @@ let rec climb =
     let new_q = parse (gt,i)
     in 
     if debug then print_climb_3 new_q;
-    if Set.exists (fun (x,x2)->(function (Item( _ , _ , (_ , Some(y) , _) , _ , _))->y=m_start|_->false) x) new_q
+    if Set.exists (fun (x,x2)->x.prod_name="S"&&x.next_num=None) new_q
     then new_q
     else    
     Set.union_all                            
     [Set.filter (fun x1-> 
-                   Set.exists (fun ((Item(a,b,(c,d,e),s,f)) as y) -> 
-                                   (nextItem y) = fst x1
-                                   &&(e <> f)
+                   Set.exists (fun item  -> 
+                                   (nextItem item = fst x1)&&(item.next_num <> None)
                                )q)new_q
      |>Set.map (fun x1->((prevItem (fst x1),snd x1)))                      
     
     ;
     Set.union_all(
-    union_from_Some[for ((Item(a,b,(c,d,e),s,f)),i) in new_q -> 
-                        if getText d = x && (b<>"S")&&c=s
-                        then Some(climb (q,l_p,i))
+    union_from_Some[for (item,i) in new_q -> 
+                        if (getText item.symb) = x && (item.prod_name<>"S")&&item.item_num=item.s
+                        then Some(climb (q,item.prod_name,i))
                         else None])
     ])                
 
@@ -95,17 +96,17 @@ and parse =
     memoize (fun (q,i) -> 
     if debug  then print_parse q i;    
     union_all
-        [map (fun x -> (x,i) )(Set.filter (fun(Item(a,b,(c,d,e),s,f)) -> (e=f))q)
-         ;if (get(i)= _end) then empty else  climb(q,getText(get(i)),i-1)
-         ;union_from_Some[for (Item(a,b,(c,d,e),s,f)) in items -> if d = None 
-                                                                  then Some (climb (q,b,i))
-                                                                  else None]|> union_all 
+        [map (fun x -> (x,i) )(Set.filter (fun item -> (item.next_num=None))q)
+         ;if (get(i)= _end) then empty else  climb(q,getText(Some(get(i))),i-1)
+         ;union_from_Some[for item in items -> if item.symb = None 
+                                               then Some (climb (q,item.prod_name,i))
+                                               else None]|> union_all 
          ])
                  
 let res str = 
     start_time:=System.DateTime.Now;
     printfn "Start time: %A" System.DateTime.Now;
-    not(parse (items.Head,( List.length (_print ())))=empty)
+    not(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),( List.length (_print ())))=empty)
  
 let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
 

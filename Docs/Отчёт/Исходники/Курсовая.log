@@ -1,7 +1,7 @@
-This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2008.12.16)  24 DEC 2008 17:19
+This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2009.1.1)  1 JAN 2009 21:02
 entering extended mode
-**G:/курсовая/Курсовая.tex
-(G:/курсовая/Курсовая.tex
+**D:/Users/rec_ascent/Docs/Отчёт/Исходники/Курсовая.tex
+(D:/Users/rec_ascent/Docs/Отчёт/Исходники/Курсовая.tex
 LaTeX2e <2005/12/01>
 Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
 rman, ngerman, german-x-2008-06-18, ngerman-x-2008-06-18, french, loaded.
@@ -260,31 +260,35 @@ Underfull \hbox (badness 10000) in paragraph at lines 183--184
 изаторов для решения задач
  []
 
-[7] (Курсовая.aux) ) 
+[7] (Курсовая.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 1774 strings out of 95304
- 20854 string characters out of 1183069
+ 1775 strings out of 95304
+ 20959 string characters out of 1183071
  74409 words of memory out of 1500000
- 4976 multiletter control sequences out of 110000
+ 4977 multiletter control sequences out of 110000
  15363 words of font info for 37 fonts, out of 3000000 for 5000
  14 hyphenation exceptions out of 8191
- 25i,6n,24p,750b,259s stack positions out of 5000i,500n,10000p,200000b,50000s
- <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi60
-0\lati1200.pk> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt
-1200.pk> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1440.p
-k> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk> <C:
-\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1728.pk> <C:\Progr
-amData\MiKTeX\2.7\fonts\pk\ljfour\unknown\unknown\dpi600\larm1200.pk> <C:\Progr
-amData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\lasl1200.pk> <C:\ProgramData
-\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm1440.pk> <C:\ProgramData\MiKTe
-X\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\larm2074.pk><C:/Program Files/MiKTeX 2.7
-/fonts/type1/bluesky/cm/cmex10.pfb><C:/Program Files/MiKTeX 2.7/fonts/type1/blu
-esky/cm/cmmi12.pfb><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr12.pf
-b><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr8.pfb><C:/Program File
-s/MiKTeX 2.7/fonts/type1/bluesky/cm/cmsy10.pfb>
-Output written on Курсовая.pdf (7 pages, 181508 bytes).
+ 25i,6n,24p,779b,259s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\lati1200.pk> <C:
+\ProgramData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\latt1200.pk> <C:\Progr
+amData\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1440.pk> <C:\ProgramData
+\MiKTeX\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1200.pk> <C:\ProgramData\MiKTe
+X\2.7\fonts\pk\ljfour\lh\lh-t2a\dpi600\labx1728.pk> <C:\ProgramData\MiKTeX\2.7\
+fonts\pk\ljfour\unknown\unknown\dpi600\larm1200.pk> <C:\ProgramData\MiKTeX\2.7\
+fonts\pk\ljfour\lh\lh-t2a\dpi600\lasl1200.pk> <C:\ProgramData\MiKTeX\2.7\fonts\
+pk\ljfour\lh\lh-t2a\dpi600\larm1440.pk> <C:\ProgramData\MiKTeX\2.7\fonts\pk\ljf
+our\lh\lh-t2a\dpi600\larm2074.pk><C:/Program Files/MiKTeX 2.7/fonts/type1/blues
+ky/cm/cmex10.pfb><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmmi12.pfb
+><C:/Program Files/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr12.pfb><C:/Program File
+s/MiKTeX 2.7/fonts/type1/bluesky/cm/cmr8.pfb><C:/Program Files/MiKTeX 2.7/fonts
+/type1/bluesky/cm/cmsy10.pfb>
+Output written on Курсовая.pdf (7 pages, 180257 bytes).
 PDF statistics:
- 478 PDF objects out of 1000 (max. 8388607)
+ 475 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 131072)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

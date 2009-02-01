@@ -13,7 +13,9 @@ open Grammar
 open Grammar.Item
 open Grammar.Symbol
 
-let lex_list(*:(Production.t<char,char> list)*)= [PLiteral("a",(1,1))]
+open System
+
+let lex_list = [PLiteral("a",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -72,19 +74,26 @@ let rules =
      ] 
 
 let items =
-    let rules_map  = List.zip ([0..(List.length rules)])rules
+    let rules_map  = List.zip ([0..(List.length rules)-1])rules
     in
     union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in
+                                      print_any itm ;
+                                      Console.WriteLine();
+                                      print_any (s,f);
+                                      Console.WriteLine();
                                       Set.map (fun (a,b,c) -> {prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = a;
                                                                symb = (if c = f
                                                                        then None 
                                                                        else 
-                                                                          (match b 
+                                                                          (print_any "it is in";
+                                                                           match b 
                                                                            with 
                                                                              Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
-                                                                           | Some(PRef(s,e))             -> Some(Nonterminal(s))));
+                                                                           | Some(PRef(s,e))             -> Some(Nonterminal(s))
+                                                                           | _ -> failwith "error!!!"));
+                                                                           
                                                                next_num = if c = f then None else Some c;
                                                                s =s;
                                                                f=f                                                                                          

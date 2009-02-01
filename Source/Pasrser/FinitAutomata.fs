@@ -57,6 +57,6 @@ let e_closure (rules,s,f) =
      in
      (Set.filter (fun (a,b,c)->a=s||Set.exists ((=)c) rsymbols)unfiltr_rules,s,f)
      
-let FA_rules rule = (e_closure(create_NFA rule))
+let FA_rules rule = print_any (create_NFA rule);(e_closure(create_NFA rule))
     
     

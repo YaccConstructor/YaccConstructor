@@ -13,7 +13,7 @@ open Grammar
 open Grammar.Item
 open Grammar.Symbol
 
-let lex_list:(Production.t<char,char> list)= [PLiteral("a",(1,1))]
+let lex_list(*:(Production.t<char,char> list)*)= [PLiteral("a",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));

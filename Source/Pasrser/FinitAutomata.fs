@@ -37,8 +37,7 @@ let rec create_NFA regexpr =
     | PToken(ch)
     | PLiteral(ch) as t -> (let s,f = state(),state() in ([s,Some(t),f],s,f))
     
-let states rules = List.fold_left (fun set (a,b,c) -> Set.union set (of_list[a;c])) empty rules 
-     
+let states rules = List.fold_left (fun set (a,b,c) -> Set.union set (of_list[a;c])) empty rules      
 
 
 let e_closure (rules,s,f) =    

@@ -15,7 +15,7 @@ open Grammar.Symbol
 
 open System
 
-let lex_list = [PLiteral("a",(1,1))]
+let lex_list = [PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -126,8 +126,8 @@ let closure q=
     next_cl (fun x -> 
              let el_for_cl = (List.nth (Set.to_list q) i)
              in 
-             (fun y ->try(x.prod_name = (getText y.symb) && x.item_num=x.s)
-                      with ex -> false) el_for_cl                                           
+             (try(x.prod_name = (getText el_for_cl.symb) && x.item_num=x.s)
+              with ex -> false)                                            
                   )
     in
     cl 0 q
@@ -146,8 +146,9 @@ let closure_set =
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in
     Set.iter (fun x -> Console.WriteLine();
-                       print_any x ; print_any " -> ";print_any (closure (Set.add  x empty));
-                       Console.WriteLine();t.Add(x,closure (Set.add  x empty)))items;
+                       let cl = closure (Set.add  x empty) in
+                       print_any x ; print_any " -> ";print_any (cl);
+                       Console.WriteLine();t.Add(x,cl))items;
     t
 
 let goto_set = 
@@ -173,6 +174,8 @@ let goto_set =
     | PRef (y,z) -> toString y
     | _ -> ""
     in
-    List.iter (fun x-> (Set.iter (fun y-> t.Add((y,m_toString x),(make_goto (add y empty)) x)))items) lex_list;
+    List.iter (fun x-> (Set.iter (fun y-> let gt = make_goto (add y empty) x in Console.WriteLine();
+                                   print_any (y,m_toString x) ; print_any " -> ";print_any (gt);
+                       Console.WriteLine();t.Add((y,m_toString x),gt)))items) lex_list;
     t  
      

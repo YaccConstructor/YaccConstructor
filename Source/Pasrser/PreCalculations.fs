@@ -81,23 +81,34 @@ let items =
                                       Console.WriteLine();
                                       print_any (s,f);
                                       Console.WriteLine();
-                                      Set.map (fun (a,b,c) -> {prod_num = i;
+                                      of_list(List.concat(Set.map (fun (a,b,c) ->( {prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = a;
-                                                               symb = (if c = f
-                                                                       then None 
-                                                                       else 
-                                                                          (print_any "it is in";
-                                                                           match b 
-                                                                           with 
-                                                                             Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
-                                                                           | Some(PRef(s,e))             -> Some(Nonterminal(s))
-                                                                           | _ -> failwith "error!!!"));
+                                                               symb = (print_any "it is in";
+                                                                       match b 
+                                                                       with 
+                                                                        Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
+                                                                       | Some(PRef(s,e))             -> Some(Nonterminal(s))
+                                                                       | _ -> failwith "error!!!");
                                                                            
-                                                               next_num = if c = f then None else Some c;
+                                                               next_num = Some c;
                                                                s =s;
                                                                f=f                                                                                          
-                                                              })itm)rules_map)
+                                                              }::
+                                                              (if c = f
+                                                               then [{prod_num = i;
+                                                               prod_name = rl.name;
+                                                               item_num = c;
+                                                               symb = None;(*(print_any "it is in";
+                                                                       match b 
+                                                                       with 
+                                                                        Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
+                                                                       | Some(PRef(s,e))             -> Some(Nonterminal(s))
+                                                                       | _ -> failwith "error!!!");*)                                                                           
+                                                               next_num = None;
+                                                               s =s;
+                                                               f=f}]  
+                                                               else [] )))itm)))rules_map)
 
 let getText a = 
     match a 
@@ -115,9 +126,8 @@ let closure q=
     next_cl (fun x -> 
              let el_for_cl = (List.nth (Set.to_list q) i)
              in 
-             (fun y -> 
-                            try(x.prod_name = (getText y.symb) && x.item_num=x.s)
-                            with ex -> false) el_for_cl                                           
+             (fun y ->try(x.prod_name = (getText y.symb) && x.item_num=x.s)
+                      with ex -> false) el_for_cl                                           
                   )
     in
     cl 0 q
@@ -130,13 +140,24 @@ let nextItem item =
 let prevItem item = List.find (fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num)(to_list items)
         
 let closure_set = 
+     Console.WriteLine("Items:");
+     print_any items;
+     Console.WriteLine();
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in
-    Set.iter (fun x -> t.Add(x,closure (Set.add  x empty)))items;
+    Set.iter (fun x -> Console.WriteLine();
+                       print_any x ; print_any " -> ";print_any (closure (Set.add  x empty));
+                       Console.WriteLine();t.Add(x,closure (Set.add  x empty)))items;
     t
 
 let goto_set = 
-    let eql (PToken(x)|PLiteral(x)) (Some(Terminal(y)|Nonterminal(y))) = x=y
+    Console.WriteLine("In goto_set!!!");
+    print_any closure_set;
+    let eql a b = 
+        match (a,b)
+        with 
+         (PToken(x)|PLiteral(x)),(Some(Terminal(y)|Nonterminal(y))) -> x=y
+        | _ -> false
     in 
     let make_goto q x =  
         let cl = union_all (Set.map (fun x -> closure_set.[x]) q)

@@ -31,6 +31,12 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Name>IL</Name>
+      <AssemblyName>IL.dll</AssemblyName>
+      <HintPath>..\IL\bin\Debug\IL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>

@@ -15,7 +15,7 @@ open Grammar.Symbol
 
 open System
 
-let lex_list = [PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1))]
+let lex_list = [PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -99,12 +99,7 @@ let items =
                                                                then [{prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = c;
-                                                               symb = None;(*(print_any "it is in";
-                                                                       match b 
-                                                                       with 
-                                                                        Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
-                                                                       | Some(PRef(s,e))             -> Some(Nonterminal(s))
-                                                                       | _ -> failwith "error!!!");*)                                                                           
+                                                               symb = None;                                                                          
                                                                next_num = None;
                                                                s =s;
                                                                f=f}]  

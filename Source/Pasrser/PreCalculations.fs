@@ -15,7 +15,7 @@ open Grammar.Symbol
 
 open System
 
-let lex_list = [PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
+let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -46,7 +46,7 @@ let production3 = PSeq([{omit=false;
                          binding = None;
                          checker = None}],None)
 let production4 = PSeq([{omit=false;
-                         rule= PLiteral("a",(1,1));
+                         rule= PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1)));
                          binding = None;
                          checker = None}],None)
                          
@@ -84,8 +84,7 @@ let items =
                                       of_list(List.concat(Set.map (fun (a,b,c) ->( {prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = a;
-                                                               symb = (print_any "it is in";
-                                                                       match b 
+                                                               symb = (match b 
                                                                        with 
                                                                         Some(PLiteral(s)|PToken(s)) -> Some(Terminal(s))
                                                                        | Some(PRef(s,e))             -> Some(Nonterminal(s))
@@ -99,7 +98,7 @@ let items =
                                                                then [{prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = c;
-                                                               symb = None;                                                                          
+                                                               symb = None;                                                                    
                                                                next_num = None;
                                                                s =s;
                                                                f=f}]  
@@ -136,7 +135,7 @@ let prevItem item = List.find (fun x -> Some(item.item_num)=x.next_num&&item.pro
         
 let closure_set = 
      Console.WriteLine("Items:");
-     print_any items;
+     map print_any items;
      Console.WriteLine();
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in

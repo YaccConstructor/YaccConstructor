@@ -30,7 +30,7 @@ let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 let start_time = ref System.DateTime.Now                                   
              
 let (getL:(int->t<string,string>)),iLength = 
-    let _lex_list = ref [PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("(",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]
+    let _lex_list = ref [PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("a",(1,1));PLiteral("$",(1,1))]
     in
     let l = List.length !_lex_list in
     let get i =  List.nth (!_lex_list) (l-i) in        
@@ -76,14 +76,17 @@ let rec climb =
     if debug then print_climb_2 gt;    
     let new_q = parse (gt,i)
     in 
-    if debug then print_climb_3 new_q;
-    if Set.exists (fun (x,x2)->x.prod_name="S"&&x.next_num=None&&x2=1) new_q
+    if debug then print_climb_3 new_q;    
+    if Set.exists (fun (x,x2)->  
+    
+     Console.WriteLine("X:  =  "+ x2.ToString());x.prod_name="S"&&x.next_num=None&&x2=1) new_q
+     
     then new_q
     else    
     Set.union_all                            
     [Set.filter (fun x1-> 
                    Set.exists (fun item  -> 
-                                   (nextItem item = fst x1)&&(item.next_num <> None)
+                                   (nextItem item = fst x1)&&(item.item_num <> item.s)(*item.next_num <> None*)
                                )q)new_q
      |>Set.map (fun x1->((prevItem (fst x1),snd x1)))                      
     
@@ -109,7 +112,7 @@ and parse =
 let res str = 
     start_time:=System.DateTime.Now;
     printfn "Start time: %A" System.DateTime.Now;
-    (*not*)Set.exists (fun (x,x2)->(print_any x2);x.prod_name="S"&&x.next_num=None&&x2=1)(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())(*=empty*))
+    (*not*)(*Set.exists (fun (x,x2)->(print_any x2);x.prod_name="S"&&x.next_num=None&&x2=1)*)print_any(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())(*=empty*))
  
 let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
 

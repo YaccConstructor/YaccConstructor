@@ -56,21 +56,29 @@ let e_closure (rules,s,f) =
      
      let get_rpart stt = of_list(List.map (fun (a,b,c)-> (b,c))(List.filter(fun (a,b,c)-> a=stt && b<>None)rules))
      in 
-     Console.WriteLine();
+     let closure_set = map (fun x -> (x,closure x)) (states rules)
+     in
+     Console.WriteLine("Closure_set:");
+     print_any (closure_set);
+     Console.WriteLine("States:");
      print_any (states rules);
      Console.WriteLine();
-     let unfiltr_rules = union_all(Set.map (fun x -> Set.map (fun (b,c)-> (x,b,c))(union_all(Set.map get_rpart (of_list(print_any (closure x);closure x))))) (states rules))
+     let unfiltr_rules = union_all(union_all(Set.map (fun x -> union_all(Set.map (fun (b,c)->(Set.map (fun y -> of_list(List.map (fun z ->(x,b,z)) (snd y)))
+                                                                                             (Set.filter (fun q -> (fst q)=c) closure_set)
+                                                                                     )
+                                                                         )
+                                                                         (union_all(Set.map get_rpart (of_list(print_any x;print_any "  ";print_any (closure x);closure x)))))) (states rules)))
      in
-     Console.WriteLine();
+     Console.WriteLine("Unfilter_rules");
      print_any unfiltr_rules;
      Console.WriteLine();
      let rsymbols = Set.map (fun (a,b,c)->c) unfiltr_rules
      in
-     Console.WriteLine();
+     Console.WriteLine("RSymbols");
      print_any rsymbols;
      Console.WriteLine();
      (Set.filter (fun (a,b,c)->a=s||Set.exists ((=)a) rsymbols)unfiltr_rules,s,f)
      
-let FA_rules rule = print_any (create_NFA rule);(e_closure(create_NFA rule))
+let FA_rules rule =let fa_rule = create_NFA rule in print_any "Fa_rule!!!!:"; print_any (fa_rule);(e_closure(fa_rule))
     
     

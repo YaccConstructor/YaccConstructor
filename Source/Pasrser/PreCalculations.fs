@@ -15,7 +15,7 @@ open Grammar.Symbol
 
 open System
 
-let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
+let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -26,7 +26,7 @@ let production2 = PSeq([{omit=false;
                          binding = None;
                          checker = None};
                          {omit=false;
-                         rule= PLiteral("+",(1,1));
+                         rule= PAlt(PLiteral("+",(1,1)),PLiteral("*",(1,1)));
                          binding = None;
                          checker = None};
                          {omit=false;
@@ -46,7 +46,7 @@ let production3 = PSeq([{omit=false;
                          binding = None;
                          checker = None}],None)
 let production4 = PSeq([{omit=false;
-                         rule= PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1)));
+                         rule= PAlt(PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1))),PLiteral("c",(1,1)));
                          binding = None;
                          checker = None}],None)
                          
@@ -128,10 +128,10 @@ let closure q=
 
 let nextItem item = 
     if item.next_num = None
-    then failwith "error"
-    else List.find (fun x -> item.next_num=Some(x.item_num)&&item.prod_num=x.prod_num) (to_list items)
+    then empty
+    else filter (fun x -> item.next_num=Some(x.item_num)&&item.prod_num=x.prod_num) items
     
-let prevItem item = List.find (fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num)(to_list items)
+let prevItem item = filter(fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num) items
         
 let closure_set = 
      Console.WriteLine("Items:");
@@ -157,7 +157,7 @@ let goto_set =
     let make_goto q x =  
         let cl = union_all (Set.map (fun x -> closure_set.[x]) q)
         in 
-        (Set.map (nextItem) (Set.filter (fun item -> (eql x item.symb)) cl))
+        union_all(Set.map (nextItem) (Set.filter (fun item -> (eql x item.symb)) cl))
     in
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>*string),Set<Item.t<'a>>>() 
     in

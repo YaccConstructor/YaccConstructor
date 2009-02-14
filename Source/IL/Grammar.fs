@@ -17,6 +17,6 @@ module Item =
                  symb:Symbol.t<'a> option;
                  next_num:int option;
                  s:int;
-                 f:int}
+                 f:int Set}
   end  
 

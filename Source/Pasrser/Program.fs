@@ -20,9 +20,10 @@ open Grammar.Item
 open Grammar.Symbol
 
 // debug = true - печатается трасса. Иначе нет.
-let debug = true
+let debug = false
 
 //interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
+//щас не работает.
 let interacive = false
 
 let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
@@ -30,7 +31,15 @@ let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 let start_time = ref System.DateTime.Now                                   
              
 let (getL:(int->t<string,string>)),iLength = 
-    let _lex_list = ref [PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("c",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]
+    //aa+b*(b+ba)+b*(b+ba)....
+    //правильная строка
+    let test1 = [PLiteral("a",(1,1));PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("b",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]
+    in
+    //неправильная строка
+    let test2 = [PLiteral("a",(1,1));PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("b",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]
+    in
+    let _lex_list = ref test1
+                        
     in
     let l = List.length !_lex_list in
     let get i =  List.nth (!_lex_list) (l-i) in        
@@ -58,6 +67,8 @@ fun a ->
 do start_time := System.DateTime.Now;
    printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now
     
+let items = PreCalculation.items
+    
 //это предпросчёт goto. сам анализатор тогда работает быстрее. (closure - очень дорогая операция)           
 let goto (q,x) =  union_all (Set.map (fun y -> goto_set.[(y,x)])q )                         
    
@@ -77,10 +88,7 @@ let rec climb =
     let new_q = parse (gt,i)
     in 
     if debug then print_climb_3 new_q;    
-    if Set.exists (fun (x,x2)->  
-    
-     Console.WriteLine("X:  =  "+ x2.ToString());x.prod_name="S"&&x.next_num=None&&x2=1) new_q
-     
+    if Set.exists (fun (x,x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_q     
     then new_q
     else    
     Set.union_all                            
@@ -97,8 +105,12 @@ let rec climb =
                         then Some(climb (q,item.prod_name,i))
                         else None])
     ])                
-
+and flg = ref true
 and parse = 
+    if !flg then start_time:=System.DateTime.Now;
+    printfn "Start time: %A" System.DateTime.Now;
+    flg:=false;
+     
     memoize (fun (q,i) -> 
     if debug  then print_parse q i;    
     union_all
@@ -108,9 +120,7 @@ and parse =
          ])
                  
 let res str = 
-    start_time:=System.DateTime.Now;
-    printfn "Start time: %A" System.DateTime.Now;
-    not(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())=empty)
+        not(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())=empty)
  
 let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
 

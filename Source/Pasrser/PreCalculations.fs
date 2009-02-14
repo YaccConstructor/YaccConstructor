@@ -15,6 +15,8 @@ open Grammar.Symbol
 
 open System
 
+let debug = false
+
 let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
 let production1 = PSeq([{omit=false;
@@ -46,9 +48,13 @@ let production3 = PSeq([{omit=false;
                          binding = None;
                          checker = None}],None)
 let production4 = PSeq([{omit=false;
-                         rule= PAlt(PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1))),PLiteral("c",(1,1)));
+                         rule= PMany(PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1))));
                          binding = None;
                          checker = None}],None)
+let production5 = PSeq([{omit=false;
+                         rule= PAlt(PAlt(production2,production3),production4);
+                         binding = None;
+                         checker = None}],None)                         
                          
 let rules = 
     [ {name = "S";
@@ -58,17 +64,7 @@ let rules =
        metaArgs = []};
        {name = "E";
        args = [];
-       body = production2;
-       _public = true; 
-       metaArgs = []};
-       {name = "E";
-       args = [];
-       body = production3;
-       _public = true; 
-       metaArgs = []};
-       {name = "E";
-       args = [];
-       body = production4;
+       body = production5;
        _public = true; 
        metaArgs = []}
      ] 
@@ -76,11 +72,13 @@ let rules =
 let items =
     let rules_map  = List.zip ([0..(List.length rules)-1])rules
     in
-    union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in
-                                      print_any itm ;
+    union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in                                      
+                                      if debug
+                                      then (
+                                      map print_any itm ;
                                       Console.WriteLine();
                                       print_any (s,f);
-                                      Console.WriteLine();
+                                      Console.WriteLine());
                                       of_list(List.concat(Set.map (fun (a,b,c) ->( {prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = a;
@@ -94,7 +92,7 @@ let items =
                                                                s =s;
                                                                f=f                                                                                          
                                                               }::
-                                                              (if c = f
+                                                              (if (exists ((=)c) f)
                                                                then [{prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = c;
@@ -134,20 +132,19 @@ let nextItem item =
 let prevItem item = filter(fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num) items
         
 let closure_set = 
+     if debug 
+     then
+     (
      Console.WriteLine("Items:");
      map print_any items;
-     Console.WriteLine();
+     Console.WriteLine());
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in
-    Set.iter (fun x -> Console.WriteLine();
-                       let cl = closure (Set.add  x empty) in
-                       print_any x ; print_any " -> ";print_any (cl);
-                       Console.WriteLine();t.Add(x,cl))items;
+    Set.iter (fun x -> let cl = closure (Set.add  x empty) in                      
+                       t.Add(x,cl))items;
     t
 
-let goto_set = 
-    Console.WriteLine("In goto_set!!!");
-    print_any closure_set;
+let goto_set =     
     let eql a b = 
         match (a,b)
         with 
@@ -168,8 +165,8 @@ let goto_set =
     | PRef (y,z) -> toString y
     | _ -> ""
     in
-    List.iter (fun x-> (Set.iter (fun y-> let gt = make_goto (add y empty) x in Console.WriteLine();
-                                   print_any (y,m_toString x) ; print_any " -> ";print_any (gt);
-                       Console.WriteLine();t.Add((y,m_toString x),gt)))items) lex_list;
-    t  
-     
+    List.iter (fun x-> (Set.iter (fun y-> let gt = make_goto (add y empty) x in 
+                                   if debug then (print_any (y,m_toString x) ; print_any " -> ";print_any (gt));
+                       t.Add((y,m_toString x),gt)))items) lex_list;
+                       
+    t

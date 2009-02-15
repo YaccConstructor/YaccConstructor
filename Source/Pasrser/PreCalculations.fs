@@ -108,7 +108,7 @@ let getText a =
     |Some(Terminal(x))     ->  toString x  
     | _                    -> "" 
 
-let closure q= 
+let closure q = 
     let rec cl i q = 
     if i = Set.count q 
     then q
@@ -140,8 +140,7 @@ let closure_set =
      Console.WriteLine());
     let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
     in
-    Set.iter (fun x -> let cl = closure (Set.add  x empty) in                      
-                       t.Add(x,cl))items;
+    Set.iter (fun x -> let cl = closure (Set.add  x empty) in t.Add(x,cl)) items;
     t
 
 let goto_set =     
@@ -161,12 +160,13 @@ let goto_set =
     let m_toString x = 
     match x 
     with
-    | PToken(y)|PLiteral(y) -> toString y
-    | PRef (y,z) -> toString y
+    | PToken(y)|PLiteral(y)|PRef(y,_) -> toString y
     | _ -> ""
     in
-    List.iter (fun x-> (Set.iter (fun y-> let gt = make_goto (add y empty) x in 
-                                   if debug then (print_any (y,m_toString x) ; print_any " -> ";print_any (gt));
-                       t.Add((y,m_toString x),gt)))items) lex_list;
+    List.iter (fun x-> (Set.iter (fun y-> 
+                                      let gt = make_goto (add y empty) x 
+                                      in 
+                                      if debug then (print_any (y,m_toString x) ; print_any " -> ";print_any (gt));
+                                      t.Add((y,m_toString x),gt)))items) lex_list;
                        
     t

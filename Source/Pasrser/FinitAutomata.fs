@@ -7,8 +7,6 @@ open IL.Source
 open Set
 
 open System
-
-let debug = false
   
 let state = 
         let i =ref 0 in
@@ -77,23 +75,28 @@ let e_closure (rules,s,f) =
      in
      let new_start_state = (to_list (map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))(filter (fun x -> exists ((=)s) x) new_states))).Head
      in
-     if debug
-     then
+#if DEBUG     
      (
      Console.WriteLine("new_states:");
-     map print_any new_states;
+     iter print_any new_states;
      Console.WriteLine("new_automata:");
-     map print_any clean_new_automata;
+     iter print_any clean_new_automata;
      Console.WriteLine("new_start_state:");
-     new_start_state;
+     print_any new_start_state;
      Console.WriteLine("new_finale_state:");
-     map print_any new_finale_state;
+     iter print_any new_finale_state;
      Console.WriteLine("Closure_set:");
      print_any (closure_set);
      Console.WriteLine("States:");
      print_any (states rules);
      Console.WriteLine()
      );
+#endif
      (clean_new_automata,new_start_state,new_finale_state)
      
-let FA_rules rule =let fa_rule = create_NFA rule in if debug then (print_any "Fa_rule!!!!:"; print_any (fa_rule));(e_closure(fa_rule))
+let FA_rules rule =
+    let fa_rule = create_NFA rule in 
+#if DEBUG 
+   (print_any "Fa_rule!!!!:"; print_any (fa_rule));
+#endif
+    e_closure(fa_rule)

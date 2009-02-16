@@ -75,7 +75,7 @@ let items =
     union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in                                      
                                       if debug
                                       then (
-                                      map print_any itm ;
+                                      iter print_any itm ;
                                       Console.WriteLine();
                                       print_any (s,f);
                                       Console.WriteLine());
@@ -136,9 +136,9 @@ let closure_set =
      then
      (
      Console.WriteLine("Items:");
-     map print_any items;
+     iter print_any items;
      Console.WriteLine());
-    let t = System.Collections.Generic.Dictionary<(Item.t<'a>),Set<(Item.t<'a>)>>()
+    let t = new System.Collections.Generic.Dictionary<(Item.t<t>),Set<(Item.t<t>)>>()
     in
     Set.iter (fun x -> let cl = closure (Set.add  x empty) in t.Add(x,cl)) items;
     t
@@ -155,7 +155,7 @@ let goto_set =
         in 
         union_all(Set.map (nextItem) (Set.filter (fun item -> (eql x item.symb)) cl))
     in
-    let t = System.Collections.Generic.Dictionary<(Item.t<'a>*string),Set<Item.t<'a>>>() 
+    let t = System.Collections.Generic.Dictionary<(Item.t<t>*string),Set<Item.t<t>>>() 
     in
     let m_toString x = 
     match x 

@@ -22,14 +22,16 @@ module Production =
     |PAlt     of (t <'patt,'expr>) * (t<'patt,'expr>)//Альтернатива
     |PSeq     of (elem <'patt,'expr>) list * 'expr option //Последовательность * атрибут.(атрибут всегда применяется к последовательности) 
     |PToken   of Source.t //собственно токен
-    |PRef     of Source.t * 'expr option 
+    |PRef     of Source.t * 'expr option // Vanilla rule reference with an optional args list.
     |PMany    of (t <'patt,'expr>) //expr*
-    |PMetaRef of Source.t * 'expr option * 'expr list
+    |PMetaRef of Source.t * 'expr option * 'expr list // Metarule reference like in "a: mr<x> y z"
+    |PLiteral of Source.t //Литерал. Хочется в правилах явно писать ,например, .."if" expr "then" expr...
+    |PRepet   of (t <'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
+    |PPerm    of (t <'patt,'expr>) list //permutation (A || B || C)
+    
+/// The following are obsolete and reduction to PRepet should be discussed.
     |PSome    of (t <'patt,'expr>) //expr+
     |POpt     of (t <'patt,'expr>) //expr?
-    |PLiteral of Source.t //Литерал. Хочется в правилах явно писать ,например, .."if" expr "then" expr...
-    |POccur   of (t <'patt,'expr>)*int*int option  //я добавить расширенное рег. выражение (не A* а от скольки-то до стольки-то.)
-    |PComb    of (t <'patt,'expr>) list //я добавил перестоновки (A|B|C) = перестановка A,B и C
 
   end
 

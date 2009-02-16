@@ -14,28 +14,13 @@ open Namer
 open Gen_fo_Transform
 
 (** if rule has metaArgs then it's metarule *)
-let isMetaRule (r:Rule.t<'a,'b>) = 
-    match r.metaArgs with
-    | [] -> false
-    | _  -> true
-
-(** size for hash tables *)
-let size = 239
-
-let findInTable tbl key =
-    try 
-      let value = Hashtbl.find tbl key in Some value 
-    with
-      Not_found -> None
+let isMetaRule (r:Rule.t<'a,'b>) = r.metaArgs = []
 
 (** find metarule with given name in hash map of collected metarules *)
-let findMetaRule tbl mName = let res = findInTable tbl mName in
-    match res with
+let findMetaRule (tbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >) mName = 
+    match tbl.TryFind mName with
     | None -> failwith "undeclared metarule "(*reportError ("undeclared metarule " ^ mName)*) ; None
-    | _    -> res
-
-(** find reference to expanded metarule *)
-let findRef refsTbl key = findInTable refsTbl key
+    | res    -> res
 
 (** reports error with arguments of metarule *)
 let invalidArgs name = 
@@ -44,8 +29,9 @@ let invalidArgs name =
 
 (** create list of pairs: (<formal parameter>, <actual parameter>) *)
 let createPairsList name l1 l2 =
-    ( try List.map2(fun x  y -> (x,y)) l1 l2 with Invalid_argument _ -> invalidArgs name )
-    |> List.map (fun (x, y) -> getText x, getText y)
+     try List.map2(fun x  y -> getText x, getText y ) l1 l2 
+     with :? System.ArgumentException -> invalidArgs  name
+    
 
 
 (** update actual parameters if condition is true and there are no oldParams
@@ -75,12 +61,7 @@ let getKey metaName metaArgs =
 (** returns actual parameter (if given list contains it with given formal) 
  *  (args is list of pairs (<formal>, <actual>) )
  *)
-let getActualParam formalName args =
-    try
-      let (_, n) = List.find (fun (x, _) -> x = formalName) args
-      in Some n
-    with
-      Not_found -> None
+let getActualParam formalName args = List.try_assoc formalName args
 
 let replaceFormal args formal = 
     let act = getActualParam (getText formal) args in
@@ -95,7 +76,9 @@ let replaceFormals mArgs args =
 (** expand references to metarules 
  *  and generate new rules every such reference 
  *)
-let rec expandMeta body metaRulesTbl refsTbl res = 
+let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >)
+                        (refsTbl:Hashtbl.t<string,Source.t>)
+                    res = 
 let rec transformBody ruleName actParams args nRules =
     function
     | PRef (r, p) -> 
@@ -146,7 +129,7 @@ let rec transformBody ruleName actParams args nRules =
 (*    | other -> reportError "EBNF construction has already be transformed" 
       ; (other, nRules)
 *)
-and transformRule rName _params (metaRule:Rule.t<Source.t,Source.t>) metaArgs =
+and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
     let       
       args = createPairsList metaRule.name metaRule.metaArgs metaArgs 
     in 
@@ -163,7 +146,7 @@ and genNewRule rName args' mRulesTbl metaName' metaArgs =
 
 and expandMetaRef metaName _params metaArgs' = 
     let key = getKey metaName metaArgs' in
-    let rs = findRef refsTbl key in
+    let rs = refsTbl.TryFind key in
     match rs with
     | None -> let rName = createNewName metaName in       
       let eRules = Hashtbl.add refsTbl key rName ;
@@ -201,17 +184,17 @@ in
  *  - collect metarules
  *  - call metarules expanding 
  *)
-let rec handleMeta rules metaRulesTbl refsTbl res = 
+let rec handleMeta rules ((metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >),refsTbl) res = 
     match rules with 
     | [] -> res
     | h::t ->
       if (isMetaRule h) then begin
-        Hashtbl.add metaRulesTbl h.name h
-      ; handleMeta t metaRulesTbl refsTbl res
+        metaRulesTbl.Add(h.name,h)
+      ; handleMeta t (metaRulesTbl,refsTbl) res
       end else 
         let (b, rules) = expandMeta (h:Rule.t<Source.t,Source.t>).body metaRulesTbl refsTbl [] in 
         let r = { h with Rule.body = b } 
-        in handleMeta t metaRulesTbl refsTbl (res @ rules @ [r])
+        in handleMeta t (metaRulesTbl,refsTbl) (res @ rules @ [r])
 
 (** main function 
  *  - create hash tables
@@ -219,7 +202,7 @@ let rec handleMeta rules metaRulesTbl refsTbl res =
  *)
 let expandMetaRules rules =
     (** hash table for metarules *)
-    let metaRulesTbl = Hashtbl.create size in
+    let metaRulesTbl = Hashtbl.create 200 in
     (** hash table for references to expanded metarules *)
-    let refsTbl = Hashtbl.create size 
-    in handleMeta rules metaRulesTbl refsTbl []
+    let refsTbl = Hashtbl.create 200 in
+    handleMeta rules (metaRulesTbl,refsTbl) []

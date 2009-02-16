@@ -12,7 +12,7 @@ let rec mult n =
     then "  "
     else String.concat "" ["  ";mult (n-1)]
     
-let rec dumpElem n (elem:Production.elem<'a,'b>) = 
+let rec dumpElem n (elem:Production.elem<t,t>) = 
     Console.WriteLine(String.concat ""[mult n;"<Elem ommit = "; string (elem.omit) ; " binding = ";
                                        (match elem.binding 
                                         with
@@ -22,7 +22,7 @@ let rec dumpElem n (elem:Production.elem<'a,'b>) =
     Console.WriteLine(String.concat ""[mult n;"<Elem\>\n"]);
     
     
-and dumpProduction n (prod:Production.t<'a,'b>) =
+and dumpProduction n (prod:Production.t<t,t>) =
     match prod
     with
     |PAlt (a,b)      -> Console.WriteLine(String.concat ""[mult n;"<Alt>"]);
@@ -35,7 +35,7 @@ and dumpProduction n (prod:Production.t<'a,'b>) =
                                                             with
                                                             |Some (x)-> getText x
                                                             | None   -> "no attr");">"]);
-                        List.map (dumpElem(n+1))a;                                    
+                        List.iter (dumpElem(n+1))a;                                    
                         Console.WriteLine(String.concat ""[mult n;"<\Seq>"])
     |PToken(a)       -> Console.WriteLine(String.concat ""[mult n;"<Token name = "; getText a;"\>"])
     |PRef (a,b)      -> Console.WriteLine(String.concat ""[mult n;"<PRef name = "; getText a;" attr=";
@@ -61,7 +61,7 @@ and dumpProduction n (prod:Production.t<'a,'b>) =
     //|PComb 
     //| _  ->  Console.WriteLine(String.concat ""[mult n;"<Other\>"])
     
-let dumpRule n (rule:Rule.t<'a,'b>) = 
+let dumpRule n (rule:Rule.t<Source.t,Source.t>) = 
     Console.WriteLine(String.concat ""[mult n;"<Rule name = "; rule.name ;">"]);
     dumpProduction (n+1) (rule.body);
     Console.WriteLine(String.concat ""[mult n;"<Rule\>"]);

@@ -122,25 +122,9 @@ let withTokenPrefix (* token name *) =
 let createTypeName (* ruleName *) = 
     sprintf "'%stype_%s" (withPrefix "") (* ruleName *)
 
-(** returns file name without extension *)
-let nameWithoutExt (fname:string) = 
-    try
-      let ind = fname.IndexOf '.'
-      in fname.Substring(0, ind)
-    with Not_found -> fname
-
 (** returns file name for tokens *)
-let createTknFileName fname = 
-    nameWithoutExt fname |> sprintf "tokens_%s.tok"
+let createTknFileName fname = System.IO.Path.GetFileNameWithoutExtension(fname) |> sprintf "tokens_%s.tok"
 
-(* now is unused
-
-(** removes double quotes from literal *)
-let saveUnquote literal = let len = String.length literal in
-    if literal.[0] = '\"' && literal.[len - 1] = '\"'
-    then String.sub literal 1 (len - 2)
-    else (reportError ("cannot unquote literal: " ^ literal); literal)
-*)
 
 (** returns token type for literal *)
 let createLiteralToken (* number *) = sprintf "LITERAL_%d" (* number *)

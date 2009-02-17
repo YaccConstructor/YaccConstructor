@@ -9,39 +9,21 @@ open Source
 open System
 
 let extract_one_rule (rule:Rule.t<'a,'b>) = 
-    let (name,args,body,_public,metaArgs) = (rule.name,rule.args,rule.body,rule._public,rule.metaArgs)
-    in
-    let rec f b =
-    match b
-    with
-    |PAlt     (a,b) -> List.concat [f a;f b] 
-    |PSeq     (a,b) -> let wrap = List.unzip(List.map (fun (x:Production.elem<'c,'d>) ->
-                                                (x.rule,fun rule -> 
-                                                            {omit=x.omit;
-                                                             rule = rule;
-                                                             binding=x.binding;
-                                                             checker=x.checker}))
-                                             a  )              
+    let rec expand = function
+    |PAlt     (a,b) -> expand a  @ expand b
+    |PSeq     (a,b) -> let wrap = List.map (fun x -> (x.rule, fun r -> {x with rule = r})) a
+                                  |> List.unzip
                        in
-                       let new_body = (List.map f (fst wrap))  
-                       in 
-                       let rec gen lst = 
-                           match lst 
-                           with
-                           | hd::tl -> [for x in hd -> x::(List.concat(gen tl))]
+                       let rec gen = function
+                           | hd::tl -> [for x in hd -> x :: ( gen tl |> List.concat)]
                            | []     -> []
-                       in
-                       List.map (fun x -> PSeq ((List.map2 (fun c f -> f c) x (snd wrap)),b))(gen new_body)   
-    |PRef   (a,b) as t   -> [t]
-    |PLiteral (a)
-    |PToken   (a) as t   -> [t]
-    | _             -> (Console.WriteLine("incorrect tree for alternative expanding!");
-                       failwith "incorrect tree for alternative expanding!")
+                       in 
+                       fst wrap |> List.map expand |> gen 
+                       |> List.map (fun x -> PSeq ((List.map2 ( |> ) x (snd wrap)),b))
+    |PRef   _ 
+    |PLiteral _
+    |PToken   _ as t   -> [t]
+    | _             -> (print_endline "incorrect tree for alternative expanding!"
+                        ; failwith "incorrect tree for alternative expanding!")
     in 
-    let new_body = f body
-    in
-    List.map (fun x -> {name = name;
-                        args =args;
-                        body =x;
-                        _public =_public;
-                        metaArgs=metaArgs}) new_body                    
+    expand rule.body |> List.map (fun x -> {rule with body = x})

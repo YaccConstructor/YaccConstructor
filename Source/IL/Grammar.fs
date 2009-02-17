@@ -1,7 +1,5 @@
 ﻿#light "off"
 
-open Set
-
 module Symbol = //Терминал или нетерминал 
   struct
    type t<'a> = 

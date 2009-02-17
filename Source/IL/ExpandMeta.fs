@@ -134,7 +134,7 @@ and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
       args = createPairsList metaRule.name metaRule.metaArgs metaArgs 
     in 
     let fArgs = getFormalArgs metaRule.name _params metaRule.args
-    in let args' = createOpt fArgs in
+    in let args' = list2opt fArgs in
     let (b, newRules) = transformBody rName args' args [] metaRule.body 
     in ( newRules @ [ createRule rName fArgs b metaRule._public [] ] )
 

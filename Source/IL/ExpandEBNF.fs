@@ -10,11 +10,8 @@
 module ExpandEBNF 
 
 open IL
-//open Misc
-//open Generation
 open Production
 open Namer
-//open Diagnostics
 open Gen_fo_Transform
 
 let createBinding bindName = Some ( createSource bindName )
@@ -46,7 +43,8 @@ let createSomeAction x = someAction x |> createSource
 
 let createNoneAction = createSource noneAction
 
-let getOptBody = let binding = createBinding getItemBind in 
+let getOptBody = 
+    let binding = createBinding getItemBind in 
     let action = Some ( createSomeAction getItemBind ) in
     let action' = Some createNoneAction in
     PAlt ( createItemSeq binding action, createEmptySeq action' )
@@ -75,44 +73,40 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
         | PRef (rName, _params) -> (PMetaRef (createSource metaName, _params, [rName]), nr)
         | PToken t 
         | PLiteral t            -> (PMetaRef (createSource metaName, None, [t]), nr)
-        | other                 -> let newName = createNewName (createSource getItem) 
-                                   in
-                                   let _params = createParams paramList 
-                                   in
-                                   let newRule = createSimpleRule (getText newName) _params other 
-                                   in
-                                   let rules = convertToMeta newRule
-                                   in 
-                                   (PMetaRef (createSource metaName, createOpt _params, [newName]), nr @ rules)
-    and bodyToMeta rs (* new rules *) 
-                   _params (* rule parameters and bindings *) =     
-    let nameOf = function 
-        | POpt  _ -> Names.opt 
-        | PSome _ -> Names.some 
-        | PMany _ -> Names.many 
-        | _       -> failwith "Invalid_argument"//raise (Invalid_argument "nameOf")
-    in
-    function
-    | POpt  r as r' -> getMeta rs _params (nameOf r') r
-    | PSome r as r' -> getMeta rs _params (nameOf r') r
-    | PMany r as r' -> getMeta rs _params (nameOf r') r
-    | PSeq (seq, a) -> 
-      let elemToMeta paramList e = 
-        let (b, rs') = bodyToMeta [] paramList e.rule 
-        in ({ e with Production.rule = b }, rs')
-      in let rec seqToMeta _params' = function
-         | []   -> ([], [])
-         | h::t -> let (e', rs') = elemToMeta _params' h in 
-           let (l', rs'') = seqToMeta (addBinding _params' h.binding) t 
-           in (e'::l', rs' @ rs'')
-         in let (seq', nr) = seqToMeta _params seq
-            in (PSeq (seq', a), rs @ nr)
-    | PAlt (l, r) -> 
-      let (l', rs') = bodyToMeta rs _params l in
-      let (r', rs'') = bodyToMeta rs' _params r 
-      in (PAlt (l', r'), rs'')
-    (* do nothing in other case *)
-    | other -> (other, rs)
+        | other                 -> let newName = createNewName (createSource getItem) in
+                                   let _params = createParams paramList in
+                                   let newRule = createSimpleRule (getText newName) _params other in
+                                   let rules = convertToMeta newRule in 
+                                   (PMetaRef (createSource metaName, list2opt _params, [newName]), nr @ rules)
+    and bodyToMeta rs     (** new rules *) 
+                  _params (** rule parameters and bindings *) =     
+        let nameOf = function 
+            | POpt  _ -> Names.opt 
+            | PSome _ -> Names.some 
+            | PMany _ -> Names.many 
+            | _       -> invalid_arg "nameOf"
+        in
+        function
+        | POpt  r as r' -> getMeta rs _params (nameOf r') r
+        | PSome r as r' -> getMeta rs _params (nameOf r') r
+        | PMany r as r' -> getMeta rs _params (nameOf r') r
+        | PSeq (seq, a) -> 
+          let elemToMeta paramList e = 
+            let (b, rs') = bodyToMeta [] paramList e.rule 
+            in ({ e with Production.rule = b }, rs')
+          in let rec seqToMeta _params' = function
+             | []   -> ([], [])
+             | h::t -> let (e', rs') = elemToMeta _params' h in 
+               let (l', rs'') = seqToMeta (addBinding _params' h.binding) t 
+               in (e'::l', rs' @ rs'')
+             in let (seq', nr) = seqToMeta _params seq
+                in (PSeq (seq', a), rs @ nr)
+        | PAlt (l, r) -> 
+          let (l', rs') = bodyToMeta rs _params l in
+          let (r', rs'') = bodyToMeta rs' _params r 
+          in (PAlt (l', r'), rs'')
+        (* do nothing in other case *)
+        | other -> (other, rs)
 in
     let (b', l') = bodyToMeta [] r.args r.body
     in l' @ [{ r with Rule.body = b' }]

@@ -8,23 +8,9 @@
 
 #light "off"
 #nowarn "40"
-
-open Set
-open System
-open Log
-open PreCalculation
-open IL.Production
-open IL.Source
 open IL
+open Production
 open Grammar.Item
-open Grammar.Symbol
-
-// debug = true - печатается трасса. Иначе нет.
-let debug = true
-
-//interacive = true - ввод строки с консоли. иначе - явная подстановка тестовой строки
-//щас не работает.
-let interacive = false
 
 let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 
@@ -53,7 +39,7 @@ let (getL:(int->t<string,string>)),iLength =
 let mgetText x = 
     match x 
     with
-    PLiteral(y)|PToken(y)-> toString y
+    PLiteral(y)|PToken(y)-> Source.toString y
     |_ -> ""
 //запоминалка. Используем для запоминания результатов ф-ий parse и climb   
 let memoize (f: 'a ->'b) =
@@ -74,7 +60,7 @@ do start_time := System.DateTime.Now;
 let items = PreCalculation.items
     
 //это предпросчёт goto. сам анализатор тогда работает быстрее. (closure - очень дорогая операция)           
-let goto (q,x) =  union_all (Set.map (fun y -> goto_set.[(y,x)])q )                         
+let goto (q,x) =  Set.union_all (Set.map (fun y -> PreCalculation.goto_set.[(y,x)])q )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -82,30 +68,37 @@ do printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (
 
 let rec climb =
     memoize (fun (q,x,i) -> 
-    if debug then print_climb_1 i x q;
-    if q = empty
-    then empty
+#if DEBUG    
+    Log.print_climb_1 i x q;
+#endif
+    if q = Set.empty
+    then Set.empty
     else
     let gt =  goto (q,x)
     in
-    if debug then print_climb_2 gt;    
+#if DEBUG
+    Log.print_climb_2 gt;    
+#endif
     let new_q = parse (gt,i)
     in 
-    if debug then print_climb_3 new_q;    
-    if Set.exists (fun (x,x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_q     
+#if DEBUG
+    Log.print_climb_3 new_q;    
+#endif
+    if Set.exists (fun (x,x2)-> x.prod_name = "S" && x.next_num = None && x2 = 1) new_q     
     then new_q
     else    
     Set.union_all                            
     [Set.filter (fun x1-> 
                    Set.exists (fun item  -> 
-                                   (exists ((=) (fst x1)) (nextItem item) )&&(item.item_num <> item.s)
+                                   (Set.exists ((=) (fst x1)) 
+                                    (PreCalculation.nextItem item) )&&(item.item_num <> item.s)
                                )q)new_q
-     |>(Set.map (fun x1->(map (fun itm -> (itm,snd x1))(prevItem (fst x1)))))|>union_all
+     |>(Set.map (fun x1->(Set.map (fun itm -> (itm,snd x1))(PreCalculation.prevItem (fst x1)))))|>Set.union_all
     
     ;
     Set.union_all(
     union_from_Some[for (item,i) in new_q -> 
-                        if (exists (fun itm -> (getText itm.symb) = x) (prevItem item)) && (item.prod_name<>"S")&&(exists (fun itm -> itm.item_num=item.s)(prevItem item))
+                        if (Set.exists (fun itm -> (PreCalculation.getText itm.symb) = x) (PreCalculation.prevItem item)) && (item.prod_name<>"S")&&(Set.exists (fun itm -> itm.item_num=item.s)(PreCalculation.prevItem item))
                         then Some(climb (q,item.prod_name,i))
                         else None])
     ])                
@@ -115,15 +108,17 @@ and parse =
     printfn "Start time: %A" System.DateTime.Now;
     flg:=false;     
     memoize (fun (q,i) -> 
-    if debug  then print_parse q i;    
-    union_all
-        [map (fun x -> (x,i) )(Set.filter (fun item -> (item.next_num=None))q)
-         ;if (getL i = m_end) then empty else  climb(q,mgetText(getL i),i-1)
+#if DEBUG
+    Log.print_parse q i;
+#endif    
+    Set.union_all
+        [Set.map (fun x -> (x,i) )(Set.filter (fun item -> (item.next_num=None))q)
+         ;if (getL i = m_end) then Set.empty else  climb(q,mgetText(getL i),i-1)
         
          ])
                  
 let res str = 
-        not(parse (of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())=empty)
+        not(parse (Set.of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),iLength())=Set.empty)
  
 let test_str1 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))*a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a*(a+a)+(a*a*(a+a)*a+a*a*(a+a))"
 
@@ -133,15 +128,8 @@ let test_str3 = "a+a*a*(a+a)*a+a*a*(a+a)+a*a*(a+a)*a+a*a*(a+a)+a+a*a*(a+a)*a+a*a
      
 do 
        let str = 
-       if interacive
-       then 
-        (Console.WriteLine("Insert string:"); 
-        Console.ReadLine())
-       else
         test_str1 
    in     
    let r = res(str) in
    printfn "Result : %A" r;
-   Console.WriteLine();
-   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));   
-   Console.ReadLine()|>ignore
+   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))

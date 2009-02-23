@@ -12,7 +12,7 @@ module ExpandEBNF
 open IL
 open Production
 open Namer
-open Gen_fo_Transform
+open TransformAux
 
 let createBinding bindName = Some ( createSource bindName )
 

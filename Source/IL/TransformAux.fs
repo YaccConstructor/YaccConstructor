@@ -6,7 +6,7 @@
  *  Author: Ilia
  *)
 
-module Gen_fo_Transform
+module TransformAux
 
 open IL
 open Production

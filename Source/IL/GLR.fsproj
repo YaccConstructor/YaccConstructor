@@ -44,7 +44,7 @@
     <Compile Include="IL.fs" />
     <Compile Include="Grammar.fs" />
     <Compile Include="Namer.fs" />
-    <Compile Include="Gen_fo_Transform.fs" />
+    <Compile Include="TransformAux.fs" />
     <Compile Include="ExpandEBNF.fs" />
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandAlter.fs" />

@@ -37,10 +37,15 @@ let rules =
 let test_grammar =  {Definition.head=Some("test");
                      Definition.grammar=[];
                      Definition.foot=Some("test")}  
+let printList l = l |> String.concat "\n" |> printfn "%s"    
 
-let t = Console.WriteLine("!!!First!!!");List.map (Dump.dumpRule 0) rules                     
-let tree = ExpandMeta.expandMetaRules (ExpandEBNF.convertEBNFtoMeta rules)  
-let p = Console.WriteLine("!!!Second!!!");List.map (Dump.dumpRule 0) tree
-let z = List.concat(List.map ExpandAlter.extract_one_rule tree)
-let h = Console.WriteLine("!!!Third!!!");List.map (Dump.dumpRule 0) z
-do ignore(Console.ReadLine());()
+do Console.WriteLine("!!!First!!!"); 
+   printList <| List.map (Dump.rule2xml 0) rules;
+   
+let tree = ExpandMeta.expandMetaRules (ExpandEBNF.convertEBNFtoMeta rules) in  
+        Console.WriteLine("!!!Second!!!");
+        printList <| List.map (Dump.rule2xml 0) tree;
+        Console.WriteLine("!!!Third!!!");
+        List.concat(List.map ExpandAlter.extract_one_rule tree)
+        |> List.map (Dump.rule2xml 0) 
+        |> printList

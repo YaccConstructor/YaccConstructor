@@ -10,12 +10,10 @@ open System
   
 let state = 
         let i =ref 0 in
-        let next () = i:=!i+1;!i in
+        let next () = incr i;!i in
         next  
   
-let rec create_NFA regexpr =
-    match regexpr
-    with
+let rec create_NFA = function 
     | PSeq (seq,attr) -> ( let new_autom = List.map (fun t -> create_NFA t.rule) seq
                            in 
                            let f (lrules,ls,lf) (rrules,rs,rf) = (List.concat [[lf,None,rs];lrules;rrules],ls,rf)                              

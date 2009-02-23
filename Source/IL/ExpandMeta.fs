@@ -11,7 +11,7 @@ open Production
 //open Misc
 //open Diagnostics
 open Namer
-open Gen_fo_Transform
+open TransformAux
 
 (** if rule has metaArgs then it's metarule *)
 let isMetaRule (r:Rule.t<'a,'b>) = r.metaArgs = []

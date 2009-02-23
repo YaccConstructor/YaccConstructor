@@ -2,20 +2,14 @@
 
 module PreCalculation
 
-open FinitAutomata
 open IL.Production
 open IL.Rule
-open IL.Source
-open Set
 open IL
-open Log
-open Grammar
 open Grammar.Item
 open Grammar.Symbol
-
 open System
 
-let debug = false
+let singleton x = Set.add x Set.empty
 
 let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
@@ -70,16 +64,16 @@ let rules =
      ] 
 
 let items =
-    let rules_map  = List.zip ([0..(List.length rules)-1])rules
-    in
-    union_all(List.map (fun (i,rl) -> let (itm,s,f) = (FA_rules(rl.body)) in                                      
-                                      if debug
-                                      then (
-                                      iter print_any itm ;
+    let rules_map  = List.zip ([0..(List.length rules)-1])rules in
+    List.map (fun (i,rl) -> let (itm,s,f) = (FinitAutomata.FA_rules(rl.body)) in                                      
+#if DEBUG
+                                      Set.iter print_any itm ;
                                       Console.WriteLine();
                                       print_any (s,f);
-                                      Console.WriteLine());
-                                      of_list(List.concat(Set.map (fun (a,b,c) ->( {prod_num = i;
+                                      Console.WriteLine();
+#endif
+                                      Set.of_list(List.concat(Set.map (fun (a,b,c) ->
+                                      ( {prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = a;
                                                                symb = (match b 
@@ -92,7 +86,7 @@ let items =
                                                                s =s;
                                                                f=f                                                                                          
                                                               }::
-                                                              (if (exists ((=)c) f)
+                                                              (if (Set.exists ((=)c) f)
                                                                then [{prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = c;
@@ -100,73 +94,64 @@ let items =
                                                                next_num = None;
                                                                s =s;
                                                                f=f}]  
-                                                               else [] )))itm)))rules_map)
+                                                               else [] )))itm)))rules_map
+    |> Set.union_all
 
-let getText a = 
-    match a 
-    with 
-    |Some(Terminal(x))     ->  toString x  
+let getText = function
+    |Some( Terminal x )     ->  Source.toString x  
     | _                    -> "" 
 
 let closure q = 
     let rec cl i q = 
-    if i = Set.count q 
-    then q
-    else
-    let next_cl f = cl (i+1) (union_all [q;filter f items])
-    in 
-    next_cl (fun x -> 
-             let el_for_cl = (List.nth (Set.to_list q) i)
-             in 
-             (try(x.prod_name = (getText el_for_cl.symb) && x.item_num=x.s)
-              with ex -> false)                                            
-                  )
-    in
+      if i = Set.count q then q
+      else
+      let next_cl f = cl (i+1) (Set.union_all [q; Set.filter f items]) in 
+        next_cl (fun x -> 
+               let el_for_cl = List.nth (Set.to_list q) i in 
+               x.prod_name = getText el_for_cl.symb && x.item_num = x.s)
+                                                             
+                    
+      in
     cl 0 q
 
 let nextItem item = 
-    if item.next_num = None
-    then empty
-    else filter (fun x -> item.next_num=Some(x.item_num)&&item.prod_num=x.prod_num) items
+  let isNext x = item.next_num = Some x.item_num && item.prod_num=x.prod_num in
+  Set.filter isNext items
     
-let prevItem item = filter(fun x -> Some(item.item_num)=x.next_num&&item.prod_num=x.prod_num) items
+let prevItem item = 
+  let isPrev x = Some item.item_num = x.next_num && item.prod_num = x.prod_num in
+  Set.filter isPrev items
         
 let closure_set = 
-     if debug 
-     then
-     (
-     Console.WriteLine("Items:");
-     iter print_any items;
-     Console.WriteLine());
-    let t = new System.Collections.Generic.Dictionary<(Item.t<t>),Set<(Item.t<t>)>>()
-    in
-    Set.iter (fun x -> let cl = closure (Set.add  x empty) in t.Add(x,cl)) items;
-    t
+#if DEBUG
+  Console.WriteLine("Items:");
+  Set.iter print_any items;
+  Console.WriteLine();
+#endif
+  dict <| Set.map (fun x -> x, closure (singleton x) ) items
 
 let goto_set =     
-    let eql a b = 
-        match (a,b)
-        with 
-         (PToken(x)|PLiteral(x)),(Some(Terminal(y)|Nonterminal(y))) -> x=y
+    let eql = function 
+        | (PToken x |PLiteral x), Some(Terminal y | Nonterminal y ) -> x=y
         | _ -> false
     in 
     let make_goto q x =  
-        let cl = union_all (Set.map (fun x -> closure_set.[x]) q)
+        let cl = Set.union_all (Set.map (fun x -> closure_set.[x]) q)
         in 
-        union_all(Set.map (nextItem) (Set.filter (fun item -> (eql x item.symb)) cl))
+        Set.union_all(Set.map (nextItem) (Set.filter (fun item -> (eql (x ,item.symb))) cl))
     in
-    let t = System.Collections.Generic.Dictionary<(Item.t<t>*string),Set<Item.t<t>>>() 
+    let t = new System.Collections.Generic.Dictionary<(Grammar.Item.t<Source.t>*string),Set<Grammar.Item.t<Source.t>>>() 
     in
-    let m_toString x = 
-    match x 
-    with
-    | PToken(y)|PLiteral(y)|PRef(y,_) -> toString y
-    | _ -> ""
+    let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
+                   | _ -> ""
     in
-    List.iter (fun x-> (Set.iter (fun y-> 
-                                      let gt = make_goto (add y empty) x 
-                                      in 
-                                      if debug then (print_any (y,m_toString x) ; print_any " -> ";print_any (gt));
-                                      t.Add((y,m_toString x),gt)))items) lex_list;
+    List.iter (fun x -> (Set.iter (fun y-> 
+                                      let gt = make_goto (singleton y) x in
+#if DEBUG
+print_any (y, toString x) ; 
+print_any " -> ";
+print_any (gt);
+#endif
+                                      t.Add((y, toString x),gt)))items) lex_list;
                        
     t

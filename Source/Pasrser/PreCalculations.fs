@@ -87,7 +87,9 @@ let items =
                                                                then [{prod_num = i;
                                                                prod_name = rl.name;
                                                                item_num = c;
-                                                               symb = None;                                                                    
+                                                               symb = (match b with 
+                                                                        Some(PLiteral(s)|PToken(s)| PRef(s,_)) -> Some(Terminal(s))                                                                      
+                                                                       | _ -> failwith "error!!!");                                                                    
                                                                next_num = None;
                                                                s =s;
                                                                f=f}]  

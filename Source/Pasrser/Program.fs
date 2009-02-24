@@ -11,6 +11,8 @@
 open IL
 open Production
 open Grammar.Item
+open Tree
+open Set
 
 let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 
@@ -51,7 +53,7 @@ do start_time := System.DateTime.Now;
 let items = PreCalculation.items
     
 //это предпросчёт goto. сам анализатор тогда работает быстрее. (closure - очень дорогая операция)           
-let goto (states,symbol) =  Set.union_all (Set.map (fun y -> PreCalculation.goto_set.[(y,symbol)])states )                         
+let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> Set.map(fun z -> (z,tree))(PreCalculation.goto_set.[(y,symbol)]))states )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -64,53 +66,57 @@ let rec climb =
 #endif
     if states = Set.empty
     then Set.empty
-    else 
+    else     
     let gt =  goto (states,symbol)
 #if DEBUG
     Log.print_climb_2 gt;    
 #endif
-    let new_states = parse (gt,i)    
+    let new_states = parse (gt,i)   
 #if DEBUG
     Log.print_climb_3 new_states;    
-#endif
-    if Set.exists (fun (x,x2)-> x.prod_name = "S" && x.next_num = None && x2 = 1) new_states     
+#endif             
+    if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
     then new_states
     else    
     Set.union_all [Set.filter (fun (items,i)-> 
-                               Set.exists (fun item  -> 
-                                           (Set.exists ((=)items)(PreCalculation.nextItem item))&&(item.item_num <> item.s)
-                                           )states
-                               )new_states
-                    |>(Set.map (fun (item,i)->(Set.map (fun itm -> itm,i)(PreCalculation.prevItem item))))|>Set.union_all
-                    ;
-                    Set.union_all(union_from_Some[for (item,i) in new_states -> 
-                                                      if  Set.exists (fun itm -> PreCalculation.getText itm.symb = symbol)
-                                                                     (PreCalculation.prevItem item) 
-                                                          && 
-                                                          item.prod_name<>"S"
-                                                          &&
-                                                          Set.exists (fun itm -> itm.item_num=item.s)(PreCalculation.prevItem item)
-                                                      then Some(climb (states,item.prod_name,i))
-                                                      else None
-                                                 ]
-                                  )
-                    ])                
+                   Set.exists (fun (item,tree)  -> 
+                                   (exists ((=) (fst items)) (PreCalculation.nextItem item) )&&(item.item_num <> item.s)
+                               )states)new_states
+     |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,snd items),i))(PreCalculation.prevItem (fst items)))))|>union_all
+    
+    ;
+    Set.union_all(
+    union_from_Some[for ((item,tree),i) in new_states -> 
+                        if (exists (fun itm -> (PreCalculation.getText itm.symb) = symbol) (PreCalculation.prevItem item))
+                            && 
+                           (item.prod_name<>"S")
+                            &&
+                           (exists (fun itm -> itm.item_num=item.s)(PreCalculation.prevItem item))
+                        then (print_any "Tree: "; print_any tree; Some(climb (Set.map (fun (state,_tree)-> (state,tree@_tree)) states,item.prod_name,i)))
+                        else None])
+    ])                
 and flg = ref true
 and parse = 
     if !flg then start_time:=System.DateTime.Now;
     printfn "Start time: %A" System.DateTime.Now;
     flg:=false;     
     memoize (fun (states,i) -> 
-#if DEBUG
-    Log.print_parse states i;
-#endif    
-    Set.union_all
-        [Set.map (fun item -> (item,i))(Set.filter (fun item -> item.next_num=None)states)
-         ;if (get_next_ch i = m_end) then Set.empty else  climb(states,mgetText(get_next_ch i),i-1)        
-        ])
+#if DEBUG 
+ (Log.print_parse states i);
+#endif
+    let text = mgetText(get_next_ch i)
+    let tree1 item = Node([Leaf (PreCalculation.getText item.symb)],item.prod_name)
+    let tree2 item = Leaf(text)
+    let new_states = Set.filter (fun (item,tree) -> (item.next_num=None))states
+    let result_states states _tree = Set.map (fun (item,tree) -> (item,(_tree item)::tree)) states
+    union_all
+        [map (fun x -> x,i)(result_states new_states tree1)
+         ;if (get_next_ch i = m_end) then empty else  climb(result_states states tree2,text,i-1)        
+         ])
                  
-let res x = not(parse (Set.of_list ([List.find (fun x -> x.prod_name ="S")(Set.to_list items)]),input_length())=Set.empty)
-
-do let r = res ()
+let res x = not(parse (of_list ((List.map (fun x -> (x,[]))(List.filter (fun x -> x.prod_name ="S")(Set.to_list items)))),input_length())=empty)
+do                    
+   let r = res ()
    printfn "Result : %A" r;
-   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))
+   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));
+   ignore(System.Console.ReadLine())

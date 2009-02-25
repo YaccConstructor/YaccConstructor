@@ -9,8 +9,6 @@ open Grammar.Item
 open Grammar.Symbol
 open System
 
-let singleton x = Set.add x Set.empty
-
 let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
 let production1 = PSeq([{omit=false;
@@ -106,9 +104,10 @@ let closure q =
       then q
       else
         let next_cl f = cl (i+1) (Set.union_all [q; Set.filter f items])
-        next_cl (fun x -> 
-                 let el_for_cl = List.nth (Set.to_list q) i 
-                 x.prod_name = getText el_for_cl.symb && x.item_num = x.s)                                                                                 
+        let closure_one elt = 
+            let el_for_cl = List.nth (Set.to_list q) i 
+            elt.prod_name = getText el_for_cl.symb && elt.item_num = elt.s 
+        next_cl closure_one                                                                                 
     in
     cl 0 q
 
@@ -126,7 +125,7 @@ let closure_set =
   Set.iter print_any items;
   Console.WriteLine();
 #endif
-  dict <| Set.map (fun x -> x, closure (singleton x) ) items
+  dict <| Set.map (fun x -> x, closure (Set.singleton x) ) items
   
 let goto_set =     
     let eql = function 
@@ -139,7 +138,7 @@ let goto_set =
     let t = new System.Collections.Generic.Dictionary<(Grammar.Item.t<Source.t>*string),Set<Grammar.Item.t<Source.t>>>()    
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""   
-    List.iter (fun x -> (Set.iter (fun y -> let gt = make_goto (singleton y) x in
+    List.iter (fun x -> (Set.iter (fun y -> let gt = make_goto (Set.singleton y) x in
 #if DEBUG
                                                 print_any (y, toString x) ; 
                                                 print_any " -> ";

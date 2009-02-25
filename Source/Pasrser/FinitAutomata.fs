@@ -9,9 +9,9 @@ open Set
 open System
   
 let state = 
-        let i =ref 0 in
-        let next () = incr i;!i in
-        next  
+    let i = ref 0
+    let next () = incr i;!i
+    next  
   
 let rec create_NFA = function 
     | PSeq (seq,attr) -> ( let new_autom = List.map (fun t -> create_NFA t.rule) seq                            
@@ -40,14 +40,15 @@ let e_closure (rules,s,f) =
               let lst = (List.filter (fun(a,b,c)-> a = stt && b = None) rules)
               if lst = [] 
               then !exists_e_elt 
-              else
-              union_all (map (fun (a,b,c)-> closure c)(of_list lst)))
+              else union_all (map (fun (a,b,c)-> closure c)(of_list lst)))
      in        
      let get_rpart stt = of_list(List.map (fun (a,b,c)-> (b,c))(List.filter(fun (a,b,c)-> a=stt && b<>None)rules))
      let closure_set = map (fun x -> exists_e_elt:=empty;(x,closure x)) (states rules)
-     let new_states = fold_left (fun sttset (q,elt) -> if (exists (fun x -> (subset elt x)&&(not(equal elt x))) sttset) 
-                                                       then (remove elt sttset) 
-                                                       else sttset) (of_list(snd(List.unzip ( to_list closure_set)))) closure_set
+     let is_subset sttset (_,elt) = 
+         if exists (fun x -> (subset elt x)&&(not(equal elt x))) sttset 
+         then remove elt sttset 
+         else sttset
+     let new_states = fold_left is_subset (of_list(snd(List.unzip ( to_list closure_set)))) closure_set
      let new_automata = List.concat(List.concat(
                         List.map (fun stt -> 
                                       List.map (fun (x,y,z) -> 
@@ -56,11 +57,10 @@ let e_closure (rules,s,f) =
                                                (List.filter (fun (x,y,z) -> (exists ((=)x) stt)&&(Option.is_some y)) rules))
                                       (to_list new_states)))
      in
-     let alter_name = List.zip [0..new_states.Count-1] (to_list new_states)     
-     let clean_new_automata = map (fun (x,y,z) -> (fst (List.find (fun (a,b) -> equal x b)alter_name)
-                                                   ,y
-                                                   ,fst (List.find (fun (a,b) -> equal z b)alter_name)))
-                                  (of_list new_automata)
+     let alter_name = List.zip [0..new_states.Count-1] (to_list new_states) 
+     let get_alter_name x = fst (List.find (fun (a,b) -> equal x b)alter_name)
+     let new_rule (x,y,z) = get_alter_name x,y,get_alter_name z
+     let clean_new_automata = map new_rule (of_list new_automata)
      let new_finale_state = map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))(filter (fun x -> exists ((=)f) x) new_states)
      let new_start_state = (to_list (map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))
                                          (filter (fun x -> exists ((=)s) x) new_states))).Head

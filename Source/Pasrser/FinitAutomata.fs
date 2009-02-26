@@ -5,8 +5,6 @@ module FinitAutomata
 open IL.Production
 open IL.Source
 open Set
-
-open System
   
 let state = 
     let i = ref 0
@@ -65,22 +63,8 @@ let e_closure (rules,s,f) =
      let new_start_state = (to_list (map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))
                                          (filter (fun x -> exists ((=)s) x) new_states))).Head
      in
-#if DEBUG     
-     (
-     Console.WriteLine("new_states:");
-     iter print_any new_states;
-     Console.WriteLine("new_automata:");
-     iter print_any clean_new_automata;
-     Console.WriteLine("new_start_state:");
-     print_any new_start_state;
-     Console.WriteLine("new_finale_state:");
-     iter print_any new_finale_state;
-     Console.WriteLine("Closure_set:");
-     print_any (closure_set);
-     Console.WriteLine("States:");
-     print_any (states rules);
-     Console.WriteLine()
-     );
+#if DEBUG          
+     Log.print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set (states rules);
 #endif
      (clean_new_automata,new_start_state,new_finale_state)
      

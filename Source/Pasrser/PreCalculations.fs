@@ -7,68 +7,16 @@ open IL.Rule
 open IL
 open Grammar.Item
 open Grammar.Symbol
-open System
 
-let lex_list = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
+let lex_list = Test.test_lexem
 
-let production1 = PSeq([{omit=false;
-                         rule= PToken("E",(1,1));
-                         binding = None;
-                         checker = None}],None)
-let production2 = PSeq([{omit=false;
-                         rule= PToken("E",(1,1));
-                         binding = None;
-                         checker = None};
-                         {omit=false;
-                         rule= PAlt(PLiteral("+",(1,1)),PLiteral("*",(1,1)));
-                         binding = None;
-                         checker = None};
-                         {omit=false;
-                         rule= PToken("E",(1,1));
-                         binding = None;
-                         checker = None}],None)
-let production3 = PSeq([{omit=false;
-                         rule= PLiteral("(",(1,1));
-                         binding = None;
-                         checker = None};
-                         {omit=false;
-                         rule= PToken("E",(1,1));
-                         binding = None;
-                         checker = None};
-                         {omit=false;
-                         rule= PLiteral(")",(1,1));
-                         binding = None;
-                         checker = None}],None)
-let production4 = PSeq([{omit=false;
-                         rule= PMany(PAlt(PLiteral("a",(1,1)),PLiteral("b",(1,1))));
-                         binding = None;
-                         checker = None}],None)
-let production5 = PSeq([{omit=false;
-                         rule= PAlt(PAlt(production2,production3),production4);
-                         binding = None;
-                         checker = None}],None)                         
-                         
-let rules = 
-    [ {name = "S";
-       args = [];
-       body = production1;
-       _public = true; 
-       metaArgs = []};
-       {name = "E";
-       args = [];
-       body = production5;
-       _public = true; 
-       metaArgs = []}
-     ] 
+let rules =Test.test_grammar
 
 let items =
     let rules_map  = List.zip ([0..(List.length rules)-1])rules
     List.map (fun (i,rl) -> let (itm,s,f) = (FinitAutomata.FA_rules(rl.body)) in                                      
 #if DEBUG
-                                      Set.iter print_any itm ;
-                                      Console.WriteLine();
-                                      print_any (s,f);
-                                      Console.WriteLine();
+                                      Log.print_item itm s f;
 #endif
                                       Set.of_list(List.concat(Set.map (fun (a,b,c) ->
                                                              ( {prod_num = i;
@@ -121,9 +69,7 @@ let prevItem item =
         
 let closure_set = 
 #if DEBUG
-  Console.WriteLine("Items:");
-  Set.iter print_any items;
-  Console.WriteLine();
+  Log.print_items items
 #endif
   dict <| Set.map (fun x -> x, closure (Set.singleton x) ) items
   
@@ -140,9 +86,7 @@ let goto_set =
                             | _ -> ""   
     List.iter (fun x -> (Set.iter (fun y -> let gt = make_goto (Set.singleton y) x in
 #if DEBUG
-                                                print_any (y, toString x) ; 
-                                                print_any " -> ";
-                                                print_any gt;
+                                                Log.print_goto_c gt y x;
 #endif
                                                 t.Add((y, toString x),gt)))items) lex_list;
                        

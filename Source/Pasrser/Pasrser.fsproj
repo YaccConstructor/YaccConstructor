@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogPrinter.fs" />
+    <Compile Include="Test.fs" />
     <Compile Include="FinitAutomata.fs" />
     <Compile Include="PreCalculations.fs" />
     <Compile Include="Tree.fs" />

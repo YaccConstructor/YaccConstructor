@@ -1,4 +1,4 @@
-#light 
+﻿#light 
 #nowarn "40"
 open IL
 open Production
@@ -21,7 +21,7 @@ let mgetText x =
     match x with
     PLiteral(y)|PToken(y)-> Source.toString y
     |_ -> ""
-//зап�_�_и�_а�>ка. �_�_п�_�>�_з�_���_ �_�>�_ зап�_�_и�_а�_и�_ �_��з�_�>�_�'а�'�_�_ �"-ий parse и climb   
+//Р·Р°РїР_Р_РёР_Р°Р>РєР°. Р_С_РїР_Р>С_Р·С_РчР_ Р_Р>С_ Р·Р°РїР_Р_РёР_Р°Р_РёС_ С_РчР·С_Р>С_С'Р°С'Р_Р_ С"-РёР№ parse Рё climb   
 let memoize (f: 'a ->'b) =
    let t = new System.Collections.Generic.Dictionary<'a,'b>()   
    fun x ->        
@@ -36,14 +36,14 @@ do start_time := System.DateTime.Now;
    printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now
     
 let items = PreCalculation.items
-    
-//�_�'�_ п�_���_п�_�_�_�+�'�' goto. �_а�_ а�_а�>иза�'�_�_ �'�_�_�_а �_а�+�_�'а���' �+�<�_�'�_����. (closure - �_�+���_�_ �_�_�_�_�_а�_ �_п���_а�+и�_)           
+let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst 
+//С_С'Р_ РїС_РчР_РїС_Р_С_С+С'С' goto. С_Р°Р_ Р°Р_Р°Р>РёР·Р°С'Р_С_ С'Р_Р_Р_Р° С_Р°Р+Р_С'Р°РчС' Р+С<С_С'С_РчРч. (closure - Р_С+РчР_С_ Р_Р_С_Р_Р_Р°С_ Р_РїРчС_Р°С+РёС_)           
 let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> Set.map(print_any tree;System.Console.WriteLine();
                                                     fun z -> (z, if exists (fun item -> 
                                                                                 ((*List.hd tree <> Label &&*)(item.item_num = z.s)(* && PreCalculation.getText item.symb = symbol*))) 
                                                                                 (PreCalculation.prevItem z)
-                                                                 then ((List.hd tree)::Label::(List.tl tree)) 
-                                                                 else ((function ((Leaf(_) as x)::Label::(Node(_)as y)::tree)-> Label::x::y::tree| x-> x) tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
+                                                                 then ((function (*(Leaf(_) as x)::Label::tree)->x::Label::tree|*)((Leaf(_) as x)::tree)->x::Label::tree|x->x)tree) 
+                                                                 else ((function ((Leaf(_) as x)::Label::tree)-> Label::x::tree| (Leaf(_) as y)::x-> Label::y::x|x->x) tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -97,7 +97,7 @@ and parse =
     Log.print_parse states i;
 #endif
     let text = mgetText(get_next_ch i)
-    let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst      
+    let rec kill_label lst = (function Label::tl -> tl| x -> x) lst      
     let tree1 item tree = 
         //let subnodes =  
         //if tree<> [] then match (List.hd tree) with Node (_,_,c)|Leaf(_,c) -> print_any c;
@@ -110,7 +110,7 @@ and parse =
               | [] -> buf,[]
         let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     
         Label::(Node(red,item.prod_name,[item.prod_name]))::n_tree
-    let tree2 item tree = ((Leaf(text,[text]))::(function (Label::tree)-> tree| x-> x) tree)
+    let tree2 item tree = ((Leaf(text,[text]))::(*function (Label::tree)-> tree| x-> x*) tree)
     let new_states = Set.filter (fun (item,tree) -> (item.next_num=None))states
     let result_states states _tree = Set.map (fun (item,tree) -> (item,(_tree item tree))) states
     union_all

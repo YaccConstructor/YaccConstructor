@@ -43,11 +43,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Tree.fs" />
     <Compile Include="LogPrinter.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="FinitAutomata.fs" />
     <Compile Include="PreCalculations.fs" />
-    <Compile Include="Tree.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

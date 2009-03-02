@@ -23,7 +23,7 @@ let rec create_NFA = function
                                                                             (lf,None,f);
                                                                             (rf,None,f)];lrules;rrules],s,f)
                             ) 
-    | PMany (expr)    ->  (function (rules,s,f) ->(List.concat [[f,None,s];[s,None,f];rules],s,f)) (create_NFA expr)                          
+    | PSome (expr)    ->  (function (rules,s,f) ->(List.concat [[f,None,s];[s,None,f];rules],s,f)) (create_NFA expr)                          
     | PToken(ch)
     | PLiteral(ch) as t -> (let s,f = state(),state() in ([s,Some(t),f],s,f))
     

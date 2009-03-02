@@ -40,10 +40,10 @@ let items = PreCalculation.items
 //Ñ_Ñ'Ð_ Ð¿Ñ_Ð÷Ð_Ð¿Ñ_Ð_Ñ_Ñ+Ñ'Ñ' goto. Ñ_Ð°Ð_ Ð°Ð_Ð°Ð>Ð¸Ð·Ð°Ñ'Ð_Ñ_ Ñ'Ð_Ð_Ð_Ð° Ñ_Ð°Ð+Ð_Ñ'Ð°Ð÷Ñ' Ð+Ñ<Ñ_Ñ'Ñ_Ð÷Ð÷. (closure - Ð_Ñ+Ð÷Ð_Ñ_ Ð_Ð_Ñ_Ð_Ð_Ð°Ñ_ Ð_Ð¿Ð÷Ñ_Ð°Ñ+Ð¸Ñ_)           
 let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> Set.map(print_any tree;System.Console.WriteLine();
                                                     fun z -> (z, if exists (fun item -> 
-                                                                                ((*List.hd tree <> Label &&*)(item.item_num = z.s)(* && PreCalculation.getText item.symb = symbol*))) 
+                                                                                ((item.item_num = z.s) && (PreCalculation.getText item.symb = symbol))) 
                                                                                 (PreCalculation.prevItem z)
                                                                  then ((List.hd tree)::Label::(List.tl tree)) 
-                                                                 else ((function ((Leaf(_) as x)::Label::(Node(_)as y)::tree)-> Label::x::y::tree| x-> x) tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
+                                                                 else ((function (x::Label::tree)-> x::tree| x-> x) tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -97,15 +97,14 @@ and parse =
     Log.print_parse states i;
 #endif
     let text = mgetText(get_next_ch i)
-    let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst      
     let tree1 item tree = 
         //let subnodes =  
         //if tree<> [] then match (List.hd tree) with Node (_,_,c)|Leaf(_,c) -> print_any c;
-        
+        let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst      
         let rec to_Label lst buf = 
             match lst with
               hd::tl -> match hd with
-                          Label -> buf,(tl)
+                          Label -> buf,(kill_label tl)
                         | x     -> to_Label tl (x::buf)
               | [] -> buf,[]
         let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     

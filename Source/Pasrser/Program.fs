@@ -34,16 +34,17 @@ let memoize (f: 'a ->'b) =
                       
 do start_time := System.DateTime.Now;
    printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now
-    
+    (* if exists (fun item -> 
+                ((*List.hd tree <> Label &&*)(item.item_num = z.s)(* && PreCalculation.getText item.symb = symbol*))) 
+                (PreCalculation.prevItem z)
+ then ((function (*(Leaf(_) as x)::Label::tree)->x::Label::tree|*)((Leaf(_) as x)::tree)->x::Label::tree|x->x)tree) 
+ else ((function ((Leaf(_) as x)::Label::tree)-> Label::x::tree| (Leaf(_) as y)::x-> Label::y::x|x->x) tree)))*)
+
 let items = PreCalculation.items
 let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst 
 //С_С'Р_ РїС_РчР_РїС_Р_С_С+С'С' goto. С_Р°Р_ Р°Р_Р°Р>РёР·Р°С'Р_С_ С'Р_Р_Р_Р° С_Р°Р+Р_С'Р°РчС' Р+С<С_С'С_РчРч. (closure - Р_С+РчР_С_ Р_Р_С_Р_Р_Р°С_ Р_РїРчС_Р°С+РёС_)           
 let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> Set.map(print_any tree;System.Console.WriteLine();
-                                                    fun z -> (z, if exists (fun item -> 
-                                                                                ((*List.hd tree <> Label &&*)(item.item_num = z.s)(* && PreCalculation.getText item.symb = symbol*))) 
-                                                                                (PreCalculation.prevItem z)
-                                                                 then ((function (*(Leaf(_) as x)::Label::tree)->x::Label::tree|*)((Leaf(_) as x)::tree)->x::Label::tree|x->x)tree) 
-                                                                 else ((function ((Leaf(_) as x)::Label::tree)-> Label::x::tree| (Leaf(_) as y)::x-> Label::y::x|x->x) tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
+                                                    (fun z -> (z,tree)))(PreCalculation.goto_set.[(y,symbol)]))states )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -66,6 +67,19 @@ let rec climb =
 #if DEBUG
     //Log.print_climb_3 new_states;    
 #endif             
+    let text = mgetText(get_next_ch i)
+    let rec kill_label lst = (function Label::tl -> tl| x -> x) lst
+    let rec mkill_label lst = (function Label::tl -> mkill_label tl| x -> x) lst      
+    let tree1 item tree =         
+        let rec to_Label lst buf = 
+            match lst with
+              hd::tl -> match hd with
+                          Label -> buf,(tl)
+                        | x     -> to_Label tl (x::buf)
+              | [] -> buf,[]
+        let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     
+        Label::(Node(red,item.prod_name,[]))::n_tree
+    let tree2 item tree = ((Leaf(text,[text]))::(*function (Label::tree)-> tree| x-> x*) tree)
     if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
     then new_states
     else    
@@ -74,7 +88,7 @@ let rec climb =
                                    (*print_any "NEXT!!!";iter print_any (PreCalculation.nextItem item));*)
                                    (exists ((=) (fst items))(PreCalculation.nextItem item) )&&(item.item_num <> item.s)
                                )states)new_states
-     |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,snd items),i))(PreCalculation.prevItem (fst items)))))|>union_all
+     |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,(if symbol <> "E" && symbol <> "S" then (*function Label::tree -> tree|x->x *)Label::Leaf(symbol,[])::((function Label::tree -> tree|x->x )(snd items)) else tree1 itm (snd items))),i))(PreCalculation.prevItem (fst items)))))|>union_all
     
     ;
     Set.union_all(
@@ -84,7 +98,7 @@ let rec climb =
                            (item.prod_name<>"S")
                             &&
                            (exists (fun itm -> itm.item_num=item.s)(PreCalculation.prevItem item))
-                        then ((*print_any "Tree: "; print_any tree;*) Some(climb (Set.map (fun (state,_) -> (state,tree)) states,item.prod_name,i)))
+                        then ((*print_any "Tree: "; print_any tree;*) Some(climb (Set.map (fun (state,_tree) -> (state,(if symbol <> "E" && symbol <> "S" then Leaf(symbol,[])::Label::tree else tree1 item (tree)))) states,item.prod_name,i)))
                         else None])
     ])                
 and flg = ref true
@@ -98,19 +112,8 @@ and parse =
 #endif
     let text = mgetText(get_next_ch i)
     let rec kill_label lst = (function Label::tl -> tl| x -> x) lst      
-    let tree1 item tree = 
-        //let subnodes =  
-        //if tree<> [] then match (List.hd tree) with Node (_,_,c)|Leaf(_,c) -> print_any c;
-        
-        let rec to_Label lst buf = 
-            match lst with
-              hd::tl -> match hd with
-                          Label -> buf,(tl)
-                        | x     -> to_Label tl (x::buf)
-              | [] -> buf,[]
-        let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     
-        Label::(Node(red,item.prod_name,[item.prod_name]))::n_tree
-    let tree2 item tree = ((Leaf(text,[text]))::(*function (Label::tree)-> tree| x-> x*) tree)
+    let tree1 item tree = tree
+    let tree2 item tree = tree
     let new_states = Set.filter (fun (item,tree) -> (item.next_num=None))states
     let result_states states _tree = Set.map (fun (item,tree) -> (item,(_tree item tree))) states
     union_all

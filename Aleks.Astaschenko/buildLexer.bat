@@ -1,0 +1,1 @@
+fslex.exe  lexer.fs  -o testLexer.fs

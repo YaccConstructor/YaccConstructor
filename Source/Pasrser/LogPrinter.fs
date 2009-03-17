@@ -82,7 +82,7 @@ let rec dump_tree i item =
     let rec iter i = (function 0 -> "" | x -> ("    "+(iter (x-1))))i
     match item with
       Node (lst,name,a_ss) -> String.concat "" ([iter i;"<NODE name=\"";name;"\">\n"](*@[iter i;"<A_S val_list=\"";(String.concat " ; " a_ss);"\">\n"]*)@(List.map (dump_tree (i+1)) lst)@[iter i;"</NODE>\n"])
-    | Leaf (name,a_ss)     -> String.concat "" [iter i;"<LEAF name=\"";name;"\" ";"val_list=\"";(String.concat " ; " a_ss); "\"/>\n"]
+    | Leaf (name,a_ss)     -> String.concat "" [iter i;"<LEAF name=\"";name;"\"/>\n"]
     | Label                -> String.concat "" [iter i;"<LABEL\"/>\n"]
     
 let print_tree tree = Console.WriteLine (dump_tree 0 tree)

@@ -33,14 +33,10 @@ let memoize (f: 'a ->'b) =
          res    
                       
 do start_time := System.DateTime.Now;
-   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now
-    (* if exists (fun item -> 
-                ((*List.hd tree <> Label &&*)(item.item_num = z.s)(* && PreCalculation.getText item.symb = symbol*))) 
-                (PreCalculation.prevItem z)
- then ((function (*(Leaf(_) as x)::Label::tree)->x::Label::tree|*)((Leaf(_) as x)::tree)->x::Label::tree|x->x)tree) 
- else ((function ((Leaf(_) as x)::Label::tree)-> Label::x::tree| (Leaf(_) as y)::x-> Label::y::x|x->x) tree)))*)
+   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now   
 
 let items = PreCalculation.items
+
 let rec kill_label lst = (function Label::tl -> kill_label tl| x -> x) lst 
 
 let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> Set.map(print_any tree;System.Console.WriteLine();
@@ -58,38 +54,22 @@ let rec climb =
     if states = Set.empty
     then Set.empty
     else     
-    let gt =  goto (states,symbol)
-    print_any "Symbol: ";print_any symbol;
+    let gt =  goto (states,symbol)    
 #if DEBUG
-    //Log.print_climb_2 gt;    
+    Log.print_climb_2 gt;    
 #endif
     let new_states = parse (gt,i)   
 #if DEBUG
-    System.Console.WriteLine("New_Q!!!");//Log.print_climb_3 new_states;    
+    Log.print_climb_3 new_states;    
 #endif             
-    let text = mgetText(get_next_ch i)
-    let rec kill_label lst = (function Label::tl -> tl| x -> x) lst   
-    let tree1 item tree =         
-        let rec to_Label lst buf = 
-            match lst with
-              hd::tl -> match hd with
-                          Label -> buf,tl
-                        | x     -> to_Label tl (x::buf)
-              | [] -> buf,[]
-        let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     
-        (Node(red,item.prod_name,[]))::n_tree
-    
     if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
-    then map (fun a -> a,1) states
+    then map (fun a -> a,1) (filter (fun (a,b)-> a.next_num = None) states)
     else    
     Set.union_all [Set.filter (fun (items,i)-> 
                    Set.exists (fun (item,tree)  ->                                    
                                    (exists ((=) (fst items))(PreCalculation.nextItem item) )&&(item.item_num <> item.s)
                                )states)new_states
-     |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,(//if symbol <> "E" && symbol <> "S" 
-                                                         (*Leaf(symbol,[])*)(snd (Set.choose states))@(snd items)
-                                                        (*else (snd items)*))),i))(PreCalculation.prevItem (fst items)))))|>union_all
-    
+     |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,((snd (Set.choose states))@(snd items))),i))(PreCalculation.prevItem (fst items)))))|>union_all    
     ;
     Set.union_all(
     union_from_Some[for ((item,tree),i) in new_states -> 
@@ -110,23 +90,14 @@ and parse =
 #if DEBUG 
     Log.print_parse states i;
 #endif
-    let text = mgetText(get_next_ch i)
-    let rec kill_label lst = (function Label::tl -> tl| x -> x) lst      
-    let tree1 item tree =
-        let rec to_Label lst buf = 
-            match lst with
-              hd::tl -> match hd with
-                          Label -> buf,tl
-                        | x     -> to_Label tl (x::buf)
-              | [] -> buf,[]
-        let (red,n_tree) = to_Label (if tree<>[] then kill_label tree else tree)  []     
-        []//(Node(red,item.prod_name,[]))::n_tree
-    let tree2 item tree = [(Leaf(text,[]))]
+    let text = mgetText(get_next_ch i)    
+    let empty_tree = []
+    let leaf_tree = [(Leaf(text,[]))]
     let new_states = Set.filter (fun (item,tree) -> (item.next_num=None))states
-    let result_states states _tree = Set.map (fun (item,tree) -> (item,(_tree item tree))) states
+    let result_states states create_tree = Set.map (fun (item,tree) -> (item,(create_tree))) states
     union_all
-        [map (fun x -> x,i)(result_states new_states tree1)
-         ;if (get_next_ch i = m_end) then empty else climb(result_states states tree2,text,i-1)        
+        [map (fun x -> x,i)(result_states new_states empty_tree)
+         ;if (get_next_ch i = m_end) then empty else climb(result_states states leaf_tree,text,i-1)        
          ])
                  
 let res x =

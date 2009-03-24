@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{b576830c-4a4c-4e00-be7c-e7731232c96f}</ProjectGuid>
+    <ProjectGuid>{7f529f7a-5e8e-40d1-b447-adcf7b996d64}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Pasrser</RootNamespace>
-    <AssemblyName>Pasrser</AssemblyName>
+    <RootNamespace>Runner</RootNamespace>
+    <AssemblyName>Runner</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Name>Pasrser</Name>
+    <Name>Runner</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,16 +31,10 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>IL</Name>
-      <AssemblyName>IL.dll</AssemblyName>
-      <HintPath>..\IL\bin\Debug\IL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="IO, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>IO</Name>
-      <AssemblyName>IO.dll</AssemblyName>
-      <HintPath>..\IO\bin\Debug\IO.dll</HintPath>
+    <Reference Include="Generator, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Name>Generator</Name>
+      <AssemblyName>Generator.dll</AssemblyName>
+      <HintPath>..\Generator\bin\Debug\Generator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -50,22 +44,12 @@
     <Reference Include="Utils, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Name>Utils</Name>
       <AssemblyName>Utils.dll</AssemblyName>
-      <HintPath>..\Utils\obj\Debug\Utils.dll</HintPath>
+      <HintPath>..\Utils\bin\Debug\Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tree.fs" />
-    <Compile Include="Data.fs" />
-    <Compile Include="Utils.fs" />
-    <Compile Include="Parser.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IL\GLR.fsproj">
-      <Name>GLR</Name>
-      <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="Runner.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -46,7 +46,7 @@ let e_closure (rules,s,f) =
          if exists (fun x -> (subset elt x)&&(not(equal elt x))) sttset 
          then remove elt sttset 
          else sttset
-     let new_states = fold_left is_subset (of_list(snd(List.unzip ( to_list closure_set)))) closure_set
+     let new_states = fold_left is_subset (of_list(snd(List.unzip (to_list closure_set)))) closure_set
      let new_automata = List.concat(List.concat(
                         List.map (fun stt -> 
                                       List.map (fun (x,y,z) -> 
@@ -59,9 +59,9 @@ let e_closure (rules,s,f) =
      let get_alter_name x = fst (List.find (fun (a,b) -> equal x b)alter_name)
      let new_rule (x,y,z) = get_alter_name x,y,get_alter_name z
      let clean_new_automata = map new_rule (of_list new_automata)
-     let new_finale_state = map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))(filter (fun x -> exists ((=)f) x) new_states)
-     let new_start_state = (to_list (map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))
-                                         (filter (fun x -> exists ((=)s) x) new_states))).Head
+     let set_alter_name = map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))
+     let new_finale_state = set_alter_name (filter (fun x -> exists ((=)f) x) new_states)
+     let new_start_state = (to_list (set_alter_name (filter (fun x -> exists ((=)s) x) new_states))).Head
      in
 #if DEBUG          
      Log.print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set (states rules);

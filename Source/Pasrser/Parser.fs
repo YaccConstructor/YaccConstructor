@@ -13,7 +13,6 @@ let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 let start_time = ref System.DateTime.Now                                   
                  
 let _end = [0;4;7;8;9]    
-let t1=   1  
 
 let memoize (f: ('a*'c) ->'b) =
    let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   

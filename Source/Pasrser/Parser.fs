@@ -10,46 +10,30 @@ open Utils
 
 let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 
-let start_time = ref System.DateTime.Now                                   
-                 
-let _end = [0;4;7;8;9]    
+let start_time = ref System.DateTime.Now
+let end_time   = ref System.DateTime.Now                     
 
 let memoize (f: ('a*'c) ->'b) =
    let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   
    fun (x,y) ->        
        let id = hash(x);
-       System.Console.WriteLine ();
-       System.Console.WriteLine ("In dictionary");
-       //print_any "Hash key: ";
-       //print_any id;
-       //System.Console.WriteLine ();
-       //print_any "Value key: ";
-       //print_any x;
-       System.Console.WriteLine ();
-       //print_any "Finding result: ";
-       let key = x
-                //Set.map (fun ((state,treelst)) -> state) x 
-                //hash(Set.map (fun ((state,treelst)) -> state,(List.map (fun (Node(_,_,_,num)|Leaf(_,_,num)|RefTo(num))->num) treelst)) x )
-       if t.ContainsKey((key,y))       
+       let key = x,y
+       if t.ContainsKey(key)       
        then 
-         (print_any" RESULT_FIND";
-          let res = t.[key,y]
-          //res)
-          Set.map(fun ((state,treelst),i)->
-                      ((state,treelst),i)
-                      //((state,(List.map (fun (Node(_,_,_,num)|Leaf(_,_,num)|RefTo(num))->RefTo(num)) treelst)),i)
-                  )res)
+         (
+          let res = t.[key]
+          res)
        else 
-         (print_any "RESULT_NOT_FIND";
+         (
           let res = f (x,y) 
-          t.Add((key,y),res);          
+          t.Add(key,res);          
           res )   
                       
 do start_time := System.DateTime.Now;
-   printfn "Closure and goto calculation.\nStart time: %A" System.DateTime.Now    
+   printfn "Parsing.\nStart time: %A" System.DateTime.Now    
 
 let goto (states,symbol) =  Set.union_all (Set.map (fun (y,tree) -> 
-                                                    Set.map(fun z -> (z,tree))(goto_set.[(y,symbol)]))states )                         
+                                                    Set.map(fun z -> (z,tree))(goto_set.[(hash (y,symbol))]))states )                         
    
 let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.get |> Set.of_list                              
    
@@ -57,18 +41,18 @@ let union_from_Some set = set |> List.filter Option.is_some |> List.map Option.g
 let rec climb =
     memoize (fun (states,(symbol,i)) -> 
 #if DEBUG    
-    //Log.print_climb_1 i symbol states;
+    Log.print_climb_1 i symbol states;
 #endif
     if states = Set.empty
     then Set.empty
     else     
     let gt =  goto (states,symbol)    
 #if DEBUG
-    //Log.print_climb_2 gt;    
+    Log.print_climb_2 gt;    
 #endif
     let new_states = parse (gt,i)   
 #if DEBUG
-    //Log.print_climb_3 new_states;    
+    Log.print_climb_3 new_states;    
 #endif             
     if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
     then map (fun a -> a,1) (filter (fun (a,b)-> a.next_num = None) states)
@@ -93,7 +77,7 @@ let rec climb =
 and parse =           
     memoize (fun (states,i) -> 
 #if DEBUG 
-    //Log.print_parse states i;
+    Log.print_parse states i;
 #endif
     let text = mgetText(get_next_ch i)    
     let empty_tree = []
@@ -105,12 +89,16 @@ and parse =
          ;if (get_next_ch i = m_end) then empty else climb(result_states states leaf_tree,(text,i-1))        
          ])
                  
-let res x =
+let res x = 
     let parse_res =parse (of_list ((List.map (fun x -> (x,[]))(List.filter (fun x -> x.prod_name ="S")(Set.to_list items)))),input_length()) 
-    (function res_s-> iter(fun ((a,b),i)->List.iter print_tree b) res_s) parse_res;
+    end_time := System.DateTime.Now;    
+    let trees = of_list(List.concat(map(fun ((a,b),i)-> b) parse_res));
+    iter(fun b -> print_tree b) trees;
+    printfn "Parser get %A dirivation tree" trees.Count;
     not(parse_res=empty)
 do                    
    let r = res ()
    printfn "Result : %A" r;
-   printfn "End time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));
+   printfn "End parsing time: %A Total: %A" !end_time (!end_time - (!start_time));
+   printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));
    ignore(System.Console.ReadLine())

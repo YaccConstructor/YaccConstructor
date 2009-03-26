@@ -8,6 +8,9 @@ open IL
 open Grammar.Item
 open Grammar.Symbol
 
+let start_time = ref System.DateTime.Now
+let end_time   = ref System.DateTime.Now      
+
 let lex_list = Test.test_lexem
 
 let rules =Test.test_grammar
@@ -78,17 +81,18 @@ let goto_set =
     let make_goto q x =  
         let cl = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
         Set.union_all(Set.map (nextItem) (Set.filter (fun item -> (eql (x ,item.symb))) cl))    
-    let t = new System.Collections.Generic.Dictionary<(Grammar.Item.t<Source.t>*string),Set<Grammar.Item.t<Source.t>>>()    
+    let t = new System.Collections.Generic.Dictionary<int(*Grammar.Item.t<Source.t>*string*),Set<Grammar.Item.t<Source.t>>>()    
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""   
     List.iter (fun x -> (Set.iter (fun y -> let gt = make_goto (Set.singleton y) x in
 #if DEBUG
                                                 Log.print_goto_c gt y x;
 #endif
-                                                t.Add((y, toString x),gt)))items) lex_list;
+                                                t.Add(hash(y, toString x),gt)))items) lex_list;
                        
     t
 
 let generate = 
     IO.writeValue "goto.dta" goto_set;
     IO.writeValue "items.dta" items;
+    printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

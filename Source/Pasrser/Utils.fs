@@ -13,7 +13,7 @@ let m_next =
     m_next  
 
 let (get_next_ch:(int->t<string,string>)),input_length =       
-    let _lex_list = ref Test.test5                          
+    let _lex_list = ref Test.test3                          
     let l = List.length !_lex_list 
     let get i =  List.nth (!_lex_list) (l-i)        
     let input_length ()= l 

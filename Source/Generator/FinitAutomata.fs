@@ -12,18 +12,17 @@ let state =
     next  
   
 let rec create_NFA = function 
-    | PSeq (seq,attr) -> ( let new_autom = List.map (fun t -> create_NFA t.rule) seq                            
-                           let f (lrules,ls,lf) (rrules,rs,rf) = (List.concat [[lf,None,rs];lrules;rrules],ls,rf)                                                        
-                           List.fold_left f new_autom.Head new_autom.Tail
-                          )                               
-    | PAlt (l,r)      -> (match (create_NFA l,create_NFA r)with
-                          ((lrules,ls,lf),(rrules,rs,rf)) -> (let s,f = state(),state()                                                                 
-                                                              List.concat [[(s,None,ls);
-                                                                            (s,None,rs);
-                                                                            (lf,None,f);
-                                                                            (rf,None,f)];lrules;rrules],s,f)
-                            ) 
-    | PSome (expr)    ->  (function (rules,s,f) ->(List.concat [[f,None,s];[s,None,f];rules],s,f)) (create_NFA expr)                          
+    | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA t.rule) seq                            
+                         let aut_concat (lrules,ls,lf) (rrules,rs,rf) = ([lf,None,rs]@lrules@rrules,ls,rf)                                                        
+                         List.fold_left aut_concat new_autom.Head new_autom.Tail
+                                                        
+    | PAlt (l,r)      -> match (create_NFA l,create_NFA r)with
+                         (lrules,ls,lf),(rrules,rs,rf) -> (let s,f = state(),state()                                                                 
+                                                           [s,None,ls]@[s,None,rs]@
+                                                           [lf,None,f]@[rf,None,f]@
+                                                           lrules@rrules,s,f)
+                          
+    | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
     | PToken(ch)
     | PLiteral(ch) as t -> (let s,f = state(),state() in ([s,Some(t),f],s,f))
     
@@ -35,12 +34,14 @@ let e_closure (rules,s,f) =
         if exists ((=)stt) (!exists_e_elt)
         then (!exists_e_elt)
         else (exists_e_elt:=add stt !exists_e_elt;
-              let lst = (List.filter (fun(a,b,c)-> a = stt && b = None) rules)
+              let lst = (List.filter (fun(state,symbol,next)-> state = stt && symbol = None) rules)
               if lst = [] 
               then !exists_e_elt 
-              else union_all (map (fun (a,b,c)-> closure c)(of_list lst)))
-     in        
-     let get_rpart stt = of_list(List.map (fun (a,b,c)-> (b,c))(List.filter(fun (a,b,c)-> a=stt && b<>None)rules))
+              else union_all (map (fun (state,symbol,next)-> closure next)(of_list lst)))
+     in  
+     let branches stt = (List.filter(fun (state,symbol,next)-> state=stt && symbol<>None)rules)
+     let get_rpart stt = of_list(List.map (fun (state,symbol,next)-> (symbol,next))(branches stt))
+                                          
      let closure_set = map (fun x -> exists_e_elt:=empty;(x,closure x)) (states rules)
      let is_subset sttset (_,elt) = 
          if exists (fun x -> (subset elt x)&&(not(equal elt x))) sttset 
@@ -55,13 +56,17 @@ let e_closure (rules,s,f) =
                                                (List.filter (fun (x,y,z) -> (exists ((=)x) stt)&&(Option.is_some y)) rules))
                                       (to_list new_states)))
      in
-     let alter_name = List.zip [0..new_states.Count-1] (to_list new_states) 
-     let get_alter_name x = fst (List.find (fun (a,b) -> equal x b)alter_name)
-     let new_rule (x,y,z) = get_alter_name x,y,get_alter_name z
+     //generte dictionary for numerating statest of new automaton
+     let alter_name = dict (List.zip (to_list new_states) [0..new_states.Count-1]) 
+     //replaceing all old states with new
+     let new_rule (state,symbol,next) = alter_name.[state],symbol,alter_name.[next]
      let clean_new_automata = map new_rule (of_list new_automata)
-     let set_alter_name = map (fun x -> fst (List.find (fun (a,b) -> equal x b) alter_name ))
-     let new_finale_state = set_alter_name (filter (fun x -> exists ((=)f) x) new_states)
-     let new_start_state = (to_list (set_alter_name (filter (fun x -> exists ((=)s) x) new_states))).Head
+     let set_alter_name = map (fun stt -> alter_name.[stt])
+     //getting new start and finale states
+     let find_state stt = set_alter_name(filter (fun x -> exists ((=)stt) x) new_states)
+     let new_finale_state =  find_state f
+     //it is really only one start state
+     let new_start_state = choose (find_state s)
      in
 #if DEBUG          
      Log.print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set (states rules);

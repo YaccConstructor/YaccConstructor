@@ -57,13 +57,13 @@ let rec climb =
     if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
     then map (fun a -> a,1) (filter (fun (a,b)-> a.next_num = None) states)
     else    
-    Set.union_all [Set.filter (fun (items,i)-> 
+    union_all [Set.filter (fun (items,i)-> 
                    Set.exists (fun (item,tree)  ->                                    
                                    (exists ((=) (fst items))(nextItem item) )&&(item.item_num <> item.s)
                                )states)new_states
      |>(Set.map (fun (items,i)->(map (fun itm -> ((itm,((snd (Set.choose states))@(snd items))),i))(prevItem (fst items)))))|>union_all    
     ;
-    Set.union_all(
+    union_all(
     union_from_Some[for ((item,tree),i) in new_states -> 
                         if (exists (fun itm -> (getText itm.symb) = symbol) (prevItem item))
                             && 

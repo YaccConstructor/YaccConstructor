@@ -14,8 +14,8 @@ Flags=2
 ShowCmd=3
 MinPos.x=-1
 MinPos.y=-1
-MaxPos.x=-8
-MaxPos.y=-28
+MaxPos.x=-4
+MaxPos.y=-30
 NormalPos.left=0
 NormalPos.top=0
 NormalPos.right=955
@@ -24,15 +24,15 @@ Class=CLatexEdit
 Document=Курсовая.tex
 
 [Frame0_Row0]
-cyCur=376
+cyCur=441
 cyMin=10
 
 [Frame0_Col0]
-cxCur=1053
+cxCur=725
 cxMin=10
 
 [Frame0_View0,0]
-Cursor.row=40
-Cursor.column=424
-TopSubLine=30
+Cursor.row=54
+Cursor.column=21
+TopSubLine=72
 

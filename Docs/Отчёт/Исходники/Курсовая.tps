@@ -24,15 +24,29 @@ Class=CLatexEdit
 Document=Курсовая.tex
 
 [Frame0_Row0]
+<<<<<<< .mine
+cyCur=599
+=======
 cyCur=376
+>>>>>>> .r44
 cyMin=10
 
 [Frame0_Col0]
+<<<<<<< .mine
+cxCur=1053
+=======
 cxCur=1082
+>>>>>>> .r44
 cxMin=10
 
 [Frame0_View0,0]
+<<<<<<< .mine
+Cursor.row=169
+Cursor.column=183
+TopSubLine=207
+=======
 Cursor.row=227
 Cursor.column=0
 TopSubLine=268
+>>>>>>> .r44
 

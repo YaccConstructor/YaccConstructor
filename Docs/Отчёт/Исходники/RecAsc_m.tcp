@@ -3,7 +3,7 @@ Type=TeXnicCenterProjectInformation
 Version=4
 
 [ProjectInfo]
-MainFile=Курсовая.tex
+MainFile=RecAsc_m.tex
 UseBibTeX=1
 UseMakeIndex=1
 ActiveProfile=LaTeX => PDF

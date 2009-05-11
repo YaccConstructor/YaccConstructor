@@ -6,7 +6,7 @@ Version=4
 MainFile=RecAsc_m.tex
 UseBibTeX=1
 UseMakeIndex=1
-ActiveProfile=LaTeX => PS
+ActiveProfile=LaTeX => PDF
 ProjectLanguage=ru
 ProjectDialect=RU
 

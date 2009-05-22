@@ -34,11 +34,11 @@
     \vskip 6em%
     {\normalsize
     \begin{tabular}{l p{0.1cm} c p{0.1cm} l}
-    Научный руководитель && .................. && \@leaderPosition\ \@leader \\
-    && /подпись/ && \\
+    Научный руководитель:  \@leader \\
+    
     \end{tabular}
     }
-    \vskip 2em%
+    \vskip 16em%
     {\large \@city\\ \@yr}%
   \end{center}\par
   \end{titlepage}%

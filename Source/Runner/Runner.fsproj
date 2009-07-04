@@ -41,12 +41,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Utils, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>Utils</Name>
-      <AssemblyName>Utils.dll</AssemblyName>
-      <HintPath>..\Utils\bin\Debug\Utils.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.fs" />

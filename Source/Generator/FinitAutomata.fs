@@ -34,13 +34,12 @@ let e_closure (rules,s,f) =
         if exists ((=)stt) (!exists_e_elt)
         then (!exists_e_elt)
         else (exists_e_elt:=add stt !exists_e_elt;
-              let lst = (List.filter (fun(state,symbol,next)-> state = stt && symbol = None) rules)
+              let lst = List.filter (fun(state,symbol,next) -> state = stt && symbol = None) rules
               if lst = [] 
               then !exists_e_elt 
-              else union_all (map (fun (state,symbol,next)-> closure next)(of_list lst)))
-     in  
-     let branches stt = (List.filter(fun (state,symbol,next)-> state=stt && symbol<>None)rules)
-     let get_rpart stt = of_list(List.map (fun (state,symbol,next)-> (symbol,next))(branches stt))
+              else union_all (map (fun (state,symbol,next) -> closure next)(of_list lst)))
+     in       
+     let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
                                           
      let closure_set = map (fun x -> exists_e_elt:=empty;(x,closure x)) (states rules)
      let is_subset sttset (_,elt) = 
@@ -48,14 +47,12 @@ let e_closure (rules,s,f) =
          then remove elt sttset 
          else sttset
      let new_states = fold_left is_subset (of_list(snd(List.unzip (to_list closure_set)))) closure_set
-     let new_automata = List.concat(List.concat(
-                        List.map (fun stt -> 
-                                      List.map (fun (x,y,z) -> 
-                                                     List.map (fun lstt-> (stt,y,lstt))
-                                                              (to_list(filter (fun q -> exists ((=)z) q ) new_states)))
-                                               (List.filter (fun (x,y,z) -> (exists ((=)x) stt)&&(Option.is_some y)) rules))
-                                      (to_list new_states)))
-     in
+     let new_automata = 
+         List.concat [for stt in new_states ->
+                        List.concat[for (x,y,z) in rules do
+                                      if (exists ((=)x) stt)&&(Option.is_some y)
+                                      then yield [for q in new_states do 
+                                                    if exists ((=)z) q then yield (stt,y,q)]]]                                                   
      //generte dictionary for numerating statest of new automaton
      let alter_name = dict (List.zip (to_list new_states) [0..new_states.Count-1]) 
      //replaceing all old states with new

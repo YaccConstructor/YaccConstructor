@@ -13,37 +13,34 @@ let end_time   = ref System.DateTime.Now
 
 let lex_list = Test.test_lexem
 
-let rules =Test.test_grammar
+let rules = Test.test_grammar_2
 
 let items =
     let rules_map  = List.zip ([0..(List.length rules)-1])rules
-    List.map (fun (i,rl) -> let (itm,s,f) = (FinitAutomata.FA_rules(rl.body)) in 
+    List.map (fun (i,rl) -> let (itm,s,f) = (FinitAutomata.FA_rules(rl.body)) 
+                            let get_symb =  function 
+                                            Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
+                                            | _ -> failwith "error!!!" 
                                          
 #if DEBUG
-                                      Log.print_item itm s f;
+                            Log.print_item itm s f;
 #endif
-                                      Set.of_list(List.concat(Set.map (fun (a,b,c) ->
-                                                             ( {prod_num = i;
-                                                               prod_name = rl.name;
-                                                               item_num = a;
-                                                               symb = (match b with 
-                                                                        Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
-                                                                       | _ -> failwith "error!!!");                                                                           
-                                                               next_num = Some c;
-                                                               s =s;
-                                                               f=f                                                                                          
-                                                              }::
-                                                              (if (Set.exists ((=)c) f)
-                                                               then [{prod_num = i;
-                                                               prod_name = rl.name;
-                                                               item_num = c;
-                                                               symb = (match b with 
-                                                                        Some(PLiteral(s)|PToken(s)| PRef(s,_)) -> Some(Terminal(s))                                                                      
-                                                                       | _ -> failwith "error!!!");                                                                    
-                                                               next_num = None;
-                                                               s =s;
-                                                               f=f}]  
-                                                               else [] )))itm)))rules_map
+                            Set.of_list(List.concat(Set.map (fun (a,b,c) ->                                                    
+                                                  (let new_item  item_num next_num =
+                                                       {prod_num = i;
+                                                        prod_name = rl.name;
+                                                        item_num = item_num;
+                                                        symb = get_symb b;                                                                           
+                                                        next_num = next_num;
+                                                        s=s;
+                                                        f=f                                                                                          
+                                                       }
+                                                   (new_item a (Some(c)))
+                                                    ::
+                                                    (if (Set.exists ((=)c) f)
+                                                     then [new_item c None]  
+                                                     else [] 
+                                                     )))itm)))rules_map
     |> Set.union_all
 
 let getText = function
@@ -79,19 +76,15 @@ let goto_set =
         | _ -> false
     in 
     let make_goto q x =  
-        let cl = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
-        Set.union_all(Set.map (nextItem) (Set.filter (fun item -> (eql (x ,item.symb))) cl))    
-    let t = new System.Collections.Generic.Dictionary<int(*Grammar.Item.t<Source.t>*string*),Set<Grammar.Item.t<Source.t>>>()    
+        let closure = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
+        Set.union_all(Set.map nextItem (Set.filter (fun item -> eql(x, item.symb)) closure))
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
-                            | _ -> ""   
-    List.iter (fun x -> (Set.iter (fun y -> let gt = make_goto (Set.singleton y) x in
-#if DEBUG
-                                                Log.print_goto_c gt y x;
-#endif
-                                                t.Add(hash(y, toString x),gt)))items) lex_list;
+                            | _ -> ""
+    let goto_data symbol item = 
+        let gt = make_goto (Set.singleton item) symbol
+        hash(item, toString symbol),gt
+    dict <| List.concat(List.map (fun symbol -> (List.map (goto_data symbol) (Set.to_list items))) lex_list)
                        
-    t
-
 let generate = 
     IO.writeValue "goto.dta" goto_set;
     IO.writeValue "items.dta" items;

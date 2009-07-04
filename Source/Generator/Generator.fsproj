@@ -53,7 +53,7 @@
     <Reference Include="Utils, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Name>Utils</Name>
       <AssemblyName>Utils.dll</AssemblyName>
-      <HintPath>..\Utils\obj\Debug\Utils.dll</HintPath>
+      <HintPath>..\Utils\bin\Debug\Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

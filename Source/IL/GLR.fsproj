@@ -43,11 +43,6 @@
   <ItemGroup>
     <Compile Include="IL.fs" />
     <Compile Include="Grammar.fs" />
-    <Compile Include="Namer.fs" />
-    <Compile Include="TransformAux.fs" />
-    <Compile Include="ExpandEBNF.fs" />
-    <Compile Include="ExpandMeta.fs" />
-    <Compile Include="ExpandAlter.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

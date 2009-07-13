@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{c948fea9-a39d-4e4c-940d-c9b9166e4506}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Utils</RootNamespace>
-    <AssemblyName>Utils</AssemblyName>
+    <ProjectGuid>{831b3b65-b615-47a7-89cf-e3908e7ca0cd}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>FE</RootNamespace>
+    <AssemblyName>FE</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Name>Utils</Name>
+    <Name>FE</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,20 +31,25 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LogPrinter.fs" />
-    <Compile Include="Test.fs" />
-  </ItemGroup>
-  <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=1.9.6.2, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
+      <Name>FSharp.PowerPack</Name>
+      <AssemblyName>FSharp.PowerPack.dll</AssemblyName>
+    </Reference>
     <Reference Include="IL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Name>IL</Name>
       <AssemblyName>IL.dll</AssemblyName>
-      <HintPath>..\IL\obj\Debug\IL.dll</HintPath>
+      <HintPath>..\IL\bin\Release\IL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Parser.fsi" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

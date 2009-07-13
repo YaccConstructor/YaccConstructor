@@ -8,10 +8,16 @@ open Set
 open Data
 open Utils
 
+open System.Threading
+
 let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
 
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now                     
+
+let all_in_work = ref false
+
+let count = ref 0 
 
 let memoize (f: ('a*'c) ->'b) =
    let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   
@@ -71,6 +77,10 @@ and parse =
     let leaf_tree = [(Leaf(text,[],1))]
     let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
     let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]
+    let p = ref empty  
+    let h = ref empty  
+    let f1 _ = p := map (fun x -> x,i)(result_states new_states [])
+    let tr1 = new Thread(new ThreadStart(f1));
     map (fun x -> x,i)(result_states new_states [])
     + if (get_next_ch i = m_end) then empty else climb(result_states states leaf_tree,(text,i-1))
     )

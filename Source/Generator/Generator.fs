@@ -13,7 +13,10 @@ let end_time   = ref System.DateTime.Now
 
 let lex_list = Test.test_lexem
 
-let rules = Test.test_grammar_2
+let rules = Test.test_grammar
+
+//let set_data grammar lexems= 
+   // rules := Test.test_grammar
 
 let items =
     let rules_map  = List.zip ([0..(List.length rules)-1])rules
@@ -70,6 +73,24 @@ let closure_set =
 #endif
   dict <| Set.map (fun x -> x, closure (Set.singleton x) ) items
   
+let goto_set_ =     
+    let eql = function 
+        | (PToken x |PLiteral x), Some(Terminal y | Nonterminal y ) -> x=y
+        | _ -> false
+    in 
+    let make_goto q x =  
+        let cl = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
+        Set.union_all(Set.map (nextItem) (Set.filter (fun item -> (eql (x ,item.symb))) cl))  
+                        
+    let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
+                            | _ -> ""   
+    (dict(Set.union_all(List.map (fun x -> (Set.map (fun y -> let gt = make_goto (Set.singleton y) x in
+#if DEBUG
+                                                              Log.print_goto_c gt y x;
+#endif
+                                                              (hash(y, toString x),gt)))items) lex_list)))
+                       
+
 let goto_set =     
     let eql = function 
         | (PToken x |PLiteral x), Some(Terminal y | Nonterminal y ) -> x=y

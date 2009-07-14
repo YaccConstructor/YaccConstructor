@@ -1,4 +1,12 @@
-﻿#light
+﻿// Generator.fs
+//
+// Copyright 2009 Semen Grigorev
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+#light
 
 module Generator
 
@@ -29,7 +37,7 @@ let items =
                             Log.print_item itm s f;
 #endif
                             Set.of_list(List.concat(Set.map (fun (a,b,c) ->                                                    
-                                                  (let new_item  item_num next_num =
+                                                   let new_item  item_num next_num =
                                                        {prod_num = i;
                                                         prod_name = rl.name;
                                                         item_num = item_num;
@@ -40,10 +48,10 @@ let items =
                                                        }
                                                    (new_item a (Some(c)))
                                                     ::
-                                                    (if (Set.exists ((=)c) f)
-                                                     then [new_item c None]  
-                                                     else [] 
-                                                     )))itm)))rules_map
+                                                    if (Set.exists ((=)c) f)
+                                                    then [new_item c None]  
+                                                    else [] 
+                                                    )itm)))rules_map
     |> Set.union_all
 
 let getText = function
@@ -51,17 +59,17 @@ let getText = function
     | _                     -> "" 
 
 let closure q = 
-    let rec cl i q = 
+    let rec inner_closure i q = 
       if i = Set.count q 
       then q
       else
-        let next_cl f = cl (i+1) (Set.union_all [q; Set.filter f items])
+        let next_cl f = inner_closure (i+1) (Set.union_all [q; Set.filter f items])
         let closure_one elt = 
             let el_for_cl = List.nth (Set.to_list q) i 
             elt.prod_name = getText el_for_cl.symb && elt.item_num = elt.s 
         next_cl closure_one                                                                                 
     in
-    cl 0 q
+    inner_closure 0 q
 
 let nextItem item = 
     let isNext x = item.next_num = Some x.item_num && item.prod_num=x.prod_num
@@ -71,25 +79,7 @@ let closure_set =
 #if DEBUG
   Log.print_items items
 #endif
-  dict <| Set.map (fun x -> x, closure (Set.singleton x) ) items
-  
-let goto_set_ =     
-    let eql = function 
-        | (PToken x |PLiteral x), Some(Terminal y | Nonterminal y ) -> x=y
-        | _ -> false
-    in 
-    let make_goto q x =  
-        let cl = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
-        Set.union_all(Set.map (nextItem) (Set.filter (fun item -> (eql (x ,item.symb))) cl))  
-                        
-    let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
-                            | _ -> ""   
-    (dict(Set.union_all(List.map (fun x -> (Set.map (fun y -> let gt = make_goto (Set.singleton y) x in
-#if DEBUG
-                                                              Log.print_goto_c gt y x;
-#endif
-                                                              (hash(y, toString x),gt)))items) lex_list)))
-                       
+  dict <| Set.map (fun x -> x, closure (Set.singleton x)) items                
 
 let goto_set =     
     let eql = function 
@@ -97,14 +87,14 @@ let goto_set =
         | _ -> false
     in 
     let make_goto q x =  
-        let closure = Set.union_all (Set.map (fun x -> closure_set.[x]) q)         
-        Set.union_all(Set.map nextItem (Set.filter (fun item -> eql(x, item.symb)) closure))
+        let closure = Set.fold_left (fun y x -> y + closure_set.[x]) Set.empty q
+        Set.union_all [for item in closure do if eql(x, item.symb) then yield nextItem item]
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
         let gt = make_goto (Set.singleton item) symbol
         hash(item, toString symbol),gt
-    dict <| List.concat(List.map (fun symbol -> (List.map (goto_data symbol) (Set.to_list items))) lex_list)
+    dict <| List.fold_left (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
                        
 let generate = 
     IO.writeValue "goto.dta" goto_set;

@@ -1,4 +1,12 @@
-﻿#light
+﻿// IO.fs
+//
+// Copyright 2009 Semen Grigorev
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+#light
 
 module IO
 
@@ -17,9 +25,14 @@ let writeValue out_path value =
     serializer.Serialize(out_stream, box value);
     writer.Close();
     out_stream.Close();
+    
+let binary_reader path =     
+    try 
+       let inStream = new FileStream(path, FileMode.OpenOrCreate)       
+       new BinaryReader (inStream)      
+    with e -> print_any e.ToString; failwith "reader_exception"
 
 let readValue path =
-    use inStream = new FileStream(path, FileMode.Open)
-    use reader = new BinaryReader(inStream)                
+    use inStream = new FileStream(path, FileMode.Open)    
     let deserializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter()
     unbox(deserializer.Deserialize(inStream))

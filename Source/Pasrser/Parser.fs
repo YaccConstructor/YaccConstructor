@@ -1,4 +1,13 @@
-﻿#light 
+﻿// Parser.fs
+//
+// Copyright 2009 Semen Grigorev
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+
+#light 
 #nowarn "40"
 open IL
 open Production
@@ -86,7 +95,10 @@ and parse =
     )
                  
 let res x = 
-    let parse_res =parse (of_list ((List.map (fun x -> (x,[]))(List.filter (fun x -> x.prod_name ="S")(Set.to_list items)))),input_length())
+    let parse_res =parse (of_list (List.map (fun x -> x,[])
+                                            (List.filter (fun x -> x.prod_name ="S")
+                                                         (Set.to_list items))),
+                                   input_length())
     end_time := System.DateTime.Now;    
     let trees = of_list(List.concat(map(fun ((a,b),i)-> b) parse_res));
     iter(fun b -> print_tree b) trees;

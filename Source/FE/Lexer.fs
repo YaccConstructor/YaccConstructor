@@ -1,5 +1,4 @@
-﻿#light "off"
-# nowarn "62"
+﻿#light
 # 1 "lexer.fsl"
 
 (** Module Lexer
@@ -7,16 +6,17 @@
  *  Author: Jk
  *)
 
- 
  open Lexing
  open Parser
- 
+
 (* Auxiliaries for the lexical analyzer *)
+
+
 let brace_depth = ref 0
-let sq_br_depth = ref 0
-let comment_depth = ref 0
-let ang_br_depth = ref 0
-let commut_depth = ref 0
+and sq_br_depth = ref 0
+and comment_depth = ref 0
+and ang_br_depth = ref 0
+and commut_depth = ref 0
 
 exception Lexical_error of string * int
 
@@ -77,7 +77,7 @@ let lexeme (lexbuf:Microsoft.FSharp.Compatibility.OCaml.Lexing.lexbuf) (n,n') =
   let len = n' - n in
   let s = Array.create len ' ' in
   try
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.StartPos.pos_cnum ) s 0 len; to_srt s
+    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.Lexeme.Length ) s 0 len; to_srt s
   with
    Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
 
@@ -85,8 +85,7 @@ let from_lexbuf lexbuf loc = lexeme lexbuf loc, loc
 let lex2source lexbuf = from_lexbuf lexbuf (Lexing.lexeme_start lexbuf,Lexing.lexeme_end lexbuf)
 
 
-
-# 82 "Lexer.fs"
+# 88 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -152,6 +151,7 @@ let trans : uint16[] array =
    (* State 30 *)
  [|65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 31us; 31us; 31us; 31us; 31us; 31us; 31us; 31us; 31us; 31us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
    (* State 31 *)
+ [|65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 32us; 32us; 32us; 32us; 32us; 32us; 32us; 32us; 32us; 32us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
    (* State 32 *)
  [|65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 26us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
    (* State 33 *)
@@ -375,9 +375,9 @@ and skip n (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_skip n
 and __fslex_skip n __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 92 "lexer.fsl"
+# 98 "lexer.fsl"
                if n > 0 then skip (n-1) lexbuf else lexbuf
-# 374 "Lexer.fs"
+# 380 "Lexer.fs"
           )
   | _ -> failwith "skip"
 (* Rule skipSpaces *)
@@ -385,9 +385,9 @@ and skipSpaces  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_s
 and __fslex_skipSpaces  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 93 "lexer.fsl"
+# 99 "lexer.fsl"
                lexbuf
-# 384 "Lexer.fs"
+# 390 "Lexer.fs"
           )
   | _ -> failwith "skipSpaces"
 (* Rule main *)
@@ -395,155 +395,154 @@ and main  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_main  1
 and __fslex_main  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 95 "lexer.fsl"
-                main (skipSpaces lexbuf) 
-# 394 "Lexer.fs"
+# 101 "lexer.fsl"
+                main lexbuf 
+# 400 "Lexer.fs"
           )
   | 1 -> ( 
-# 96 "lexer.fsl"                 
-                lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }
+# 102 "lexer.fsl"
+                lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 } 
                               ; main lexbuf
                              
-# 401 "Lexer.fs"
+# 407 "Lexer.fs"
           )
   | 2 -> ( 
-# 99 "lexer.fsl"
+# 105 "lexer.fsl"
                 COLON 
-# 406 "Lexer.fs"
+# 412 "Lexer.fs"
           )
   | 3 -> ( 
-# 100 "lexer.fsl"
+# 106 "lexer.fsl"
                 SEMICOLON 
-# 411 "Lexer.fs"
+# 417 "Lexer.fs"
           )
   | 4 -> ( 
-# 101 "lexer.fsl"
+# 107 "lexer.fsl"
                 BAR 
-# 416 "Lexer.fs"
+# 422 "Lexer.fs"
           )
   | 5 -> ( 
-# 102 "lexer.fsl"
+# 108 "lexer.fsl"
                EQUAL
-# 421 "Lexer.fs"
+# 427 "Lexer.fs"
           )
   | 6 -> ( 
-# 103 "lexer.fsl"
+# 109 "lexer.fsl"
                DLESS
-# 426 "Lexer.fs"
+# 432 "Lexer.fs"
           )
   | 7 -> ( 
-# 104 "lexer.fsl"
+# 110 "lexer.fsl"
                DGREAT
-# 431 "Lexer.fs"
+# 437 "Lexer.fs"
           )
   | 8 -> ( 
-# 105 "lexer.fsl"
+# 111 "lexer.fsl"
                STAR
-# 436 "Lexer.fs"
+# 442 "Lexer.fs"
           )
   | 9 -> ( 
-# 106 "lexer.fsl"
+# 112 "lexer.fsl"
                PLUS
-# 441 "Lexer.fs"
+# 447 "Lexer.fs"
           )
   | 10 -> ( 
-# 107 "lexer.fsl"
+# 113 "lexer.fsl"
                QUESTION
-# 446 "Lexer.fs"
+# 452 "Lexer.fs"
           )
   | 11 -> ( 
-# 109 "lexer.fsl"
+# 115 "lexer.fsl"
                 comment_depth := 1;
                         handle_lexical_error comment lexbuf;
                         main lexbuf
                       
-# 454 "Lexer.fs"
+# 460 "Lexer.fs"
           )
   | 12 -> ( 
-# 114 "lexer.fsl"
+# 120 "lexer.fsl"
                 let n1 = Lexing.lexeme_end lexbuf in
                         let n2 = handle_lexical_error predicate lexbuf in
                         PREDICATE (from_lexbuf lexbuf (n1,n2))
                       
-# 462 "Lexer.fs"
+# 468 "Lexer.fs"
           )
   | 13 -> ( 
-# 119 "lexer.fsl"
+# 125 "lexer.fsl"
                  let text = lex2source lexbuf in
                          match (fst text).[0] with
                          'a'..'z' -> LIDENT text
                          | _ -> UIDENT text
                       
-# 471 "Lexer.fs"
+# 477 "Lexer.fs"
           )
   | 14 -> ( 
-# 124 "lexer.fsl"
+# 130 "lexer.fsl"
                EOF
-# 476 "Lexer.fs"
+# 482 "Lexer.fs"
           )
   | 15 -> ( 
-# 126 "lexer.fsl"
-                let n1 = Lexing.lexeme_end lexbuf in
+# 132 "lexer.fsl"
+                            let n1 = Lexing.lexeme_end lexbuf in
                         commut_depth := 1;
                         let n2 = handle_lexical_error commut lexbuf in
-                                COMMUT//ATION(from_lexbuf lexbuf (n1,n2))
+                                COMMUT
                           
-# 485 "Lexer.fs"
+# 491 "Lexer.fs"
           )
   | 16 -> ( 
-# 133 "lexer.fsl"
+# 139 "lexer.fsl"
                 let n1 = Lexing.lexeme_end lexbuf in
                         brace_depth := 1;
                         let n2 = handle_lexical_error action lexbuf in
                          ACTION (from_lexbuf lexbuf (n1,n2))
                       
-# 494 "Lexer.fs"
+# 500 "Lexer.fs"
           )
   | 17 -> ( 
-# 139 "lexer.fsl"
+# 145 "lexer.fsl"
                 let n1 = Lexing.lexeme_end lexbuf in
                         ang_br_depth := 1;
                         let n2 = handle_lexical_error pattern lexbuf in
                         PATTERN (from_lexbuf lexbuf (n1,n2))
                       
-# 503 "Lexer.fs"
+# 509 "Lexer.fs"
           )
   | 18 -> ( 
-# 145 "lexer.fsl"
+# 151 "lexer.fsl"
                 let n1 = Lexing.lexeme_end lexbuf in
                         sq_br_depth := 1;
                         let n2 = handle_lexical_error param lexbuf in
                         PARAM (from_lexbuf lexbuf (n1,n2))
                       
-# 512 "Lexer.fs"
+# 518 "Lexer.fs"
           )
   | 19 -> ( 
-# 151 "lexer.fsl"
+# 157 "lexer.fsl"
                 reset_string_buffer();
-                       let string_start = lexbuf.StartPos.AbsoluteOffset(*Lexing.lex_start_pos*) in
-                       string lexbuf;
-                               lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start}; 
-                               //lexbuf.StartPos.pos_cnum(*Lexing.lex_start_pos*) <- string_start;
-                       STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
+                                      let string_start = lexbuf.StartPos.pos_cnum in
+                                      string lexbuf;
+                                              lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
+                                      STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
                      
-# 522 "Lexer.fs"
+# 528 "Lexer.fs"
           )
   | 20 -> ( 
-# 157 "lexer.fsl"
+# 163 "lexer.fsl"
                LPAREN
-# 527 "Lexer.fs"
+# 533 "Lexer.fs"
           )
   | 21 -> ( 
-# 158 "lexer.fsl"
+# 164 "lexer.fsl"
                RPAREN
-# 532 "Lexer.fs"
+# 538 "Lexer.fs"
           )
   | 22 -> ( 
-# 160 "lexer.fsl"
+# 166 "lexer.fsl"
                 raise(Lexical_error
                                ("illegal character " ^ (*String.escaped*)(Lexing.lexeme lexbuf),
                                  Lexing.lexeme_start lexbuf)) 
-# 539 "Lexer.fs"
+# 545 "Lexer.fs"
           )
   | _ -> failwith "main"
 (* Rule predicate *)
@@ -551,34 +550,34 @@ and predicate  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_pr
 and __fslex_predicate  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 166 "lexer.fsl"
+# 172 "lexer.fsl"
                 Lexing.lexeme_start lexbuf  
-# 549 "Lexer.fs"
+# 555 "Lexer.fs"
           )
   | 1 -> ( 
-# 167 "lexer.fsl"
+# 173 "lexer.fsl"
                 reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      predicate lexbuf 
-# 557 "Lexer.fs"
+# 563 "Lexer.fs"
           )
   | 2 -> ( 
-# 172 "lexer.fsl"
+# 178 "lexer.fsl"
                 comment_depth := 1;
                      comment lexbuf;
                      predicate lexbuf 
-# 564 "Lexer.fs"
+# 570 "Lexer.fs"
           )
   | 3 -> ( 
-# 176 "lexer.fsl"
+# 182 "lexer.fsl"
                 raise (Lexical_error("unterminated predicate", Lexing.lexeme_start lexbuf)) 
-# 569 "Lexer.fs"
+# 575 "Lexer.fs"
           )
   | 4 -> ( 
-# 178 "lexer.fsl"
+# 184 "lexer.fsl"
                predicate lexbuf
-# 574 "Lexer.fs"
+# 580 "Lexer.fs"
           )
   | _ -> failwith "predicate"
 (* Rule action *)
@@ -586,41 +585,41 @@ and action  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_actio
 and __fslex_action  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 181 "lexer.fsl"
+# 187 "lexer.fsl"
                 incr brace_depth;
                      action lexbuf 
-# 585 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 184 "lexer.fsl"
-                decr brace_depth;
-                     if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf 
 # 591 "Lexer.fs"
           )
+  | 1 -> ( 
+# 190 "lexer.fsl"
+                decr brace_depth;
+                     if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf 
+# 597 "Lexer.fs"
+          )
   | 2 -> ( 
-# 186 "lexer.fsl"
+# 192 "lexer.fsl"
                 reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      action lexbuf 
-# 599 "Lexer.fs"
+# 605 "Lexer.fs"
           )
   | 3 -> ( 
-# 191 "lexer.fsl"
+# 197 "lexer.fsl"
                 comment_depth := 1;
                      comment lexbuf;
                      action lexbuf 
-# 606 "Lexer.fs"
+# 612 "Lexer.fs"
           )
   | 4 -> ( 
-# 195 "lexer.fsl"
+# 201 "lexer.fsl"
                 raise (Lexical_error("unterminated action", Lexing.lexeme_start lexbuf)) 
-# 611 "Lexer.fs"
+# 617 "Lexer.fs"
           )
   | 5 -> ( 
-# 197 "lexer.fsl"
+# 203 "lexer.fsl"
                action lexbuf
-# 616 "Lexer.fs"
+# 622 "Lexer.fs"
           )
   | _ -> failwith "action"
 (* Rule pattern *)
@@ -628,41 +627,41 @@ and pattern  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_patt
 and __fslex_pattern  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 201 "lexer.fsl"
+# 207 "lexer.fsl"
                 incr ang_br_depth;
                      pattern lexbuf 
-# 627 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 204 "lexer.fsl"
-                decr ang_br_depth;
-                     if !ang_br_depth = 0 then Lexing.lexeme_start lexbuf else pattern lexbuf 
 # 633 "Lexer.fs"
           )
+  | 1 -> ( 
+# 210 "lexer.fsl"
+                decr ang_br_depth;
+                     if !ang_br_depth = 0 then Lexing.lexeme_start lexbuf else pattern lexbuf 
+# 639 "Lexer.fs"
+          )
   | 2 -> ( 
-# 206 "lexer.fsl"
+# 212 "lexer.fsl"
                 reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      pattern lexbuf 
-# 641 "Lexer.fs"
+# 647 "Lexer.fs"
           )
   | 3 -> ( 
-# 211 "lexer.fsl"
+# 217 "lexer.fsl"
                 comment_depth := 1;
                      comment lexbuf;
                      pattern lexbuf 
-# 648 "Lexer.fs"
+# 654 "Lexer.fs"
           )
   | 4 -> ( 
-# 215 "lexer.fsl"
+# 221 "lexer.fsl"
                 raise (Lexical_error("unterminated pattern", Lexing.lexeme_start lexbuf)) 
-# 653 "Lexer.fs"
+# 659 "Lexer.fs"
           )
   | 5 -> ( 
-# 217 "lexer.fsl"
+# 223 "lexer.fsl"
                pattern lexbuf
-# 658 "Lexer.fs"
+# 664 "Lexer.fs"
           )
   | _ -> failwith "pattern"
 (* Rule param *)
@@ -670,41 +669,41 @@ and param  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_param 
 and __fslex_param  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 222 "lexer.fsl"
+# 228 "lexer.fsl"
                 incr sq_br_depth;
                      pattern lexbuf 
-# 669 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 225 "lexer.fsl"
-                decr sq_br_depth;
-                     if !sq_br_depth = 0 then Lexing.lexeme_start lexbuf else param lexbuf 
 # 675 "Lexer.fs"
           )
+  | 1 -> ( 
+# 231 "lexer.fsl"
+                decr sq_br_depth;
+                     if !sq_br_depth = 0 then Lexing.lexeme_start lexbuf else param lexbuf 
+# 681 "Lexer.fs"
+          )
   | 2 -> ( 
-# 227 "lexer.fsl"
+# 233 "lexer.fsl"
                 reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      param lexbuf 
-# 683 "Lexer.fs"
+# 689 "Lexer.fs"
           )
   | 3 -> ( 
-# 232 "lexer.fsl"
+# 238 "lexer.fsl"
                 comment_depth := 1;
                      comment lexbuf;
                      param lexbuf 
-# 690 "Lexer.fs"
+# 696 "Lexer.fs"
           )
   | 4 -> ( 
-# 236 "lexer.fsl"
+# 242 "lexer.fsl"
                 raise (Lexical_error("unterminated param",  Lexing.lexeme_start lexbuf)) 
-# 695 "Lexer.fs"
+# 701 "Lexer.fs"
           )
   | 5 -> ( 
-# 238 "lexer.fsl"
+# 244 "lexer.fsl"
                param lexbuf
-# 700 "Lexer.fs"
+# 706 "Lexer.fs"
           )
   | _ -> failwith "param"
 (* Rule string *)
@@ -712,42 +711,42 @@ and string  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_strin
 and __fslex_string  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 242 "lexer.fsl"
+# 248 "lexer.fsl"
                 () 
-# 710 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 244 "lexer.fsl"
-                store_string_char(char_for_backslash(Lexing.lexeme_char lexbuf 1));
-                     string lexbuf 
 # 716 "Lexer.fs"
           )
-  | 2 -> ( 
-# 247 "lexer.fsl"
-                store_string_char(char_for_decimal_code lexbuf 1);
+  | 1 -> ( 
+# 250 "lexer.fsl"
+                store_string_char(char_for_backslash(Lexing.lexeme_char lexbuf 1));
                      string lexbuf 
 # 722 "Lexer.fs"
           )
+  | 2 -> ( 
+# 253 "lexer.fsl"
+                store_string_char(char_for_decimal_code lexbuf 1);
+                     string lexbuf 
+# 728 "Lexer.fs"
+          )
   | 3 -> ( 
-# 250 "lexer.fsl"
+# 256 "lexer.fsl"
                 raise(Lexical_error("unterminated string", Lexing.lexeme_start lexbuf)) 
-# 727 "Lexer.fs"
+# 733 "Lexer.fs"
           )
   | 4 -> ( 
-# 252 "lexer.fsl"
+# 258 "lexer.fsl"
                 warning lexbuf
                              (Printf.sprintf "illegal backslash escape in string: `\\%c'"
                                              (Lexing.lexeme_char lexbuf 1));
                      store_string_char(Lexing.lexeme_char lexbuf 0);
                      store_string_char(Lexing.lexeme_char lexbuf 1);
                      string lexbuf 
-# 737 "Lexer.fs"
+# 743 "Lexer.fs"
           )
   | 5 -> ( 
-# 259 "lexer.fsl"
+# 265 "lexer.fsl"
                 store_string_char(Lexing.lexeme_char lexbuf 0);
                      string lexbuf 
-# 743 "Lexer.fs"
+# 749 "Lexer.fs"
           )
   | _ -> failwith "string"
 (* Rule commut *)
@@ -755,45 +754,45 @@ and commut  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_commu
 and __fslex_commut  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 263 "lexer.fsl"
+# 269 "lexer.fsl"
                                incr commut_depth;
                            commut lexbuf
                              
-# 755 "Lexer.fs"
+# 761 "Lexer.fs"
           )
   | 1 -> ( 
-# 267 "lexer.fsl"
+# 273 "lexer.fsl"
                            decr commut_depth;
                            if !commut_depth = 0 then Lexing.lexeme_start lexbuf else commut lexbuf
                              
-# 762 "Lexer.fs"
+# 768 "Lexer.fs"
           )
   | 2 -> ( 
-# 271 "lexer.fsl"
+# 277 "lexer.fsl"
                            reset_string_buffer();
                            string lexbuf;
                            reset_string_buffer();
                            commut lexbuf
                                  
-# 771 "Lexer.fs"
+# 777 "Lexer.fs"
           )
   | 3 -> ( 
-# 277 "lexer.fsl"
+# 283 "lexer.fsl"
                            comment_depth := 1;
                            comment lexbuf;
                            commut lexbuf
                                  
-# 779 "Lexer.fs"
+# 785 "Lexer.fs"
           )
   | 4 -> ( 
-# 283 "lexer.fsl"
+# 289 "lexer.fsl"
                 raise (Lexical_error("unterminated pattern", Lexing.lexeme_start lexbuf)) 
-# 784 "Lexer.fs"
+# 790 "Lexer.fs"
           )
   | 5 -> ( 
-# 285 "lexer.fsl"
+# 291 "lexer.fsl"
                commut lexbuf
-# 789 "Lexer.fs"
+# 795 "Lexer.fs"
           )
   | _ -> failwith "commut"
 (* Rule comment *)
@@ -801,57 +800,57 @@ and comment  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = __fslex_comm
 and __fslex_comment  __fslex_state lexbuf =
   match __fslex_tables.Interpret(__fslex_state,lexbuf) with
   | 0 -> ( 
-# 289 "lexer.fsl"
+# 295 "lexer.fsl"
                 incr comment_depth; comment lexbuf 
-# 799 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 291 "lexer.fsl"
-                decr comment_depth;
-                     if !comment_depth = 0 then () else comment lexbuf 
 # 805 "Lexer.fs"
           )
+  | 1 -> ( 
+# 297 "lexer.fsl"
+                decr comment_depth;
+                     if !comment_depth = 0 then () else comment lexbuf 
+# 811 "Lexer.fs"
+          )
   | 2 -> ( 
-# 294 "lexer.fsl"
+# 300 "lexer.fsl"
                 reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      comment lexbuf 
-# 813 "Lexer.fs"
+# 819 "Lexer.fs"
           )
   | 3 -> ( 
-# 299 "lexer.fsl"
-                comment lexbuf 
-# 818 "Lexer.fs"
-          )
-  | 4 -> ( 
-# 301 "lexer.fsl"
-                comment lexbuf 
-# 823 "Lexer.fs"
-          )
-  | 5 -> ( 
-# 303 "lexer.fsl"
-                comment lexbuf 
-# 828 "Lexer.fs"
-          )
-  | 6 -> ( 
 # 305 "lexer.fsl"
                 comment lexbuf 
-# 833 "Lexer.fs"
+# 824 "Lexer.fs"
           )
-  | 7 -> ( 
+  | 4 -> ( 
 # 307 "lexer.fsl"
-                raise(Lexical_error("unterminated comment", Lexing.lexeme_start lexbuf)) 
-# 838 "Lexer.fs"
+                comment lexbuf 
+# 829 "Lexer.fs"
           )
-  | 8 -> ( 
+  | 5 -> ( 
 # 309 "lexer.fsl"
                 comment lexbuf 
-# 843 "Lexer.fs"
+# 834 "Lexer.fs"
+          )
+  | 6 -> ( 
+# 311 "lexer.fsl"
+                comment lexbuf 
+# 839 "Lexer.fs"
+          )
+  | 7 -> ( 
+# 313 "lexer.fsl"
+                raise(Lexical_error("unterminated comment", Lexing.lexeme_start lexbuf)) 
+# 844 "Lexer.fs"
+          )
+  | 8 -> ( 
+# 315 "lexer.fsl"
+                comment lexbuf 
+# 849 "Lexer.fs"
           )
   | _ -> failwith "comment"
 
-# 311 "lexer.fsl"
+# 317 "lexer.fsl"
 
 
 # 3000000 "Lexer.fs"

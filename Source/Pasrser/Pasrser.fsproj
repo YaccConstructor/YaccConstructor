@@ -34,27 +34,9 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>IL</Name>
-      <AssemblyName>IL.dll</AssemblyName>
-      <HintPath>..\IL\bin\Debug\IL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="IO, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>IO</Name>
-      <AssemblyName>IO.dll</AssemblyName>
-      <HintPath>..\IO\bin\Debug\IO.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="Utils, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>Utils</Name>
-      <AssemblyName>Utils.dll</AssemblyName>
-      <HintPath>..\Utils\obj\Debug\Utils.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -64,9 +46,14 @@
     <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IL\GLR.fsproj">
-      <Name>GLR</Name>
+    <ProjectReference Include="..\Runtime\Runtime.fsproj">
+      <Name>Runtime</Name>
       <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.fsproj">
+      <Name>Utils</Name>
+      <Project>{c948fea9-a39d-4e4c-940d-c9b9166e4506}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

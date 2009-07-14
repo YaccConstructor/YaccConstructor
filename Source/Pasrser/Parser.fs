@@ -52,7 +52,7 @@ let rec climb =
     Log.print_climb_2 gt;
     Log.print_climb_3 new_states;    
 #endif             
-    if Set.exists (fun ((x,tree),x2)-> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
+    if Set.exists (fun ((x,tree),x2) -> x.prod_name="S"&&x.next_num=None&&x2=1) new_states     
     then set [for state in states do if (fst state).next_num = None then yield state,1] 
     else     
       union_all          

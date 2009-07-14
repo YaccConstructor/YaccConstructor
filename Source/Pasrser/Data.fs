@@ -1,11 +1,9 @@
 ﻿#light
 
-module Data
- 
-open IO
+module Data 
+
 open IL
-open Grammar.Item
 
-let goto_set:System.Collections.Generic.IDictionary<int,Set<Grammar.Item.t<Source.t>>> = readValue "goto.dta"
+let goto_set:System.Collections.Generic.IDictionary<int,Set<Grammar.Item.t<Source.t>>> = IO.readValue "goto.dta"
 
-let items:Set<t<Source.t>> = readValue "items.dta"
+let items:Set<Grammar.Item.t<Source.t>> = IO.readValue "items.dta"

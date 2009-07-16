@@ -31,14 +31,14 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LogPrinter.fs" />
-    <Compile Include="Test.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LogPrinter.fs" />
+    <Compile Include="Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Runtime\Runtime.fsproj">

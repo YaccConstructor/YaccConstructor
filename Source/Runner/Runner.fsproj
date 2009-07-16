@@ -31,12 +31,6 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Generator, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Name>Generator</Name>
-      <AssemblyName>Generator.dll</AssemblyName>
-      <HintPath>..\Generator\bin\Debug\Generator.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -44,6 +38,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Generator\Generator.fsproj">
+      <Name>Generator</Name>
+      <Project>{f82927e0-fad1-40f4-8e7c-c0abf340665c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

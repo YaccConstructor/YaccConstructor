@@ -34,7 +34,7 @@ let rec create_NFA = function
     | PToken(ch)
     | PLiteral(ch) as t -> (let s,f = state(),state() in ([s,Some(t),f],s,f))
     
-let states rules = List.fold_left (fun set (a,b,c) -> Set.union set (of_list[a;c])) empty rules      
+let states rules = List.fold_left (fun buf (a,b,c) -> buf+(of_list[a;c])) empty rules      
      
 let e_closure (rules,s,f) =    
     let exists_e_elt:(int Set ref) = ref empty   
@@ -45,7 +45,7 @@ let e_closure (rules,s,f) =
               let lst = List.filter (fun(state,symbol,next) -> state = stt && symbol = None) rules
               if lst = [] 
               then !exists_e_elt 
-              else union_all (map (fun (state,symbol,next) -> closure next)(of_list lst)))
+              else fold_left (fun buf (state,symbol,next) -> buf + closure next) empty (of_list lst))
      in       
      let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
                                           

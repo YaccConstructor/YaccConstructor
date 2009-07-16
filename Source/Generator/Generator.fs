@@ -23,35 +23,31 @@ let lex_list = Test.test_lexem
 
 let rules = Test.test_grammar
 
-//let set_data grammar lexems= 
-   // rules := Test.test_grammar
-
 let items =
     let rules_map  = List.zip ([0..(List.length rules)-1])rules
-    List.map (fun (i,rl) -> let (itm,s,f) = (FinitAutomata.FA_rules(rl.body)) 
-                            let get_symb =  function 
-                                            Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
-                                            | _ -> failwith "error!!!" 
-                                         
+    List.map (fun (i,rl) -> 
+                let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
+                let get_symb =  function 
+                                Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
+                                | _ -> failwith "error!!!"                                          
 #if DEBUG
-                            Log.print_item itm s f;
+                Log.print_item itm s f;
 #endif
-                            Set.of_list(List.concat(Set.map (fun (a,b,c) ->                                                    
-                                                   let new_item  item_num next_num =
-                                                       {prod_num = i;
-                                                        prod_name = rl.name;
-                                                        item_num = item_num;
-                                                        symb = get_symb b;                                                                           
-                                                        next_num = next_num;
-                                                        s=s;
-                                                        f=f                                                                                          
-                                                       }
-                                                   (new_item a (Some(c)))
-                                                    ::
-                                                    if (Set.exists ((=)c) f)
-                                                    then [new_item c None]  
-                                                    else [] 
-                                                    )itm)))rules_map
+                Set.fold_left (fun buf (a,b,c) ->                                                    
+                                   let new_item  item_num next_num =
+                                      {prod_num = i;
+                                       prod_name = rl.name;
+                                       item_num = item_num;
+                                       symb = get_symb b;                                                                           
+                                       next_num = next_num;
+                                       s=s;
+                                       f=f                                                                                          
+                                      }
+                                   buf + Set.singleton(new_item a (Some(c)))+
+                                    if Set.exists ((=)c) f
+                                    then Set.singleton(new_item c None)
+                                    else Set.empty 
+                                   )Set.empty itm)rules_map
     |> Set.union_all
 
 let getText = function
@@ -63,7 +59,7 @@ let closure q =
       if i = Set.count q 
       then q
       else
-        let next_cl f = inner_closure (i+1) (Set.union_all [q; Set.filter f items])
+        let next_cl f = inner_closure (i+1) (q + Set.filter f items)
         let closure_one elt = 
             let el_for_cl = List.nth (Set.to_list q) i 
             elt.prod_name = getText el_for_cl.symb && elt.item_num = elt.s 

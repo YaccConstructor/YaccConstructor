@@ -85,11 +85,7 @@ and parse =
     let text = mgetText(get_next_ch i)        
     let leaf_tree = [(Leaf(text,[],1))]
     let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
-    let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]
-    let p = ref empty  
-    let h = ref empty  
-    let f1 _ = p := map (fun x -> x,i)(result_states new_states [])
-    let tr1 = new Thread(new ThreadStart(f1));
+    let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]    
     map (fun x -> x,i)(result_states new_states [])
     + if (get_next_ch i = m_end) then empty else climb(result_states states leaf_tree,(text,i-1))
     )

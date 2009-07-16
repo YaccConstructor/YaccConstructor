@@ -1,4 +1,9 @@
-﻿#light "off"
+﻿(** Module IL
+ *
+ *  Author: Jk
+ *)
+
+#light "off"
 
 module Source = 
   struct
@@ -60,5 +65,5 @@ module Definition =
      head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)
      grammar : Grammar.t<'patt,'expr>;//грамматика
      foot    :'expr option //текст после грамматики
-    }
+    }    
 end

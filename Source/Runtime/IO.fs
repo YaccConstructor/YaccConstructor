@@ -32,6 +32,16 @@ let binary_reader path =
        new BinaryReader (inStream)      
     with e -> print_any e.ToString; failwith "reader_exception"
 
+let text_writer path = 
+    try
+       let t = new FileInfo(path);
+       let writer = t.CreateText();       
+       //let outStream = new FileStream(path, FileMode.OpenOrCreate)       
+       //new BinaryWriter(outStream,System.Text.Encoding.UTF8) ;
+       writer     
+    with e -> print_any e.ToString; failwith "reader_exception"
+
+
 let readValue path =
     use inStream = new FileStream(path, FileMode.Open)    
     let deserializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter()

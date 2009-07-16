@@ -95,4 +95,7 @@ let goto_set =
 let generate = 
     IO.writeValue "goto.dta" goto_set;
     IO.writeValue "items.dta" items;
+    CodeGenerator.out := IO.text_writer "test1.fs";
+    CodeGenerator.print_header "test";
+    (!CodeGenerator.out).Close();
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

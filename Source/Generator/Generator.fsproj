@@ -41,6 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FinitAutomata.fs" />
+    <Compile Include="GrammarPreparer.fs" />
+    <Compile Include="CodeGenerator.fs" />
     <Compile Include="Generator.fs" />
   </ItemGroup>
   <ItemGroup>

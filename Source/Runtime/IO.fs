@@ -35,9 +35,7 @@ let binary_reader path =
 let text_writer path = 
     try
        let t = new FileInfo(path);
-       let writer = t.CreateText();       
-       //let outStream = new FileStream(path, FileMode.OpenOrCreate)       
-       //new BinaryWriter(outStream,System.Text.Encoding.UTF8) ;
+       let writer = t.CreateText();              
        writer     
     with e -> print_any e.ToString; failwith "reader_exception"
 

@@ -44,6 +44,11 @@ let print_climb_3 new_q =
     print_any new_q;
     Console.WriteLine( "")   
 
+let print_climb_info i x q gt new_q =
+    print_climb_1 i x q;
+    print_climb_2 gt;
+    print_climb_3 new_q
+    
 let print_parse q i=     
     Console.WriteLine( " PARSER "); 
     Console.Write( "Parser q : "); 

@@ -30,12 +30,12 @@ let (get_next_ch:(int->t<string,string>)),input_length =
      
 let mgetText x = 
     match x with
-    PLiteral(y)|PToken(y)-> Source.toString y
-    |_ -> ""
+    |PLiteral(y)|PToken(y)-> Source.toString y
+    |_                    -> ""
 
 let getText = function
-    |Some( Grammar.Symbol.Terminal x )     ->  Source.toString x  
-    | _                                    -> "" 
+    |Some(Grammar.Symbol.Terminal x) -> Source.toString x  
+    | _                              -> "" 
 
 
 let prevItem item = 

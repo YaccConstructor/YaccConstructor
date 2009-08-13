@@ -19,10 +19,6 @@ open Grammar.Symbol
 
 let test_lexem = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(":",(1,1));PLiteral(";",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("T",(1,1));PLiteral("F",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
 
-
-
-
-
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
                          binding = None;

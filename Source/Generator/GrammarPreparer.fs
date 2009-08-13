@@ -14,5 +14,8 @@ open IL
 
 let prepare (definition:IL.Definition.t<'a,'b>) = definition.head,definition.grammar,definition.foot
 
+let get_start_nterm (grammar:IL.Grammar.t<'a,'b>) = 
+    List.filter (fun (x:IL.Rule.t<'a,'b>)-> x._public) grammar
+
 //let get_rules (grammar:IL.Grammar.t<'a,'b>) =  
  

@@ -19,7 +19,9 @@ open Utils
 
 open System.Threading
 
-let m_end,m_start = (PLiteral("$",(1,1)),PToken("S",(1,1)))
+let start_ntrem = "S";
+
+let m_end,m_start = (PLiteral("$",(1,1)),PToken(start_ntrem,(1,1)))
 
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now                     
@@ -55,19 +57,19 @@ let rec climb =
     let gt =  goto (states,symbol)
     Log.print_climb_info i symbol states gt new_states;        
 #endif             
-    if Set.exists (fun ((item,tree),i) -> item.prod_name="S" && item.next_num=None && i=1) new_states     
+    if Set.exists (fun ((item,tree),i) -> item.prod_name=start_ntrem && item.next_num=None && i=1) new_states     
     then set [for state in states do if (fst state).next_num = None then yield state,1] 
     else     
       union_all         
         [for (item,tree),i in new_states do
-             let prev_itm = prevItem item                    
-             if exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm
-                && item.prod_name <> "S"
+             let prev_itm = Utils.prevItem item items                  
+             if exists (fun itm -> Utils.getText itm.symb = symbol && itm.item_num=item.s) prev_itm
+                && item.prod_name <> start_ntrem
              then 
                 let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
                 yield climb(map create_new_tree states,(item.prod_name,i))
              else
-                if exists (fun (itm,_) -> exists ((=)item) (nextItem itm) && itm.item_num <> itm.s) states
+                if exists (fun (itm,_) -> exists ((=)item) (Utils.nextItem itm items) && itm.item_num <> itm.s) states
                 then yield map (fun itm -> (itm, snd (choose states)@tree), i) prev_itm ])                
 
 and parse =           
@@ -75,7 +77,7 @@ and parse =
 #if DEBUG 
     Log.print_parse states i;
 #endif
-    let text = mgetText(get_next_ch i)        
+    let text = Utils.mgetText(get_next_ch i)        
     let leaf_tree = [Leaf(text,[],1)]
     let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
     let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]    
@@ -85,7 +87,7 @@ and parse =
                  
 let res _ = 
     let parse_res =parse (of_list (List.map (fun x -> x,[])
-                                            (List.filter (fun x -> x.prod_name ="S")
+                                            (List.filter (fun x -> x.prod_name =start_ntrem)
                                                          (Set.to_list items))),
                                    input_length())
     end_time := System.DateTime.Now;    
@@ -94,7 +96,4 @@ let res _ =
     printfn "Parser get %A dirivation tree" trees.Count;
     not(parse_res=empty)
 do                    
-   let r = res ()
-   printfn "Result : %A" r;
-   printfn "End parsing time: %A Total: %A" !end_time (!end_time - (!start_time));
-   printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))   
+    Log.print_result !start_time !end_time (res ())

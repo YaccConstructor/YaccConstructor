@@ -88,4 +88,8 @@ let print_autonaton new_states clean_new_automata new_start_state new_finale_sta
      Console.WriteLine("States:");
      print_any states;
      Console.WriteLine()   
-          
+
+let print_result (start_time:System.DateTime) end_time result=
+    printfn "Result : %A" result;
+    printfn "End parsing time: %A Total: %A" end_time (end_time - start_time);
+    printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - start_time)             

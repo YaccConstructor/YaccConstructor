@@ -13,11 +13,7 @@ module FinitAutomata
 open IL.Production
 open IL.Source
 open Set
-  
-let state = 
-    let i = ref 0
-    let next () = incr i;!i
-    next  
+open Utils
   
 let rec create_NFA = function 
     | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA t.rule) seq                            
@@ -25,14 +21,14 @@ let rec create_NFA = function
                          List.fold_left aut_concat new_autom.Head new_autom.Tail
                                                         
     | PAlt (l,r)      -> match (create_NFA l,create_NFA r)with
-                         (lrules,ls,lf),(rrules,rs,rf) -> (let s,f = state(),state()                                                                 
+                         (lrules,ls,lf),(rrules,rs,rf) -> (let s,f = next(),next()                                                                 
                                                            [s,None,ls]@[s,None,rs]@
                                                            [lf,None,f]@[rf,None,f]@
                                                            lrules@rrules,s,f)
                           
     | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
     | PToken(ch)
-    | PLiteral(ch) as t -> (let s,f = state(),state() in ([s,Some(t),f],s,f))
+    | PLiteral(ch) as t -> (let s,f = next(),next() in ([s,Some(t),f],s,f))
     
 let states rules = List.fold_left (fun buf (a,b,c) -> buf+(of_list[a;c])) empty rules      
      

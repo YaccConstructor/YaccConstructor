@@ -42,9 +42,9 @@ let e_closure (rules,s,f) =
               if lst = [] 
               then !exists_e_elt 
               else fold_left (fun buf (state,symbol,next) -> buf + closure next) empty (of_list lst))
-     in       
+     in
      let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
-                                          
+
      let closure_set = map (fun x -> exists_e_elt:=empty;(x,closure x)) (states rules)
      let is_subset sttset (_,elt) = 
          if exists (fun x -> (subset elt x)&&(not(equal elt x))) sttset 
@@ -55,15 +55,12 @@ let e_closure (rules,s,f) =
          List.concat [for stt in new_states ->
                         List.concat[for (x,y,z) in rules do
                                       if (exists ((=)x) stt)&&(Option.is_some y)
-                                      then yield [for q in new_states do 
-                                                    if exists ((=)z) q then yield (stt,y,q)]]]                                                   
-     //generte dictionary for numerating statest of new automaton
-     let alter_name = dict (List.zip (to_list new_states) [0..new_states.Count-1]) 
-     //replaceing all old states with new
+                                      then yield [for q in new_states do
+                                                    if exists ((=)z) q then yield (stt,y,q)]]]     
+     let alter_name = dict (List.zip (to_list new_states) [0..new_states.Count-1])      
      let new_rule (state,symbol,next) = alter_name.[state],symbol,alter_name.[next]
      let clean_new_automata = map new_rule (of_list new_automata)
-     let set_alter_name = map (fun stt -> alter_name.[stt])
-     //getting new start and finale states
+     let set_alter_name = map (fun stt -> alter_name.[stt])     
      let find_state stt = set_alter_name(filter (fun x -> exists ((=)stt) x) new_states)
      let new_finale_state =  find_state f
      //it is really only one start state
@@ -77,6 +74,6 @@ let e_closure (rules,s,f) =
 let FA_rules rule =
     let fa_rule = create_NFA rule in 
 #if DEBUG 
-    (print_any "Fa_rule!!!!:"; print_any (fa_rule));
+    (print_any "Fa_rule :"; print_any (fa_rule));
 #endif
     e_closure(fa_rule)

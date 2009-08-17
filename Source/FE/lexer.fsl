@@ -71,15 +71,15 @@ let warning lexbuf msg =
 
 let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.concat ""
 
-let lexeme (lexbuf:Microsoft.FSharp.Compatibility.OCaml.Lexing.lexbuf) (n,n') =
+let _lexeme (lexbuf:Microsoft.FSharp.Compatibility.OCaml.Lexing.lexbuf) (n,n') =
   let len = n' - n in
   let s = Array.create len ' ' in
   try
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.Lexeme.Length ) s 0 len; to_srt s
+    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) (n - lexbuf.StartPos.AbsoluteOffset) s 0 len; to_srt s
   with
    Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
 
-let from_lexbuf lexbuf loc = lexeme lexbuf loc, loc
+let from_lexbuf lexbuf loc = _lexeme lexbuf loc, loc
 let lex2source lexbuf = from_lexbuf lexbuf (Lexing.lexeme_start lexbuf,Lexing.lexeme_end lexbuf)
 
 }

@@ -73,15 +73,24 @@ let warning lexbuf msg =
 
 let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.concat ""
 
-let lexeme (lexbuf:Microsoft.FSharp.Compatibility.OCaml.Lexing.lexbuf) (n,n') =
+let _lexeme (lexbuf:Microsoft.FSharp.Text.Lexing.LexBuffer<byte>) (n,n') =
   let len = n' - n in
+  print_any "n = "; 
+  print_any (n);
+  print_any "n' = ";
+  print_any n';
+  print_any "len = "; 
+  print_any len;  
+  print_any "nlex_pos = ";
+  print_any lexbuf.StartPos.AbsoluteOffset;
   let s = Array.create len ' ' in
+  let t = Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf) in
   try
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.Lexeme.Length ) s 0 len; to_srt s
+    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( lexbuf.LexemeLength(*n - lexbuf.StartPos.AbsoluteOffset*) ) s 0 (len-1); to_srt s
   with
    Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
 
-let from_lexbuf lexbuf loc = lexeme lexbuf loc, loc
+let from_lexbuf lexbuf loc = _lexeme lexbuf loc, loc
 let lex2source lexbuf = from_lexbuf lexbuf (Lexing.lexeme_start lexbuf,Lexing.lexeme_end lexbuf)
 
 
@@ -522,7 +531,7 @@ and __fslex_main  __fslex_state lexbuf =
                 reset_string_buffer();
                                       let string_start = lexbuf.StartPos.pos_cnum in
                                       string lexbuf;
-                                              lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
+                                      //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
                                       STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
                      
 # 528 "Lexer.fs"

@@ -9,7 +9,7 @@ if .%1 == .-r (
    if .%1 == .-d (
       xcopy /y /s Generator\bin\Debug\Generator.dll Runner\bin\Debug\Generator.dll
    ) else       (
-      echo Incorrect first argument.
+      goto help
    )
 )
 
@@ -29,7 +29,7 @@ if .%1 == .-r (
          Runner\bin\Debug\Runner.exe
       )      
    ) else       ( 
-      echo Incorrect first argument.
+      goto help
    )
 )
 
@@ -45,7 +45,7 @@ if .%1 == .-r (
       xcopy /y  goto.dta  Pasrser\bin\Debug\
       xcopy /y  items.dta  Pasrser\bin\Debug\
    ) else       ( 
-      echo Incorrect first argument.
+      goto help
    )
 )
 
@@ -65,8 +65,14 @@ if .%1 == .-r (
          Pasrser\bin\Debug\pasrser.exe
       )
    ) else       (
-      echo Incorrect first argument.
+      goto help
    )
 )
 
 echo Parsing is finished.
+
+:help
+echo type "run.cmd %c1 %c2" where %c1 is run mode:
+echo   -r  = RELEASE mode
+echo   -d  = DEBUG mode
+echo  if %c2 = -o then trace is print into logs folder                                                   

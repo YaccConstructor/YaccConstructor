@@ -60,17 +60,15 @@ let rec climb =
     if Set.exists (fun ((item,tree),i) -> item.prod_name=start_ntrem && item.next_num=None && i=1) new_states     
     then set [for state in states do if (fst state).next_num = None then yield state,1] 
     else     
-      union_all         
-        [for (item,tree),i in new_states do
-             let prev_itm = Utils.prevItem item items                  
-             if exists (fun itm -> Utils.getText itm.symb = symbol && itm.item_num=item.s) prev_itm
-                && item.prod_name <> start_ntrem
-             then 
-                let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
-                yield climb(map create_new_tree states,(item.prod_name,i))
-             else
-                if exists (fun (itm,_) -> exists ((=)item) (Utils.nextItem itm items) && itm.item_num <> itm.s) states
-                then yield map (fun itm -> (itm, snd (choose states)@tree), i) prev_itm ])                
+      [for (item,tree),i in new_states do
+         let prev_itm = prevItem item                    
+         if exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> "S"
+         then 
+            let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
+            yield climb(map create_new_tree states,(item.prod_name,i))
+         else
+            if exists (fun (itm,_) -> exists ((=)item) (nextItem itm) && itm.item_num <> itm.s) states
+            then yield map (fun itm -> (itm, snd (choose states)@tree), i) prev_itm ] |> union_all)                
 
 and parse =           
     memoize (fun (states,i) -> 

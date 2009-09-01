@@ -75,18 +75,11 @@ let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.con
 
 let _lexeme (lexbuf:Microsoft.FSharp.Text.Lexing.LexBuffer<byte>) (n,n') =
   let len = n' - n in
-  print_any "n = "; 
-  print_any (n);
-  print_any "n' = ";
-  print_any n';
-  print_any "len = "; 
-  print_any len;  
-  print_any "nlex_pos = ";
-  print_any lexbuf.StartPos.AbsoluteOffset;
   let s = Array.create len ' ' in
-  let t = Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf) in
   try
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( lexbuf.LexemeLength(*n - lexbuf.StartPos.AbsoluteOffset*) ) s 0 (len-1); to_srt s
+  //let t = lexbuf.lex_abs_pos in
+(*String.blit lexbuf.lex_buffer ( n - lexbuf.lex_abs_pos ) s 0 len;s*)
+    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.Lexeme.Length ) s 0 len; to_srt s
   with
    Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
 

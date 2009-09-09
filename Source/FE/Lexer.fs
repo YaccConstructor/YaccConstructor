@@ -79,7 +79,7 @@ let _lexeme (lexbuf:Microsoft.FSharp.Text.Lexing.LexBuffer<byte>) (n,n') =
   try
   //let t = lexbuf.lex_abs_pos in
 (*String.blit lexbuf.lex_buffer ( n - lexbuf.lex_abs_pos ) s 0 len;s*)
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.Lexeme.Length ) s 0 len; to_srt s
+    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) ( n - lexbuf.StartPos.AbsoluteOffset) s 0 len; to_srt s
   with
    Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
 

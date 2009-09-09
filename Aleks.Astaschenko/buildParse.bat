@@ -1,1 +1,0 @@
-fsyacc.exe parser.fs -o testParser.fs

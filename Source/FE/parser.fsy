@@ -59,7 +59,7 @@ rule_nlist: rule SEMICOLON rule_nlist { $1 :: $3 }
 
 rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON alts
       { {
-          Rule.public = $1
+          Rule._public = $1
         ; Rule.name = Source.toString $2
         ; Rule.metaArgs = getList $3
         ; Rule.body = $6
@@ -127,4 +127,3 @@ call: UIDENT             {PToken $1}
         None -> PRef  ($1, $3)
         | Some x -> PMetaRef ($1,$3,x)
       }
-

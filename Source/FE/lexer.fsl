@@ -3,12 +3,12 @@
  *
  *  Author: Jk
  *)
-
+ #nowarn "62"
+ 
  open Lexing
  open Parser
 
 (* Auxiliaries for the lexical analyzer *)
-
 
 let brace_depth = ref 0
 and sq_br_depth = ref 0
@@ -47,11 +47,6 @@ let char_for_backslash = function
   | 'b' -> '\b'
   | 'r' -> '\r'
   |  c   -> c
-
-let char_for_decimal_code lexbuf i =
-  Char.chr(100 * (Char.code(Lexing.lexeme_char lexbuf i) - 48) +
-               10 * (Char.code(Lexing.lexeme_char lexbuf (i+1)) - 48) +
-                    (Char.code(Lexing.lexeme_char lexbuf (i+2)) - 48))
 
 (*let line_num = ref 1
 let line_pos = ref 0
@@ -99,8 +94,8 @@ rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
 and skipSpaces  = parse blank {lexbuf}
 and  main = parse
        blank  { main lexbuf }
-     | '\010' { lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 } 
-               ; main lexbuf
+     | '\010' { //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }; 
+                main lexbuf
               }
      | ':'  { COLON }
      | ';'  { SEMICOLON }
@@ -125,10 +120,10 @@ and  main = parse
        {  let text = lex2source lexbuf in
           match (fst text).[0] with
           'a'..'z' -> LIDENT text
-          | _ -> UIDENT text
+          |_       -> UIDENT text
        }
      | eof {EOF}
-         | "[*"
+     | "[*"
            {
              let n1 = Lexing.lexeme_end lexbuf in
          commut_depth := 1;
@@ -155,10 +150,10 @@ and  main = parse
        }
     | "\""
       { reset_string_buffer();
-                       let string_start = lexbuf.StartPos.pos_cnum in
-                       string lexbuf;
-                               lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
-                       STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
+        let string_start = lexbuf.StartPos.pos_cnum in
+        string lexbuf;
+        lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
+        STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
       }
     | "(" {LPAREN}
     | ")" {RPAREN}

@@ -1,11 +1,11 @@
-binExpr<<operand binOp>>
-: l=operand r=( op=binOp r=operand { (op, r) } )*
-{ List.fold_left ( fun l (op,r) -> op l r ) l r }
-;
-termOp: PLUS { ( +. ) } | MINUS { ( -. ) } ;
-factorOp : MULT { ( *. ) } | DIV { ( /. ) } ;
-powOp: "^" { ( ** ) } ;
-powExpr: n=NUMBER { float n } | "(" e=expr ")" { e } ;
-factor: res=binExpr<<powExpr powOp>> { res } ;
-term: res=binExpr<<factor factorOp>> { res } ;
-expr: res=binExpr<<term termOp>> { res } ;
+{ open IL
+open IL.Production
+open IL
+open Misc
+let getList = function Some x -> x | None -> []
+let createSeqElem bnd omitted r check =
+{ binding = bnd; omit = omitted; rule = r; checker = check }
+}
+a : {illex};
+
+{}

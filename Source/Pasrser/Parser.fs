@@ -8,15 +8,12 @@
 
 
 #light 
-#nowarn "40"
-#nowarn "62"
 open IL
 open Production
 open Grammar.Item
 open Tree
 open Data
 open Utils
-open Set
 
 open System.Threading
 
@@ -50,7 +47,7 @@ let goto (states,symbol) = Set.unionMany [for y,tree in states -> set[for z in (
    
 let rec climb =
     memoize (fun (states,(symbol,i)) -> 
-    if Set.is_empty states
+    if Set.isEmpty states
     then Set.empty
     else         
     let new_states = parse (goto (states,symbol),i)
@@ -62,14 +59,14 @@ let rec climb =
     then set [for state in states do if (fst state).next_num = None then yield state,1] 
     else     
       [for (item,tree),i in new_states do
-         let prev_itm = prevItem item items                 
-         if exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> "S"
+         let prev_itm = prevItem item items                   
+         if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> "S"
          then 
             let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
-            yield climb(map create_new_tree states,(item.prod_name,i))
+            yield climb(Set.map create_new_tree states,(item.prod_name,i))
          else
-            if exists (fun (itm,_) -> exists ((=)item) (nextItem itm items) && itm.item_num <> itm.s) states
-            then yield map (fun itm -> (itm, snd (choose states)@tree), i) prev_itm ] |> union_all)                
+            if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm items) && itm.item_num <> itm.s) states
+            then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itm ] |> Set.unionMany)                
 
 and parse =           
     memoize (fun (states,i) -> 

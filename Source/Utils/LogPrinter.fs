@@ -16,32 +16,32 @@ open System
 let print_goto x q cl= 
     Console.WriteLine( " GOTO "); 
     Console.Write( "GOTO x : ");
-    print_any x ;
+    printf "%A " x ;
     Console.WriteLine( "");
     Console.Write( "GOTO cl : ");
-    print_any cl;
+    printf "%A " cl;
     Console.WriteLine( "")
     
 let print_climb_1 i x q =  
     Console.WriteLine( " CLIMB "); 
     Console.Write( "Climb i : "); 
-    print_any i;
+    printf "%A " i;
     Console.WriteLine( "");
     Console.Write( "Climb x : "); 
-    print_any x;
+    printf "%A " x;
     Console.WriteLine( "");
     Console.Write( "Climb q : "); 
-    print_any q;
+    printf "%A " q;
     Console.WriteLine( "")
     
 let print_climb_2 gt =      
     Console.Write( "Climb gt : ");
-    print_any gt;
+    printf "%A " gt;
     Console.WriteLine( "")
      
 let print_climb_3 new_q =     
     Console.Write( "Climb new_q : ");
-    print_any new_q;
+    printf "%A " new_q;
     Console.WriteLine( "")   
 
 let print_climb_info i x q gt new_q =
@@ -52,41 +52,41 @@ let print_climb_info i x q gt new_q =
 let print_parse q i=     
     Console.WriteLine( " PARSER "); 
     Console.Write( "Parser q : "); 
-    print_any q;
+    printf "%A " q;
     Console.WriteLine( "");
     Console.Write( "Parser i : "); 
-    print_any i;
+    printf "%A " i;
     Console.WriteLine( "")
     
 let print_item itm s f =    
-    Set.iter print_any itm ;
+    Set.iter (printf "%A ") itm ;
     Console.WriteLine();
-    print_any (s,f);
+    printf "%A " (s,f);
     Console.WriteLine()
 
 let print_items items = 
     Console.WriteLine("Items:");
-    Set.iter print_any items;
+    Set.iter (printf "%A ") items;
     Console.WriteLine()
     
 let print_goto_c gt y x =
-    print_any (y,x) ; 
-    print_any " -> ";
-    print_any gt
+    printf "%A " (y,x) ; 
+    printf "%A " " -> ";
+    printf "%A " gt
     
 let print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set states =
      Console.WriteLine("new_states:");
-     Set.iter print_any new_states;
+     Set.iter (printf "%A ") new_states;
      Console.WriteLine("new_automata:");
-     Set.iter print_any clean_new_automata;
+     Set.iter (printf "%A ") clean_new_automata;
      Console.WriteLine("new_start_state:");
-     print_any new_start_state;
+     printf "%A " new_start_state;
      Console.WriteLine("new_finale_state:");
-     Set.iter print_any new_finale_state;
+     Set.iter (printf "%A ") new_finale_state;
      Console.WriteLine("Closure_set:");
-     print_any closure_set;
+     printf "%A " closure_set;
      Console.WriteLine("States:");
-     print_any states;
+     printf "%A " states;
      Console.WriteLine()   
 
 let print_result (start_time:System.DateTime) end_time result=

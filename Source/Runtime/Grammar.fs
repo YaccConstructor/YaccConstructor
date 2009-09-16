@@ -9,14 +9,14 @@
 #light "off"
 
 module Symbol = //Терминал или нетерминал 
-  struct
+  begin
    type t<'a> = 
     |Terminal    of 'a
     |Nonterminal of 'a 
   end  
   
 module Item = 
-  struct   
+  begin   
    type t<'a> = {prod_num:int;
                  prod_name:string;
                  item_num:int;

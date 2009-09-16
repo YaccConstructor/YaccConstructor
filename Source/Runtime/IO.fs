@@ -27,17 +27,17 @@ let writeValue out_path value =
     out_stream.Close();
     
 let binary_reader path =     
-    try 
+    try
        let inStream = new FileStream(path, FileMode.OpenOrCreate)       
        new BinaryReader (inStream)      
-    with e -> print_any e.ToString; failwith "reader_exception"
+    with e -> printf "%A " e.ToString; failwith "reader_exception"
 
 let text_writer path = 
     try
        let t = new FileInfo(path);
        let writer = t.CreateText();              
        writer     
-    with e -> print_any e.ToString; failwith "reader_exception"
+    with e -> printf "%A " e.ToString; failwith "reader_exception"
 
 
 let readValue path =

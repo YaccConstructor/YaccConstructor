@@ -6,7 +6,7 @@
 #light "off"
 
 module Source = 
-  struct
+  begin
    type t = string * (int * int) 
    
    let toString ((r,_):t):string = r
@@ -14,7 +14,7 @@ module Source =
   end
 
 module Production = 
-  struct
+  begin
     type elem <'patt,'expr> = 
     {
      omit:bool; //Вычитание
@@ -41,25 +41,25 @@ module Production =
   end
 
 module Rule = 
-  struct
-    type t <'patt,'expr> = 
-    { 
-     name    : string;
-     args    : 'patt list;
-     body    : (Production.t <'patt,'expr>);
-     _public : bool; //Стартовый нетерминал (иногда их хочется иметь много...)
-     metaArgs: 'patt list
-    }
+  begin
+   type t <'patt,'expr> = 
+   { 
+    name    : string;
+    args    : 'patt list;
+    body    : (Production.t <'patt,'expr>);
+    _public : bool; //Стартовый нетерминал (иногда их хочется иметь много...)
+    metaArgs: 'patt list
+   }
   end
 
 
 module Grammar = 
-  struct
+  begin
     type t <'patt,'expr> = (Rule.t<'patt,'expr>) list //грамматика - список правил.
   end 
 
 module Definition = 
-  struct
+  begin
     type ('patt,'expr) t = 
     { 
      head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)

@@ -35,7 +35,7 @@ let items =
 #if DEBUG
                 Log.print_item itm s f;
 #endif
-                Set.fold_left (fun buf (a,b,c) ->                                                    
+                Set.fold (fun buf (a,b,c) ->                                                    
                                    let new_item  item_num next_num =
                                       {prod_num = i;
                                        prod_name = rl.name;
@@ -50,7 +50,7 @@ let items =
                                     then Set.singleton(new_item c None)
                                     else Set.empty 
                                    )Set.empty itm)rules_map
-    |> Set.union_all
+    |> Set.unionMany
 
 let closure q = 
     let rec inner_closure i q = 
@@ -77,14 +77,14 @@ let goto_set =
         | _ -> false
     in 
     let make_goto q x =  
-        let closure = Set.fold_left (fun y x -> y + closure_set.[x]) Set.empty q
-        Set.union_all [for item in closure do if eql(x, item.symb) then yield Utils.nextItem item items]
+        let closure = Set.fold (fun y x -> y + closure_set.[x]) Set.empty q
+        Set.unionMany [for item in closure do if eql(x, item.symb) then yield Utils.nextItem item items]
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
         let gt = make_goto (Set.singleton item) symbol
         hash(item, toString symbol),gt
-    dict <| List.fold_left (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
+    dict <| List.fold (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
                        
 let generate = 
     IO.writeValue "goto.dta" goto_set;

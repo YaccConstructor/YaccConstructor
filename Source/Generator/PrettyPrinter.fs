@@ -43,7 +43,7 @@ let print_source (str,(i1,i2)) =
 
 let print_production production = 
     match production with 
-    | PLiteral(t) -> print_str "PLiteral";print_source t   
+    | PLiteral(t) -> print_str "PLiteral";print_source t
 
 let generate_list list_name list_body iterator = 
     (!out).WriteLine("let " + list_name + " = [" + String.concat " ; " (iterator list_body) + "]")

@@ -37,7 +37,7 @@ let text_writer path =
        let t = new FileInfo(path);
        let writer = t.CreateText();              
        writer     
-    with e -> printf "%A " e.ToString; failwith "reader_exception"
+    with e -> printf "%A " e.ToString; failwith "writer_exception"
 
 
 let readValue path =

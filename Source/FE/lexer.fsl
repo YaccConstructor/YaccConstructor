@@ -1,12 +1,15 @@
 {
-(** Module Lexer
- *
- *  Author: Jk
- *)
+// Copyright 2009 Jake Kirilenko
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
  #nowarn "62"
  
  open Lexing
  open Parser
+
 
 (* Auxiliaries for the lexical analyzer *)
 
@@ -15,6 +18,9 @@ and sq_br_depth = ref 0
 and comment_depth = ref 0
 and ang_br_depth = ref 0
 and commut_depth = ref 0
+
+
+let currentFileContent = ref ""
 
 exception Lexical_error of string * int
 
@@ -37,6 +43,12 @@ let store_string_char c =
    );
   (!string_buff).[!string_index] <- c;
   incr string_index
+
+let char_for_decimal_code lexbuf i =
+  Char.chr(100 * (Char.code(Lexing.lexeme_char lexbuf i) - 48) +
+               10 * (Char.code(Lexing.lexeme_char lexbuf (i+1)) - 48) +
+                    (Char.code(Lexing.lexeme_char lexbuf (i+2)) - 48))
+
 
 let get_stored_string () =
   Array.sub !string_buff 0 !string_index
@@ -66,13 +78,9 @@ let warning lexbuf msg =
 
 let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.concat ""
 
-let _lexeme (lexbuf:Microsoft.FSharp.Compatibility.OCaml.Lexing.lexbuf) (n,n') =
-  let len = n' - n in
-  let s = Array.create len ' ' in
-  try
-    Array.blit (Array.of_seq(Microsoft.FSharp.Compatibility.OCaml.Lexing.lexeme lexbuf)) (n - lexbuf.StartPos.AbsoluteOffset) s 0 len; to_srt s
-  with
-   Invalid_argument _ as ex -> (Printf.eprintf "Large file? jk's bug";raise ex)
+let _lexeme lexbuf (n,n') =
+  let len = n' - n
+  currentFileContent.Value.Substring(n,len)
 
 let from_lexbuf lexbuf loc = _lexeme lexbuf loc, loc
 let lex2source lexbuf = from_lexbuf lexbuf (Lexing.lexeme_start lexbuf,Lexing.lexeme_end lexbuf)
@@ -150,10 +158,10 @@ and  main = parse
        }
     | "\""
       { reset_string_buffer();
-        let string_start = lexbuf.StartPos.pos_cnum in
+        let string_start = lexbuf.StartPos in
         string lexbuf;
-        lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_cnum = string_start};                                
-        STRING (from_lexbuf lexbuf (string_start,Lexing.lexeme_end lexbuf))
+        lexbuf.StartPos <- string_start;
+        STRING (from_lexbuf lexbuf (string_start.pos_cnum, Lexing.lexeme_end lexbuf))
       }
     | "(" {LPAREN}
     | ")" {RPAREN}

@@ -24,21 +24,17 @@ let m_end,m_start = (PLiteral("$",(1,1)),PToken(start_ntrem,(1,1)))
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now                     
 
-let memoize (f: ('a*'c) ->'b) =
+let memoize f =
    let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   
    fun (x,y) ->        
-       let id = hash(x);
+       let id = hash(x)
        let key = x,y
        if t.ContainsKey(key)       
-       then 
-         (
-          let res = t.[key] in
-          res)
+       then t.[key] 
        else 
-         (
           let res = f(x,y) 
-          t.Add(key,res);          
-          res )   
+          t.Add(key,res)
+          res
                       
 do start_time := System.DateTime.Now;
    printfn "Parsing.\nStart time: %A" System.DateTime.Now    

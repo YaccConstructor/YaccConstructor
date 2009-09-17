@@ -1,14 +1,15 @@
 %{
-(** Module Parser
- *
- *  Author: Jk
- *)
+// Copyright 2009 Jake Kirilenko
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
 
+  open Microsoft.FSharp.Text
   open IL
   open IL.Production
-  open IL
-  open Misc
-
+  
+  let o2l = function Some x -> [x] | None -> []
   let getList = function Some x -> x | None -> []
   (*let parse_error (s:string):unit = ()*)
   let missing name = print_endline ("Missing " ^ name)
@@ -35,7 +36,7 @@
 
 
 %start file
-%type <(IL.Source.t, IL.Source.t) IL.Definition.t> file
+%type <(IL.Source.t, IL.Source.t)IL.Definition.t> file
 
 %%
 
@@ -83,13 +84,7 @@ bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3)}
               | BAR seq {$2}
 
 seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3) }
-   | perms_list   {$1}
    | ACTION {PSeq([],Some $1)}
-
-perms_list:perm COMMUT perms_list {PPerm($1)::PPerm($3)}
-   | /* empty */ {[]}
-
-perm: LIDENT {$1}
 
 seq_elem_list: seq_elem seq_elem_list {$1::$2}
              | /* empty */ {[]}

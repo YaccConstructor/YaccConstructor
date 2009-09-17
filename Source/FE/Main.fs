@@ -1,6 +1,6 @@
 ﻿// Main.fs
 //
-// Copyright 2009 Semen Grigorev
+// Copyright 2009 Jake Kirilenko
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,14 +23,6 @@ let run path =
     Seq.iter (printfn "%A ") example
 
 
-let run2 path = 
+let ParseFile path = 
     let buf = run_common path
-    Parser.file Lexer.main buf
-      
-    
-let main =
- let d = run2 "test001.yrd";
- d;
- ()
-
-
+    Parser.file Lexer.main buf      

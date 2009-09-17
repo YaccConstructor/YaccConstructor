@@ -131,13 +131,6 @@ and  main = parse
           |_       -> UIDENT text
        }
      | eof {EOF}
-     | "[*"
-           {
-             let n1 = Lexing.lexeme_end lexbuf in
-         commut_depth := 1;
-         let n2 = handle_lexical_error commut lexbuf in
-                 COMMUT
-           }
      | '{'
        { let n1 = Lexing.lexeme_end lexbuf in
          brace_depth := 1;
@@ -229,7 +222,7 @@ and pattern = parse
 and param = parse
     '['
     { incr sq_br_depth;
-      pattern lexbuf }
+      param lexbuf }
   | ']'
     { decr sq_br_depth;
       if !sq_br_depth = 0 then Lexing.lexeme_start lexbuf else param lexbuf }
@@ -267,32 +260,7 @@ and string = parse
   | _
     { store_string_char(Lexing.lexeme_char lexbuf 0);
       string lexbuf }
-
-and commut = parse
-    "[*"  {
-                incr commut_depth;
-            commut lexbuf
-              }
-   |"*]"  {
-            decr commut_depth;
-            if !commut_depth = 0 then Lexing.lexeme_start lexbuf else commut lexbuf
-              }
-   | '"'  {
-            reset_string_buffer();
-            string lexbuf;
-            reset_string_buffer();
-            commut lexbuf
-                  }
-   | "(*" {
-            comment_depth := 1;
-            comment lexbuf;
-            commut lexbuf
-                  }
-  | eof
-    { raise (Lexical_error("unterminated pattern", Lexing.lexeme_start lexbuf)) }
-  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
-  |  _ {commut lexbuf}
-
+      
 and comment = parse
     "(*"
     { incr comment_depth; comment lexbuf }

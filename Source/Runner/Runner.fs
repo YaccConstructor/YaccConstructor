@@ -9,4 +9,7 @@
 
 #light
 
-let generate = Generator.generate
+let generate = 
+    let commandLineArgs = System.Environment.GetCommandLineArgs()
+    Generator.generate Main.main 
+//let generate = Generator.generate

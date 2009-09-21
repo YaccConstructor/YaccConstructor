@@ -46,9 +46,9 @@ let e_closure (rules,s,f) =
 
      let closure_set = Set.map (fun x -> exists_e_elt:=Set.Empty;(x,closure x)) (states rules)
      let is_subset sttset (_,elt:Set<'a>) = 
-         if Set.exists (fun x -> (elt.IsSupersetOf x)&&(not(elt=x))) sttset 
+         if Set.exists (fun x -> (elt.IsSubsetOf x)&&(not(elt.Equals x))) sttset 
          then Set.remove elt sttset 
-         else sttset
+         else sttset    
      let new_states = Set.fold is_subset (Set.of_list(snd(List.unzip (Set.to_list closure_set)))) closure_set
      let new_automata = 
          List.concat [for stt in new_states ->
@@ -60,10 +60,10 @@ let e_closure (rules,s,f) =
      let new_rule (state,symbol,next) = alter_name.[state],symbol,alter_name.[next]
      let clean_new_automata = Set.map new_rule (Set.of_list new_automata)
      let set_alter_name = Set.map (fun stt -> alter_name.[stt])     
-     let find_state stt = set_alter_name(Set.filter (fun x -> Set.exists ((=)stt) x) new_states)
-     let new_finale_state =  find_state f
+     let find_state stt = set_alter_name (Set.filter (fun x -> Set.exists ((=)stt) x) new_states)
+     let new_finale_state = find_state f
      //it is really only one start state
-     let new_start_state = (find_state s).MinimumElement
+     let new_start_state =(find_state s).MinimumElement
      in
 #if DEBUG          
      Log.print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set (states rules);

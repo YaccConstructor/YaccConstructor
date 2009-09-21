@@ -6,7 +6,6 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-
 #light 
 open IL
 open Production
@@ -56,7 +55,7 @@ let rec climb =
     else     
       [for (item,tree),i in new_states do
          let prev_itm = prevItem item items                   
-         if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> "S"
+         if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> start_ntrem
          then 
             let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
             yield climb(Set.map create_new_tree states,(item.prod_name,i))

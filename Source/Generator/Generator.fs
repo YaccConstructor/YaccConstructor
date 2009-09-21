@@ -31,7 +31,7 @@ let items =
                 let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
                 let get_symb =  function 
                                 Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
-                                | _ -> failwith "error!!!"                                          
+                                | _ -> failwith "Generator error."                                          
 #if DEBUG
                 Log.print_item itm s f;
 #endif
@@ -86,10 +86,10 @@ let goto_set =
         hash(item, toString symbol),gt
     dict <| List.fold (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
                        
-let generate = 
+let generate input_grammar = 
     IO.writeValue "goto.dta" goto_set;
     IO.writeValue "items.dta" items;
-    PrettyPrinter.out := IO.text_writer "test1.fs";
-    PrettyPrinter.print_header "test" ["IL"];
-    (!PrettyPrinter.out).Close();
+    //PrettyPrinter.out := IO.text_writer "test1.fs";
+    //PrettyPrinter.print_header "test" ["IL"];
+    //(!PrettyPrinter.out).Close();
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

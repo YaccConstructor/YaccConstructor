@@ -29,5 +29,5 @@ let ParseFile path =
 
 #if DEBUG
 let main =
-    printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test003.yrd"
+    printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test002.yrd"
 #endif    

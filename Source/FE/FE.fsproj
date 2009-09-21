@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{831b3b65-b615-47a7-89cf-e3908e7ca0cd}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>FE</RootNamespace>
     <AssemblyName>FE</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -53,11 +53,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <ProjectReference Include="..\Generator\Generator.fsproj">
-      <Name>Generator</Name>
-      <Project>{f82927e0-fad1-40f4-8e7c-c0abf340665c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Runtime\Runtime.fsproj">
       <Name>Runtime</Name>
       <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>

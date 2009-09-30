@@ -87,7 +87,12 @@ let goto_set =
     dict <| List.fold (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
                        
 let generate input_grammar = 
-    IO.writeValue "goto.dta" goto_set;
+    IO.writeValue "goto.dta" (System.Linq.Enumerable.ToList(goto_set)) ; 
+    // to lad use smth like this
+//       let dict = new System.Collections.Generic.Dictionary<int,int>() in
+//         List.iter (fun (k,v) -> dict.Add(k,v));
+//         dict 
+    //
     IO.writeValue "items.dta" items;
     //PrettyPrinter.out := IO.text_writer "test1.fs";
     //PrettyPrinter.print_header "test" ["IL"];

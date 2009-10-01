@@ -50,6 +50,11 @@
       <Project>{f82927e0-fad1-40f4-8e7c-c0abf340665c}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Runtime\Runtime.fsproj">
+      <Name>Runtime</Name>
+      <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

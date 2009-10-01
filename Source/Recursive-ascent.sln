@@ -13,6 +13,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Runner", "Runner\Runner.fsp
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FE", "FE\FE.fsproj", "{831B3B65-B615-47A7-89CF-E3908E7CA0CD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AB55B110-70AD-4640-9C69-E688CDC94E24}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tests\test001.yrd = ..\Tests\test001.yrd
+		..\Tests\test002.yrd = ..\Tests\test002.yrd
+		..\Tests\test003.yrd = ..\Tests\test003.yrd
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

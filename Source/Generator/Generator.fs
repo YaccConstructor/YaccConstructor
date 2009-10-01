@@ -21,13 +21,11 @@ let end_time   = ref System.DateTime.Now
 
 let lex_list = Test.test_lexem
 
-let rules = Test.test_grammar
-
-//let start_nterm = GrammarPreparer.get_start_nterm grammar
-
-let items =
-    let rules_map  = List.zip ([0..(List.length rules)-1])rules
-    List.map (fun (i,rl) -> 
+let items,(_generate:IL.Grammar.t<IL.Source.t,IL.Source.t>->unit) =
+    let _items:(Set<Grammar.Item.t<Source.t>> ref) = ref Set.Empty
+    let generate rules =
+       let rules_map  = List.zip ([0..(List.length rules)-1])rules
+       _items:= List.map (fun (i,rl) -> 
                 let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
                 let get_symb =  function 
                                 Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
@@ -51,13 +49,15 @@ let items =
                                     else Set.empty 
                                    )Set.empty itm)rules_map
     |> Set.unionMany
-
+    let items () = !_items
+    items,generate
+    
 let closure q = 
     let rec inner_closure i q = 
       if i = Set.count q 
       then q
       else
-        let next_cl f = inner_closure (i+1) (q + Set.filter f items)
+        let next_cl f = inner_closure (i+1) (q + Set.filter f (items()))
         let closure_one elt = 
             let el_for_cl = List.nth (Set.to_list q) i 
             elt.prod_name = Utils.getText el_for_cl.symb && elt.item_num = elt.s 
@@ -67,9 +67,9 @@ let closure q =
         
 let closure_set = 
 #if DEBUG
-  Log.print_items items
+  Log.print_items (items())
 #endif
-  dict <| Set.map (fun x -> x, closure (Set.singleton x)) items                
+  dict <| Set.map (fun x -> x, closure (Set.singleton x)) (items())                
 
 let goto_set =     
     let eql = function 
@@ -78,22 +78,28 @@ let goto_set =
     in 
     let make_goto q x =  
         let closure = Set.fold (fun y x -> y + closure_set.[x]) Set.empty q
-        Set.unionMany [for item in closure do if eql(x, item.symb) then yield Utils.nextItem item items]
+        Set.unionMany [for item in closure do if eql(x, item.symb) then yield Utils.nextItem item (items())]
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
         let gt = make_goto (Set.singleton item) symbol
         hash(item, toString symbol),gt
-    dict <| List.fold (fun buf symbol -> buf@[for item in items -> goto_data symbol item]) [] lex_list
+    dict <| List.fold (fun buf symbol -> buf@[for item in (items()) -> goto_data symbol item]) [] lex_list
                        
-let generate input_grammar = 
+let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)= 
+    let head,grammar,foot = GrammarPreparer.prepare input_grammar
+#if DEBUG
+    printf "Input extracted rules \n %A \n"<| grammar;
+    printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
+#endif    
+    _generate(ExpandMeta.expandMetaRules grammar);    
     IO.writeValue "goto.dta" (System.Linq.Enumerable.ToList(goto_set)) ; 
     // to lad use smth like this
 //       let dict = new System.Collections.Generic.Dictionary<int,int>() in
 //         List.iter (fun (k,v) -> dict.Add(k,v));
 //         dict 
     //
-    IO.writeValue "items.dta" items;
+    IO.writeValue "items.dta" (items());
     //PrettyPrinter.out := IO.text_writer "test1.fs";
     //PrettyPrinter.print_header "test" ["IL"];
     //(!PrettyPrinter.out).Close();

@@ -25,9 +25,13 @@ let run path =
 
 let ParseFile path = 
     let buf = run_common path
-    print_any(Parser.file Lexer.main buf)
-
+    let res = Parser.file Lexer.main buf
+#if DEBUG
+    printf "%A\n" <|res
+#endif    
+    res
+    
 #if DEBUG
 let main =
-    printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test002.yrd"
+    printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test001.yrd"
 #endif    

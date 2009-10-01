@@ -49,6 +49,13 @@
       <AssemblyName>FSharp.PowerPack.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="FSharp.PowerPack.Build.Tasks, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
+      <Name>FSharp.PowerPack.Build.Tasks</Name>
+      <AssemblyName>FSharp.PowerPack.Build.Tasks.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\FSharp-1.9.6.16\\bin\FSharp.PowerPack.Build.Tasks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>

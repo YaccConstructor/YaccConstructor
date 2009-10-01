@@ -11,5 +11,6 @@
 
 let generate = 
     let commandLineArgs = System.Environment.GetCommandLineArgs()
-    Generator.generate Main.main 
+    //Main.main;
+    Generator.generate (Main.ParseFile @"..\..\..\..\Tests\test002.yrd")
 //let generate = Generator.generate

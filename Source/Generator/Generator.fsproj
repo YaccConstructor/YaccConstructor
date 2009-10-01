@@ -34,12 +34,22 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
+      <Name>FSharp.PowerPack</Name>
+      <AssemblyName>FSharp.PowerPack.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Namer.fs" />
+    <Compile Include="TransformAux.fs" />
+    <Compile Include="ExpandEBNF.fs" />
+    <Compile Include="ExpandMeta.fs" />
+    <Compile Include="ExpandAlter.fs" />
     <Compile Include="FinitAutomata.fs" />
     <Compile Include="GrammarPreparer.fs" />
     <Compile Include="PrettyPrinter.fs" />

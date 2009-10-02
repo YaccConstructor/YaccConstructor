@@ -24,10 +24,13 @@ let rec create_NFA = function
                                                            [s,None,ls]@[s,None,rs]@
                                                            [lf,None,f]@[rf,None,f]@
                                                            lrules@rrules,s,f)
-                          
+                  
+    | PMany (expr)                     
     | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
     | PToken(ch)
+    | PRef(ch,_)
     | PLiteral(ch) as t -> (let s,f = next(),next() in ([s,Some(t),f],s,f))
+    
     
 let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      
      

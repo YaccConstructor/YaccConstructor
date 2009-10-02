@@ -43,4 +43,7 @@ let text_writer path =
 let readValue path =
     use inStream = new FileStream(path, FileMode.Open)    
     let deserializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter()
-    unbox(deserializer.Deserialize(inStream))
+    let data = deserializer.Deserialize(inStream)
+    let res = unbox(data)
+    let t = 1+1
+    res

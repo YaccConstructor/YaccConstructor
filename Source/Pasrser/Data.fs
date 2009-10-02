@@ -20,6 +20,11 @@ let (get_next_ch:int->t<string,string>),input_length =
     let input_length () = l 
     get,input_length           
 
-let goto_set:System.Collections.Generic.IDictionary<int,Set<Grammar.Item.t<Source.t>>> = IO.readValue "goto.dta"
+let goto_set:System.Collections.Generic.Dictionary<int,Set<Grammar.Item.t<Source.t>>> = 
+      let dict = new System.Collections.Generic.Dictionary<int,Set<Grammar.Item.t<Source.t>>>() in
+      let rv = IO.readValue "goto.dta" in
+         List.iter (fun (k,v) -> dict.Add(k,v))rv
+      dict   
+  
 
 let items:Set<Grammar.Item.t<Source.t>> = IO.readValue "items.dta"

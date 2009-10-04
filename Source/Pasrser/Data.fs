@@ -28,3 +28,5 @@ let goto_set:System.Collections.Generic.Dictionary<int,Set<Grammar.Item.t<Source
       dict   
   
 let items:Set<Grammar.Item.t<Source.t>> = IO.readValue "items.dta"
+
+let start_nterms:List<string> = IO.readValue "start_nterms.dta" 

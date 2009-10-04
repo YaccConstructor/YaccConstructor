@@ -14,14 +14,12 @@ open Tree
 open Data
 open Utils
 
-open System.Threading
-
-let start_ntrem = "S";
-
-let m_end,m_start = (PLiteral("$",(1,1)),PToken(start_ntrem,(1,1)))
+let m_end = PLiteral("$",(1,1))
 
 let start_time = ref System.DateTime.Now
-let end_time   = ref System.DateTime.Now                     
+let end_time   = ref System.DateTime.Now               
+
+let is_start symbol_name = List.exists ((=) symbol_name) Data.start_nterms
 
 let memoize f =
    let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   
@@ -38,7 +36,8 @@ let memoize f =
 do start_time := System.DateTime.Now;
    printfn "Parsing.\nStart time: %A" System.DateTime.Now    
 
-let goto (states,symbol) = Set.unionMany [for y,tree in states -> set[for z in (goto_set.[hash (y,symbol)]) -> z,tree]]   
+let goto (states,symbol) = Set.unionMany [for y,tree in states 
+                                              -> set[for z in (goto_set.[hash (y,symbol)]) -> z,tree]]   
    
 let rec climb =
     memoize (fun (states,(symbol,i)) -> 
@@ -47,23 +46,25 @@ let rec climb =
     else         
     let new_states = parse (goto (states,symbol),i)
 #if DEBUG
-    let gt =  goto (states,symbol)
+    let gt = goto (states,symbol)
     Log.print_climb_info i symbol states gt new_states;        
 #endif             
-    if Set.exists (fun ((item,tree),i) -> item.prod_name=start_ntrem && item.next_num=None && i=1) new_states     
+    if Set.exists (fun ((item,tree),i) ->is_start item.prod_name && item.next_num=None && i=1) new_states     
     then set [for state in states do if (fst state).next_num = None then yield state,1] 
-    else     
+    else
       [for (item,tree),i in new_states do
          let prev_itm = prevItem item items                   
-         if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s)prev_itm && item.prod_name <> start_ntrem
+         if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s) prev_itm 
+            && is_start item.prod_name
          then 
             let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
             yield climb(Set.map create_new_tree states,(item.prod_name,i))
          else
-            if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm items) && itm.item_num <> itm.s) states
+            if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm items) && itm.item_num <> itm.s)
+                          states
             then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itm ] |> Set.unionMany)                
 
-and parse =           
+and parse =
     memoize (fun (states,i) -> 
 #if DEBUG 
     Log.print_parse states i;
@@ -75,16 +76,16 @@ and parse =
     Set.map (fun x -> x,i)(result_states new_states [])
     + if (get_next_ch i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1))
     )
-                 
-let res _ = 
+      
+let res _ =
     let parse_res =parse (Set.of_list (List.map (fun x -> x,[])
-                                            (List.filter (fun x -> x.prod_name =start_ntrem)
-                                                         (Set.to_list items))),
-                                   input_length())
+                                                (List.filter (fun x ->is_start x.prod_name)
+                                                             (Set.to_list items)))
+                         ,input_length())
     end_time := System.DateTime.Now;    
-    let trees = Set.of_list(List.concat(Set.map(fun ((a,b),i)-> b) parse_res));
+    let trees = Set.of_list(List.concat(Set.map(fun ((a,b),i) -> b) parse_res));
     Seq.iter(fun b -> print_tree b) trees;
     printfn "Parser get %A dirivation tree" trees.Count;
-    not(parse_res=Set.Empty)
-do                    
+    not(parse_res.IsEmpty)
+do
     Log.print_result !start_time !end_time (res ())

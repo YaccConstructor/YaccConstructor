@@ -19,8 +19,6 @@ open Grammar.Symbol
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now      
 
-//let lex_list = Test.test_lexem
-
 let items,_grammar,(_generate:IL.Grammar.t<IL.Source.t,IL.Source.t>->unit) =
     let _items:(Set<Grammar.Item.t<Source.t>> ref) = ref Set.Empty
     let _grammar:IL.Grammar.t<IL.Source.t,IL.Source.t> ref = ref[]
@@ -101,9 +99,11 @@ let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)=
     printf "Input extracted rules \n %A \n"<| grammar;
     printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
     printf "\n Token list: \n %A " <|(GrammarPreparer.get_all_t(_grammar()))
+    printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
 #endif            
     IO.writeValue "goto.dta" (System.Linq.Enumerable.ToList(goto_set())) ; 
     IO.writeValue "items.dta" (items());
+    IO.writeValue "start_nterms.dta" (GrammarPreparer.get_start_nterms (_grammar()));
     //PrettyPrinter.out := IO.text_writer "test1.fs";
     //PrettyPrinter.print_header "test" ["IL"];
     //(!PrettyPrinter.out).Close();

@@ -23,4 +23,4 @@ definition[list]: variable=VAR EQUAL value=exprCalc[list] { variable,value } ;
 
 definitionList[list]: l=definition[list] r=definitionList[(l::list)] { r } | { list } ;
 
-expr: list=definitionList[ [] ] res=exprCalc[list] { res } ;
++expr: list=definitionList[ [] ] res=exprCalc[list] { res } ;

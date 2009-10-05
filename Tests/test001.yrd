@@ -1,1 +1,1 @@
-expr: n=NUMBER { float n };
++expr: n=NUMBER { float n };

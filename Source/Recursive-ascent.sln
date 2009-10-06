@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Runtime", "Runtime\Runtime.fsproj", "{D1437F9E-B01E-48AF-912E-4AF72AC36C89}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Pasrser", "Pasrser\Pasrser.fsproj", "{B576830C-4A4C-4E00-BE7C-E7731232C96F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "Pasrser\Parser.fsproj", "{B576830C-4A4C-4E00-BE7C-E7731232C96F}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Generator", "Generator\Generator.fsproj", "{F82927E0-FAD1-40F4-8E7C-C0ABF340665C}"
 EndProject

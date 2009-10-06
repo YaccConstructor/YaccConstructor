@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{831b3b65-b615-47a7-89cf-e3908e7ca0cd}</ProjectGuid>
+    <ProjectGuid>{b576830c-4a4c-4e00-be7c-e7731232c96f}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>FE</RootNamespace>
-    <AssemblyName>FE</AssemblyName>
+    <RootNamespace>Pasrser</RootNamespace>
+    <AssemblyName>Pasrser</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Name>FE</Name>
+    <Name>Parser</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,52 +30,33 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
-    <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Core.GrammarParser --open Yard.Core --light-off</OtherFlags>
-    </FsYacc>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags>--unicode --light-off</OtherFlags>
-    </FsLex>
-    <Compile Include="Parser.fsi" />
-    <Compile Include="Parser.fs" />
-    <Compile Include="Lexer.fs" />
-    <Compile Include="Main.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="FSharp.Core, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
-      <Name>FSharp.Core</Name>
-      <AssemblyName>FSharp.Core.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="FSharp.PowerPack, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
-      <Name>FSharp.PowerPack</Name>
-      <AssemblyName>FSharp.PowerPack.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="FSharp.PowerPack.Build.Tasks, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
-      <Name>FSharp.PowerPack.Build.Tasks</Name>
-      <AssemblyName>FSharp.PowerPack.Build.Tasks.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\FSharp-1.9.6.16\\bin\FSharp.PowerPack.Build.Tasks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>Microsoft.Build.Framework</Name>
-      <AssemblyName>Microsoft.Build.Framework.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Tree.fs" />
+    <Compile Include="Data.fs" />
+    <Compile Include="Parser.fs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Runtime\Runtime.fsproj">
       <Name>Runtime</Name>
       <Project>{d1437f9e-b01e-48af-912e-4af72ac36c89}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.fsproj">
+      <Name>Utils</Name>
+      <Project>{c948fea9-a39d-4e4c-940d-c9b9166e4506}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">

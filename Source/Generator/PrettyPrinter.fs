@@ -8,7 +8,7 @@
 
 #light
 
-module PrettyPrinter
+module Yard.Core.PrettyPrinter
 
 open IO
 open IL.Production

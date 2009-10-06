@@ -6,7 +6,7 @@
  *  Author: Ilia
  *)
 
-module TransformAux
+module Yard.Core.TransformAux
 
 open IL
 open Production

@@ -7,7 +7,7 @@
  *  Author: Ilia
  *)
 
-module Namer
+module Yard.Core.Namer
 
 open IL
 //open Misc

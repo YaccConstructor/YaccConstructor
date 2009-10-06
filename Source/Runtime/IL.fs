@@ -4,7 +4,7 @@
  *)
 
 #light "off"
-
+module Yard.Core.IL
 module Source = 
   begin
    type t = string * (int * int) 
@@ -60,10 +60,14 @@ module Grammar =
 
 module Definition = 
   begin
+    type info = { fileName: string};
     type ('patt,'expr) t = 
     { 
+     info : info;
      head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)
      grammar : Grammar.t<'patt,'expr>;//грамматика
      foot    :'expr option //текст после грамматики
     }    
+    
+    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []}
 end

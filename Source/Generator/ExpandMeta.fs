@@ -5,7 +5,7 @@
  *
  *  Author: Ilia
  *)
-module ExpandMeta 
+module Yard.Core.ExpandMeta 
 open IL
 open Production
 //open Misc

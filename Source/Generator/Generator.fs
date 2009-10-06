@@ -8,7 +8,7 @@
 
 #light
 
-module Generator
+module Yard.Core.Generator
 
 open IL.Production
 open IL.Rule
@@ -101,9 +101,9 @@ let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)=
     printf "\n Token list: \n %A " <|(GrammarPreparer.get_all_t(_grammar()))
     printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
 #endif            
-    IO.writeValue "goto.dta" (System.Linq.Enumerable.ToList(goto_set())) ; 
-    IO.writeValue "items.dta" (items());
-    IO.writeValue "start_nterms.dta" (GrammarPreparer.get_start_nterms (_grammar()));
+    IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(goto_set())) ; 
+    IO.writeValue (input_grammar.info.fileName + ".items.dta") (items());
+    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));
     //PrettyPrinter.out := IO.text_writer "test1.fs";
     //PrettyPrinter.print_header "test" ["IL"];
     //(!PrettyPrinter.out).Close();

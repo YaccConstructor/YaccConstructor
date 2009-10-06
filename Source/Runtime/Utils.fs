@@ -8,7 +8,7 @@
 
 #light
 
-module Utils
+module Yard.Core.Utils
 
 open IL
 open Production

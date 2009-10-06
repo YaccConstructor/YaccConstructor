@@ -7,12 +7,14 @@
 // as published by the Free Software Foundation.
 
 #light
+module Yard.Core.Main
 open Microsoft.FSharp.Text.Lexing
 
 let run_common path = 
-    Lexer.currentFileContent := System.IO.File.ReadAllText(path);
-    let reader = IO.binary_reader path in
-    LexBuffer<_>.FromBinaryReader reader
+    let content = System.IO.File.ReadAllText(path)
+    Lexer.currentFileContent := content;
+    let reader = new System.IO.StringReader(content) in
+    LexBuffer<_>.FromTextReader reader
 
 let run path =
     let buf = run_common path in
@@ -25,13 +27,15 @@ let run path =
 
 let ParseFile path = 
     let buf = run_common path
-    let res = Parser.file Lexer.main buf
+    let res = GrammarParser.file Lexer.main buf
 #if DEBUG
     printf "%A\n" <|res
 #endif    
-    res
+    {res with Yard.Core.IL.Definition.info = {fileName = path}}
     
 #if DEBUG
 let main =
     printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test001.yrd"
 #endif    
+
+//(new Microsoft.FSharp.Text.Lexing.LexBuffer<_>()).

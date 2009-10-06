@@ -7,7 +7,7 @@
  *
  *  Author: Ilia
  *)
-module ExpandEBNF 
+module Yard.Core.ExpandEBNF 
 
 open IL
 open Production

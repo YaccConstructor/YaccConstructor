@@ -8,7 +8,7 @@
 
 #light 
 
-module FinitAutomata
+module Yard.Core.FinitAutomata
 
 open IL.Production
 open IL.Source

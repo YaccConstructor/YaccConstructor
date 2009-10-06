@@ -8,7 +8,7 @@
 
 #light
 
-module IO
+module Yard.Core.IO
 
 open System.IO
 open IL

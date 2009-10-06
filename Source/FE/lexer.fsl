@@ -8,8 +8,8 @@
  #nowarn "62"
  
  open Lexing
- open Parser
-
+ open Yard.Core.GrammarParser
+ open Microsoft.FSharp.Text
 
 (* Auxiliaries for the lexical analyzer *)
 
@@ -44,10 +44,10 @@ let store_string_char c =
   (!string_buff).[!string_index] <- c;
   incr string_index
 
-let char_for_decimal_code lexbuf i =
-  Char.chr(100 * (Char.code(Lexing.lexeme_char lexbuf i) - 48) +
-               10 * (Char.code(Lexing.lexeme_char lexbuf (i+1)) - 48) +
-                    (Char.code(Lexing.lexeme_char lexbuf (i+2)) - 48))
+let char_for_decimal_code (lexbuf:Lexing.LexBuffer<_>) i =
+  Char.chr(100 * (Char.code(lexbuf.LexemeChar i) - 48) +
+               10 * (Char.code(lexbuf.LexemeChar (i+1)) - 48) +
+                    (Char.code(lexbuf.LexemeChar (i+2)) - 48))
 
 
 let get_stored_string () =
@@ -63,27 +63,27 @@ let char_for_backslash = function
 (*let line_num = ref 1
 let line_pos = ref 0
 *)
-let handle_lexical_error fn lexbuf =
-  let pos = Lexing.lexeme_start lexbuf in
+let handle_lexical_error fn (lexbuf:Lexing.LexBuffer<_>) =
+  let pos = lexbuf.StartPos.AbsoluteOffset in
   try
     fn lexbuf
   with Lexical_error(msg, _) ->
     raise(Lexical_error(msg, pos))
 
-let warning lexbuf msg =
+let warning (lexbuf:Lexing.LexBuffer<_>) msg =
   Printf.eprintf "ocamllex warning:\nFile \"%s\",  character %d: %s.\n"
-                  Sys.argv.[1] (Lexing.lexeme_start lexbuf) msg;   
+                  Sys.argv.[1] (lexbuf.StartPos.AbsoluteOffset) msg;   
   flush stderr
 ;;
 
 let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.concat ""
 
 let _lexeme lexbuf (n,n') =
-  let len = n' - n
+  let len = n' - n in
   currentFileContent.Value.Substring(n,len)
 
-let from_lexbuf lexbuf loc = _lexeme lexbuf loc, loc
-let lex2source lexbuf = from_lexbuf lexbuf (Lexing.lexeme_start lexbuf,Lexing.lexeme_end lexbuf)
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) loc = _lexeme lexbuf loc, loc
+let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos.AbsoluteOffset,lexbuf.EndPos.AbsoluteOffset)
 
 }
 
@@ -120,7 +120,7 @@ and  main = parse
          main lexbuf
        }
      | "=>{"
-       { let n1 = Lexing.lexeme_end lexbuf in
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
          let n2 = handle_lexical_error predicate lexbuf in
          PREDICATE (from_lexbuf lexbuf (n1,n2))
        }
@@ -132,19 +132,19 @@ and  main = parse
        }
      | eof {EOF}
      | '{'
-       { let n1 = Lexing.lexeme_end lexbuf in
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
          brace_depth := 1;
          let n2 = handle_lexical_error action lexbuf in
           ACTION (from_lexbuf lexbuf (n1,n2))
        }
     | '<'
-       { let n1 = Lexing.lexeme_end lexbuf in
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
          ang_br_depth := 1;
          let n2 = handle_lexical_error pattern lexbuf in
          PATTERN (from_lexbuf lexbuf (n1,n2))
        }
     | '['
-       { let n1 = Lexing.lexeme_end lexbuf in
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
          sq_br_depth := 1;
          let n2 = handle_lexical_error param lexbuf in
          PARAM (from_lexbuf lexbuf (n1,n2))
@@ -154,18 +154,18 @@ and  main = parse
         let string_start = lexbuf.StartPos in
         string lexbuf;
         lexbuf.StartPos <- string_start;
-        STRING (from_lexbuf lexbuf (string_start.pos_cnum, Lexing.lexeme_end lexbuf))
+        STRING (from_lexbuf lexbuf (string_start.pos_cnum, lexbuf.EndPos.AbsoluteOffset))
       }
     | "(" {LPAREN}
     | ")" {RPAREN}
     | _
        { raise(Lexical_error
-                ("illegal character " ^ (*String.escaped*)(Lexing.lexeme lexbuf),
-                  Lexing.lexeme_start lexbuf)) }
+                ("illegal character " ^ (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
+                  lexbuf.StartPos.AbsoluteOffset)) }
 
 (*  ------------------------ *)
 and predicate = parse
-    "}=>"    { Lexing.lexeme_start lexbuf  }
+    "}=>"    { lexbuf.StartPos.AbsoluteOffset  }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -175,7 +175,7 @@ and predicate = parse
       comment lexbuf;
       predicate lexbuf }
   | eof
-    { raise (Lexical_error("unterminated predicate", Lexing.lexeme_start lexbuf)) }
+    { raise (Lexical_error("unterminated predicate", lexbuf.StartPos.AbsoluteOffset)) }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {predicate lexbuf}
 and action = parse
@@ -184,7 +184,7 @@ and action = parse
       action lexbuf }
   | '}'
     { decr brace_depth;
-      if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf }
+      if !brace_depth = 0 then lexbuf.StartPos.AbsoluteOffset else action lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -194,7 +194,7 @@ and action = parse
       comment lexbuf;
       action lexbuf }
   | eof
-    { raise (Lexical_error("unterminated action", Lexing.lexeme_start lexbuf)) }
+    { raise (Lexical_error("unterminated action", lexbuf.StartPos.AbsoluteOffset)) }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {action lexbuf}
  
@@ -204,7 +204,7 @@ and pattern = parse
       pattern lexbuf }
   | '>'
     { decr ang_br_depth;
-      if !ang_br_depth = 0 then Lexing.lexeme_start lexbuf else pattern lexbuf }
+      if !ang_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else pattern lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -214,7 +214,7 @@ and pattern = parse
       comment lexbuf;
       pattern lexbuf }
   | eof
-    { raise (Lexical_error("unterminated pattern", Lexing.lexeme_start lexbuf)) }
+    { raise (Lexical_error("unterminated pattern", lexbuf.StartPos.AbsoluteOffset)) }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {pattern lexbuf}
 
@@ -225,7 +225,7 @@ and param = parse
       param lexbuf }
   | ']'
     { decr sq_br_depth;
-      if !sq_br_depth = 0 then Lexing.lexeme_start lexbuf else param lexbuf }
+      if !sq_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else param lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -235,7 +235,7 @@ and param = parse
       comment lexbuf;
       param lexbuf }
   | eof
-    { raise (Lexical_error("unterminated param",  Lexing.lexeme_start lexbuf)) }
+    { raise (Lexical_error("unterminated param",  lexbuf.StartPos.AbsoluteOffset)) }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {param lexbuf}
      
@@ -243,22 +243,22 @@ and string = parse
     '"'
     { () }
   | '\\' backslash_escapes
-    { store_string_char(char_for_backslash(Lexing.lexeme_char lexbuf 1));
+    { store_string_char(char_for_backslash(lexbuf.LexemeChar 1));
       string lexbuf }
   | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9']
     { store_string_char(char_for_decimal_code lexbuf 1);
       string lexbuf }
   | eof
-    { raise(Lexical_error("unterminated string", Lexing.lexeme_start lexbuf)) }
+    { raise(Lexical_error("unterminated string", lexbuf.StartPos.AbsoluteOffset)) }
   | '\\' _
     { warning lexbuf
               (Printf.sprintf "illegal backslash escape in string: `\\%c'"
-                              (Lexing.lexeme_char lexbuf 1));
-      store_string_char(Lexing.lexeme_char lexbuf 0);
-      store_string_char(Lexing.lexeme_char lexbuf 1);
+                              (lexbuf.LexemeChar 1));
+      store_string_char(lexbuf.LexemeChar 0);
+      store_string_char(lexbuf.LexemeChar 1);
       string lexbuf }
   | _
-    { store_string_char(Lexing.lexeme_char lexbuf 0);
+    { store_string_char(lexbuf.LexemeChar 0);
       string lexbuf }
       
 and comment = parse
@@ -281,7 +281,7 @@ and comment = parse
   | "'\\" ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
       { comment lexbuf }
   | eof
-    { raise(Lexical_error("unterminated comment", Lexing.lexeme_start lexbuf)) }
+    { raise(Lexical_error("unterminated comment", lexbuf.StartPos.AbsoluteOffset)) }
   | _
     { comment lexbuf }
 

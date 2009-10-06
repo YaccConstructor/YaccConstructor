@@ -8,9 +8,12 @@
 
 
 #light
-
-let generate = 
-    let commandLineArgs = System.Environment.GetCommandLineArgs()
-    //Main.main;
-    Generator.generate (Main.ParseFile @"..\..\..\..\Tests\test002.yrd")
-//let generate = Generator.generate
+open Yard.Core
+let  runTest testFilePath = 
+    let commandLineArgs = System.Environment.GetCommandLineArgs()        
+    Generator.generate (Main.ParseFile testFilePath)
+    let tables = new Tables(testFilePath)
+    let parser = new Parser(tables)
+    parser.Run() 
+    
+do runTest @"..\..\..\..\Tests\test002.yrd"    

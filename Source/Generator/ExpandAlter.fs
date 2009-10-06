@@ -1,6 +1,6 @@
 ﻿#light "off"
 
-module ExpandAlter
+module Yard.Core.ExpandAlter
 
 open IL
 open Rule

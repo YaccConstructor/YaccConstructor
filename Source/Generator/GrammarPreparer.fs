@@ -8,7 +8,7 @@
 
 #light
 
-module GrammarPreparer 
+module Yard.Core.GrammarPreparer 
 
 open IL
 open IL.Production

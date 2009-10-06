@@ -4,10 +4,10 @@
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
-
   open Microsoft.FSharp.Text
-  open IL
-  open IL.Production
+  open Yard.Core.IL
+  open Yard.Core.IL.Production
+  
   
   let o2l = function Some x -> [x] | None -> []
   let getList = function Some x -> x | None -> []
@@ -44,7 +44,7 @@ file: action_opt
       rule_nlist
       action_opt
       EOF
-      { {
+      { { Definition.empty with
           Definition.head=$1
         ; Definition.grammar=$2
         ; Definition.foot=$3

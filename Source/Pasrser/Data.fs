@@ -7,26 +7,20 @@
 // as published by the Free Software Foundation.
 
 #light
-
-module Data 
-
+namespace Yard.Core
+open System.Collections.Generic;
 open IL
 open Production
 
-let (get_next_ch:int->t<string,string>),input_length =       
-    let lex_list = ref Test.test3                          
-    let l = List.length !lex_list 
-    let get i =  List.nth (!lex_list) (l-i)        
-    let input_length () = l 
-    get,input_length           
+type Tables(fName: string) = class
+    let gotoSet =           
+          let kvpList = IO.readValue (fName + ".goto.dta" ): List<KeyValuePair<int,Set<Grammar.Item.t<Source.t>>>>          
+          dict <| seq{for kvp in kvpList do yield kvp.Key, kvp.Value}
+      
+    let items =  IO.readValue (fName + ".items.dta")  : Set<Grammar.Item.t<Source.t>> 
 
-let goto_set:System.Collections.Generic.Dictionary<int,Set<Grammar.Item.t<Source.t>>> = 
-      let dict = new System.Collections.Generic.Dictionary<int,Set<Grammar.Item.t<Source.t>>>() in
-      let rv:System.Collections.Generic.List<_> = IO.readValue "goto.dta" in      
-          for (k_v_pair:System.Collections.Generic.KeyValuePair<int,Set<Grammar.Item.t<Source.t>>>)
-           in (rv.ToArray()) do  dict.Add(k_v_pair.Key,k_v_pair.Value)
-      dict   
-  
-let items:Set<Grammar.Item.t<Source.t>> = IO.readValue "items.dta"
-
-let start_nterms:List<string> = IO.readValue "start_nterms.dta" 
+    let startNterms = IO.readValue (fName + ".start_nterms.dta"): string list
+    member self.GotoSet with get() = gotoSet
+    member self.Items with get() = items
+    member self.StartNterms with get () = startNterms
+  end

@@ -7,7 +7,7 @@
 // as published by the Free Software Foundation.
 
 #light "off"
-
+module Yard.Core.Grammar
 module Symbol = //Терминал или нетерминал 
   begin
    type t<'a> = 

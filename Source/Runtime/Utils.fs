@@ -20,12 +20,12 @@ let next =
     next  
 
 let getText = function
-    |Some(Grammar.Symbol.Terminal x) -> IL.Source.toString x  
+    |Some(x) -> x  
     | _                              -> "" 
 
 let mgetText x = 
     match x with
-    |PLiteral(y)|PToken(y)-> Source.toString y
+    |PLiteral(y)|PToken(y)|PRef(y,_)-> Source.toString y
     |_                    -> ""
 
 let prevItem item items = 

@@ -14,13 +14,13 @@ open IL.Production
 open IL.Rule
 open IL
 open Grammar.Item
-open Grammar.Symbol
+
 
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now      
 
 let items,_grammar,(_generate:IL.Grammar.t<IL.Source.t,IL.Source.t>->unit) =
-    let _items:(Set<Grammar.Item.t<Source.t>> ref) = ref Set.Empty
+    let _items:(Set<Grammar.Item.t<string>> ref) = ref Set.Empty
     let _grammar:IL.Grammar.t<IL.Source.t,IL.Source.t> ref = ref[]
     let generate rules =
        _grammar := rules;
@@ -28,7 +28,7 @@ let items,_grammar,(_generate:IL.Grammar.t<IL.Source.t,IL.Source.t>->unit) =
        _items:= List.map (fun (i,rl) -> 
                 let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
                 let get_symb =  function 
-                                Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Terminal(s))                                                                                  
+                                Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Source.toString s)                                                                                  
                                 | _ -> failwith "Generator error."                                          
 #if DEBUG
                 Log.print_item itm s f;
@@ -70,35 +70,37 @@ let get_closure_set,calc_closure_set =
 #if DEBUG
   Log.print_items (items())
 #endif
-  let _closure_set = ref( dict <| []);
+  let _closure_set = ref( dict []);
   let calculate_clousure_set () = _closure_set:=dict <| Set.map (fun x -> x, closure (Set.singleton x)) (items())                
   let closure_set () = !_closure_set
   closure_set,calculate_clousure_set
 
 let goto_set ()=     
     let eql = function 
-        | (PToken x |PLiteral x), Some(Terminal y | Nonterminal y ) -> x=y
+        | x, Some(y) -> x = y
         | _ -> false
     in 
     let make_goto q x =  
         calc_closure_set()
-        let closure = Set.fold (fun y x -> y + get_closure_set().[x]) Set.empty q
-        Set.unionMany [for item in closure do if eql(x, item.symb) then yield Utils.nextItem item (items())]
+        let closure = Set.fold (fun y _x -> y + get_closure_set().[_x]) Set.empty q
+        Set.unionMany <|seq{for item in closure do if eql(x, item.symb) then yield Utils.nextItem item (items())}
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
         let gt = make_goto (Set.singleton item) symbol
-        hash(item, toString symbol),gt
-    dict <| List.fold (fun buf symbol -> buf@[for item in (items()) -> goto_data symbol item]) 
+        printf "\n GOTO \n:";
+        Log.print_goto_c symbol item gt;
+        hash(item, symbol),gt
+    dict <| Set.fold (fun buf symbol -> buf@[for item in (items()) -> goto_data symbol item]) 
                       [] (GrammarPreparer.get_all_t(_grammar()))
                        
 let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)= 
     let head,grammar,foot = GrammarPreparer.prepare input_grammar
     _generate(ExpandMeta.expandMetaRules grammar);
 #if DEBUG
-    printf "Input extracted rules \n %A \n"<| grammar;
-    printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
-    printf "\n Token list: \n %A " <|(GrammarPreparer.get_all_t(_grammar()))
+    //printf "Input extracted rules \n %A \n"<| grammar;
+    //printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
+    printf "\n Token list: \n  " ;Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))
     printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
 #endif            
     IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(goto_set())) ; 
@@ -106,5 +108,5 @@ let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)=
     IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));
     //PrettyPrinter.out := IO.text_writer "test1.fs";
     //PrettyPrinter.print_header "test" ["IL"];
-    //(!PrettyPrinter.out).Close();
+    //(!PrettyPrinter.out).Close();    
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

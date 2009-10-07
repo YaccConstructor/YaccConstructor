@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Tree.fs" />
     <Compile Include="Data.fs" />
+    <Compile Include="Lexeme.fs" />
     <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>

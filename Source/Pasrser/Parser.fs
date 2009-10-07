@@ -13,13 +13,17 @@ open Production
 open Grammar.Item
 open Tree
 open Utils
+open Lexeme.Lexeme
+open Lexeme
 
 type Parser(tables: Tables) = class
-  let m_end = PLiteral("$",(1,1))
+  let m_end = {name = "$";value = 1}
   let start_time = ref System.DateTime.Now
   let end_time   = ref System.DateTime.Now               
-  let (get_next_ch:int->t<string,string>),input_length =       
-      let lex_list = [PLiteral("NUM",(1,1));PLiteral("PLUS",(1,1));PLiteral("NUM",(1,1));PLiteral("$",(1,1))]                          
+  let (get_next_ch:int->t<int>),input_length =       
+      let lex_list = //[{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
+                     //[{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
+                     [{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "LEFT";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "RIGHT";value = 1};{name = "$";value = 1}]
       let l = List.length lex_list 
       let get i =  List.nth (lex_list) (l-i)        
       let input_length () = l 
@@ -66,7 +70,7 @@ type Parser(tables: Tables) = class
         [for (item,tree),i in new_states do
            let prev_itm = prevItem item tables.Items                   
            if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s) prev_itm 
-              && is_start item.prod_name
+              && not(is_start item.prod_name)
            then 
               let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
               yield climb(Set.map create_new_tree states,(item.prod_name,i))
@@ -80,7 +84,7 @@ type Parser(tables: Tables) = class
   #if DEBUG 
       Log.print_parse states i;
   #endif
-      let text = Utils.mgetText(get_next_ch i)        
+      let text = (get_next_ch i).name
       let leaf_tree = [Leaf(text,[],1)]
       let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
       let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]    

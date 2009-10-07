@@ -25,7 +25,10 @@ let rec create_NFA = function
                                                            [lf,None,f]@[rf,None,f]@
                                                            lrules@rrules,s,f)
                   
-    | PMany (expr)                     
+    (*it is dirty hack. IT MUST BE FIXED*)              
+    | PMany (expr)    (*->  (function (rules,s,f) ->
+                                    let ns,nf = next(),next()
+                                    ([f,None,ns]@[nf,None,s]@[ns,None,nf]@rules,s,nf)) (create_NFA expr)*)
     | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
     | PToken(ch)
     | PRef(ch,_)
@@ -76,6 +79,6 @@ let e_closure (rules,s,f) =
 let FA_rules rule =
     let fa_rule = create_NFA rule in 
 #if DEBUG 
-    (printf "Fa_rule :"; printf "%A " (fa_rule));
+    (printf "\n Fa_rule : \n %A " (fa_rule));
 #endif
     e_closure(fa_rule)

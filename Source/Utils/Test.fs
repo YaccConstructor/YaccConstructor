@@ -15,12 +15,12 @@ open IL.Production
 open IL.Rule
 open IL
 open Grammar.Item
-open Grammar.Symbol
 
-let test_lexem = //[PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(":",(1,1));PLiteral(";",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("T",(1,1));PLiteral("F",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
-                 [PLiteral("NUM",(1,1));PLiteral("MINUS",(1,1));PLiteral("PLUS",(1,1));
-                  PLiteral("DIV",(1,1));PLiteral("POW",(1,1));PLiteral("MULT",(1,1));
-                  PLiteral("LEFT",(1,1));PLiteral("RIGHT",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))] 
+
+let test_lexem = [PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(":",(1,1));PLiteral(";",(1,1));PLiteral("c",(1,1));PLiteral("E",(1,1));PLiteral("T",(1,1));PLiteral("F",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))]
+                 //[PLiteral("NUM",(1,1));PLiteral("MINUS",(1,1));PLiteral("PLUS",(1,1));
+                 // PLiteral("DIV",(1,1));PLiteral("POW",(1,1));PLiteral("MULT",(1,1));
+                 // PLiteral("LEFT",(1,1));PLiteral("RIGHT",(1,1));PLiteral("+",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral(")",(1,1))] 
                  
 let production1 = PSeq([{omit=false;
                          rule= PToken("E",(1,1));
@@ -155,36 +155,34 @@ let rules_1 =
        {name = "E";
        args = [];
        body = production2_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []};
        {name = "E";
        args = [];
        body = production5_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []};
        {name = "T";
        args = [];
        body = production6_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []};
        {name = "T";
        args = [];
        body = production7_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []};
        {name = "F";
        args = [];
        body = production4_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []};
        {name = "F";
        args = [];
        body = production3_1;
-       _public = true; 
+       _public = false; 
        metaArgs = []}
      ] 
-
-
 
 
 let test_grammar = rules
@@ -193,7 +191,9 @@ let test_grammar_2 = rules_1
 
 //aa+b*(b+ba)+b*(b+ba)....
 //правильная строка
-let test1 = [PLiteral("a",(1,1));PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("b",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]  
+let test1 = [PLiteral("NUMBER",(1,1));PLiteral("PLUS",(1,1));PLiteral("NUMBER",(1,1));PLiteral("$",(1,1))]  
+//[PLiteral("NUMBER",(1,1));PLiteral("$",(1,1))]  
+   //[PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("$",(1,1))]  
 //неправильная строка
 let test2 = [PLiteral("a",(1,1));PLiteral("a",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("a",(1,1));PLiteral(")",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("*",(1,1));PLiteral("(",(1,1));PLiteral("b",(1,1));PLiteral("+",(1,1));PLiteral("b",(1,1));PLiteral("b",(1,1));PLiteral(")",(1,1));PLiteral("$",(1,1))]    
 

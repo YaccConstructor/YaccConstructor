@@ -14,10 +14,10 @@ open Production
 
 type Tables(fName: string) = class
     let gotoSet =           
-          let kvpList = IO.readValue (fName + ".goto.dta" ): List<KeyValuePair<int,Set<Grammar.Item.t<Source.t>>>>          
+          let kvpList = IO.readValue (fName + ".goto.dta" ): List<KeyValuePair<int,Set<Grammar.Item.t<string>>>>          
           dict <| seq{for kvp in kvpList do yield kvp.Key, kvp.Value}
       
-    let items =  IO.readValue (fName + ".items.dta")  : Set<Grammar.Item.t<Source.t>> 
+    let items =  IO.readValue (fName + ".items.dta")  : Set<Grammar.Item.t<string>> 
 
     let startNterms = IO.readValue (fName + ".start_nterms.dta"): string list
     member self.GotoSet with get() = gotoSet

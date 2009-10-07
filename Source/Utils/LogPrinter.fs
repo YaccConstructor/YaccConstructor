@@ -50,13 +50,8 @@ let print_climb_info i x q gt new_q =
     print_climb_3 new_q
     
 let print_parse q i=     
-    Console.WriteLine( " PARSER "); 
-    Console.Write( "Parser q : "); 
-    printf "%A " q;
-    Console.WriteLine( "");
-    Console.Write( "Parser i : "); 
-    printf "%A " i;
-    Console.WriteLine( "")
+    printf "\n PARSER \n Parser q : \n %A \n" q;
+    printf "Parser i : %A \n" i;
     
 let print_item itm s f =    
     Set.iter (printf "%A ") itm ;
@@ -69,23 +64,23 @@ let print_items items =
     Set.iter (printf "%A ") items;
     Console.WriteLine()
     
-let print_goto_c gt y x =
+let print_goto_c y x gt=
     printf "%A " (y,x) ; 
     printf "%A " " -> ";
     printf "%A " gt
     
 let print_autonaton new_states clean_new_automata new_start_state new_finale_state closure_set states =
-     Console.WriteLine("new_states:");
+     Console.WriteLine("\n new_states:");
      Set.iter (printf "%A ") new_states;
-     Console.WriteLine("new_automata:");
+     Console.WriteLine("\n new_automata:");
      Set.iter (printf "%A ") clean_new_automata;
-     Console.WriteLine("new_start_state:");
+     Console.WriteLine("\n new_start_state:");
      printf "%A " new_start_state;
-     Console.WriteLine("new_finale_state:");
+     Console.WriteLine("\n new_finale_state:");
      Set.iter (printf "%A ") new_finale_state;
-     Console.WriteLine("Closure_set:");
+     Console.WriteLine("\n Closure_set:");
      printf "%A " closure_set;
-     Console.WriteLine("States:");
+     Console.WriteLine("\n States:");
      printf "%A " states;
      Console.WriteLine()   
 

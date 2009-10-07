@@ -16,4 +16,4 @@ let  runTest testFilePath =
     let parser = new Parser(tables)
     parser.Run() 
     
-do runTest @"..\..\..\..\Tests\test002.yrd"    
+do runTest @"..\..\..\..\Tests\test001_2.yrd"    

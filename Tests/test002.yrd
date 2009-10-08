@@ -15,4 +15,5 @@ factor: res=binExpr<<powExpr powOp>> { res } ;
 
 term: res=binExpr<<factor factorOp>> { res } ;
 
-+expr: res=binExpr<<term termOp>> { res } ;
+expr: res=binExpr<<term termOp>> { res } ;
++s:expr;

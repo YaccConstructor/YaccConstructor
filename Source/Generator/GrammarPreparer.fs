@@ -15,14 +15,13 @@ open IL.Production
 
 let prepare (definition:IL.Definition.t<'a,'b>) = definition.head,definition.grammar,definition.foot
 
-let get_start_nterms (grammar:IL.Grammar.t<'a,'b>) = 
+let get_start_nterms grammar = 
     List.fold (fun buf (x:IL.Rule.t<'a,'b>)-> if x._public then x.name::buf else buf) [] grammar
 
-let rec get_all_t (grammar:IL.Grammar.t<'a,'b>) =     
+let rec get_all_t grammar =     
     let rec get_tok production = 
         match production with
-            | PSeq (seq,attr)   -> 
-               Set.unionMany (List.map (fun (elem:(IL.Production.elem<_,_>)) -> get_tok elem.rule)seq)                                                                
+            | PSeq (seq,attr)   -> Set.unionMany (List.map (fun elem -> get_tok elem.rule)seq)                                                                
             | PAlt (l,r)        -> get_tok l + get_tok r                          
             | PMany (expr)                     
             | PSome (expr)      ->  get_tok expr
@@ -30,4 +29,4 @@ let rec get_all_t (grammar:IL.Grammar.t<'a,'b>) =
             | PRef(ch,_)
             | PLiteral(ch) as t -> Set.singleton (Source.toString ch)
             
-    List.fold (fun lst (production:IL.Rule.t<_,_>) -> (Set.singleton production.name)+(get_tok production.body)+lst) Set.Empty grammar  
+    List.fold (fun lst (production:IL.Rule.t<_,_>) -> (get_tok production.body)+lst) Set.Empty grammar

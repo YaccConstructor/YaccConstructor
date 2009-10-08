@@ -21,12 +21,12 @@ let next =
 
 let getText = function
     |Some(x) -> x  
-    | _                              -> "" 
+    | _      -> "" 
 
 let mgetText x = 
     match x with
     |PLiteral(y)|PToken(y)|PRef(y,_)-> Source.toString y
-    |_                    -> ""
+    |_                              -> ""
 
 let prevItem item items = 
     let isPrev x = Some item.item_num = x.next_num && item.prod_num = x.prod_num

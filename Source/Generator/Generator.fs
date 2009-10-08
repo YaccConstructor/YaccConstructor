@@ -78,35 +78,33 @@ let get_closure_set,calc_closure_set =
 let goto_set ()=     
     let eql = function 
         | x, Some(y) -> x = y
-        | _ -> false
+        | _          -> false
     in 
     let make_goto q x =  
         calc_closure_set()
-        let closure = Set.fold (fun y _x -> y + get_closure_set().[_x]) Set.empty q
+        let closure = Set.fold (fun y x -> y + get_closure_set().[x]) Set.empty q
         Set.unionMany <|seq{for item in closure do if eql(x, item.symb) then yield Utils.nextItem item (items())}
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
         let gt = make_goto (Set.singleton item) symbol
+#if DEBUG        
         printf "\n GOTO \n:";
         Log.print_goto_c symbol item gt;
+#endif        
         hash(item, symbol),gt
     dict <| Set.fold (fun buf symbol -> buf@[for item in (items()) -> goto_data symbol item]) 
                       [] (GrammarPreparer.get_all_t(_grammar()))
                        
-let generate (input_grammar:IL.Definition.t<Source.t,Source.t>)= 
-    let head,grammar,foot = GrammarPreparer.prepare input_grammar
-    _generate(ExpandMeta.expandMetaRules grammar);
-#if DEBUG
-    //printf "Input extracted rules \n %A \n"<| grammar;
+let generate input_grammar= 
+    let head,rules,foot = GrammarPreparer.prepare input_grammar
+    _generate(ExpandMeta.expandMetaRules rules);
+#if DEBUG    
     //printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
     printf "\n Token list: \n  " ;Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))
     printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
 #endif            
     IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(goto_set())) ; 
     IO.writeValue (input_grammar.info.fileName + ".items.dta") (items());
-    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));
-    //PrettyPrinter.out := IO.text_writer "test1.fs";
-    //PrettyPrinter.print_header "test" ["IL"];
-    //(!PrettyPrinter.out).Close();    
+    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));    
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

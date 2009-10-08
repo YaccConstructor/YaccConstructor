@@ -14,22 +14,20 @@ open Grammar.Item
 open Tree
 open Utils
 open Lexeme.Lexeme
-open Lexeme
+
 
 type Parser(tables: Tables) = class
   let m_end = {name = "$";value = 1}
   let start_time = ref System.DateTime.Now
   let end_time   = ref System.DateTime.Now               
-  let (get_next_ch:int->t<int>),input_length =       
+  let (get_next_ch:int->t<_>),input_length =       
       let lex_list = //[{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
                      //[{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
-                     [{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "LEFT";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "RIGHT";value = 1};{name = "$";value = 1}]
+                     [{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "LEFT";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "RIGHT";value = 1};{name = "$";value = 1}]
       let l = List.length lex_list 
       let get i =  List.nth (lex_list) (l-i)        
       let input_length () = l 
       get,input_length           
-
-
 
   let is_start symbol_name = List.exists ((=) symbol_name) tables.StartNterms
 
@@ -64,20 +62,20 @@ type Parser(tables: Tables) = class
       let gt = goto (states,symbol)
       Log.print_climb_info i symbol states gt new_states;        
   #endif             
-      if Set.exists (fun ((item,tree),i) ->is_start item.prod_name && item.next_num=None && i=1) new_states     
-      then set [for state in states do if (fst state).next_num = None then yield state,1] 
+      if Set.exists (fun ((item,tree),i) -> is_start item.prod_name && item.next_num=None && i=1) new_states     
+      then set <|seq {for item,tree as state in states do if item.next_num = None then yield state,1}
       else
-        [for (item,tree),i in new_states do
-           let prev_itm = prevItem item tables.Items                   
-           if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s) prev_itm 
-              && not(is_start item.prod_name)
-           then 
-              let create_new_tree (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
-              yield climb(Set.map create_new_tree states,(item.prod_name,i))
-           else
+        seq {for (item,tree),i in new_states do
+             let prev_itms = prevItem item tables.Items                   
+             if Set.exists (fun itm -> getText itm.symb = symbol && itm.item_num=item.s) prev_itms 
+                && not(is_start item.prod_name)
+             then 
+                let create_new_item (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
+                yield climb(Set.map create_new_item states,(item.prod_name,i))
+             else
               if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items) && itm.item_num <> itm.s)
                             states
-              then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itm ] |> Set.unionMany)                
+              then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itms }  |> Set.unionMany)                
 
   and parse =
       memoize (fun (states,i) -> 
@@ -87,16 +85,14 @@ type Parser(tables: Tables) = class
       let text = (get_next_ch i).name
       let leaf_tree = [Leaf(text,[],1)]
       let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
-      let result_states states create_tree = set[for (item,tree) in states -> item,create_tree]    
+      let result_states states create_tree = set <| seq{for (item,tree) in states -> item,create_tree}
       Set.map (fun x -> x,i)(result_states new_states [])
       + if (get_next_ch i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1))
       )
         
   let res () =
-      let parse_res =parse (Set.of_list (List.map (fun x -> x,[])
-                                                  (List.filter (fun x ->is_start x.prod_name)
-                                                               (Set.to_list tables.Items)))
-                           ,input_length())
+      let startItems = Set.filter (fun item ->is_start item.prod_name) tables.Items
+      let parse_res =parse (Set.map (fun item -> item,[]) startItems,input_length())
       end_time := System.DateTime.Now;    
       let trees = Set.of_list(List.concat(Set.map(fun ((a,b),i) -> b) parse_res));
       Seq.iter(fun b -> print_tree b) trees;

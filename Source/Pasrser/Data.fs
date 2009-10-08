@@ -9,8 +9,6 @@
 #light
 namespace Yard.Core
 open System.Collections.Generic;
-open IL
-open Production
 
 type Tables(fName: string) = class
     let gotoSet =           
@@ -20,6 +18,7 @@ type Tables(fName: string) = class
     let items =  IO.readValue (fName + ".items.dta")  : Set<Grammar.Item.t<string>> 
 
     let startNterms = IO.readValue (fName + ".start_nterms.dta"): string list
+    
     member self.GotoSet with get() = gotoSet
     member self.Items with get() = items
     member self.StartNterms with get () = startNterms

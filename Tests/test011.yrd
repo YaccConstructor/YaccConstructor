@@ -1,2 +1,2 @@
-+s:r = e {r};
++s:res = e { res };
 e: (e (PLUS|MINUS|MULT|DIV) e)| LEFT e RIGHT | NUMBER {};

@@ -19,9 +19,9 @@ open Grammar.Item
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now      
 
-let items,_grammar,(_generate:IL.Grammar.t<IL.Source.t,IL.Source.t>->unit) =
-    let _items:(Set<Grammar.Item.t<string>> ref) = ref Set.Empty
-    let _grammar:IL.Grammar.t<IL.Source.t,IL.Source.t> ref = ref[]
+let items,_grammar,_generate =
+    let _items = ref Set.Empty
+    let _grammar = ref[]
     let generate rules =
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
@@ -61,7 +61,7 @@ let closure q =
         let next_cl f = inner_closure (i+1) (q + Set.filter f (items()))
         let closure_one elt = 
             let el_for_cl = List.nth (Set.to_list q) i 
-            elt.prod_name = Utils.getText el_for_cl.symb && elt.item_num = elt.s 
+            elt.prod_name = Option.get el_for_cl.symb && elt.item_num = elt.s 
         next_cl closure_one                                                                                 
     in
     inner_closure 0 q
@@ -75,15 +75,12 @@ let get_closure_set,calc_closure_set =
   let closure_set () = !_closure_set
   closure_set,calculate_clousure_set
 
-let goto_set ()=     
-    let eql = function 
-        | x, Some(y) -> x = y
-        | _          -> false
-    in 
+let goto_set ()=         
     let make_goto q x =  
         calc_closure_set()
         let closure = Set.fold (fun y x -> y + get_closure_set().[x]) Set.empty q
-        Set.unionMany <|seq{for item in closure do if eql(x, item.symb) then yield Utils.nextItem item (items())}
+        Set.unionMany 
+          <|seq {for item in closure do if x = Option.get item.symb then yield Utils.nextItem item (items())}
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 

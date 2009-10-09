@@ -17,17 +17,8 @@ open Grammar.Item
 let next = 
     let i = ref 0
     let next() = incr i;!i
-    next  
-
-let getText = function
-    |Some(x) -> x  
-    | _      -> "" 
-
-let mgetText x = 
-    match x with
-    |PLiteral(y)|PToken(y)|PRef(y,_)-> Source.toString y
-    |_                              -> ""
-
+    next      
+    
 let prevItem item items = 
     let isPrev x = Some item.item_num = x.next_num && item.prod_num = x.prod_num
     Set.filter isPrev items

@@ -1,2 +1,2 @@
-+s:r = expr {r};
-expr: n=NUMBER op= PLUS n2 = NUMBER{ float n };
++s:r = expr { r };
+expr: n=NUMBER{ float n };

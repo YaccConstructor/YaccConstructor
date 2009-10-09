@@ -1,0 +1,26 @@
+binExpr<<operand binOp>>[list]
+: l=operand[list] r=(op=binOp r=operand[list] {(op,r)})*
+  {List.fold_left (fun l (op,r) -> op l r) l r }
+;
+
+termOp: PLUS {( +. )} | MINUS { ( -. ) } ;
+
+factorOp: MULT {( *. )} | DIV { ( /. ) } ;
+
+powOp: POW { ( ** ) } ;
+
+powExpr[list]: n=NUMBER { float n } 
+ | s=VAR { List.assoc s list } 
+ | LEFT e=exprCalc[list] RIGHT { e } ;
+
+factor[list]: res=binExpr<<powExpr powOp>>[list] { res } ;
+                                                      
+term[list]: res=binExpr<<factor factorOp>>[list] { res } ;
+
+exprCalc[list]: res=binExpr<<term termOp>>[list] { res } ;
+
+definition[list]: variable=VAR EQUAL value=exprCalc[list] { variable,value } ;
+
+definitionList[list]: l=definition[list] r=definitionList[(l::list)] { r } | { list } ;
+
++expr: list=definitionList[ [] ] res=exprCalc[list] { res } ;

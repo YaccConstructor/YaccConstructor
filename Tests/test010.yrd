@@ -2,6 +2,6 @@
 f: NUMBER {};
 f: LEFT e RIGHT {};
 t: t (MULT|DIV) f {};
-t: f{f};
-e: t{t};
+t: f{};
+e: t{};
 e: e (PLUS|MINUS) t {};

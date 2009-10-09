@@ -1,0 +1,2 @@
++s:res = expr { res };
+expr: (n=NUMBER{ float n } | l=LITERAL { string l };

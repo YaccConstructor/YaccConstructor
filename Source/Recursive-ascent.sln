@@ -16,10 +16,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AB55B110-70AD-4640-9C69-E688CDC94E24}"
 	ProjectSection(SolutionItems) = preProject
 		..\Tests\test001.yrd = ..\Tests\test001.yrd
-		..\Tests\test001_1.yrd = ..\Tests\test001_1.yrd
-		..\Tests\test001_2.yrd = ..\Tests\test001_2.yrd
 		..\Tests\test002.yrd = ..\Tests\test002.yrd
 		..\Tests\test003.yrd = ..\Tests\test003.yrd
+		..\Tests\test010.yrd = ..\Tests\test010.yrd
+		..\Tests\test011.yrd = ..\Tests\test011.yrd
+		..\Tests\test100.yrd = ..\Tests\test100.yrd
+		..\Tests\test101.yrd = ..\Tests\test101.yrd
 	EndProjectSection
 EndProject
 Global

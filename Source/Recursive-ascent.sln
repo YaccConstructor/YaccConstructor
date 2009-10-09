@@ -9,7 +9,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Generator", "Generator\Gene
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils", "Utils\Utils.fsproj", "{C948FEA9-A39D-4E4C-940D-C9B9166E4506}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Runner", "Runner\Runner.fsproj", "{7F529F7A-5E8E-40D1-B447-ADCF7B996D64}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tester", "Runner\Tester.fsproj", "{7F529F7A-5E8E-40D1-B447-ADCF7B996D64}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FE", "FE\FE.fsproj", "{831B3B65-B615-47A7-89CF-E3908E7CA0CD}"
 EndProject
@@ -18,8 +18,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AB55B110
 		..\Tests\test001.yrd = ..\Tests\test001.yrd
 		..\Tests\test002.yrd = ..\Tests\test002.yrd
 		..\Tests\test003.yrd = ..\Tests\test003.yrd
+		..\Tests\test004.yrd = ..\Tests\test004.yrd
+		..\Tests\test005.yrd = ..\Tests\test005.yrd
+		..\Tests\test006.yrd = ..\Tests\test006.yrd
 		..\Tests\test010.yrd = ..\Tests\test010.yrd
 		..\Tests\test011.yrd = ..\Tests\test011.yrd
+		..\Tests\test012.yrd = ..\Tests\test012.yrd
+		..\Tests\test013.yrd = ..\Tests\test013.yrd
 		..\Tests\test100.yrd = ..\Tests\test100.yrd
 		..\Tests\test101.yrd = ..\Tests\test101.yrd
 	EndProjectSection

@@ -11,7 +11,7 @@
     <AssemblyName>Runner</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Name>Runner</Name>
+    <Name>Tester</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,6 +37,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Tests.fs" />
     <Compile Include="Runner.fs" />
   </ItemGroup>
   <ItemGroup>

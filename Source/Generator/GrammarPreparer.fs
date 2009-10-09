@@ -12,6 +12,7 @@ module Yard.Core.GrammarPreparer
 
 open IL
 open IL.Production
+open IL.Rule
 
 let prepare (definition:IL.Definition.t<'a,'b>) = definition.head,definition.grammar,definition.foot
 
@@ -30,3 +31,20 @@ let rec get_all_t grammar =
             | PLiteral(ch) as t -> Set.singleton (Source.toString ch)
             
     List.fold (fun lst (production:IL.Rule.t<_,_>) -> (get_tok production.body)+lst) Set.Empty grammar
+    
+let createStartRule ruleName productionName = 
+    {name=ruleName;
+     args = [];
+     body =  PSeq([{omit=false;
+                   rule= PRef((productionName,(0,0)),None);
+                   binding = None;
+                   checker = None};
+                  ],None); _public=true; metaArgs =[]}
+                  
+let replace_Public rules = 
+    List.map (fun rule -> {name=rule.name;
+                           args=rule.args;
+                           body=rule.body;
+                           _public=false;
+                           metaArgs=rule.metaArgs}) 
+              rules

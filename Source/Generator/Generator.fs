@@ -14,6 +14,7 @@ open IL.Production
 open IL.Rule
 open IL
 open Grammar.Item
+open GrammarPreparer
 
 
 let start_time = ref System.DateTime.Now
@@ -54,17 +55,16 @@ let items,_grammar,_generate =
     items,grammar,generate
     
 let closure q = 
-    let rec inner_closure i q = 
-      if i = Set.count q 
-      then q
-      else
-        let next_cl f = inner_closure (i+1) (q + Set.filter f (items()))
-        let closure_one elt = 
-            let el_for_cl = List.nth (Set.to_list q) i 
-            elt.prod_name = Option.get el_for_cl.symb && elt.item_num = elt.s 
-        next_cl closure_one                                                                                 
-    in
-    inner_closure 0 q
+    let q' = ref (set q)
+    let l = ref 0
+    while (!l < Set.count !q') do
+        l:= Set.count !q';
+        for item in !q' 
+            do for item' in (items()) 
+                   do if Option.get item.symb = item'.prod_name && item'.item_num = 0
+                      then q':= Set.add item' !q'
+        
+    !q'              
         
 let get_closure_set,calc_closure_set = 
 #if DEBUG
@@ -95,9 +95,11 @@ let goto_set ()=
                        
 let generate input_grammar= 
     let head,rules,foot = GrammarPreparer.prepare input_grammar
-    _generate(ExpandMeta.expandMetaRules rules);
+    let addStartRule rules = 
+        List.fold (fun rules rule_name -> (GrammarPreparer.createStartRule "_yard_start" rule_name)::rules) (replace_Public rules) (GrammarPreparer.get_start_nterms rules)
+    _generate(ExpandMeta.expandMetaRules (addStartRule rules));
 #if DEBUG    
-    //printf "Transformed grammar \n %A\n" <|(ExpandMeta.expandMetaRules grammar)
+    printf "Transformed grammar \n %A\n" <|_grammar()
     printf "\n Token list: \n  " ;Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))
     printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
 #endif            

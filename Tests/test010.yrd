@@ -1,4 +1,4 @@
-+s:r = e {r};
++s:e {};
 f: NUMBER {};
 f: LEFT e RIGHT {};
 t: t (MULT|DIV) f {};

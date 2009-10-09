@@ -8,13 +8,11 @@
 
 #light 
 namespace Yard.Core
-open IL
-open Production
+
 open Grammar.Item
 open Tree
 open Utils
 open Lexeme.Lexeme
-
 
 type TableInterpretator (tables: Tables) = class
 
@@ -23,7 +21,7 @@ type TableInterpretator (tables: Tables) = class
   let is_start symbol_name = List.exists ((=) symbol_name) tables.StartNterms
 
   let memoize f =
-     let t = new System.Collections.Generic.Dictionary<Set<'x>*'c,'b>()   
+     let t = new System.Collections.Generic.Dictionary<_,_>()   
      fun (x,y,z) ->        
          let id = hash(x)
          let key = x,y
@@ -66,26 +64,22 @@ type TableInterpretator (tables: Tables) = class
               then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itms }  |> Set.unionMany)                
 
   and parse =
-      memoize (fun (states,i,getLexeme) -> 
-  #if DEBUG 
-      Log.print_parse states i;
-  #endif
-      let text = (getLexeme i).name
-      let leaf_tree = [Leaf(text,[],1)]
-      let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
-      let result_states states create_tree = set <| seq{for (item,tree) in states -> item,create_tree}
-      Set.map (fun x -> x,i)(result_states new_states [])
-      + if (getLexeme i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1),getLexeme)
+      memoize (
+        fun (states,i,getLexeme) -> 
+        #if DEBUG 
+          Log.print_parse states i;
+        #endif
+          let text = (getLexeme i).name
+          let leaf_tree = [Leaf(text,[],1)]
+          let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
+          let result_states states create_tree = set <| seq{for (item,tree) in states -> item,create_tree}
+          Set.map (fun x -> x,i)(result_states new_states [])
+          + if (getLexeme i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1),getLexeme)
       )
         
   let run getLexeme inputLength =
       let startItems = Set.filter (fun item ->is_start item.prod_name) tables.Items
       parse (Set.map (fun item -> item,[]) startItems,inputLength,getLexeme)
-      //end_time := System.DateTime.Now;    
-      //let trees = Set.of_list(List.concat(Set.map(fun ((a,b),i) -> b) parse_res));
-      //Seq.iter(fun b -> print_tree b) trees;
-      //printfn "Parser get %A dirivation tree" trees.Count;
-      //not(parse_res.IsEmpty)
+      
   member self.Run getLexeme inputLength = run getLexeme inputLength
 end
-    

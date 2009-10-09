@@ -26,9 +26,10 @@ let rec create_NFA = function
                                                            lrules@rrules,s,f)
                   
     (*it is dirty hack. IT MUST BE FIXED*)              
-    | PMany (expr)    (*->  (function (rules,s,f) ->
-                                    let ns,nf = next(),next()
-                                    ([f,None,ns]@[nf,None,s]@[ns,None,nf]@rules,s,nf)) (create_NFA expr)*)
+    | PMany (expr)    (*->  (let (rules1,s1,f1) = (create_NFA expr)
+                           let (rules2,s2,f2) = (create_NFA (PSome expr))
+                           //let ns,nf = next(),next()
+                           ([f1,None,s2]@rules1@rules2,s1,f2)) *)
     | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
     | PToken(ch)
     | PRef(ch,_)

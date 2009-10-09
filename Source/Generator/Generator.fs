@@ -71,7 +71,8 @@ let get_closure_set,calc_closure_set =
   Log.print_items (items())
 #endif
   let _closure_set = ref( dict []);
-  let calculate_clousure_set () = _closure_set:=dict <| Set.map (fun x -> x, closure (Set.singleton x)) (items())                
+  let calculate_clousure_set () =
+      _closure_set := dict <| Set.map (fun x -> x, closure (Set.singleton x)) (items())                
   let closure_set () = !_closure_set
   closure_set,calculate_clousure_set
 

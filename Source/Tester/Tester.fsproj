@@ -51,7 +51,7 @@
       <Project>{f82927e0-fad1-40f4-8e7c-c0abf340665c}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Pasrser\Parser.fsproj">
+    <ProjectReference Include="..\Parser\Parser.fsproj">
       <Name>Parser</Name>
       <Project>{b576830c-4a4c-4e00-be7c-e7731232c96f}</Project>
       <Private>True</Private>

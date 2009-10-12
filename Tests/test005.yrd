@@ -1,2 +1,1 @@
-+s:res = expr { res };
-expr: NUMBER(PLUS NUMBER)*;
++expr: NUMBER(PLUS NUMBER)*;

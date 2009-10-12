@@ -1,4 +1,4 @@
-﻿// Runner.fs
+﻿// Tester.fs
 //
 // Copyright 2009 Semen Grigorev
 //
@@ -16,9 +16,9 @@ let  runTest testFilePath =
     Generator.generate (Main.ParseFile testFilePath)
     let tables = new Tables(testFilePath)
     let parser = new Parser(tables)
-    let result = parser.Run Tests.test1
+    let result = parser.Run Tests.test3
     let trees = List.concat(Set.map(fun ((a,b),i) -> b) result)
     Seq.iter(fun b -> print_tree b) trees
     printfn "Parser get %A dirivation tree" trees.Length
     
-do runTest @"..\..\..\..\Tests\test013.yrd"
+do runTest @"..\..\..\..\Tests\test100.yrd"

@@ -42,10 +42,10 @@ type TableInterpretator (tables: Tables) = class
       memoize (fun (states,(symbol,i),getLexeme) -> 
       if Set.isEmpty states
       then Set.empty
-      else         
-      let new_states = parse (goto (states,symbol),i,getLexeme)
-  #if DEBUG
-      let gt = goto (states,symbol)
+      else    
+      let gt = goto (states,symbol)     
+      let new_states = parse (gt,i,getLexeme)
+  #if DEBUG      
       Log.print_climb_info i symbol states gt new_states;        
   #endif             
       if Set.exists (fun ((item,tree),i) -> is_start item.prod_name && item.next_num=None && i=1) new_states     
@@ -54,14 +54,16 @@ type TableInterpretator (tables: Tables) = class
         seq {for (item,tree),i in new_states do
              let prev_itms = prevItem item tables.Items                   
              if Set.exists (fun itm -> Option.get itm.symb = symbol && itm.item_num=item.s) prev_itms 
-                && not(is_start item.prod_name)
+                && not(is_start item.prod_name)  
              then 
                 let create_new_item (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
-                yield climb(Set.map create_new_item states,(item.prod_name,i),getLexeme)
-             else
-              if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items) && itm.item_num <> itm.s)
+                yield Set.filter (fun ((item,_),_) -> item.item_num > 0)
+                                 (climb(Set.map create_new_item states,(item.prod_name,i),getLexeme))
+             if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items))
                             states
-              then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itms }  |> Set.unionMany)                
+             then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itms 
+              }  |> Set.unionMany
+             )                
 
   and parse =
       memoize (

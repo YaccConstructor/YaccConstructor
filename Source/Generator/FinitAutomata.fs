@@ -39,8 +39,8 @@ let rec create_NFA = function
 let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      
      
 let e_closure (rules,s,f) =    
-    let exists_e_elt:(int Set ref) = ref Set.Empty   
-    let rec closure stt =
+    let exists_e_elt = ref Set.Empty   
+    (*let rec closure stt =
         if Set.exists ((=)stt) (!exists_e_elt)
         then (!exists_e_elt)
         else (exists_e_elt:=Set.add stt !exists_e_elt;
@@ -48,6 +48,20 @@ let e_closure (rules,s,f) =
               if lst = [] 
               then !exists_e_elt 
               else Set.fold (fun buf (state,symbol,next) -> buf + closure next) Set.Empty (Set.of_list lst))
+      *)        
+     in         
+     let closure q = 
+         let q' = ref (Set.singleton q)
+         let l = ref 0
+         while (!l < Set.count !q') do
+            l:= Set.count !q';
+            for s1 in !q' 
+                do for (s2,ch2,f2)as state' in rules 
+                       do if s2=s1 && ch2=None
+                          then q':= (Set.add f2) !q'
+            
+         !q'              
+             
      in
      let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
 

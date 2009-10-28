@@ -16,7 +16,7 @@ let  runTest testFilePath =
     Generator.generate (Main.ParseFile testFilePath)
     let tables = new Tables(testFilePath)
     let parser = new Parser(tables)
-    let result = parser.Run Tests.test3
+    let result = parser.Run Tests.test6_2
     let trees = List.concat(Set.map(fun ((a,b),i) -> b) result)
     Seq.iter(fun b -> print_tree b) trees
     printfn "Parser get %A dirivation tree" trees.Length

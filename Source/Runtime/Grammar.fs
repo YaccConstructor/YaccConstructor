@@ -15,6 +15,7 @@ module Item =
                  item_num:int;
                  symb:'a option;
                  next_num:int option;
+                 seq_number:int;
                  s:int;
                  f:int Set}
   end  

@@ -14,54 +14,50 @@ open IL.Production
 open IL.Source
 open Utils
   
-let rec create_NFA = function 
-    | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA t.rule) seq                            
-                         let aut_concat (lrules,ls,lf) (rrules,rs,rf) = ([lf,None,rs]@lrules@rrules,ls,rf)                                                        
-                         List.fold aut_concat new_autom.Head new_autom.Tail
+let rec create_NFA seq_num  = function 
+    | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
+                         let bindings = List.map (fun elem -> elem.binding) seq                                                  
+                         let aut_concat ((lrules,ls,lf),(code1,bindings1)) ((rrules,rs,rf),(code2,bindings2)) bvp = (([lf,None,rs]@lrules@rrules,ls,rf),(code1+(CodeGenerator.genBynding bvp code2),bindings1))
+                         List.fold2 aut_concat new_autom.Head new_autom.Tail (CodeGenerator.genBindingMap bindings)
                                                         
-    | PAlt (l,r)      -> match (create_NFA l,create_NFA r)with
-                         (lrules,ls,lf),(rrules,rs,rf) -> (let s,f = next(),next()                                                                 
-                                                           [s,None,ls]@[s,None,rs]@
-                                                           [lf,None,f]@[rf,None,f]@
-                                                           lrules@rrules,s,f)
+    | PAlt (l,r)      -> match (create_NFA (seq_num+1) l,create_NFA (seq_num+2) r)with
+                         ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->
+                             let code = "if then "+code1+" else" + code2
+                             let s,f = next(),next()                                                                 
+                             ([s,None,ls]@[s,None,rs]@[lf,None,f]@[rf,None,f]@lrules@rrules,s,f),(code,[])
                   
     (*it is dirty hack. IT MUST BE FIXED*)              
     | PMany (expr)    (*->  (let (rules1,s1,f1) = (create_NFA expr)
                            let (rules2,s2,f2) = (create_NFA (PSome expr))
                            //let ns,nf = next(),next()
                            ([f1,None,s2]@rules1@rules2,s1,f2)) *)
-    | PSome (expr)    ->  (function (rules,s,f) ->([f,None,s]@[s,None,f]@rules,s,f)) (create_NFA expr)                          
+    | PSome (expr)    ->  
+        (function ((rules,s,f),(code,bindings)) ->            
+                  let code = CodeGenerator.genSome code bindings
+                  (([f,None,s]@[s,None,f]@rules,s,f),(code,bindings))) (create_NFA seq_num expr )                          
     | PToken(ch)
     | PRef(ch,_)
-    | PLiteral(ch) as t -> (let s,f = next(),next() in ([s,Some(t),f],s,f))
-    
-    
+    | PLiteral(ch) as t -> 
+       let s,f = next(),next()
+       let code = "\n"
+       (([s,Some(t,seq_num),f],s,f),(code,[]))
+    | x -> failwith "You should support new elem" 
+        
 let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      
      
 let e_closure (rules,s,f) =    
-    let exists_e_elt = ref Set.Empty   
-    (*let rec closure stt =
-        if Set.exists ((=)stt) (!exists_e_elt)
-        then (!exists_e_elt)
-        else (exists_e_elt:=Set.add stt !exists_e_elt;
-              let lst = List.filter (fun(state,symbol,next) -> state = stt && symbol = None) rules
-              if lst = [] 
-              then !exists_e_elt 
-              else Set.fold (fun buf (state,symbol,next) -> buf + closure next) Set.Empty (Set.of_list lst))
-      *)        
-     in         
-     let closure q = 
-         let q' = ref (Set.singleton q)
-         let l = ref 0
-         while (!l < Set.count !q') do
-            l:= Set.count !q';
-            for s1 in !q' 
-                do for (s2,ch2,f2)as state' in rules 
-                       do if s2=s1 && ch2=None
-                          then q':= (Set.add f2) !q'
+    let exists_e_elt = ref Set.Empty               
+    let closure q = 
+        let q' = ref (Set.singleton q)
+        let l = ref 0
+        while (!l < Set.count !q') do
+           l:= Set.count !q';
+           for s1 in !q' 
+               do for (s2,ch2,f2)as state' in rules 
+                      do if s2=s1 && ch2=None
+                         then q':= (Set.add f2) !q'
             
-         !q'              
-             
+        !q'          
      in
      let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
 
@@ -92,7 +88,7 @@ let e_closure (rules,s,f) =
      (clean_new_automata,new_start_state,new_finale_state)
      
 let FA_rules rule =
-    let fa_rule = create_NFA rule in 
+    let fa_rule,code = create_NFA 0 rule in 
 #if DEBUG 
     (printf "\n Fa_rule : \n %A " (fa_rule));
 #endif

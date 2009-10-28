@@ -56,7 +56,11 @@ type TableInterpretator (tables: Tables) = class
              if Set.exists (fun itm -> Option.get itm.symb = symbol && itm.item_num=item.s) prev_itms 
                 && not(is_start item.prod_name)  
              then 
-                let create_new_item (state,_tree) = state, [Node(_tree@tree,item.prod_name,[],1)]
+                let create_new_item (state,_tree) =
+                   #if DEBUG
+                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,[],1)]
+                   #endif 
+                      state, [Node(_tree@tree,item.prod_name,[],1)]
                 yield Set.filter (fun ((item,_),_) -> item.item_num > 0)
                                  (climb(Set.map create_new_item states,(item.prod_name,i),getLexeme))
              if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items))
@@ -71,6 +75,7 @@ type TableInterpretator (tables: Tables) = class
         #if DEBUG 
           Log.print_parse states i;
         #endif
+          let value = (getLexeme i).value
           let text = (getLexeme i).name
           let leaf_tree = [Leaf(text,[],1)]
           let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states

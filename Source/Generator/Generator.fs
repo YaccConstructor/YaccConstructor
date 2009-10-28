@@ -29,18 +29,22 @@ let items,_grammar,_generate =
        _items:= List.map (fun (i,rl) -> 
                 let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
                 let get_symb =  function 
-                                Some(PLiteral(s)|PToken(s)|PRef(s,_)) -> Some(Source.toString s)                                                                                  
-                                | _ -> failwith "Generator error."                                          
+                                Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
+                                | _ -> failwith "Generator error." 
+                let getSeqNum = function 
+                                Some(_,seqNum) -> seqNum                                                                                  
+                                | _ -> failwith "Generator error. Can not find seqNumber"                                                                          
 #if DEBUG
                 Log.print_item itm s f;
 #endif
                 Set.fold (fun buf (a,b,c) ->                                                    
                                    let new_item  item_num next_num =
-                                      {prod_num = i;
+                                      {prod_num = i;                                      
                                        prod_name = rl.name;
                                        item_num = item_num;
                                        symb = get_symb b;                                                                           
                                        next_num = next_num;
+                                       seq_number = getSeqNum b;
                                        s=s;
                                        f=f                                                                                          
                                       }

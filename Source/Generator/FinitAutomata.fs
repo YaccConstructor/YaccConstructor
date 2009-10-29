@@ -6,7 +6,7 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-#light 
+#light
 
 module Yard.Core.FinitAutomata
 
@@ -17,8 +17,17 @@ open Utils
 let rec create_NFA seq_num  = function 
     | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
                          let bindings = List.map (fun elem -> elem.binding) seq                                                  
-                         let aut_concat ((lrules,ls,lf),(code1,bindings1)) ((rrules,rs,rf),(code2,bindings2)) bvp = (([lf,None,rs]@lrules@rrules,ls,rf),(code1+(CodeGenerator.genBynding bvp code2),bindings1))
-                         List.fold2 aut_concat new_autom.Head new_autom.Tail (CodeGenerator.genBindingMap bindings)
+                         let aut_concat ((lrules,ls,lf),(code1,bindings1)) ((rrules,rs,rf),(code2,bindings2)) bvp = 
+                             ([lf,None,rs]@lrules@rrules,ls,rf),(code1+(CodeGenerator.genBynding bvp code2),bindings1@bindings2)
+                         let rebuld (autom,(code,bindings)) bvp = autom,((CodeGenerator.genBynding bvp code),bindings)
+                         let action = if attr.IsNone then "()" else (toString attr.Value)
+                         let bindingValueMap = CodeGenerator.genBindingMap bindings
+                         let (autom,(code,_bindings))=
+                             List.fold2 aut_concat 
+                                       (rebuld new_autom.Head  bindingValueMap.Head)
+                                       new_autom.Tail 
+                                       bindingValueMap.Tail
+                         (autom,(CodeGenerator.genSeq code bindingValueMap action,_bindings))                                       
                                                         
     | PAlt (l,r)      -> match (create_NFA (seq_num+1) l,create_NFA (seq_num+2) r)with
                          ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->

@@ -21,4 +21,4 @@ let  runTest testFilePath =
     Seq.iter(fun b -> print_tree b) trees
     printfn "Parser get %A dirivation tree" trees.Length
     
-do runTest @"..\..\..\..\Tests\test100.yrd"
+do runTest @"..\..\..\..\Tests\test002.yrd"

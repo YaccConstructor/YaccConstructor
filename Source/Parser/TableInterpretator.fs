@@ -37,7 +37,7 @@ type TableInterpretator (tables: Tables) = class
         <| seq { for y,tree in states 
                  -> set <| seq {for z in (tables.GotoSet.[hash (y,symbol)]) 
                                 -> z,tree}}
-     
+                                     
   let rec climb =
       memoize (fun (states,(symbol,i),getLexeme) -> 
       if Set.isEmpty states
@@ -84,7 +84,7 @@ type TableInterpretator (tables: Tables) = class
           + if (getLexeme i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1),getLexeme)
       )
         
-  let run getLexeme inputLength =
+  let run getLexeme inputLength =      
       let startItems = Set.filter (fun item ->is_start item.prod_name) tables.Items
       parse (Set.map (fun item -> item,[]) startItems,inputLength,getLexeme)
       

@@ -23,11 +23,14 @@ let end_time   = ref System.DateTime.Now
 let items,_grammar,_generate =
     let _items = ref Set.Empty
     let _grammar = ref[]
-    let generate rules =
+    let generate rules path =
+       let codeGenerator = new CodeGenerator.CodeGenerator(path,path+".fs")
+       codeGenerator.Write (codeGenerator.GenHeader())
+       let finitAutomata = new FinitAutomata.FinitAutomata(codeGenerator) 
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
-       _items:= List.map (fun (i,rl) -> 
-                let (itm,s,f) = FinitAutomata.FA_rules(rl.body) 
+       _items:= List.map (fun (i,rl) ->                 
+                let (itm,s,f) = finitAutomata.FA_rules rl.name rl.body
                 let get_symb =  function 
                                 Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
                                 | _ -> failwith "Generator error." 
@@ -53,7 +56,8 @@ let items,_grammar,_generate =
                                     then Set.singleton(new_item c None)
                                     else Set.empty 
                                    )Set.empty itm)rules_map
-    |> Set.unionMany
+       |> Set.unionMany;
+       codeGenerator.CloseOutStream() 
     let items () = !_items
     let grammar () = !_grammar
     items,grammar,generate
@@ -102,7 +106,7 @@ let generate input_grammar=
     let head,rules,foot = GrammarPreparer.prepare input_grammar
     let addStartRule rules = 
         List.fold (fun rules rule_name -> (GrammarPreparer.createStartRule "_yard_start" rule_name)::rules) (replace_Public rules) (GrammarPreparer.get_start_nterms rules)
-    _generate(ExpandMeta.expandMetaRules (addStartRule rules));
+    _generate(ExpandMeta.expandMetaRules (addStartRule rules))(input_grammar.info.fileName);
 #if DEBUG    
     printf "Transformed grammar \n %A\n" <|_grammar()
     printf "\n Token list: \n  " ;Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))

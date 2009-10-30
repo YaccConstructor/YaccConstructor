@@ -1,2 +1,2 @@
-+s: res = expr {expr};
-expr: n1=NUMBER op= PLUS n2 = NUMBER {float n1 + float n2};
++s: res = expr {res};
+expr: n1=NUMBER op= PLUS n2 = (n3 = NUMBER {n3+1}) {float n1 + float n2};

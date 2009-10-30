@@ -1,2 +1,2 @@
-+expr1:NUMBER PLUS NUMBER {};
-+expr2:NUMBER MULT NUMBER {};
++expr1: n = NUMBER {string n};
++expr2: n = NUMBER {float n};

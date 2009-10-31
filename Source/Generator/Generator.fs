@@ -20,9 +20,10 @@ open GrammarPreparer
 let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now      
 
-let items,_grammar,_generate =
+let items,_grammar,_generate, ruleToActionMap=
     let _items = ref Set.Empty
     let _grammar = ref[]
+    let _ruleToActonMap = ref[]
     let generate rules path =
        let codeGenerator = new CodeGenerator.CodeGenerator(path,path+".fs")
        codeGenerator.Write (codeGenerator.GenHeader())
@@ -30,7 +31,10 @@ let items,_grammar,_generate =
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
        _items:= List.map (fun (i,rl) ->                 
-                let (itm,s,f) = finitAutomata.FA_rules rl.name rl.body
+                let (itm,s,f),code = finitAutomata.FA_rules rl.body
+                let topLevelBindingName = rl.name+i.ToString()+"_action"
+                _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
+                if rl.name<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code)
                 let get_symb =  function 
                                 Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
                                 | _ -> failwith "Generator error." 
@@ -60,7 +64,8 @@ let items,_grammar,_generate =
        codeGenerator.CloseOutStream() 
     let items () = !_items
     let grammar () = !_grammar
-    items,grammar,generate
+    let ruleToActionMap ()= dict !_ruleToActonMap
+    items,grammar,generate,ruleToActionMap
     
 let closure q = 
     let q' = ref (set q)
@@ -114,5 +119,6 @@ let generate input_grammar=
 #endif            
     IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(goto_set())) ; 
     IO.writeValue (input_grammar.info.fileName + ".items.dta") (items());
-    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));    
+    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));
+    IO.writeValue (input_grammar.info.fileName + ".rule_to_action.dta") (System.Linq.Enumerable.ToList(ruleToActionMap()));
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));

@@ -48,7 +48,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
   let write (str:string) = outStream.WriteLine(str)
   
   let genTopLEvelBinding name code = 
-      "\n\nlet " + name + "_action arg = \n (" + code + ")arg"
+      "\n\nlet " + name + " arg = \n (" + code + ")arg"
   
   member self.GenSome code bindings = genSome code bindings
   member self.GenBindingMap bindings = genBindingMap bindings

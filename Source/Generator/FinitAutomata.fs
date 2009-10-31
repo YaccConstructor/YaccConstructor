@@ -98,15 +98,12 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   #endif
        (clean_new_automata,new_start_state,new_finale_state)
        
-  let funEnumerator = Enumerator()
-       
-  let fa_rules ruleName rule =     
+  let fa_rules rule =     
       let fa_rule,(code,binding) = create_NFA 0 rule in 
-      if ruleName<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding (ruleName+funEnumerator.Next().ToString()) code)
   #if DEBUG 
       (printf "\n Fa_rule : \n %A " (fa_rule));
   #endif
-      e_closure(fa_rule)
+      e_closure(fa_rule),code
            
-  member self.FA_rules ruleName rule = fa_rules ruleName rule
+  member self.FA_rules rule = fa_rules rule
 end      

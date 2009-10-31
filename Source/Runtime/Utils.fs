@@ -14,10 +14,12 @@ open IL
 open Production
 open Grammar.Item
 
-let next = 
+type Enumerator() = class
     let i = ref 0
-    let next() = incr i;!i
-    next      
+    let next() = incr i;!i          
+    member self.Next() = next()
+    member self.Reset() = i := 0   
+end
     
 let prevItem item items = 
     let isPrev x = Some item.item_num = x.next_num && item.prod_num = x.prod_num

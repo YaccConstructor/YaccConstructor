@@ -45,9 +45,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tree.fs" />
-    <Compile Include="TablesLoader.fs" />
     <Compile Include="Lexeme.fs" />
+    <Compile Include="AST.fs" />
+    <Compile Include="TablesLoader.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Parser.fs" />
   </ItemGroup>

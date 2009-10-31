@@ -15,6 +15,7 @@ open IL.Source
 open Utils
 
 type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
+  let varEnumerator = new Enumerator()
   let rec create_NFA seq_num  = function 
       | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
                            let bindings = List.map (fun elem -> elem.binding) seq                                                  
@@ -33,7 +34,7 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
       | PAlt (l,r)      -> match (create_NFA (seq_num+1) l,create_NFA (seq_num+2) r)with
                            ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->
                                let code = "if then "+code1+" else" + code2
-                               let s,f = next(),next()                                                                 
+                               let s,f = varEnumerator.Next(),varEnumerator.Next()                                                                 
                                ([s,None,ls]@[s,None,rs]@[lf,None,f]@[rf,None,f]@lrules@rrules,s,f),(code,[])
                     
       (*it is dirty hack. IT MUST BE FIXED*)              
@@ -48,7 +49,7 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
       | PToken(ch)
       | PRef(ch,_)
       | PLiteral(ch) as t -> 
-         let s,f = next(),next()
+         let s,f = varEnumerator.Next(),varEnumerator.Next()
          let code = "\n"
          (([s,Some(t,seq_num),f],s,f),(code,[]))
       | x -> failwith "You should support new elem" 
@@ -97,9 +98,11 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   #endif
        (clean_new_automata,new_start_state,new_finale_state)
        
+  let funEnumerator = Enumerator()
+       
   let fa_rules ruleName rule =     
       let fa_rule,(code,binding) = create_NFA 0 rule in 
-      if ruleName<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding (ruleName) code)
+      if ruleName<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding (ruleName+funEnumerator.Next().ToString()) code)
   #if DEBUG 
       (printf "\n Fa_rule : \n %A " (fa_rule));
   #endif

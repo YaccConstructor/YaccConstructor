@@ -9,7 +9,7 @@
 
 #light
 open Yard.Core
-open Tree
+open AST
 
 let  runTest testFilePath = 
     let commandLineArgs = System.Environment.GetCommandLineArgs()        

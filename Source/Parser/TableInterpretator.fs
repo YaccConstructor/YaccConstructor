@@ -10,9 +10,10 @@
 namespace Yard.Core
 
 open Grammar.Item
-open Tree
+open AST
 open Utils
 open Lexeme.Lexeme
+
 
 type TableInterpretator (tables: Tables) = class
 
@@ -58,9 +59,9 @@ type TableInterpretator (tables: Tables) = class
              then 
                 let create_new_item (state,_tree) =
                    #if DEBUG
-                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,[],1)]
+                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV})]
                    #endif 
-                      state, [Node(_tree@tree,item.prod_name,[],1)]
+                      state, [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV})]
                 yield Set.filter (fun ((item,_),_) -> item.item_num > 0)
                                  (climb(Set.map create_new_item states,(item.prod_name,i),getLexeme))
              if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items))
@@ -77,11 +78,21 @@ type TableInterpretator (tables: Tables) = class
         #endif
           let value = (getLexeme i).value
           let text = (getLexeme i).name
-          let leaf_tree = [Leaf(text,[],1)]
+          let leaf_tree item = [Leaf(text,{prodNum = item.prod_num; seqNum = item.seq_number;varNum = 1;value = Value.LeafV((getLexeme i))})]
           let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
-          let result_states states create_tree = set <| seq{for (item,tree) in states -> item,create_tree}
-          Set.map (fun x -> x,i)(result_states new_states [])
+          let result_states states create_tree = set <| seq{for (item,tree) in states -> item,(create_tree item)}
+          Set.map (fun x -> x,i)(result_states new_states (fun x -> []))
           + if (getLexeme i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1),getLexeme)
+
+          //let curLexeme = getLexeme i
+          (*let value = (getLexeme i).value
+          let text = (getLexeme i).name
+          let leaf_tree (item:Grammar.Item.t<string>)= 
+              [Leaf(text,{prodNum = item.prod_num; seqNum = item.seq_number;varNum = 1;value = Value.LeafV((getLexeme i))})]
+          let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
+          let result_states states = set <| seq{for (item,tree) in states -> item,leaf_tree item}
+          Set.map (fun x -> x,i)(result_states new_states)
+          + if (getLexeme i = m_end) then Set.Empty else climb(result_states states,(text,i-1),getLexeme)*)
       )
         
   let run getLexeme inputLength =      

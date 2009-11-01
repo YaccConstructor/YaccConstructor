@@ -1,1 +1,2 @@
-+expr: NUMBER(PLUS NUMBER)*;
+t: NUMBER{};
++expr: t(PLUS t)*;

@@ -19,7 +19,12 @@ type Tables(fName: string) = class
 
     let startNterms = IO.readValue (fName + ".start_nterms.dta"): string list
     
+    let ruleToActionMap = 
+        let kvpList = IO.readValue (fName + ".rule_to_action.dta" ): List<KeyValuePair<int,string>>          
+        dict <| seq{for kvp in kvpList do yield kvp.Key, kvp.Value}
+          
     member self.GotoSet with get() = gotoSet
     member self.Items with get() = items
     member self.StartNterms with get () = startNterms
+    member self.RuleToActionMap with get () = ruleToActionMap
   end

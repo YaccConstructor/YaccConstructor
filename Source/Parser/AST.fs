@@ -9,25 +9,27 @@
 
 #light
 
+namespace Yard.Core
+
 module AST
 
 module Value =
  begin 
-  type value<'a> = 
+  type value<'a,'b> = 
     | LeafV of Lexeme.Lexeme.t<'a> 
-    | NodeV
+    | NodeV of 'b
      
-  type t<'a> = {
+  type t<'a,'b> = {
     prodNum : int;
     seqNum  : int;
     varNum  : int;
-    value   : value<'a>;   
+    value   : value<'a,'b>;   
   }
 end
 
-type AST <'a> = 
-     | Node  of (AST<'a> list)*string*Value.t<'a>
-     | Leaf  of string*Value.t<'a>
+type AST <'a,'b> = 
+     | Node  of (AST<'a,'b> list)*string*Value.t<'a,'b>
+     | Leaf  of string*Value.t<'a,'b>
          
 let rec dump_tree i item =
     let rec iter i = (function 0 -> "" | x -> ("    "+(iter (x-1))))i

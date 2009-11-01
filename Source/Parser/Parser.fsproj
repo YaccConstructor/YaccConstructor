@@ -46,10 +46,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lexeme.fs" />
+    <Compile Include="test012.yrd.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="TablesLoader.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="ASTInterpretator.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Runtime\Runtime.fsproj">

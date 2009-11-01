@@ -16,9 +16,12 @@ let  runTest testFilePath =
     Generator.generate (Main.ParseFile testFilePath)
     let tables = new Tables(testFilePath)
     let parser = new Parser(tables)
-    let result = parser.Run Tests.test1
+    let result = parser.Run Tests.test2_w_a
+    let astInterp = new ASTInterpretator(tables)    
     let trees = List.concat(Set.map(fun ((a,b),i) -> b) result)
-    Seq.iter(fun b -> print_tree b) trees
-    printfn "Parser get %A dirivation tree" trees.Length
+    Seq.iter(fun b -> print_tree b) trees    
+    printfn "Parser get %A dirivation tree" trees.Length;
+    let res_2 = List.map astInterp.Interp trees
+    List.iter (printf "\nresult: %A") res_2
     
-do runTest @"..\..\..\..\Tests\test002.yrd"
+do runTest @"..\..\..\..\Tests\test012.yrd"

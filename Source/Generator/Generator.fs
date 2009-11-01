@@ -31,10 +31,10 @@ let items,_grammar,_generate, ruleToActionMap=
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
        _items:= List.map (fun (i,rl) ->                 
-                let (itm,s,f),code = finitAutomata.FA_rules rl.body
+                let (itm,s,f),code,binding = finitAutomata.FA_rules rl.body
                 let topLevelBindingName = rl.name+i.ToString()+"_action"
                 _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
-                if rl.name<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code)
+                if rl.name<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code binding)
                 let get_symb =  function 
                                 Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
                                 | _ -> failwith "Generator error." 
@@ -110,7 +110,8 @@ let goto_set ()=
 let generate input_grammar= 
     let head,rules,foot = GrammarPreparer.prepare input_grammar
     let addStartRule rules = 
-        List.fold (fun rules rule_name -> (GrammarPreparer.createStartRule "_yard_start" rule_name)::rules) (replace_Public rules) (GrammarPreparer.get_start_nterms rules)
+        List.fold (fun rules rule_name -> (GrammarPreparer.createStartRule "_yard_start" rule_name)::rules)
+                  (replace_Public rules) (GrammarPreparer.get_start_nterms rules)
     _generate(ExpandMeta.expandMetaRules (addStartRule rules))(input_grammar.info.fileName);
 #if DEBUG    
     printf "Transformed grammar \n %A\n" <|_grammar()

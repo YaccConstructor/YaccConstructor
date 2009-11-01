@@ -17,7 +17,7 @@ open Lexeme.Lexeme
 
 type TableInterpretator (tables: Tables) = class
 
-  let m_end = {name = "$";value = 1}
+  let m_end = {name = "$";value = "$"}
               
   let is_start symbol_name = List.exists ((=) symbol_name) tables.StartNterms
 
@@ -59,9 +59,9 @@ type TableInterpretator (tables: Tables) = class
              then 
                 let create_new_item (state,_tree) =
                    #if DEBUG
-                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV})]
+                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV(null)})]
                    #endif 
-                      state, [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV})]
+                      state, [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV(null:obj)})]
                 yield Set.filter (fun ((item,_),_) -> item.item_num > 0)
                                  (climb(Set.map create_new_item states,(item.prod_name,i),getLexeme))
              if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items))

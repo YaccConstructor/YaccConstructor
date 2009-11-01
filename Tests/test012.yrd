@@ -1,6 +1,7 @@
-f: (NUMBER| (LEFT e RIGHT)) {};
-t: t (MULT|DIV) f;
-t: f{};
-e: t{};
-e: e (PLUS|MINUS) t {};
-+s: e {};
+f: n=NUMBER {float (n:string)};
+f: l=LEFT expr=e r=RIGHT {expr};
+t: l=t op=MULT r=f {(l: float)*(r:float)};
+t: res=f{res};
+e: res=t{res};
+e: l=e op=PLUS r=t {(l:float) + (r:float)};
++s: res=e {res};

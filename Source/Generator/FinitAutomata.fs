@@ -29,7 +29,7 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
                                          (rebuld new_autom.Head  bindingValueMap.Head)
                                          new_autom.Tail 
                                          bindingValueMap.Tail
-                           (autom,(codeGenerator.GenSeq code bindingValueMap action,_bindings))                                       
+                           (autom,(codeGenerator.GenSeq code bindingValueMap action,List.map snd bindingValueMap))                                       
                                                           
       | PAlt (l,r)      -> match (create_NFA (seq_num+1) l,create_NFA (seq_num+2) r)with
                            ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->
@@ -103,7 +103,7 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   #if DEBUG 
       (printf "\n Fa_rule : \n %A " (fa_rule));
   #endif
-      e_closure(fa_rule),code
+      e_closure(fa_rule),code,binding
            
   member self.FA_rules rule = fa_rules rule
 end      

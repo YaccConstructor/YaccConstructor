@@ -31,7 +31,7 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.CodeDom, Version=1.9.6.16, Culture=neutral, PublicKeyToken=a19089b1c74d0809">
@@ -52,7 +52,7 @@
   <ItemGroup>
     <Compile Include="Lexeme.fs" />
     <Compile Include="AST.fs" />
-    <Compile Include="test012.yrd.fs" />
+    <Compile Include="test002.yrd.fs" />
     <Compile Include="TablesLoader.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Parser.fs" />

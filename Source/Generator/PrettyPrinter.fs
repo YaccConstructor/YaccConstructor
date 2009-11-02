@@ -25,6 +25,10 @@ let print_imports imports = List.iter print_import imports
 
 let new_l _ = print_str_n ""
 
+(*let x w = 
+    let c = new System.Data.Linq.DBConvert.ChangeType<System.Object>()
+    1
+*)
 let print_header file_name imports =     
     print_str_n "//Test comment";new_l();
     print_str_n "#light";new_l();

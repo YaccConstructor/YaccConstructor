@@ -13,11 +13,6 @@ open Microsoft.FSharp.Compiler.CodeDom.Internal
 open Microsoft.FSharp.Compiler.CodeDom
 
 type Parser(tables: Tables) = class
-
-    let cp = new FSharpCodeProvider()
-    let expr = System.CodeDom.CodeExpression()
-    //expr.UserData.Add("a","b")
-    let cp2 = Microsoft.FSharp.Compiler.CodeDom.Internal.Generator.generateExpression(expr)
     
     let get_next_ch,input_length,init =       
       let lex_list = ref []

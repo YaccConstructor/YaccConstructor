@@ -13,7 +13,7 @@ open Lexeme.Lexeme
 
 let test00 = [{name = "$";value = 1}]
 let test0 = [{name = "NUMBER";value = 1};{name = "$";value = 1}]
-let test1 = [{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
+let test1 = [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "1"};{name = "$";value = "$"}]
 let test1_0_1 = [{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
 let test1_1 = [{name = "NUMBER";value = 1};{name = "MULT";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]
 let test1_2 = [{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "PLUS";value = 1};{name = "NUMBER";value = 1};{name = "$";value = 1}]

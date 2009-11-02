@@ -43,11 +43,16 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Data.Linq</Name>
+      <AssemblyName>System.Data.Linq.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lexeme.fs" />
-    <Compile Include="test012.yrd.fs" />
     <Compile Include="AST.fs" />
+    <Compile Include="test012.yrd.fs" />
     <Compile Include="TablesLoader.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Parser.fs" />

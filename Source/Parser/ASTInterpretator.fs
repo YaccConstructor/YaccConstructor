@@ -22,12 +22,15 @@ type ASTInterpretator(tables: Tables) = class
         match tree with
         | AST.Node(childs,name,_value) -> 
               let getVal x = 
-                   match (((interp x):AST.Value.t<_,_>).value) with 
-                   | AST.Value.NodeV(x) -> x :> obj
-                   | AST.Value.LeafV(x) -> x.value :> obj
-              let values = List.map getVal childs
+                   let _val = interp x
+                   match (_val:AST.Value.t<_,_>).value with 
+                   | AST.Value.NodeV(x) -> [(_val.seqNum:>obj);(x:>obj)] 
+                   | AST.Value.LeafV(x) -> [(_val.seqNum:>obj);(x.value:>obj)] 
+              let values = List.concat (List.map getVal childs)
               let _asm = Assembly.Load(Assembly.GetExecutingAssembly().FullName)
-              let _action = _asm.GetType("Actions").GetMethod(ruleToActionMap.[_value.prodNum])
+              let _type = _asm.GetType("Actions")
+              let methodName = ruleToActionMap.[_value.prodNum] 
+              let _action = _type.GetMethod(methodName)
               let typeParam = Array.of_list (List.map (fun x -> x.GetType()) values)               
               let gen_action = 
                   if _action.ContainsGenericParameters 
@@ -35,7 +38,8 @@ type ASTInterpretator(tables: Tables) = class
                      let count = _action.GetGenericArguments().Length
                      _action.MakeGenericMethod(Array.init count (fun _ -> (new System.Object()).GetType()))
                       else _action
-              let res = gen_action.Invoke(null, Array.of_list values)              
+              let args =  Array.of_list values
+              let res = gen_action.Invoke(null, args)              
               {_value with value = AST.Value.NodeV(res)}
         | AST.Leaf(name,value)        -> value
                 

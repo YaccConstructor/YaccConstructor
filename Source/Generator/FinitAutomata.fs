@@ -16,6 +16,7 @@ open Utils
 
 type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   let varEnumerator = new Enumerator()
+  let altEnumerator = new Enumerator()
   let rec create_NFA seq_num  = function 
       | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
                            let bindings = List.map (fun elem -> elem.binding) seq                                                  
@@ -31,9 +32,12 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
                                          bindingValueMap.Tail
                            (autom,(codeGenerator.GenSeq code bindingValueMap action,List.map snd bindingValueMap))                                       
                                                           
-      | PAlt (l,r)      -> match (create_NFA (seq_num+1) l,create_NFA (seq_num+2) r)with
+      | PAlt (l,r)      -> let lAltNum = ref 0
+                           let rAltNum = ref 0
+                           match (create_NFA (lAltNum:=altEnumerator.Next();!lAltNum) l,
+                                  create_NFA (rAltNum:=altEnumerator.Next();!rAltNum) r)with
                            ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->
-                               let code = "if then "+code1+" else" + code2
+                               let code = ""//codeGenerator.GenAlt code1 code2
                                let s,f = varEnumerator.Next(),varEnumerator.Next()                                                                 
                                ([s,None,ls]@[s,None,rs]@[lf,None,f]@[rf,None,f]@lrules@rrules,s,f),(code,[])
                     
@@ -106,4 +110,4 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
       e_closure(fa_rule),code,binding
            
   member self.FA_rules rule = fa_rules rule
-end      
+end

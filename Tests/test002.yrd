@@ -1,2 +1,2 @@
 +s: res = expr {res};
-expr: n1=NUMBER PLUS n2 = NUMBER {float n1 + float n2};
+expr: <n1:string>=NUMBER PLUS <n2:string> = NUMBER {float n1 + float n2};

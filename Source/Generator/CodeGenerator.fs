@@ -16,7 +16,13 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
 
   let outStream = IO.text_writer outPath
   
+  let generateValueExtraction = ref true
+  
+  let resetValueExtruction() = generateValueExtraction:=true
+  
   let varEnumerator = new Enumerator()
+  
+  let resetValueEnumerator() = varEnumerator.Reset()
   
   let defaultParams = "(seqNum,varNum)" 
   
@@ -28,11 +34,16 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
       "\nmodule Actions\n"+
       "open Yard.Core\n"
                   
-  let genDefaultFanctions = 
-      "let getValue,getSeqNum =\n"+
-      "    let _getV arg = snd arg in\n"+
-      "    let _getSeqNum arg = fst arg in\n"+
-      "    _getV,_getSeqNum\n"
+  let genDefaultFanctions =
+      "let getValue,getSeqNum =\n"+ 
+      " let _val arg =\n"+
+      "      if (Option.isNone arg)\n"+
+      "      then failwith \"Argument exception. Value can not be None\"\n"+
+      "     else Option.get arg\n"+
+      " in\n"+
+      " let _getSeqNum arg = (fst (_val arg)):int in\n"+
+      " let _getV arg = ignore(_getSeqNum arg);snd (_val arg) in\n"+
+      " _getV,_getSeqNum"
          
 
                   
@@ -46,20 +57,38 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
   let genBindingMap bindings =
       List.map (fun (k:Option<_>) -> ((if k.IsNone then None else Some(IL.Source.toString k.Value)) ,"x"+(varEnumerator.Next()).ToString()))  bindings
 
-  let genBynding (bnd,var) code =
+
+  let genParams2 bindingLst =
+      match bindingLst with
+      | [] -> ""
+      | hd::[] -> hd
+      | hd::tl -> List.fold (fun buf name -> buf + " " + name) (List.hd  bindingLst ) (List.tl  bindingLst)
+
+  let genBynding bnd var code =
       let codeIsEmpty = String.trim [' ';'\n'] code <> ""
+      let genVarExtr = 
+          if !generateValueExtraction 
+          then generateValueExtraction:=false; "(getValue " +  genParams2 var + ")"
+          else genParams2 var 
+          + "\n" 
+ 
       match bnd with
       |Some(_bnd) -> "let (" + _bnd + ") = "+ (if codeIsEmpty 
                                                then "\n(" + code + ")" 
-                                               else "") + "(getValue " +  var + ") in \n"
+                                               else "") + genVarExtr + " in \n"
       |None        ->  if codeIsEmpty 
-                       then "(" + code + ")" + "(getValue " +  var + ") \n"
-                       else "" 
+                       then "(" + code + ")" + genVarExtr
+                       else ""(*//it is for type inferrence. If we have function with one parameter f (a,b) 
+                            //in reflection we get fumction with 2 parameters f a b  
+                            //we need expract pairs(tuples) in list and concat this lists
+                           "//it is need for correct type inference \nignore(arg1:(obj*obj));"*) 
          
-  let genSeq code bindingLst action=     
-      let bnpl =  bindingLst 
-      let _params = List.fold (fun buf (_,name) -> buf + " " + name) (snd (List.hd bnpl)) (List.tl bnpl)
-      "fun " + _params + " ->\n  " + code + action
+  let genParams bindingLst =
+      List.fold (fun buf (_,name) -> buf + " " + name) (snd (List.hd  bindingLst )) (List.tl  bindingLst)
+
+         
+  let genSeq code bindingLst action=                 
+      "fun " + (genParams2 bindingLst) + " ->\n  " + code + action
   
   let close () = outStream.Close();
   
@@ -70,21 +99,22 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
                                (List.init (List.length binding) (fun i -> "arg"+i.ToString()))
       "\n\nlet " + name + " "+argNames+" = \n (" + code + ")"+argNames
       
-  //let genAlt seqNum code1 code2 =        
-  
-  let genAlt lAltNum rAltNum code1 code2 bindings = 
-      "if getSeqNum" + (snd bindings) + ")>=" + lAltNum.ToString() + "\n"+
-      "then " + code1 + "\n"+
-      "else " + code2 + "\n"
-  
+  let genAlt code1 code2 bindings1 bindings2 =
+    "fun " + (genParams2 (bindings1@bindings2)) + " -> \n  " +
+    "if Option.isNone " + List.hd bindings1 + "\n" +
+    "then ("+ code1 + ")" + genParams2 bindings1 + "\n" +
+    "else ("+ code2 + ")"  + genParams2 bindings2 + "\n"
+     
   member self.GenSome code bindings = genSome code bindings
   member self.GenBindingMap bindings = genBindingMap bindings
-  member self.GenBynding bndVarMap code = genBynding bndVarMap code
+  member self.GenBynding bnd nameList code = genBynding bnd nameList code
   member self.GenSeq code bindingLst action = genSeq code bindingLst action
   member self.CloseOutStream () = close ()
   member self.Write str = write str
   member self.GenTopLEvelBinding name code binding = genTopLEvelBinding name code binding
   member self.GenHeader () = genHeader
   member self.GenDefaultFunctions with get() = genDefaultFanctions
-  member self.GenAlt lAltNum rAltNum code1 code2 bindings =genAlt lAltNum rAltNum code1 code2 bindings
+  member self.GenAlt code1 code2 bindings1 bindings2 = genAlt code1 code2 bindings1 bindings2
+  member self.ResetValueEnumerator () = resetValueEnumerator()
+  member self.ResetValueExtraction () = resetValueExtruction()
 end

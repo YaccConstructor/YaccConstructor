@@ -27,6 +27,8 @@ let test8_1 = [{name = "CHAR";value = 1};{name = "NUMBER";value = 1};{name = "$"
 let test6_1 = [{name = "CHAR";value = 1};{name = "PLUS";value = 1};{name = "$";value = 1}]
 let test6_2 = [{name = "CHAR";value = 1};{name = "PLUS";value = 1};{name = "MINUS";value = 1};{name = "$";value = 1}]
 
+let test3_w_a_1 = [{name = "NUMBER";value = "1"};{name = "$";value = "$"}]
+
 let test2_w_a = 
     [{name = "NUMBER";value = "2"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
 

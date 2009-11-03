@@ -17,29 +17,31 @@ open Utils
 type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   let varEnumerator = new Enumerator()
   let altEnumerator = new Enumerator()
+  let stateEnumerator = new Enumerator()
   let rec create_NFA seq_num  = function 
       | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
                            let bindings = List.map (fun elem -> elem.binding) seq                                                  
-                           let aut_concat ((lrules,ls,lf),(code1,bindings1)) ((rrules,rs,rf),(code2,bindings2)) bvp = 
-                               ([lf,None,rs]@lrules@rrules,ls,rf),(code1+(codeGenerator.GenBynding bvp code2),bindings1@bindings2)
-                           let rebuld (autom,(code,bindings)) bvp = autom,((codeGenerator.GenBynding bvp code),bindings)
+                           let aut_concat ((lrules,ls,lf),(code1,bindings1)) ((rrules,rs,rf),(code2,bindings2)) b = 
+                               ([lf,None,rs]@lrules@rrules,ls,rf),(code1+(codeGenerator.GenBynding b bindings2 code2),bindings1@bindings2)
+                           let rebuld (autom,(code,bindings)) b = autom,((codeGenerator.GenBynding b bindings code),bindings)
                            let action = if attr.IsNone then "()" else (toString attr.Value)
                            let bindingValueMap = codeGenerator.GenBindingMap bindings
                            let (autom,(code,_bindings))=
                                List.fold2 aut_concat 
-                                         (rebuld new_autom.Head  bindingValueMap.Head)
+                                         (rebuld new_autom.Head (fst bindingValueMap.Head))
                                          new_autom.Tail 
-                                         bindingValueMap.Tail
-                           (autom,(codeGenerator.GenSeq code bindingValueMap action,List.map snd bindingValueMap))                                       
+                                         (List.map fst bindingValueMap.Tail)
+                                         
+                           (autom,(codeGenerator.GenSeq code _bindings action, _bindings))                                       
                                                           
       | PAlt (l,r)      -> let lAltNum = ref 0
                            let rAltNum = ref 0
                            match (create_NFA (lAltNum:=altEnumerator.Next();!lAltNum) l,
-                                  create_NFA (rAltNum:=altEnumerator.Next();!rAltNum) r)with
+                                  (codeGenerator.ResetValueExtraction();create_NFA (rAltNum:=altEnumerator.Next();!rAltNum) r))with
                            ((lrules,ls,lf),(code1,bindings1)),((rrules,rs,rf),(code2,bindings2)) ->
-                               let code = ""//codeGenerator.GenAlt code1 code2
-                               let s,f = varEnumerator.Next(),varEnumerator.Next()                                                                 
-                               ([s,None,ls]@[s,None,rs]@[lf,None,f]@[rf,None,f]@lrules@rrules,s,f),(code,[])
+                               let code = codeGenerator.GenAlt code1 code2 bindings1 bindings2
+                               let s,f = stateEnumerator.Next(),stateEnumerator.Next()                                                                 
+                               ([s,None,ls]@[s,None,rs]@[lf,None,f]@[rf,None,f]@lrules@rrules,s,f),(code,bindings1@bindings2)
                     
       (*it is dirty hack. IT MUST BE FIXED*)              
       | PMany (expr)    (*->  (let (rules1,s1,f1) = (create_NFA expr)
@@ -53,9 +55,9 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
       | PToken(ch)
       | PRef(ch,_)
       | PLiteral(ch) as t -> 
-         let s,f = varEnumerator.Next(),varEnumerator.Next()
+         let s,f = stateEnumerator.Next(),stateEnumerator.Next()
          let code = "\n"
-         (([s,Some(t,seq_num),f],s,f),(code,[]))
+         (([s,Some(t,seq_num),f],s,f),(code,["x"+varEnumerator.Next().ToString()]))
       | x -> failwith "You should support new elem" 
           
   let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      
@@ -102,12 +104,14 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
   #endif
        (clean_new_automata,new_start_state,new_finale_state)
        
-  let fa_rules rule =     
+  let fa_rules rule =       
+      codeGenerator.ResetValueEnumerator();    
+      codeGenerator.ResetValueExtraction();    
       let fa_rule,(code,binding) = create_NFA 0 rule in 
   #if DEBUG 
       (printf "\n Fa_rule : \n %A " (fa_rule));
   #endif
       e_closure(fa_rule),code,binding
            
-  member self.FA_rules rule = fa_rules rule
+  member self.FA_rules rule = varEnumerator.Reset();fa_rules rule
 end

@@ -101,7 +101,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
       
   let genAlt code1 code2 bindings1 bindings2 =
     "fun " + (genParams2 (bindings1@bindings2)) + " -> \n  " +
-    "if Option.isNone " + List.hd bindings1 + "\n" +
+    "if not(Option.isNone " + List.hd bindings1 + ")\n" +
     "then ("+ code1 + ")" + genParams2 bindings1 + "\n" +
     "else ("+ code2 + ")"  + genParams2 bindings2 + "\n"
      

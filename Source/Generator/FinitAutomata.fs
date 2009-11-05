@@ -57,7 +57,8 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
       | PLiteral(ch) as t -> 
          let s,f = stateEnumerator.Next(),stateEnumerator.Next()
          let code = "\n"
-         (([s,Some(t,seq_num),f],s,f),(code,["x"+varEnumerator.Next().ToString()]))
+         let num =varEnumerator.Next()
+         (([s,Some(t,num),f],s,f),(code,["x"+num.ToString()]))
       | x -> failwith "You should support new elem" 
           
   let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      

@@ -15,10 +15,10 @@ open Production
 open Grammar.Item
 
 type Enumerator() = class
-    let i = ref 0
+    let i = ref -1
     let next() = incr i;!i          
     member self.Next() = next()
-    member self.Reset() = i := 0   
+    member self.Reset() = i := -1   
 end
     
 let prevItem item items = 

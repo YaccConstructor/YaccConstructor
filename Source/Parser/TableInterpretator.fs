@@ -49,24 +49,29 @@ type TableInterpretator (tables: Tables) = class
   #if DEBUG      
       Log.print_climb_info i symbol states gt new_states;        
   #endif             
-      if Set.exists (fun ((item,tree),i) -> is_start item.prod_name && item.next_num=None && i=1) new_states     
+      if Set.exists (fun ((item,(tree,seqNum)),i) -> is_start item.prod_name && item.next_num=None && i=1) new_states     
       then set <|seq {for item,tree as state in states do if item.next_num = None then yield state,1}
       else
-        seq {for (item,tree),i in new_states do
+        seq {for (item,(tree,seqNum)),i in new_states do
              let prev_itms = prevItem item tables.Items                   
              if Set.exists (fun itm -> Option.get itm.symb = symbol && itm.item_num=item.s) prev_itms 
                 && not(is_start item.prod_name)  
              then 
-                let create_new_item (state,_tree) =
+                let create_new_item (state,(_tree,_seqNum)) =
                    #if DEBUG
-                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV(null)})]
+                      printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = _seqNum;varNum =1;value = Value.NodeV(null)})]
                    #endif 
-                      state, [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = item.seq_number;varNum =1;value = Value.NodeV(null:obj)})]
+                      state, ([Node(_tree@tree,item.prod_name,
+                                    {prodNum = item.prod_num;
+                                     seqNum = seqNum;
+                                     varNum =1;
+                                     value = Value.NodeV(null:obj)})]
+                               ,item.seq_number)      
                 yield Set.filter (fun ((item,_),_) -> item.item_num > 0)
                                  (climb(Set.map create_new_item states,(item.prod_name,i),getLexeme))
              if Set.exists (fun (itm,_) -> Set.exists ((=)item) (nextItem itm tables.Items))
                             states
-             then yield Set.map (fun itm -> (itm, snd (states.MinimumElement)@tree), i) prev_itms 
+             then yield Set.map (fun itm -> (itm, (fst(snd (states.MinimumElement))@tree,seqNum)), i) prev_itms 
               }  |> Set.unionMany
              )                
 
@@ -78,20 +83,21 @@ type TableInterpretator (tables: Tables) = class
         #endif
           let value = (getLexeme i).value
           let text = (getLexeme i).name
-          let leaf_tree item = 
+          let leaf_tree item seqNum= 
               [Leaf(text,{prodNum = item.prod_num;
                           seqNum = item.seq_number;
                           varNum = 1;
                           value = Value.LeafV((getLexeme i))})]
-          let new_states = Set.filter (fun (item,tree) -> item.next_num=None)states
-          let result_states states create_tree = set <| seq{for (item,tree) in states -> item,(create_tree item)}
-          Set.map (fun x -> x,i)(result_states new_states (fun x -> []))
+              ,item.seq_number
+          let new_states = Set.filter (fun (item,_) -> item.next_num=None)states
+          let result_states states create_tree = set <| seq{for (item,(tree,seqNum)) in states -> item,(create_tree item seqNum)}
+          Set.map (fun x -> x,i)(result_states new_states (fun x y -> ([],y)))
           + if (getLexeme i = m_end) then Set.Empty else climb(result_states states leaf_tree,(text,i-1),getLexeme)
       )
         
   let run getLexeme inputLength =      
       let startItems = Set.filter (fun item ->is_start item.prod_name) tables.Items
-      parse (Set.map (fun item -> item,[]) startItems,inputLength,getLexeme)
+      parse (Set.map (fun item -> item,([],-1)) startItems,inputLength,getLexeme)
       
   member self.Run getLexeme inputLength = run getLexeme inputLength
 end

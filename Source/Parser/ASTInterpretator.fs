@@ -27,18 +27,32 @@ type ASTInterpretator(tables: Tables) = class
                    | AST.Value.NodeV(x) -> _val.seqNum,(Some((_val.seqNum),x):>obj)
                    | AST.Value.LeafV(x) -> _val.seqNum,(Some((_val.seqNum),x.value):>obj)
               let fillPrefix lst = 
-                  let localMaxSeqNum = fst  (List.hd (List.rev lst))
-                  let prefix = List.init (localMaxSeqNum) (fun _ -> None)
+                  let localMaxSeqNum = fst  (List.hd lst)
+                  let prefix = List.init (localMaxSeqNum) (fun i -> i,(None:>obj))
                   prefix  
+              let addNone lst = 
+                  let _lst = fillPrefix lst
+                  let rec fill lst1 lst2 =
+                    match lst1,lst2 with 
+                    | ((i1,v1)::tl1) as ls1 ,(((i2,_)as p2 ::tl2) as ls2)-> 
+                       if i2-i1>1
+                       then fill ((i1+1,(None:>obj))::ls1) ls2
+                       else fill (p2::ls1) tl2
+                    | [],hd::tl  -> fill [hd] tl
+                    | lst,[] -> List.rev lst
+                  let res =fill [] (_lst@lst) 
+                  res
+                   
               let _asm = Assembly.Load(Assembly.GetExecutingAssembly().FullName)
               let _type = _asm.GetType("Actions")
               let methodName = ruleToActionMap.[_value.prodNum] 
               let _action = _type.GetMethod(methodName)              
               let values = 
                  let lst = (List.map getVal childs)
-                 let newPrefix = List.map (fun x -> x:>obj) (fillPrefix lst)
-                 newPrefix@(List.map snd lst)
-                 @(List.map (fun x -> x:>obj)(List.init ((_action.GetParameters()).Length - newPrefix.Length-lst.Length) (fun _ -> None)))
+                 let newPrefix = addNone lst
+                 let paramCount =(_action.GetParameters()).Length
+                 (List.map snd newPrefix)
+                 @(List.map (fun x -> x:>obj)(List.init (paramCount - newPrefix.Length) (fun _ -> None)))
               //let typeParam = Array.of_list (List.map (fun x -> x.GetType()) values) 
               //let x = _action.GetParameters();              
               let gen_action = 

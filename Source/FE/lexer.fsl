@@ -127,8 +127,9 @@ and  main = parse
      | identstart identbody *
        {  let text = lex2source lexbuf in
           match (fst text).[0] with
-          'a'..'z' -> LIDENT text
-          |_       -> UIDENT text
+          | c when List.mem c ['a'..'z'] -> LIDENT text
+          | c when List.mem c ['A'..'Z'] -> UIDENT text
+          |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF}
      | '{'

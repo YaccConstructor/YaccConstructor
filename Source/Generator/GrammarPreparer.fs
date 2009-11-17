@@ -30,7 +30,7 @@ let rec get_all_t grammar =
             | PRef(ch,_)
             | PLiteral(ch) as t -> Set.singleton (Source.toString ch)
             
-    List.fold (fun lst (production:IL.Rule.t<_,_>) -> (get_tok production.body)+lst) Set.Empty grammar
+    List.fold (fun lst (production:IL.Rule.t<_,_>) -> (get_tok production.body)+lst) Set.empty grammar
     
 let createStartRule ruleName productionName = 
     {name=ruleName;

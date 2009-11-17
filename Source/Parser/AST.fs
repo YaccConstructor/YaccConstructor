@@ -8,10 +8,7 @@
 
 
 #light
-
-namespace Yard.Core
-
-module AST
+module Yard.Core.AST
 
 module Value =
  begin 

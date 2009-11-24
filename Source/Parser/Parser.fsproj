@@ -54,6 +54,8 @@
     <Compile Include="AST.fs" />
     <Compile Include="test003.yrd.fs" />
     <Compile Include="TablesLoader.fs" />
+    <Compile Include="ParserState.fs" />
+    <Compile Include="ParserResult.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="ASTInterpretator.fs" />

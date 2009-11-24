@@ -8,7 +8,7 @@
 
 #light 
 namespace Yard.Core
-open Lexeme.Lexeme
+open Lexeme
 open Microsoft.FSharp.Compiler.CodeDom.Internal
 open Microsoft.FSharp.Compiler.CodeDom
 
@@ -27,8 +27,8 @@ type Parser(tables: Tables) = class
           
     let run input =  
         init input
-        let tableInterp = new TableInterpretator(tables)
-        tableInterp.Run get_next_ch (input_length())
+        let tableInterp = new TableInterpretator(tables,get_next_ch)
+        tableInterp.Run (input_length())
 
     member self.Run input = run input
 

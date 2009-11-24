@@ -20,7 +20,7 @@ open Microsoft.FSharp.Text.Parsing.ParseHelpers
   let o2l = function Some x -> [x] | None -> []
   let getList = function Some x -> x | None -> []
   (*let parse_error (s:string):unit = ()*)
-  let missing name = print_endline ("Missing " ^ name)
+  let missing name = print_endline ("Missing " + name)
   let createSeqElem bnd omitted r check =
       { binding = bnd; omit = omitted; rule = r; checker = check }
 

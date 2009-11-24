@@ -1,4 +1,6 @@
 ﻿
+namespace Yard.Core
+
 module Lexeme =
  begin 
   type t<'a> = {

@@ -21,7 +21,7 @@ let start_time = ref System.DateTime.Now
 let end_time   = ref System.DateTime.Now      
 
 let items,_grammar,_generate, ruleToActionMap=
-    let _items = ref Set.Empty
+    let _items = ref Set.empty
     let _grammar = ref[]
     let _ruleToActonMap = ref[]
     let generate rules path =

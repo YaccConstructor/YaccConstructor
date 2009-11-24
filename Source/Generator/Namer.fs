@@ -16,7 +16,7 @@ open Production
 //open Diagnostics
 
 (** prefix for all items created by Yard *)
-let withPrefix s = "yard_" ^ s
+let withPrefix s = "yard_" + s
 
 (** global variable for number of current generated rule *)
 let curNum = ref 1
@@ -37,7 +37,7 @@ let createNewName name =
     let newName = createName name in (curNum := (!curNum) + 1 ; newName)
 
 module Names =
- struct
+ begin
 //sig 
 //  (** metarule name for option: "item?" *)
 //  val opt:string 
@@ -112,7 +112,7 @@ let someAction = sprintf " Some %s "
 let noneAction = " None "
 
 (** prefix for Elkhound bindings *)
-let withElkPrefix x = "_elk_" ^ x
+let withElkPrefix x = "_elk_" + x
 
 (** token type (need for using bindings with tokens) *)
 let withTokenPrefix (* token name *) = 

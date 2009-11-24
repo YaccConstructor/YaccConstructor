@@ -17,7 +17,7 @@ open TransformAux
 let isMetaRule (r:Rule.t<'a,'b>) = r.metaArgs <> []
 
 (** find metarule with given name in hash map of collected metarules *)
-let findMetaRule (tbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >) mName = 
+let findMetaRule (tbl:Hashtbl.t<string,Rule.t<Source.t,Source.t>>) mName = 
     match tbl.TryFind mName with
     | None -> failwith "undeclared metarule "(*reportError ("undeclared metarule " ^ mName)*) ; None
     | res    -> res

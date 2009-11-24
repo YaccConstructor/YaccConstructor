@@ -23,11 +23,11 @@ type ASTInterpretator(tables: Tables) = class
         | AST.Node(childs,name,_value) -> 
               let getVal x = 
                    let _val = interp x
-                   match (_val:AST.Value.t<_,_>).value with 
-                   | AST.Value.NodeV(x) -> _val.seqNum,(Some((_val.seqNum),x):>obj)
-                   | AST.Value.LeafV(x) -> _val.seqNum,(Some((_val.seqNum),x.value):>obj)
+                   match (_val:Value.t<_,_>).value with 
+                   | Value.NodeV(x) -> _val.seqNum,(Some((_val.seqNum),x):>obj)
+                   | Value.LeafV(x) -> _val.seqNum,(Some((_val.seqNum),x.value):>obj)
               let fillPrefix lst = 
-                  let localMaxSeqNum = fst  (List.hd lst)
+                  let localMaxSeqNum = fst  (List.head lst)
                   let prefix = List.init (localMaxSeqNum) (fun i -> i,(None:>obj))
                   prefix  
               let addNone lst = 
@@ -62,9 +62,9 @@ type ASTInterpretator(tables: Tables) = class
                      let count = _action.GetGenericArguments().Length
                      _action.MakeGenericMethod(Array.init count (fun _ -> (new System.Object()).GetType()))
                       else _action
-              let args =  Array.of_list values
+              let args =  Array.ofList values
               let res = gen_action.Invoke(null, args)              
-              {_value with value = AST.Value.NodeV(res)}
+              {_value with value = Value.NodeV(res)}
         | AST.Leaf(name,value)        -> value
                 
     member self.Interp tree = interp tree

@@ -62,7 +62,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
       match bindingLst with
       | [] -> ""
       | hd::[] -> hd
-      | hd::tl -> List.fold (fun buf name -> buf + " " + name) (List.hd  bindingLst ) (List.tl  bindingLst)
+      | hd::tl -> List.fold (fun buf name -> buf + " " + name) (List.head  bindingLst ) (List.tail  bindingLst)
 
   let genBynding bnd var code =
       let codeIsEmpty = String.trim [' ';'\n'] code <> ""
@@ -84,7 +84,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
                            "//it is need for correct type inference \nignore(arg1:(obj*obj));"*) 
          
   let genParams bindingLst =
-      List.fold (fun buf (_,name) -> buf + " " + name) (snd (List.hd  bindingLst )) (List.tl  bindingLst)
+      List.fold (fun buf (_,name) -> buf + " " + name) (snd (List.head  bindingLst )) (List.tail  bindingLst)
 
          
   let genSeq code bindingLst action=                 
@@ -101,7 +101,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
       
   let genAlt code1 code2 bindings1 bindings2 =
     "fun " + (genParams2 (bindings1@bindings2)) + " -> \n  " +
-    "if not(Option.isNone " + List.hd bindings1 + ")\n" +
+    "if not(Option.isNone " + List.head bindings1 + ")\n" +
     "then ("+ code1 + ")" + genParams2 bindings1 + "\n" +
     "else ("+ code2 + ")"  + genParams2 bindings2 + "\n"
      

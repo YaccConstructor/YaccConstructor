@@ -61,10 +61,10 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
          (([s,Some(t,num),f],s,f),(code,["x"+num.ToString()]))
       | x -> failwith "You should support new elem" 
           
-  let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.of_list[a;c])) Set.Empty rules      
+  let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.ofList[a;c])) Set.empty rules      
        
   let e_closure (rules,s,f) =    
-      let exists_e_elt = ref Set.Empty               
+      let exists_e_elt = ref Set.empty               
       let closure q = 
           let q' = ref (Set.singleton q)
           let l = ref 0
@@ -79,21 +79,21 @@ type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
        in
        let get_rpart stt = set [for state,symbol,next in  rules do if state=stt && symbol<>None then yield symbol,next]
 
-       let closure_set = Set.map (fun x -> exists_e_elt:=Set.Empty;(x,closure x)) (states rules)
+       let closure_set = Set.map (fun x -> exists_e_elt:=Set.empty;(x,closure x)) (states rules)
        let is_subset sttset (_,elt:Set<'a>) = 
            if Set.exists (fun x -> (elt.IsSubsetOf x)&&(not(elt.Equals x))) sttset 
            then Set.remove elt sttset 
            else sttset    
-       let new_states = Set.fold is_subset (Set.of_list(snd(List.unzip (Set.to_list closure_set)))) closure_set
+       let new_states = Set.fold is_subset (Set.ofList(snd(List.unzip (Set.toList closure_set)))) closure_set
        let new_automata = 
            List.concat [for stt in new_states ->
                           List.concat[for (x,y,z) in rules do
                                         if (Set.exists ((=)x) stt)&&(Option.isSome y)
                                         then yield [for q in new_states do
                                                       if Set.exists ((=)z) q then yield (stt,y,q)]]]     
-       let alter_name = dict (List.zip (Set.to_list new_states) [0..new_states.Count-1])      
+       let alter_name = dict (List.zip (Set.toList new_states) [0..new_states.Count-1])      
        let new_rule (state,symbol,next) = alter_name.[state],symbol,alter_name.[next]
-       let clean_new_automata = Set.map new_rule (Set.of_list new_automata)
+       let clean_new_automata = Set.map new_rule (Set.ofList new_automata)
        let set_alter_name = Set.map (fun stt -> alter_name.[stt])     
        let find_state stt = set_alter_name (Set.filter (fun x -> Set.exists ((=)stt) x) new_states)
        let new_finale_state = find_state f

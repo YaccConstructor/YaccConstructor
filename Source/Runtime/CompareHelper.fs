@@ -1,4 +1,12 @@
-﻿module Yard.Core.CompareHelper
+﻿// CompareHelper.fs
+//
+// Copyright 2009 Semen Grigorev
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+module Yard.Core.CompareHelper
 
 let inline equalsOn f x (yobj:obj) =
     match yobj with
@@ -7,7 +15,7 @@ let inline equalsOn f x (yobj:obj) =
 
 let inline hashOn f x =  hash (f x)
 
-let inline compareOn f x (yobj: obj) =
-    match yobj with
+let inline compareOn f x (mObj: obj) =
+    match mObj with
     | :? 'T as y -> compare (f x) (f y)
-    | _ -> invalidArg "yobj" "cannot compare values of different types"
+    | _ -> invalidArg "mObj" "cannot compare values of different types"

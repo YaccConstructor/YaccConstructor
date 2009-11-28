@@ -38,50 +38,55 @@ type TableInterpretator (tables: Tables,getLexeme) = class
                                 -> State(z,state.trees)}}             
                                      
   let rec climb = 
-      memoize 
-          (fun parserState ->  
-              let states,symbol,position = parserState.states, parserState.symbol, parserState.position
-                   
-              if Set.isEmpty states
-              then Set.empty
-              else    
-                  let gt = goto (states,symbol)     
-                  let new_states = parse (ParserState(gt,symbol,position))
-                  #if DEBUG      
-                  Log.print_climb_info position symbol states gt new_states        
-                  #endif             
-                  if Set.exists (fun (parserResult:ParserResult<_,_,_>) -> 
-                                      let item = parserResult.state.item 
-                                      is_start item.prod_name && item.next_num=None && position=1) 
-                                 new_states     
-                  then set <|seq {for state in states do if state.item.next_num = None then yield ParserResult(state,1)}
-                  else
-                    seq {for (parserResult:ParserResult<_,_,_>) in new_states do
-                         let item = parserResult.state.item
-                         let trees = parserResult.state.trees
-                         let prev_itms = prevItem item tables.Items                   
-                         if Set.exists (fun itm -> Option.get itm.symb = symbol && itm.item_num=item.s) prev_itms 
-                            && not(is_start item.prod_name)  
-                         then 
-                            let create_new_item (state:State<_,_,_>) =
-                               #if DEBUG
-                                  //printf "\n\n current state:\n %A \n\n subtree_1 \n %A \n\n subtree_2\n %A \n tree:\n%A\n" item _tree tree [Node(_tree@tree,item.prod_name,{prodNum = item.prod_num;seqNum = _seqNum;varNum =1;value = Value.NodeV(null)})]
-                               #endif 
-                                  State(state.item,
-                                        ([Node(state.trees@trees,item.prod_name,
-                                                {prodNum = item.prod_num;
-                                                 seqNum = item.seq_number;                                                          
-                                                 varNum = 1;
-                                                 value = Value.NodeV(null:obj)})])
-                                        )      
-                            yield Set.filter (fun (parserResult:ParserResult<_,_,_>) -> parserResult.state.item.item_num > 0)
-                                             (climb(ParserState(Set.map create_new_item states,item.prod_name,position)))
-                         if Set.exists (fun (state:State<_,_,_>) -> Set.exists ((=)item) (nextItem state.item tables.Items))
-                                       states
-                         then yield Set.map (fun itm -> ParserResult(State(itm, (states.MinimumElement.trees)@trees),position))
-                                            prev_itms
-                          }  |> Set.unionMany 
-      )
+    let inline calculate states symbol position=    
+      let gt = goto (states,symbol)     
+      let new_states = parse (ParserState(gt,symbol,position))
+      #if DEBUG      
+      Log.print_climb_info position symbol states gt new_states        
+      #endif     
+      
+      let inline checker (parserResult:ParserResult<_,_,_>) =
+        let item = parserResult.state.item 
+        is_start item.prod_name && item.next_num=None && position=1
+                
+      if Set.exists checker new_states     
+      then set <|seq {for state in states do
+                        if state.item.next_num = None 
+                        then yield ParserResult(state,1)}
+      else
+        seq {for (parserResult:ParserResult<_,_,_>) in new_states do
+               let item,trees = parserResult.state.item, parserResult.state.trees                             
+               let prev_itms = prevItem item tables.Items
+               let inline checker item = Option.get item.symb = symbol && item.item_num=item.s
+               if Set.exists checker prev_itms && not(is_start item.prod_name)  
+               then 
+                  let create_new_item (state:State<_,_,_>) =
+                    let newNode = 
+                      Node(state.trees@trees
+                           ,item.prod_name
+                           ,{prodNum = item.prod_num;
+                             seqNum = item.seq_number;                                                          
+                             varNum = 1;
+                             value = Value.NodeV(null:obj)})
+                    State(state.item,[newNode]) 
+                  let newStates = climb(ParserState(Set.map create_new_item states, item.prod_name, position))
+                  let inline filter (parserResult:ParserResult<_,_,_>) = parserResult.state.item.item_num > 0
+                  yield Set.filter filter newStates
+               let inline checker (state:State<_,_,_>) = Set.exists ((=)item) (nextItem state.item tables.Items)
+               if Set.exists checker states
+               then 
+                  let inline createResult item = 
+                    ParserResult(State(item,states.MinimumElement.trees@trees), position)
+                  yield Set.map createResult prev_itms
+              }  |> Set.unionMany  
+               
+    let climbFunction (parserState:ParserState<_,_,_>) =
+      let states,symbol,position = parserState.states, parserState.symbol, parserState.position                      
+      if Set.isEmpty states
+      then Set.empty
+      else calculate states symbol position  
+ 
+    memoize(fun parserState -> climbFunction parserState)
 
   and parse =
       memoize         
@@ -101,9 +106,7 @@ type TableInterpretator (tables: Tables,getLexeme) = class
                   
             let new_states = Set.filter (fun (state:State<_,_,_>) -> state.item.next_num = None) states          
             let result_states states create_tree =
-                  set <| seq{ for (state:State<_,_,_>) in states
-                              -> State(state.item,create_tree state.item)}
-                  
+                  set <| seq{ for (state:State<_,_,_>) in states -> State(state.item,create_tree state.item)}                  
             Set.map (fun state -> ParserResult(state,position))(result_states new_states (fun _ -> []))
             + 
             if (getLexeme position = m_end) 

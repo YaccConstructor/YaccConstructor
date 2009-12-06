@@ -16,12 +16,13 @@ module Value =
   type value<'a,'b> = 
     | LeafV of Lexeme.t<'a> 
     | NodeV of 'b
+    override self.ToString() = match self with |NodeV(x) -> "null"|LeafV(x) -> x.value.ToString()
      
   type t<'a,'b> = {
     prodNum : int;
     seqNum  : int;
     varNum  : int;
-    value   : value<'a,'b>;   
+    value   : value<'a,'b>;    
   }
 end
 
@@ -36,10 +37,10 @@ module AST =
         match item with
           Node (lst,name,value) -> 
                 String.concat "" 
-                              ([iter i;"<NODE name=\"";name;"\" seqNum=\"";value.seqNum.ToString();"\">\n"]
+                              ([iter i;"<NODE name=\"";name;"\" seqNum=\"";value.seqNum.ToString();"\" value=\"";value.value.ToString();"\">\n"]
                                @(List.map (dump_tree (i+1)) lst)@[iter i;"</NODE>\n"])
         | Leaf (name,value)     -> 
-               String.concat "" [iter i;"<LEAF name=\"";name;"\" seqNum=\"";value.seqNum.ToString();"\" />\n"]        
+               String.concat "" [iter i;"<LEAF name=\"";name;"\" seqNum=\"";value.seqNum.ToString();"\" value=\"";value.value.ToString();"\"/>\n"]        
         
     let print_tree tree = System.Console.WriteLine (dump_tree 0 tree)
  end   

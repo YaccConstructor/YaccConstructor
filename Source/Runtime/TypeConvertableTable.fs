@@ -12,7 +12,7 @@ open Yard.Core
 open System.Collections.Generic
 
 [<AbstractClass>]
-type TypeConvertableTable<'b,'c  when 'b :equality>(fileName) = 
+type TypeConvertableTable<'b,'c  when 'b:equality>(fileName) = 
     inherit Table<List<KeyValuePair<'b,'c>>>(fileName)
     
     abstract ConvertTypeOnSave: IDictionary<'b,'c>  -> List<KeyValuePair<'b,'c>>

@@ -12,7 +12,7 @@ open Lexeme
 open Microsoft.FSharp.Compiler.CodeDom.Internal
 open Microsoft.FSharp.Compiler.CodeDom
 
-type Parser(tables: Tables) = class
+type Parser(tables: TablesLoader) = class
     
     let get_next_ch,input_length,init =       
       let lex_list = ref []

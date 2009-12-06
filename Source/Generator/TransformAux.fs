@@ -46,6 +46,6 @@ let createParams =
 let list2opt = function
     | []     -> None
     | [h]    -> Some h (** list contains only one element!!! *)
-    | _other -> invalid_arg "list2opt" 
+    | _other -> invalidArg "list2opt" "Inpul list cannot contains more than one element." 
 
 (* end of TransformAux *)

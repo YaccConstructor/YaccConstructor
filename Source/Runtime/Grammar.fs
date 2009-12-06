@@ -6,10 +6,8 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-#light "off"
 module Yard.Core.Grammar
-module Item = 
-  begin   
+module Item = begin   
    type t<'a> = {prod_num:int;
                  prod_name:string;
                  item_num:int;

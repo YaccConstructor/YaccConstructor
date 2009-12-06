@@ -14,7 +14,7 @@ open Microsoft.FSharp.Compiler.CodeDom
 open System.CodeDom.Compiler
 open System.Reflection
 
-type ASTInterpretator(tables: Tables) = class
+type ASTInterpretator(tables: TablesLoader) = class
 
     let ruleToActionMap = tables.RuleToActionMap
     

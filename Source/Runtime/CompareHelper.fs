@@ -1,4 +1,4 @@
-﻿// CompareHelper.fs
+﻿// CompareHelper.fs contains
 //
 // Copyright 2009 Semen Grigorev
 //
@@ -8,8 +8,8 @@
 
 module Yard.Core.CompareHelper
 
-let inline equalsOn f x (yobj:obj) =
-    match yobj with
+let inline equalsOn f x (mObj:obj) =
+    match mObj with
     | :? 'T as y -> (f x = f y)
     | _ -> false
 

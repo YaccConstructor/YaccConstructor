@@ -84,7 +84,7 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
             | POpt  _ -> Names.opt 
             | PSome _ -> Names.some 
             | PMany _ -> Names.many 
-            | _       -> invalid_arg "nameOf"
+            | _       -> invalidArg "nameOf" "Argument may be only POpt, PSome or PMany."
         in
         function
         | POpt  r as r' -> getMeta rs _params (nameOf r') r

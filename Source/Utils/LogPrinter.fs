@@ -6,8 +6,6 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-#light 
-
 module Log
 
 let print_goto x q cl = printf "\n GOTO \n GOTO x : %A \n GOTO cl : %A \n" x cl

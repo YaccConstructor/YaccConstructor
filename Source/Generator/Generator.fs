@@ -6,8 +6,6 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-#light
-
 module Yard.Core.Generator
 
 open IL.Production
@@ -25,26 +23,28 @@ let items,_grammar,_generate, ruleToActionMap=
     let _grammar = ref[]
     let _ruleToActonMap = ref[]
     let generate rules path =
-       let codeGenerator = new CodeGenerator.CodeGenerator(path,path+".fs")
+       let codeGenerator = new CodeGenerator(path,path+".fs")
        codeGenerator.Write (codeGenerator.GenHeader())
        codeGenerator.Write (codeGenerator.GenDefaultFunctions)
-       let finitAutomata = new FinitAutomata.FinitAutomata(codeGenerator) 
+       let finitAutomata = new FinitAutomata(codeGenerator) 
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
        _items:= List.map (fun (i,rl) ->                 
                 let (itm,s,f),code,binding = finitAutomata.FA_rules rl.body
                 let topLevelBindingName = rl.name+i.ToString()+"_action"
                 _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
-                if rl.name<>"_yard_start" then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code binding)
-                let get_symb =  function 
-                                Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
-                                | _ -> failwith "Generator error." 
+                if rl.name<>"_yard_start" 
+                then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code binding)
+                let get_symb = function 
+                                 Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
+                                 | _ -> failwith "Generator error." 
                 let getSeqNum = function 
-                                Some(_,seqNum) -> seqNum                                                                                  
-                                | _ -> failwith "Generator error. Can not find seqNumber"                                                                          
+                                 Some(_,seqNum) -> seqNum                                                                                  
+                                 | _ -> failwith "Generator error. Can not find seqNumber"                                                                          
 #if DEBUG
                 Log.print_item itm s f;
 #endif
+                //let createItem 
                 Set.fold (fun buf (a,b,c) ->                                                    
                                    let new_item  item_num next_num =
                                       {prod_num = i;                                      
@@ -95,7 +95,9 @@ let goto_set ()=
         calc_closure_set()
         let closure = Set.fold (fun y x -> y + get_closure_set().[x]) Set.empty q
         Set.unionMany 
-          <|seq {for item in closure do if x = Option.get item.symb then yield Utils.nextItem item (items())}
+          <|seq {for item in closure do 
+                  if x = Option.get item.symb 
+                  then yield Utils.nextItem item (items())}
     let toString = function | PToken y |PLiteral y | PRef (y,_) -> Source.toString y 
                             | _ -> ""
     let goto_data symbol item = 
@@ -108,19 +110,27 @@ let goto_set ()=
     dict <| Set.fold (fun buf symbol -> buf@[for item in (items()) -> goto_data symbol item]) 
                       [] (GrammarPreparer.get_all_t(_grammar()))
                        
-let generate input_grammar= 
+let generate input_grammar = 
     let head,rules,foot = GrammarPreparer.prepare input_grammar
     let addStartRule rules = 
         List.fold (fun rules rule_name -> (GrammarPreparer.createStartRule "_yard_start" rule_name)::rules)
                   (replace_Public rules) (GrammarPreparer.get_start_nterms rules)
     _generate(ExpandMeta.expandMetaRules (addStartRule rules))(input_grammar.info.fileName);
+    
 #if DEBUG    
     printf "Transformed grammar \n %A\n" <|_grammar()
-    printf "\n Token list: \n  " ;Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))
+    printf "\n Token list: \n  ";
+    Set.iter (printf "%A;")(GrammarPreparer.get_all_t(_grammar()))
     printf "\n Start Nterms: \n %A " <|GrammarPreparer.get_start_nterms (_grammar())
-#endif            
-    IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(goto_set())) ; 
-    IO.writeValue (input_grammar.info.fileName + ".items.dta") (items());
-    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") (GrammarPreparer.get_start_nterms (_grammar()));
-    IO.writeValue (input_grammar.info.fileName + ".rule_to_action.dta") (System.Linq.Enumerable.ToList(ruleToActionMap()));
-    printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time));
+#endif
+
+    let gotoSet = goto_set()
+    let items = items()
+    let startNTerms = GrammarPreparer.get_start_nterms (_grammar())
+    let ruleToActionMap = ruleToActionMap()
+    IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(gotoSet ))
+    IO.writeValue (input_grammar.info.fileName + ".items.dta") items
+    IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") startNTerms
+    IO.writeValue (input_grammar.info.fileName + ".rule_to_action.dta") (System.Linq.Enumerable.ToList(ruleToActionMap))
+    printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))
+    (gotoSet,items,startNTerms,ruleToActionMap)

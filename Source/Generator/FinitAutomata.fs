@@ -6,15 +6,13 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-#light
-
-module Yard.Core.FinitAutomata
+namespace Yard.Core
 
 open IL.Production
 open IL.Source
 open Utils
 
-type FinitAutomata (codeGenerator:CodeGenerator.CodeGenerator) = class
+type FinitAutomata (codeGenerator:CodeGenerator) = class
   let varEnumerator = new Enumerator()
   let altEnumerator = new Enumerator()
   let stateEnumerator = new Enumerator()

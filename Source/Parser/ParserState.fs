@@ -14,17 +14,20 @@ open Yard.Core.CompareHelper
 type State<'symb,'leafVal,'nodeVal  when 'symb : equality and 'symb : comparison > = struct
  val item : Grammar.Item.t<'symb> 
  val trees: AST.t<'leafVal,'nodeVal> list  
- static member Item (x:State<_,_,_>) = x.item 
- override x.Equals y = equalsOn State<_,_,_>.Item x y
- override x.GetHashCode() = hashOn State<_,_,_>.Item x 
+ static member Item (x:State<_,_,_>) = x.item
+ override self.ToString() = 
+  String.concat "" [  "Item: "; self.item.ToString();"\n";"Trees"
+                    ; String.concat "\n" (List.map (AST.dump_tree 0) self.trees);"\n"]  
+ override self.Equals y = equalsOn State<_,_,_>.Item self y
+ override self.GetHashCode() = hashOn State<_,_,_>.Item self 
  interface System.IComparable with
-      member x.CompareTo y = compareOn State<_,_,_>.Item x y
+      member self.CompareTo y = compareOn State<_,_,_>.Item self y
  new (item,trees) = {item=item;trees = trees}     
 end
 
-type public ParserState<'symb,'leafVal,'nodeVal when 'symb : equality and 'symb : comparison> = struct
+type ParserState<'symb,'leafVal,'nodeVal when 'symb : equality and 'symb : comparison> = struct
  val position : int;
  val symbol : string;
- val states : State<'symb,'leafVal,'nodeVal> Set; 
+ val states : State<'symb,'leafVal,'nodeVal> Set;  
  new (states,symbol,position) = {states=states;symbol=symbol;position=position}
 end

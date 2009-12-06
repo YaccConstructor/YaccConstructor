@@ -13,7 +13,7 @@ open AST
 open Utils
 open Lexeme 
 
-type TableInterpretator (tables: Tables,getLexeme) = class
+type TableInterpretator (tables: TablesLoader,getLexeme) = class
 
   let m_end = {name = "$";value = "$"}
              
@@ -35,29 +35,29 @@ type TableInterpretator (tables: Tables,getLexeme) = class
       Set.unionMany 
         <| seq { for (state:State<_,_,_>) in states 
                  -> set <| seq {for z in (tables.GotoSet.[hash (state.item,symbol)]) 
-                                -> State(z,state.trees)}}             
+                                -> State(z,state.trees)}}
                                      
   let rec climb = 
-    let inline calculate states symbol position=    
+    let calculate states symbol position=    
       let gt = goto (states,symbol)     
       let new_states = parse (ParserState(gt,symbol,position))
       #if DEBUG      
       Log.print_climb_info position symbol states gt new_states        
       #endif     
       
-      let inline checker (parserResult:ParserResult<_,_,_>) =
+      let checker (parserResult:ParserResult<_,_,_>) =
         let item = parserResult.state.item 
         is_start item.prod_name && item.next_num=None && position=1
                 
       if Set.exists checker new_states     
       then set <|seq {for state in states do
-                        if state.item.next_num = None 
+                        if state.item.next_num.IsNone 
                         then yield ParserResult(state,1)}
       else
         seq {for (parserResult:ParserResult<_,_,_>) in new_states do
-               let item,trees = parserResult.state.item, parserResult.state.trees                             
+               let item,trees,position = parserResult.state.item, parserResult.state.trees,parserResult.position                             
                let prev_itms = prevItem item tables.Items
-               let inline checker item = Option.get item.symb = symbol && item.item_num=item.s
+               let checker item = Option.get item.symb = symbol && item.item_num=item.s
                if Set.exists checker prev_itms && not(is_start item.prod_name)  
                then 
                   let create_new_item (state:State<_,_,_>) =
@@ -70,12 +70,12 @@ type TableInterpretator (tables: Tables,getLexeme) = class
                              value = Value.NodeV(null:obj)})
                     State(state.item,[newNode]) 
                   let newStates = climb(ParserState(Set.map create_new_item states, item.prod_name, position))
-                  let inline filter (parserResult:ParserResult<_,_,_>) = parserResult.state.item.item_num > 0
+                  let filter (parserResult:ParserResult<_,_,_>) = parserResult.state.item.item_num > 0
                   yield Set.filter filter newStates
-               let inline checker (state:State<_,_,_>) = Set.exists ((=)item) (nextItem state.item tables.Items)
+               let checker (state:State<_,_,_>) = Set.exists ((=)item) (nextItem state.item tables.Items)
                if Set.exists checker states
                then 
-                  let inline createResult item = 
+                  let createResult item = 
                     ParserResult(State(item,states.MinimumElement.trees@trees), position)
                   yield Set.map createResult prev_itms
               }  |> Set.unionMany  
@@ -84,8 +84,8 @@ type TableInterpretator (tables: Tables,getLexeme) = class
       let states,symbol,position = parserState.states, parserState.symbol, parserState.position                      
       if Set.isEmpty states
       then Set.empty
-      else calculate states symbol position  
- 
+      else calculate states symbol position
+
     memoize(fun parserState -> climbFunction parserState)
 
   and parse =

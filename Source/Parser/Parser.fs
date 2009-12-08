@@ -28,7 +28,9 @@ type Parser(tables: TablesLoader) = class
     let run input =  
         init input
         let tableInterp = new TableInterpretator(tables,get_next_ch)
-        tableInterp.Run (input_length())
+        let result = tableInterp.Run (input_length())
+        let getForest (parserResult:ParserResult<_,_,_>) = parserResult.state.trees
+        List.concat(List.map getForest (List.ofSeq result))
 
     member self.Run input = run input
 

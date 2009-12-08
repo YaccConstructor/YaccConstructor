@@ -10,13 +10,13 @@ namespace Yard.Core
 
 open Yard.Core.CompareHelper
 
-[<Struct;StructuralComparison;StructuralEquality>]
+[<Struct>]
 type State<'symb,'leafVal,'nodeVal  when 'leafVal : equality and 'leafVal : comparison > =
  val item : Grammar.Item.t<'symb> 
  val trees : AST.t<'leafVal,'nodeVal> list  
  new (item,trees) = {item=item;trees = trees}     
 
-[<StructuralComparison; StructuralEquality;Struct>]
+[<Struct>]
 type ParserState<'symb,'leafVal,'nodeVal 
                   when 'leafVal : equality and 'leafVal : comparison 
                   and 'symb : equality and 'symb : comparison> = 

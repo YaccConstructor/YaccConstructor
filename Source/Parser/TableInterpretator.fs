@@ -34,8 +34,8 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
   let goto (states,symbol) = 
       Set.unionMany 
         <| seq { for (state:State<_,_,_>) in states 
-                 -> set <| seq {for z in (tables.GotoSet.[hash (state.item,symbol)]) 
-                                -> State(z,state.trees)}}
+                 -> set <| seq {for item in (tables.GotoSet.[hash (state.item,symbol)]) 
+                                -> State(item,state.trees)}}
                                     
   let rec climb = 
     let calculate states symbol position=    
@@ -65,7 +65,7 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                       Node(state.trees@trees
                            ,item.prod_name
                            ,{prodNum = item.prod_num;
-                             seqNum = item.seq_number;                                                          
+                             seqNum = 1;//item.seq_number;                                                          
                              varNum = 1;
                              value = Value.NodeV(null:obj)})
                     State(state.item,[newNode])                   

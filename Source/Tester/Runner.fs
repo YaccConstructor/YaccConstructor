@@ -17,10 +17,9 @@ let  runTest testFilePath =
     let parser = new Parser(tables)
     
     //now we have not lexer. Lists from Test module are emulation of input stream
-    let inputStream = Test.test1
-    let result = parser.Run inputStream    
-    let trees = List.concat(List.map(fun (parserResult:ParserResult<_,_,_>) -> parserResult.state.trees) (List.ofSeq result))
-    Seq.iter(fun b -> AST.print_tree b) (Set.ofSeq trees)
+    let inputStream = Test.test011_2
+    let trees = parser.Run inputStream        
+    Seq.iter(fun b -> AST.print_tree b) trees
     printfn "Parser get %A dirivation tree" trees.Length
     //let astInterp = new ASTInterpretator(tables)    
     //let res_2 = List.map astInterp.Interp trees

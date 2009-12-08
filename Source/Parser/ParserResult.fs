@@ -8,6 +8,7 @@
 
 namespace Yard.Core
 
+[<StructuralComparison;StructuralEquality>]
 type ParserResult<'symb,'leafVal,'nodeVal when 'leafVal : equality and 'leafVal : comparison> = struct
  val position : int;
  val state : State<'symb,'leafVal,'nodeVal>; 

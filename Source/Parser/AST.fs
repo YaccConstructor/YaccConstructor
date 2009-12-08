@@ -18,13 +18,19 @@ module Value =
     | LeafV of Lexeme.t<'a> 
     | NodeV of 'b
     
-    member self.GetValue x = match x with LeafV(a) -> Some(a)|NodeV(a) -> None
-    override self.ToString() = match self with |NodeV(x) -> "null"|LeafV(x) -> x.value.ToString()
+    member self.GetValue x = 
+      match x with 
+      | LeafV(a) -> Some(a)
+      | NodeV(a) -> None      
+    override self.ToString() = 
+      match self with 
+      | NodeV(x) -> "null"
+      | LeafV(x) -> x.value.ToString()
     override self.Equals y = equalsOn self.GetValue self y
     override self.GetHashCode() = hashOn self.GetValue self 
-    interface System.IComparable with
-      member self.CompareTo y = compareOn self.GetValue self y
-     
+    interface System.Collections.IStructuralComparable with      
+      member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'a,'b>))
+         
   type t<'a,'b when 'a : equality and 'a : comparison> = {
     prodNum : int;
     seqNum  : int;

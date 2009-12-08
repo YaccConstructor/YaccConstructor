@@ -8,17 +8,24 @@
 
 namespace Yard.Core
 
+open Yard.Core.CompareHelper
+
 module Value = 
  begin 
-  //type cobj =
-   //with compare x y = 1
-   
-  type value<'a,'b> = 
+
+  [<CustomEquality; CustomComparison>] 
+  type value<'a,'b when 'a : equality and 'a : comparison> = 
     | LeafV of Lexeme.t<'a> 
     | NodeV of 'b
+    
+    member self.GetValue x = match x with LeafV(a) -> Some(a)|NodeV(a) -> None
     override self.ToString() = match self with |NodeV(x) -> "null"|LeafV(x) -> x.value.ToString()
+    override self.Equals y = equalsOn self.GetValue self y
+    override self.GetHashCode() = hashOn self.GetValue self 
+    interface System.IComparable with
+      member self.CompareTo y = compareOn self.GetValue self y
      
-  type t<'a,'b> = {
+  type t<'a,'b when 'a : equality and 'a : comparison> = {
     prodNum : int;
     seqNum  : int;
     varNum  : int;
@@ -27,8 +34,8 @@ module Value =
 end
 
 module AST =
-  begin
-    type t<'a,'b> = 
+  begin    
+    type t<'a,'b when 'a : equality and 'a : comparison> = 
          | Node  of (t<'a,'b> list)*string*Value.t<'a,'b>
          | Leaf  of string*Value.t<'a,'b>
              

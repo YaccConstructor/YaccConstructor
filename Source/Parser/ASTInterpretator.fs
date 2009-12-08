@@ -34,14 +34,14 @@ type ASTInterpretator(tables: TablesLoader) = class
                   let _lst = fillPrefix lst
                   let rec fill lst1 lst2 =
                     match lst1,lst2 with 
-                    | ((i1,v1)::tl1) as ls1 ,(((i2,_)as p2 ::tl2) as ls2)-> 
+                    | ((i1,v1)::tl1) as ls1 ,(((i2,_)as p2::tl2) as ls2)-> 
                        if i2-i1>1
                        then fill ((i1+1,(None:>obj))::ls1) ls2
                        else fill (p2::ls1) tl2
                     | [],hd::tl  -> fill [hd] tl
                     | lst,[] -> List.rev lst
-                  let res =fill [] (_lst@lst) 
-                  res
+                  let res = fill [] (_lst@lst) 
+                  res 
                    
               let _asm = Assembly.Load(Assembly.GetExecutingAssembly().FullName)
               let _type = _asm.GetType("Actions")

@@ -20,10 +20,13 @@ let  runTest testFilePath =
     let inputStream = Test.test1_0_1
     let result = parser.Run inputStream    
     let trees = List.concat(List.map(fun (parserResult:ParserResult<_,_,_>) -> parserResult.state.trees) (List.ofSeq result))
+    //Seq.iter(fun b -> AST.print_tree b) trees    
+    //printfn "Parser get %A dirivation tree" trees.Length;
+    //let trees = List.concat(Set.map(fun ((a,b),i) -> b) result)
     Seq.iter(fun b -> AST.print_tree b) trees    
-    printfn "Parser get %A dirivation tree" trees.Length;
-    let astInterp = new ASTInterpretator(tables)    
-    let res_2 = List.map astInterp.Interp trees
-    List.iter (printf "\nresult: %A") res_2
+    printfn "Parser get %A dirivation tree" trees.Length
+    //let astInterp = new ASTInterpretator(tables)    
+    //let res_2 = List.map astInterp.Interp trees
+    //List.iter (printf "\nresult: %A") res_2
     
-do runTest @"..\..\..\..\Tests\test005.yrd"
+do runTest @"..\..\..\..\Tests\test011.yrd"

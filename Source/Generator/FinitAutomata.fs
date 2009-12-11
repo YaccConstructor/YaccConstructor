@@ -9,15 +9,8 @@
 namespace Yard.Core
 
 [<Struct>]
-type Rule<'a> = 
-  val start : int
-  val symbol : Option<'a>
-  val finish : int
-  new (start,symbol,finish) = {start=start;symbol=symbol;finish=finish}
-
-[<Struct>]
 type FinitAutomata<'a,'b> =
- val rules : List<Rule<'a>>
+ val rules : List<int*Option<'a>*int>
  val startState : int
  val finaleState : 'b
  new (rules,startState,finaleState) = {rules=rules;startState=startState;finaleState=finaleState}

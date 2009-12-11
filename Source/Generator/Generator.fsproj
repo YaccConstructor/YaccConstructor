@@ -57,6 +57,7 @@
     <Compile Include="ExpandAlter.fs" />
     <Compile Include="CodeGenerator.fs" />
     <Compile Include="FinitAutomata.fs" />
+    <Compile Include="FinitAutomataCreator.fs" />
     <Compile Include="GrammarPreparer.fs" />
     <Compile Include="PrettyPrinter.fs" />
     <Compile Include="Generator.fs" />

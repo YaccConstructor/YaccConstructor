@@ -29,39 +29,39 @@ let items,_grammar,_generate, ruleToActionMap=
        let finitAutomata = new FinitAutomataCreator(codeGenerator) 
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
-       _items:= List.map (fun (i,rl) ->                 
-                let (itm,s,f),code,binding = finitAutomata.FA_rules rl.body
-                let topLevelBindingName = rl.name+i.ToString()+"_action"
-                _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
-                if rl.name<>"_yard_start" 
-                then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code binding)
-                let get_symb = function 
-                                 Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
-                                 | _ -> failwith "Generator error." 
-                let getSeqNum = function 
-                                 Some(_,seqNum) -> seqNum                                                                                  
-                                 | _ -> failwith "Generator error. Can not find seqNumber"                                                                          
-#if DEBUG
-                Log.print_item itm s f;
-#endif
-                //let createItem 
-                Set.fold (fun buf (a,b,c) ->                                                    
-                                   let new_item  item_num next_num =
-                                      {prod_num = i;                                      
-                                       prod_name = rl.name;
-                                       item_num = item_num;
-                                       symb = get_symb b;                                                                           
-                                       next_num = next_num;
-                                       seq_number = getSeqNum b;
-                                       s=s;
-                                       f=f                                                                                          
-                                      }
-                                   buf + Set.singleton(new_item a (Some(c)))+
-                                    if Set.exists ((=)c) f
-                                    then Set.singleton(new_item c None)
-                                    else Set.empty 
-                                   )Set.empty itm)rules_map
-       |> Set.unionMany;
+       let creatItem (i,rule) =
+          let (itm,s,f),code,binding = finitAutomata.FA_rules rule.body
+          let topLevelBindingName = rule.name+i.ToString()+"_action"
+          _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
+          if rule.name<>"_yard_start" 
+          then codeGenerator.Write (codeGenerator.GenTopLEvelBinding topLevelBindingName code binding)
+          let get_symb = function 
+                           Some((PLiteral(s)|PToken(s)|PRef(s,_)),_) -> Some(Source.toString s)                                                                                  
+                           | _ -> failwith "Generator error." 
+          let getSeqNum = function 
+                           Some(_,seqNum) -> seqNum                                                                                  
+                           | _ -> failwith "Generator error. Can not find seqNumber"                                                                          
+          #if DEBUG
+          Log.print_item itm s f;
+          #endif
+          let _createItem buf (fromS,symbol,toS) =
+              let new_item  item_num next_num =
+                {prod_num = i;                                      
+                 prod_name = rule.name;
+                 item_num = item_num;
+                 symb = get_symb symbol;                                                                           
+                 next_num = next_num;
+                 seq_number = getSeqNum symbol;
+                 s=s;
+                 f=f                                                                                          
+                }
+              buf + Set.singleton(new_item fromS (Some(toS)))+
+               if Set.exists ((=)toS) f
+               then Set.singleton(new_item toS None)
+               else Set.empty 
+               
+          Set.fold _createItem Set.empty itm
+       _items := List.map creatItem rules_map |> Set.unionMany;
        codeGenerator.CloseOutStream() 
     let items () = !_items
     let grammar () = !_grammar

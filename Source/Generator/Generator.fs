@@ -26,7 +26,7 @@ let items,_grammar,_generate, ruleToActionMap=
        let codeGenerator = new CodeGenerator(path,path+".fs")
        codeGenerator.Write (codeGenerator.GenHeader())
        codeGenerator.Write (codeGenerator.GenDefaultFunctions)
-       let finitAutomata = new FinitAutomata(codeGenerator) 
+       let finitAutomata = new FinitAutomataCreator(codeGenerator) 
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
        _items:= List.map (fun (i,rl) ->                 

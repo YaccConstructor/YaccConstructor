@@ -1,6 +1,6 @@
 ﻿// FinitAutomataCreator.fs
 //
-// Copyright 2009 Semen Grigorev
+// Copyright 2009-2010 Semen Grigorev
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -80,7 +80,7 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
          let num =varEnumerator.Next()
          CreatorResult(FinitAutomata([(s,Some(t,num),f)],s,f),code,["x"+num.ToString()])
       | x -> failwith "You should support new elem" 
-          
+            
   let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.ofList[a;c])) Set.empty rules      
        
   let e_closure (rules,s,f) =    

@@ -5,8 +5,7 @@ module Lexeme =
  begin 
   type t<'a> = {
     name : string;
-    value: 'a;  
-     
+    value: 'a;       
   }
   
  end

@@ -1,0 +1,24 @@
+graph sample_1
+{
+        c1[label = "c"];
+        c2[label = "c"];
+        c3[label = "c"];
+
+  
+        S -- a;
+        S -- c1;
+        S -- c2;
+        S -- c3;
+                
+        subgraph cluster_STR
+        {
+                label = "string in language defined by ";
+                bgcolor = grey;
+
+                a;
+                c1;
+                c2;
+                c3
+
+        };
+}

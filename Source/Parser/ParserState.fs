@@ -14,8 +14,9 @@ open Yard.Core.CompareHelper
 type State<'symb,'leafVal,'nodeVal  when 'leafVal : equality and 'leafVal : comparison > =
  val item : Grammar.Item.t<'symb> 
  val trees : AST.t<'leafVal,'nodeVal> list  
- new (item,trees) = {item=item;trees = trees}     
-
+ new (item,trees) = {item=item;trees = trees} 
+ override self.ToString() = "item: " + (self.item.ToString()) + "\n"
+ 
 [<Struct>]
 type ParserState<'symb,'leafVal,'nodeVal 
                   when 'leafVal : equality and 'leafVal : comparison 
@@ -24,3 +25,8 @@ type ParserState<'symb,'leafVal,'nodeVal
  val symbol : string;
  val states : State<'symb,'leafVal,'nodeVal> Set;  
  new (states,symbol,position) = {states=states;symbol=symbol;position=position}
+ override self.ToString() = 
+   "position: " + (self.position.ToString()) + "\n"
+   + "symbol: " + self.symbol + "\n"
+   + "states: [" + (String.concat ";" (Set.map (fun x -> x.ToString()) self.states)) + "]\n"
+ 

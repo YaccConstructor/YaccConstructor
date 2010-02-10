@@ -16,8 +16,8 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
   let varEnumerator = new Enumerator()
   let altEnumerator = new Enumerator()
   let stateEnumerator = new Enumerator()
-  let rec create_NFA seq_num  = function 
-      | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num t.rule) seq 
+  let rec create_NFA seq_num  trace = function 
+      | PSeq (seq,attr) -> let new_autom = List.map (fun t -> create_NFA seq_num (TSeq::trace) t.rule) seq 
                            let bindings = List.map (fun elem -> elem.binding) seq                                                  
                            let aut_concat (automata1:CreatorResult<_,_>) (automata2:CreatorResult<_,_>) b=
                               let fa1,code1,bindings1 = automata1.automata, automata1.actionCode, automata1.bindings                              
@@ -44,10 +44,10 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
                                                           
       | PAlt (l,r)      -> let lAltNum = ref 0
                            let rAltNum = ref 0
-                           match (create_NFA (lAltNum:=altEnumerator.Next();!lAltNum) l,
+                           match (create_NFA (lAltNum:=altEnumerator.Next();!lAltNum) (TAlt(First)::trace) l,
                                   (codeGenerator.ResetValueExtraction()
                                    create_NFA (rAltNum:=altEnumerator.Next()
-                                               !rAltNum) r)) with
+                                               !rAltNum) (TAlt(Second)::trace) r)) with
                            | atm1,atm2 ->                               
                                let code = codeGenerator.GenAlt atm1.actionCode atm2.actionCode atm1.bindings atm2.bindings
                                let s,f = stateEnumerator.Next(),stateEnumerator.Next()
@@ -55,8 +55,10 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
                                    let fa1 = atm1.automata
                                    let fa2 = atm2.automata
                                    fa1.startState,fa1.finaleState,fa2.startState,fa2.finaleState
-                               CreatorResult( FinitAutomata(  (s,None,ls)::(s,None,rs)::(lf,None,f)::(rf,None,f)
-                                                            ::atm1.automata.rules@atm2.automata.rules,s,f)
+                               let newS = FAState(s,[])
+                               let newF = FAState(f,[])
+                               CreatorResult( FinitAutomata(  (newS,None,ls)::(newS,None,rs)::(lf,None,newF)::(rf,None,newF)
+                                                            ::atm1.automata.rules@atm2.automata.rules,newS,newF)
                                              ,code,atm1.bindings@atm2.bindings)
                     
       (*it is dirty hack. IT MUST BE FIXED*)              
@@ -71,14 +73,16 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
                     CreatorResult(FinitAutomata(  (a.finaleState,None,a.startState)
                                                 ::(a.startState,None,a.finaleState)
                                                 ::a.rules,a.startState,a.finaleState),code,atm.bindings))
-                   (create_NFA seq_num expr )                          
+                   (create_NFA seq_num (TClosure::trace) expr )                          
       | PToken(ch)
       | PRef(ch,_)
       | PLiteral(ch) as t -> 
          let s,f = stateEnumerator.Next(),stateEnumerator.Next()
          let code = "\n"
          let num =varEnumerator.Next()
-         CreatorResult(FinitAutomata([(s,Some(t,num),f)],s,f),code,["x"+num.ToString()])
+         let startState = FAState(s, trace)
+         let finaleState = FAState(f, trace)
+         CreatorResult(FinitAutomata([(startState,Some(t,num),finaleState)],startState,finaleState),code,["x"+num.ToString()])
       | x -> failwith "You should support new elem" 
             
   let states rules = List.fold (fun buf (a,b,c) -> buf+(Set.ofList[a;c])) Set.empty rules      
@@ -111,7 +115,14 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
                                         if (Set.exists ((=)x) stt)&&(Option.isSome y)
                                         then yield [for q in new_states do
                                                       if Set.exists ((=)z) q then yield (stt,y,q)]]]     
-       let alter_name = dict (List.zip (Set.toList new_states) [0..new_states.Count-1])      
+       let alter_name = 
+           let newStatesLst = Set.toList new_states
+           let _alterNames = List.map2 (fun state newNumber -> 
+                                            let newTrace = Set.maxElement(Set.filter (fun (faState:FAState) -> not (List.isEmpty faState.trace))
+                                                                                     state).trace
+                                            FAState(newNumber,newTrace))
+                                       newStatesLst [0..new_states.Count - 1]
+           dict (List.zip  newStatesLst _alterNames)
        let new_rule (state,symbol,next) = alter_name.[state],symbol,alter_name.[next]
        let clean_new_automata = Set.map new_rule (Set.ofList new_automata)
        let set_alter_name = Set.map (fun stt -> alter_name.[stt])     
@@ -128,12 +139,12 @@ type FinitAutomataCreator (codeGenerator:CodeGenerator) = class
   let fa_rules rule =       
       codeGenerator.ResetValueEnumerator();    
       codeGenerator.ResetValueExtraction();    
-      let _result = create_NFA 0 rule in 
+      let _result = create_NFA 0 [] rule in 
   #if DEBUG 
       (printf "\n Fa_rule : \n %A " (_result.automata.rules));
   #endif
       let fa = _result.automata
       e_closure (fa.rules,fa.startState,fa.finaleState), _result.actionCode,_result.bindings
            
-  member self.FA_rules rule = varEnumerator.Reset();fa_rules rule
+  member self.FA_rules rule = varEnumerator.Reset(); fa_rules rule
 end

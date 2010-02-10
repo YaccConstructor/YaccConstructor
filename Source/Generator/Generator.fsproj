@@ -62,7 +62,6 @@
     <Compile Include="GrammarPreparer.fs" />
     <Compile Include="PrettyPrinter.fs" />
     <Compile Include="Generator.fs" />
-    <Compile Include="Trace.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Runtime\Runtime.fsproj">

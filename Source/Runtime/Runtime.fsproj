@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IL.fs" />
+    <Compile Include="Trace.fs" />
     <Compile Include="Grammar.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="Utils.fs" />

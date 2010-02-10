@@ -29,6 +29,7 @@ let rec get_all_t grammar =
             | PToken(ch)
             | PRef(ch,_)
             | PLiteral(ch) as t -> Set.singleton (Source.toString ch)
+            | _ as t            -> failwith ("Error in get all tokens. Seems, that union case " + t.ToString() + "is not supported now.")
             
     List.fold (fun lst (production:IL.Rule.t<_,_>) -> (get_tok production.body)+lst) Set.empty grammar
     

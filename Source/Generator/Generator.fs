@@ -30,7 +30,7 @@ let items,_grammar,_generate, ruleToActionMap=
        _grammar := rules;
        let rules_map  = List.zip ([0..(List.length rules)-1])rules
        let creatItem (i,rule) =
-          let (itm,s,f),code,binding = finitAutomata.FA_rules rule.body
+          let (itm,s:FAState,f:Set<FAState>),code,binding = finitAutomata.FA_rules rule.body
           let topLevelBindingName = rule.name+i.ToString()+"_action"
           _ruleToActonMap:=(i,topLevelBindingName)::(!_ruleToActonMap)
           if rule.name<>"_yard_start" 
@@ -44,20 +44,22 @@ let items,_grammar,_generate, ruleToActionMap=
           #if DEBUG
           Log.print_item itm s f;
           #endif
-          let _createItem buf (fromS,symbol,toS) =
-              let new_item  item_num next_num =
-                {prod_num = i;                                      
+          let _createItem buf (fromS:FAState,symbol,toS:FAState) =
+              let newItem  itemNum nextNum fromSTrace toSTrace=
+                {prod_num = i;
                  prod_name = rule.name;
-                 item_num = item_num;
-                 symb = get_symb symbol;                                                                           
-                 next_num = next_num;
+                 item_num = itemNum;
+                 symb = get_symb symbol;
+                 next_num = nextNum;
                  seq_number = getSeqNum symbol;
-                 s=s;
-                 f=f                                                                                          
+                 s = s.num;
+                 f = Set.map (fun (_f:FAState) -> _f.num) f;
+                 fromStateTrace = fromSTrace;
+                 toStateTrace = toSTrace
                 }
-              buf + Set.singleton(new_item fromS (Some(toS)))+
-               if Set.exists ((=)toS) f
-               then Set.singleton(new_item toS None)
+              buf + Set.singleton(newItem fromS.num (Some(toS.num)) fromS.trace toS.trace)+
+               if Set.exists ((=)toS.num) (Set.map (fun (_f:FAState) -> _f.num) f)
+               then Set.singleton(newItem toS.num None fromS.trace toS.trace)
                else Set.empty 
                
           Set.fold _createItem Set.empty itm

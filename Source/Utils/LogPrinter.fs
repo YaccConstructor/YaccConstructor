@@ -17,8 +17,8 @@ let print_climb_2 gt = printf "\n Climb gt : \n %A \n" gt
 let print_climb_3 new_q = printf "\n Climb new_q : \n %A \n" new_q
 
 let print_climb_info i x q gt new_q =
-    print_climb_1 i x q;
-    print_climb_2 gt;
+    print_climb_1 i x q
+    print_climb_2 gt
     print_climb_3 new_q
     
 let print_parse q i=     

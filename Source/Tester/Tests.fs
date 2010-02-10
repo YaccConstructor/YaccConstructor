@@ -18,6 +18,11 @@ let test001 = [{name = "NUMBER";value = "1"};{name = "$";value = "1"}]
 //tests for grammar test002.yrd
 let test002 = [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "$";value = "$"}]
 
+//tests for grammar test003.yrd
+let test003_0 = [{name = "NUMBER";value = "1"};{name = "$";value = "$"}]
+let test003_1 = [{name = "LITERAL";value = "go!"};{name = "PLUS";value = "+"};{name = "$";value = "$"}]
+
+
 //tests for grammar test005.yrd
 let test005_0 = [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "$";value = "$"}]
 let test005_1 = [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
@@ -58,7 +63,5 @@ let test8_1 = [{name = "CHAR";value = 1};{name = "NUMBER";value = 1};{name = "$"
 let test6_1 = [{name = "CHAR";value = 1};{name = "PLUS";value = 1};{name = "$";value = 1}]
 let test6_2 = [{name = "CHAR";value = 1};{name = "PLUS";value = 1};{name = "MINUS";value = 1};{name = "$";value = 1}]
 
-let test3_w_a_1 = [{name = "NUMBER";value = "1"};{name = "$";value = "$"}]
-let test3_w_a_2 = [{name = "LITERAL";value = "go!"};{name = "PLUS";value = "+"};{name = "$";value = "$"}]
 
     

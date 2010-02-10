@@ -9,16 +9,22 @@
 namespace Yard.Core
 
 [<Struct>]
+type FAState = 
+   val num : int
+   val trace : List<Trace>
+   new (number,trace) = {num = number; trace = trace}
+
+[<Struct>]
 type FinitAutomata<'a,'b> =
- val rules : List<int*Option<'a>*int>
- val startState : int
+ val rules : List<FAState*Option<'a>*FAState>
+ val startState : FAState
  val finaleState : 'b
- new (rules,startState,finaleState) = {rules=rules;startState=startState;finaleState=finaleState}
+ new (rules,startState,finaleState) = {rules=rules; startState=startState; finaleState=finaleState}
  
 [<Struct>]
 type CreatorResult<'a,'b> =
   val automata : FinitAutomata<'a,'b>
   val actionCode : string
   val bindings : List<string>
-  new (automata,actionCode,bindings) = {automata=automata;actionCode=actionCode;bindings=bindings}
+  new (automata,actionCode,bindings) = {automata=automata; actionCode=actionCode; bindings=bindings}
  

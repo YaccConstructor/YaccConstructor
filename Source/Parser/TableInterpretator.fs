@@ -67,6 +67,7 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                            ,{prodNum = item.prod_num;
                              seqNum = 1;//item.seq_number;                                                          
                              varNum = 1;
+                             trace = item.fromStateTrace;
                              value = Value.NodeV(null:obj)})
                     State(state.item,[newNode])                   
                   let newStates = climb(ParserState(Set.map createNewItem states, item.prod_name, position))
@@ -102,6 +103,7 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                   [Leaf(text,{prodNum = item.prod_num;
                               seqNum = item.seq_number;
                               varNum = 1;
+                              trace = item.toStateTrace;
                               value = Value.LeafV(value)})]
                   
             let new_states = Set.filter (fun (state:State<_,_,_>) -> state.item.next_num = None) states          

@@ -62,12 +62,30 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                then 
                   let createNewItem (state:State<_,_,_>) =
                     let newNode = 
-                      Node(state.trees@trees
+                      Node(
+                           //state.trees@trees
+                           (List.map (fun tree -> 
+                                         match tree with 
+                                         | Node(_a,_b,_val) -> Node(_a,_b, if _val.trace.IsEmpty 
+                                                                           then {_val with trace = item.toStateTrace}
+                                                                           else _val)
+                                         | Leaf(_a,_val)   -> Leaf(_a,if _val.trace.IsEmpty 
+                                                                           then {_val with trace = item.toStateTrace}
+                                                                           else _val))state.trees)
+                                         @(List.map (fun tree -> 
+                                         match tree with 
+                                         | Node(_a,_b,_val) as n -> Node(_a,_b, if _val.trace.IsEmpty 
+                                                                                then {_val with trace = item.fromStateTrace}
+                                                                                else _val)
+                                         | Leaf(_a,_val) -> Leaf(_a,if _val.trace.IsEmpty 
+                                                                           then {_val with trace = item.fromStateTrace}
+                                                                           else _val
+                                                                           ))trees)
                            ,item.prod_name
                            ,{prodNum = item.prod_num;
                              seqNum = 1;//item.seq_number;                                                          
                              varNum = 1;
-                             trace = item.fromStateTrace;
+                             trace = [];//item.fromStateTrace;
                              value = Value.NodeV(null:obj)})
                     State(state.item,[newNode])                   
                   let newStates = climb(ParserState(Set.map createNewItem states, item.prod_name, position))
@@ -77,7 +95,13 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                if Set.exists checker states
                then 
                   let createResult item = 
-                    ParserResult(State(item,states.MinimumElement.trees@trees), position)
+                    ParserResult(State(item
+                                       ,states.MinimumElement.trees
+                                        @
+                                        (List.map (fun tree -> 
+                                         match tree with 
+                                         | Node(_a,_b,_val) -> Node(_a,_b, {_val with trace = item.toStateTrace})
+                                         | Leaf(_a,_val)   -> Leaf(_a,{_val with trace = item.toStateTrace}))trees)), position)
                   yield Set.map createResult prevItms
               }  |> Set.unionMany  
                
@@ -103,7 +127,7 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                   [Leaf(text,{prodNum = item.prod_num;
                               seqNum = item.seq_number;
                               varNum = 1;
-                              trace = item.toStateTrace;
+                              trace = [];//item.toStateTrace;
                               value = Value.LeafV(value)})]
                   
             let new_states = Set.filter (fun (state:State<_,_,_>) -> state.item.next_num = None) states          

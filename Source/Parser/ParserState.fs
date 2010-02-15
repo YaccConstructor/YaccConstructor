@@ -15,7 +15,9 @@ type State<'symb,'leafVal,'nodeVal  when 'leafVal : equality and 'leafVal : comp
  val item : Grammar.Item.t<'symb> 
  val trees : AST.t<'leafVal,'nodeVal> list  
  new (item,trees) = {item=item;trees = trees} 
- override self.ToString() = "item: " + (self.item.ToString()) + "\n"
+ override self.ToString() = 
+   "item: \n" + (self.item.ToString()) + "\n"
+   + "  trees: \n" + (String.concat "\n" (List.map (AST.dump_tree 2) self.trees))
  
 [<Struct>]
 type ParserState<'symb,'leafVal,'nodeVal 

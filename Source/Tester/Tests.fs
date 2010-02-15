@@ -32,13 +32,13 @@ let test005_1 = [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name
 let test011_0 = 
     [{name = "NUMBER";value = "2"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
 let test011_1 = 
-  [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "$";value = "$"}]
+    [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "$";value = "$"}]
 let test011_2 = 
-  [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
+    [{name = "NUMBER";value = "1"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "2"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
 
 //tests for grammar test012.yrd
 let test012_0 = 
-  [{name = "NUMBER";value = "2"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
+    [{name = "NUMBER";value = "2"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "$";value = "$"}]
 let test012_1 = 
     [{name = "NUMBER";value = "2"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "4"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "4"}
     ;{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "4"};{name = "MULT";value = "*"};{name = "NUMBER";value = "3"};{name = "PLUS";value = "+"};{name = "NUMBER";value = "4"}

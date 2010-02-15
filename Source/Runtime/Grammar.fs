@@ -21,14 +21,14 @@ module Item = begin
         fromStateTrace: List<Yard.Core.Trace>;
         toStateTrace: List<Yard.Core.Trace>}
          override self.ToString() = 
-              "production number: " + (self.prod_num.ToString()) + "\n"
-            + "production name  : " + (self.prod_name) + "\n"
-            + "item number      : " + (self.item_num.ToString()) + "\n"
-            + "symbol           : " + (self.symb.ToString()) + "\n"
-            + "next number      : " + (if self.next_num.IsSome then  self.next_num.ToString() else "null") + "\n"
-            + "start state      : " + (self.s.ToString()) + "\n"
-            + "finale states    : " + (self.s.ToString()) + "\n"
-            + "trace for start state: " + (self.fromStateTrace.ToString()) + "\n"
-            + "trace for start state: " + (self.toStateTrace.ToString()) + "\n"
+              "    production number: " + (self.prod_num.ToString()) + "\n"
+            + "    production name  : " + (self.prod_name) + "\n"
+            + "    item number      : " + (self.item_num.ToString()) + "\n"
+            + "    symbol           : " + (self.symb.ToString()) + "\n"
+            + "    next number      : " + (if self.next_num.IsSome then  self.next_num.ToString() else "null") + "\n"
+            + "    start state      : " + (self.s.ToString()) + "\n"
+            + "    finale states    : " + (self.s.ToString()) + "\n"
+            + "    trace for start state: " + (self.fromStateTrace.ToString()) + "\n"
+            + "    trace for start state: " + (self.toStateTrace.ToString()) + "\n"
   end  
 

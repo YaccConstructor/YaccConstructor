@@ -21,8 +21,8 @@ let  runTest testFilePath =
     let trees = parser.Run inputStream        
     Seq.iter(fun b -> AST.print_tree b) trees
     printfn "Parser get %A dirivation tree" trees.Length
-    //let astInterp = new ASTInterpretator(tables)    
-    //let res_2 = List.map astInterp.Interp trees
-    //List.iter (printf "\nresult: %A") res_2
+    let astInterp = new ASTInterpretator(tables)    
+    let res_2 = List.map astInterp.Interp trees
+    List.iter (printf "\nresult: %A") res_2
     
 do runTest @"..\..\..\..\Tests\test011.yrd"

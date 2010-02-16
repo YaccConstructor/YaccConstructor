@@ -21,7 +21,10 @@ type ASTInterpretator(tables: TablesLoader) = class
     let rec interp tree = 
         match tree with
         | AST.Node(childs,name,_value) -> 
-              let getVal x = 
+              let _tree = REAST.createREAST childs
+              printfn "%A\n" (_tree.ToString())
+              let s = List.map interp childs
+              (*let getVal x = 
                    let _val = interp x
                    match (_val:Value.t<_,_>).value with 
                    | Value.NodeV(x) -> _val.seqNum,(Some((_val.seqNum),x):>obj)
@@ -64,7 +67,8 @@ type ASTInterpretator(tables: TablesLoader) = class
                       else _action
               let args =  Array.ofList values
               let res = gen_action.Invoke(null, args)              
-              {_value with value = Value.NodeV(res)}
+              {_value with value = Value.NodeV(res)}*)
+              _value
         | AST.Leaf(name,value)        -> value
                 
     member self.Interp tree = interp tree

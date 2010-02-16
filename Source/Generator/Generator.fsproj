@@ -56,7 +56,6 @@
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandAlter.fs" />
     <Compile Include="CodeGenerator.fs" />
-    <Compile Include="YADRTreeVisitor.fs" />
     <Compile Include="FinitAutomata.fs" />
     <Compile Include="FinitAutomataCreator.fs" />
     <Compile Include="GrammarPreparer.fs" />

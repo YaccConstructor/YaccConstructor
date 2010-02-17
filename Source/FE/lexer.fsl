@@ -5,8 +5,7 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
- #nowarn "62"
- 
+ module internal Yard.Core.GrammarLexer
  open Lexing
  open Yard.Core.GrammarParser
  open Microsoft.FSharp.Text
@@ -14,10 +13,10 @@
 (* Auxiliaries for the lexical analyzer *)
 
 let brace_depth = ref 0
-and sq_br_depth = ref 0
-and comment_depth = ref 0
-and ang_br_depth = ref 0
-and commut_depth = ref 0
+let sq_br_depth = ref 0
+let comment_depth = ref 0
+let ang_br_depth = ref 0
+let commut_depth = ref 0
 
 
 let currentFileContent = ref ""

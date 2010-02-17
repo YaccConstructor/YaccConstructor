@@ -9,6 +9,7 @@
 #light
 module Yard.Core.Main
 open Microsoft.FSharp.Text.Lexing
+module Lexer = Yard.Core.GrammarLexer
 
 let run_common path = 
     let content = System.IO.File.ReadAllText(path)

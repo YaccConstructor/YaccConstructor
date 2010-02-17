@@ -12,7 +12,7 @@ open Production
 //open Diagnostics
 open Namer
 open TransformAux
-
+open Microsoft.FSharp.Compatibility.OCaml
 (** if rule has metaArgs then it's metarule *)
 let isMetaRule (r:Rule.t<'a,'b>) = r.metaArgs <> []
 

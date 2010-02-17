@@ -11,7 +11,6 @@
 namespace Yard.Core
 
 open Microsoft.FSharp.Compiler.CodeDom
-open System.CodeDom.Compiler
 open System.Reflection
 
 type ASTInterpretator(tables: TablesLoader) = class

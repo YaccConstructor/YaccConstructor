@@ -20,7 +20,7 @@ open Microsoft.FSharp.Text.Parsing.ParseHelpers
   let o2l = function Some x -> [x] | None -> []
   let getList = function Some x -> x | None -> []
   (*let parse_error (s:string):unit = ()*)
-  let missing name = print_endline ("Missing " + name)
+  let missing name = System.Console.WriteLine("Missing " + name)
   let createSeqElem bnd omitted r check =
       { binding = bnd; omit = omitted; rule = r; checker = check }
 
@@ -277,7 +277,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 47 "Parser.fsy"
-                      { Definition.empty with
+                             { Definition.empty with
                                Definition.head=_1
                              ; Definition.grammar=_2
                              ; Definition.foot=_3
@@ -293,7 +293,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 54 "Parser.fsy"
-                      Some _1 
+                                          Some _1 
                    )
 # 54 "Parser.fsy"
                  : 'action_opt));
@@ -303,7 +303,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 55 "Parser.fsy"
-                      None 
+                                               None 
                    )
 # 55 "Parser.fsy"
                  : 'action_opt));
@@ -315,7 +315,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 57 "Parser.fsy"
-                      _1 :: _3 
+                                                             _1 :: _3 
                    )
 # 57 "Parser.fsy"
                  : 'rule_nlist));
@@ -326,7 +326,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 58 "Parser.fsy"
-                      [_1] 
+                                                  [_1] 
                    )
 # 58 "Parser.fsy"
                  : 'rule_nlist));
@@ -337,7 +337,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 59 "Parser.fsy"
-                      missing "SEMI"; raise Parsing.Parse_error  
+                                              missing "SEMI"; raise Parsing.Parse_error  
                    )
 # 59 "Parser.fsy"
                  : 'rule_nlist));
@@ -352,7 +352,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 62 "Parser.fsy"
-                      {
+                             {
                                Rule._public = _1
                              ; Rule.name = Source.toString _2
                              ; Rule.metaArgs = getList _3
@@ -368,7 +368,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 70 "Parser.fsy"
-                     true
+                                          true
                    )
 # 70 "Parser.fsy"
                  : 'plus_opt));
@@ -378,7 +378,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 71 "Parser.fsy"
-                     false
+                                          false
                    )
 # 71 "Parser.fsy"
                  : 'plus_opt));
@@ -389,7 +389,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 73 "Parser.fsy"
-                     Some _2
+                                                                           Some _2
                    )
 # 73 "Parser.fsy"
                  : 'formal_meta_param_opt));
@@ -399,7 +399,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 74 "Parser.fsy"
-                     None
+                                                         None
                    )
 # 74 "Parser.fsy"
                  : 'formal_meta_param_opt));
@@ -410,7 +410,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 76 "Parser.fsy"
-                     [_1]
+                                               [_1]
                    )
 # 76 "Parser.fsy"
                  : 'formal_meta_list));
@@ -422,7 +422,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 77 "Parser.fsy"
-                     _1::_2
+                                                                _1::_2
                    )
 # 77 "Parser.fsy"
                  : 'formal_meta_list));
@@ -433,7 +433,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 79 "Parser.fsy"
-                     Some _1
+                                       Some _1
                    )
 # 79 "Parser.fsy"
                  : 'param_opt));
@@ -443,7 +443,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 79 "Parser.fsy"
-                     None
+                                                               None
                    )
 # 79 "Parser.fsy"
                  : 'param_opt));
@@ -454,7 +454,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 81 "Parser.fsy"
-                      _1 
+                                 _1 
                    )
 # 81 "Parser.fsy"
                  : 'alts));
@@ -466,7 +466,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 81 "Parser.fsy"
-                     PAlt (_1,_2)
+                                                           PAlt (_1,_2)
                    )
 # 81 "Parser.fsy"
                  : 'alts));
@@ -478,7 +478,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 83 "Parser.fsy"
-                     PAlt(_2,_3)
+                                                            PAlt(_2,_3)
                    )
 # 83 "Parser.fsy"
                  : 'bar_seq_nlist));
@@ -489,7 +489,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 84 "Parser.fsy"
-                     _2
+                                              _2
                    )
 # 84 "Parser.fsy"
                  : 'bar_seq_nlist));
@@ -502,7 +502,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 86 "Parser.fsy"
-                      PSeq (_1::_2, _3) 
+                                                              PSeq (_1::_2, _3) 
                    )
 # 86 "Parser.fsy"
                  : 'seq));
@@ -513,7 +513,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 87 "Parser.fsy"
-                     PSeq([],Some _1)
+                                  PSeq([],Some _1)
                    )
 # 87 "Parser.fsy"
                  : 'seq));
@@ -525,7 +525,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 89 "Parser.fsy"
-                     _1::_2
+                                                            _1::_2
                    )
 # 89 "Parser.fsy"
                  : 'seq_elem_list));
@@ -535,7 +535,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 90 "Parser.fsy"
-                     []
+                                                 []
                    )
 # 90 "Parser.fsy"
                  : 'seq_elem_list));
@@ -547,7 +547,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 92 "Parser.fsy"
-                     {_1 with checker = _2}
+                                                    {_1 with checker = _2}
                    )
 # 92 "Parser.fsy"
                  : 'seq_elem));
@@ -558,7 +558,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 94 "Parser.fsy"
-                      Some _1 
+                                                  Some _1 
                    )
 # 94 "Parser.fsy"
                  : 'predicate_opt));
@@ -568,7 +568,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 95 "Parser.fsy"
-                      None    
+                                                  None    
                    )
 # 95 "Parser.fsy"
                  : 'predicate_opt));
@@ -580,7 +580,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 97 "Parser.fsy"
-                      createSeqElem (Some _1) false _3 None 
+                                              createSeqElem (Some _1) false _3 None 
                    )
 # 97 "Parser.fsy"
                  : 'bound));
@@ -591,7 +591,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 98 "Parser.fsy"
-                      createSeqElem None false _1 None      
+                                              createSeqElem None false _1 None      
                    )
 # 98 "Parser.fsy"
                  : 'bound));
@@ -602,7 +602,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 100 "Parser.fsy"
-                     _1
+                                   _1
                    )
 # 100 "Parser.fsy"
                  : 'patt));
@@ -613,7 +613,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 100 "Parser.fsy"
-                     _1
+                                                  _1
                    )
 # 100 "Parser.fsy"
                  : 'patt));
@@ -624,7 +624,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 102 "Parser.fsy"
-                     PMany _1
+                                                PMany _1
                    )
 # 102 "Parser.fsy"
                  : 'prim));
@@ -635,7 +635,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 103 "Parser.fsy"
-                     PSome _1
+                                                PSome _1
                    )
 # 103 "Parser.fsy"
                  : 'prim));
@@ -646,7 +646,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 104 "Parser.fsy"
-                     POpt _1
+                                                POpt _1
                    )
 # 104 "Parser.fsy"
                  : 'prim));
@@ -657,7 +657,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 105 "Parser.fsy"
-                     _2
+                                                _2
                    )
 # 105 "Parser.fsy"
                  : 'prim));
@@ -668,7 +668,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 106 "Parser.fsy"
-                     _1
+                                                _1
                    )
 # 106 "Parser.fsy"
                  : 'prim));
@@ -679,7 +679,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 107 "Parser.fsy"
-                     PLiteral _1
+                                                PLiteral _1
                    )
 # 107 "Parser.fsy"
                  : 'prim));
@@ -690,7 +690,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 109 "Parser.fsy"
-                     _1
+                                         _1
                    )
 # 109 "Parser.fsy"
                  : 'meta_param));
@@ -701,7 +701,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 110 "Parser.fsy"
-                     _1
+                                         _1
                    )
 # 110 "Parser.fsy"
                  : 'meta_param));
@@ -712,7 +712,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 111 "Parser.fsy"
-                     _1
+                                         _1
                    )
 # 111 "Parser.fsy"
                  : 'meta_param));
@@ -723,7 +723,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 113 "Parser.fsy"
-                     [_1]
+                                              [_1]
                    )
 # 113 "Parser.fsy"
                  : 'meta_params));
@@ -735,7 +735,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 114 "Parser.fsy"
-                     _1 :: _2
+                                                          _1 :: _2
                    )
 # 114 "Parser.fsy"
                  : 'meta_params));
@@ -745,7 +745,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 116 "Parser.fsy"
-                     None
+                                                  None
                    )
 # 116 "Parser.fsy"
                  : 'meta_param_opt));
@@ -756,7 +756,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 117 "Parser.fsy"
-                     Some _2
+                                                               Some _2
                    )
 # 117 "Parser.fsy"
                  : 'meta_param_opt));
@@ -767,7 +767,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 119 "Parser.fsy"
-                     PToken _1
+                                               PToken _1
                    )
 # 119 "Parser.fsy"
                  : 'call));
@@ -780,7 +780,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 121 "Parser.fsy"
-                      match _2 with
+                             match _2 with
                              None -> PRef  (_1, _3)
                              | Some x -> PMetaRef (_1,_3,x)
                            

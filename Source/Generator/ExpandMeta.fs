@@ -1,6 +1,4 @@
-﻿#light "off"
-
-(** Module ExpandMeta contains:
+﻿(** Module ExpandMeta contains:
  *  - function, which expands metarules 
  *
  *  Author: Ilia
@@ -76,109 +74,108 @@ let replaceFormals mArgs args =
 (** expand references to metarules 
  *  and generate new rules every such reference 
  *)
-let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >)
-                        (refsTbl:Hashtbl.t<string,Source.t>)
-                    res = 
-let rec transformBody ruleName actParams args nRules =
-    function
-    | PRef (r, p) -> 
-      let rName = getText r in
-      (** pass actual parameters for item 
-       *  (which is replaced with yard_item_...) 
-       *)
-      let aParams = updateActParams (isItem rName) actParams p in 
-      let param = getActualParam rName args in 
-      (match param with
-      | Some n -> (PRef (getNewSource r n, aParams), nRules)
-      | None   -> (PRef (r, p), nRules)
-      )
-    | PAlt (l, r) -> 
-      let (l', nRules') = transformBody ruleName actParams args nRules l 
-      in let (r', nRules'') = transformBody ruleName actParams args nRules' r 
-      in (PAlt (l', r'), nRules'')
-    | PSeq (seq, a) -> 
-      let rec transformSeq args = function
+let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >) (refsTbl:Hashtbl.t<string,Source.t>) res = 
+    let rec transformBody ruleName actParams args nRules = 
+        function
+        | PRef (r, p) -> 
+          let rName = getText r in
+          (** pass actual parameters for item 
+           *  (which is replaced with yard_item_...) 
+           *)
+          let aParams = updateActParams (isItem rName) actParams p in 
+          let param = getActualParam rName args in 
+          (match param with
+          | Some n -> (PRef (getNewSource r n, aParams), nRules)
+          | None   -> (PRef (r, p), nRules)
+          )
+        | PAlt (l, r) -> 
+          let (l', nRules') = transformBody ruleName actParams args nRules l 
+          in let (r', nRules'') = transformBody ruleName actParams args nRules' r in 
+          (PAlt (l', r'), nRules'')
+        | PSeq (seq, a) -> 
+          let rec transformSeq args = function
+              | h::t -> 
+                let (body', newRules) = transformBody ruleName actParams 
+                                                      args [] h.rule 
+                in let (seq', newRules') = transformSeq args t 
+                   in ({ h with rule = body' }::seq', newRules @ newRules')
+              | []   -> ([], [])
+          in let (l', nRules') = transformSeq args seq 
+             in (PSeq (l', a), nRules @ nRules')
+        | PToken t -> (PToken t, nRules)
+        | PLiteral r -> (PLiteral r, nRules)
+
+        | PMetaRef (n, p, mArgs) -> 
+          (** we accept other metarule as parameter *)
+          let n' = (*printPairList args ;*) replaceFormal args n in
+          let mRuleName' = getText n' in
+          let p' = updateActParams (isEBNFmeta mRuleName') actParams p in
+          let mArgs' = replaceFormals mArgs args in
+          let (b', nRules') = expandMetaRef n' p' mArgs'
+          in (b', nRules @ nRules')      
+        | POpt r -> 
+          let (b', nRules') = transformBody ruleName actParams args nRules r
+          in (POpt b', nRules')
+        | PSome r -> 
+          let (b', nRules') = transformBody ruleName actParams args nRules r
+          in (PSome b', nRules')
+        | PMany r -> 
+          let (b', nRules') = transformBody ruleName actParams args nRules r
+          in (PMany b', nRules')
+    (*    | other -> reportError "EBNF construction has already be transformed" 
+          ; (other, nRules)
+    *)
+    and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
+        let       
+          args = createPairsList metaRule.name metaRule.metaArgs metaArgs 
+        in 
+        let fArgs = getFormalArgs metaRule.name _params metaRule.args
+        in let args' = list2opt fArgs in
+        let (b, newRules) = transformBody rName args' args [] metaRule.body 
+        in ( newRules @ [ createRule rName fArgs b metaRule._public [] ] )
+
+    and genNewRule rName args' mRulesTbl metaName' metaArgs =
+        let res = findMetaRule mRulesTbl metaName' in 
+        match res with 
+        | Some metaRule -> transformRule rName args' metaRule metaArgs
+        | None -> []
+
+    and expandMetaRef metaName _params metaArgs' = 
+        let key = getKey metaName metaArgs' in
+        let rs = refsTbl.TryFind key in
+        match rs with
+        | None -> 
+          let rName = createNewName metaName in       
+          let eRules = Hashtbl.add refsTbl key rName ;
+                       genNewRule (getText rName) _params 
+                                  metaRulesTbl (getText metaName) metaArgs' 
+          in let b = PRef (rName, _params) 
+             in (b, res @ eRules)
+        | Some rn -> (PRef (rn, _params), res)
+
+    in
+        match body with
+        | PMetaRef (mn, p, mArgs) -> expandMetaRef mn p mArgs
+        | PSeq (seq, a) -> 
+          let rec expandSeq mRulesTbl rfsTbl rs = function
           | h::t -> 
-            let (body', newRules) = transformBody ruleName actParams 
-                                                  args [] h.rule 
-            in let (seq', newRules') = transformSeq args t 
-               in ({ h with rule = body' }::seq', newRules @ newRules')
-          | []   -> ([], [])
-      in let (l', nRules') = transformSeq args seq 
-         in (PSeq (l', a), nRules @ nRules')
-    | PToken t -> (PToken t, nRules)
-    | PLiteral r -> (PLiteral r, nRules)
-
-    | PMetaRef (n, p, mArgs) -> 
-      (** we accept other metarule as parameter *)
-      let n' = (*printPairList args ;*) replaceFormal args n in
-      let mRuleName' = getText n' in
-      let p' = updateActParams (isEBNFmeta mRuleName') actParams p in
-      let mArgs' = replaceFormals mArgs args in
-      let (b', nRules') = expandMetaRef n' p' mArgs'
-      in (b', nRules @ nRules')      
-    | POpt r -> 
-      let (b', nRules') = transformBody ruleName actParams args nRules r
-      in (POpt b', nRules')
-    | PSome r -> 
-      let (b', nRules') = transformBody ruleName actParams args nRules r
-      in (PSome b', nRules')
-    | PMany r -> 
-      let (b', nRules') = transformBody ruleName actParams args nRules r
-      in (PMany b', nRules')
-(*    | other -> reportError "EBNF construction has already be transformed" 
-      ; (other, nRules)
-*)
-and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
-    let       
-      args = createPairsList metaRule.name metaRule.metaArgs metaArgs 
-    in 
-    let fArgs = getFormalArgs metaRule.name _params metaRule.args
-    in let args' = list2opt fArgs in
-    let (b, newRules) = transformBody rName args' args [] metaRule.body 
-    in ( newRules @ [ createRule rName fArgs b metaRule._public [] ] )
-
-and genNewRule rName args' mRulesTbl metaName' metaArgs =
-    let res = findMetaRule mRulesTbl metaName' in 
-    match res with 
-    | Some metaRule -> transformRule rName args' metaRule metaArgs
-    | None -> []
-
-and expandMetaRef metaName _params metaArgs' = 
-    let key = getKey metaName metaArgs' in
-    let rs = refsTbl.TryFind key in
-    match rs with
-    | None -> let rName = createNewName metaName in       
-      let eRules = Hashtbl.add refsTbl key rName ;
-                   genNewRule (getText rName) _params 
-                              metaRulesTbl (getText metaName) metaArgs' 
-      in let b = PRef (rName, _params) 
-         in (b, res @ eRules)
-    | Some rn -> (PRef (rn, _params), res)
-
-in
-    match body with
-    | PMetaRef (mn, p, mArgs) -> expandMetaRef mn p mArgs
-    | PSeq (seq, a) -> 
-      let rec expandSeq mRulesTbl rfsTbl rs = function
-      | h::t -> let (b, res') = expandMeta h.rule mRulesTbl rfsTbl rs in 
-        let (b', res'') = expandSeq mRulesTbl rfsTbl res' t
-        in ({ h with rule = b }::b', res'')
-      | [] -> ([], rs)
-      in let (eSeq, res') = expandSeq metaRulesTbl refsTbl res seq      
-         in (PSeq (eSeq, a), res')
-    
-    | PAlt (l, r) -> 
-      let (l', res') = expandMeta l metaRulesTbl refsTbl res in
-      let (r', res'') = expandMeta r metaRulesTbl refsTbl res'
-      in (PAlt(l', r'), res'')
-    | POpt r  -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                 in (POpt r', res')
-    | PSome r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                 in (PSome r', res')
-    | PMany r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                 in (PMany r', res')
-    | other -> (other, res)
+            let (b, res') = expandMeta h.rule mRulesTbl rfsTbl rs in 
+            let (b', res'') = expandSeq mRulesTbl rfsTbl res' t
+            in ({ h with rule = b }::b', res'')
+          | [] -> ([], rs)
+          in let (eSeq, res') = expandSeq metaRulesTbl refsTbl res seq      
+             in (PSeq (eSeq, a), res')
+        
+        | PAlt (l, r) -> let (l', res') = expandMeta l metaRulesTbl refsTbl res in
+                         let (r', res'') = expandMeta r metaRulesTbl refsTbl res'
+                         in (PAlt(l', r'), res'')
+        | POpt r  -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
+                     in (POpt r', res')
+        | PSome r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
+                     in (PSome r', res')
+        | PMany r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
+                     in (PMany r', res')
+        | other -> (other, res)
 
 (** grammar processing:
  *  - collect metarules
@@ -187,14 +184,14 @@ in
 let rec handleMeta rules ((metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >),refsTbl) res = 
     match rules with 
     | [] -> res
-    | h::t ->
-      if (isMetaRule h) then begin
-        metaRulesTbl.Add(h.name,h)
-      ; handleMeta t (metaRulesTbl,refsTbl) res
-      end else 
+    | h::t -> 
+      if (isMetaRule h) then 
+        metaRulesTbl.Add(h.name,h);
+        handleMeta t (metaRulesTbl,refsTbl) res      
+      else 
         let (b, rules) = expandMeta (h:Rule.t<Source.t,Source.t>).body metaRulesTbl refsTbl [] in 
-        let r = { h with Rule.body = b } 
-        in handleMeta t (metaRulesTbl,refsTbl) (res @ rules @ [r])
+        let r = { h with Rule.body = b } in 
+        handleMeta t (metaRulesTbl,refsTbl) (res @ rules @ [r])
 
 (** main function 
  *  - create hash tables

@@ -1,6 +1,4 @@
-﻿#light "off"
-
-module Yard.Core.ExpandAlter
+﻿module Yard.Core.ExpandAlter
 
 open IL
 open Rule
@@ -23,7 +21,7 @@ let extract_one_rule (rule:Rule.t<'a,'b>) =
     |PRef   _ 
     |PLiteral _
     |PToken   _ as t   -> [t]
-    | _             -> (print_endline "incorrect tree for alternative expanding!"
+    | _             -> (System.Console.WriteLine("incorrect tree for alternative expanding!")
                         ; failwith "incorrect tree for alternative expanding!")
     in 
     expand rule.body |> List.map (fun x -> {rule with body = x})

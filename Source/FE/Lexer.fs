@@ -8,7 +8,7 @@
 // as published by the Free Software Foundation.
 
  module internal Yard.Core.GrammarLexer
- open Lexing
+ open Microsoft.FSharp.Text.Lexing
  open Yard.Core.GrammarParser
  open Microsoft.FSharp.Text
 
@@ -46,9 +46,9 @@ let store_string_char c =
   incr string_index
 
 let char_for_decimal_code (lexbuf:Lexing.LexBuffer<_>) i =
-  Char.chr(100 * (Char.code(lexbuf.LexemeChar i) - 48) +
-               10 * (Char.code(lexbuf.LexemeChar (i+1)) - 48) +
-                    (Char.code(lexbuf.LexemeChar (i+2)) - 48))
+  char(100 * (int(lexbuf.LexemeChar i) - 48) +
+               10 * (int(lexbuf.LexemeChar (i+1)) - 48) +
+                    (int(lexbuf.LexemeChar (i+2)) - 48))
 
 
 let get_stored_string () =
@@ -73,11 +73,11 @@ let handle_lexical_error fn (lexbuf:Lexing.LexBuffer<_>) =
 
 let warning (lexbuf:Lexing.LexBuffer<_>) msg =
   Printf.eprintf "ocamllex warning:\nFile \"%s\",  character %d: %s.\n"
-                  Sys.argv.[1] (lexbuf.StartPos.AbsoluteOffset) msg;   
-  flush stderr
+                  (System.Environment.GetCommandLineArgs()).[1] (lexbuf.StartPos.AbsoluteOffset) msg;   
+  stderr.Flush()
 ;;
 
-let to_srt ch_arr = (Array.map (fun x -> String.of_char x) ch_arr) |> String.concat ""
+let to_srt ch_arr = (Array.map (fun x -> string x) ch_arr) |> String.concat ""
 
 let _lexeme lexbuf (n,n') =
   let len = n' - n in
@@ -452,8 +452,8 @@ and _fslex_main  _fslex_state lexbuf =
 # 127 "Lexer.fsl"
                          let text = lex2source lexbuf in
                          match (fst text).[0] with
-                         | c when List.mem c ['a'..'z'] -> LIDENT text
-                         | c when List.mem c ['A'..'Z'] -> UIDENT text
+                         | c when List.contains c ['a'..'z'] -> LIDENT text
+                         | c when List.contains c ['A'..'Z'] -> UIDENT text
                          |_       -> failwith "Incorrect indentStart" 
                       
 # 459 "Lexer.fs"
@@ -513,7 +513,7 @@ and _fslex_main  _fslex_state lexbuf =
   | 21 -> ( 
 # 162 "Lexer.fsl"
                         raise(Lexical_error
-                               ("illegal character " ^ (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
+                               ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
                                  lexbuf.StartPos.AbsoluteOffset)) 
 # 518 "Lexer.fs"
           )

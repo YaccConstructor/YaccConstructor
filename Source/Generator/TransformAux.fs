@@ -1,6 +1,4 @@
-﻿#light "off"
-
-(** Module TransformAux contains:
+﻿(** Module TransformAux contains:
  *  - common functions for grammar transformations
  *
  *  Author: Ilia

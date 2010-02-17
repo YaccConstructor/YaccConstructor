@@ -3,7 +3,6 @@
  *  Author: Jk
  *)
 
-#light "off"
 module Yard.Core.IL
 module Source = 
   begin
@@ -13,17 +12,14 @@ module Source =
 
   end
   
-module Production = 
-  begin
-    type elem<'patt,'expr> = 
-    {
+module Production =   begin
+    type elem<'patt,'expr> = {
      omit:bool; //Вычитание
      rule:(t<'patt,'expr>);//Правило
      binding:'patt option; //замыкание :) f:F ну или f:=F...
      checker:'expr option //"почти" резольвер
     }   
-    and
-    t<'patt,'expr> =    
+    and    t<'patt,'expr> =    
     |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)//Альтернатива
     |PSeq     of (elem<'patt,'expr>) list * 'expr option //Последовательность * атрибут.(атрибут всегда применяется к последовательности) 
     |PToken   of Source.t //собственно токен
@@ -40,10 +36,8 @@ module Production =
 
   end
 
-module Rule = 
-  begin
-   type t<'patt,'expr> = 
-   { 
+module Rule = begin
+   type t<'patt,'expr> = { 
     name    : string;
     args    : 'patt list;
     body    : (Production.t<'patt,'expr>);
@@ -58,11 +52,9 @@ module Grammar =
     type t<'patt,'expr> = (Rule.t<'patt,'expr>) list //грамматика - список правил.
   end 
 
-module Definition = 
-  begin
-    type info = { fileName: string};
-    type ('patt,'expr) t = 
-    { 
+module Definition = begin
+    type info = { fileName: string}
+    type t<'patt,'expr>  = { 
      info : info;
      head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)
      grammar : Grammar.t<'patt,'expr>;//грамматика

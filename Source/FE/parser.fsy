@@ -8,6 +8,7 @@
   open Yard.Core.IL
   open Yard.Core.IL.Production
   
+  exception Parse_error
   
   let o2l = function Some x -> [x] | None -> []
   let getList = function Some x -> x | None -> []
@@ -56,7 +57,7 @@ action_opt: ACTION { Some $1 }
 
 rule_nlist: rule SEMICOLON rule_nlist { $1 :: $3 }
           | rule SEMICOLON { [$1] }
-          | rule error { missing "SEMI"; raise Parsing.Parse_error  }
+          | rule error { missing "SEMI"; raise Parse_error  }
 
 rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON alts
       { {

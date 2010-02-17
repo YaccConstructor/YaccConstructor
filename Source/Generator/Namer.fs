@@ -1,6 +1,4 @@
-﻿#light "off"
-
-(** module Namer contains: 
+﻿(** module Namer contains: 
  *  constants and functions for naming of
  *  different items, created by Yard (during gammar transformations)
  *

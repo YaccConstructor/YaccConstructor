@@ -1,7 +1,4 @@
-﻿#light "off"
-
-
-(** Module ExpandEBNF contains:
+﻿(** Module ExpandEBNF contains:
  *  - functions for rules convertion from EBNF to metarules 
  *    (rules parametrized by other rules)
  *
@@ -26,9 +23,9 @@ let getAddToListAction = createSource addToListAction
 
 let getMetaSeq metaName = 
     PSeq(
-    [ createSimpleElem (createRef getItem None)(*createItemRef*) (createBinding headBind);
-      createSimpleElem (createMetaRef metaName) (createBinding tailBind)],
-    (Some getAddToListAction))
+      [ createSimpleElem (createRef getItem None)(*createItemRef*) (createBinding headBind);
+        createSimpleElem (createMetaRef metaName) (createBinding tailBind)],
+       (Some getAddToListAction))
 
 let createListAction elem = Some ( oneElemListAction elem |> createSource )
 
@@ -52,8 +49,9 @@ let getOptBody =
 let getMetaOpt = createMetaRule Names.opt getOptBody
 
 (** create metarule for some: "item+" *)
-let getSomeBody = let binding = createBinding headBind in
-    let action = createListAction headBind in
+let getSomeBody =
+    let binding = createBinding headBind 
+    let action = createListAction headBind 
     PAlt (createItemSeq binding action, getMetaSeq Names.some)
 
 let getMetaSome = createMetaRule Names.some getSomeBody
@@ -96,9 +94,10 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
             in ({ e with Production.rule = b }, rs')
           in let rec seqToMeta _params' = function
              | []   -> ([], [])
-             | h::t -> let (e', rs') = elemToMeta _params' h in 
+             | h::t -> 
+               let (e', rs') = elemToMeta _params' h
                let (l', rs'') = seqToMeta (addBinding _params' h.binding) t 
-               in (e'::l', rs' @ rs'')
+               (e'::l', rs' @ rs'')
              in let (seq', nr) = seqToMeta _params seq
                 in (PSeq (seq', a), rs @ nr)
         | PAlt (l, r) -> 
@@ -107,7 +106,6 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
           in (PAlt (l', r'), rs'')
         (* do nothing in other case *)
         | other -> (other, rs)
-in
     let (b', l') = bodyToMeta [] r.args r.body
     in l' @ [{ r with Rule.body = b' }]
 

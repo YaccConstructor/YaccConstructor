@@ -11,14 +11,15 @@ open Production
 open Namer
 open TransformAux
 open Microsoft.FSharp.Compatibility.OCaml
+type Dictionary<'a,'b> = System.Collections.Generic.Dictionary<'a,'b>
 (** if rule has metaArgs then it's metarule *)
 let isMetaRule (r:Rule.t<'a,'b>) = r.metaArgs <> []
 
 (** find metarule with given name in hash map of collected metarules *)
-let findMetaRule (tbl:Hashtbl.t<string,Rule.t<Source.t,Source.t>>) mName = 
-    match tbl.TryFind mName with
-    | None -> failwith "undeclared metarule "(*reportError ("undeclared metarule " ^ mName)*) ; None
-    | res    -> res
+let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName = 
+    try Some (tbl.Item mName) with
+    | :?System.Collections.Generic.KeyNotFoundException -> failwith "undeclared metarule "(*reportError ("undeclared metarule " ^ mName)*) ; None
+    
 
 (** reports error with arguments of metarule *)
 let invalidArgs name = 
@@ -59,8 +60,7 @@ let getKey metaName metaArgs =
 (** returns actual parameter (if given list contains it with given formal) 
  *  (args is list of pairs (<formal>, <actual>) )
  *)
-let getActualParam formalName args = List.try_assoc formalName args
-
+let getActualParam formalName args = List.tryPick (fun (x,y) -> if x = formalName then Some y else None) args
 let replaceFormal args formal = 
     let act = getActualParam (getText formal) args in
     match act with
@@ -74,7 +74,7 @@ let replaceFormals mArgs args =
 (** expand references to metarules 
  *  and generate new rules every such reference 
  *)
-let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >) (refsTbl:Hashtbl.t<string,Source.t>) res = 
+let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) (refsTbl:Dictionary<string,Source.t>) res = 
     let rec transformBody ruleName actParams args nRules = 
         function
         | PRef (r, p) -> 
@@ -122,6 +122,7 @@ let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t>
         | PMany r -> 
           let (b', nRules') = transformBody ruleName actParams args nRules r
           in (PMany b', nRules')
+        | PPerm _ | PRepet _ -> raise (new System.NotImplementedException())
     (*    | other -> reportError "EBNF construction has already be transformed" 
           ; (other, nRules)
     *)
@@ -141,17 +142,16 @@ let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t>
         | None -> []
 
     and expandMetaRef metaName _params metaArgs' = 
-        let key = getKey metaName metaArgs' in
-        let rs = refsTbl.TryFind key in
-        match rs with
-        | None -> 
+        let key = getKey metaName metaArgs' in                
+        if refsTbl.ContainsKey(key) then (PRef (refsTbl.Item key, _params), res)
+        else
           let rName = createNewName metaName in       
-          let eRules = Hashtbl.add refsTbl key rName ;
+          let eRules = refsTbl.Add(key,rName) ;
                        genNewRule (getText rName) _params 
                                   metaRulesTbl (getText metaName) metaArgs' 
           in let b = PRef (rName, _params) 
              in (b, res @ eRules)
-        | Some rn -> (PRef (rn, _params), res)
+        
 
     in
         match body with
@@ -181,7 +181,7 @@ let rec expandMeta body (metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t>
  *  - collect metarules
  *  - call metarules expanding 
  *)
-let rec handleMeta rules ((metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.t> >),refsTbl) res = 
+let rec handleMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >),refsTbl) res = 
     match rules with 
     | [] -> res
     | h::t -> 
@@ -199,7 +199,7 @@ let rec handleMeta rules ((metaRulesTbl:Hashtbl.t<string,Rule.t<Source.t,Source.
  *)
 let expandMetaRules rules =
     (** hash table for metarules *)
-    let metaRulesTbl = Hashtbl.create 200 in
+    let metaRulesTbl = new Dictionary<string,Rule.t<Source.t,Source.t> >(200) in
     (** hash table for references to expanded metarules *)
-    let refsTbl = Hashtbl.create 200 in
+    let refsTbl = new Dictionary<string,Source.t>(200) in
     handleMeta rules (metaRulesTbl,refsTbl) []

@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,7 +36,6 @@
   <ItemGroup>
     <Compile Include="Lexeme.fs" />
     <Compile Include="AST.fs" />
-    <Compile Include="test003.yrd.fs" />
     <Compile Include="TablesLoader.fs" />
     <Compile Include="ParserState.fs" />
     <Compile Include="RegExpAST.fs" />

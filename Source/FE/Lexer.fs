@@ -8,6 +8,7 @@
 // as published by the Free Software Foundation.
 
  module internal Yard.Core.GrammarLexer
+ #nowarn "62";;
  open Microsoft.FSharp.Text.Lexing
  open Yard.Core.GrammarParser
  open Microsoft.FSharp.Text

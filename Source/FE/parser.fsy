@@ -4,6 +4,7 @@
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
+#nowarn "62";; 
   open Microsoft.FSharp.Text
   open Yard.Core.IL
   open Yard.Core.IL.Production

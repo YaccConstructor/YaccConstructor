@@ -1,0 +1,49 @@
+\enlargethispage{100cm}
+% Start of code
+% \begin{tikzpicture}[anchor=mid,>=latex',join=bevel,]
+\begin{tikzpicture}[>=latex',join=bevel,]
+\pgfsetlinewidth{1bp}
+%%
+\pgfsetcolor{black}
+  % Edge: n1 -> n2
+  \draw [->] (136bp,168bp) .. controls (136bp,160bp) and (136bp,150bp)  .. (136bp,131bp);
+  % Edge: n3 -> n2
+  \draw [->] (224bp,36bp) .. controls (199bp,51bp) and (188bp,51bp)  .. (160bp,73bp);
+  % Edge: n2 -> n3
+  \draw [->] (244bp,73bp) .. controls (221bp,54bp) and (211bp,53bp)  .. (181bp,36bp);
+  % Node: n1
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (0bp,168bp) -- (0bp,204bp) -- (163bp,204bp) -- (163bp,168bp) -- cycle;
+  \draw (49bp,168bp) -- (49bp,204bp);
+  \draw (110bp,168bp) -- (110bp,204bp);
+  \draw (24bp,186bp) node {start};
+  \draw (79bp,186bp) node {14, 12};
+  \draw (136bp,186bp) node {finish};
+\end{scope}
+  % Node: n2
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (111bp,72bp) -- (111bp,131bp) -- (297bp,131bp) -- (297bp,72bp) -- cycle;
+  \draw (160bp,72bp) -- (160bp,131bp);
+  \draw (244bp,72bp) -- (244bp,131bp);
+  \draw (135bp,113bp) node {start};
+  \draw (202bp,113bp) node {1 ,4 ,5 ,6 };
+  \draw (202bp,96bp) node { 8, 9, 10 };
+  \draw (202bp,79bp) node { 11, 15};
+  \draw (270bp,113bp) node {finish};
+\end{scope}
+  % Node: n3
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (132bp,0bp) -- (132bp,36bp) -- (277bp,36bp) -- (277bp,0bp) -- cycle;
+  \draw (181bp,0bp) -- (181bp,36bp);
+  \draw (224bp,0bp) -- (224bp,36bp);
+  \draw (156bp,18bp) node {start};
+  \draw (202bp,18bp) node {2, 3};
+  \draw (250bp,18bp) node {finish};
+\end{scope}
+%
+\end{tikzpicture}
+% End of code
+

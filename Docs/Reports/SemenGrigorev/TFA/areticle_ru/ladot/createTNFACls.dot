@@ -1,0 +1,44 @@
+digraph createTNFACls
+{
+rankdir = LR;
+
+  subgraph Cls 
+  {
+   
+    rankdir = LR;
+
+    i[ texlbl = "$i$"
+     , shape = plaintext];
+
+    subgraph L{
+    e_1[ texlbl = "$i+1$"
+       , shape = plaintext];
+
+    doA_2[ texlbl = "(doTNFA a)"
+         , shape = plaintext
+         , label = "a"];
+
+    e_2[ texlbl = "$i+2$"
+       , shape = plaintext];
+    }
+    j_3[ texlbl = "$i+3$"
+       , shape = plaintext];
+
+    i -> e_1[ texlbl = "$\epsilon/ClsStart_k(pos)$"
+            , label = "1234"];
+    
+    e_1 -> doA_2[ texlbl = "$\epsilon/ \omega$"
+                , label = " "];
+    doA_2 -> e_2[ texlbl = "$\epsilon/ \omega$"
+                , label = " "];
+    e_2 -> e_1[ texlbl = "$\epsilon/ \omega$"
+              , label = " "];
+    e_1 -> e_2[ texlbl = "$\epsilon/ \omega$"
+              , label = " "];
+                    
+    e_2 -> j_3[ texlbl = "$\epsilon/ClsEnd_k(pos)$"
+              , label = "1234"];
+     
+  }
+ 
+}

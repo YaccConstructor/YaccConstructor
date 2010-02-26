@@ -1,0 +1,21 @@
+digraph createTNFACls
+{
+  rankdir = LR;
+
+  map[ texlbl = "concat (map doTNFA lst)"
+     , shape = plaintext
+     , label = "concat (map doTNFA lst)"];
+  
+
+  i[ texlbl = "$i$"
+   , shape = plaintext];
+
+  j[ texlbl = "$i+1$"
+   , shape = plaintext]
+  
+  i -> map[ texlbl = "$\epsilon/SeqStart_k (pos)$"
+          , label = "12345"];
+  map -> j[ texlbl = "$\epsilon/SeqEnd_k (pos)$"
+          , label = "1234"];
+}
+

@@ -1,0 +1,129 @@
+\documentclass{article}
+\usepackage[x11names, rgb]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage[russian]{babel}
+%\usepackage{dot2texi}
+\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{amsmath}
+
+\textwidth=160mm
+%\textheight=250mm
+%\topmargin=-30mm
+\oddsidemargin=-5mm
+\evensidemargin=-5mm
+
+\begin{document}
+
+\section{Построение TNFA}  
+
+Для построения TNFA по дереву можно использовать несколько изменённый алгоритм Томпсона. Узлы дерва YARD можно разделить на 4 типа: лист, последовательность, альтернатива, замыкание. Эти типы соответствуют основным конструкциям расширенных регулярных выражений.
+
+Атрибут ребра (дуги, перехода в NFA) - функция. В общем случае ей доступна вся информация о состоянии автомата и она может производить любые действия. В нашем случае она бутет записывать информацию о начале и конце распознования конструкции регулярного выражения в список. 
+
+Каждая метка соответствует началу или концу распознования той или иной  конструкции регулярного выражения и содержит:
+  \begin{itemize}
+    \item уникальный идентификатор, одинаковый для метки начала и конца одной и той же конструкции
+    \item информацию о конструкции, которой она соответствует
+    \item позицию маркера в строке, в момент генерации метки
+  \end{itemize}
+
+Определим следующий набор меток:
+  \begin{verbatim}
+    type tag = 
+      //Последовательность
+      | TSeqStart of int*int //(уникальный идентификатор, позиция маркера)
+      | TSeqEnd of int*int
+      //Первая ветка альтернативы
+      | TAlt1Start of int*int
+      | TAlt1End of int*int  
+      //Вторая ветка альтернативы
+      | TAlt2Start of int*int
+      | TAlt2End of int*int
+      //Замыкание
+      | TClsStart of int*int
+      | TClsEnd of int*int  
+  \end{verbatim}
+
+Определим функции, которые будем использовать в качестве меток для рёбер. Общим параметром для всех функций будет текущая позиция указателя в строке $pos$. Так же каждой функции доступна некоторая общая структура данных, в которую ведётся запись данных, $globalTagsList$. Набор функций выглядит следующим образом:
+  \begin{itemize}
+    \item 
+      $\omega          $ -- \verb|fun _ -> () |  Будет означать отсутствие метки.
+    \item 
+      $SeqStart_k(pos) $ -- \verb| fun pos -> TSeqStart(k, pos) :: globalTagsList| Подразумевается, что уникальный идентификатор вычисляется заранее, поэтому для разных конструкций строятся разные функции. Чтобы различать их, присвоим им индекс, соответствующий идентификатору.
+    \item 
+      $SeqEnd_k(pos)   $ -- \verb| fun pos -> TSeqEnd(k, pos) :: globalTagsList|  
+    \item 
+      $Alt1Start_k(pos)$ -- \verb|fun pos -> TAlt1Start(k, pos) :: globalTagsList|
+    \item 
+      $Alt1End_k(pos)  $ -- \verb|fun pos -> TAlt1End(k, pos) :: globalTagsList|
+    \item 
+      $Alt2Start_k(pos)$ -- \verb|fun pos -> TAlt2Start(k, pos) :: globalTagsList|
+    \item 
+      $Alt2End_k(pos)$   -- \verb|fun pos -> TAlt2End(k, pos) :: globalTagsList|
+    \item 
+      $ClsStart_k(pos)$  -- \verb|fun pos -> TClsStart(k, pos) :: globalTagsList|
+    \item 
+      $ClsEnd_k(pos)$    -- \verb|fun pos -> TClsEnd(k, pos) :: globalTagsList|
+  \end{itemize}
+
+Тогда для расстановки меток можно будет дополнить алгоритм Томпсона. Результат будет таким:
+  \begin{itemize}
+    \item
+      Лист : Leaf(a) \
+      \begin{flushleft}
+        \input{createTNFALeaf.tex}
+      \end{flushleft}
+    \item 
+      Последовательность : Seq(lst) \
+      \begin{flushleft}
+        \input{createTNFASeq.tex}
+      \end{flushleft}
+    \item 
+      Альтернатива : Alt(a,b) \
+      \begin{flushleft}
+        \input{createTNFAAlt.tex}
+      \end{flushleft}
+    \item 
+      Замыкание : Cls(a) \
+      \begin{flushleft}
+        \input{createTNFACls.tex}
+      \end{flushleft}
+  \end{itemize}
+
+\clearpage
+
+После работы построенного таким образом автомата в $globalTagsList$ будет лежать структура, описывающая проесс распознования строк. Она будет являться привильной скобочной структурой(если считать, что метки начала и конца конструкции образуют скобчную пару). 
+
+
+\section{Построение дерева вывода}
+
+Для построения дерева вывода строки, поданной на вход автомату, можно воспользоваться деей, описанной выше. Для этого потребуется только изменить фукции меток и глобальную стуктуру данных. 
+
+Необходимо преобразовать $globalTagsList$ в стек. Теперь в нём будут лежать не только метки, но и деревья вывода. Фкнкции $Start$ по прежнему будут класть в $globalTagsList$ метку о начале соответствующей конструкции, а $End$ функции будут снимать все элементы до соответствующей метки, строть из них очередной узел, соответствующий распознанной конструкции и класть его обратно.
+
+Таким образом, в конце работы автомата, если строка принята, то в $globalTagsList$ будет лежать дерево вывода этой строки.
+
+\section{Преобразование TNFA в TDFA}
+
+Общая идея преобразования заключается в том, что можно расширить понятие состояния таким образом, чтобы стал возможен перенос в него функций с рёбер. Часть функций будут выполняться на входе в состояние, часть на выходе. 
+
+
+
+\section{Пример}
+
+  \begin{flushleft}
+        \input{TNFAExample.tex}
+  \end{flushleft}
+
+\clearpage
+
+  \begin{flushleft}
+        \input{TNFA2TDFAs1.tex}
+  \end{flushleft}
+
+  \begin{flushleft}
+        \input{TNFA2TDFAs2.tex}
+  \end{flushleft}
+
+\end{document}

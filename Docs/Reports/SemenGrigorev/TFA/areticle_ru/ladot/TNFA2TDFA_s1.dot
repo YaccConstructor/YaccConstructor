@@ -1,0 +1,40 @@
+digraph TNFA2TDFA_s1
+{
+  rankdir = LR;
+  node[width = 0.2, height = 0.2,fixedsize = "true",shape = plaintext,fontsize = 2];
+
+  subgraph cluster_S1
+  {
+    rankdir = LR;
+    14 -> 12[label = "1", texlbl = "$\epsilon/SS_2$"];
+  } 
+
+  subgraph cluster_S2
+  {
+    13 -> 10[label = " ", texlbl = "$\epsilon/\omega$"];
+    10 -> 9[label = " ", texlbl = "$\epsilon/CS_1$"];
+    9 -> 5 [label = "1234", texlbl = "$\epsilon/\omega$"];
+    5 -> 1[label = " ", texlbl = "$\epsilon/SS_1$"];
+    4 -> 6[label = " ", texlbl = "$\epsilon/SE_1$"];
+    6 -> 8[label = "1234", texlbl = "$\epsilon/\omega$"];
+    8 -> 11[label = " ", texlbl = "$\epsilon/CE_1$"];
+    11 -> 15[label = "12", texlbl = "$\epsilon/SE_2$"];
+    9 -> 8[label = "e/w",texlbl = "$\epsilon/\omega$"];
+    8 -> 9[label = "e/w",texlbl = "$\epsilon/\omega$"];
+    {rank = "same"; 5 9};
+    {rank = "same"; 1 10};
+    {rank = "same"; 6 8};
+    {rank = "same"; 4 11};
+
+  } 
+
+  subgraph cluster_S3
+  {
+    2 -> 3[label = " ", texlbl = "$\epsilon/\omega$"];
+  } 
+
+  12 -> 13[label = " ", texlbl = "$t/\omega$"];  
+  1 -> 2[label = " ", texlbl = "$+/\omega$"];
+  3 -> 4[label = " ", texlbl = "$t/\omega$"];
+
+}

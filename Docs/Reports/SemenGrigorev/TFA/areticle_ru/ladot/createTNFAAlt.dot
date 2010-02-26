@@ -1,0 +1,30 @@
+digraph createTNFAAlt
+{
+  rankdir = LR;
+
+  rankdir = LR;
+
+  doA[ texlbl = "(doTNFA a)"
+        , shape = plaintext
+        , label = "(doTNFA a)"];
+
+  doB[ texlbl = "(doTNFA b)"
+        , shape = plaintext
+        , label = "(doTNFA b)"];
+
+  i_2[ texlbl = "$i$"
+   , shape = plaintext];
+
+  j_2[ texlbl = "$i+1$"
+   , shape = plaintext]
+  
+  i_2 -> doA[ texlbl = "$\epsilon/Alt1Start_k(pos)$"
+            , label = "12345"];
+  i_2 -> doB[ texlbl = "$\epsilon/Alt2Start_k(pos)$"
+            , label = "12345"];
+
+  doA -> j_2[ texlbl = "$\epsilon/Alt1End_k(pos)$"
+            , label = "12345"];
+  doB -> j_2[ texlbl = "$\epsilon/Alt2End_k(pos)$"
+            , label = "12345"];
+}

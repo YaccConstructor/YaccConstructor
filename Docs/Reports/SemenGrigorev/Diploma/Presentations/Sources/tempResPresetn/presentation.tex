@@ -1,0 +1,161 @@
+\documentclass{beamer}
+\usepackage{beamerthemesplit}
+\usetheme{CambridgeUS}
+% Выпишем часть возможных стилей, некоторые из них могут содержать
+% дополнительные опции
+% Darmstadt, Ilmenau, CambridgeUS, default, Bergen, Madrid, AnnArbor,Pittsburg, Rochester,
+% Antiles, Montpellier, Berkley, Berlin
+
+\usepackage{amsmath}
+\usepackage{cmap} % for serchable pdf's
+\usepackage[T2A]{fontenc} 
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+
+% Если у вас есть логотип вашей кафедры, факультета или университета, то
+% его можно включить в презентацию.
+%\Logo{\includegraphics[width=1cm]{logo.eps}}
+\title[GLR-анализатор]{Разработка GLR-транслятора для среды .NET}
+\subtitle{Дипломная работа}
+\institute[СПбГУ]{
+Санкт-Петербургский государственный университет \\
+Математико-Механический факультет \\
+Кафедра системного программирования }
+\author[Лукичёв А.С. Григорьев С.В.]{
+	Научный руководитель: Лукичёв Александр Сергеевич \\ 
+  \and
+  Автор: Григорьев Семён }
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Задача}
+	Разработка GLR-транслятора для среды .NET  со следующими свойствами:  
+	\begin{itemize}
+		\item Работа с произвольными КС грамматиками
+		\item Поддержка расширенных контекстно-свободных  грамматик
+		\item Поддержка s-атрибутных грамматик
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Что такое GLR}
+	 GLR-анализатор предназначен для работы с произвольной (в том числе неоднозначной!) КС  грамматикой
+	\begin{itemize}
+		\item Работает за линейное время 
+    \item {$O(n^{3})$ в худшем случае}
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Область применения}
+	Реинжиниринг программного обеспечения :
+	\begin{itemize}
+		\item Упрощение создания и сопровождения грамматик
+		\begin{itemize}
+			\item Нет необходимости задавать однозначную КС
+			\item Нет десятков конфликтов при одном изменении
+		\end{itemize}	
+		\item Работа с диалектами одного языка    
+		\begin{itemize}
+			\item Задание общей грамматики
+			\item Автоматическое определение диалекта
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Алгоритм анализа}
+%	Рассмотренные подходы:
+%	\begin{itemize}
+%		\item Алгоритм Эрли
+%		\begin{itemize}
+%			\item Состояние 
+%		\end{itemize}
+%
+%		\item Алгоритм Томиты		
+%		\begin{itemize}
+%			\item Структурированный в виде графа стек
+%			\item Ветвление стека
+%		\end{itemize}
+%
+		%\item 
+		Рекурсивно-восходящий алгоритм
+		\begin{itemize}
+			\item Система взаимно рекурсивных функций
+			\item Кэширование результатов вызова функций 
+		\end{itemize}
+
+	%\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Алгоритм трансляции}
+	Требования к алгоритму:
+		\begin{itemize}
+		
+			\item Поддержка произвольных КС грамматик
+			\begin{itemize}
+				\item Side-эффекты
+			\end{itemize}
+			
+			\item Поддержка EBNF грамматик без их преобразования
+			\begin{itemize}
+				\item Правая часть правила - регулярное выражение
+				\item Узлы одного уровня в дереве вывода - строка,порождённая регулярным выражением
+			\end{itemize}
+
+		\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Алгоритм трансляции}
+	Рассмотренные подходы:
+		\begin{itemize}
+		
+			\item Отложенные вычисления (Continuation Passing Style, CPS)
+			\begin{itemize}
+				\item Конструирование функции, которая вычисляется после завершения вывода 
+			\end{itemize}
+			
+			\item Интерпретация леса вывода
+			\begin{itemize}
+				\item Построение леса вывода
+				\item Вычисление атрибутов
+			\end{itemize}
+		\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Алгоритм трансляции.}
+	Интерпретация леса вывода. Подходы:
+		\begin{itemize}			
+			\item Специальное преобразование грамматики на основе атрибутов
+			\begin{itemize}		
+				\item Атрибут - часть алфавита
+				\item В дерево вывода добавляются узлы соответствующие атрибутам
+				%\item $e \rightarrow (a{action1} b{action2}) {action3}$
+			\end{itemize}			
+			
+			\item Преобразование дерева вывода во время вычисления атрибутов
+			\begin{itemize}
+				\item Листья - строка, порождённая регулярным выражением
+				\item Построить дерево вывода этой строки
+				\item Проинтерпретировать полученное дерево
+			\end{itemize}
+
+		\end{itemize}
+\end{frame}
+
+\end{document}

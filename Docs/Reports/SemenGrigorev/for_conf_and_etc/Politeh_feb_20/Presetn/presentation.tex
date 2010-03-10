@@ -5,14 +5,16 @@
 % дополнительные опции
 % Darmstadt, Ilmenau, CambridgeUS, default, Bergen, Madrid, AnnArbor,Pittsburg, Rochester,
 % Antiles, Montpellier, Berkley, Berlin
-
+\usepackage{pdfpages}
 \usepackage{amsmath}
 \usepackage{cmap} % for serchable pdf's
 \usepackage[T2A]{fontenc} 
 \usepackage[cp1251]{inputenc}
 \usepackage[english,russian]{babel}
 \usepackage{indentfirst}
-
+%\usepackage{dot2texi}
+%\usepackage{tikz}
+%\usetikzlibrary{shapes,arrows}
 % Если у вас есть логотип вашей кафедры, факультета или университета, то
 % его можно включить в презентацию.
 %\Logo{\includegraphics[width=1cm]{logo.eps}}
@@ -74,13 +76,7 @@
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Концепция}
-	
-\end{frame}
-
-\begin{frame}
-	\transwipe[direction=90]
-	\frametitle{Детали реализации}
+	\frametitle{Реализация}
 		Рекурсивно-восходящий алгоритм
 		\begin{itemize}
 			\item Система взаимно рекурсивных функций
@@ -90,63 +86,36 @@
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Детали реализации}
-	Требования к алгоритму:
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Пример грамматики: 
 		\begin{itemize}
-		
-			\item Поддержка произвольных КС грамматик
-			\begin{itemize}
-				\item Side-эффекты
-			\end{itemize}
-			
-			\item Поддержка EBNF грамматик без их преобразования
-			\begin{itemize}
-				\item Правая часть правила - регулярное выражение
-				\item Узлы одного уровня в дереве вывода - строка,порождённая регулярным выражением
-			\end{itemize}
-
+			\item $S \rightarrow A(+A)*$
+			\item $A \rightarrow a$
 		\end{itemize}
+	Преобразованная грамматика:
+  \begin{itemize}
+		\item $S \rightarrow AB$
+		\item $A \rightarrow a$
+		\item $B \rightarrow +AB$		
+		\item $B \rightarrow \epsilon$
+	\end{itemize}
+	Входная цепочка: a+a
+
 \end{frame}
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Алгоритм трансляции}
-	Рассмотренные подходы:
-		\begin{itemize}
-		
-			\item Отложенные вычисления (Continuation Passing Style, CPS)
-			\begin{itemize}
-				\item Конструирование функции, которая вычисляется после завершения вывода 
-			\end{itemize}
-			
-			\item Интерпретация леса вывода
-			\begin{itemize}
-				\item Построение леса вывода
-				\item Вычисление атрибутов
-			\end{itemize}
-		\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\transwipe[direction=90]
-	\frametitle{Алгоритм трансляции.}
-	Интерпретация леса вывода. Подходы:
-		\begin{itemize}			
-			\item Специальное преобразование грамматики на основе атрибутов
-			\begin{itemize}		
-				\item Атрибут - часть алфавита
-				\item В дерево вывода добавляются узлы соответствующие атрибутам
-				%\item $e \rightarrow (a{action1} b{action2}) {action3}$
-			\end{itemize}			
-			
-			\item Преобразование дерева вывода во время вычисления атрибутов
-			\begin{itemize}
-				\item Листья - строка, порождённая регулярным выражением
-				\item Построить дерево вывода этой строки
-				\item Проинтерпретировать полученное дерево
-			\end{itemize}
-
-		\end{itemize}
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Ожидания пользователя:	
+   \begin{center}
+      \pgfimage[width=3cm,height=3cm]{tree1.pdf}
+   \end{center}
+   
+	Результат:	
+   \begin{center}
+      \pgfimage[width=3cm,height=3cm]{tree2.pdf}
+   \end{center}
+   
 \end{frame}
 
 \begin{frame}
@@ -174,11 +143,7 @@
 \begin{frame}
 	\transwipe[direction=90]
 	\frametitle{Заключение}
-	 GLR-анализатор предназначен для работы с произвольной (в том числе неоднозначной!) КС  грамматикой
-	\begin{itemize}
-		\item Работает за линейное время 
-    \item {$O(n^{3})$ в худшем случае}
-	\end{itemize}	
+	 Что тут?
 \end{frame}
 
 \end{document}

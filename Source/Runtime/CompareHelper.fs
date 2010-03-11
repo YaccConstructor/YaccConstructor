@@ -1,4 +1,5 @@
-﻿// CompareHelper.fs contains
+﻿// CompareHelper.fs 
+// contains helper functions for CustomEquality and CustomComparison realisation
 //
 // Copyright 2009-2010 Semen Grigorev
 //
@@ -18,4 +19,4 @@ let inline hashOn f x =  hash (f x)
 let inline compareOn f x (mObj: obj) =
     match mObj with
     | :? 'T as y -> compare (f x) (f y)
-    | _ -> invalidArg "mObj" "cannot compare values of different types"
+    | _ -> invalidArg "mObj" "Cannot compare values of different types"

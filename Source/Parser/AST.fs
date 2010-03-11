@@ -12,7 +12,6 @@ open Yard.Core.CompareHelper
 
 module Value = 
  begin 
-
   [<CustomEquality; CustomComparison>] 
   type value<'a,'b when 'a : equality and 'a : comparison> = 
     | LeafV of Lexeme.t<'a> 
@@ -43,8 +42,8 @@ end
 module AST =
   begin    
     type t<'a,'b when 'a : equality and 'a : comparison> = 
-         | Node  of (t<'a,'b> list)*string*Value.t<'a,'b>
-         | Leaf  of string*Value.t<'a,'b>
+         | Node  of (t<'a,'b> list) * string * Value.t<'a,'b>
+         | Leaf  of string * Value.t<'a,'b>
              
     let rec dump_tree i item =
         let rec iter i = (function 0 -> "" | x -> ("    "+(iter (x-1))))i
@@ -52,9 +51,10 @@ module AST =
           Node (lst,name,value) -> 
                 String.concat "" 
                               ([iter i;"<NODE name=\"";name;"\" trace=\"";value.trace.ToString();(*"\" value=\"";value.value.ToString();*)"\">\n"]
-                               @(List.map (dump_tree (i+1)) lst)@[iter i;"</NODE>\n"])
+                               @(List.map (dump_tree (i+1)) lst)
+                               @[iter i;"</NODE>\n"])
         | Leaf (name,value)     -> 
                String.concat "" [iter i;"<LEAF name=\"";name;"\" trace=\"";value.trace.ToString();(*"\" value=\"";value.value.ToString();*)"\"/>\n"]        
         
-    let print_tree tree = System.Console.WriteLine (dump_tree 0 tree)
+    let PrintTree tree = System.Console.WriteLine (dump_tree 0 tree)
  end   

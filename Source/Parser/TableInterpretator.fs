@@ -41,9 +41,9 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
     let calculate states symbol position=    
       let gt = goto (states,symbol)     
       let newStates = parse (ParserState(gt,symbol,position))
-      #if DEBUG      
+#if DEBUG      
       Log.print_climb_info position symbol states gt newStates        
-      #endif     
+#endif     
       
       let checker (parserResult:ParserResult<_,_,_>) =
         let item = parserResult.state.item 
@@ -55,7 +55,7 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
                         then yield ParserResult(state,1)}
       else
         seq {for (parserResult:ParserResult<_,_,_>) in newStates do
-               let item,trees,position = parserResult.state.item, parserResult.state.trees,parserResult.position                             
+               let item,trees,position = parserResult.state.item, parserResult.state.trees, parserResult.position                             
                let prevItms = prevItem item tables.Items
                let checker _item = Option.get _item.symb = symbol && _item.item_num=item.s
                if Set.exists checker prevItms && not(isStart item.prod_name)  
@@ -123,21 +123,21 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
             #endif
             let value = (getLexeme position)
             let text = (getLexeme position).name
-            let leaf_tree item = 
+            let leafTree item = 
                   [Leaf(text,{prodNum = item.prod_num;
                               seqNum = item.seq_number;
                               varNum = 1;
                               trace = [];//item.toStateTrace;
                               value = Value.LeafV(value)})]
                   
-            let new_states = Set.filter (fun (state:State<_,_,_>) -> state.item.next_num = None) states          
-            let result_states states create_tree =
+            let newStates = Set.filter (fun (state:State<_,_,_>) -> state.item.next_num = None) states          
+            let resultStates states create_tree =
                   set <| seq{ for (state:State<_,_,_>) in states -> State(state.item,create_tree state.item)}                  
-            Set.map (fun state -> ParserResult(state,position))(result_states new_states (fun _ -> []))
+            Set.map (fun state -> ParserResult(state,position))(resultStates newStates (fun _ -> []))
             + 
             if getLexeme position = m_end
             then Set.empty 
-            else climb(ParserState(result_states states leaf_tree,text,position-1))
+            else climb(ParserState(resultStates states leafTree,text,position-1))
       )
         
   let run inputLength =      

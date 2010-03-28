@@ -1,0 +1,289 @@
+{
+// Copyright 2009 Jake Kirilenko
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+ module internal Yard.Core.GrammarLexer
+ open Microsoft.FSharp.Text.Lexing
+ open Yard.Core.GrammarParser
+ open Microsoft.FSharp.Text
+
+(* Auxiliaries for the lexical analyzer *)
+
+let brace_depth = ref 0
+let sq_br_depth = ref 0
+let comment_depth = ref 0
+let ang_br_depth = ref 0
+let commut_depth = ref 0
+
+
+let currentFileContent = ref ""
+
+exception Lexical_error of string * int
+
+let initial_string_buffer = Array.create 256 ' ' //String.create 256
+
+let string_buff = ref initial_string_buffer
+
+let string_index = ref 0
+
+let reset_string_buffer () =
+    string_buff := initial_string_buffer;
+    string_index := 0
+
+let store_string_char c =
+  (if (!string_index >= (Array.length !string_buff))
+   then(
+     let new_buff =  Array.create (Array.length !string_buff * 2) ' 'in
+     Array.blit !string_buff 0 new_buff 0 (Array.length !string_buff);
+     string_buff := new_buff)
+   );
+  (!string_buff).[!string_index] <- c;
+  incr string_index
+
+let char_for_decimal_code (lexbuf:Lexing.LexBuffer<_>) i =
+  char(100 * (int(lexbuf.LexemeChar i) - 48) +
+               10 * (int(lexbuf.LexemeChar (i+1)) - 48) +
+                    (int(lexbuf.LexemeChar (i+2)) - 48))
+
+
+let get_stored_string () =
+  Array.sub !string_buff 0 !string_index
+
+let char_for_backslash = function
+    'n' -> '\n'
+  | 't' -> '\t'
+  | 'b' -> '\b'
+  | 'r' -> '\r'
+  |  c   -> c
+
+(*let line_num = ref 1
+let line_pos = ref 0
+*)
+let handle_lexical_error fn (lexbuf:Lexing.LexBuffer<_>) =
+  let pos = lexbuf.StartPos.AbsoluteOffset in
+  try
+    fn lexbuf
+  with Lexical_error(msg, _) ->
+    raise(Lexical_error(msg, pos))
+
+let warning (lexbuf:Lexing.LexBuffer<_>) msg =
+  Printf.eprintf "ocamllex warning:\nFile \"%s\",  character %d: %s.\n"
+                  (System.Environment.GetCommandLineArgs()).[1] (lexbuf.StartPos.AbsoluteOffset) msg;   
+  stderr.Flush()
+;;
+
+let to_srt ch_arr = (Array.map (fun x -> string x) ch_arr) |> String.concat ""
+
+let _lexeme lexbuf (n,n') =
+  let len = n' - n in
+  currentFileContent.Value.Substring(n,len)
+
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) loc = _lexeme lexbuf loc, loc
+let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos.AbsoluteOffset,lexbuf.EndPos.AbsoluteOffset)
+
+}
+
+
+let identstart =
+  ['A'-'Z' 'a'-'z' '\192'-'\214' '\216'-'\246' '\248'-'\255']
+let identbody =
+  ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
+let backslash_escapes =
+  ['\\' '"' '\'' 'n' 't' 'b' 'r']
+
+
+let blank =  [' ' '\013' '\009' '\012'] *
+
+rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
+and skipSpaces  = parse blank {lexbuf}
+and  main = parse
+       blank  { main lexbuf }
+     | '\010' { //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }; 
+                main lexbuf
+              }
+     | ':'  { COLON }
+     | ';'  { SEMICOLON }
+     | '|'  { BAR }
+     | '='  {EQUAL}
+     | "<<" {DLESS}
+     | ">>" {DGREAT}
+     | '*'  {STAR}
+     | '+'  {PLUS}
+     | '?'  {QUESTION}
+     | "(*"
+       { comment_depth := 1;
+         handle_lexical_error comment lexbuf;
+         main lexbuf
+       }
+     | "=>{"
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+         let n2 = handle_lexical_error predicate lexbuf in
+         PREDICATE (from_lexbuf lexbuf (n1,n2))
+       }
+     | identstart identbody *
+       {  let text = lex2source lexbuf in
+          match (fst text).[0] with
+          | c when List.contains c ['a'..'z'] -> LIDENT text
+          | c when List.contains c ['A'..'Z'] -> UIDENT text
+          |_       -> failwith "Incorrect indentStart" 
+       }
+     | eof {EOF}
+     | '{'
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+         brace_depth := 1;
+         let n2 = handle_lexical_error action lexbuf in
+          ACTION (from_lexbuf lexbuf (n1,n2))
+       }
+    | '<'
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+         ang_br_depth := 1;
+         let n2 = handle_lexical_error pattern lexbuf in
+         PATTERN (from_lexbuf lexbuf (n1,n2))
+       }
+    | '['
+       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+         sq_br_depth := 1;
+         let n2 = handle_lexical_error param lexbuf in
+         PARAM (from_lexbuf lexbuf (n1,n2))
+       }
+    | "\""
+      { reset_string_buffer();
+        let string_start = lexbuf.StartPos in
+        string lexbuf;
+        lexbuf.StartPos <- string_start;
+        STRING (from_lexbuf lexbuf (string_start.pos_cnum, lexbuf.EndPos.AbsoluteOffset))
+      }
+    | "(" {LPAREN}
+    | ")" {RPAREN}
+    | _
+       { raise(Lexical_error
+                ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
+                  lexbuf.StartPos.AbsoluteOffset)) }
+
+(*  ------------------------ *)
+and predicate = parse
+    "}=>"    { lexbuf.StartPos.AbsoluteOffset  }
+  | '"' { reset_string_buffer();
+      string lexbuf;
+      reset_string_buffer();
+      predicate lexbuf }
+  | "(*"
+    { comment_depth := 1;
+      comment lexbuf;
+      predicate lexbuf }
+  | eof
+    { raise (Lexical_error("unterminated predicate", lexbuf.StartPos.AbsoluteOffset)) }
+  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+  |  _ {predicate lexbuf}
+and action = parse
+    '{'
+    { incr brace_depth;
+      action lexbuf }
+  | '}'
+    { decr brace_depth;
+      if !brace_depth = 0 then lexbuf.StartPos.AbsoluteOffset else action lexbuf }
+  | '"' { reset_string_buffer();
+      string lexbuf;
+      reset_string_buffer();
+      action lexbuf }
+  | "(*"
+    { comment_depth := 1;
+      comment lexbuf;
+      action lexbuf }
+  | eof
+    { raise (Lexical_error("unterminated action", lexbuf.StartPos.AbsoluteOffset)) }
+  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+  |  _ {action lexbuf}
+ 
+and pattern = parse
+    '<'
+    { incr ang_br_depth;
+      pattern lexbuf }
+  | '>'
+    { decr ang_br_depth;
+      if !ang_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else pattern lexbuf }
+  | '"' { reset_string_buffer();
+      string lexbuf;
+      reset_string_buffer();
+      pattern lexbuf }
+  | "(*"
+    { comment_depth := 1;
+      comment lexbuf;
+      pattern lexbuf }
+  | eof
+    { raise (Lexical_error("unterminated pattern", lexbuf.StartPos.AbsoluteOffset)) }
+  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+  |  _ {pattern lexbuf}
+
+
+and param = parse
+    '['
+    { incr sq_br_depth;
+      param lexbuf }
+  | ']'
+    { decr sq_br_depth;
+      if !sq_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else param lexbuf }
+  | '"' { reset_string_buffer();
+      string lexbuf;
+      reset_string_buffer();
+      param lexbuf }
+  | "(*"
+    { comment_depth := 1;
+      comment lexbuf;
+      param lexbuf }
+  | eof
+    { raise (Lexical_error("unterminated param",  lexbuf.StartPos.AbsoluteOffset)) }
+  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+  |  _ {param lexbuf}
+     
+and string = parse
+    '"'
+    { () }
+  | '\\' backslash_escapes
+    { store_string_char(char_for_backslash(lexbuf.LexemeChar 1));
+      string lexbuf }
+  | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9']
+    { store_string_char(char_for_decimal_code lexbuf 1);
+      string lexbuf }
+  | eof
+    { raise(Lexical_error("unterminated string", lexbuf.StartPos.AbsoluteOffset)) }
+  | '\\' _
+    { warning lexbuf
+              (Printf.sprintf "illegal backslash escape in string: `\\%c'"
+                              (lexbuf.LexemeChar 1));
+      store_string_char(lexbuf.LexemeChar 0);
+      store_string_char(lexbuf.LexemeChar 1);
+      string lexbuf }
+  | _
+    { store_string_char(lexbuf.LexemeChar 0);
+      string lexbuf }
+      
+and comment = parse
+    "(*"
+    { incr comment_depth; comment lexbuf }
+  | "*)"
+    { decr comment_depth;
+      if !comment_depth = 0 then () else comment lexbuf }
+  | '"'
+    { reset_string_buffer();
+      string lexbuf;
+      reset_string_buffer();
+      comment lexbuf }
+  | "''"
+      { comment lexbuf }
+  | "'" [^ '\\' '\''] "'"
+      { comment lexbuf }
+  | "'\\" backslash_escapes "'"
+      { comment lexbuf }
+  | "'\\" ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+      { comment lexbuf }
+  | eof
+    { raise(Lexical_error("unterminated comment", lexbuf.StartPos.AbsoluteOffset)) }
+  | _
+    { comment lexbuf }
+
+{
+}

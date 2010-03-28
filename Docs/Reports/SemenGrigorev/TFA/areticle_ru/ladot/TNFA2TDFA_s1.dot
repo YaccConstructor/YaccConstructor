@@ -3,6 +3,21 @@ digraph TNFA2TDFA_s1
   rankdir = LR;
   node[width = 0.2, height = 0.2,fixedsize = "true",shape = plaintext,fontsize = 2];
 
+  12[label = "2"];
+  13[label = "3"];
+  14[label = "1"];
+  15[label = "14"];
+  2[label = "8"];
+  5[label = "6"];
+  10[label = "4"];
+  1[label = "7"];
+  3[label = "9"];
+  4[label = "10"];
+  6[label = "11"];
+  8[label = "12"];
+  9[label = "5"];
+  11[label = "13"];
+
   subgraph cluster_S1
   {
     rankdir = LR;

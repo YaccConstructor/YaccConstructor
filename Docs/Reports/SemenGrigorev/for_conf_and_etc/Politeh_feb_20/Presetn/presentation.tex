@@ -18,7 +18,7 @@
 % Если у вас есть логотип вашей кафедры, факультета или университета, то
 % его можно включить в презентацию.
 %\Logo{\includegraphics[width=1cm]{logo.eps}}
-\title[GLR-анализатор]{Гнератор синтаксических анализаторов для произвольных контекстно-свободных грамматик}
+\title[GLR-анализатор]{Генератор синтаксических анализаторов для произвольных контекстно-свободных грамматик}
 %\subtitle{Дипломная работа}
 \institute[СПбГУ]{
 Санкт-Петербургский государственный университет \\
@@ -56,9 +56,9 @@
 \begin{frame}
 	\transwipe[direction=90]
 	\frametitle{Задача}
-	Разработка генератора синтаксических анализаторов для среды .NET со следующими свойствами:  
+	Разработка генератора синтаксических анализаторов для \bfseries{\underline {среды .NET}} \normalfont со следующими свойствами:  
 	\begin{itemize}
-		\item Работа с произвольными контекстно-свободных грамматиками
+		\item Работа с произвольными контекстно-свободными грамматиками
 		\item Поддержка расширенных контекстно-свободных  грамматик
 		\item Поддержка s-атрибутных грамматик
 	\end{itemize}
@@ -67,34 +67,55 @@
 \begin{frame}
 	\transwipe[direction=90]
 	\frametitle{Алгоритм}
-	 GLR-анализатор предназначен для работы с произвольной (в том числе неоднозначной!) КС  грамматикой
+	 GLR-анализатор предназначен для работы с произвольной (\bfseries{\underline {в том числе неоднозначной!}} \normalfont) КС  грамматикой
 	\begin{itemize}
 		\item Работает за линейное время 
     \item {$O(n^{3})$ в худшем случае}
-	\end{itemize}	
+	\end{itemize}
+	Рассмотренные подходы:
+	\begin{itemize}
+			\item Алгоритм Эрли				
+			\item Алгоритм Томиты				
+			\item Рекурсивно-восходящий алгоритм				
+	\end{itemize}					
 \end{frame}
+
+%\begin{frame}
+%	\transwipe[direction=90]
+%	\frametitle{Алгоритм}
+%	Рассмотренные подходы:
+%	\begin{itemize}
+%			\item Алгоритм Эрли
+%				\begin{itemize}
+%					\item Состояние
+%				\end{itemize}	
+%			\item Алгоритм Томиты
+%				\begin{itemize}
+%					\item Структурированный в виде графа стек
+ %         \item Ветвление стека
+  %      \end{itemize}	
+	%		\item Рекурсивно-восходящий алгоритм
+	%			\begin{itemize}
+	%				\item Система взаимно рекурсивных функций
+	%				\item Кэширование результатов вызова функций
+	%			\end{itemize}
+	%\end{itemize}				
+%\end{frame}
+
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Алгоритм}
-	Рассмотренные подходы:
-	\begin{itemize}
-			\item Алгоритм Эрли
-				\begin{itemize}
-					\item Состояние
-				\end{itemize}	
-			\item Алгоритм Томиты
-				\begin{itemize}
-					\item Структурированный в виде графа стек
-          \item Ветвление стека
-        \end{itemize}	
-			\item Рекурсивно-восходящий алгоритм
-				\begin{itemize}
-					\item Система взаимно рекурсивных функций
-					\item Кэширование результатов вызова функций
-				\end{itemize}
-	\end{itemize}				
-\end{frame}
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Конструкции расширенных регулярных выражений в правых частях правил.
+		\begin{itemize}
+			\item удобно
+			\item иногда необходимо
+			\begin{itemize}
+				\item повторение с указанием диапазона: x[1..5]
+			  \item \bfseries{\underline {это не эквивалентно x^+}} \normalfont  		
+			\end{itemize}
+		\end{itemize}
+	\end{frame}
 
 \begin{frame}
 	\transwipe[direction=90]
@@ -132,17 +153,6 @@
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Применённые продукты Microsoft}
-	 При разработке используются следующие продукты Microsoft:
-	\begin{itemize}
-		\item Microsoft Visual Studio 2008 - среда разработки
-		\item F\# - язык разработки и цеклевой язык генератора
-    \item F\# PowerPack - FsLex и FsYacc.
-	\end{itemize}	
-\end{frame}
-
-\begin{frame}
-	\transwipe[direction=90]
 	\frametitle{Результаты}
 	Реализован прототип GLR-анализатора, обладающий следующими свойствами:
 	\begin{itemize}
@@ -154,12 +164,27 @@
 
 \begin{frame}
 	\transwipe[direction=90]
-	\frametitle{Заключение}
-	Дальнейшее развитие:
+	\frametitle{Применённые продукты Microsoft}
+	 При разработке используются следующие продукты Microsoft:
 	\begin{itemize}
-		\item поддержка s-атрибутных грамматик
-    \item ...
-    \item ...
+		\item Microsoft Visual Studio 2008 - среда разработки
+		\item F\# - язык разработки и целевой язык генератора
+    \item F\# PowerPack - FsLex и FsYacc.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Заключение}	
+	\begin{itemize}
+		\item Изучен инструментарий для автоматизации разработки анализаторов	  
+		\item Изучен рекурсивно-восходящий алгоритм анализа
+		\item Изучен язык программирования F\#
+		\item Дальнейшее развитие:
+		\begin{itemize}
+			\item поддержка s-атрибутных грамматик
+	    \item изменение архитектуры. Инструмент - "`конструктор"'
+	 	\end{itemize}	 	
 	\end{itemize}
 \end{frame}
 

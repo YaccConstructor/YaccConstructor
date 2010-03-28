@@ -3,6 +3,21 @@ digraph TNFAExample
 
   node[width = 0.2, height = 0.2, fontsize = 2 ,fixedsize ="true"];  
 
+  12[label = "2"];
+  13[label = "3"];
+  14[label = "1"];
+  15[label = "14"];
+  2[label = "8"];
+  5[label = "6"];
+  10[label = "4"];
+  1[label = "7"];
+  3[label = "9"];
+  4[label = "10"];
+  6[label = "11"];
+  8[label = "12"];
+  9[label = "5"];
+  11[label = "13"];
+
   
   14 -> 12 [minlen = 0.5,label = "12", texlbl = "$\epsilon/SS_2$"];
 
@@ -11,6 +26,7 @@ digraph TNFAExample
   13 -> 10 [minlen = 0.5,label = " ", texlbl = "$\epsilon/\omega$"];
   10 -> 9 [label = " ", texlbl = "$\epsilon/CS_1$"];
   9 -> 5 [label = "1234", texlbl = "$\epsilon/\omega$"];
+
   5 -> 1 [label = " ", texlbl = "$\epsilon/SS_1$"];
   1 -> 2 [minlen = 0.5,label = " ", texlbl = "$+/\omega$"];
   2 -> 3 [minlen = 0.5,label = " ", texlbl = "$\epsilon/\omega$"];

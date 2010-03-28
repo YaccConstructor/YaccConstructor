@@ -1,12 +1,12 @@
 digraph TNFA2TDFA_s2
 {
-  //rankdir = LR;
+  rankdir = LR;
   //{rank = "same"; n1 n2 n3}
   node[shape=record];
-  n1 [label = "<start> start |<id>14, 12|<finish>finish"];
-  n2 [label = "<start> start |<id>1 ,4 ,5 ,6 \n 8, 9, 10 \n 11, 15|<finish>finish"];
-  n3 [label = "<start> start |<id>2, 3|<finish>finish"];
-  "n1":finish -> "n2":start;
-  "n2":finish -> "n3":start;
-  "n3":finish -> "n2":start;
+  n1 [label = "<start> start \n -1:SS_2|<id>1|<finish>finish \n 2:om"];
+  n2 [label = "<start> start \n 1:(CS_1 ;SS_1) ; \n 3:SS_1|<id>2|<finish>finish \n 3:(SE_1) ; \n -1:(CE_1)"];
+  n3 [label = "<start> start \n 2:om|<id>3|<finish>finish \n 2:om"];
+  "n1":finish -> "n2":start [label = "t/1"];
+  "n2":finish -> "n3":start [label = "+/2"];
+  "n3":finish -> "n2":start [label = "t/3"];
 }

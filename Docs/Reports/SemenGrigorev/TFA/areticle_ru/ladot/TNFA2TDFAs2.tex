@@ -6,42 +6,51 @@
 %%
 \pgfsetcolor{black}
   % Edge: n1 -> n2
-  \draw [->] (136bp,168bp) .. controls (136bp,160bp) and (136bp,150bp)  .. (136bp,131bp);
+  \draw [->] (74bp,112bp) .. controls (88bp,112bp) and (104bp,112bp)  .. (131bp,112bp);
+  \draw (102bp,121bp) node {t/1};
   % Edge: n3 -> n2
-  \draw [->] (224bp,36bp) .. controls (199bp,51bp) and (188bp,51bp)  .. (160bp,73bp);
+  \draw [->] (331bp,47bp) .. controls (320bp,60bp) and (326bp,69bp)  .. (312bp,79bp) .. controls (302bp,87bp) and (290bp,93bp)  .. (268bp,101bp);
+  \draw (299bp,106bp) node {t/3};
   % Edge: n2 -> n3
-  \draw [->] (244bp,73bp) .. controls (221bp,54bp) and (211bp,53bp)  .. (181bp,36bp);
+  \draw [->] (268bp,46bp) .. controls (283bp,51bp) and (298bp,56bp)  .. (312bp,62bp) .. controls (315bp,64bp) and (319bp,66bp)  .. (331bp,73bp);
+  \draw (299bp,71bp) node {+/2};
   % Node: n1
 \begin{scope}
   \pgfsetstrokecolor{black}
-  \draw (0bp,168bp) -- (0bp,204bp) -- (163bp,204bp) -- (163bp,168bp) -- cycle;
-  \draw (49bp,168bp) -- (49bp,204bp);
-  \draw (110bp,168bp) -- (110bp,204bp);
-  \draw (24bp,186bp) node {start};
-  \draw (79bp,186bp) node {14, 12};
-  \draw (136bp,186bp) node {finish};
+  \draw (0bp,91bp) -- (0bp,200bp) -- (74bp,200bp) -- (74bp,91bp) -- cycle;
+  \draw (0bp,158bp) -- (74bp,158bp);
+  \draw (0bp,133bp) -- (74bp,133bp);
+  \draw (37bp,182bp) node {start };
+  \draw (37bp,165bp) node { -1:SS\_2};
+  \draw (37bp,140bp) node {1};
+  \draw (37bp,115bp) node {finish };
+  \draw (37bp,98bp) node { 2:om};
 \end{scope}
   % Node: n2
 \begin{scope}
   \pgfsetstrokecolor{black}
-  \draw (111bp,72bp) -- (111bp,131bp) -- (297bp,131bp) -- (297bp,72bp) -- cycle;
-  \draw (160bp,72bp) -- (160bp,131bp);
-  \draw (244bp,72bp) -- (244bp,131bp);
-  \draw (135bp,113bp) node {start};
-  \draw (202bp,113bp) node {1 ,4 ,5 ,6 };
-  \draw (202bp,96bp) node { 8, 9, 10 };
-  \draw (202bp,79bp) node { 11, 15};
-  \draw (270bp,113bp) node {finish};
+  \draw (131bp,-1bp) -- (131bp,142bp) -- (268bp,142bp) -- (268bp,-1bp) -- cycle;
+  \draw (131bp,83bp) -- (268bp,83bp);
+  \draw (131bp,58bp) -- (268bp,58bp);
+  \draw (199bp,124bp) node {start };
+  \draw (199bp,107bp) node { 1:(CS\_1 ;SS\_1) ; };
+  \draw (199bp,90bp) node { 3:SS\_1};
+  \draw (199bp,65bp) node {2};
+  \draw (199bp,40bp) node {finish };
+  \draw (199bp,23bp) node { 3:(SE\_1) ; };
+  \draw (199bp,6bp) node { -1:(CE\_1)};
 \end{scope}
   % Node: n3
 \begin{scope}
   \pgfsetstrokecolor{black}
-  \draw (132bp,0bp) -- (132bp,36bp) -- (277bp,36bp) -- (277bp,0bp) -- cycle;
-  \draw (181bp,0bp) -- (181bp,36bp);
-  \draw (224bp,0bp) -- (224bp,36bp);
-  \draw (156bp,18bp) node {start};
-  \draw (202bp,18bp) node {2, 3};
-  \draw (250bp,18bp) node {finish};
+  \draw (331bp,5bp) -- (331bp,114bp) -- (388bp,114bp) -- (388bp,5bp) -- cycle;
+  \draw (331bp,72bp) -- (388bp,72bp);
+  \draw (331bp,47bp) -- (388bp,47bp);
+  \draw (359bp,96bp) node {start };
+  \draw (359bp,79bp) node { 2:om};
+  \draw (359bp,54bp) node {3};
+  \draw (359bp,29bp) node {finish };
+  \draw (359bp,12bp) node { 2:om};
 \end{scope}
 %
 \end{tikzpicture}

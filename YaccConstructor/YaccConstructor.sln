@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{62D91EA2-A776-44C2-8891-2CA45A01A365}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Main", "Main\Main.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|x86.ActiveCfg = Debug|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|x86.Build.0 = Debug|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.ActiveCfg = Release|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Mixed Platforms.Build.0 = Release|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|x86.ActiveCfg = Release|x86
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

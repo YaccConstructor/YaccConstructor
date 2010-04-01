@@ -8,6 +8,9 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Main", "Main\Main.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+	ProjectSection(ProjectDependencies) = postProject
+		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {894323B6-EBCC-41D7-B4D1-E701466B1914}
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject

@@ -30,7 +30,7 @@ let ParseFile path =
     let buf = run_common path
     let res = GrammarParser.file Lexer.main buf
 #if DEBUG
-    printf "%A\n" <|res
+    //printf "%A\n" <|res
 #endif    
     {res with Yard.Core.IL.Definition.info = {fileName = path}}
     

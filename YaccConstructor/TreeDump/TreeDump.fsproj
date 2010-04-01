@@ -41,6 +41,13 @@
   <ItemGroup>
     <Compile Include="Generator.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

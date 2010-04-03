@@ -1,13 +1,25 @@
 ﻿module Main.Program
 
 open Yard.Core
-open Yard.Generators.TreeDump
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
     let grammarFilePath = @"..\..\..\..\Tests\test010.yrd"
-    let feName = "Yard"
+    let feName = "YardFrontend"
     let generatorName = "TreeDump"
-    let ilTree = (FrontendsManager.getFrontend feName).parseFile grammarFilePath
-    printf "%A" ((GeneratorsManager.Generator generatorName).Generate ilTree)
+
+    // Load frontends assemblies dlls - get them from file, current folder or command line
+    let ass = System.Reflection.Assembly.Load("YardFrontend")
+    let inst = ass.CreateInstance("Yard.Frontends.YardFrontend")
+    FrontendsManager.Register(inst :?> IFrontend);
+
+    // Load generator assemblies dlls - get them from file, current folder or command line
+    let ass = System.Reflection.Assembly.Load("TreeDump")
+    let inst = ass.CreateInstance("Yard.Generators.TreeDump")
+    GeneratorsManager.Register(inst :?> IGenerator);
+
+    let ilTree = (FrontendsManager.Frontend feName).ParseFile grammarFilePath
+    let gen = GeneratorsManager.Generator(generatorName)
+    let s = gen.Generate ilTree
+    printf "%A" s
 

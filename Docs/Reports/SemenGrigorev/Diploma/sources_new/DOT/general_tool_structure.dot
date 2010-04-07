@@ -1,0 +1,70 @@
+digraph general_structure
+{
+   SOURCE_GRAMMAR [shape = plaintext, label = "Файл с грамматикой."]
+   
+   YARD [shape = box, label = "YARD \n Используется как парсер входной грамматики"]
+   
+   IL [shape = plaintext, label = "Дерево вывода грамматики"]
+   
+   LEXEMES_SREAM [shape = plaintext, label = "Поток лексем (входное выражение)"]
+   
+   TABLES [shape = plaintext, label = "Набор таблиц"]
+   
+   T_GOTO [shape = plaintext, label = "GOTO \n Содержит правила переходов"]
+   T_ITEMS [shape = plaintext, label = "Items \n Содержит множество item-ов"]
+   T_ACTION_MAP [shape = plaintext, label = "Action Map \n Содержит отображение из првил в функции, \n сгенерированные по атрибутам этого правила"]
+   
+   SOURCE_CODE [shape = plaintext, label = "Файл на F#, содержащий функции \n для вычисления пользовательских атрибутов"]        
+
+   RESULT [shape = plaintext, label = "Результат \n Результат вычислений, заданных пользователем в атрибутах"]
+   
+   {rank = "same"; TABLES SOURCE_CODE LEXEMES_SREAM};
+   
+   subgraph cluster_GENERATOR
+   {   	
+		labeljust=l
+		label = "Генератор \l По дереву грамматики строит набор таблиц \l и генерирует функции для вычисления \l пользовательских атрибутов"
+		
+		
+		TRANSFORMATIONS[shape = box, label = "Преобразования грамматики. \n Необходимы, так как YARD поддерживает конструкции, не поддерживаемые генератором. \n Например макроправила"]
+		
+		TRANSFORMED_GRAMMAR[shape = plaintext, label = "Преобразованное дерево"]
+		
+		GENERATOR[shape = box, label = "Генерация таблиц и кода"]
+		
+		TRANSFORMATIONS -> TRANSFORMED_GRAMMAR
+		TRANSFORMED_GRAMMAR -> GENERATOR
+   }
+   
+   
+   subgraph cluster_CORE
+   {
+		label = "Ядро"
+		labeljust=l
+		
+		TABLE_INTERPRETATOR [shape = box, label = "Интерпретатор таблиц \n Строит лес вывода входного выражения \n на основе сгенерированных таблиц"]			
+		
+		DIRIV_FOREST [shape = plaintext, label = "Лес вывода входного выражения"]
+		
+		AST_INTERPRETATOR [shape = box, label = "Интерпертатор леса вывода \n Вычисляет атрибуты над лесом вывода"]
+		
+		
+		TABLE_INTERPRETATOR -> DIRIV_FOREST		
+		DIRIV_FOREST -> AST_INTERPRETATOR
+   }
+   
+   SOURCE_GRAMMAR -> YARD
+   YARD -> IL
+   IL -> TRANSFORMATIONS      
+   GENERATOR -> TABLES
+   GENERATOR -> SOURCE_CODE   
+   LEXEMES_SREAM -> TABLE_INTERPRETATOR
+   TABLES -> T_GOTO
+   TABLES -> T_ITEMS
+   TABLES -> T_ACTION_MAP
+   T_GOTO -> TABLE_INTERPRETATOR
+   T_ITEMS -> TABLE_INTERPRETATOR   
+   SOURCE_CODE -> AST_INTERPRETATOR
+   T_ACTION_MAP -> AST_INTERPRETATOR
+   AST_INTERPRETATOR -> RESULT
+}

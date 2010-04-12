@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{diploma}[2006/05/22 LaTeX Diploma class]
-\LoadClass[a4paper,12pt]{article} 
+\LoadClass[a4paper,14pt]{article} 
 
 \newcommand{\university}{\renewcommand{\@university}}
 \newcommand{\@university}{\ClassWarning{diploma}{No parameter given}\@eha}

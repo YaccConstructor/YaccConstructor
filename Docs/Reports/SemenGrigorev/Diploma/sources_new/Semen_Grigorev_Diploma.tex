@@ -8,7 +8,8 @@
 \usepackage{graphicx}
 %\usepackage[titletoc]{appendix} 
 %\usepackage{citehack}
-%\renewcommand{\baselinestretch}{1.5}
+\renewcommand{\baselinestretch}{1.5}
+\usepackage{pdfpages}
 \begin{document}
 \sloppy
 
@@ -16,7 +17,7 @@
 \author{Григорьева Семёна Вячеславовича}
 \university{Санкт-Петербургский Государственный Университет}
 \facility{Математико-механический факультет}
-\group{361}
+\group{461}
 \position{студента}
 \chair{Кафедра системного программирования}
 \leaderPosition{к.ф.-м.н.}
@@ -36,6 +37,7 @@
 
 \input{preface.tex}
 \input{review.tex}
+\includepdf{general_tool_structure.pdf}
 \input{realisation.tex}
 \input{conclusion.tex}
 \input{references.tex}

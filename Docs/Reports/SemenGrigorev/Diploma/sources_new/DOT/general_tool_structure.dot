@@ -2,25 +2,25 @@ digraph general_structure
 {
 	SOURCE_GRAMMAR [shape = plaintext, label = "Файл с грамматикой."]
 	
-	LEXEMES_SREAM [shape = plaintext, label = "Поток лексем \n Токенизированое входное выражение"]
+	LEXEMES_SREAM [shape = plaintext, label = "Поток лексем"]
 	
-	RESULT [shape = plaintext, label = "Результат \n Результат вычислений, заданных пользователем в атрибутах"]
+	RESULT [shape = plaintext, label = "Результат"]
 	
 	subgraph cluster_TOOL
 	{
 	  
 	   
-	   YARD [shape = box, label = "YARD \n Используется как парсер входной грамматики"]
+	   YARD [shape = box, label = "Парсер входной грамматики"]
 	   
 	   IL [shape = plaintext, label = "Дерево вывода грамматики"]	   	  
 	   
-	   TABLES [shape = plaintext, label = "Набор таблиц \n Содержит данные, необходимые для \n синтаксического анализа и вычисления атрибутов"]
+	   TABLES [shape = plaintext, label = "Набор таблиц"]
 	   
-	   T_GOTO [shape = plaintext, label = "GOTO \n Таблица переходов \n синтаксического анализатора"]
-	   T_ITEMS [shape = plaintext, label = "Items \n Информация о состояниях \n синтаксического анализатора"]
-	   T_ACTION_MAP [shape = plaintext, label = "Action Map \n Отображение из првил в функции, \n сгенерированные по атрибутам этого правила"]
+	   T_GOTO [shape = plaintext, label = "GOTO "]
+	   T_ITEMS [shape = plaintext, label = "Items"]
+	   T_ACTION_MAP [shape = plaintext, label = "Action Map"]
 	   
-	   SOURCE_CODE [shape = plaintext, label = "Файл на F#, содержащий функции \n для вычисления пользовательских атрибутов"]        	  
+	   SOURCE_CODE [shape = plaintext, label = "Функции вычисления атрибутов"]        	  
 	   
 	   {rank = "same"; TABLES SOURCE_CODE };
 	   {rank = "same"; T_GOTO T_ITEMS T_ACTION_MAP};
@@ -28,10 +28,10 @@ digraph general_structure
 	   subgraph cluster_GENERATOR
 	   {   	
 			labeljust=l
-			label = "Генератор \l По дереву грамматики строит набор таблиц \l и генерирует функции для вычисления \l пользовательских атрибутов"
+			label = "Генератор \l"
 			
 			
-			TRANSFORMATIONS[shape = box, label = "Преобразования грамматики. \n Необходимы, так как YARD поддерживает конструкции, не поддерживаемые генератором. \n Например макроправила"]
+			TRANSFORMATIONS[shape = box, label = "Преобразования грамматики"]
 			
 			TRANSFORMED_GRAMMAR[shape = plaintext, label = "Преобразованное дерево"]
 			
@@ -47,7 +47,7 @@ digraph general_structure
 			label = "Ядро"
 			labeljust=l
 			
-			TABLE_INTERPRETATOR [shape = box, label = "Интерпретатор таблиц \n Строит лес вывода входного выражения \n на основе сгенерированных таблиц. \n Основан на рекурсивно-восходящем алгоритме"]			
+			TABLE_INTERPRETATOR [shape = box, label = "Интерпретатор таблиц "]			
 			
 			DIRIV_FOREST [shape = plaintext, label = "Лес вывода входного выражения"]
 			
@@ -68,7 +68,7 @@ digraph general_structure
 			}
 			*/
 			
-			CALCULATOR[shape = box, label ="Вычисление \n Применнение функции, найденной \n с помощью Action Map в \n сгенерённом файле, к дереву"]
+			CALCULATOR[shape = box, label ="Вычислитель атрибутов"]
 			
 			TABLE_INTERPRETATOR -> DIRIV_FOREST		
 			//DIRIV_FOREST -> TREE_WALKER

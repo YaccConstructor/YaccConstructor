@@ -12,7 +12,7 @@ graph sample_1
                 
         subgraph cluster_STR
         {
-                label = "string in language defined by ";
+                label = "Строка, выводимая в грамматке, \n заданной регулярным выражением в правой части правила";
                 bgcolor = grey;
 
                 a;

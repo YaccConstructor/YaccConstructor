@@ -13,9 +13,8 @@ module Lexer = Yard.Core.GrammarLexer
 
 let run_common path = 
     let content = System.IO.File.ReadAllText(path)
-    Lexer.currentFileContent := content;
-    let reader = new System.IO.StringReader(content) in
-    LexBuffer<_>.FromTextReader reader
+    Lexer.currentFileContent := content;   
+    LexBuffer<_>.FromString content
 
 let run path =
     let buf = run_common path in

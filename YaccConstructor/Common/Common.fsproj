@@ -44,14 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IL.fs" />
-    <Compile Include="Trace.fs" />
-    <Compile Include="Grammar.fs" />
-    <Compile Include="IO.fs" />
-    <Compile Include="Utils.fs" />
-    <Compile Include="CompareHelper.fs" />
-    <Compile Include="AbstractTable.fs" />
-    <Compile Include="TypeConvertableTable.fs" />
-    <Compile Include="Tables.fs" />
     <Compile Include="IGenerator.fs" />
     <Compile Include="GeneratorsManager.fs" />
     <Compile Include="IFrontend.fs" />

@@ -30,4 +30,5 @@ type ExpandAlter() =
     interface IConvertion with
         member this.Name = "ExpandAlter"
         member this.ConvertList ruleList = List.collect extract_one_rule ruleList
+        member this.EliminatedProductionTypes = ["PAlt"]
     end

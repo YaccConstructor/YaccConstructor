@@ -121,4 +121,5 @@ type ExpandEBNF() =
     interface IConvertion with
         member this.Name = "ExpandEBNF"
         member this.ConvertList ruleList = List.collect convertToMeta ruleList
+        member this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]
     end

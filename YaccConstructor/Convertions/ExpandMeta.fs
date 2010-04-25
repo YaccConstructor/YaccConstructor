@@ -209,4 +209,5 @@ type ExpandMeta() =
     interface IConvertion with
         member this.Name = "ExpandMeta"
         member this.ConvertList ruleList = expandMetaRules ruleList
+        member this.EliminatedProductionTypes = [""]
     end

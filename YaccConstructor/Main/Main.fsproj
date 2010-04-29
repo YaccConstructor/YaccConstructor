@@ -62,6 +62,11 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RecursiveAscent\RecursiveAscent.fsproj">
+      <Name>RecursiveAscent</Name>
+      <Project>{fa4ae1e5-0ad3-4d38-85d1-fe52c43a1655}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{894323b6-ebcc-41d7-b4d1-e701466b1914}</Project>

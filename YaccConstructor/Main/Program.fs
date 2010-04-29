@@ -14,23 +14,30 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
-    let grammarFilePath = @"..\..\..\..\Tests\test101.yrd"
+    let grammarFilePath = @"..\..\..\..\Tests\test001.yrd"
     let feName = "YardFrontend"
-    let generatorName = "TreeDump"
+    let generatorName = "RecursiveAscent"
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
-    let assembly = System.Reflection.Assembly.Load("YardFrontend")
-    let inst = assembly.CreateInstance("Yard.Frontends.YardFrontend")
+    let assembly = System.Reflection.Assembly.Load(feName)
+    let inst = assembly.CreateInstance("Yard.Frontends."+feName+"."+feName)
     FrontendsManager.Register(inst :?> IFrontend);
 
     // Load generator assemblies dlls - get them from file, current folder or command line
-    let assembly = System.Reflection.Assembly.Load("TreeDump")
-    let inst = assembly.CreateInstance("Yard.Generators.TreeDump")
+    let assembly = System.Reflection.Assembly.Load(generatorName)
+    let inst = assembly.CreateInstance("Yard.Generators."+generatorName+"."+generatorName)
     GeneratorsManager.Register(inst :?> IGenerator);
 
+
+    // Parse grammar
     let ilTree = (FrontendsManager.Frontend feName).ParseFile grammarFilePath
-    let ilTreeExpandedEBNF = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandEBNF.ExpandEBNF())
+
+    // Apply convertions
+    let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
+
+    // Generate something
     let gen = GeneratorsManager.Generator(generatorName)
-    let s = gen.Generate ilTree
+    let s = gen.Generate ilTreeExpandedMeta
+
     printf "%A" s
 

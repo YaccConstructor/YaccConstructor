@@ -1,4 +1,4 @@
-﻿namespace Yard.Frontends
+﻿namespace Yard.Frontends.YardFrontend
 
 open Yard.Core
 

@@ -1,0 +1,2147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>FsCheck</name></assembly>
+<members>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Unit">
+<summary>
+Generates (), of the unit type.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Tuple6``6">
+<summary>
+Genereate a 6-tuple.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Tuple5``5">
+<summary>
+Genereate a 5-tuple.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Tuple4``4">
+<summary>
+Genereate a 4-tuple.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Tuple3``3">
+<summary>
+Genereate a 3-tuple.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Tuple2``2">
+<summary>
+Genereate a 2-tuple.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.String">
+<summary>
+Generates arbitrary strings, which are lists of chars generated by Char.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Option``1">
+<summary>
+Generate an option value that is &apos;None&apos; 1/4 of the time.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Object">
+<summary>
+Generate an object.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Int">
+<summary>
+Generate arbitrary int that is between -size and size.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.FsList``1">
+<summary>
+Generate a list of values. The size of the list is between 0 and the test size + 1.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Float">
+<summary>
+Generates arbitrary floats, NaN, NegativeInfinity, PositiveInfinity, Maxvalue, MinValue, Epsilon included fairly frequently.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Char">
+<summary>
+Generates arbitrary chars, between ASCII codes Char.MinValue and 127.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Byte">
+<summary>
+Generates arbitrary bytes.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Bool">
+<summary>
+Generates arbitrary bools.
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.Arbitrary.Arrow``2">
+<summary>
+Generate a function value.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Arbitrary.Arbitrary">
+<summary>
+A collection of default generators.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="P:FsCheck.Arbitrary.date">
+<summary>
+ Generate a date with no time-part
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.enumOf``1">
+<summary>
+ Generate a random enum of the type specified by the type parameter
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkFixedSizeArray``1(``0[])">
+<summary>
+ Shrink a fixed-size array by shrinking data values only
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkNonEmptyArray``1(``0[])">
+<summary>
+ Shrink a non-empty array, keeping it non-empty
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.nonEmptyArray``1">
+<summary>
+ Generate a non-empty array
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkNonEmptySet``1(Microsoft.FSharp.Collections.FSharpSet{``0})">
+<summary>
+ Shrink a non-empty set, keeping it non-empty
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.nonEmptySet``1">
+<summary>
+ Generate a non-empty set
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkMap``2(Microsoft.FSharp.Collections.FSharpMap{``0,``1})">
+<summary>
+ Shrink a map
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.map``2">
+<summary>
+ Generate a map
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkSet``1(Microsoft.FSharp.Collections.FSharpSet{``0})">
+<summary>
+ Shrink a set
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.set``1">
+<summary>
+ Generate a set
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.shrinkNonEmptySetSize``1(Microsoft.FSharp.Collections.FSharpSet{``0})">
+<summary>
+ Shrink the size of set, ensuring it is still non-empty
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.nonEmptySubsetOf``1(Microsoft.FSharp.Collections.FSharpSet{``0})">
+<summary>
+ Generate a non-empty subset of an existing (non-empty) set
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.subsetOf``1(Microsoft.FSharp.Collections.FSharpSet{``0})">
+<summary>
+ Generate a subset of an existing set
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="P:FsCheck.Arbitrary.positiveInt">
+<summary>
+ Generator/shrinker for non-negative integers
+</summary>
+</member>
+<member name="P:FsCheck.Arbitrary.shrinkPositiveInt">
+<summary>
+ Generator/shrinker for non-negative integers
+</summary>
+</member>
+<member name="P:FsCheck.Arbitrary.nonNegativeInt">
+<summary>
+ Generator/shrinker for non-negative integers
+</summary>
+</member>
+<member name="P:FsCheck.Arbitrary.shrinkNonNegativeInt">
+<summary>
+ Generator/shrinker for non-negative integers
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.setOf``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Generate a set using the given generator
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.array2DOf``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Generate a 2D array of an arbitrary size
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.array2DOfSize``1(FsCheck.Generator.Gen{``0},System.Int32,System.Int32)">
+<summary>
+ Generate a 2D array of a specified size
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.arrayOf``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Generate an array using the specified generator
+</summary>
+</member>
+<member name="M:FsCheck.Arbitrary.arrayOfSize``1(FsCheck.Generator.Gen{``0},System.Int32)">
+<summary>
+ Generate an array of a specified size and generator
+</summary>
+</member>
+<member name="T:FsCheck.Arbitrary">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Property">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Arbitrary">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Functions">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Generator">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Random">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Common">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Checks.Helpers">
+
+</member>
+<member name="M:FsCheck.Commands.ISpecification`2.Initial">
+<summary>
+Initial state of both object and model.
+</summary>
+</member>
+<member name="M:FsCheck.Commands.ISpecification`2.GenCommand(`1)">
+<summary>
+Generate a number of possible commands based on the current state of the model. The commands
+are just hints to speed up execution; preconditions are still checked.
+</summary>
+</member>
+<member name="T:FsCheck.Commands.ISpecification`2">
+<summary>
+A specification for an object under test, based on an abstract model of the
+object&apos;s behavior.
+</summary>
+</member>
+<member name="M:FsCheck.Commands.ICommand`2.RunModel(`1)">
+<summary>
+Executes the command on the model of the object.
+</summary>
+</member>
+<member name="M:FsCheck.Commands.ICommand`2.RunActual(`0)">
+<summary>
+Excecutes the command on the actual object under test.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Commands.ICommand`2.Pre(`1)">
+<summary>
+Precondition for execution of the command.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Commands.ICommand`2.Post(`0,`1)">
+<summary>
+Postcondition that must hold after execution of the command.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Commands.ICommand`2">
+<summary>
+A single command describes pre and post conditions and the model for a single method under test.
+</summary>
+</member>
+<member name="M:FsCheck.Commands.asProperty``2(FsCheck.Commands.ISpecification{``0,``1})">
+<summary>
+Turn a specification into a property.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Commands">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Common">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Functions">
+
+</member>
+<member name="">
+
+</member>
+<member name="P:FsCheck.Generator.Arbitrary`1.Arbitrary">
+<summary>
+Returns a generator for &apos;a.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Generator.Arbitrary`1.Shrink(`0)">
+<summary>
+Returns a sequence of the immediate shrinks of the given value. The immediate shrinks should not include
+doubles or the given value itself. The default implementation returns the empty sequence (i.e. no shrinking).
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Generator.Arbitrary`1.CoArbitrary``1(`0)">
+<summary>
+Returns a generator transformer for &apos;a. Necessary to generate functions with &apos;a as domain. Fails by
+default if it is not overridden.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Generator.GenBuilder">
+<summary>
+The workflow type for generators.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Generator.Gen`1.Map``2(Microsoft.FSharp.Core.FSharpFunc`2{`0,``1})">
+<summary>
+map the given function to the value in the generator, yielding a new generator of the result type.  
+</summary>
+</member>
+<member name="T:FsCheck.Generator.Gen`1">
+<summary>
+Generator of a random value, based on a size parameter and a randomly generated int.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Generator.overwriteGeneratorsByType(System.Type)">
+<summary>
+Register the generators that are static members of the given type, overwriting any existing generators.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.registerGeneratorsByType(System.Type)">
+<summary>
+Register the generators that are static members of the given type.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.overwriteGenerators``1">
+<summary>
+Register the generators that are static members of the type argument, overwriting any existing generators.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.registerGenerators``1">
+<summary>
+Register the generators that are static members of the type argument.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Generator.shrink``1(``0)">
+<summary>
+Returns the immediate shrinks for the given value.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.coarbitrary``2(``0)">
+<summary>
+Returns a generator transformer for the given value, aka a coarbitrary function.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.arbitrary``1">
+<summary>
+Returns a Gen&lt;&apos;a&gt;
+</summary>
+</member>
+<member name="M:FsCheck.Generator.variant``1(System.Int32,FsCheck.Generator.Gen{``0})">
+<summary>
+Basic co-arbitrary generator transformer, which is dependent on an int.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.promote``2(Microsoft.FSharp.Core.FSharpFunc`2{``0,FsCheck.Generator.Gen{``1}})">
+<summary>
+Promote the given function f to a function generator.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.constant``1(``0)">
+<summary>
+Always generate v.          
+</summary>
+</member>
+<member name="M:FsCheck.Generator.nonEmptyListOf``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Generates a non-empty list of random length. The maximum length 
+ depends on the size parameter.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.listOf``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Generates a list of random length. The maximum length depends on the
+ size parameter.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.suchThat``1(Microsoft.FSharp.Core.FSharpFunc`2{``0,System.Boolean},FsCheck.Generator.Gen{``0})">
+<summary>
+Generates a value that satisfies a predicate. Contrary to suchThatOption, this function keeps re-trying
+by increasing the size of the original generator ad infinitum.  Make sure there is a high chance that 
+the predicate is satisfied.
+Note to QuickCheck users: order of arguments wrt QuickCheck is reversed, to make piping easier.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.suchThatOption``1(Microsoft.FSharp.Core.FSharpFunc`2{``0,System.Boolean},FsCheck.Generator.Gen{``0})">
+<summary>
+Tries to generate a value that satisfies a predicate. This function &apos;gives up&apos; by generating None
+if the given original generator did not generate any values that satisfied the predicate, after trying to
+get values from by increasing its size.
+Note to QuickCheck users: order of arguments wrt QuickCheck is reversed, to make piping easier.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.vectorOf``1(System.Int32,FsCheck.Generator.Gen{``0})">
+<summary>
+Generates a list of given length, containing values generated by the given generator.
+Identical to vector, but with arguments reversed so it is consistent with listOf and nonEmptyListOf.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.vector``1(FsCheck.Generator.Gen{``0},System.Int32)">
+<summary>
+Generates a list of given length, containing values generated by the given generator.
+vector g n generates a list of n t&apos;s, if t is the type that g generates.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.sequence``1(Microsoft.FSharp.Collections.FSharpList{FsCheck.Generator.Gen{``0}})">
+<summary>
+Sequence the given list of generators into a generator of a list.
+Note to QuickCheck users: this is monadic sequence, which cannot be expressed generally in F#.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen6``7(Microsoft.FSharp.Core.FSharpFunc`2{``0,Microsoft.FSharp.Core.FSharpFunc`2{``1,Microsoft.FSharp.Core.FSharpFunc`2{``2,Microsoft.FSharp.Core.FSharpFunc`2{``3,Microsoft.FSharp.Core.FSharpFunc`2{``4,Microsoft.FSharp.Core.FSharpFunc`2{``5,``6}}}}}},FsCheck.Generator.Gen{``0},FsCheck.Generator.Gen{``1},FsCheck.Generator.Gen{``2},FsCheck.Generator.Gen{``3},FsCheck.Generator.Gen{``4},FsCheck.Generator.Gen{``5})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen5``6(Microsoft.FSharp.Core.FSharpFunc`2{``0,Microsoft.FSharp.Core.FSharpFunc`2{``1,Microsoft.FSharp.Core.FSharpFunc`2{``2,Microsoft.FSharp.Core.FSharpFunc`2{``3,Microsoft.FSharp.Core.FSharpFunc`2{``4,``5}}}}},FsCheck.Generator.Gen{``0},FsCheck.Generator.Gen{``1},FsCheck.Generator.Gen{``2},FsCheck.Generator.Gen{``3},FsCheck.Generator.Gen{``4})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.four``1(FsCheck.Generator.Gen{``0})">
+<summary>
+Build a generator that generates a 4-tuple of the values generated by the given generator.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen4``5(Microsoft.FSharp.Core.FSharpFunc`2{``0,Microsoft.FSharp.Core.FSharpFunc`2{``1,Microsoft.FSharp.Core.FSharpFunc`2{``2,Microsoft.FSharp.Core.FSharpFunc`2{``3,``4}}}},FsCheck.Generator.Gen{``0},FsCheck.Generator.Gen{``1},FsCheck.Generator.Gen{``2},FsCheck.Generator.Gen{``3})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.three``1(FsCheck.Generator.Gen{``0})">
+<summary>
+Build a generator that generates a 3-tuple of the values generated by the given generator.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen3``4(Microsoft.FSharp.Core.FSharpFunc`2{``0,Microsoft.FSharp.Core.FSharpFunc`2{``1,Microsoft.FSharp.Core.FSharpFunc`2{``2,``3}}},FsCheck.Generator.Gen{``0},FsCheck.Generator.Gen{``1},FsCheck.Generator.Gen{``2})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.two``1(FsCheck.Generator.Gen{``0})">
+<summary>
+Build a generator that generates a 2-tuple of the values generated by the given generator.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen2``3(Microsoft.FSharp.Core.FSharpFunc`2{``0,Microsoft.FSharp.Core.FSharpFunc`2{``1,``2}},FsCheck.Generator.Gen{``0},FsCheck.Generator.Gen{``1})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.liftGen``2(Microsoft.FSharp.Core.FSharpFunc`2{``0,``1},FsCheck.Generator.Gen{``0})">
+<summary>
+Lift the given function over values to a function over generators of those values.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.frequency``1(Microsoft.FSharp.Collections.FSharpList{System.Tuple`2{System.Int32,FsCheck.Generator.Gen{``0}}})">
+<summary>
+Build a generator that generates a value from one of the generators in the given non-empty list, with
+given probabilities. The sum of the probabilities must be larger than zero.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.oneof``1(Microsoft.FSharp.Collections.FSharpList{FsCheck.Generator.Gen{``0}})">
+<summary>
+Build a generator that generates a value from one of the generators in the given non-empty list, with
+equal probability.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.elements``1(Microsoft.FSharp.Collections.FSharpList{``0})">
+<summary>
+Build a generator that randomly generates one of the values in the given non-empty list.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.choose(System.Int32,System.Int32)">
+<summary>
+Generates an integer between l and h, inclusive.
+Note to QuickCheck users: this function is more general in QuickCheck, generating a Random a.
+</summary>
+</member>
+<member name="P:FsCheck.Generator.gen">
+<summary>
+The workflow function for generators, e.g. gen { ... }
+</summary>
+</member>
+<member name="M:FsCheck.Generator.generate``1(System.Int32,FsCheck.Random.StdGen,FsCheck.Generator.Gen{``0})">
+<summary>
+Generates a value out of the generator with maximum size n.
+</summary>
+</member>
+<member name="P:FsCheck.Generator.rand">
+<summary>
+Default generator that generates a random number generator. Useful for starting off the process
+of generating a random value.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.resize``1(System.Int32,FsCheck.Generator.Gen{``0})">
+<summary>
+Override the current size of the test. resize n g invokes generator g with size parameter n.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.sized``1(Microsoft.FSharp.Core.FSharpFunc`2{System.Int32,FsCheck.Generator.Gen{``0}})">
+<summary>
+Obtain the current size. sized g calls g, passing it the current size as a parameter.
+</summary>
+</member>
+<member name="M:FsCheck.Generator.fmapGen``2(Microsoft.FSharp.Core.FSharpFunc`2{``0,``1},FsCheck.Generator.Gen{``0})">
+<summary>
+Apply (&apos;map&apos;) the function f on the value in the generator, yielding a new generator.
+</summary>
+</member>
+<member name="T:FsCheck.Generator">
+
+</member>
+<member name="M:FsCheck.GeneratorUtils.resizeSqrt``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Given a generator, produce another generator that has a size parameter
+ equal to the sqrt of the current size parameter.
+ Useful when producing lists of lists or similar.
+</summary>
+</member>
+<member name="M:FsCheck.GeneratorUtils.filtered``1(Microsoft.FSharp.Core.FSharpFunc`2{``0,System.Boolean})">
+<summary>
+ Return a generator and shrinker that is a &apos;filtered&apos; version of an existing type
+ where the arbitrary and shrink instances are looked up by type class.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.GeneratorUtils.arbGenShrinkWrap``2(FsCheck.Generator.Gen{``0},Microsoft.FSharp.Core.FSharpFunc`2{``0,System.Collections.Generic.IEnumerable{``0}},Microsoft.FSharp.Core.FSharpFunc`2{``0,``1},Microsoft.FSharp.Core.FSharpFunc`2{``1,``0})">
+<summary>
+ Shortcut for constructing an Arbitrary instance from a generator and shrinker.
+ The values produced/consumed by the generator shrinker will bewrapped/unwrapped
+ in another type.
+ coarb will not be supported for this type.
+</summary>
+</member>
+<member name="M:FsCheck.GeneratorUtils.arbGenShrink``1(FsCheck.Generator.Gen{``0},Microsoft.FSharp.Core.FSharpFunc`2{``0,System.Collections.Generic.IEnumerable{``0}})">
+<summary>
+ Shortcut for constructing an Arbitrary instance from a generator and shrinker.
+ coarb will not be supported for this type.
+</summary>
+</member>
+<member name="M:FsCheck.GeneratorUtils.arbGen``1(FsCheck.Generator.Gen{``0})">
+<summary>
+ Shortcut for constructing an Arbitrary instance from a generator
+ shrink and coarb will not be supported for this type
+</summary>
+</member>
+<member name="T:FsCheck.GeneratorUtils">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Property.Property">
+<summary>
+Type synonym for a test result generator.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Property.Result.And(FsCheck.Property.Result)">
+<summary>
+Returns a new result that is Succeeded if and only if both this
+and the given Result are Succeeded.
+</summary>
+</member>
+<member name="T:FsCheck.Property.Result">
+<summary>
+The result of one execution of a property.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="P:FsCheck.Property.Outcome.Shrink">
+<summary>
+ determines for which OUtcome the result should be shrunk, or shrinking should continue.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Property.propl``1(``0)">
+<summary>
+Lazy property constructor. Constructs a property from a Lazy&lt;bool&gt;.
+</summary>
+</member>
+<member name="M:FsCheck.Property.prop``1(``0)">
+<summary>
+Property constructor. Constructs a property from a bool.
+</summary>
+</member>
+<member name="M:FsCheck.Property.within``1(System.Int32,System.Lazy{``0})">
+<summary>
+Fails the property if it does not complete within t milliseconds. Note that the called property gets a
+cancel signal, but whether it responds to that is up to the property; the execution may not actually stop.
+</summary>
+</member>
+<member name="M:FsCheck.Property.op_DotBarDot``2(``0,``1)">
+<summary>
+Construct a property that fails if both fail. (cfr &apos;or&apos;)
+</summary>
+</member>
+<member name="M:FsCheck.Property.op_DotAmpDot``2(``0,``1)">
+<summary>
+Construct a property that succeeds if both succeed. (cfr &apos;and&apos;)
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Property.op_AtBar``1">
+<summary>
+Add the given label to the property. label on the left hand side, property on the right.
+</summary>
+</member>
+<member name="M:FsCheck.Property.op_BarAt``1(``0)">
+<summary>
+Add the given label to the property. Property on the left hand side, label on the right.
+</summary>
+</member>
+<member name="M:FsCheck.Property.label``1(System.String)">
+<summary>
+Add the given label to the property. The labels of a failing sub-property are displayed when it fails.
+</summary>
+</member>
+<member name="M:FsCheck.Property.collect``2(``0)">
+<summary>
+Collect data values property combinator. The argument of collect is evaluated in each test case, 
+and the distribution of values is reported, using any_to_string.
+</summary>
+</member>
+<member name="M:FsCheck.Property.trivial``1(System.Boolean)">
+<summary>
+Count trivial cases property combinator. Test cases for which the condition is True are classified as trivial.
+</summary>
+</member>
+<member name="M:FsCheck.Property.classify``1(System.Boolean,System.String)">
+<summary>
+Classify test cases combinator. Test cases satisfying the condition are assigned the classification given.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Property.throws``2(System.Lazy{``1})">
+<summary>
+Expect exception &apos;t when executing p. So, results in success if an exception of the given type is thrown, 
+and a failure otherwise.
+</summary>
+</member>
+<member name="M:FsCheck.Property.op_EqualsEqualsGreater``1">
+<summary>
+Conditional property combinator. Resulting property holds if the property after ==&gt; holds whenever the condition does.
+</summary>
+</member>
+<member name="M:FsCheck.Property.forAllShrink``3(FsCheck.Generator.Gen{``0},Microsoft.FSharp.Core.FSharpFunc`2{``0,``1},Microsoft.FSharp.Core.FSharpFunc`2{``0,``2})">
+<summary>
+Quantified property combinator. Provide a custom test data generator to a property. 
+Shrink failing test cases using the given shrink function.
+</summary>
+</member>
+<member name="M:FsCheck.Property.forAll``2(FsCheck.Generator.Gen{``0},Microsoft.FSharp.Core.FSharpFunc`2{``0,``1})">
+<summary>
+Quantified property combinator. Provide a custom test data generator to a property.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Property.shrinking``3(Microsoft.FSharp.Core.FSharpFunc`2{``0,``1},``0,Microsoft.FSharp.Core.FSharpFunc`2{``0,``2})">
+<summary>
+Property combinator to shrink an original value x using the shrinking function shrink:&apos;a -&gt; #seq&lt;&apos;a&gt;, and the testable
+function pf. 
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Property">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Random">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Reflect.genericTypeEq(System.Type,System.Type)">
+<summary>
+Equality for generic types    
+</summary>
+</member>
+<member name="M:FsCheck.Reflect.getUnionTagReader(System.Type)">
+<summary>
+ Get reader for union case name (aka tag)
+</summary>
+</member>
+<member name="M:FsCheck.Reflect.getUnionCases(System.Type)">
+<summary>
+ Returns the case name, type, and functions that will construct a constructor and a reader of a union type respectively
+</summary>
+</member>
+<member name="M:FsCheck.Reflect.getRecordReader(System.Type)">
+<summary>
+ Get reader for record type
+</summary>
+</member>
+<member name="M:FsCheck.Reflect.getRecordConstructor(System.Type)">
+<summary>
+ Get constructor for record type
+</summary>
+</member>
+<member name="M:FsCheck.Reflect.getRecordFields(System.Type)">
+<summary>
+ Get information on the fields of a record type
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Reflect">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.ReflectArbitrary.reflectGen``1">
+<summary>
+Builds a generator for the given type based on reflection. Currently works for record and union types.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.ReflectArbitrary.enumOfType(System.Type)">
+<summary>
+ Generate a random enum of the type specified by the System.Type
+</summary>
+</member>
+<member name="T:FsCheck.ReflectArbitrary">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Runner.Config">
+<summary>
+For configuring a run.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.IRunner.OnShrink(Microsoft.FSharp.Collections.FSharpList{System.Object},Microsoft.FSharp.Core.FSharpFunc`2{Microsoft.FSharp.Collections.FSharpList{System.Object},System.String})">
+<summary>
+Called on a succesful shrink.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.IRunner.OnFinished(System.String,FsCheck.Runner.TestResult)">
+<summary>
+Called whenever all tests are done, either True, False or Exhausted.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.IRunner.OnArguments(System.Int32,Microsoft.FSharp.Collections.FSharpList{System.Object},Microsoft.FSharp.Core.FSharpFunc`2{System.Int32,Microsoft.FSharp.Core.FSharpFunc`2{Microsoft.FSharp.Collections.FSharpList{System.Object},System.String}})">
+<summary>
+Called whenever arguments are generated and after the test is run.
+</summary>
+</member>
+<member name="T:FsCheck.Runner.IRunner">
+<summary>
+For implementing your own test runner.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Runner.verboseCheckAll(System.Type)">
+<summary>
+ Check all public static methods on the given type that have a Testable return type with configuration &apos;verbose&apos;
+</summary>
+</member>
+<member name="M:FsCheck.Runner.quickCheckAll(System.Type)">
+<summary>
+Check all public static methods on the given type that have a Testable return type with configuration &apos;quick&apos;
+</summary>
+</member>
+<member name="M:FsCheck.Runner.verboseCheckN``1(System.String,``0)">
+<summary>
+Check with the configuration &apos;verbose&apos;, and using the given name.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.quickCheckN``1(System.String,``0)">
+<summary>
+Check with the configuration &apos;quick&apos;, and using the given name.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.verboseCheck``1(``0)">
+<summary>
+Check with the configuration &apos;verbose&apos;.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.quickCheck``1(``0)">
+<summary>
+Check with the configuration &apos;quick&apos;.  
+</summary>
+</member>
+<member name="M:FsCheck.Runner.checkAll(FsCheck.Runner.Config,System.Type)">
+<summary>
+Check all public static methods on the given type that have a Testable return type(this includes let-bound functions in a module)
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.Runner.check``1(FsCheck.Runner.Config,``0)">
+<summary>
+Check the given property p using the given Config.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="P:FsCheck.Runner.init">
+<summary>
+Force this value to do the necessary initializations of typeclasses. Normally this initialization happens automatically. 
+In any case, it can be forced any number of times without problem.
+</summary>
+</member>
+<member name="P:FsCheck.Runner.verbose">
+<summary>
+The verbose configuration prints each generated argument.
+</summary>
+</member>
+<member name="P:FsCheck.Runner.quick">
+<summary>
+The quick configuration only prints a summary result at the end of the test.
+</summary>
+</member>
+<member name="P:FsCheck.Runner.consoleRunner">
+<summary>
+A runner that simply prints results to the console.
+</summary>
+</member>
+<member name="M:FsCheck.Runner.testFinishedToString(System.String,FsCheck.Runner.TestResult)">
+<summary>
+A function that returns the default string that is printed as a result of the test.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.Runner">
+
+</member>
+<member name="P:FsCheck.TypeClass.getInstance">
+<summary>
+Get the typeclass instance from the given typeclass and instance type.
+</summary>
+</member>
+<member name="M:FsCheck.TypeClass.overwriteInstances``2">
+<summary>
+Register instances in a given class as instances of the given type class, overwriting any existing instances.  
+</summary>
+</member>
+<member name="M:FsCheck.TypeClass.overwriteInstancesByType(System.Type,System.Type)">
+<summary>
+Register instances in a given class as instances of the given type class, overwriting any existing instances. 
+</summary>
+</member>
+<member name="M:FsCheck.TypeClass.registerInstances``2">
+<summary>
+Register instances in a given class as instances of the given type class.
+</summary>
+</member>
+<member name="M:FsCheck.TypeClass.registerInstancesByType(System.Type,System.Type)">
+<summary>
+Register instances in a given class as instances of the given type class.
+Thows a failure exception if no instances are found.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:FsCheck.TypeClass.newTypeClass``1">
+<summary>
+Define a new typeclass of the given (generic) type. The methods on this class are the ones that will be associated with
+its generic type.
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:FsCheck.TypeClass">
+
+</member>
+</members>
+</doc>

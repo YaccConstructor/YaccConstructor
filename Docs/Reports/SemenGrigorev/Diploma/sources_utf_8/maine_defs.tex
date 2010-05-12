@@ -1,0 +1,32 @@
+\section{Основные определения}
+
+Определим ряд понятий и введём некоторые обозначения, необходимых для дальнейшего изложения.
+\\
+\\
+	{\bfseries Определение 1.} \textit{EBNF}: Extended Backus-Naur Form -- способ формального  определения грамматики, элементов и атрибутов языка программирования~\cite{ISOEBNF}.
+\\
+	{\bfseries Определение 2.} \textit{Непосредственная поддержка EBNF-грамматик}: будем говорить, что инструмент непосредственно поддерживает EBNF-грамматики, если он работает с ними без их преобразования.
+\\
+	{\bfseries Определение 3.} \textit{Символ}: общее название для терминала или нетерминал при описании конечных автоматов.
+\\
+	{\bfseries Определение 4.} \textit{$q$}: LR-состояние (core)~\cite{DrgBook}
+\\
+	{\bfseries Определение 5.} \textit{$goto$}: $goto \ q \ X $ = $\{A\stackrel{}{\rightarrow}aX.b | A\rightarrow a.Xb \in $q*$\}, $
+\\
+	{\bfseries Определение 6.} \textit{q*}: замыкание. q* $= q \bigcup \{B\rightarrow.c | A \rightarrow a.Bb \in $q*$\} \bigcup \{x\stackrel{}{\rightarrow}.x | A\stackrel{}{\rightarrow} a.xb \in $q*$\}$~\cite{DrgBook}
+
+Для примеров псевдокода, приводимых далее, будем использовать синтаксические соглашения, принятые в языке программирования F\#.
+
+%\begin{itemize}
+
+	%\item GLR: Generalized LR Parsing~\cite{CurrentParsTechn}
+
+	%%\item ДКА: детерминированный конечный автомат. Такой автомат, в котором для каждой последовательности входных символов существует лишь одно состояние, в которое автомат может перейти из текущего~\cite{DrgBook}.
+	
+	%%\item НКА: недетерминированный конечный автомат~\cite{DrgBook}.
+	
+	%\item Замыкание: q* = q$ \bigcup \{B\rightarrow.c | A \rightarrow a.Bb \in $q*$\} \bigcup \{x\stackrel{}{\rightarrow}.x | A\stackrel{}{\rightarrow} a.xb \in $q*$\}$~\cite{DrgBook}
+	
+	%%\item LR-ситуация: продукция с точкой в некоторой позиции правой части~\cite{DrgBook}.
+
+%\end{itemize}

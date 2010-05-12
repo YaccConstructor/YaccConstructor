@@ -1,0 +1,6 @@
+graph Syntax_tree
+{        
+        concat -- a;
+        alternative -- b;
+        concat -- alternative -- closure -- c;
+}

@@ -1,0 +1,158 @@
+digraph general_structure
+{
+	/*SOURCE_GRAMMAR [shape = note, label = "Файл с грамматикой"]
+	
+	LEXEMES_SREAM [shape = note, label = "Поток лексем"]
+
+  {rank = "same"; SOURCE_GRAMMAR LEXEMES_SREAM };
+	
+	RESULT [shape = note, label = "Результат"]
+	
+	subgraph cluster_TOOL
+	{
+	  
+	   
+	   YARD [shape = box, label = "Парсер входной грамматики"]
+	   
+	   IL [shape = note, label = "Дерево вывода грамматики"]	   	  
+	   
+	   TABLES [label = "Набор таблиц"]
+	   
+	   T_GOTO [shape = note, label = "GOTO "]
+	   T_ITEMS [shape = note, label = "Items"]
+	   T_ACTION_MAP [shape = note, label = "Action Map"]
+	   
+	   SOURCE_CODE [shape = note, label = "Функции вычисления атрибутов"]        	  
+	   
+	   {rank = "same"; TABLES SOURCE_CODE };
+	   {rank = "same"; T_GOTO T_ITEMS T_ACTION_MAP};
+	   
+	   subgraph cluster_GENERATOR
+	   {   	
+			labeljust=l
+			label = "Генератор \l"
+			
+			
+			TRANSFORMATIONS[shape = box, label = "Преобразования грамматики"]
+			
+			TRANSFORMED_GRAMMAR[shape = note, label = "Преобразованное дерево"]
+			
+			GENERATOR[shape = box, label = "Генерация таблиц и кода"]
+			
+			TRANSFORMATIONS -> TRANSFORMED_GRAMMAR
+			TRANSFORMED_GRAMMAR -> GENERATOR
+	   }
+	   
+	   
+	   subgraph cluster_CORE
+	   {
+			label = "Ядро"
+			labeljust=l
+			
+			TABLE_INTERPRETATOR [shape = box, label = "Интерпретатор таблиц "]			
+			
+			DIRIV_FOREST [shape = note, label = "Лес вывода входного выражения"]
+			
+			/*subgraph cluster_AST_INTERPRETATOR
+			{
+				label = "Интерпертатор леса вывода \n Вычисляет атрибуты над лесом вывода"
+				TREE_WALKER[shape = box, label ="Обход дерева вывода"]
+				NODES[shape = note, label = "Список сыновей узла дерева вывода"]
+				STRING_TO_TREE_CONVERTER[shape = box, label ="Свёртка списка в дерево"]
+				RE_TREE[shape = note, label = "Дерево вывода строки в грамматике, \n заданной регулярным выражением \n в правой части правила"]
+				CALCULATOR[shape = box, label ="Вычисление \n Применнение функции, найденной \n с помощью Action Map в \n сгенерённом файле, к дереву"]
+				
+				TREE_WALKER -> NODES
+				NODES -> STRING_TO_TREE_CONVERTER
+				STRING_TO_TREE_CONVERTER -> RE_TREE
+				RE_TREE -> CALCULATOR
+				
+			}
+			*/
+			
+			/*CALCULATOR[shape = box, label ="Вычислитель атрибутов"]
+			
+			TABLE_INTERPRETATOR -> DIRIV_FOREST		
+			//DIRIV_FOREST -> TREE_WALKER
+			DIRIV_FOREST -> CALCULATOR
+	   }
+	   	   
+	   YARD -> IL
+	   IL -> TRANSFORMATIONS      
+	   GENERATOR -> TABLES
+	   GENERATOR -> SOURCE_CODE   	   
+	   TABLES -> T_GOTO
+	   TABLES -> T_ITEMS
+	   TABLES -> T_ACTION_MAP
+	   T_GOTO -> TABLE_INTERPRETATOR
+	   T_ITEMS -> TABLE_INTERPRETATOR   
+	   SOURCE_CODE -> CALCULATOR
+	   T_ACTION_MAP -> CALCULATOR	   
+   }
+   
+   SOURCE_GRAMMAR -> YARD
+   LEXEMES_SREAM -> TABLE_INTERPRETATOR
+   CALCULATOR -> RESULT
+*/
+
+
+	SOURCE_GRAMMAR [shape = note, label = "Файл с грамматикой"]
+	
+	LEXEMES_SREAM [shape = note, label = "Поток лексем"]
+
+  {rank = "same"; SOURCE_GRAMMAR LEXEMES_SREAM };
+	
+	RESULT [shape = note, label = "Результат"]
+	
+	subgraph cluster_TOOL
+	{
+	  
+	   
+	   YARD [width = 4, shape = component, label = "Парсер входной грамматики"]
+	   
+	   IL [shape = note, label = "Дерево вывода грамматики"]	   	  
+	   
+	   TABLES [label = "Набор таблиц"]
+	   
+	   T_GOTO [shape = note, label = "GOTO "]
+	   T_ITEMS [shape = note, label = "Items"]
+	   T_ACTION_MAP [shape = note, label = "Action Map"]
+	   
+	   SOURCE_CODE [shape = note, label = "Функции вычисления атрибутов"]        	  
+	   
+	   {rank = "same"; TABLES SOURCE_CODE };
+	   {rank = "same"; T_GOTO T_ITEMS T_ACTION_MAP};
+	   
+	   GENERATOR
+	   [
+      width = 4,
+			label = "Генератор",
+			shape = component
+			]			
+	   
+	   
+	   CORE
+	   [
+      width = 4,
+			label = "Ядро",
+			shape = component]
+			
+			   	   
+	   YARD -> IL
+	   IL -> GENERATOR
+	   GENERATOR -> TABLES
+	   GENERATOR -> SOURCE_CODE   	   
+	   TABLES -> T_GOTO
+	   TABLES -> T_ITEMS
+	   TABLES -> T_ACTION_MAP
+	   T_GOTO -> CORE
+	   T_ITEMS -> CORE
+	   SOURCE_CODE -> CORE
+	   T_ACTION_MAP -> CORE
+   }
+   
+   SOURCE_GRAMMAR -> YARD
+   LEXEMES_SREAM -> CORE
+   CORE -> RESULT
+
+}

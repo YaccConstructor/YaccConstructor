@@ -1,0 +1,14 @@
+\section{Определения}
+
+Определения используемых терминов и обозначения:
+\begin{itemize}
+\item GLR: Generalized LR Parsing ~\cite{CurrentParsTechn}
+\item EBNF: Extended Backus-Naur Form – расширенная нормальная форма Бэкуса–Наура, расширенная БНФ. Способ формального определения грамматики, элементов и атрибутов языка программирования ~\cite{ISOEBNF}.
+\item ДКА: детерминированный конечный автомат. Такой автомат, в котором для каждой последовательности входных символов существует лишь одно состояние, в которое автомат может перейти из текущего. ~\cite{DrgBook}.
+\item НКА: недетерминированный конечный автомат  ~\cite{DrgBook}.
+\item Символ: общее название для терминала или нетерминал  при описании КА.   
+\item $q$ - LR-состояние (core) ~\cite{DrgBook}
+\item Замыкание: q* = q$ \bigcup \{B\rightarrow.c | A \rightarrow a.Bb \in $q*$\} \bigcup \{x\stackrel{}{\rightarrow}.x | A\stackrel{}{\rightarrow} a.xb \in $q*$\}$ ~\cite{DrgBook}
+\item Функция goto: goto  q X = $\{A\stackrel{}{\rightarrow}aX.b | A\rightarrow a.Xb \in $q*$\}, $
+\item LR-ситуация: продукция с точкой в некоторой позиции правой части ~\cite{DrgBook}.
+\end{itemize} 

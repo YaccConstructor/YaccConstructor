@@ -1,0 +1,23 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,]
+%%
+\node (i) at (27bp,45bp) [draw,ellipse] {$i$};
+  \node (e_2) at (325bp,45bp) [draw,ellipse] {$i+2$};
+  \node (e_1) at (129bp,45bp) [draw,ellipse] {$i+1$};
+  \node (j_3) at (427bp,45bp) [draw,ellipse] {$i+3$};
+  \node (doA_2) at (227bp,98bp) [draw,rectangle] {($buildL\!N\!F\!A$ T)};
+  \draw [->] (e_2) ..controls (293bp,22bp) and (273bp,10bp)  .. (254bp,6bp) .. controls (231bp,0bp) and (224bp,0bp)  .. (200bp,6bp) .. controls (185bp,9bp) and (169bp,18bp)  .. (e_1);
+  \pgfsetstrokecolor{black}
+  \draw (227bp,14bp) node {$\epsilon/ \omega$};
+  \draw [->] (i) ..controls (65bp,45bp) and (78bp,45bp)  .. (e_1);
+  \draw (77bp,53bp) node {$\epsilon/(ClsS,k)$};
+  \draw [->] (e_1) ..controls (192bp,45bp) and (248bp,45bp)  .. (e_2);
+  \draw (227bp,53bp) node {$\epsilon/ \omega$};
+  \draw [->] (e_2) ..controls (365bp,45bp) and (378bp,45bp)  .. (j_3);
+  \draw (377bp,53bp) node {$\epsilon/(ClsE,k)$};
+  \draw [->] (doA_2) ..controls (267bp,77bp) and (281bp,69bp)  .. (e_2);
+  \draw (275bp,82bp) node {$\epsilon/ \omega$};
+  \draw [->] (e_1) ..controls (162bp,64bp) and (177bp,71bp)  .. (doA_2);
+  \draw (179bp,80bp) node {$\epsilon/ \omega$};
+%
+\end{tikzpicture}

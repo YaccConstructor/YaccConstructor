@@ -1,0 +1,63 @@
+\begin{dot2tex}[dot]
+
+digraph general_structure
+{
+	SOURCE_GRAMMAR [shape = note, label = "Файл с грамматикой"]
+	
+	LEXEMES_SREAM [shape = note, label = "Поток лексем"]
+
+  {rank = "same"; SOURCE_GRAMMAR LEXEMES_SREAM };
+	
+	RESULT [shape = note, label = "Результат"]
+	
+	subgraph cluster_TOOL
+	{
+	  
+	   
+	   YARD [shape = component, label = "Парсер входной грамматики"]
+	   
+	   IL [shape = note, label = "Дерево вывода грамматики"]	   	  
+	   
+	   TABLES [label = "Набор таблиц"]
+	   
+	   T_GOTO [shape = note, label = "GOTO "]
+	   T_ITEMS [shape = note, label = "Items"]
+	   T_ACTION_MAP [shape = note, label = "Action Map"]
+	   
+	   SOURCE_CODE [shape = note, label = "Функции вычисления атрибутов"]        	  
+	   
+	   {rank = "same"; TABLES SOURCE_CODE };
+	   {rank = "same"; T_GOTO T_ITEMS T_ACTION_MAP};
+	   
+	   GENERATOR
+	   [
+			label = "Генератор",
+			shape = component
+			]			
+	   
+	   
+	   CORE
+	   [
+			label = "Ядро",
+			shape = component]
+			
+			   	   
+	   YARD -> IL
+	   
+	   GENERATOR -> TABLES
+	   GENERATOR -> SOURCE_CODE   	   
+	   TABLES -> T_GOTO
+	   TABLES -> T_ITEMS
+	   TABLES -> T_ACTION_MAP
+	   T_GOTO -> CORE
+	   T_ITEMS -> CORE
+	   SOURCE_CODE -> CORE
+	   T_ACTION_MAP -> CORE
+   }
+   
+   SOURCE_GRAMMAR -> YARD
+   LEXEMES_SREAM -> CORE
+   CORE -> RESULT
+}
+
+\end{dot2tex}

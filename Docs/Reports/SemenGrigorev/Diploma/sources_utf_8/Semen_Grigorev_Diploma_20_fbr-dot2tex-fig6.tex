@@ -1,0 +1,13 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,]
+%%
+\node (i) at (27bp,18bp) [draw,ellipse] {$i$};
+  \node (map) at (218bp,18bp) [draw,rectangle] {$concat$ ($map$ $buildL\!N\!F\!A$ lst)};
+  \node (j) at (409bp,18bp) [draw,ellipse] {$i+1$};
+  \draw [->] (i) ..controls (69bp,18bp) and (88bp,18bp)  .. (map);
+  \pgfsetstrokecolor{black}
+  \draw (86bp,26bp) node {$\epsilon/(SeqS,k)$};
+  \draw [->] (map) ..controls (337bp,18bp) and (356bp,18bp)  .. (j);
+  \draw (350bp,26bp) node {$\epsilon/(SeqE,k)$};
+%
+\end{tikzpicture}

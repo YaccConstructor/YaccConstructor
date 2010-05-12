@@ -1,0 +1,147 @@
+digraph labeles_general
+{
+        compound = true;
+
+        subgraph cluster_input_string
+        {
+                label = "Пример входной строки:";
+                inp_str[label = "'accc'"
+                       ,shape = plaintext];
+        }
+
+        subgraph cluster_rule
+        {
+                label = "Правило из грамматики, заданной пользователем. \n Правая часть правила может быть регулярным выражением."                
+                rule[label = "Правило \n S = a(b|c*)"];
+                l_rule[label = "S"];
+                r_rule[label = "Регулярне выражение: \n  a(b|c*)"];
+                rule -> r_rule;
+                rule -> l_rule;
+        }
+        
+
+        subgraph cluster_diriv_tree
+        {
+                label = "В дереве вывода есть узлы, соответствующие данному правилу. \n Непосредственные сыновья этого узля образуют строку, принадлежащую языку, заданному \n регулярным выражением из правой части правила.";
+                Dirivation_tree[label = "Дерево вывода"];
+
+                Dirivation_tree -> S[style = dotted];
+                Dirivation_tree[shape = box]; 
+                S -> a;
+
+                c1[label = "c"];
+                c2[label = "c"];
+                c3[label = "c"];
+                S -> c1;
+                S -> c2;
+                S -> c3;
+                
+                subgraph cluster_STR
+                {
+                        label = "Строка из языка, заданного регулярным выражением \n в правой части правила";
+                        bgcolor = grey;
+
+                        a;
+                        c1;
+                        c2;
+                        c3;
+
+                };
+
+        };
+
+        subgraph cluster_Syntax_tree
+        {        
+                label = "Правая часть правила - регулярное выражение. \n Можно построить его синтаксическое дерево.";
+                
+                a1[label = "a"];
+                b1[label = "b"];
+                c4[label = "c"];
+
+                concat -> a1;
+                alternative -> b1;
+                concat -> alternative -> closure -> c4;
+        };
+
+        subgraph cluster_dtree_with_labels
+        {
+                label = "К узлам в дереве вывода можно добавить дополнительные метки, \n с помощью которых можно восстановить дерево вывода входной строки в языке, заданном регулярным выражением.\n Эти метки вычисляются на этапе генерации анализатора и добавляются в \n дерево вывода в процессе разбора. Таким образом, в каждой вершине хранится путь до соответствующего листа в дереве вывода строки."
+                
+                a2[label = "a \n label = [conc]"
+                 ,shape = box];
+
+                c5[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                c6[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                c7[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                S2[label = "S"];                  
+  
+                S2 -> a2;
+                S2 -> c5;
+                S2 -> c6;
+                S2 -> c7;
+        }
+
+        subgraph cluster_diriv_tree_extracted
+        {
+				label = "Воспользовавшись метками можно раскрыть дерево вывода, заменив \n непосредственных сыновей деревом вывода задаваемой ими строки.";
+                Diriv_tree_extracted[label = "Дерево вывода"
+                                    ,shape = box];
+                S3[label = "S"];
+                a3[label = "a"];
+                c8[label = "c"];
+                c9[label = "c"];
+                c10[label = "c"];
+                concat3[label = "concat"];
+                closure3[label = "closure"];
+                alternative3[label = "alternative"];
+
+                Diriv_tree_extracted -> S3[style = dotted];
+                S3 -> concat3 -> a3;
+                concat3 -> alternative3 -> closure3 -> c8;
+                closure3 -> c9;
+                closure3 -> c10;
+
+                subgraph cluster_STR_2
+                {
+                        label = "Строка из языка, заданного регулярным выражением \n в правой части правила";
+                        bgcolor = grey;
+
+                        a3;
+                        c8;
+                        c9;
+                        c10
+
+                };
+
+        }
+
+        l_rule -> Dirivation_tree[lhead = cluster_diriv_tree
+                                 ,ltail = cluster_rule
+                                 ,label = ""];
+
+        inp_str -> Dirivation_tree[lhead = cluster_diriv_tree
+                                  ,ltail = cluster_input_string
+                                  ,label = ""];
+        
+        r_rule -> concat[lhead = cluster_Syntax_tree
+                        ,ltail = cluster_rule
+                        ,label = "Синтаксическое дерево регулярного выражения"];
+
+        c2 -> S2[lhead = cluster_dtree_with_labels
+                ,ltail = cluster_diriv_tree
+                ,label = "Добавление меток к узлам"]; 
+
+        c6 -> Diriv_tree_extracted[lhead = cluster_diriv_tree_extracted
+                                  ,ltail = cluster_dtree_with_labels
+                                  ,label = ""];
+
+        b1 -> Diriv_tree_extracted[lhead = cluster_diriv_tree_extracted
+                                  , ltail = cluster_Syntax_tree
+                                  ,label = ""];
+}               

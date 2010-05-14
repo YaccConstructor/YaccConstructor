@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Program.fs" />
     <Compile Include="GenTests.fs" />
+    <Compile Include="TestConvertion.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

@@ -18,7 +18,7 @@ using System.Diagnostics;
 namespace Irony.Parsing { 
 
   //BNF expressions are represented as OR-list of Plus-lists of BNF terms
-  internal class BnfExpressionData : List<BnfTermList> {
+  public class BnfExpressionData : List<BnfTermList> {
     public override string ToString() {
       try {
         string[] pipeArr = new string[this.Count];
@@ -47,7 +47,7 @@ namespace Irony.Parsing {
       Data.Add(new BnfTermList());
     }
 
-    internal BnfExpressionData Data;
+    public BnfExpressionData Data;
     public override string ToString() {
       return Data.ToString(); 
     } 

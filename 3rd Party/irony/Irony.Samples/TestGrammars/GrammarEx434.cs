@@ -18,7 +18,7 @@ using Irony.Parsing;
 
 namespace Irony.Samples {
   //Expression grammar (4.19), from example 4.34 in Dragon book, p.222
-  class GrammarEx434 : Grammar {
+  public class GrammarEx434 : Grammar {
     public GrammarEx434() {
       NonTerminal E = new NonTerminal("E");
       NonTerminal T = new NonTerminal("T");

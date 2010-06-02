@@ -22,7 +22,7 @@ namespace Irony.Samples {
   // Note that the table in the book contains kernel-only items for each state,
   //  while we print out all items
   class GrammarEx446  : Grammar {
-    public GrammarEx446() {
+    public public GrammarEx446() {
       // A' is augmented root
       NonTerminal S = new NonTerminal("S");
       NonTerminal L = new NonTerminal("L");

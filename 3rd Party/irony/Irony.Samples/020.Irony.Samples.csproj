@@ -90,9 +90,9 @@
     <Compile Include="Wiki\WikiCodeplexGrammar.cs" />
     <Compile Include="Wiki\WikiCreoleGrammar.cs" />
     <Compile Include="Wiki\WikiHtmlConverter.cs" />
-    <None Include="TestGrammars\GrammarEx434.cs" />
-    <None Include="TestGrammars\GrammarEx446.cs" />
-    <None Include="TestGrammars\GrammarExL514.cs" />
+    <Compile Include="TestGrammars\GrammarEx434.cs" />
+    <Compile Include="TestGrammars\GrammarEx446.cs" />
+    <Compile Include="TestGrammars\GrammarExL514.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SourceSamples\DataFiles\CarModels.csv" />

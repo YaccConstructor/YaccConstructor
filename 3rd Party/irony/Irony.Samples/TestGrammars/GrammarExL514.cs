@@ -21,7 +21,7 @@ namespace Irony.Samples {
   // Grammar:
   //      A -> (A) | a
   // LALR(1) item list for this grammar is provided in example 5.17 on page 225.
-  class GrammarExL514 : Grammar {
+  public class GrammarExL514 : Grammar {
     public GrammarExL514() {
       NonTerminal A = new NonTerminal("A");
       Terminal a = new Terminal("a");

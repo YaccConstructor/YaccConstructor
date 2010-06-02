@@ -45,6 +45,12 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Irony">
+      <HintPath>..\..\3rd Party\lib\Irony.dll</HintPath>
+    </Reference>
+    <Reference Include="Irony.Samples">
+      <HintPath>..\..\3rd Party\lib\Irony.Samples.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

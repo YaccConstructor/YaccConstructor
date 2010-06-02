@@ -1,14 +1,13 @@
-﻿namespace Yard.Frontends.YardFrontend
+﻿namespace Yard.Frontends.IronyFrontend
 
 open Yard.Core
 
-type YardFrontend() = 
+type IronyFrontend() = 
     interface IFrontend with
-        member this.Name = "YardFrontend"
+        member this.Name = "IronyFrontend"
         member this.ParseGrammar t = 
             match t with
-            | (:? System.String as s) -> Main.ParseFile s
+            | :? Irony.Parsing.Grammar as g -> Converter.Convert g
             | _ -> IL.Definition.empty
         member this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
     end
-

@@ -22,6 +22,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RecursiveAscent", "Recursiv
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{5936D84D-A842-43B3-97FD-E2C6990E77DB}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend", "IronyFrontend\IronyFrontend.fsproj", "{0DDC2026-FA70-405A-B3A5-39C1886AFA15}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -106,12 +108,23 @@ Global
 		{5936D84D-A842-43B3-97FD-E2C6990E77DB}.Release|Mixed Platforms.Build.0 = Release|x86
 		{5936D84D-A842-43B3-97FD-E2C6990E77DB}.Release|x86.ActiveCfg = Release|x86
 		{5936D84D-A842-43B3-97FD-E2C6990E77DB}.Release|x86.Build.0 = Release|x86
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
+		{0DDC2026-FA70-405A-B3A5-39C1886AFA15} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 		{FA4AE1E5-0AD3-4D38-85D1-FE52C43A1655} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 	EndGlobalSection

@@ -16,7 +16,7 @@ let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
 
     let grammar, feName = 
-        if true then
+        if false then
             @"..\..\..\..\Tests\test005.yrd":>obj, "YardFrontend"
         else 
             new Irony.Samples.GrammarEx446():>obj, "IronyFrontend"

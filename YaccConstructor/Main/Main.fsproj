@@ -68,6 +68,11 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\IronyFrontend\IronyFrontend.fsproj">
+      <Name>IronyFrontend</Name>
+      <Project>{0ddc2026-fa70-405a-b3a5-39c1886afa15}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RecursiveAscent\RecursiveAscent.fsproj">
       <Name>RecursiveAscent</Name>
       <Project>{fa4ae1e5-0ad3-4d38-85d1-fe52c43a1655}</Project>

@@ -2,6 +2,8 @@ dot string_of_childs.dot -Tpdf -o string_of_childs.pdf
 
 dot TNFA_SAMPLE.dot -Tpdf -o TNFA_SAMPLE.pdf
 
+dot TNFA_SAMPLE.dot -Tpdf -o ..\..\tempReport\TNFA_SAMPLE.pdf
+
 rem dot sample_for_label_syntax_tree.dot -Tpdf -o sample_for_label_syntax_tree.pdf
 
 rem dot sample_for_label_diriv_tree_with_labels.dot -Tpdf -o sample_for_label_diriv_tree_with_labels.pdf

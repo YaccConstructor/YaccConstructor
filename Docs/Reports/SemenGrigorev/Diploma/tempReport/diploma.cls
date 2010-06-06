@@ -39,7 +39,7 @@
     \vskip 4em%
     {\large Дипломная работа \@position\ \@group\ группы\\}
     {\Large\it\@author\\}
-    \vskip 6em%
+    \vskip 10em%
     {\normalsize
     \begin{tabular}{l p{0.1cm} c p{0.1cm} l}
     Научный руководитель && .................. && \@leaderPosition\ \@leader \\
@@ -50,7 +50,7 @@
     заведующий кафедрой && /подпись/ && \\
     \end{tabular}
     }
-    \vskip 2em%
+    \vskip 8em%
     {\large \@city\\ \@yr}%
   \end{center}\par
   \end{titlepage}%

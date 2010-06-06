@@ -1,5 +1,5 @@
 digraph G
 {
-	rankdir = LR
-	S -> T [label="a/l"]
+        rankdir = LR
+        S -> F [label="a/l"]
 }

@@ -34,12 +34,12 @@
 \renewcommand\maketitle{\begin{titlepage}%
   \begin{center}
     {\Large \@university \\ \@facility \\}
-    \vskip 2em%
+    \vskip 1.5em%
     {\large \@chair \\}
-    \vskip 3em%
-    {\Huge \@title \\}
     \vskip 2em%
-    {\large Дипломная работа \@position\ \@group\ группы\\}
+    {\Huge \@title \\}
+    \vskip 1.5em%
+    {\large Выпускная квалификационная работа бакалавра  \\ \@position\ \@group\ группы\\}
     {\Large\it\@author\\}
     \vskip 3em%
     {\normalsize

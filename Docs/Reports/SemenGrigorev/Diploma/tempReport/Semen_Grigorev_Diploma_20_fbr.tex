@@ -6,7 +6,11 @@
 \usepackage{indentfirst}
 \usepackage[colorlinks=true,urlcolor=black,linkcolor=black,filecolor=black,citecolor=black,unicode,pdftex]{hyperref}
 \usepackage{graphicx}
-%\usepackage{pdfpages}
+\usepackage{pdfpages}
+\usepackage{amsmath}
+\usepackage{dot2texi}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
 %\usepackage[titletoc]{appendix} 
 %\usepackage{citehack}
 \renewcommand{\baselinestretch}{1.5}
@@ -40,15 +44,28 @@
 \city{Санкт-Петербург}
 \yr{2010}
 
-\input{preheader.tex}
+\maketitle
+\setcounter{page}{2}
+\tableofcontents
+\newpage
+
+
+%\input{preheader.tex}
 \input{../sources_new/preface.tex}
-%\input{../sources_new/maine_defs.tex}
+\clearpage
+\input{../sources_new/maine_defs.tex}
+\clearpage
 \input{task_definition.tex}
+\clearpage
 %\input{solution_review.tex}
-%\input{../sources_new/review.tex}
-\input{../sources_new/architecture.tex}
-%\input{../sources_new/realisation.tex}
+\input{../sources_new/review.tex}
+\clearpage
+\input{../sources_new/realisation.tex}
+\clearpage
+\input{experiments.tex}
+\clearpage
 \input{../sources_new/conclusion.tex}
+\clearpage
 \input{../sources_new/references.tex}
 
 \end{document}

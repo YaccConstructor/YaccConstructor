@@ -14,14 +14,9 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
-
-    let grammar, feName = 
-        if false then
-            @"..\..\..\..\Tests\test005.yrd":>obj, "YardFrontend"
-        else 
-            new Irony.Samples.GrammarEx446():>obj, "IronyFrontend"
-
-    let generatorName = "RecursiveAscent"
+    let grammarFilePath = @"..\..\..\..\Tests\test101.yrd"
+    let feName = "YardFrontend"
+    let generatorName = "FParsecGenerator"
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
     let assembly = System.Reflection.Assembly.Load(feName)
@@ -35,14 +30,14 @@ let () =
 
 
     // Parse grammar
-    let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammar
+    let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
 
     // Apply convertions
     let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
 
     // Generate something
     let gen = GeneratorsManager.Generator(generatorName)
-    let s = gen.Generate ilTreeExpandedMeta
+    let s = gen.Generate (ilTree ) // дерево передается без конвертации для FParsecGenerator
 
-    printf "%A" s
+    printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
 

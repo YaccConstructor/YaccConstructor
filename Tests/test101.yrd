@@ -27,8 +27,8 @@ term[list]: binExpr<<factor factorOp>>[list];
 
 exprCalc[list]: binExpr<<term termOp>>[list];
 
-definition[list]: VAR -EQUAL exprCalc[list] { variable,value } ;
+definition[list]: VAR -EQUAL exprCalc[list] ;
 
-definitionList[list]: l=definition[list] r=definitionList[(l::list)] { r } | { list } ;
+definitionList[list]: -l=definition[list] definitionList[(l::list)] | { list } ;
 
-+expr: list=definitionList[ [] ] res=exprCalc[list] { res } ;
++expr: -list=definitionList[ [] ] exprCalc[list];

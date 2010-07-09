@@ -24,6 +24,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend", "IronyFrontend\IronyFrontend.fsproj", "{0DDC2026-FA70-405A-B3A5-39C1886AFA15}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FParsecGenerator", "..\..\LastVer\YaccConstructor\FParsecGenerator\FParsecGenerator.fsproj", "{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -118,6 +120,16 @@ Global
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Debug|x86.ActiveCfg = Debug|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Debug|x86.Build.0 = Debug|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|Any CPU.ActiveCfg = Release|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|Mixed Platforms.Build.0 = Release|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.ActiveCfg = Release|x86
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,5 +139,6 @@ Global
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 		{FA4AE1E5-0AD3-4D38-85D1-FE52C43A1655} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 	EndGlobalSection
 EndGlobal

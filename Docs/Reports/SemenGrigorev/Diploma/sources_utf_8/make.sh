@@ -6,4 +6,4 @@ pdflatex SemenDiplomaTitle_en.tex
 
 pdflatex --shell-escape Semen_Grigorev_Diploma_20_fbr.tex
 
-acroread Semen_Grigorev_Diploma_20_fbr.pdf &
+evince Semen_Grigorev_Diploma_20_fbr.pdf &

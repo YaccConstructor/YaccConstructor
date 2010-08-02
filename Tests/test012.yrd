@@ -1,7 +1,10 @@
-f: n=NUMBER {float (n:string)};
-f: l=LEFT expr=e r=RIGHT {expr};
-t: l=t op=MULT r=f {(l: float)*(r:float)};
-t: res=f{res};
-e: res=t{res};
-e: l=e op=PLUS r=t {(l:float) + (r:float)};
+f : <n:string>=NUMBER {float n};
+f: l=LEFT <expr:float>=e r=RIGHT {expr};  
+  
+t : <l:float>=t op=MULT <r:float>=f {l*r};
+t: res=f {res};
+  
+e : res=t {res};
+  e:  <l:float>=e op=PLUS <r:float>=t {l+r}; 
+  
 +s: res=e {res};

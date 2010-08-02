@@ -14,9 +14,9 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
-    let grammarFilePath = @"..\..\..\..\Tests\test101.yrd"
+    let grammarFilePath = @"..\..\..\..\Tests\test022.yrd"
     let feName = "YardFrontend"
-    let generatorName = "FParsecGenerator"
+    let generatorName = "RecursiveAscent"
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
     let assembly = System.Reflection.Assembly.Load(feName)

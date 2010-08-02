@@ -35,16 +35,16 @@ let rec get_all_t grammar =
 let createStartRule ruleName productionName = 
     {name=ruleName;
      args = [];
-     body =  PSeq([{omit=false;
-                   rule= PRef((productionName,(0,0)),None);
-                   binding = None;
-                   checker = None};
+     body =  PSeq([{omit=false
+                    rule= PRef((productionName,(0,0)),None)
+                    binding = None
+                    checker = None};
                   ],None); _public=true; metaArgs =[]}
                   
-let replace_Public rules = 
-    List.map (fun rule -> {name=rule.name;
-                           args=rule.args;
-                           body=rule.body;
-                           _public=false;
+let replacePublic rules = 
+    List.map (fun rule -> {name=rule.name
+                           args=rule.args
+                           body=rule.body
+                           _public=false
                            metaArgs=rule.metaArgs}) 
               rules

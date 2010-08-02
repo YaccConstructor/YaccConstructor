@@ -26,6 +26,42 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend", "IronyFront
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FParsecGenerator", "..\..\LastVer\YaccConstructor\FParsecGenerator\FParsecGenerator.fsproj", "{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55E40801-E853-4AFD-806C-06969CE72CB0}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tests\test001.yrd = ..\Tests\test001.yrd
+		..\Tests\test002.yrd = ..\Tests\test002.yrd
+		..\Tests\test003.yrd = ..\Tests\test003.yrd
+		..\Tests\test004.yrd = ..\Tests\test004.yrd
+		..\Tests\test005.yrd = ..\Tests\test005.yrd
+		..\Tests\test006.yrd = ..\Tests\test006.yrd
+		..\Tests\test007.yrd = ..\Tests\test007.yrd
+		..\Tests\test008.yrd = ..\Tests\test008.yrd
+		..\Tests\test009.yrd = ..\Tests\test009.yrd
+		..\Tests\test010.yrd = ..\Tests\test010.yrd
+		..\Tests\test011.yrd = ..\Tests\test011.yrd
+		..\Tests\test012.yrd = ..\Tests\test012.yrd
+		..\Tests\test013.yrd = ..\Tests\test013.yrd
+		..\Tests\test015.yrd = ..\Tests\test015.yrd
+		..\Tests\test016.yrd = ..\Tests\test016.yrd
+		..\Tests\test017.yrd = ..\Tests\test017.yrd
+		..\Tests\test018.yrd = ..\Tests\test018.yrd
+		..\Tests\test019.yrd = ..\Tests\test019.yrd
+		..\Tests\test020.yrd = ..\Tests\test020.yrd
+		..\Tests\test021.yrd = ..\Tests\test021.yrd
+		..\Tests\test022.yrd = ..\Tests\test022.yrd
+		..\Tests\test023_2.yrd = ..\Tests\test023_2.yrd
+		..\Tests\test024.yrd = ..\Tests\test024.yrd
+		..\Tests\test100.yrd = ..\Tests\test100.yrd
+		..\Tests\test101.yrd = ..\Tests\test101.yrd
+		..\Tests\test23.yrd = ..\Tests\test23.yrd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{14701F02-1904-4FE8-A4CD-965AB00EE30E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCore", "RACCCore\RACCCore.fsproj", "{0538039C-7A92-4D26-BE10-56D892DAE8E9}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCGeneral", "RACCGeneral\RACCGeneral.fsproj", "{AB2AA21B-69D0-4967-A459-BC2B193F99C6}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -130,6 +166,26 @@ Global
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|Mixed Platforms.Build.0 = Release|x86
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.ActiveCfg = Release|x86
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.Build.0 = Release|x86
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -138,7 +194,10 @@ Global
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
-		{FA4AE1E5-0AD3-4D38-85D1-FE52C43A1655} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
+		{14701F02-1904-4FE8-A4CD-965AB00EE30E} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
+		{FA4AE1E5-0AD3-4D38-85D1-FE52C43A1655} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
+		{0538039C-7A92-4D26-BE10-56D892DAE8E9} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
+		{AB2AA21B-69D0-4967-A459-BC2B193F99C6} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
 	EndGlobalSection
 EndGlobal

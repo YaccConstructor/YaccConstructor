@@ -58,11 +58,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LastVer\YaccConstructor\FParsecGenerator\FParsecGenerator.fsproj">
-      <Name>FParsecGenerator</Name>
-      <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -71,11 +66,6 @@
     <ProjectReference Include="..\Convertions\Convertions.fsproj">
       <Name>Convertions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\IronyFrontend\IronyFrontend.fsproj">
-      <Name>IronyFrontend</Name>
-      <Project>{0ddc2026-fa70-405a-b3a5-39c1886afa15}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RecursiveAscent\RecursiveAscent.fsproj">

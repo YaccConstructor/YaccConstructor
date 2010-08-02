@@ -1,0 +1,4 @@
++s:res=t {res};
+t: t PLUS 
+ |res= e {res};
+e:res = NUMBER {res};

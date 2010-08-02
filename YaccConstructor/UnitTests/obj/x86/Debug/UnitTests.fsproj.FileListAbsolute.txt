@@ -50,3 +50,4 @@ D:\withTests\YaccConstructor\UnitTests\bin\Debug\nunit.framework.xml
 D:\withTests\YaccConstructor\UnitTests\obj\x86\Debug\ResolveAssemblyReference.cache
 D:\withTests\YaccConstructor\UnitTests\obj\x86\Debug\UnitTests.exe
 D:\withTests\YaccConstructor\UnitTests\obj\x86\Debug\UnitTests.pdb
+D:\rec_ascent\trunk\YaccConstructor\UnitTests\obj\x86\Debug\ResolveAssemblyReference.cache

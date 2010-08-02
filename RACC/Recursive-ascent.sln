@@ -32,6 +32,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AB55B110
 		..\Tests\test101.yrd = ..\Tests\test101.yrd
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LFALib", "LFALib\LFALib.fsproj", "{7ADDFF3A-E246-4520-9F27-9B4BDA2C88B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{831B3B65-B615-47A7-89CF-E3908E7CA0CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{831B3B65-B615-47A7-89CF-E3908E7CA0CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{831B3B65-B615-47A7-89CF-E3908E7CA0CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ADDFF3A-E246-4520-9F27-9B4BDA2C88B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ADDFF3A-E246-4520-9F27-9B4BDA2C88B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ADDFF3A-E246-4520-9F27-9B4BDA2C88B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ADDFF3A-E246-4520-9F27-9B4BDA2C88B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0ddc2026-fa70-405a-b3a5-39c1886afa15}</ProjectGuid>
+    <ProjectGuid>{631ea129-cc3a-4157-a8d3-7130e83a83cc}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>IronyFrontend</RootNamespace>
-    <AssemblyName>IronyFrontend</AssemblyName>
+    <RootNamespace>RACCTester</RootNamespace>
+    <AssemblyName>RACCTester</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>IronyFrontend</Name>
+    <Name>RACCTester</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\IronyFrontend.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\RACCTester.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,13 +29,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\IronyFrontend.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\RACCTester.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="Irony">
-      <HintPath>..\..\3rd Party\lib\Irony.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -43,13 +39,24 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Converter.fs" />
-    <Compile Include="IronyFrontend.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="test024.yrd.tables.fs" />
+    <Compile Include="Runner.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCore\RACCCore.fsproj">
+      <Name>RACCCore</Name>
+      <Project>{0538039c-7a92-4d26-be10-56d892dae8e9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCGeneral\RACCGeneral.fsproj">
+      <Name>RACCGeneral</Name>
+      <Project>{ab2aa21b-69d0-4967-a459-bc2b193f99c6}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

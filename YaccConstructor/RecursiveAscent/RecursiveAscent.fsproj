@@ -53,7 +53,7 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\General\RACCGeneral.fsproj">
+    <ProjectReference Include="..\RACCGeneral\RACCGeneral.fsproj">
       <Name>RACCGeneral</Name>
       <Project>{ab2aa21b-69d0-4967-a459-bc2b193f99c6}</Project>
       <Private>True</Private>

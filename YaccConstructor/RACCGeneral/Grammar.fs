@@ -9,35 +9,58 @@
 module Yard.Generators.RecursiveAscent.Grammar
 
 open Yard.Core.CompareHelper
+open System.Runtime.Serialization 
+open System.Reflection
+open Microsoft.FSharp.Reflection
+open Yard.Generators.RecursiveAscent.IO
 
 module Item = begin 
   
-   [<CustomEquality; CustomComparison>] 
+   [<CustomEquality; CustomComparison; DataContract>] 
    type t<'a when 'a : equality> = 
-       {prod_num:int;
-        prod_name:string;
-        item_num:int;
-        symb: Option<'a>;
-        next_num: Option<int>;
-        seq_number:int;
-        s:int;
-        f: Set<int>;
-        fromStateTrace: List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>
-        toStateTrace: List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>}
+       {(*[<DataMember>]*)
+        prod_num       : int;
+        prod_name      : string;
+        item_num       : int;
+        symb           : Option<'a>;
+        next_num       : Option<int>;
+        seq_number     : int;
+        s              : int;
+        f              : Set<int>;
+        fromStateTrace : List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>
+        toStateTrace   : List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>}
+                 
          member self.GetValue x = x.prod_num,x.item_num,x.symb,x.next_num
-         override self.Equals y = equalsOn self.GetValue self y
+         member self.printTrace trace = 
+                printList 
+                    trace 
+                    (fun (x,y) -> 
+                          "("
+                        + printList x (function |Some(x) -> " Some(" + toString x + ")"
+                                                     |None    -> "None")
+                        + ","
+                        + printList y (fun x -> printList x (fun y -> y.ToString()))
+                        + ")"
+                    )
+
+         override self.Equals y = equalsOn self.GetValue self y                      
          override self.GetHashCode() = hashOn self.GetValue self 
+
          interface System.Collections.IStructuralComparable with      
            member self.CompareTo (y,c) = c.Compare(self.GetValue self , self.GetValue(y :?> t<'a>))
-         override self.ToString() = 
-              "    production number: " + (self.prod_num.ToString()) + "\n"
-            + "    production name  : " + (self.prod_name) + "\n"
-            + "    item number      : " + (self.item_num.ToString()) + "\n"
-            + "    symbol           : " + (self.symb.ToString()) + "\n"
-            + "    next number      : " + (if self.next_num.IsSome then  self.next_num.ToString() else "null") + "\n"
-            + "    start state      : " + (self.s.ToString()) + "\n"
-            + "    finale states    : " + (self.s.ToString()) + "\n"
-            + "    trace for start state: " + (self.fromStateTrace.ToString()) + "\n"
-            + "    trace for start state: " + (self.toStateTrace.ToString()) + "\n"
+
+         override self.ToString() =
+              "\n       {\n" 
+            + "        prod_num       = " + (self.prod_num.ToString()) + ";\n"
+            + "        prod_name      = \"" + (self.prod_name) + "\";\n"
+            + "        item_num       = " + (self.item_num.ToString()) + ";\n"
+            + "        symb           = " + (if self.symb.IsSome then  "Some(" + (IO.toString self.symb.Value) + ")" else "None") + ";\n"
+            + "        next_num       = " + (if self.next_num.IsSome then  "Some("+self.next_num.Value.ToString()+")" else "None") + ";\n"
+            + "        seq_number     = " + self.seq_number.ToString() + ";\n"
+            + "        s              = " + (self.s.ToString()) + ";\n"
+            + "        f              = " + printSet self.f (fun x -> x.ToString()) + ";\n"
+            + "        fromStateTrace = " + (self.printTrace self.fromStateTrace) + ";\n"
+            + "        toStateTrace   = " + (self.printTrace self.toStateTrace) + ";\n"
+            + "       }"
   end  
 

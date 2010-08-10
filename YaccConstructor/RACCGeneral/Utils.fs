@@ -25,4 +25,4 @@ let prevItem item items =
     
 let nextItem item items = 
     let isNext x = item.next_num = Some x.item_num && item.prod_num=x.prod_num
-    Set.filter isNext items    
+    Set.filter isNext items

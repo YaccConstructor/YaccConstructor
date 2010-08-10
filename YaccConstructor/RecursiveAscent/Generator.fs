@@ -89,7 +89,7 @@ let items,_grammar,_generate, ruleToActionMap=
        codeGenerator.CloseOutStream() 
     let items () = !_items
     let grammar () = !_grammar
-    let ruleToActionMap ()= dict !_ruleToActonMap
+    let ruleToActionMap ()=  !_ruleToActonMap
     items, grammar, generate, ruleToActionMap
     
 let closure q = 
@@ -145,7 +145,7 @@ let goto_set ()=
 #endif        
         hash(item, symbol),gt
         
-    dict <| Set.fold (fun buf symbol -> buf @ [for item in (items()) -> goto_data symbol item]) 
+    Set.fold (fun buf symbol -> buf @ [for item in (items()) -> goto_data symbol item]) 
                      [] 
                      (GrammarPreparer.get_all_t(_grammar()))
                        
@@ -170,8 +170,11 @@ let generate input_grammar =
     let items = items()
     let startNTerms = GrammarPreparer.get_start_nterms (_grammar())
     let ruleToActionMap = ruleToActionMap()
-    IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(gotoSet ))
-    IO.writeValue (input_grammar.info.fileName + ".items.dta") items
+    let l = System.Linq.Enumerable.ToList(gotoSet)
+    //IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(gotoSet))
+    //IO.writeValue (input_grammar.info.fileName + ".items.dta") items
+    //let printList lst printItem = "[" + String.concat ";" (List.map printItem lst) + "]"
+    IO.writeTables input_grammar.info.fileName gotoSet items startNTerms ruleToActionMap    
     IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") startNTerms
     IO.writeValue (input_grammar.info.fileName + ".rule_to_action.dta") (System.Linq.Enumerable.ToList(ruleToActionMap))
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))

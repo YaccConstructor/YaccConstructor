@@ -24,7 +24,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend", "IronyFrontend\IronyFrontend.fsproj", "{0DDC2026-FA70-405A-B3A5-39C1886AFA15}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FParsecGenerator", "..\..\LastVer\YaccConstructor\FParsecGenerator\FParsecGenerator.fsproj", "{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FParsecGenerator", "FParsecGenerator\FParsecGenerator.fsproj", "{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55E40801-E853-4AFD-806C-06969CE72CB0}"
 	ProjectSection(SolutionItems) = preProject
@@ -49,11 +49,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55E40801
 		..\Tests\test020.yrd = ..\Tests\test020.yrd
 		..\Tests\test021.yrd = ..\Tests\test021.yrd
 		..\Tests\test022.yrd = ..\Tests\test022.yrd
+		..\Tests\test023.yrd = ..\Tests\test023.yrd
 		..\Tests\test023_2.yrd = ..\Tests\test023_2.yrd
 		..\Tests\test024.yrd = ..\Tests\test024.yrd
 		..\Tests\test100.yrd = ..\Tests\test100.yrd
 		..\Tests\test101.yrd = ..\Tests\test101.yrd
-		..\Tests\test23.yrd = ..\Tests\test23.yrd
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{14701F02-1904-4FE8-A4CD-965AB00EE30E}"
@@ -61,6 +61,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCore", "RACCCore\RACCCore.fsproj", "{0538039C-7A92-4D26-BE10-56D892DAE8E9}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCGeneral", "RACCGeneral\RACCGeneral.fsproj", "{AB2AA21B-69D0-4967-A459-BC2B193F99C6}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCTester", "RACCTester\RACCTester.fsproj", "{631EA129-CC3A-4157-A8D3-7130E83A83CC}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -186,6 +188,16 @@ Global
 		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AB2AA21B-69D0-4967-A459-BC2B193F99C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -194,10 +206,11 @@ Global
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{0DDC2026-FA70-405A-B3A5-39C1886AFA15} = {020587D2-50BA-4E6D-9BD5-1059EBCC13D7}
 		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
-		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 		{14701F02-1904-4FE8-A4CD-965AB00EE30E} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
+		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C} = {62D91EA2-A776-44C2-8891-2CA45A01A365}
 		{FA4AE1E5-0AD3-4D38-85D1-FE52C43A1655} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
 		{0538039C-7A92-4D26-BE10-56D892DAE8E9} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
 		{AB2AA21B-69D0-4967-A459-BC2B193F99C6} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
+		{631EA129-CC3A-4157-A8D3-7130E83A83CC} = {14701F02-1904-4FE8-A4CD-965AB00EE30E}
 	EndGlobalSection
 EndGlobal

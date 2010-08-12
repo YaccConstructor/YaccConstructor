@@ -104,6 +104,7 @@ and  main = parse
      | '\010' { //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }; 
                 main lexbuf
               }
+     | '-'  {MINUS}
      | ':'  { COLON }
      | ';'  { SEMICOLON }
      | '|'  { BAR }

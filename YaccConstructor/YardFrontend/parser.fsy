@@ -26,6 +26,7 @@
 %token BAR
 %token STAR
 %token PLUS
+%token MINUS
 %token QUESTION
 %token LPAREN
 %token RPAREN
@@ -91,7 +92,9 @@ seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3) }
 seq_elem_list: seq_elem seq_elem_list {$1::$2}
              | /* empty */ {[]}
 
-seq_elem: bound predicate_opt {{$1 with checker = $2}}
+seq_elem: omit_opt bound predicate_opt {{$2 with checker = $3; omit = $1 }}
+
+omit_opt: MINUS { true } | /*empty*/ { false }
 
 predicate_opt: PREDICATE   { Some $1 }
              | /* empty */ { None    }

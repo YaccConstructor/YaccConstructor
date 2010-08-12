@@ -19,28 +19,30 @@ let rec printBody indent body  =
       match  List.rev elems with
         | [] -> sprintf "preturn %s" (repr a)
         | lastElem::otherElems -> 
-            let lastRepr = sprintf "%s |>> fun (%s) -> (%s)" (printBody indent lastElem.rule) (printBinding lastElem.binding) (repr a)
-            List.fold (fun r e -> printElem indent e + "(" + r + ")") lastRepr otherElems 
-//    |PSeq(elems,None) -> 
-//      match List.rev elems with
-//        | [] -> "???" 
-//        | lastElem::otherElems ->
-//            let i =  ref elems.Length
-//            let lastRepr = sprintf "%s |>> fun (%s)" (printBody indent lastElem.rule) 
-//                                                         (printBinding lastElem.binding + " as f" + (!i).ToString() )
-//            let beg = List.fold (fun (l,r) e -> decr i; 
-//                                                (("f" + (!i).ToString() )::l,printElem indent e  + " as f" + (!i).ToString() + " ->(" + r   ) )
-//                                                                                                  (["f" + (!i).ToString()],lastRepr) otherElems
-//         //   let list = List.map (fun u ->"f" + (!u).ToString() ) (fst beg) 
-//            sprintf "%s -> (%s)"  (snd beg) (String.concat "," <| fst beg)
-    |PToken a ->  "lexer.p" + Source.toString a
+            let lastRepr = sprintf "%s |>> fun (%s) -> (%s) " (printBody indent lastElem.rule) (printBinding lastElem.binding) (repr a)
+            let list = List.fold (fun r e -> printElem indent e + ") -> (" + r + ")" ) (lastRepr  ) otherElems 
+            sprintf "%s  " list 
+    |PSeq(elems,None) -> 
+      match List.rev elems with
+        | [] -> "???" 
+        | lastElem::otherElems ->
+            let i =  ref elems.Length
+            let lastRepr = sprintf "%s |>> fun (%s)  " (printBody indent lastElem.rule) 
+                                                         (printBinding lastElem.binding + " as _" + (!i).ToString() ) 
+                                                 
+            let rec beg = List.fold (fun (l,r) e -> decr i; 
+                                                    ((if e.omit then l else ("_" + (!i).ToString())::l),printElem indent e  + " as _" + (!i).ToString() + ") ->(" + r   ) )
+                                                                                                  ((if lastElem.omit then [] else ["_" + (!i).ToString()]),lastRepr ) otherElems
+       
+            sprintf "%s -> (%s "  (snd beg) (String.concat "," <| fst beg) + String.replicate elems.Length ")"
+    |PToken a ->  "Lexer.p" + Source.toString a
     |PRef (r,arg)->  sprintf "%s %s" (Source.toString r)  (printArg arg)
     |PMany a -> sprintf "many ( attempt(%s))" <| printBody (indent +  "") a
     |PMetaRef (a,b,c)->sprintf "%s %s %s" (Source.toString a) (printArgs " " c) ( printArg b)   
     |PLiteral a -> "literal_" + Source.toString a   
     | x -> failwith <| sprintf "Unsupported construct\n%A" x
 
-and printElem indent e = sprintf "%s >>= fun (%s) -> " (printBody indent e.rule) (printBinding e.binding )
+and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 

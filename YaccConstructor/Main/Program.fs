@@ -14,9 +14,9 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
-    let grammarFilePath = @"..\..\..\..\Tests\test024.yrd"
+    let grammarFilePath = @"..\..\..\..\Tests\test101.yrd"
     let feName = "YardFrontend"
-    let generatorName = "RecursiveAscent"
+    let generatorName = "FParsecGenerator"
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
     let assembly = System.Reflection.Assembly.Load(feName)
@@ -31,6 +31,7 @@ let () =
 
     // Parse grammar
     let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
+   // let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
 
     // Apply convertions
     let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
@@ -42,6 +43,7 @@ let () =
     //Run tests
     //let tester = Yard.Generators.RecursiveAscent.RACCTester()
     //let s = tester.RunTest grammarFilePath
-
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
+
+ //   printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
 

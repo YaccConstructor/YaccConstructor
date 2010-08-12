@@ -16,6 +16,7 @@ type token =
   | RPAREN
   | LPAREN
   | QUESTION
+  | MINUS
   | PLUS
   | STAR
   | BAR
@@ -37,6 +38,7 @@ type tokenId =
     | TOKEN_RPAREN
     | TOKEN_LPAREN
     | TOKEN_QUESTION
+    | TOKEN_MINUS
     | TOKEN_PLUS
     | TOKEN_STAR
     | TOKEN_BAR
@@ -61,6 +63,7 @@ type nonTerminalId =
     | NONTERM_seq
     | NONTERM_seq_elem_list
     | NONTERM_seq_elem
+    | NONTERM_omit_opt
     | NONTERM_predicate_opt
     | NONTERM_bound
     | NONTERM_patt

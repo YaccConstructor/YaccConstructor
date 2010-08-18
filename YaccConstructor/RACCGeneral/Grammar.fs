@@ -16,9 +16,9 @@ open Yard.Generators.RecursiveAscent.IO
 
 module Item = begin 
   
-   [<CustomEquality; CustomComparison; DataContract>] 
+   [<CustomEquality; CustomComparison>] 
    type t<'a when 'a : equality> = 
-       {(*[<DataMember>]*)
+       {
         prod_num       : int;
         prod_name      : string;
         item_num       : int;
@@ -44,7 +44,9 @@ module Item = begin
                     )
 
          override self.Equals y = equalsOn self.GetValue self y                      
-         override self.GetHashCode() = hashOn self.GetValue self 
+         override self.GetHashCode() = 
+                  let h =  hashOn self.GetValue self 
+                  h
 
          interface System.Collections.IStructuralComparable with      
            member self.CompareTo (y,c) = c.Compare(self.GetValue self , self.GetValue(y :?> t<'a>))

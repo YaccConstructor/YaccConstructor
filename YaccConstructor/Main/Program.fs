@@ -14,7 +14,7 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =
 //    let commandLineArgs = System.Environment.GetCommandLineArgs()
-    let grammarFilePath = @"..\..\..\..\Tests\test101.yrd"
+    let grammarFilePath = @"..\..\..\..\Tests\test002.yrd"
     let feName = "YardFrontend"
     let generatorName = "FParsecGenerator"
 
@@ -38,11 +38,11 @@ let () =
 
     // Generate something
     let gen = GeneratorsManager.Generator(generatorName)
-    let s = gen.Generate (ilTree ) // дерево передается без конвертации для FParsecGenerator
+    let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
 
     //Run tests
-    //let tester = Yard.Generators.RecursiveAscent.RACCTester()
-    //let s = tester.RunTest grammarFilePath
+    let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
+    let s = tester.RunTest 
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
 
  //   printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")

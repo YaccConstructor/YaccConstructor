@@ -41,8 +41,11 @@ type TableInterpretator (tables: TablesLoader,getLexeme) = class
             res                     
 
   let goto states symbol =             
-      seq { for (state:State<_,_,_,_>) in states 
-             -> seq {for item in (tables.GotoSet.[hash (state.item,symbol)]) -> 
+      seq { for (state:State<_,_,_,_>) in states                
+             -> let  h = hash (state.item,symbol)
+                let _item = state.item
+                let h2 = hash (_item,symbol)
+                seq {for item in (tables.GotoSet.[hash (state.item,symbol)]) -> 
                               let _trace =                                     
                                   List.filter (fun(k,v) -> not (List.isEmpty k)) item.fromStateTrace
                                   |> List.unzip

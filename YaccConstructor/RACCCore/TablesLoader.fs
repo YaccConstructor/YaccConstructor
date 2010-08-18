@@ -9,8 +9,8 @@
 namespace Yard.Generators.RecursiveAscent
 open System.Collections.Generic;
 
-type TablesLoader( fName: string
-            ,gotoSet : IDictionary<int,Set<Grammar.Item.t<string>>>
+type TablesLoader( //fName: string
+            (*,*)gotoSet : IDictionary<int,Set<Grammar.Item.t<string>>>
             ,items : Set<Grammar.Item.t<string>>
             ,startNterms : string list
             ,ruleToActionMap:IDictionary<int,string>) = class

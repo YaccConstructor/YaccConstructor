@@ -64,6 +64,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCGeneral", "RACCGeneral\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCTester", "RACCTester\RACCTester.fsproj", "{631EA129-CC3A-4157-A8D3-7130E83A83CC}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tester", "Tester\Tester.fsproj", "{574E1121-922C-4132-920C-98B5E4ADD5A3}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -198,6 +200,16 @@ Global
 		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{631EA129-CC3A-4157-A8D3-7130E83A83CC}.Release|x86.ActiveCfg = Release|Any CPU
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|x86.ActiveCfg = Debug|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|x86.Build.0 = Debug|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Any CPU.ActiveCfg = Release|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Mixed Platforms.Build.0 = Release|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|x86.ActiveCfg = Release|x86
+		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

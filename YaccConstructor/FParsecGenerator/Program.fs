@@ -12,6 +12,8 @@ let printArgs indent = List.map repr  >> String.concat " " >> (+) indent
 let printBinding = function None -> "_" | Some patt -> repr patt
 let printArg = function None -> "" | Some arg -> repr arg
 
+    
+
 let rec printBody indent body  =
     match body with
     |PAlt(a,b)  -> sprintf "(attempt (%s)) <|> (%s)" (printBody (indent) a) (printBody (indent) b) 
@@ -39,7 +41,10 @@ let rec printBody indent body  =
     |PRef (r,arg)->  sprintf "%s %s" (Source.toString r)  (printArg arg)
     |PMany a -> sprintf "many ( attempt(%s))" <| printBody (indent +  "") a
     |PMetaRef (a,b,c)->sprintf "%s %s %s" (Source.toString a) (printArgs " " c) ( printArg b)   
-    |PLiteral a -> "literal_" + Source.toString a   
+    |PLiteral a -> "Lexer.literal " +  Source.toString a  
+//What about following items
+    |PSome a -> sprintf "many1 ( attempt(%s))" <| printBody (indent +  "") a
+    |POpt a -> sprintf "opt ( attempt(%s))" <| printBody (indent +  "") a
     | x -> failwith <| sprintf "Unsupported construct\n%A" x
 
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )

@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tests.fs" />
-    <Compile Include="test002.yrd.tables.fs" />
+    <Compile Include="test024.yrd.tables.fs" />
     <Compile Include="Runner.fs" />
   </ItemGroup>
   <ItemGroup>

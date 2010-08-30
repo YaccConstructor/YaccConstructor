@@ -41,8 +41,8 @@ let () =
     let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
 
     //Run tests
-    let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
-    let s = tester.RunTest 
+  //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
+  //  let s = tester.RunTest 
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
 
  //   printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")

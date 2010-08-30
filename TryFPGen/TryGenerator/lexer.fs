@@ -11,10 +11,13 @@ let ws = spaces // skips any whitespace
 let ch c =   skipChar c >>. ws
 let str s =  pstring s .>> ws
 
+
+// next two functions - part of lexer for c grammar
 let pLETTER: Parser<string, unit> = (many1Satisfy isLower .>> ws) <|> (many1Satisfy isUpper .>> ws) <|> str "_" <|> str "$" 
 
 
 let pNUMBER: Parser<float, unit> =  pfloat .>>  ws 
+
 
 let pPLUS: Parser<string, unit> = str "+"
 
@@ -35,8 +38,6 @@ let (pRIGHT : Parser<string, unit>) = str ")"
 
 let literal s = pstring s .>> ws
 
-//keywords
-
 
 let (pVAR : Parser<string, unit>)  =
     let idStr = many1Satisfy isLower .>> ws // [a-z]+
@@ -54,21 +55,4 @@ let (pVAR : Parser<string, unit>)  =
         else // reconstruct error
             Reply(reply.Status, reply.Error, reply.State)
 
-(*let openLiteral a =
-    let nudeLiteral = (Source.toString a).Substring(1, (String.length(Source.toString a)-2))
-    match nudeLiteral with
-    |"+" -> "PLUS" 
-    | "-" -> "MINUS"
-    | "*" -> "MULT"
-    | "**" -> "POW"
-    | "/" -> "DIV"
-    | "(" -> "LEFT"
-    | ")" -> "RIGHT"
-    | ":=" -> "EQUAL"
-    |nL -> nL
-
-
-
-
- *)
 

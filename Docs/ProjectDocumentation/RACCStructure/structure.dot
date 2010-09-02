@@ -14,6 +14,7 @@ digraph RACCStructure
                 Lexer -> Driver;
         }
 
+        Lexer -> ILexer:title;
         Driver -> Parser;
         Driver -> ASTInterpretator;
         
@@ -31,13 +32,18 @@ digraph RACCStructure
         {
                 label="Core";
                 Parser;
-                ASTInterpretator;                
+                ASTInterpretator; 
+                TableInterpretator;
+                AST;               
         }
 
+        Parser -> ILexer:title;
+        
         subgraph cluster_Common
         {
-                label="Common";
-                
+                label="Common";                
+                ILexer [  shape = record
+                        , label = "{<title> ILexer | <lexeme> lexeme | <next> Next}"];
         }
         
         subgraph cluster_FALib

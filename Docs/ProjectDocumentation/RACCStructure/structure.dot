@@ -5,24 +5,30 @@ digraph RACCStructure
                 x1 [shape = none, label = "A"];
                 x2 [shape = none, label = "B"];
                 x1 -> x2 [style = dotted, label = " A used in B"];
+
                 x3 [shape = none, label = "A"];
                 x4 [shape = none, label = "B"];
-//                x5 [shape = none, label = "A"];
                 x3 -> x4 [label = " A call B"];                
         }
         
+
+        InputSources [shape = note];
         InputGrammar [shape = note];
         f_ActionCode [shape = note, label = "ActionCode.fs"];
         f_Tables [shape = note, label = "Tables.fs"];
-        //v_ASTTree1 [shape = note, label = "ParseTree"];
-        //v_ASTTree2 [shape = note, label = "ParseTree"];
 
         subgraph cluster_UserApplication
         {
                 label="UserApplication";
                 Tables;
                 ActionCode;
-                Driver;
+
+                subgraph cluster_ua_Driver
+                {
+                        label = "module Driver";
+                        Driver;
+                }
+
                 Lexer;
                 Tables -> Driver;                      
                 ActionCode -> Driver;
@@ -32,6 +38,7 @@ digraph RACCStructure
         ILexer -> Lexer;
         Driver -> Parser;
         Driver -> ASTInterpretator;
+        InputSources -> Driver;
         
         subgraph cluster_Generator
         {
@@ -41,16 +48,40 @@ digraph RACCStructure
                 subgraph cluster_g_Driver
                 {
                         label = "module Driver";
-                        Generate [label = "Generate:(IL.Grammar:unit)"];
-                        generateCode;
+
+                        Generate [label = "Generate:(IL.Grammar:unit)"];                        
+                        generateCode [shape = box, label = "generateCode grammar = \n   let codeGen = CodeGenerator(outPath) \n   codeGen.Genearte(grammar) \n codeGen.CloseOutStream()"];
                         generateTables;
+
                         Generate -> generateCode;
-                        Generate -> generateTables;
+                        Generate -> generateTables;                        
                 }
+
+                generateCode -> CloseOutStream;
+                outStream -> CloseOutStream [style = dotted];
+
+                subgraph cluster_CodeGenerator
+                {
+                        label = "CodeGenerator(outPath:string)";
+                        GenerateCode [label = "Generate:(IL.Grammar:unit)"];                        
+                        generateAlt;
+                        generateSeq;
+                        generateLeaf;
+                        generateSome;
+                        generateAlt -> GenerateCode [style = dotted];
+                        generateSeq -> GenerateCode [style = dotted];
+                        generateLeaf -> GenerateCode [style = dotted];
+                        generateSome -> GenerateCode [style = dotted];                        
+                        outStream [shape=rec, label = "outStream = IO.text_writer outPath"];
+                        outStream -> generateAlt [style = dotted];
+                        outStream -> generateSeq [style = dotted];
+                        outStream -> generateLeaf [style = dotted];
+                        outStream -> generateSome [style = dotted];
+                        CloseOutStream;
+                }                                          
                 
-                CodeGenerator;
                 RuleToLDFA;
-                generateCode -> CodeGenerator;
+                generateCode -> GenerateCode;
                 generateTables -> TablesGenerator;
                 TablesGenerator -> RuleToLDFA;
         }
@@ -58,7 +89,7 @@ digraph RACCStructure
         TablesGenerator -> f_Tables
         InputGrammar -> Generate;
         RuleToLDFA -> NLFAToDLFA;        
-        CodeGenerator -> f_ActionCode;
+        GenerateCode -> f_ActionCode;
         f_ActionCode -> ActionCode;
         f_Tables -> Tables
 
@@ -67,7 +98,26 @@ digraph RACCStructure
                 label="Core";
                 Parser;
                 ASTInterpretator; 
-                TableInterpretator;
+                RegExp;
+
+                RegExp -> ASTInterpretator [style = dotted];
+
+                subgraph cluster_TableInterpretator
+                {
+                        label = "TableInterpretator";
+                        memoize;
+                        parse;
+                        climb;
+                        TableInterpretator [label = "Run"];
+                        
+                        TableInterpretator -> parse;
+                        parse -> climb;
+                        climb -> parse;
+                        memoize -> climb [style = dotted];
+                        memoize -> parse [style = dotted];
+
+                }
+
                 subgraph cluster_AST
                 {
                         label = "module AST"

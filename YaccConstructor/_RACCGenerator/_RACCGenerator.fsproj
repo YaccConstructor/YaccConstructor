@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{fa4ae1e5-0ad3-4d38-85d1-fe52c43a1655}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>RecursiveAscent</RootNamespace>
-    <AssemblyName>RecursiveAscent</AssemblyName>
+    <ProjectGuid>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>_RACCGenerator</RootNamespace>
+    <AssemblyName>_RACCGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RecursiveAscent</Name>
+    <Name>_RACCGenerator</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\RecursiveAscent.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\_RACCGenerator.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,12 +29,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\RecursiveAscent.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\_RACCGenerator.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Compiler.CodeDom, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -42,22 +39,13 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrammarPreparer.fs" />
     <Compile Include="CodeGenerator.fs" />
-    <Compile Include="FinitAutomata.fs" />
-    <Compile Include="FinitAutomataCreator.fs" />
-    <Compile Include="Generator.fs" />
-    <Compile Include="RecursiveAscent.fs" />
+    <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RACCGeneral\RACCGeneral.fsproj">
-      <Name>RACCGeneral</Name>
-      <Project>{ab2aa21b-69d0-4967-a459-bc2b193f99c6}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

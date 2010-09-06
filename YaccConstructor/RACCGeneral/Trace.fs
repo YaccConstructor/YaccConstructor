@@ -8,19 +8,6 @@
 
 namespace Yard.Generators.RecursiveAscent
 
-open System.Runtime.Serialization 
-open System.Reflection
-open Microsoft.FSharp.Reflection
-
-type Position = 
-|First
-|Second
- override self.ToString() = 
-   match self with
-   |First  -> "First"
-   |Second -> "Second"
-
-[<KnownType("KnownTypes")>]
 type Trace = 
 | TSmbS of int
 | TSmbE of int
@@ -44,5 +31,3 @@ type Trace =
    | TAlt2E(n)     -> "TAlt2E(" + n.ToString() + ")"
    | TClosureS(n)  -> "TClosureS(" + n.ToString() + ")"
    | TClosureE(n)  -> "TClosureE(" + n.ToString() + ")"
- static member KnownTypes() = // KnownTypes uses the F# reflection API to select only the union types
-        typeof<Trace>.GetNestedTypes(BindingFlags.Public ||| BindingFlags.NonPublic) |> Array.filter FSharpType.IsUnion  

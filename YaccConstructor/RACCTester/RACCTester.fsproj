@@ -42,6 +42,7 @@
     <Compile Include="Tests.fs" />
     <Compile Include="test024.yrd.tables.fs" />
     <Compile Include="Runner.fs" />
+    <Compile Include="test002.yrd.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

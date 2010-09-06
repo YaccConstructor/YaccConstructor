@@ -36,7 +36,7 @@ type CodeGenerator(sourceGramamr: string ,outPath: string) = class
       "\r\n#light \"off\"\r\n" +      
       "\r\nmodule Actions\r\n"+
       "open Yard.Core\r\n"+
-      "open Yard.Core.REAST\r\n"
+      "open open Yard.Generators.RecursiveAscent.REAST\r\n"
                   
   let genDefaultFanctions = ""               
                   

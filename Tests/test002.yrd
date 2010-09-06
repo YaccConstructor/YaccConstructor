@@ -1,2 +1,2 @@
-+s: expr ;
-expr: NUMBER "void"  NUMBER;
++s: expr;
+expr: NUMBER "+" NUMBER ;

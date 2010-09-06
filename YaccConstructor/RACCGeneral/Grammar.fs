@@ -30,7 +30,8 @@ module Item = begin
         fromStateTrace : List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>
         toStateTrace   : List<List<Option<'a>>*List<List<Yard.Generators.RecursiveAscent.Trace>>>}
                  
-         member self.GetValue x = x.prod_num,x.item_num,x.symb,x.next_num
+         member self.GetValue x = x.prod_num, x.item_num, x.symb, x.next_num
+
          member self.printTrace trace = 
                 printList 
                     trace 
@@ -44,12 +45,11 @@ module Item = begin
                     )
 
          override self.Equals y = equalsOn self.GetValue self y                      
-         override self.GetHashCode() = 
-                  let h =  hashOn self.GetValue self 
-                  h
 
+         override self.GetHashCode() = hashOn self.GetValue self 
+                  
          interface System.Collections.IStructuralComparable with      
-           member self.CompareTo (y,c) = c.Compare(self.GetValue self , self.GetValue(y :?> t<'a>))
+           member self.CompareTo (y,c) = c.Compare(self.GetValue self, self.GetValue(y :?> t<'a>))
 
          override self.ToString() =
               "\n       {\n" 

@@ -11,7 +11,7 @@ namespace Yard.Generators.RecursiveAscent
 open Microsoft.FSharp.Compiler.CodeDom
 open System.Reflection
 
-type ASTInterpretator(tables: TablesLoader) = class
+type ASTInterpretator(assemblyName : string, tables: TablesLoader) = class
      
     let actionCodeModuleName = "Actions"
      
@@ -24,7 +24,7 @@ type ASTInterpretator(tables: TablesLoader) = class
 #if DEBUG              
               printfn "%A\n" (_tree.ToString())
 #endif                            
-              let _asm = Assembly.Load(Assembly.GetExecutingAssembly().FullName)
+              let _asm = Assembly.Load(assemblyName)
               let _type = _asm.GetType(actionCodeModuleName)
               let methodName = ruleToActionMap.[_value.prodNum] 
               let _action = _type.GetMethod(methodName)                             

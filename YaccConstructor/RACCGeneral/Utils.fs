@@ -14,7 +14,7 @@ open Grammar.Item
 
 type Enumerator() = class
     let i = ref -1
-    let next() = incr i;!i          
+    let next() = incr i; !i          
     member self.Next() = next()
     member self.Reset() = i := -1   
 end

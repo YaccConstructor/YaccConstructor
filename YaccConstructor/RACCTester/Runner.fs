@@ -9,6 +9,7 @@
 module Yard.Generators.RecursiveAscent
 
 open Yard.Generators.RecursiveAscent
+open System.Reflection
 open Tables
 
 
@@ -41,9 +42,9 @@ type RACCTester((*_gotoSet,_items,_startNterms,_ruleToActionMap*)) = class
                 if List.isEmpty trees then printfn "Input string is not correct.\n"
     //#endif    
                 //printfn "Parser get %A dirivation tree" trees.Length    
-                //let astInterp = new ASTInterpretator(tables)    
-                //let res_2 = List.map astInterp.Interp trees
-                //List.iter (printf "\nResult: %A") res_2
+                let astInterp = new ASTInterpretator(Assembly.GetExecutingAssembly().FullName ,tables)
+                let res_2 = List.map astInterp.Interp trees
+                List.iter (printf "\nResult: %A") res_2
                 //printfn "\n Total time = %A " (System.DateTime.Now.t - startTime)
                 //printfn  "\n %A ; %A" (!count) (parser.ClimbVisitsCount + parser.ParseVisitsCount) //((System.DateTime.Now - startTime).TotalMilliseconds)
                 incr count

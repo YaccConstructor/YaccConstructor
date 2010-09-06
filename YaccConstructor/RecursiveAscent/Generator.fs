@@ -146,7 +146,7 @@ let goto_set ()=
         let h = hash(item, symbol),gt
         h
         
-    dict<|Set.fold (fun buf symbol -> buf @ [for item in (items()) -> goto_data symbol item]) 
+    Set.fold (fun buf symbol -> buf @ [for item in (items()) -> goto_data symbol item]) 
                      [] 
                      (GrammarPreparer.get_all_t(_grammar()))
                        
@@ -171,12 +171,12 @@ let generate input_grammar =
     //let str1 = String.concat "\n" (List.map (fun x -> x.ToString()) gotoSet)  
     let items = items()
     let startNTerms = GrammarPreparer.get_start_nterms (_grammar())
-    let ruleToActionMap = dict<| ruleToActionMap()
+    let ruleToActionMap =  ruleToActionMap()
     let l = System.Linq.Enumerable.ToList(gotoSet)
     //IO.writeValue (input_grammar.info.fileName + ".goto.dta") (System.Linq.Enumerable.ToList(gotoSet))
     //IO.writeValue (input_grammar.info.fileName + ".items.dta") items
     //let printList lst printItem = "[" + String.concat ";" (List.map printItem lst) + "]"
-    //IO.writeTables input_grammar.info.fileName gotoSet items startNTerms ruleToActionMap    
+    IO.writeTables input_grammar.info.fileName gotoSet items startNTerms ruleToActionMap    
     //IO.writeValue (input_grammar.info.fileName + ".start_nterms.dta") startNTerms
     //IO.writeValue (input_grammar.info.fileName + ".rule_to_action.dta") (System.Linq.Enumerable.ToList(ruleToActionMap))
     printfn "End working time: %A Total: %A" System.DateTime.Now (System.DateTime.Now - (!start_time))

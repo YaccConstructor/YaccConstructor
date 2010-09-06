@@ -28,7 +28,7 @@ let () =
     let inst = assembly.CreateInstance("Yard.Generators."+generatorName+"."+generatorName)
     GeneratorsManager.Register(inst :?> IGenerator);
 
-
+    
     // Parse grammar
     let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
    // let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
@@ -44,6 +44,4 @@ let () =
   //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
   //  let s = tester.RunTest 
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
-
- //   printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
 

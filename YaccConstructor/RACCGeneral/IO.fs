@@ -48,7 +48,9 @@ let toString (v:obj) =
     | _         -> v.ToString()
 
 let printSet _set printItem = "set [|" + String.concat ";" (Set.map printItem _set) + "|]"
+
 let printList lst printItem = "(List.ofArray [|" + String.concat ";" (List.map printItem lst) + "|])"
+
 let printDict lst printItem = "dict <| " + printList lst printItem 
 
 let writeTables path goto items nTerms ruleToActionMap = 

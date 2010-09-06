@@ -56,7 +56,7 @@ module Grammar =
 module Definition = begin
     type info = { fileName: string}
     type t<'patt,'expr>  = { 
-     info : info;
+     info    : info;
      head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)
      grammar : Grammar.t<'patt,'expr>;//грамматика
      foot    :'expr option //текст после грамматики

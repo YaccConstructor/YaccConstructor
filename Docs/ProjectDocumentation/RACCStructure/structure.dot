@@ -49,38 +49,47 @@ digraph RACCStructure
                 {
                         label = "module Driver";
 
-                        Generate [label = "Generate:(IL.Grammar:unit)"];                        
-                        generateCode [shape = box, label = "generateCode grammar = \n   let codeGen = CodeGenerator(outPath) \n   codeGen.Genearte(grammar) \n codeGen.CloseOutStream()"];
+                        Generate [label = "Generate:(IL.Definition:unit)"];                        
+                        generateCode [shape = box, label = "generateCode grammar = \n   let codeGen = CodeGenerator(outPath) \n   codeGen.Genearte(grammar)"];
                         generateTables;
 
                         Generate -> generateCode;
                         Generate -> generateTables;                        
                 }
 
-                generateCode -> CloseOutStream;
-                outStream -> CloseOutStream [style = dotted];
-
                 subgraph cluster_CodeGenerator
                 {
                         label = "CodeGenerator(outPath:string)";
-                        GenerateCode [label = "Generate:(IL.Grammar:unit)"];                        
-                        generateAlt;
+                        GenerateCode [shape=box, label = "Generate (grammar:IL.Definition):unit) = \n geherateHeader grammar.head\n generateFooter grammar.foot\n closeOutSream"];                        
+                        generateAlt [shape=box, label = "generateAlt alt = \n code = \"\" \n write code"];
                         generateSeq;
                         generateLeaf;
                         generateSome;
+                        write [shape=box, label = "write str:string = outStream.WriteLine(str)"];
+                        generateHeader [shape=box, label = "generateHeader header:Option('expr) = write str"];
+                        generateFooter [shape=box, label = "generateFooter footer:Option('expr) = write str"];
+                        outStream [shape=box, label = "outStream = IO.text_writer outPath"];
+                        closeOutStream [ shape= box, label = "closeOutStream = outStrieam.Close()"];
+
                         generateAlt -> GenerateCode [style = dotted];
                         generateSeq -> GenerateCode [style = dotted];
                         generateLeaf -> GenerateCode [style = dotted];
-                        generateSome -> GenerateCode [style = dotted];                        
-                        outStream [shape=rec, label = "outStream = IO.text_writer outPath"];
-                        outStream -> generateAlt [style = dotted];
-                        outStream -> generateSeq [style = dotted];
-                        outStream -> generateLeaf [style = dotted];
-                        outStream -> generateSome [style = dotted];
-                        CloseOutStream;
+                        generateSome -> GenerateCode [style = dotted];
+                        GenerateCode -> generateHeader;
+                        GenerateCode -> generateFooter;        
+                        outStream -> write [style = dotted];
+                        generateAlt -> write;
+                        generateSeq -> write;
+                        generateLeaf -> write;
+                        generateSome -> write;
+                        generateHeader -> write;
+                        generateFooter -> write;
+                        outStream -> closeOutStream [style = dotted];
+                        GenerateCode -> closeOutStream;                                                
                 }                                          
                 
                 RuleToLDFA;
+
                 generateCode -> GenerateCode;
                 generateTables -> TablesGenerator;
                 TablesGenerator -> RuleToLDFA;

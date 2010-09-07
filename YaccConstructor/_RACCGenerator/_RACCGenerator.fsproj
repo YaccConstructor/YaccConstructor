@@ -39,7 +39,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TextWriter.fs" />
     <Compile Include="CodeGenerator.fs" />
+    <Compile Include="TableGenerator.fs" />
     <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>

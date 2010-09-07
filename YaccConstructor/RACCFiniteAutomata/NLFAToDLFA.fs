@@ -1,9 +1,18 @@
-﻿// TableInterpretator.fs
+﻿// NLFAToDLFA.fs
 //
 // Copyright 2009-2010 Semen Grigorev
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
+//
+//Implementation of NLFA to DLFA convertion
 
-namespace Yard.Generators.RACC
+module Yard.Generators.RACC.NLFAToDLFA
+
+let eClosure nlfa = nlfa
+
+let NLFAToDLFA nlfa = eClosure nlfa
+
+
+

@@ -10,11 +10,17 @@
 
 namespace  Yard.Generators.RACC
 
-type DFASymbol<'symbolVal> = Symbol of 'symbolVal
+type DFASymbol<'symbolVal> = 
+    | Symbol of 'symbolVal
+    | Dummy
 
 type NFASymbol<'symbolVal> = 
     | Epsilon
     | Symbol of 'symbolVal
+
+type DLFAState<'stateVal> =
+    | State of 'stateVal
+    | DummyState
 
 type Rule<'symbol, 'label> =
     {
@@ -24,18 +30,18 @@ type Rule<'symbol, 'label> =
         ToStateID   : int
     }    
 
-type NLFA<'stateInfo, 'symbolVal, 'label> =
+type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {        
-        IDToStateMap : System.Collections.Generic.IDictionary<int,'stateInfo>
+        IDToStateMap : System.Collections.Generic.IDictionary<int, 'stateVal>
         StartStates  : Set<int>
         FinaleStates : Set<int>
-        Rules        : List<Rule<NFASymbol<'symbolVal>, 'label>>
+        Rules        : Set<Rule<NFASymbol<'symbolVal>, 'label>>
     }
 
-type DLFA<'stateInfo, 'symbolVal, 'label> =
+type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {
-        IDToStateMap : System.Collections.Generic.IDictionary<int,'stateInfo>
+        IDToStateMap : System.Collections.Generic.IDictionary<int, DLFAState<'stateVal>>
         StartState   : int
         FinaleStates : Set<int>
-        Rules        : List<Rule<DFASymbol<'symbolVal>, 'label>>
+        Rules        : Set<Rule<DFASymbol<'symbolVal>, 'label>>
     }

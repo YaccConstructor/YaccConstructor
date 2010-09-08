@@ -13,7 +13,31 @@ module Yard.Generators.RACC.NLFAToDLFA
 
 //see Dragon book p129
 let NLFAToDLFA (nlfa:NLFA<_,_,_>) =
-    let symbols = Set.map (fun rule -> rule.Symbol) nlfa.Rules
+    let symbols = Set.filter ((<>) Epsilon) (Set.map (fun rule -> rule.Symbol) nlfa.Rules)
+    let stateIDs = Set.ofSeq nlfa.IDToStateMap.Keys
+    let eLinesSet = ref (System.Collections.Generic.Dictionary<int,_>() )    
+    let eLines = 
+        Set.map
+            (fun id -> 
+                let eSteps = Set.fold 
+                               (fun buf rule -> if rule.FromStateID = id && rule.Symbol = Epsilon
+                                                then Set.add (rule.ToStateID, rule.Label) buf
+                                                else buf)
+                               Set.empty
+                               nlfa.Rules
+                
+                Set.map (fun step -> 
+                            if (!eLinesSet).ContainsKey(fst step)
+                            then 
+                                let elt = (!eLinesSet).[fst step]
+                                () 
+                            else false ) eSteps
+            )
+            stateIDs
+
+
+    //let buldELines = 
+
     let move stateSet symbol = 
         Set.map 
             (fun state -> Set.map 
@@ -53,9 +77,12 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) =
         Set.iter
              (fun symbol ->
                 let U = eClosure (move T symbol)
-                if not ((List.exists ((=)U) !notVisitedNewStates)  || (List.exists ((=)U) !visitedNewStates))
-                then 
-                    notVisitedNewStates := U :: !notVisitedNewStates
-                newRules := [])
+                if not (Set.isEmpty U)
+                    then
+                        if  not ((List.exists ((=)U) !notVisitedNewStates)  || (List.exists ((=)U) !visitedNewStates))
+                        then 
+                            notVisitedNewStates := U :: !notVisitedNewStates
+                        newRules := (T,symbol,U)::!newRules)
              symbols
     done
+    !newRules

@@ -55,6 +55,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCFiniteAutomata", "RACC
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCUserApplication", "RACCUserApplication\_RACCUserApplication.fsproj", "{41F3C60A-2738-44FE-9889-D666C7E046C2}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempTester", "TempTester\TempTester.fsproj", "{A63CA12D-76B0-4739-A076-76F62030E6B0}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -249,6 +251,16 @@ Global
 		{41F3C60A-2738-44FE-9889-D666C7E046C2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{41F3C60A-2738-44FE-9889-D666C7E046C2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{41F3C60A-2738-44FE-9889-D666C7E046C2}.Release|x86.ActiveCfg = Release|Any CPU
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Debug|x86.ActiveCfg = Debug|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Debug|x86.Build.0 = Debug|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Release|Any CPU.ActiveCfg = Release|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Release|Mixed Platforms.Build.0 = Release|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Release|x86.ActiveCfg = Release|x86
+		{A63CA12D-76B0-4739-A076-76F62030E6B0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -269,5 +281,6 @@ Global
 		{EB0A41F1-11DC-4F49-BBB6-6825A0EE576F} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
 		{79A37C58-942E-47E9-9C12-DC1DEE00E52E} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
 		{41F3C60A-2738-44FE-9889-D666C7E046C2} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
+		{A63CA12D-76B0-4739-A076-76F62030E6B0} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
 	EndGlobalSection
 EndGlobal

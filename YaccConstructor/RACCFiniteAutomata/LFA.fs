@@ -11,12 +11,12 @@
 namespace  Yard.Generators.RACC
 
 type DFASymbol<'symbolVal> = 
-    | Symbol of 'symbolVal
+    | DSymbol of 'symbolVal
     | Dummy
 
 type NFASymbol<'symbolVal> = 
     | Epsilon
-    | Symbol of 'symbolVal
+    | NSymbol of 'symbolVal
 
 type DLFAState<'stateVal> =
     | State of 'stateVal

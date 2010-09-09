@@ -15,28 +15,39 @@ module Yard.Generators.RACC.NLFAToDLFA
 let NLFAToDLFA (nlfa:NLFA<_,_,_>) =
     let symbols = Set.filter ((<>) Epsilon) (Set.map (fun rule -> rule.Symbol) nlfa.Rules)
     let stateIDs = Set.ofSeq nlfa.IDToStateMap.Keys
-    let eLinesSet = ref (System.Collections.Generic.Dictionary<int,_>() )    
-    let eLines = 
-        Set.map
-            (fun id -> 
-                let eSteps = Set.fold 
-                               (fun buf rule -> if rule.FromStateID = id && rule.Symbol = Epsilon
-                                                then Set.add (rule.ToStateID, rule.Label) buf
-                                                else buf)
-                               Set.empty
-                               nlfa.Rules
-                
-                Set.map (fun step -> 
-                            if (!eLinesSet).ContainsKey(fst step)
-                            then 
-                                let elt = (!eLinesSet).[fst step]
-                                () 
-                            else false ) eSteps
-            )
+    let eLinesSet = ref Set.empty
+    
+    let notVisitetStates = ref (List.ofSeq nlfa.StartStates)
+    let visitedStates = ref []
+
+    let rec eLines state =         
+        visitedStates := state :: !visitedStates
+        let eSteps = Set.fold 
+                        (fun buf rule -> if rule.FromStateID = state && rule.Symbol = Epsilon
+                                         then Set.add (rule.ToStateID, rule.Label) buf
+                                         else buf)
+                        Set.empty
+                        nlfa.Rules
+        Set.map 
+            (fun step ->                
+                if not (List.exists ((=) (fst step)) !visitedStates) 
+                then
+                    let eL = eLines (fst step)
+                    if Set.isEmpty eL
+                    then Set.singleton [step]
+                    else Set.map (fun tl -> step::tl) eL
+                else Set.singleton [step]) eSteps 
+        |> Set.unionMany           
+
+                     
+    let buldELines = 
+        Set.map 
+            (fun stateID ->
+                if not (List.exists ((=) stateID) !visitedStates) 
+                then
+                    let el = (eLines stateID)
+                    eLinesSet := Set.union (!eLinesSet) (Set.map (fun x -> stateID,x)el))
             stateIDs
-
-
-    //let buldELines = 
 
     let move stateSet symbol = 
         Set.map 
@@ -85,4 +96,4 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) =
                         newRules := (T,symbol,U)::!newRules)
              symbols
     done
-    !newRules
+    !newRules, !eLinesSet

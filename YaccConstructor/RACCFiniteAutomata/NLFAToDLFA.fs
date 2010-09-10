@@ -165,4 +165,4 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
             DRules        = Set.ofList rules
         }
 
-    !eLinesSet, newAutomata
+    newAutomata

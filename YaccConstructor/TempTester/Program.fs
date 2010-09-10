@@ -4,7 +4,7 @@ let fa =
     {
         NIDToStateMap = dict [(1,1);(2,2);(3,3);(4,4);(5,5);(6,6)]
         NStartState   = 1
-        NFinaleStates = Set.ofList [6]
+        NFinaleState  = 6
         NRules        = Set.ofList [{FromStateID = 1; Symbol = Epsilon; Label = "l1"; ToStateID = 2}
                                    ;{FromStateID = 2; Symbol = NSymbol("a"); Label = "l2"; ToStateID = 3}
                                    ;{FromStateID = 3; Symbol = Epsilon; Label = "l3"; ToStateID = 4}
@@ -18,7 +18,7 @@ let fa2 =
     {
         NIDToStateMap = dict [(1,1);(2,2);(3,3);(4,4)]
         NStartState  = 1
-        NFinaleStates = Set.ofList [4]
+        NFinaleState = 4
         NRules        = Set.ofList [{FromStateID = 1; Symbol = Epsilon; Label = "l1"; ToStateID = 2}
                                    ;{FromStateID = 2; Symbol = NSymbol("a"); Label = "l"; ToStateID = 3}
                                    ;{FromStateID = 3; Symbol = Epsilon; Label = "l2"; ToStateID = 4}
@@ -31,7 +31,7 @@ let fa3 =
     {
         NIDToStateMap = dict [(1,1);(2,2);(3,3);(4,4);(5,5);(6,6)]
         NStartState    = 1
-        NFinaleStates = Set.ofList [6]
+        NFinaleState = 6
         NRules        = Set.ofList [{FromStateID = 1; Symbol = Epsilon; Label = "SCls"; ToStateID = 2}
                                    ;{FromStateID = 2; Symbol = Epsilon; Label = "Sa"; ToStateID = 3}
                                    ;{FromStateID = 3; Symbol =  NSymbol("a"); Label = "l"; ToStateID = 4}

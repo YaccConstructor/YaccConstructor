@@ -112,7 +112,7 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
         let getAlterName s = alterNames.[s]            
 
         let startState = getAlterName (List.find (Set.exists ((=)nlfa.NStartState)) states)
-        let finaleStates = (List.filter (Set.exists (fun x -> Set.exists ((=)x) nlfa.NFinaleStates)) states)
+        let finaleStates = (List.filter (Set.exists (fun x -> (=) x  nlfa.NFinaleState)) states)
         let alterFinaleStates = List.map getAlterName finaleStates
         let dummyStates = 
             let l = List.length states
@@ -143,7 +143,7 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                             FromStateID = getAlterName state
                             Symbol      = Dummy
                             Label       =
-                                let ids = Set.filter (fun x -> Set.exists ((=)x) state)  nlfa.NFinaleStates
+                                let ids = Set.filter (fun x -> Set.exists ((=)x) state)  (Set.singleton nlfa.NFinaleState)
                                 Set.map 
                                         (fun x -> Set.map (fun (_,line) -> eLineFilter line) (Set.filter (fun y -> fst y = x) buldELines)) 
                                         ids

@@ -50,6 +50,16 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RACCFiniteAutomata\_RACCFiniteAutomata.fsproj">
+      <Name>_RACCFiniteAutomata</Name>
+      <Project>{79a37c58-942e-47e9-9c12-dc1dee00e52e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\_RACCCommon\_RACCCommon.fsproj">
+      <Name>_RACCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

@@ -34,7 +34,7 @@ type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
     {        
         NIDToStateMap : System.Collections.Generic.IDictionary<int, 'stateVal>
         NStartState   : int
-        NFinaleStates : Set<int>
+        NFinaleState  : int
         NRules        : Set<Rule<NFASymbol<'symbolVal>, 'label>>
     }
 

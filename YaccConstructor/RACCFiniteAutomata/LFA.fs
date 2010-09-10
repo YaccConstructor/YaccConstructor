@@ -32,16 +32,16 @@ type Rule<'symbol, 'label> =
 
 type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {        
-        IDToStateMap : System.Collections.Generic.IDictionary<int, 'stateVal>
-        StartStates  : Set<int>
-        FinaleStates : Set<int>
-        Rules        : Set<Rule<NFASymbol<'symbolVal>, 'label>>
+        NIDToStateMap : System.Collections.Generic.IDictionary<int, 'stateVal>
+        NStartState   : int
+        NFinaleStates : Set<int>
+        NRules        : Set<Rule<NFASymbol<'symbolVal>, 'label>>
     }
 
 type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {
-        IDToStateMap : System.Collections.Generic.IDictionary<int, DLFAState<'stateVal>>
-        StartState   : int
-        FinaleStates : Set<int>
-        Rules        : Set<Rule<DFASymbol<'symbolVal>, 'label>>
+        DIDToStateMap : System.Collections.Generic.IDictionary<int, DLFAState<'stateVal>>
+        DStartState   : int
+        DFinaleStates : Set<int>
+        DRules        : Set<Rule<DFASymbol<'symbolVal>, 'label>>
     }

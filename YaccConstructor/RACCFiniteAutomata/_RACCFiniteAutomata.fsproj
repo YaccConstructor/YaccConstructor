@@ -41,6 +41,14 @@
   <ItemGroup>
     <Compile Include="LFA.fs" />
     <Compile Include="NLFAToDLFA.fs" />
+    <Compile Include="AtmBuilder.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\_RACCCommon\_RACCCommon.fsproj">
+      <Name>_RACCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

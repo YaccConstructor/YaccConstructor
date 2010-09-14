@@ -1,4 +1,4 @@
-﻿namespace Yard.Generators
+﻿namespace Yard.Generators.TreeDump
 
 open Yard.Core
 

@@ -123,9 +123,73 @@ type AtmBuilder(enumerator:Enumerator) =
                                     ]                                         
             }
 
+        let addInHead sttInfo smb lbl atm =
+            let stateID = enumerator.Next()
+            let stateVal = if Option.isNone sttInfo then stateID else Option.get sttInfo
+            {
+                NIDToStateMap = 
+                    let d = atm.NIDToStateMap
+                    d.Add(stateID,stateVal)                    
+                    d
+                        
+
+                NStartState   = stateID
+                NFinaleState  = atm.NFinaleState
+                NRules        = atm.NRules 
+                                |>Set.add
+                                    {
+                                        FromStateID = stateID
+                                        ToStateID   = atm.NStartState
+                                        Label       = lbl
+                                        Symbol      = smb
+                                    } 
+            }
+
+        let append sttInfo smb lbl atm =        
+            let stateID = enumerator.Next()
+            let stateVal = if Option.isNone sttInfo then stateID else Option.get sttInfo
+            {
+                NIDToStateMap = 
+                    let d = atm.NIDToStateMap
+                    d.Add(stateID,stateVal)                    
+                    d
+                        
+
+                NStartState   = atm.NStartState
+                NFinaleState  = stateID
+                NRules        = atm.NRules 
+                                |>Set.add
+                                    {
+                                        FromStateID = atm.NFinaleState
+                                        ToStateID   = stateID
+                                        Label       = lbl
+                                        Symbol      = smb
+                                    } 
+            }
+
+        let trivial sttInfo1 sttInfo2 smb lbl =
+            let startStateID = enumerator.Next()
+            let finaleStateID = enumerator.Next()
+            let startStateVal = if Option.isNone sttInfo1 then startStateID else Option.get sttInfo1
+            let finaleStateVal = if Option.isNone sttInfo2 then finaleStateID else Option.get sttInfo2
+            {
+                NIDToStateMap = dict [(startStateID,startStateVal);(finaleStateID,finaleStateVal)]                        
+                NStartState   = startStateID
+                NFinaleState  = finaleStateID
+                NRules        = Set.singleton
+                                    {
+                                        FromStateID = startStateID
+                                        ToStateID   = finaleStateID
+                                        Label       = lbl
+                                        Symbol      = smb
+                                    }
+            }
 
         member self.Concat lAtm rAtm lbl = concat lAtm rAtm lbl
         member self.Alt atm1 atm2 alt1Slbl alt1Elbl alt2Slbl alt2Elbl = 
             alt atm1 atm2 alt1Slbl alt1Elbl alt2Slbl alt2Elbl
         member self.Cls  atm clsSlbl clsElbl = cls atm clsSlbl clsElbl
+        member self.AddInHead sttInfo smb lbl atm = addInHead sttInfo smb lbl atm
+        member self.Append sttInfo smb lbl atm = append sttInfo smb lbl atm
+        member self.Trivial sttInfo1 sttInfo2 smb lbl =trivial sttInfo1 sttInfo2 smb lbl
     end

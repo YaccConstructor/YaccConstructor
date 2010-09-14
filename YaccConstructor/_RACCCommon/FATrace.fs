@@ -17,12 +17,12 @@ type TStep =
     | TAlt1E 
     | TAlt2S 
     | TAlt2E 
-    | TClosureS 
-    | TClosureE
+    | TClsS 
+    | TClsE
 
 type FATrace = 
     | Omega
-    | FATrace of List<TStep>
+    | FATrace of TStep
 
 
 

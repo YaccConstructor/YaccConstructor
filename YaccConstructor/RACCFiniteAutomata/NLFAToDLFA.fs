@@ -8,7 +8,7 @@
 //
 //Implementation of NLFA to DLFA convertion
 
-module Yard.Generators.RACC.NLFAToDLFA
+module Yard.Generators._RACCGenerator.NLFAToDLFA
 
 
 //see Dragon book p129

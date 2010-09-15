@@ -6,7 +6,7 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-namespace  Yard.Generators.RACC
+namespace  Yard.Generators._RACCGenerator
 
 open System.IO
 open Yard.Core.IL.Definition
@@ -52,11 +52,14 @@ type TableGenerator(outPath: string) =
                     |> builder.Append None Epsilon (FATrace TSmbE)
 
                 | x                 -> failwith ("You should support elem " + x.ToString())
+
             NLFAToDLFA.NLFAToDLFA (build production)
         
 
-        let genearte (grammar:Yard.Core.IL.Grammar.t<_,_>) =            
-            let DLFAList = List.map (fun (x:Rule.t<_,_>) -> buildDLFA x.body) grammar
+        let genearte (grammar:Yard.Core.IL.Definition.t<_,_>) =
+            let DLFAmap = 
+                List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body) grammar.grammar
+                |> dict
             closeOutStream ()
                 
         member self.Gemerate grammar = genearte grammar

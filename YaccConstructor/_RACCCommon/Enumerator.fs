@@ -6,7 +6,7 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-namespace Yard.Generators.RACC
+namespace Yard.Generators._RACCGenerator
 
 type Enumerator() = class
     let i = ref -1

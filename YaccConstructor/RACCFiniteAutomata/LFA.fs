@@ -8,7 +8,7 @@
 //
 //Implementation of LFA
 
-namespace  Yard.Generators.RACC
+namespace  Yard.Generators._RACCGenerator
 
 type DFASymbol<'symbolVal> = 
     | DSymbol of 'symbolVal

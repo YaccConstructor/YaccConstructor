@@ -8,7 +8,7 @@
 //
 //Implementation of NLFA to DLFA convertion
 
-namespace Yard.Generators.RACC
+namespace Yard.Generators._RACCGenerator
 
 type AtmBuilder(enumerator:Enumerator) =
     class

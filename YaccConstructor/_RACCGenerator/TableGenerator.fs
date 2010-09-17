@@ -47,7 +47,7 @@ type TableGenerator(outPath: string) =
 
             NLFAToDLFA.NLFAToDLFA (build production) (fun x -> List.filter ((<>)Omega) x) 
 
-        let goto items (dlfaMap:System.Collections.Generic.IDictionary<_,_>) =
+        let goto items (dlfaMap:System.Collections.Generic.IDictionary<_,DLFA<_,_,_>>) =
             let cls q =
                 let q' = ref q
                 let l = ref 0
@@ -56,18 +56,50 @@ type TableGenerator(outPath: string) =
                     for (fa,st) in !q' 
                         do for (fa',st') in items
                                do 
-                                let rule = List.filter (fun rule -> x) dlfaMap.[fa].Rules
-                                if
-                                then q':= Set.add (fa',st') !q'       
-                
+                                let rules = Set.filter (fun rule -> rule.FromStateID = st) (dlfaMap.[fa]).DRules
+                                let isEq rule = 
+                                    let symbStr = 
+                                        match rule.Symbol with
+                                        |DSymbol(s) -> s
+                                        | _         -> ""
+                                    fa' = symbStr
+                                if (Set.exists isEq rules)&&((dlfaMap.[fa]).DStartState = st')
+                                then q':= Set.add (fa',st') !q'                       
                 !q'
-            1
+
+            let symbols = 
+                Seq.map (fun key -> (dlfaMap.[key]).DRules) dlfaMap.Keys
+                |> Seq.concat
+                |> Seq.map (fun rule -> rule.Symbol)
+                |> Set.ofSeq
+            
+            Set.map 
+                (fun smb ->
+                    List.map
+                        (fun item -> 
+                            let gt = cls (Set.singleton item)
+                            Set.map 
+                                (fun elt -> 
+                                    let atm = dlfaMap.[fst elt]
+                                    let rules =
+                                        Set.filter (fun rule -> 
+                                                        rule.FromStateID = snd elt
+                                                        && rule.Symbol = smb)
+                                                     atm.DRules
+                                    Set.map (fun rule -> elt, smb, fst elt, rule.ToStateID) rules)
+                                gt
+                            |>Set.unionMany)                        
+                        items
+                        |>Set.unionMany)
+                symbols
+            |>Set.unionMany
         
         let items dlfaMap =
             List.map 
                 (fun (name,dlfa) -> 
                     Seq.map 
-                        (fun stateID -> (name,stateID))
+                        (fun stateID ->                         
+                            name,stateID)
                         dlfa.DIDToStateMap.Keys)
                 dlfaMap
             |> Seq.concat 
@@ -81,9 +113,11 @@ type TableGenerator(outPath: string) =
             let items = items dlfaMap
             let str2 = "let items = \n" + ToString.listToString items + "\n"
             write str2
+            let goto = goto items (dict dlfaMap)
+            let str3 = "let gotoSet = \n" + ToString.setToString goto + "\n"
+            write str3
             textWriter.CloseOutStream ()
                 
         member self.Gemerate grammar = genearte grammar
                 
     end
-

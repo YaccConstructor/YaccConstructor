@@ -63,7 +63,7 @@ type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
         + "   NIDToStateMap = " + ToString.dictToString self.NIDToStateMap + "\n"
         + "   NStartState   = " + self.NStartState.ToString() + "\n"
         + "   NFinaleState  = " + self.NFinaleState.ToString() + "\n"
-        + "   NRules        = " + ToString.setTostring self.NRules + "\n"
+        + "   NRules        = " + ToString.setToString self.NRules + "\n"
         + "}\n"
 
 type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
@@ -78,5 +78,5 @@ type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
         + "   DIDToStateMap = " + ToString.dictToString self.DIDToStateMap + "\n"
         + "   DStartState   = " + self.DStartState.ToString() + "\n"
         + "   DFinaleStates = " + self.DFinaleStates.ToString() + "\n"
-        + "   DRules        = " + ToString.setTostring self.DRules + "\n"
+        + "   DRules        = " + ToString.setToString self.DRules + "\n"
         + "}\n"

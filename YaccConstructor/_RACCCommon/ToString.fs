@@ -20,7 +20,7 @@ and dictToString (_dict:System.Collections.Generic.IDictionary<_,_>) =
     "dict [|" + (String.concat ";" (Seq.map
                                      (fun k -> "("+ toString k + "," + (toString _dict.[k]) + ")")
                                      _dict.Keys)) + "|]" 
-and setTostring _set =
+and setToString _set =
     "Set.ofArray [|" + (String.concat ";" (Set.map toString _set)) + "|]"    
 
 

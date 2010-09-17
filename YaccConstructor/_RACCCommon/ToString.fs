@@ -8,11 +8,21 @@
 
 module  Yard.Generators._RACCGenerator.ToString
 
+open Yard.Generators._RACCGenerator
+
 let rec toString (_val:obj) =
     match _val with
     | :? string  -> "\"" + (_val.ToString()) + "\""
-    | :? char    -> "'" + (_val.ToString()) + "'"   
-    | _           -> _val.ToString()
+    | :? char    -> "'" + (_val.ToString()) + "'" 
+    | :? (string * int)    -> 
+        let l = fst (_val :?> (string*int))
+        let r = snd (_val :?> (string*int))
+        "(" + toString l + "," + toString r + ")"
+    | :? (int*(string * int)) -> 
+        let l = fst (_val :?> (int*(string * int)))
+        let r = snd (_val :?> (int*(string * int)))
+        "(" + toString l + "," + toString r + ")"
+    | _          -> _val.ToString()
 
 and listToString _list =
      "List.ofArray [|" + (String.concat ";" (List.map toString _list)) + "|]"    

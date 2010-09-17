@@ -18,7 +18,7 @@ type DFASymbol<'symbolVal> =
     override self.ToString() = 
         match self with
         | Dummy       -> "Dummy"
-        | DSymbol (s) -> "(DSymbol " + s.ToString() + ")"
+        | DSymbol (s) -> "(DSymbol " + ToString.toString s + ")"
 
 type NFASymbol<'symbolVal> = 
     | Epsilon
@@ -45,10 +45,10 @@ type Rule<'symbol, 'label> =
     }    
     override self.ToString() = 
           "{ \n"
-        + "   FromStateID = " + ToString.toString self.FromStateID + "\n"
-        + "   Symbol      = " + self.Symbol.ToString() + "\n"
-        + "   Label       = " + self.Label.ToString() + "\n"
-        + "   ToStateID   = " + ToString.toString self.ToStateID + "\n"
+        + "   FromStateID = " + ToString.toString self.FromStateID + ";\n"
+        + "   Symbol      = " + self.Symbol.ToString() + ";\n"
+        + "   Label       = " + self.Label.ToString() + ";\n"
+        + "   ToStateID   = " + ToString.toString self.ToStateID + ";\n"
         + "}\n"    
 
 type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
@@ -60,10 +60,10 @@ type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
     }
     override self.ToString() = 
           "{ \n"
-        + "   NIDToStateMap = " + ToString.dictToString self.NIDToStateMap + "\n"
-        + "   NStartState   = " + self.NStartState.ToString() + "\n"
-        + "   NFinaleState  = " + self.NFinaleState.ToString() + "\n"
-        + "   NRules        = " + ToString.setToString self.NRules + "\n"
+        + "   NIDToStateMap = " + ToString.dictToString self.NIDToStateMap + ";\n"
+        + "   NStartState   = " + self.NStartState.ToString() + ";\n"
+        + "   NFinaleState  = " + self.NFinaleState.ToString() + ";\n"
+        + "   NRules        = " + ToString.setToString self.NRules + ";\n"
         + "}\n"
 
 type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
@@ -75,8 +75,8 @@ type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
     }
     override self.ToString() = 
           "{ \n"
-        + "   DIDToStateMap = " + ToString.dictToString self.DIDToStateMap + "\n"
-        + "   DStartState   = " + self.DStartState.ToString() + "\n"
-        + "   DFinaleStates = " + self.DFinaleStates.ToString() + "\n"
-        + "   DRules        = " + ToString.setToString self.DRules + "\n"
+        + "   DIDToStateMap = " + ToString.dictToString self.DIDToStateMap + ";\n"
+        + "   DStartState   = " + self.DStartState.ToString() + ";\n"
+        + "   DFinaleStates = " + self.DFinaleStates.ToString() + ";\n"
+        + "   DRules        = " + ToString.setToString self.DRules + ";\n"
         + "}\n"

@@ -8,23 +8,15 @@
 
 namespace  Yard.Generators._RACCGenerator
 
-open System.IO
 open Yard.Core.IL.Definition
 open Yard.Core.IL.Production
 open Yard.Core.IL
 
 type TableGenerator(outPath: string) = 
     class
-        let outStrieam =         
-            try
-                let t = new FileInfo(outPath)
-                let writer = t.CreateText()             
-                writer     
-            with e -> failwith ("Writer Exception:" + e.ToString())
-                         
-        let write (str:string) = outStrieam.WriteLine(str)
 
-        let closeOutStream _ = outStrieam.Close()
+        let textWriter = TextWriter outPath                                
+        let write str = textWriter.Write(str)        
          
         let buildDLFA production =
             let stateEnumerator = new Enumerator()
@@ -53,14 +45,43 @@ type TableGenerator(outPath: string) =
 
                 | x                 -> failwith ("You should support elem " + x.ToString())
 
-            NLFAToDLFA.NLFAToDLFA (build production)
-        
+            NLFAToDLFA.NLFAToDLFA (build production) (fun x -> List.filter ((<>)Omega) x) 
 
+        let goto items (dlfaMap:System.Collections.Generic.IDictionary<_,_>) =
+            let cls q =
+                let q' = ref q
+                let l = ref 0
+                while (!l < Set.count !q') do
+                    l:= Set.count !q';
+                    for (fa,st) in !q' 
+                        do for (fa',st') in items
+                               do 
+                                let rule = List.filter (fun rule -> x) dlfaMap.[fa].Rules
+                                if
+                                then q':= Set.add (fa',st') !q'       
+                
+                !q'
+            1
+        
+        let items dlfaMap =
+            List.map 
+                (fun (name,dlfa) -> 
+                    Seq.map 
+                        (fun stateID -> (name,stateID))
+                        dlfa.DIDToStateMap.Keys)
+                dlfaMap
+            |> Seq.concat 
+            |> List.ofSeq 
+            
         let genearte (grammar:Yard.Core.IL.Definition.t<_,_>) =
-            let DLFAmap = 
-                List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body) grammar.grammar
-                |> dict
-            closeOutStream ()
+            let dlfaMap = 
+                List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body) grammar.grammar                            
+            let str = "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
+            write str
+            let items = items dlfaMap
+            let str2 = "let items = \n" + ToString.listToString items + "\n"
+            write str2
+            textWriter.CloseOutStream ()
                 
         member self.Gemerate grammar = genearte grammar
                 

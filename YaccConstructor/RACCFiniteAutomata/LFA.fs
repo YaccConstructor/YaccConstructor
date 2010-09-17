@@ -10,17 +10,31 @@
 
 namespace  Yard.Generators._RACCGenerator
 
+open Yard.Generators._RACCGenerator
+
 type DFASymbol<'symbolVal> = 
     | DSymbol of 'symbolVal
     | Dummy
+    override self.ToString() = 
+        match self with
+        | Dummy       -> "Dummy"
+        | DSymbol (s) -> "(DSymbol " + s.ToString() + ")"
 
 type NFASymbol<'symbolVal> = 
     | Epsilon
     | NSymbol of 'symbolVal
+    override self.ToString() = 
+        match self with
+        | Epsilon     -> "Epsilon"
+        | NSymbol (s) -> "(NSymbol " + s.ToString() + ")"
 
 type DLFAState<'stateVal> =
     | State of 'stateVal
     | DummyState
+    override self.ToString() = 
+        match self with
+        | DummyState -> "DummyState"
+        | State (s)  -> "(State " + s.ToString() + ")"
 
 type Rule<'symbol, 'label> =
     {
@@ -29,6 +43,13 @@ type Rule<'symbol, 'label> =
         Label       : 'label
         ToStateID   : int
     }    
+    override self.ToString() = 
+          "{ \n"
+        + "   FromStateID = " + ToString.toString self.FromStateID + "\n"
+        + "   Symbol      = " + self.Symbol.ToString() + "\n"
+        + "   Label       = " + self.Label.ToString() + "\n"
+        + "   ToStateID   = " + ToString.toString self.ToStateID + "\n"
+        + "}\n"    
 
 type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {        
@@ -37,6 +58,13 @@ type NLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
         NFinaleState  : int
         NRules        : Set<Rule<NFASymbol<'symbolVal>, 'label>>
     }
+    override self.ToString() = 
+          "{ \n"
+        + "   NIDToStateMap = " + ToString.dictToString self.NIDToStateMap + "\n"
+        + "   NStartState   = " + self.NStartState.ToString() + "\n"
+        + "   NFinaleState  = " + self.NFinaleState.ToString() + "\n"
+        + "   NRules        = " + ToString.setTostring self.NRules + "\n"
+        + "}\n"
 
 type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: comparison> =
     {
@@ -45,3 +73,10 @@ type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
         DFinaleStates : Set<int>
         DRules        : Set<Rule<DFASymbol<'symbolVal>, 'label>>
     }
+    override self.ToString() = 
+          "{ \n"
+        + "   DIDToStateMap = " + ToString.dictToString self.DIDToStateMap + "\n"
+        + "   DStartState   = " + self.DStartState.ToString() + "\n"
+        + "   DFinaleStates = " + self.DFinaleStates.ToString() + "\n"
+        + "   DRules        = " + ToString.setTostring self.DRules + "\n"
+        + "}\n"

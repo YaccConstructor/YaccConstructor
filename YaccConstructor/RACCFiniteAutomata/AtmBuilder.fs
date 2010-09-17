@@ -128,9 +128,12 @@ type AtmBuilder(enumerator:Enumerator) =
             let stateVal = if Option.isNone sttInfo then stateID else Option.get sttInfo
             {
                 NIDToStateMap = 
-                    let d = atm.NIDToStateMap
-                    d.Add(stateID,stateVal)                    
+                    let d = System.Collections.Generic.Dictionary(atm.NIDToStateMap)
+                    //let p = Seq.append d (dict[stateID,stateVal])
+                    //System.Collections.Generic.Dictionary(d)
+                    d.Add(stateID,stateVal)
                     d
+                    
                         
 
                 NStartState   = stateID

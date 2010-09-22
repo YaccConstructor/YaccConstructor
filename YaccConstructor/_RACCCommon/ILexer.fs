@@ -6,13 +6,13 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-namespace Yard.Generators.RACC
+namespace Yard.Generators._RACCGenerator
 
 type Lexeme<'value> = {
     name : string;
     value: 'value;     
   }
  
-type ILexer<'lexemeValue> = interface
-    abstract Next : unit -> Lexeme<'lexemeValue>
+type ILexer<'lexemeValue ,'lbType> = interface
+    abstract Next : (Microsoft.FSharp.Text.Lexing.LexBuffer<'lbType>) -> Lexeme<'lexemeValue>
 end

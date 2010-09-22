@@ -18,7 +18,7 @@ let run_common path =
     LexBuffer<_>.FromTextReader reader
 
 let run path =
-    let buf = run_common path in
+    let buf = run_common path in 
     let example = seq {
                        while not buf.IsPastEndOfStream do
                              yield Lexer.main buf  

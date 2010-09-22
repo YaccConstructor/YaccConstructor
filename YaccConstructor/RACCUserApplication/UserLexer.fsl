@@ -1,0 +1,45 @@
+﻿{
+// UserLexer.fs
+//
+// Copyright 2009-2010 Semen Grigorev
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation.
+
+module UserLexer
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Yard.Generators._RACCGenerator
+ }
+ 
+
+ let digit = ['0'-'9']
+
+ rule tokens = parse
+ | digit+ 
+        {{name = "NUMBER"; value = LexBuffer.LexemeString(lexbuf)}}
+ | "+" 
+        {{name = "PLUS"; value = LexBuffer.LexemeString(lexbuf)}}
+ | "-" 
+        {{name = "MINUS"; value = LexBuffer.LexemeString(lexbuf)}}
+ | "*" 
+        {{name = "MULT"; value = LexBuffer.LexemeString(lexbuf)}}
+ | "/" 
+        {{name = "DIV"; value = LexBuffer.LexemeString(lexbuf)}}
+ | "(" 
+        {{name = "LBR"; value = LexBuffer.LexemeString(lexbuf)}}
+ | ")" 
+        {{name = "RBR"; value = LexBuffer.LexemeString(lexbuf)}}
+ | eof  {{name = "EOF"; value = LexBuffer.LexemeString(lexbuf)}}
+
+ {
+
+ type Lexer() = 
+    interface ILexer<string,char> with
+    
+       member self.Next lb = tokens lb
+    
+    end
+
+ }

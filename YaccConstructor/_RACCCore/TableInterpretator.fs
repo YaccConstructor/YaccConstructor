@@ -10,10 +10,33 @@ namespace Yard.Generators._RACCGenerator
 
 type TableInterpreter(tables) =
     class
-        let goto = ()
-        let memoize = ()
-        let parse (lexer:ILexer<_,_>) lexbuf  = (lexer).Next lexbuf
-        let climb   = ()
+        let goto states symbol = 
+            Set.map 
+                (fun state -> tables.gotoSet.[hash(state,symbol)])
+                states
+            |> Set.unionMany
 
-        member self.Parse lexer lexbuf = parse lexer lexbuf
+        let memoize f = 
+            let t = new System.Collections.Generic.Dictionary<_,_>()
+            fun (parserState) ->        
+                let id = hash(parserState)
+                let key = parserState
+                if t.ContainsKey(key)       
+                then             
+                    t.[key] 
+                else     
+                    let res = f(parserState) 
+                    t.Add(key,res)
+                    res                     
+
+        let parse = 
+            memoize
+                (fun parserState ->
+                    1)
+
+        let climb = ()
+
+        let run lexer lexbuf = ()
+
+        member self.Parse lexer lexbuf = run  lexer lexbuf
     end

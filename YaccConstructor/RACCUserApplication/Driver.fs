@@ -29,7 +29,7 @@ let run path =
         }
     let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
     let forest = driver.Parse l buf
-    forest
+    printfn "%A" forest
 do run @"W:\Users\gsv2\Diploma\trunk\YaccConstructor\RACCUserApplication\test"
 System.Console.ReadLine();
 

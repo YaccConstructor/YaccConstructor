@@ -12,9 +12,8 @@ type TableInterpreter(tables) =
     class
         let goto states symbol = 
             Set.map 
-                (fun state -> tables.gotoSet.[hash(state,symbol)])
-                states
-            |> Set.unionMany
+                (fun state -> (dict tables.gotoSet).[hash(state,symbol)])
+                states            
 
         let memoize f = 
             let t = new System.Collections.Generic.Dictionary<_,_>()
@@ -29,13 +28,31 @@ type TableInterpreter(tables) =
                     t.Add(key,res)
                     res                     
 
+        let climb = 
+            memoize
+                (fun parserState ->
+                    let isFinaleState state= 
+                        let dfa = tables.automataDict.[fst state]
+                        Set.exists ((=) (snd state)) dfa.DFinaleStates
+                    let resPart1 = Set.filter isFinaleState parserState.statesSet
+                    let resPart2 = Set.empty
+                        //let climbRes = climb 
+                    resPart1 + resPart2)
+
+        
         let parse = 
             memoize
                 (fun parserState ->
-                    1)
+                    let isFinaleState state= 
+                        let dfa = tables.automataDict.[fst state]
+                        Set.exists ((=) (snd state)) dfa.DFinaleStates
+                    let resPart1 = {parserState Set.filter isFinaleState parserState.statesSet
+                    let resPart2 = 
+                        let climbRes = climb {parserState with inpSymbol = parserState.lexer.Next(parserState.inpStream)}
+                        Set.filter (not isFinaleState) 
+                    resPart1 + resPart2)
 
-        let climb = ()
-
+        
         let run lexer lexbuf = ()
 
         member self.Parse lexer lexbuf = run  lexer lexbuf

@@ -14,7 +14,7 @@ type Tables<'gt, 'item, 'atmDictKey, 'stateSmb, 'stateVal, 'lbl
                 and 'stateVal : comparison 
                 and 'lbl : comparison> =
     {
-        gotoSet      : System.Collections.Generic.IDictionary<int,'gt>;
+        gotoSet      : Set<'gt>;
         automataDict : System.Collections.Generic.IDictionary<'atmDictKey,DLFA<'stateSmb, 'stateVal, 'lbl>>;
         items        : List<'item>;
     }

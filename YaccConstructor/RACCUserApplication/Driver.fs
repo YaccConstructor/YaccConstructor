@@ -18,6 +18,12 @@ let run_common path =
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 
+type t<'buf,'a,'b> = 
+    {
+        buf : 'buf
+        lexer : ILexer<'a,'b>
+    }
+
 let run path =
     let buf = run_common path 
     let l = UserLexer.Lexer()
@@ -27,9 +33,13 @@ let run path =
             automataDict = autumataDict
             items = items
         }
-    let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
-    let forest = driver.Parse l buf
-    printfn "%A" forest
+    let tt = {buf=buf; lexer = l}
+
+    //let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
+    //let forest = driver.Parse l buf
+
+    printfn "%A" (tt.lexer.Next( tt.buf))
+    printfn "%A" (tt.lexer.Next( tt.buf))
 do run @"W:\Users\gsv2\Diploma\trunk\YaccConstructor\RACCUserApplication\test"
 System.Console.ReadLine();
 

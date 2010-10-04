@@ -5,6 +5,7 @@ type CoreDriver(tables) =
         let parse (lexer: ILexer<_,_>) lexbuf =
             let tablesInterpretator = TableInterpreter(tables)
             tablesInterpretator.Parse lexer lexbuf
+            
 
         let interprete inpForest = ()
 

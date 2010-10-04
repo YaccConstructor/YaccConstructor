@@ -16,12 +16,12 @@ type Item<'state, 'symbol> =
 
 type TableInterpreter(tables) =
     class
-        let goto states symbol = 
+        let goto tables states symbol = 
             Set.map 
                 (fun state -> (dict tables.gotoSet).[hash(state,symbol)])
                 states            
 
-        let getDFA state = tables.automataDict.[fst state]
+        let getDFA tables state = tables.automataDict.[fst state]
 
         let buildItem state= 
             Set.map
@@ -34,13 +34,13 @@ type TableInterpreter(tables) =
                             | _           -> failwith "Error 01"
                     })
 
-        let getItems smb state =
-            let dfa = getDFA state
+        let getItems tables smb state =
+            let dfa = getDFA tables state
             Set.filter (fun rule -> rule.FromStateID = snd state && rule.Symbol = DSymbol smb) dfa.DRules
             |> buildItem state
 
-        let getPrevItems smb state =
-            let dfa = getDFA state
+        let getPrevItems tables smb state =
+            let dfa = getDFA tables state
             Set.filter (fun rule -> rule.ToStateID = snd state && rule.Symbol = DSymbol smb) dfa.DRules
             |> buildItem state
 
@@ -60,24 +60,29 @@ type TableInterpreter(tables) =
         let rec climb = 
             memoize
                 (fun parserState ->
-                    let gotoSet = goto parserState.statesSet parserState.inpSymbol
+                    let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
                     let parserResult = parse {parserState with statesSet = gotoSet}                    
                     let resPart1 =                        
-                        let possibleStates = Set.map (getItems parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
+                        let possibleStates = Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
                         let resItems =
-                            Set.filter
-                                (fun state ->
-                                    Set.exists
-                                        (fun res -> 
-                                            let prevItems = getPrevItems parserState.inpSymbol.name res.rItem
-                                            Set.exists ((=)state) prevItems
-                                            )
-                                        parserResult)
+                            Set.fold
+                                (fun buf state ->
+                                    let filter res =                                         
+                                        let prevItems = getPrevItems tables parserState.inpSymbol.name res.rItem
+                                        Set.exists ((=)state) prevItems
+                                    let res = Set.filter filter parserResult
+                                    if not (Set.isEmpty res)
+                                    then Set.add {Set.maxElement res with rItem = state.state} buf
+                                    else buf)
+                                Set.empty
                                 possibleStates
 
-                        Set.map (fun item -> {parserResult with rItem = item.state}) resItems
-                    let resPart2 = Set.empty
-                        //let climbRes = climb 
+                        resItems
+                    let resPart2 = 
+                        Set.map 
+                            (fun res -> climb {parserState with inpSymbol = res.rLexer.Next(res.rInpStream); inpStream = res.rInpStream; lexer = res.rLexer})
+                            parserResult
+                        |> Set.unionMany                         
                     resPart1 + resPart2)
 
         
@@ -102,7 +107,17 @@ type TableInterpreter(tables) =
                     resPart1 + resPart2)
 
         
-        let run lexer lexbuf = ()
+        let run (lexer:ILexer<_,_>) lexbuf = 
+            let res = 
+                parse 
+                {
+                    statesSet = Set.singleton ("s",0)
+                    inpSymbol = lexer.Next(lexbuf)
+                    inpStream = lexbuf
+                    lexer     = lexer
+
+                }
+            printfn "\n result %A" res
 
         member self.Parse lexer lexbuf = run  lexer lexbuf
     end

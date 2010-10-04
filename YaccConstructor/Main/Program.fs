@@ -2,6 +2,7 @@
 
 open Yard.Core
 open Yard.Core.IL
+open Microsoft.FSharp.Text
 
 //TODO: move it to ConvertionManager
 let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) = 
@@ -53,4 +54,3 @@ let () =
   //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
   //  let s = tester.RunTest 
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
-

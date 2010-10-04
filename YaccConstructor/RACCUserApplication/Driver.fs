@@ -34,9 +34,9 @@ let run path =
             items = items
         }
     let tt = {buf=buf; lexer = l}
-    //let ti = TableInterpreter(tables)
-    //ti.Parse l buf
-    1
+    //let ti  TableInterpreter. //= TableInterpreter()
+    TableInterpreter.run l buf tables
+    
 
     //let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
     //let forest = driver.Parse l buf

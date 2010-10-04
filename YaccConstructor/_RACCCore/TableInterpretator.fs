@@ -14,14 +14,14 @@ type Item<'state, 'symbol> =
         symbol : 'symbol
     }
 
-type TableInterpreter(tables) =
-    class
+module  TableInterpreter = //() =
+    //class
         let goto tables states symbol = 
             Set.map 
                 (fun state -> (dict tables.gotoSet).[hash(state,symbol)])
                 states            
 
-        let getDFA tables state = tables.automataDict.[fst state]
+        let private getDFA tables state = tables.automataDict.[fst state]
 
         let buildItem state= 
             Set.map
@@ -46,22 +46,22 @@ type TableInterpreter(tables) =
 
         let memoize f = 
             let t = new System.Collections.Generic.Dictionary<_,_>()
-            fun (parserState) ->        
+            fun tables parserState ->        
                 let id = hash(parserState)
                 let key = parserState
                 if t.ContainsKey(key)       
                 then             
                     t.[key] 
                 else     
-                    let res = f(parserState) 
+                    let res = f tables parserState
                     t.Add(key,res)
                     res                     
 
-        let rec climb = 
+        let rec climb() = 
             memoize
-                (fun parserState ->
+                (fun tables parserState ->
                     let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
-                    let parserResult = parse {parserState with statesSet = gotoSet}                    
+                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                    
                     let resPart1 =                        
                         let possibleStates = Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
                         let resItems =
@@ -80,15 +80,15 @@ type TableInterpreter(tables) =
                         resItems
                     let resPart2 = 
                         Set.map 
-                            (fun res -> climb {parserState with inpSymbol = res.rLexer.Next(res.rInpStream); inpStream = res.rInpStream; lexer = res.rLexer})
+                            (fun res -> (climb()) tables {parserState with inpSymbol = res.rLexer.Next(res.rInpStream); inpStream = res.rInpStream; lexer = res.rLexer})
                             parserResult
                         |> Set.unionMany                         
                     resPart1 + resPart2)
 
         
-        and parse = 
+        and parse ()= 
             memoize
-                (fun parserState ->
+                (fun tables parserState ->
                     let isFinaleState state= 
                         let dfa = tables.automataDict.[fst state]
                         Set.exists ((=) (snd state)) dfa.DFinaleStates
@@ -102,22 +102,22 @@ type TableInterpreter(tables) =
                                 })
                             (Set.filter isFinaleState parserState.statesSet)
                     let resPart2 = 
-                        let climbRes = climb {parserState with inpSymbol = parserState.lexer.Next(parserState.inpStream)}
+                        let climbRes = (climb()) tables {parserState with inpSymbol = parserState.lexer.Next(parserState.inpStream)}
                         Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
                     resPart1 + resPart2)
 
         
-        let run (lexer:ILexer<_,_>) lexbuf = 
+        let run (lexer:ILexer<_,_>) lexbuf tables= 
             let res = 
-                parse 
-                {
-                    statesSet = Set.singleton ("s",0)
-                    inpSymbol = lexer.Next(lexbuf)
-                    inpStream = lexbuf
-                    lexer     = lexer
+                (parse()) tables
+                    {
+                        statesSet = Set.singleton ("s",0)
+                        inpSymbol = lexer.Next(lexbuf)
+                        inpStream = lexbuf
+                        lexer     = lexer
 
-                }
+                    }
             printfn "\n result %A" res
 
-        member self.Parse lexer lexbuf = run  lexer lexbuf
-    end
+     //   member self.Parse lexer lexbuf tables = run  lexer lexbuf tables
+    //end

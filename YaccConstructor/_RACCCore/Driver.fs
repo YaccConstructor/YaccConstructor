@@ -1,10 +1,10 @@
 ﻿namespace Yard.Generators._RACCGenerator
 
-type CoreDriver(tables) =
+type CoreDriver() =
     class
-        let parse (lexer: ILexer<_,_>) lexbuf =
-            let tablesInterpretator = TableInterpreter(tables)
-            tablesInterpretator.Parse lexer lexbuf
+        let parse (lexer: ILexer<_,_>) lexbuf tables=
+            //let tablesInterpretator = TableInterpreter()
+            TableInterpreter.run lexer lexbuf tables
             
 
         let interprete inpForest = ()

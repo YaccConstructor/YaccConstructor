@@ -13,29 +13,35 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
         and  foot = ilTree.foot
     }
 
-let () =    
+let () =   
+//    try 
+
     let feName = ref "YardFrontend"
-    let generatorName = ref "_RACCGenerator"
+    let generatorName = ref "RecursiveAscent"
+    let testsPath = ref @"..\..\..\..\Tests"
+    let testFile = ref "test002.yrd"
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
 //         "-c", ArgType.String (fun s -> 
          "-g", ArgType.String (fun s -> generatorName := s), "Generator name"
+         "--testpath", ArgType.String (fun s -> testsPath := s), "Directory where test files are placed"
+         "-t", ArgType.String (fun s -> testFile := s), "Name of test file"
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
-    let grammarFilePath = @"..\..\..\..\Tests\test002.yrd"
+    let grammarFilePath = !testsPath + "\\" + !testFile
 
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
     let assembly = System.Reflection.Assembly.Load(!feName)
-    let inst = assembly.CreateInstance("Yard.Frontends." + !feName+"." + !feName)
+    let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
     FrontendsManager.Register(inst :?> IFrontend);
 
     // Load generator assemblies dlls - get them from file, current folder or command line
     let assembly = System.Reflection.Assembly.Load(!generatorName)
-    let inst = assembly.CreateInstance("Yard.Generators." + !generatorName+"." + !generatorName)
+    let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
     GeneratorsManager.Register(inst :?> IGenerator);
 
     
@@ -53,4 +59,7 @@ let () =
     //Run tests
   //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
   //  let s = tester.RunTest 
+
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
+//    with 
+//    | x -> eprintf "%A" x

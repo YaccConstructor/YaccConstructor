@@ -18,7 +18,7 @@ module  TableInterpreter = //() =
     //class
         let goto tables states symbol = 
             Set.map 
-                (fun state -> (dict tables.gotoSet).[hash(state,symbol)])
+                (fun state -> (dict tables.gotoSet).[(*hash*)(state,DSymbol(symbol.name))])
                 states            
 
         let private getDFA tables state = tables.automataDict.[fst state]
@@ -61,29 +61,32 @@ module  TableInterpreter = //() =
             memoize
                 (fun tables parserState ->
                     let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
-                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                    
-                    let resPart1 =                        
-                        let possibleStates = Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
-                        let resItems =
-                            Set.fold
-                                (fun buf state ->
-                                    let filter res =                                         
-                                        let prevItems = getPrevItems tables parserState.inpSymbol.name res.rItem
-                                        Set.exists ((=)state) prevItems
-                                    let res = Set.filter filter parserResult
-                                    if not (Set.isEmpty res)
-                                    then Set.add {Set.maxElement res with rItem = state.state} buf
-                                    else buf)
-                                Set.empty
-                                possibleStates
+                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}  
+                    if (Set.exists (fun res -> res.rInpStream.IsPastEndOfStream) parserResult)
+                    then parserResult
+                    else                                      
+                        let resPart1 =                        
+                            let possibleStates = Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
+                            let resItems =
+                                Set.fold
+                                    (fun buf state ->
+                                        let filter res =                                         
+                                            let prevItems = getPrevItems tables parserState.inpSymbol.name res.rItem
+                                            Set.exists ((=)state) prevItems
+                                        let res = Set.filter filter parserResult
+                                        if not (Set.isEmpty res)
+                                        then Set.add {Set.maxElement res with rItem = state.state} buf
+                                        else buf)
+                                    Set.empty
+                                    possibleStates
 
-                        resItems
-                    let resPart2 = 
-                        Set.map 
-                            (fun res -> (climb()) tables {parserState with inpSymbol = res.rLexer.Next(res.rInpStream); inpStream = res.rInpStream; lexer = res.rLexer})
-                            parserResult
-                        |> Set.unionMany                         
-                    resPart1 + resPart2)
+                            resItems
+                        let resPart2 = 
+                            Set.map 
+                                (fun res -> (climb()) tables {parserState with (*inpSymbol = res.rLexer.Next(res.rInpStream);*) inpStream = res.rInpStream; lexer = res.rLexer})
+                                parserResult
+                            |> Set.unionMany                         
+                        resPart1 + resPart2)
 
         
         and parse ()= 
@@ -102,8 +105,16 @@ module  TableInterpreter = //() =
                                 })
                             (Set.filter isFinaleState parserState.statesSet)
                     let resPart2 = 
-                        let climbRes = (climb()) tables {parserState with inpSymbol = parserState.lexer.Next(parserState.inpStream)}
-                        Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
+                        if parserState.inpStream.IsPastEndOfStream
+                        then
+                            Set.empty
+                        else
+                            let nextLexeme = parserState.lexer.Next(parserState.inpStream)
+                            if nextLexeme.name = "EOF"
+                                then Set.empty
+                                else 
+                                    let climbRes = (climb()) tables {parserState with inpSymbol = nextLexeme}
+                                    Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
                     resPart1 + resPart2)
 
         
@@ -112,7 +123,7 @@ module  TableInterpreter = //() =
                 (parse()) tables
                     {
                         statesSet = Set.singleton ("s",0)
-                        inpSymbol = lexer.Next(lexbuf)
+                        inpSymbol = {name = "";value =""}//lexer.Next(lexbuf)
                         inpStream = lexbuf
                         lexer     = lexer
 

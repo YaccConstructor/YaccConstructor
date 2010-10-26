@@ -86,7 +86,7 @@ type TableGenerator(outPath: string) =
                                                         rule.FromStateID = snd elt
                                                         && rule.Symbol = smb)
                                                      atm.DRules
-                                    Set.map (fun rule -> hash(elt, smb), (fst elt, rule.ToStateID)) rules)
+                                    Set.map (fun rule -> (*hash*)(item, smb), (fst elt, rule.ToStateID)) rules)
                                 gt
                             |>Set.unionMany)                        
                         items

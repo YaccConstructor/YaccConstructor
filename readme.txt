@@ -1,5 +1,5 @@
-IDE : Microsoft Visual Studio 2008. 
-F# version: 1.9.9.9
-startup project - Tester
+IDE : Microsoft Visual Studio 2010. 
+F# version: 2.0.0.0
+startup project - Main
 Source folder contains all sources of project.
 Tests folder contains test YARD grammars 

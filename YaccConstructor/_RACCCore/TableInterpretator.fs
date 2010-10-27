@@ -17,8 +17,11 @@ type Item<'state, 'symbol> =
 module  TableInterpreter = //() =
     //class
         let goto tables states symbol = 
-            Set.map 
-                (fun state -> (dict tables.gotoSet).[(*hash*)(state,DSymbol(symbol.name))])
+            Set.fold 
+                (fun buf state -> 
+                    try Set.add (dict tables.gotoSet).[(*hash*)(state,DSymbol(symbol.name))] buf
+                    with _ -> buf)                    
+                Set.empty
                 states            
 
         let private getDFA tables state = tables.automataDict.[fst state]
@@ -60,11 +63,24 @@ module  TableInterpreter = //() =
         let rec climb() = 
             memoize
                 (fun tables parserState ->
+                    printfn "\n Climb \n  parserState=%A" parserState
                     let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
-                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}  
-                    if (Set.exists (fun res -> res.rInpStream.IsPastEndOfStream) parserResult)
-                    then parserResult
-                    else                                      
+                    if gotoSet.IsEmpty
+                    then
+                        Set.map 
+                            (fun state -> 
+                                { 
+                                 
+                                    rItem  = state
+                                    rInpStream = parserState.inpStream
+                                    rLexer = parserState.lexer
+                                 })
+                            parserState.statesSet
+                    else
+                        let parserResult = (parse()) tables {parserState with statesSet = gotoSet}  
+                        //if (Set.exists (fun res -> res.rInpStream.IsPastEndOfStream) parserResult)
+                        //then parserResult
+                       // else                                      
                         let resPart1 =                        
                             let possibleStates = Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  |> Set.unionMany
                             let resItems =
@@ -81,20 +97,27 @@ module  TableInterpreter = //() =
                                     possibleStates
 
                             resItems
-                        let resPart2 = 
-                            Set.map 
-                                (fun res -> (climb()) tables {parserState with (*inpSymbol = res.rLexer.Next(res.rInpStream);*) inpStream = res.rInpStream; lexer = res.rLexer})
-                                parserResult
-                            |> Set.unionMany                         
+                        let resPart2 =
+                                Set.map 
+                                    (fun res -> 
+                                        (climb())
+                                             tables 
+                                             { 
+                                                parserState with 
+                                                    inpSymbol = {name= fst res.rItem; value = ""};(*statesSet = Set.singleton res.rItem;*) (*inpSymbol = res.rLexer.Next(res.rInpStream);*)
+                                                    inpStream = res.rInpStream; lexer = res.rLexer})
+                                    parserResult
+                                |> Set.unionMany                         
                         resPart1 + resPart2)
 
         
         and parse ()= 
             memoize
                 (fun tables parserState ->
+                    printfn "\n Parse \n  parserState=%A" parserState
                     let isFinaleState state= 
                         let dfa = tables.automataDict.[fst state]
-                        Set.exists ((=) (snd state)) dfa.DFinaleStates
+                        Set.exists ((=) (snd state)) dfa.DFinaleStates                    
                     let resPart1 = 
                         Set.map 
                             (fun item -> 
@@ -108,13 +131,13 @@ module  TableInterpreter = //() =
                         if parserState.inpStream.IsPastEndOfStream
                         then
                             Set.empty
-                        else
-                            let nextLexeme = parserState.lexer.Next(parserState.inpStream)
-                            if nextLexeme.name = "EOF"
-                                then Set.empty
-                                else 
-                                    let climbRes = (climb()) tables {parserState with inpSymbol = nextLexeme}
-                                    Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
+                        else  
+                            let nextLexeme = parserState.lexer.Next(parserState.inpStream)                                        
+                            if nextLexeme.name = "EOF" 
+                            then Set.empty                              
+                            else
+                                let climbRes = (climb()) tables {parserState with statesSet=Set.filter (isFinaleState >> not) parserState.statesSet; inpSymbol = nextLexeme}
+                                Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
                     resPart1 + resPart2)
 
         
@@ -123,7 +146,8 @@ module  TableInterpreter = //() =
                 (parse()) tables
                     {
                         statesSet = Set.singleton ("s",0)
-                        inpSymbol = {name = "";value =""}//lexer.Next(lexbuf)
+                        inpSymbol = {name = "";value =""}
+                                    //lexer.Next(lexbuf)
                         inpStream = lexbuf
                         lexer     = lexer
 

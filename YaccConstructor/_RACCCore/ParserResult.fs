@@ -13,14 +13,14 @@ open Yard.Core.CompareHelper
 [<CustomEquality; CustomComparison>]
 type ParserResult<'item, 'value, 'lb when 'item : comparison> =
     {
-        rItem      : 'item        
+        rItem      : 'item
         rInpStream : Lexing.LexBuffer<'lb>
-        rLexer     : ILexer<'value,'lb>       
+        rLexer     : ILexer<'value,'lb>
     }
       
      member self.GetValue (x:ParserResult<_,_,_>) =
         x.rItem, x.rInpStream
      override self.Equals y = equalsOn self.GetValue self y
-     override self.GetHashCode() = hashOn self.GetValue self 
-     interface System.Collections.IStructuralComparable with      
+     override self.GetHashCode() = hashOn self.GetValue self
+     interface System.Collections.IStructuralComparable with
             member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> ParserResult<'item, 'value, 'lb>))

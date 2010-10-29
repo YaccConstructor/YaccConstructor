@@ -34,7 +34,7 @@ module  TableInterpreter =
             Set.map
                 (fun rule -> 
                     {
-                        state = state
+                        state =  {state with position = rule.FromStateID}
                         symbol = 
                             match rule.Symbol with
                             | DSymbol (s) -> s
@@ -68,13 +68,12 @@ module  TableInterpreter =
             memoize
                 (fun tables parserState ->
 #if DEBUG
-                    printfn "\n Climb \n  parserState=%A\n gotoset: \n state = %A \n symbol = %A \n" parserState parserState.statesSet parserState.inpSymbol
-
+                    printfn "\n Climb \n  parserState=%A\n gotoset: \n state = %A \n symbol = %A \n" 
+                            parserState parserState.statesSet parserState.inpSymbol
 #endif
                     let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
 #if DEBUG
                     printfn "\n goto result = %A \n" gotoSet
-
 #endif
                     if gotoSet.IsEmpty
                     then
@@ -88,8 +87,33 @@ module  TableInterpreter =
                             parserState.statesSet
                     else
                         let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                          
-                        let resPart1 =                        
-                            let possibleStates = 
+                        let resPart1 =  
+                            Set.fold
+                                (fun buf res ->
+                                    if res.rItem.position > 0
+                                    then
+                                        let prevItems = getPrevItems tables parserState.inpSymbol.name res.rItem
+                                        Set.fold 
+                                            (fun buf itm -> 
+                                                if itm.state.position>0
+                                                then 
+                                                    Set.add
+                                                        {
+                                                            rItem      = prevItems.MaximumElement.state
+                                                            rInpStream = parserState.inpStream
+                                                            rLexer     = parserState.lexer
+                                                        }
+                                                        buf  
+                                                else
+                                                    buf)
+                                            buf
+                                            prevItems
+                                                                                                                                                                  
+                                    else
+                                        buf)
+                                Set.empty
+                                parserResult                      
+                            (*let possibleStates = 
                                 Set.map (getItems tables parserState.inpSymbol.name) parserState.statesSet  
                                 |> Set.unionMany
                             let resItems =
@@ -107,10 +131,10 @@ module  TableInterpreter =
                                                          item.forest @ frst
                                                         ,item.itemName
                                                         ,{
-                                                        id    = item.itemName
-                                                        trace = []
-                                                        value = NodeV 0 
-                                                        }
+                                                            id    = item.itemName
+                                                            trace = []
+                                                            value = NodeV 0 
+                                                         }
                                                       )
                                                 ]
                                             let d = Set.maxElement res
@@ -123,7 +147,7 @@ module  TableInterpreter =
                                         else buf)
                                     Set.empty
                                     possibleStates
-                            resItems
+                            resItems*)
 
                         let resPart2 =
                                 Set.map 
@@ -178,7 +202,7 @@ module  TableInterpreter =
                                         }
                                         )]
                             let climbRes = 
-                                let fl = Set.filter (isFinaleState >> not) parserState.statesSet
+                                let fl =  parserState.statesSet//Set.filter (isFinaleState >> not) parserState.statesSet
                                 (climb()) 
                                     tables 
                                         {

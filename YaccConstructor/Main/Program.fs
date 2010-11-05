@@ -14,7 +14,7 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
     }
 
 let () =   
-//    try 
+  try 
 
     let feName = ref "YardFrontend"
     let generatorName = ref "_RACCGenerator"
@@ -61,5 +61,5 @@ let () =
   //  let s = tester.RunTest 
 
     printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
-//    with 
-//    | x -> eprintf "%A" x
+  with 
+  | x -> eprintf "%A" x // program should terminate correctly. Writing to error stream for Tester

@@ -100,6 +100,11 @@
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
+      <Name>YardPrinter</Name>
+      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\_RACCGenerator\_RACCGenerator.fsproj">
       <Name>_RACCGenerator</Name>
       <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>

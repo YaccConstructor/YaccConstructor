@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://fsharp.net
-
-module Yard.Generators.FParsecGenerator.Program
+﻿module Yard.Generators.FParsecGenerator.Program
 
 open Yard.Core.IL.Production
 open Yard.Core.IL.Rule

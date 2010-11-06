@@ -17,9 +17,9 @@ let () =
   try 
 
     let feName = ref "YardFrontend"
-    let generatorName = ref "_RACCGenerator"
+    let generatorName = ref "YardPrinter"
     let testsPath = ref @"..\..\..\..\Tests"
-    let testFile = ref "test002.yrd"
+    let testFile = ref "test003.yrd"
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
@@ -59,7 +59,7 @@ let () =
     //Run tests
   //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
   //  let s = tester.RunTest 
-
-    printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
+    printf "%A" s
+    //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
   with 
   | x -> eprintf "%A" x // program should terminate correctly. Writing to error stream for Tester

@@ -29,7 +29,7 @@ let run path =
     let l = UserLexer.Lexer()
     let tables =
         {
-            gotoSet = gotoSet
+            gotoSet = (*dict*) gotoSet
             automataDict = autumataDict
             items = items
         }
@@ -43,6 +43,7 @@ let run path =
 
     //printfn "%A" (tt.lexer.Next( tt.buf))
     //printfn "%A" (tt.lexer.Next( tt.buf))
-do run @"W:\Users\gsv2\Diploma\trunk\YaccConstructor\RACCUserApplication\test"
+do run //@"W:\Users\gsv2\Diploma\trunk\YaccConstructor\RACCUserApplication\test"
+    @"..\..\test"
 System.Console.ReadLine();
 

@@ -23,7 +23,7 @@ module  TableInterpreter =
                 (fun buf state -> 
                     try 
                         let gt = (dict tables.gotoSet).[(*hash*)((state.itemName,state.position),DSymbol(symbol.name))]
-                        Set.add  {itemName = fst gt; position = snd gt; forest=[]} buf
+                        Set.add  {itemName = fst gt; position = snd gt; forest=state.forest} buf
                     with _ -> buf)                    
                 Set.empty
                 states            
@@ -90,27 +90,33 @@ module  TableInterpreter =
                     let resPart1 =  
                         Set.fold
                             (fun buf res ->
-                                if res.rItem.position > 0
-                                then
+                                (*if res.rItem.position > 0
+                                then*)
                                     let prevItems = getPrevItems tables parserState.inpSymbol.name res.rItem
                                     Set.fold 
                                         (fun buf itm -> 
-                                            if itm.state.position>0
-                                            then 
+                                            (*if itm.state.position>0
+                                            then*) 
+                                                let stt = prevItems.MaximumElement.state
                                                 Set.add
                                                     {
-                                                        rItem      = prevItems.MaximumElement.state
+                                                        rItem      = {stt with forest = 
+                                                            [Node(   itm.state.forest 
+                                                                  ,stt.itemName
+                                                                  ,{id    = stt.itemName
+                                                                    trace = []
+                                                                    value = NodeV 1})]}
                                                         rInpStream = parserState.inpStream
                                                         rLexer     = parserState.lexer
                                                     }
                                                     buf  
-                                            else
-                                                buf)
+                                            (*else
+                                                buf*))
                                         buf
                                         prevItems
                                                                                                                                                                   
-                                else
-                                    buf)
+                                (*else
+                                    buf*))
                             Set.empty
                             parserResult                                                
 
@@ -126,7 +132,9 @@ module  TableInterpreter =
                                                 //lexer     = res.rLexer
                                                 statesSet = 
                                                     Set.map 
-                                                        (fun stt -> {stt with forest = stt.forest @ res.rItem.forest})
+                                                        (fun stt -> //stt)
+                                                                    
+                                                                     {stt with forest = stt.forest @ res.rItem.forest})
                                                         parserState.statesSet
                                             })
                                 parserResult
@@ -172,10 +180,10 @@ module  TableInterpreter =
                                     [ Leaf(
                                             nextLexeme.name
                                             ,{
-                                            id    = item.itemName
-                                            trace = []
-                                            value = LeafV nextLexeme
-                                            }
+                                                id    = item.itemName
+                                                trace = []
+                                                value = LeafV nextLexeme
+                                             }
                                             )]
                                 let climbRes = 
                                 

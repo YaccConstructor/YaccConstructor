@@ -22,8 +22,8 @@ module  TableInterpreter =
             Set.fold 
                 (fun buf state -> 
                     try 
-                        let gt = (dict tables.gotoSet).[(*hash*)((state.itemName,state.position),DSymbol(symbol.name))]
-                        Set.add  {itemName = fst gt; position = snd gt; forest=state.forest} buf
+                        let gt = (*dict *) Set.filter (fun (x,y) -> x = ((state.itemName,state.position),DSymbol(symbol.name))) tables.gotoSet |> Set.map snd//.[(*hash*)]
+                        Set.map (fun gt -> Set.add  {itemName = fst gt; position = snd gt; forest=state.forest} buf) gt |> Set.unionMany
                     with _ -> buf)                    
                 Set.empty
                 states            
@@ -86,7 +86,24 @@ module  TableInterpreter =
                                  })
                             parserState.statesSet
                     else*)
-                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                          
+                    let parserResult = (parse()) tables {parserState with statesSet = gotoSet}
+                    (*if (Set.isEmpty parserResult && Set.exists (fun stt -> stt.position = 0 && stt.itemName = "s") parserState.statesSet)
+                    then
+                        Set.fold 
+                            (fun buf state -> 
+                                (*if state.position = 0
+                                then*)
+                                    Set.add
+                                        { 
+                                            rItem      = state
+                                            rInpStream = parserState.inpStream
+                                            rLexer     = parserState.lexer
+                                         }
+                                         buf
+                                (*else buf*))
+                            Set.empty
+                            parserState.statesSet
+                    else*)
                     let resPart1 =  
                         Set.fold
                             (fun buf res ->
@@ -96,12 +113,12 @@ module  TableInterpreter =
                                     Set.fold 
                                         (fun buf itm -> 
                                             (*if itm.state.position>0
-                                            then*) 
+                                            then*)
                                                 let stt = prevItems.MaximumElement.state
                                                 Set.add
                                                     {
                                                         rItem      = {stt with forest = 
-                                                            [Node(   itm.state.forest 
+                                                            [Node(   itm.state.forest @ res.rItem.forest
                                                                   ,stt.itemName
                                                                   ,{id    = stt.itemName
                                                                     trace = []
@@ -157,7 +174,7 @@ module  TableInterpreter =
                         Set.map 
                             (fun item -> 
                                 {
-                                    rItem      = item
+                                    rItem      = item// with forest = []}
                                     rInpStream = parserState.inpStream
                                     rLexer     = parserState.lexer
                                 })

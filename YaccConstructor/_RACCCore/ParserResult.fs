@@ -19,7 +19,7 @@ type ParserResult<'item, 'value, 'lb when 'item : comparison> =
     }
       
      member self.GetValue (x:ParserResult<_,_,_>) =
-        x.rItem, x.rInpStream
+        x.rItem, hash x.rInpStream
      override self.Equals y = equalsOn self.GetValue self y
      override self.GetHashCode() = hashOn self.GetValue self
      interface System.Collections.IStructuralComparable with

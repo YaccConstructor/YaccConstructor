@@ -35,7 +35,7 @@ open Yard.Generators._RACCGenerator
 
  {
 
- type Lexer() = 
+ type Lexer(lb) = 
     let locBuf = ref []
     interface ILexer<string> with        
     
@@ -45,7 +45,13 @@ open Yard.Generators._RACCGenerator
         else
             let t = tokens lb
             locBuf := t :: !locBuf
-            t    
+            t
+       member self.IsEnd () =
+            lb.IsPastEndOfStream 
+            ||
+                let t = tokens lb
+                locBuf := t :: !locBuf
+                t.name = "EOF"
     end
 
  }

@@ -8,11 +8,11 @@
 
 namespace Yard.Generators._RACCGenerator
 
-type ParserState<'state, 'value, 'stream, 'lb when 'state :comparison> =
+type ParserState<'state, 'value, 'lb when 'state :comparison> =
     {
         statesSet : Set<'state>
         inpSymbol : Lexeme<'value>
-        inpStream : 'stream
-        lexer     : ILexer<'value,'lb>
+        i         : int
+        lexer     : ILexer<'value>
     }
 

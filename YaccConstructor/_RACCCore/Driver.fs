@@ -2,7 +2,7 @@
 
 type CoreDriver() =
     class
-        let parse (lexer: ILexer<_,_>) lexbuf tables=
+        let parse (lexer: ILexer<_>) lexbuf tables=
             //let tablesInterpretator = TableInterpreter()
             TableInterpreter.run lexer lexbuf tables
             

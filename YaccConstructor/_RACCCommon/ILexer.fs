@@ -13,6 +13,7 @@ type Lexeme<'value> = {
     value: 'value;     
   }
  
-type ILexer<'lexemeValue ,'lbType> = interface
-    abstract Next : (Microsoft.FSharp.Text.Lexing.LexBuffer<'lbType>) -> Lexeme<'lexemeValue>
+type ILexer<'lexemeValue> = interface
+    abstract Get : int -> Lexeme<'lexemeValue>
+    abstract IsEnd : unit -> bool 
 end

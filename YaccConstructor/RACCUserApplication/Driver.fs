@@ -21,12 +21,12 @@ let run_common path =
 type t<'buf,'a,'b> = 
     {
         buf : 'buf
-        lexer : ILexer<'a,'b>
+        lexer : ILexer<'a>
     }
 
 let run path =
     let buf = run_common path 
-    let l = UserLexer.Lexer()
+    let l = UserLexer.Lexer(buf)
     let tables =
         {
             gotoSet = (*dict*) gotoSet

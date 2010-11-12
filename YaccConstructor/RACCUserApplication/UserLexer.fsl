@@ -36,10 +36,16 @@ open Yard.Generators._RACCGenerator
  {
 
  type Lexer() = 
-    interface ILexer<string,char> with
+    let locBuf = ref []
+    interface ILexer<string> with        
     
-       member self.Next lb = tokens lb
-    
+       member self.Get pos = 
+        if !locBuf |> List.length >= pos
+        then ((!locBuf) |> List.rev).[pos-1]
+        else
+            let t = tokens lb
+            locBuf := t :: !locBuf
+            t    
     end
 
  }

@@ -89,11 +89,23 @@ and _fslex_tokens  _fslex_state lexbuf =
 
 # 36 "userlexer.fsl"
   
-type Lexer() = 
-    interface ILexer<string,char> with
+type Lexer(lb) = 
+    let locBuf = ref []
+    interface ILexer<string> with        
     
-       member self.Next lb = tokens lb
-    
+       member self.Get pos = 
+        if !locBuf |> List.length >= pos
+        then ((!locBuf) |> List.rev).[pos-1]
+        else
+            let t = tokens lb
+            locBuf := t :: !locBuf
+            t
+       member self.IsEnd () =
+            lb.IsPastEndOfStream 
+            ||
+                let t = tokens lb
+                locBuf := t :: !locBuf
+                t.name = "EOF"
     end
 
  

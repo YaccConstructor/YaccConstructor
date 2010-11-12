@@ -11,16 +11,16 @@ namespace Yard.Generators._RACCGenerator
 open Yard.Core.CompareHelper
 
 [<CustomEquality; CustomComparison>]
-type ParserResult<'item, 'value, 'lb when 'item : comparison> =
+type ParserResult<'item, 'value when 'item : comparison> =
     {
         rItem      : 'item
-        rInpStream : Lexing.LexBuffer<'lb>
-        rLexer     : ILexer<'value,'lb>
+        rI         : int
+        rLexer     : ILexer<'value>
     }
       
-     member self.GetValue (x:ParserResult<_,_,_>) =
-        x.rItem, hash x.rInpStream
+     member self.GetValue (x:ParserResult<_,_>) =
+        x.rItem, x.rI
      override self.Equals y = equalsOn self.GetValue self y
      override self.GetHashCode() = hashOn self.GetValue self
      interface System.Collections.IStructuralComparable with
-            member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> ParserResult<'item, 'value, 'lb>))
+            member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> ParserResult<'item, 'value>))

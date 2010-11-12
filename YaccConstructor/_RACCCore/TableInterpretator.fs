@@ -67,16 +67,27 @@ module  TableInterpreter =
                 res                     
 
     let print ps =
-        printfn "ParseState: \n     i = %A \n      symbol = %A \n     statesSet ="     ps.i   ps.inpSymbol 
-        Set.map 
-            (fun s -> List.map PrintTree s.forest)
+        printfn "ParseState:\n"
+        printfn "     i = %A\n" ps.i
+        printfn "     symbol = %A\n" ps.inpSymbol
+        printfn "     statesSet = [\n" 
+        Set.iter 
+            (fun s -> 
+                printfn "         State:\n"
+                printfn "             item = %A\n" s.itemName 
+                printfn "             position = %A\n" s.position
+                printfn "             forest = <<\n"
+                List.iter PrintTree s.forest
+                printfn "\n             >>\n")
             ps.statesSet
+        printfn "     ]\n" 
 
     let rec climb() = 
         memoize
             (fun tables parserState ->
 #if DEBUG
-                printfn "\n Climb \n  parserState=%A\n" (print parserState)
+                printfn "\n Climb \n" 
+                print parserState
 #endif
                 let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
 #if DEBUG
@@ -84,20 +95,6 @@ module  TableInterpreter =
 #endif          
                 
                 let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                                        
-                (*if Set.isEmpty  parserResult 
-                    &&  Set.exists 
-                        (fun itm -> itm.itemName = "s" && itm.position = 0 && (parserState.inpStream:Lexing.LexBuffer<_>).IsPastEndOfStream ) 
-                        parserState.statesSet
-                then
-                    Set.map 
-                        (fun itm -> 
-                            {
-                                rItem      = itm 
-                                rInpStream = parserState.inpStream
-                                rLexer     = parserState.lexer
-                            })
-                        parserState.statesSet
-                else*)
                 let resPart1 =  
                     Set.map
                         (fun res ->                                
@@ -111,14 +108,13 @@ module  TableInterpreter =
                                             value = NodeV 1
                                         }
                                     let node f = (f , itm.state.itemName, _val ) |> Node
-                                    if  //(itm.state.itemName ="s" && itm.state.position = 0 && (parserState.inpStream:Lexing.LexBuffer<_>).IsPastEndOfStream )  
-                                        //||
-                                        itm.state.position > 0
+                                    if itm.state.position > 0
                                     then                                        
                                         Set.add
                                             {
-                                                rItem  = {itm.state with forest = (*[node*) (parserState.statesSet.MinimumElement.forest @ res.rItem.forest)(*]*)}
-                                                rI     = parserState.i
+                                                rItem  = {itm.state with forest = (parserState.statesSet.MinimumElement.forest 
+                                                                                    @ res.rItem.forest)}
+                                                rI     = res.rI
                                                 rLexer = parserState.lexer
                                             }
                                             buf
@@ -150,7 +146,7 @@ module  TableInterpreter =
                         parserResult
                     |> Set.unionMany                                                               
                 let res = resPart1
-                printfn "RESULT   %A" res
+                //printfn "RESULT   %A" res
                 res)
 
         
@@ -158,7 +154,8 @@ module  TableInterpreter =
         memoize
             (fun tables parserState ->
 #if DEBUG
-                printfn "\n Parse \n  parserState=%A" (print parserState)
+                printfn "\n Parse \n" 
+                print parserState
 #endif                        
                 let isFinaleState state= 
                     let dfa = tables.automataDict.[state.itemName]
@@ -184,7 +181,7 @@ module  TableInterpreter =
                             try
                                     parserState.lexer.Get(parserState.i)
                             with _ -> {name = "EOF"; value = ""}
-                        printfn "\n NEXT LEXEME = %A \n" nextLexeme
+                        //printfn "\n NEXT LEXEME = %A \n" nextLexeme
                         if nextLexeme.name = "EOF" 
                         then Set.empty                              
                         else
@@ -209,7 +206,7 @@ module  TableInterpreter =
                                         }
                             Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
                 let res = resPart1 + resPart2
-                printfn "RESULT   %A" res
+                //printfn "RESULT   %A" res
                 res)
 
         

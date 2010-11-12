@@ -57,6 +57,6 @@ let rec dumpTree i item =
                 |> String.concat "" 
 
       | Leaf (name,value)     -> 
-            String.concat "" [iter i;"<LEAF name=\""; name; "\"/>\n"]        
+            String.concat "" [iter i;"<LEAF name=\""; name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
         
 let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)

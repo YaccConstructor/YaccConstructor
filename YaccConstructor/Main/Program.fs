@@ -35,19 +35,21 @@ let () =
 
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
-    let assembly = System.Reflection.Assembly.Load(!feName)
-    let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
-    FrontendsManager.Register(inst :?> IFrontend);
-
-    // Load generator assemblies dlls - get them from file, current folder or command line
-    let assembly = System.Reflection.Assembly.Load(!generatorName)
-    let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
-    GeneratorsManager.Register(inst :?> IGenerator);
-
+    try
+        let assembly = System.Reflection.Assembly.Load(!feName)
+        let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
+        FrontendsManager.Register(inst :?> IFrontend);
+    with _ -> printfn "%A is not correct frontend name" !feName
     
-    // Parse grammar
+    // Load generator assemblies dlls - get them from file, current folder or command line
+    try
+        let assembly = System.Reflection.Assembly.Load(!generatorName)
+        let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
+        GeneratorsManager.Register(inst :?> IGenerator);
+    with _ -> printfn "%A is not correct generator name" !generatorName
+    
+    // Parse grammar    
     let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath
-   // let ilTree = (FrontendsManager.Frontend feName).ParseGrammar grammarFilePath
 
     // Apply convertions
     let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
@@ -62,4 +64,5 @@ let () =
     printf "%A" s
     //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
   with 
+  | :? System.IO.IOException -> eprintf "Could not read file"
   | x -> eprintf "%A" x // program should terminate correctly. Writing to error stream for Tester

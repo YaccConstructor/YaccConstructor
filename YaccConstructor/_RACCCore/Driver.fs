@@ -2,13 +2,12 @@
 
 type CoreDriver() =
     class
-        let parse (lexer: ILexer<_>) lexbuf tables=
-            //let tablesInterpretator = TableInterpreter()
-            TableInterpreter.run lexer lexbuf tables
+        let parse (lexer: ILexer<_>) tables=            
+            TableInterpreter.run lexer tables
             
 
         let interprete inpForest = ()
 
-        member self.Parse lexer lexbuf = parse lexer lexbuf
+        member self.Parse lexer = parse lexer
         member self.Interprete inpForest = interprete inpForest 
     end

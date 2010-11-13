@@ -29,21 +29,18 @@ let run path =
     let l = UserLexer.Lexer(buf)
     let tables =
         {
-            gotoSet = (*dict*) gotoSet
+            gotoSet = gotoSet
             automataDict = autumataDict
             items = items
         }
-    let tt = {buf=buf; lexer = l}
-    //let ti  TableInterpreter. //= TableInterpreter()
-    TableInterpreter.run l buf tables
+    let tt = {buf=buf; lexer = l}    
+    TableInterpreter.run l tables
     
 
     //let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
     //let forest = driver.Parse l buf
 
-    //printfn "%A" (tt.lexer.Next( tt.buf))
-    //printfn "%A" (tt.lexer.Next( tt.buf))
-do run //@"W:\Users\gsv2\Diploma\trunk\YaccConstructor\RACCUserApplication\test"
-    @"..\..\test"
+    
+do run @"..\..\test"
 System.Console.ReadLine();
 

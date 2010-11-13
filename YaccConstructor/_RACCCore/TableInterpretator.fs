@@ -88,9 +88,8 @@ module  TableInterpreter =
 #if DEBUG
                 printfn "\n Climb \n" 
                 print parserState
-#endif
-                let flg = parserState.inpSymbol.name = "s" && parserState.lexer.Get(parserState.i).name = "EOF"
-                if flg 
+#endif                
+                if parserState.inpSymbol.name = "s" && parserState.lexer.Get(parserState.i).name = "EOF" 
                 then
                  Set.map
                     (fun  state ->                                                                        
@@ -102,59 +101,48 @@ module  TableInterpreter =
                     )                    
                     parserState.statesSet
                 else    
-                let gotoSet = goto tables parserState.statesSet parserState.inpSymbol
-#if DEBUG
-               // printfn "\n goto result = %A \n" gotoSet
-#endif          
+                let gotoSet = goto tables parserState.statesSet parserState.inpSymbol        
                 
-                let parserResult = (parse()) tables {parserState with statesSet = gotoSet}                                        
-                let resPart1 =  
-                    Set.map
-                        (fun res ->                                
-                            getPrevItems tables parserState.inpSymbol.name res.rItem
-                            |> Set.fold  
-                                (fun buf itm ->
-                                    let _val  = 
-                                        {
-                                            id    = itm.state.itemName
-                                            trace = []
-                                            value = NodeV 1
-                                        }
-                                    let node f = (f , itm.state.itemName, _val ) |> Node
-                                    if itm.state.position > 0
-                                    then                                                                                
-                                        Set.map
-                                            (fun state ->
-                                                {
-                                                    rItem  = {itm.state with forest = (state.forest 
-                                                                                        @ res.rItem.forest)}
-                                                    rI     = res.rI
-                                                    rLexer = parserState.lexer
-                                                })
-                                            parserState.statesSet
-                                        |>Set.union  buf
-                                    else                                         
-                                        (climb())
-                                            tables 
-                                            { 
-                                                parserState with 
-                                                    inpSymbol = {name = res.rItem.itemName; value = ""} 
-                                                    i = res.rI                                           
-                                                    statesSet = 
-                                                        Set.map 
-                                                            (fun stt -> {stt with forest = [stt.forest @ res.rItem.forest |> node ]})
-                                                            parserState.statesSet
-                                            }
-                                        |> Set.union  buf
-                                )
-                                Set.empty                                                              
-                        )                        
-                        parserResult
-                    |> Set.unionMany                                                               
-                let res = resPart1
-                //printfn "RESULT   %A" res
-                res)
-
+                (parse()) tables {parserState with statesSet = gotoSet}
+                |> Set.map
+                    (fun res ->                                
+                        getPrevItems tables parserState.inpSymbol.name res.rItem
+                        |> Set.fold
+                            (fun buf itm ->
+                                let _val =
+                                    {
+                                        id    = itm.state.itemName
+                                        trace = []
+                                        value = NodeV 1
+                                    }
+                                let node forest = (forest , itm.state.itemName, _val ) |> Node
+                                if itm.state.position > 0
+                                then
+                                    parserState.statesSet            
+                                    |> Set.map
+                                        (fun state ->
+                                            {
+                                                rItem  = {itm.state with forest = state.forest @ res.rItem.forest}
+                                                rI     = res.rI
+                                                rLexer = parserState.lexer
+                                            })                                        
+                                    |> Set.union buf
+                                else                                             
+                                    {
+                                        parserState with
+                                            inpSymbol = {name = res.rItem.itemName; value = ""} 
+                                            i = res.rI                                           
+                                            statesSet = 
+                                                Set.map 
+                                                    (fun stt -> {stt with forest = [stt.forest @ res.rItem.forest |> node ]})
+                                                    parserState.statesSet
+                                    }
+                                    |> (climb()) tables                                    
+                                    |> Set.union  buf
+                            )
+                            Set.empty
+                    )                    
+                |> Set.unionMany)
         
     and parse ()= 
         memoize
@@ -165,8 +153,8 @@ module  TableInterpreter =
 #endif                        
                 let isFinaleState state= 
                     let dfa = tables.automataDict.[state.itemName]
-                    Set.exists ((=) (state.position)) dfa.DFinaleStates                    
-                let resPart1 =                    
+                    Set.exists ((=) (state.position)) dfa.DFinaleStates
+                let resPart1 =
                     let buildResult item =
                         {
                             rItem  = {item with forest = []}
@@ -176,42 +164,34 @@ module  TableInterpreter =
                     Set.filter isFinaleState parserState.statesSet
                     |> Set.map buildResult
                         
-                let resPart2 =                                                                                     
-                    let nextLexeme =                    
-                        try
-                                parserState.lexer.Get(parserState.i)
-                        with _ -> {name = "EOF"; value = ""}                    
-                    if nextLexeme.name = "EOF" 
+                let resPart2 =                                                                               
+                    let nextLexeme =  parserState.lexer.Get(parserState.i)                        
+                    if nextLexeme.name = "EOF"
                     then 
-                        Set.empty                             
+                        Set.empty
                     else
-                        let leaf item =
-                            [ Leaf(
-                                    nextLexeme.name
-                                    ,{
-                                        id    = item.itemName
-                                        trace = []
-                                        value = LeafV nextLexeme
-                                        }
-                                    )]
-                        let climbRes =                                 
-                                (climb()) 
-                                    tables 
-                                    {
-                                        parserState with 
-                                            statesSet = 
-                                                parserState.statesSet 
-                                                |> Set.map (fun stt -> {stt with forest =  leaf stt})
-                                            inpSymbol = nextLexeme
-                                            i         = parserState.i + 1
-                                    }
-                        Set.filter (fun res -> not (isFinaleState res.rItem)) climbRes 
-                let res = resPart1 + resPart2
-                //printfn "RESULT   %A" res
-                res)
+                        let _val item =
+                            {
+                                id    = item.itemName
+                                trace = []
+                                value = LeafV nextLexeme
+                            }
+                        let leaf item = [(nextLexeme.name, _val item) |> Leaf]
+                                                        
+                        {
+                            parserState with 
+                                statesSet = 
+                                    parserState.statesSet 
+                                    |> Set.map (fun stt -> {stt with forest =  leaf stt})
+                                inpSymbol = nextLexeme
+                                i         = parserState.i + 1
+                        }
+                        |> (climb()) tables 
+                        |> Set.filter (fun res -> not (isFinaleState res.rItem))
+                resPart1 + resPart2)
 
         
-    let run (lexer:ILexer<_>) lexbuf tables= 
+    let run lexer tables= 
         let res = 
             (parse()) tables
                 {
@@ -219,7 +199,6 @@ module  TableInterpreter =
                     inpSymbol = {name = "";value =""}                                    
                     i         = 1
                     lexer     = lexer
-
                 }
         Set.iter 
             (fun x -> 

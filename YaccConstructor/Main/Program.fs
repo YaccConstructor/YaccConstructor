@@ -18,8 +18,8 @@ let () =
 
     let feName = ref "YardFrontend"
     let generatorName = ref "YardPrinter"
-    let testsPath = ref @"..\..\..\..\Tests"
-    let testFile = ref "test003.yrd"
+    let testsPath = ref @"..\..\..\..\Tests\TempTests"
+    let testFile = ref "test1.yrd"
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"

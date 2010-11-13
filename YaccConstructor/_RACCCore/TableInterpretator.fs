@@ -22,7 +22,7 @@ module  TableInterpreter =
         Set.fold 
             (fun buf state -> 
                 try 
-                    Set.filter (fun (x,y) -> x = ((state.itemName,state.position),DSymbol(symbol.name))) tables.gotoSet
+                    Set.filter (fun (x,y) -> x = hash ((state.itemName,state.position),DSymbol(symbol.name))) tables.gotoSet
                     |> Set.map snd
                     |> Set.map (fun gt -> Set.add  {itemName = fst gt; position = snd gt; forest=state.forest} buf)
                     |> Set.unionMany

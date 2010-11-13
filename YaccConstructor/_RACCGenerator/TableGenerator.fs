@@ -77,17 +77,14 @@ type TableGenerator(outPath: string) =
                 (fun smb ->
                     List.map
                         (fun item -> 
-                            let gt = cls (Set.singleton item)
-                            Set.map 
+                            cls (Set.singleton item)
+                            |> Set.map 
                                 (fun elt -> 
-                                    let atm = dlfaMap.[fst elt]
-                                    let rules =
-                                        Set.filter (fun rule -> 
-                                                        rule.FromStateID = snd elt
-                                                        && rule.Symbol = smb)
-                                                     atm.DRules
-                                    Set.map (fun rule -> (*hash*)(item, smb), (fst elt, rule.ToStateID)) rules)
-                                gt
+                                    dlfaMap.[fst elt].DRules
+                                    |> Set.filter (fun rule -> 
+                                                    rule.FromStateID = snd elt
+                                                    && rule.Symbol = smb)                                              
+                                    |> Set.map (fun rule -> hash(item, smb), (fst elt, rule.ToStateID)))
                             |>Set.unionMany)                        
                         items
                         |>Set.unionMany)

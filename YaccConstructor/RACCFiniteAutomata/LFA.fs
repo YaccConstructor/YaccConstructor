@@ -47,7 +47,7 @@ type Rule<'symbol, 'label> =
           "{ \n"
         + "   FromStateID = " + ToString.toString self.FromStateID + ";\n"
         + "   Symbol      = " + self.Symbol.ToString() + ";\n"
-        + "   Label       = " + self.Label.ToString() + ";\n"
+        + "   Label       = " + ToString.toString self.Label + ";\n"
         + "   ToStateID   = " + ToString.toString self.ToStateID + ";\n"
         + "}\n"    
 
@@ -77,6 +77,6 @@ type DLFA<'stateVal, 'symbolVal, 'label when 'symbolVal: comparison and 'label: 
           "{ \n"
         + "   DIDToStateMap = " + ToString.dictToString self.DIDToStateMap + ";\n"
         + "   DStartState   = " + self.DStartState.ToString() + ";\n"
-        + "   DFinaleStates = " + self.DFinaleStates.ToString() + ";\n"
+        + "   DFinaleStates = " + ToString.setToString self.DFinaleStates + ";\n"
         + "   DRules        = " + ToString.setToString self.DRules + ";\n"
         + "}\n"

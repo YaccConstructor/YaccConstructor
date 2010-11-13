@@ -1,0 +1,5 @@
+
+
+identefier:  r=VAR l=(VAR)*  {List.fold (fun l r -> l+r) l r};
+
++s: "goto" identefier ";"| "continue" identefier ";"| "break" identefier ";" ;

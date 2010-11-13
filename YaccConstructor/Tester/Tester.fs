@@ -8,11 +8,12 @@
 open System.IO
 open System.Diagnostics
 open System.Text.RegularExpressions
+open System.Configuration
 
-let mainApp = @"..\..\..\Main\bin\debug\Main.exe"
-let mainPath = @"..\..\..\Main\bin\debug"
-let testsPath = @"..\..\..\..\Tests\"
-let tmpPath = @"C:\tmp"
+let mainApp = ConfigurationManager.AppSettings.["mainApp"].ToString()
+let mainPath = ConfigurationManager.AppSettings.["mainPath"].ToString()
+let testsPath = ConfigurationManager.AppSettings.["testsPath"].ToString()
+let tmpPath = ConfigurationManager.AppSettings.["tmpPath"].ToString()
 
 let shellExecute program args =
     let startInfo = new ProcessStartInfo()
@@ -32,10 +33,12 @@ let shellExecute program args =
     proc.WaitForExit()
     !callResult
 
-let testFiles = Seq.filter (fun name -> Regex.Match(name, "test(.*)\.yrd$").Success) (Seq.map Path.GetFileName (seq {yield! Directory.GetFiles(testsPath)}))
+let testFiles = 
+    seq {yield! Directory.GetFiles(testsPath, "*" ,SearchOption.AllDirectories)}
+    |> Seq.map (fun path -> Path.GetFileName path, Path.GetDirectoryName path)
+    |> Seq.filter (fun (name,path) -> Regex.Match(name, "test(.*)\.yrd$").Success) 
 
 let () = 
-    Seq.iter (fun testName -> 
-       printf "%-40s %s\n" testName (if shellExecute mainApp ("-t "+testName) then "SUCCEDED" else "FAILED")
+    Seq.iter (fun (testName, testPath) -> 
+       printf "%-40s %s\n" testName (if shellExecute mainApp ("-t " + testName + " --testpath " + testPath) then "SUCCEDED" else "FAILED")
     ) testFiles
- 

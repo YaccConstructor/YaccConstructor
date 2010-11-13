@@ -39,14 +39,14 @@ let () =
         let assembly = System.Reflection.Assembly.Load(!feName)
         let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
         FrontendsManager.Register(inst :?> IFrontend);
-    with _ -> printfn "%A is not correct frontend name" !feName
+    with _ -> eprintf "%A is not correct frontend name" !feName
     
     // Load generator assemblies dlls - get them from file, current folder or command line
     try
         let assembly = System.Reflection.Assembly.Load(!generatorName)
         let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
         GeneratorsManager.Register(inst :?> IGenerator);
-    with _ -> printfn "%A is not correct generator name" !generatorName
+    with _ -> eprintf "%A is not correct generator name" !generatorName
     
     // Parse grammar    
     let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath
@@ -57,10 +57,7 @@ let () =
     // Generate something
     let gen = GeneratorsManager.Generator(!generatorName)
     let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
-
-    //Run tests
-  //  let tester = Yard.Generators.RecursiveAscent.RACCTester((*s :?> _*))
-  //  let s = tester.RunTest 
+       
     printf "%A" s
     //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
   with 

@@ -16,8 +16,8 @@ let printTextBox tabSize splitTabSize windowSize tbList =
         List.collect (fun t ->
             match t with
             | Str(s) -> [(s, ident)]
-            | Tabbed(tbList) -> [("\n", ident)]@(printIdentedList tbList (ident+tabSize))@[("\n", ident)]
-            | Line(tbList)   -> [("\n", ident)]@(printIdentedList tbList (ident        ))@[("\n", ident)]
+            | Tabbed(tbList) -> (printIdentedList tbList (ident+tabSize))@[("\n", ident)] //[("\n", ident)]@
+            | Line(tbList)   -> (printIdentedList tbList (ident        ))@[("\n", ident)] //[("\n", ident)]@
         ) tbList
 
     let strList = printIdentedList tbList 0
@@ -30,7 +30,7 @@ let printTextBox tabSize splitTabSize windowSize tbList =
                 else
                     (str_acc+word, true, 0)
             else
-                let spaces_count = if newline then ident else 1
+                let spaces_count = if newline then ident else 2
                 if (String.length word<=windowSize-chars_in_line-spaces_count) then
                     let appended = (String.replicate spaces_count " ")+word
                     (str_acc+appended,false, chars_in_line+(String.length appended))
@@ -70,7 +70,7 @@ let printRule (rule:Rule.t<Source.t,Source.t>) =
                 | None -> ""
             [Str((if elem.omit then "-" else "") + (binding elem.binding))]@(bracketsIf ((match elem.binding with Some(_) -> true | None -> priority elem.rule=1) && priority elem.rule<50) (printProduction elem.rule))
         match production with
-        | PAlt(alt1, alt2) -> [Line(printProduction alt1); Line([Str("| ")]@(printProduction alt2))] //Альтернатива
+        | PAlt(alt1, alt2) -> [Tabbed(printProduction alt1); Line([Str("| ")]@(printProduction alt2))] //Альтернатива
         | PSeq(elem_list,attr_option) -> (List.collect printElem elem_list)@[Str(printAttr(attr_option))] //Последовательность * атрибут.(атрибут всегда применяется к последовательности) 
         | PToken(source) -> [Str(Source.toString source)] //собственно токен
         | PRef(source, attr_option) -> [Str((Source.toString source) + printArg(attr_option))] //Vanilla rule reference with an optional args list.
@@ -88,4 +88,4 @@ let printRule (rule:Rule.t<Source.t,Source.t>) =
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     let tbList = List.collect (fun rule -> printRule rule) input_grammar.grammar
-    printSourceOpt(input_grammar.head)+(printTextBox 4 8 80 tbList)+printSourceOpt(input_grammar.foot)
+    printSourceOpt(input_grammar.head)+(printTextBox 4 4 80 tbList)+printSourceOpt(input_grammar.foot)

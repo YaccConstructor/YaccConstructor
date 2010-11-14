@@ -41,6 +41,7 @@ let run path =
     //let forest = driver.Parse l buf
 
     
-do run @"..\..\test"
-System.Console.ReadLine();
+let main path =
+    run path
+    //System.Console.ReadLine();
 

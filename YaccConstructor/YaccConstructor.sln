@@ -50,7 +50,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCFiniteAutomata", "RACC
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCUserApplication", "RACCUserApplication\_RACCUserApplication.fsproj", "{41F3C60A-2738-44FE-9889-D666C7E046C2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempTester", "TempTester\TempTester.fsproj", "{A63CA12D-76B0-4739-A076-76F62030E6B0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCTester", "TempTester\_RACCTester.fsproj", "{A63CA12D-76B0-4739-A076-76F62030E6B0}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject

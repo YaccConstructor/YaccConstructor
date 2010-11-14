@@ -205,3 +205,4 @@ module  TableInterpreter =
                 printfn "\n result %A \n\n pos: %A \n" x.rItem.itemName x.rI
                 List.iter PrintTree x.rItem.forest)
             res
+        res

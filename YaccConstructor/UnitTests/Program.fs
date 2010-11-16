@@ -5,6 +5,7 @@ module Program
 
 
 open FsCheck
+open FsCheck.Prop
 open Microsoft.FSharp.Text.Lexing
 open Yard.Core.Main
 open Main.Program
@@ -46,14 +47,14 @@ module module1 =
        
         [<Test>] member test.``tagOfToken test`` () =
                     let tagOfTokenProp (t:token)=  (tagOfToken t >= 0) && (tagOfToken t <= 19)
-                    quickCheck tagOfTokenProp
+                    Check.Quick  tagOfTokenProp
 
 
         [<Test>] member test.``tokenTagToTokenId test`` () =
                     let tokenTagToTokenIdProp (i:int ) = ((i>=0) && (i<=20)) ==> (lazy((tokenTagToTokenId i).GetType() = typeof<tokenId>)) 
                     let excProp(i:int) = ((i<0) || (i>20))==> throws<System.Exception,_> (lazy (raise <| System.Exception("tokenTagToTokenId: bad token")))
-                    quickCheck tokenTagToTokenIdProp  
-                    quickCheck excProp 
+                    Check.Quick tokenTagToTokenIdProp  
+                    Check.Quick excProp 
         
 
         [<Test>] member test.``tokenToString test`` () = 
@@ -63,7 +64,7 @@ module module1 =
                             
                             
                      let tokenTostringProp (t:token) = List.exists(fun e -> e = token_to_string t ) strList
-                     quickCheck tokenTostringProp
+                     Check.Quick tokenTostringProp
 
 
 

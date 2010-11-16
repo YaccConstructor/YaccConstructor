@@ -3,8 +3,7 @@
 type CoreDriver() =
     class
         let parse (lexer: ILexer<_>) tables=            
-            TableInterpreter.run lexer tables
-            
+            TableInterpreter.run lexer tables            
 
         let interprete inpForest = ()
 

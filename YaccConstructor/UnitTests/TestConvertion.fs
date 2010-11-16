@@ -1,6 +1,7 @@
 ﻿module TestConvertion
 
 open FsCheck
+open FsCheck.Prop
 open System.Threading
 open Microsoft.FSharp.Text.Lexing
 open Yard.Core.Main
@@ -56,12 +57,10 @@ module module2 =
 
 
           [<Test>] member test.``ExpandEBNF Test`` () =
-                     quickCheck ExpandEBNFTest  
+                     Check.Quick ExpandEBNFTest  
 
           [<Test>] member test.``ExpandAlter Test`` () =
-                     quickCheck ExpandAlterTest                         
+                     Check.Quick ExpandAlterTest                         
                      
           [<Test>] member test.``ExpandMeta Test`` () =
-                     quickCheck ExpandMetaRulesTest 
-                      
-
+                     Check.Quick ExpandMetaRulesTest 

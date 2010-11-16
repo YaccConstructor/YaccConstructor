@@ -3,6 +3,7 @@
 module GenTests
 
 open FsCheck
+open FsCheck.Prop
 open Microsoft.FSharp.Text.Lexing
 open Yard.Core.Main
 open Yard.Core.GrammarParser
@@ -23,9 +24,9 @@ module module2 =
           let _grammar = [rule; rule2]
 
           [<Test>] member test.``condition`` () =
-                     let prop (x:int ) = (x > 5) ==> ( x > 4)
+                     let prop (x:int ) = (x > 5) ==> (x > 4)
                                          |> trivial (x < 10)
-                     quickCheck prop 
+                     Check.Quick prop 
 
 
           [<Test>] member test.``get_all_t test`` () = 

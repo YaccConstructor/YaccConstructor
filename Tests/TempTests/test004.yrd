@@ -1,4 +1,0 @@
-+s:res = expr { res };
-lit: l=LITERAL {l};
-num: n=NUMBER {n};
-expr: (n = num { float n }) | (l = lit { string l });

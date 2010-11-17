@@ -1,2 +1,0 @@
-+s : NUMBER {printfn "Number is detected!"} 
-   | MINUS {printfn "Minus is detected!"};

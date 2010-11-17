@@ -1,2 +1,0 @@
-+expr1: n = NUMBER {string n};
-+expr2: n = NUMBER {float n};

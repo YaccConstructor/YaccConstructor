@@ -1,3 +1,0 @@
-+ s : l;
-l : PLUS l;
-l : MINUS;

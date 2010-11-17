@@ -1,6 +1,0 @@
-+s:res = expr { res };
-expr
- : res=(  (<n:string>=NUMBER{ "Number = " + (string n) }) 
-         |(<l:string>=LITERAL { "literal = " + (string l) }) t = PLUS {}
-       )
-       {printfn "Result = %A"res};

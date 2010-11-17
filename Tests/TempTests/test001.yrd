@@ -1,2 +1,0 @@
-+s:r = expr { r };
-expr: n=NUMBER{ float n };

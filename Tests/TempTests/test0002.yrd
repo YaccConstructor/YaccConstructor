@@ -1,2 +1,0 @@
-+s:e;
-e: NUMBER | (e PLUS e) | (e MINUS e) | (e MULT e) | (e DIV e);

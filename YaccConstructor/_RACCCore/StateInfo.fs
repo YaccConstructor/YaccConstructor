@@ -8,10 +8,11 @@
 
 namespace Yard.Generators._RACCGenerator
 
-type StateInfo<'position, 'tree, 'itemName> =
+type StateInfo<'position, 'tree, 'itemName, 'traceStep> =
     {
         position : 'position
         forest   : List<'tree>
         itemName : 'itemName    
+        sTrace    : List<'traceStep>
     }
 

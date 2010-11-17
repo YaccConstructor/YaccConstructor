@@ -51,7 +51,18 @@ let rec dumpTree i item =
     let rec iter i = (function 0 -> "" | x -> ("    "+(iter (x-1))))i
     match item with
         Node (lst,name,value) -> 
-                 [iter i;"<NODE name=\""; name; "\">\n"]
+                let trace = 
+                    List.map 
+                        (fun x -> 
+                            Set.map 
+                                (fun y -> y.ToString())
+                                x
+                            |> String.concat ";"
+                            |> fun x -> "{" + x + "}")
+                        value.trace
+                    |> String.concat ";"
+                    |> fun x -> "[" + x + "]"
+                [iter i;"<NODE name=\""; name; " \"trace=\""; trace; "\">\n"]
                 @(List.map (dumpTree (i+1)) lst)
                 @[iter i;"</NODE>\n"]
                 |> String.concat "" 

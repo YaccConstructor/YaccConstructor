@@ -1,7 +1,8 @@
-﻿namespace Yard.Testers._RACCTester
+﻿module Yard.Testers._RACCTester
 
-open  Yard.Generators._RACCGenerator
+open Yard.Generators._RACCGenerator
 open Yard.Core
+open System.Configuration
 
 type _RACCTester() =
     class
@@ -16,3 +17,5 @@ type _RACCTester() =
                     result    = Some "res \n mk"
                  }]
     end
+
+do ConfigurationManager.AppSettings.["testsPath"].ToString() |> m1.main |> ignore

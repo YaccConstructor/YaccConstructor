@@ -1,7 +1,4 @@
-﻿// Learn more about F# at http://fsharp.net
-
-
-module Program
+﻿module Program
 
 
 open FsCheck
@@ -14,7 +11,7 @@ open NUnit.Framework
 
 
 
-module module1 =
+
     [<TestFixture>]
     type ``Frontend Tests`` ()=    
     

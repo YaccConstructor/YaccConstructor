@@ -62,7 +62,7 @@ let rec dumpTree i item =
                         value.trace
                     |> String.concat ";"
                     |> fun x -> "[" + x + "]"
-                [iter i;"<NODE name=\""; name; " \"trace=\""; trace; "\">\n"]
+                [iter i;"<NODE name=\""; name; "\" trace=\""; trace; "\">\n"]
                 @(List.map (dumpTree (i+1)) lst)
                 @[iter i;"</NODE>\n"]
                 |> String.concat "" 

@@ -30,14 +30,15 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                         Set.empty
                         nlfa.NRules
         Set.map 
-            (fun step ->                
-                if not (List.exists ((=) (fst step)) !localVisitedStates) 
+            (fun (_to,l) ->                
+                if not (List.exists ((=) _to) !localVisitedStates) 
                 then
-                    let eL = eLines (fst step)
+                    let eL = eLines _to
                     if Set.isEmpty eL
-                    then Set.singleton [step]
-                    else Set.map (fun tl -> step::tl) eL
-                else Set.singleton [step]) eSteps 
+                    then Set.singleton [(_to,l)]
+                    else Set.map (fun tl -> (_to,l)::tl) eL
+                else Set.singleton [(_to,l)]) 
+            eSteps 
         |> Set.unionMany           
 
                      
@@ -47,14 +48,15 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                 if not (List.exists ((=) stateID) !globalVisitedStates) 
                 then
                     localVisitedStates := []
-                    let el = (eLines stateID)
+                    let el = eLines stateID
                     eLinesSet := Set.union (!eLinesSet) (Set.map (fun x -> stateID,x)el))
             stateIDs
         Set.map 
             (fun eLine -> 
-                let n = fst (List.head(List.rev (snd eLine)))
+                let _to = fst (List.head(List.rev (snd eLine)))
+                let from = fst eLine
                 let line = List.map (fun (_, lbl) -> lbl) (snd eLine)
-                n,line)
+                from,_to,line)
             !eLinesSet        
 
     let move stateSet symbol = 
@@ -119,6 +121,32 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
             dict (List.zip finaleStates [l .. l+finaleStates.Length-1])
 
         let rules = 
+            let createLabel state =
+                Set.map                                 
+                    (fun x -> 
+                        Set.filter (fun (from,_to,l) -> Set.exists ((=)from) state && Set.exists ((=)_to) state) buldELines
+                        |> Set.map (fun (_,_,line) -> eLineFilter line))
+                    state
+                |> Set.unionMany
+                |> List.ofSeq
+                |> fun lst ->
+                    List.fold
+                        (fun buf elt ->
+                            let checker =
+                                List.fold 
+                                    (fun buf l -> 
+                                        match l with
+                                        | hd::tl -> buf || tl=elt
+                                        | [] -> buf || false)
+                                    false
+                                    lst
+                            if checker
+                            then buf
+                            else elt::buf)
+                        []
+                        lst
+                |> Set.ofList
+
             let _rules =
                 List.map 
                     (fun (_from, _smb, _to) -> 
@@ -128,10 +156,7 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                                 match _smb with
                                 | NSymbol(s) -> DSymbol(s)
                                 | _          -> failwith "NLFA to DLFA convertion fail. Seems that DLFA contains epsilon transition."
-                            Label = Set.map 
-                                        (fun x -> Set.map (fun (_,line) -> eLineFilter line) (Set.filter (fun y -> fst y = x) buldELines)) 
-                                        _from
-                                    |> Set.unionMany
+                            Label = createLabel _from
                             ToStateID = getAlterName _to
                         }
                     )
@@ -142,14 +167,8 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                         {
                             FromStateID = getAlterName state
                             Symbol      = Dummy
-                            Label       =
-                                let ids = Set.filter (fun x -> Set.exists ((=)x) state)  (Set.singleton nlfa.NFinaleState)
-                                Set.map 
-                                        (fun x -> Set.map (fun (_,line) -> eLineFilter line) (Set.filter (fun y -> fst y = x) buldELines)) 
-                                        ids
-                                |> Set.unionMany
-                            ToStateID = dummyStates.[state]
-
+                            Label       = createLabel state                                 
+                            ToStateID   = dummyStates.[state]
                         }
                     )
                     finaleStates

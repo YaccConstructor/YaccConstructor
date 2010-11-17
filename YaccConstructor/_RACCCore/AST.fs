@@ -55,7 +55,12 @@ let rec dumpTree i item =
                     List.map 
                         (fun x -> 
                             Set.map 
-                                (fun y -> y.ToString())
+                                (fun y -> 
+                                    List.map 
+                                        (fun z -> z.ToString())
+                                        y
+                                    |> String.concat ";"
+                                    |> fun x -> "[" + x + "]")
                                 x
                             |> String.concat ";"
                             |> fun x -> "{" + x + "}")

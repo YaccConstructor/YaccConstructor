@@ -1,0 +1,7 @@
+{
+let value x =
+    ((x:>Lexeme<string>).value)
+}
++s: res = e {res};
+e : n = NUMBER {value n |> float}
+  | n = NUMBER PLUS e = e {value n |> float |> ((+) e)};

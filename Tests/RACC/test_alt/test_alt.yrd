@@ -1,0 +1,6 @@
+{
+let value x =
+    ((x:>Lexeme<string>).value)
+}
++s: p = PLUS {"Detected: " + (value p)} 
+  | m = MULT {"Detected: " + (value m)};

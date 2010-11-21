@@ -1,0 +1,8 @@
+{
+let value x =
+    ((x:>Lexeme<string>).value)
+}
++s: l=NUMBER PLUS r=NUMBER {(value l |> float) + (value r |> float)};
+{
+//test footer
+}

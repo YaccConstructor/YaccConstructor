@@ -1,5 +1,0 @@
-+ s : t {printfn "\n reduce t rule \n"};
-t : a {printfn "\n reduce a rule \n"};
-t : b {printfn "\n reduce b rule \n"};
-a : PLUS NUMBER {printfn "\n visit a rule \n"};
-b : PLUS NUMBER SEMICOLON {printfn "\n visit b rule \n"};

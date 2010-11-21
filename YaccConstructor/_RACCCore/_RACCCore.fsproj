@@ -48,6 +48,7 @@
     <Compile Include="ParserResult.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Driver.fs" />
+    <Compile Include="ASTInerpretator.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RACCFiniteAutomata\_RACCFiniteAutomata.fsproj">

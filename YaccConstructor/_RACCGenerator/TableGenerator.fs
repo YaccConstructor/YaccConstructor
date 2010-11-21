@@ -115,7 +115,7 @@ type TableGenerator(outPath: string) =
 
 
         let genearte (grammar:Yard.Core.IL.Definition.t<_,_>) =
-            generatePreheader grammar.info.fileName
+            generatePreheader grammar.info.fileName            
             let dlfaMap = 
                 List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body) grammar.grammar                            
             let str = "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"

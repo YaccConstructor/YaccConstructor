@@ -34,7 +34,8 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
-    <Compile Include="test_seq.yrd.tables.fs" />
+    <Compile Include="test_summator_1.yrd.tables.fs" />
+    <Compile Include="test_summator_1.yrd.fs" />
     <Compile Include="Lexer.fs" />
     <None Include="UserLexer.fsl" />
     <Compile Include="Driver.fs" />

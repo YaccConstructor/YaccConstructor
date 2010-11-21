@@ -17,11 +17,12 @@ type _RACCGenerator() =
         member this.Name = "_RACCGenerator"
         member this.Generate t = 
             let extension = ".fs"
-            let tables_str = ".tables"
-            let codeGenerator = CodeGenerator(t.info.fileName + extension)
-            let tableGenerator = TableGenerator(t.info.fileName + tables_str + extension)
-            tableGenerator.Gemerate t :> obj
-            //codeGenerator.Gemerate t :> obj
+            let tablesStr = ".tables"
+            let actionsStr = ".actions"
+            let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
+            let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
+            tableGenerator.Gemerate t
+            codeGenerator.Gemerate t :> obj
         member this.AcceptableProductionTypes = 
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) 
             |> List.map (fun unionCase -> unionCase.Name)

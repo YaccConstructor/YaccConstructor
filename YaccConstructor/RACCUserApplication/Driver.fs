@@ -33,15 +33,11 @@ let run path =
             automataDict = autumataDict
             items = items
         }
-    let tt = {buf=buf; lexer = l}    
-    TableInterpreter.run l tables
     
-
-    //let driver = Yard.Generators._RACCGenerator.CoreDriver(tables)
-    //let forest = driver.Parse l buf
-
+    let trees = TableInterpreter.run l tables
+    let r = ASTInterpretator.interp RACC.Actions.ruleToAction trees.MinimumElement.rItem.forest.Head 
+    printf "\nResult %A\n" r
+    trees        
     
-let main path =
-    run path
-    //System.Console.ReadLine();
+let main path = run path
 

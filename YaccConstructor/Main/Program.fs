@@ -17,9 +17,9 @@ let () =
   try 
 
     let feName = ref "YardFrontend"
-    let generatorName = ref "YardPrinter"
-    let testsPath = ref @"..\..\..\..\Tests\TempTests"
-    let testFile = ref "test1.yrd"
+    let generatorName = ref "_RACCGenerator"
+    let testsPath = ref @"..\..\..\..\Tests\RACC\test_seq"
+    let testFile = ref "test_seq.yrd"
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"

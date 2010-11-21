@@ -70,6 +70,40 @@ type RegExpAST() =
                 | _    -> false,[]
                     
             | []     -> true,[]
+
+        let rec buildREAST trace values =
+            match trace with
+            | hd::tl ->                 
+                match hd with
+                | FATrace TSmbS ->                                         
+                    match tl with 
+                    | _hd::tl ->                   
+                        match _hd with
+                        | FATrace TSmbE -> List.head values |> RELeaf, tl, List.tail values
+                        | _             -> RELeaf null,[],[]
+                    | _   -> RELeaf null,[],[]
+                | FATrace TAlt1S ->
+                    let r,_tl,_val = buildREAST tl values
+                    match _tl with
+                    | FATrace TAlt1E::tl -> REAlt (Some(r),None), tl, _val
+                    | _          -> RELeaf null,[],[]                
+                | FATrace TAlt2S ->
+                    let r,_tl,_val = buildREAST tl values
+                    match _tl with
+                    | FATrace TAlt2E::tl -> REAlt (None,Some(r)), tl, _val
+                    | _          -> RELeaf null,[],[]   
+
+                | FATrace TSeqS ->
+                    let rec inner buf tl vals =
+                        let r,_tl,_val = buildREAST tl vals                        
+                        match _tl with
+                        | FATrace TSeqE::tl -> r::buf |> List.rev |> RESeq, tl, _val
+                        | _          -> inner (r::buf) _tl _val                                  
+                    inner [] tl values
+                | _    -> RELeaf null,[],[]
+                    
+            | []     -> RELeaf null,[],[]
+
         let rec buildCorrectTrace trace =
             match trace with
             | hd1::hd2::tl1 -> 
@@ -88,11 +122,9 @@ type RegExpAST() =
                     hd1
                 |> fun x -> x::tl1 |> buildCorrectTrace
             | hd::[] -> hd
-            | []     -> Set.empty            
-
-        let buildREAST trace =
-            match trace with
-            | 1 -> 1
+            | []     -> Set.empty                    
 
         member self.BuilCorrectTrace trace = List.rev trace |> buildCorrectTrace  |> Set.filter (verifyTrace >> fst)
+
+        member self.BuildREAST trace values = buildREAST trace values
     end

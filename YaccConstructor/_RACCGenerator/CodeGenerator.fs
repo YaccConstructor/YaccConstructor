@@ -77,9 +77,11 @@ type CodeGenerator(outPath: string) =
                 indentString indentSize + "match expr with\n"
                 + indentString indentSize + "| RESeq [" + (List.unzip namesPair |> snd |> String.concat "; ") + "] -> \n"
                 + (List.map genElem elems |> String.concat "\n")
+                + "\n"
+                + indentString (indentSize + 1)
                 + if expr.IsSome
-                  then indentString (indentSize + 1) + "box (" + Source.toString expr.Value + ")\n"
-                  else indentString (indentSize + 1) + "box ()"
+                  then "box (" + Source.toString expr.Value + ")\n"
+                  else "box ()"
                  
             | PAlt(alt1,alt2)  -> 
                  let lFun = generateBody (indentSize + 2) alt1
@@ -96,6 +98,12 @@ type CodeGenerator(outPath: string) =
             | PRef(x,_) ->
                  indentString indentSize + "match expr with\n" 
                + indentString indentSize + "| RELeaf " + Source.toString x + " -> " + Source.toString x + " :?> 'a\n"
+               
+            | PMany(expr) ->
+                 indentString indentSize + "match expr with\n"
+               + indentString indentSize + "| REClosure(lst) -> \n" 
+               + indentString (indentSize + 1) + "let " + lAltFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
+               + indentString (indentSize + 1) + lAltFName + " x \n"
                
             | _ -> "NotSupported"
                     

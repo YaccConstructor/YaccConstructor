@@ -16,7 +16,9 @@ type TableGenerator(outPath: string) =
     class
 
         let textWriter = TextWriter outPath                                
-        let write str = textWriter.Write(str)        
+        let write str = textWriter.Write(str)
+
+        let enumerator = new Enumerator()
          
         let buildDLFA production =
             let stateEnumerator = new Enumerator()
@@ -24,24 +26,28 @@ type TableGenerator(outPath: string) =
             let rec build production =
                 match production with
                 | PSeq (seq,attr)   -> 
-                    let automataLst = List.map (fun t -> build t.rule) seq                      
+                    let automataLst = List.map (fun t -> build t.rule) seq
+                    let seqNum = enumerator.Next()
                     List.fold (fun x y -> builder.Concat x y Omega)  automataLst.Head automataLst.Tail
-                    |> builder.AddInHead None Epsilon (FATrace TSeqS)
-                    |> builder.Append None Epsilon (FATrace TSeqE)
+                    |> builder.AddInHead None Epsilon (FATrace (TSeqS seqNum))
+                    |> builder.Append None Epsilon (FATrace (TSeqE seqNum))
 
                 | PAlt (l,r)        -> 
                     let lAtm = build l
                     let rAtm = build r
-                    builder.Alt lAtm rAtm (FATrace TAlt1S) (FATrace TAlt1E) (FATrace TAlt2S) (FATrace TAlt2E)
+                    let alt1Num, alt2Num = enumerator.Next(), enumerator.Next()
+                    builder.Alt lAtm rAtm (FATrace (TAlt1S alt1Num)) (FATrace (TAlt1E alt1Num)) (FATrace (TAlt2S alt2Num)) (FATrace (TAlt2E alt2Num))
 
-                | PSome (expr)      -> 
-                    builder.Cls (build expr) (FATrace TClsS) (FATrace TClsE)
+                | PMany (expr)      -> 
+                    let clsNum = enumerator.Next()
+                    builder.Cls (build expr) (FATrace (TClsS clsNum)) (FATrace (TClsE clsNum))
 
                 | PRef(ch,_)
                 | PToken(ch)        -> 
+                    let smbNum = enumerator.Next()
                     builder.Trivial None None (NSymbol (Source.toString ch)) Omega
-                    |> builder.AddInHead None Epsilon (FATrace TSmbS)
-                    |> builder.Append None Epsilon (FATrace TSmbE)
+                    |> builder.AddInHead None Epsilon (FATrace (TSmbS smbNum))
+                    |> builder.Append None Epsilon (FATrace (TSmbE smbNum))
 
                 | x                 -> failwith ("You should support elem " + x.ToString())
 
@@ -84,7 +90,7 @@ type TableGenerator(outPath: string) =
                                     |> Set.filter (fun rule -> 
                                                     rule.FromStateID = snd elt
                                                     && rule.Symbol = smb)                                              
-                                    |> Set.map (fun rule -> hash(item, smb), (fst elt, rule.ToStateID)))
+                                    |> Set.map (fun rule -> hash (item, smb), (fst elt, rule.ToStateID)))
                             |>Set.unionMany)                        
                         items
                         |>Set.unionMany)

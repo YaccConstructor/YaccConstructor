@@ -20,7 +20,7 @@ let run_common path =
 
 type t<'buf,'a,'b> = 
     {
-        buf : 'buf
+        buf   : 'buf
         lexer : ILexer<'a>
     }
 
@@ -35,7 +35,9 @@ let run path =
         }
     
     let trees = TableInterpreter.run l tables
-    let r = ASTInterpretator.interp RACC.Actions.ruleToAction trees.MinimumElement.rItem.forest.Head 
+    let r = 
+        Seq.collect (fun e -> e.rItem.forest |> List.map (ASTInterpretator.interp RACC.Actions.ruleToAction)) trees
+        
     printf "\nResult %A\n" r
     trees        
     

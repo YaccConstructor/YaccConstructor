@@ -25,6 +25,8 @@ open Yard.Core.IL.Rule
 open Yard.Core.IL
 open Yard.Generators.FParsecGenerator.WriteToFile
 
+open System.Text.RegularExpressions
+
 let repr = fst
 let printArgs indent = List.map repr  >> String.concat " " >> (+) indent
 let printBinding = function None -> "_" | Some patt -> repr patt
@@ -68,6 +70,9 @@ let rec printBody indent body  =
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 
 
+let grammarName filename =
+    Regex.Match(filename, @"(^|\\)([^\\]+)\.yrd$").Groups.Item(2).Value
+
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 
     
     let header = printArg input_grammar.head 
@@ -76,6 +81,6 @@ let generate (input_grammar:Definition.t<Source.t,Source.t>) =
                                       + printBody "" e.body ) 
                          input_grammar.grammar
 
-    let res = "module test\n" + "\nopen FParsec.Primitives\n" + header + "let rec " + String.concat ( "\n\n and ") functions
+    let res = "module " + (grammarName input_grammar.info.fileName) + "\n" + "\nopen FParsec.Primitives\n" + header + "let rec " + String.concat ( "\n\n and ") functions
   
     WriteFile  (System.IO.Path.ChangeExtension(input_grammar.info.fileName,".fs"),res)

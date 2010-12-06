@@ -5,18 +5,14 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</ProjectGuid>
+    <ProjectGuid>{a63ca12d-76b0-4739-a076-76f62030e6b0}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Main</RootNamespace>
-    <AssemblyName>Main</AssemblyName>
+    <RootNamespace>TempTester</RootNamespace>
+    <AssemblyName>RACCTester</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <Name>Main</Name>
-    <SccProjectName>Svn</SccProjectName>
-    <SccProvider>SubversionScc</SccProvider>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccLocalPath>Svn</SccLocalPath>
+    <Name>RACCTester</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,8 +22,8 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\TempTester.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,63 +32,42 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\TempTester.XML</DocumentationFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="RACCTester.fs" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="Irony">
-      <HintPath>..\..\3rd Party\lib\Irony.dll</HintPath>
-    </Reference>
-    <Reference Include="Irony.Samples">
-      <HintPath>..\..\3rd Party\lib\Irony.Samples.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\RACCUserApplication\RACCUserApplication.fsproj">
+      <Name>RACCUserApplication</Name>
+      <Project>{41f3c60a-2738-44fe-9889-d666c7e046c2}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
+      <Name>RACCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCore\RACCCore.fsproj">
+      <Name>RACCCore</Name>
+      <Project>{18c1ea93-afbd-45d6-b8ab-e8d17ff53d19}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Convertions\Convertions.fsproj">
-      <Name>Convertions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
-      <Name>FParsecGenerator</Name>
-      <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
-      <Name>TreeDump</Name>
-      <Project>{894323b6-ebcc-41d7-b4d1-e701466b1914}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
-      <Name>YardFrontend</Name>
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RACCGenerator\RACCGenerator.fsproj">
-      <Name>RACCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

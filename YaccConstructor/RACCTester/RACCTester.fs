@@ -18,13 +18,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-module Yard.Testers._RACCTester
+module Yard.Testers.RACCTester
 
 open Yard.Generators.RACCGenerator
 open Yard.Core
 open System.Configuration
 
-type _RACCTester() =
+type RACCTester() =
     class
         interface ITester with
             member self.BuildUserApplication testPath testName = 

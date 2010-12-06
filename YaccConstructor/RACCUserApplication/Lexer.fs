@@ -11,7 +11,7 @@
 module UserLexer
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
-open Yard.Generators._RACCGenerator
+open Yard.Generators.RACCGenerator
  
 # 16 "lexer.fs"
 let trans : uint16[] array = 

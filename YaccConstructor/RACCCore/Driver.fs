@@ -1,4 +1,4 @@
-﻿namespace Yard.Generators._RACCGenerator
+﻿namespace Yard.Generators.RACCGenerator
 
 type CoreDriver() =
     class

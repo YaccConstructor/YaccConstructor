@@ -6,10 +6,10 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
-namespace Yard.Generators._RACCGenerator
+namespace Yard.Generators.RACCGenerator
 
 
-open Yard.Generators._RACCGenerator.AST
+open Yard.Generators.RACCGenerator.AST
 
 type Item<'state, 'symbol, 'tree> =
     {

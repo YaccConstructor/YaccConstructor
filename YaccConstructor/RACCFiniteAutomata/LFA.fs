@@ -18,9 +18,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-namespace  Yard.Generators._RACCGenerator
+namespace  Yard.Generators.RACCGenerator
 
-open Yard.Generators._RACCGenerator
+open Yard.Generators.RACCGenerator
 
 type DFASymbol<'symbolVal> = 
     | DSymbol of 'symbolVal

@@ -20,7 +20,7 @@
 
 module Yard.Testers._RACCTester
 
-open Yard.Generators._RACCGenerator
+open Yard.Generators.RACCGenerator
 open Yard.Core
 open System.Configuration
 

@@ -18,13 +18,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-namespace Yard.Generators._RACCGenerator
+namespace Yard.Generators.RACCGenerator
 
 open Yard.Core
 
-type _RACCGenerator() = 
+type RACCGenerator() = 
     interface IGenerator with        
-        member this.Name = "_RACCGenerator"
+        member this.Name = "RACCGenerator"
         member this.Generate t = 
             let extension = ".fs"
             let tablesStr = ".tables"

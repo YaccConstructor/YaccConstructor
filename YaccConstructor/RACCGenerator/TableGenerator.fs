@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace  Yard.Generators._RACCGenerator
+namespace  Yard.Generators.RACCGenerator
 
 open Yard.Core.IL.Definition
 open Yard.Core.IL.Production
@@ -125,9 +125,9 @@ type TableGenerator(outPath: string) =
             write ("//date:" + System.DateTime.Now.ToString())
             write ("")
             write ("#light \"off\"")
-            write ("module Yard.Generators._RACCGenerator.Tables")
+            write ("module Yard.Generators.RACCGenerator.Tables")
             write ("")
-            write ("open Yard.Generators._RACCGenerator")
+            write ("open Yard.Generators.RACCGenerator")
             write ("")
 
 

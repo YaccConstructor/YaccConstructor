@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace  Yard.Generators._RACCGenerator
+namespace  Yard.Generators.RACCGenerator
 
 open Yard.Core.IL
 open Yard.Core.IL.Definition
@@ -39,7 +39,7 @@ type CodeGenerator(outPath: string) =
             write ""
             write ("module RACC.Actions")
             write ""
-            write ("open Yard.Generators._RACCGenerator")
+            write ("open Yard.Generators.RACCGenerator")
 
         let notMatched = 
             let msg =

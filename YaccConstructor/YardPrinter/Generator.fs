@@ -8,9 +8,9 @@ let printSourceOpt = function None -> "" | Some arg -> "\n{"+(fst arg)+"}\n\n"
 
 type TextBox =
 | Tabbed of seq<TextBox> 
-| Line of seq<TextBox>
+| Line   of seq<TextBox>
 | StrSeq of seq<TextBox>
-| Str of string
+| Str    of string
 with 
   member x.IsTab with get() = match x with Tabbed _ -> true | _ -> false
   

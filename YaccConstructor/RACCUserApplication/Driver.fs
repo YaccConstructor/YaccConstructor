@@ -20,8 +20,8 @@
 module m1
 
 open Microsoft.FSharp.Text.Lexing
-open Yard.Generators._RACCGenerator
-open Yard.Generators._RACCGenerator.Tables
+open Yard.Generators.RACCGenerator
+open Yard.Generators.RACCGenerator.Tables
 module Lexer = UserLexer
 
 let run_common path = 

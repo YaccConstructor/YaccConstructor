@@ -17,7 +17,7 @@ let () =
   try 
 
     let feName = ref "YardFrontend"
-    let generatorName = ref "_RACCGenerator"
+    let generatorName = ref "RACCGenerator"
     let testsPath = ref @"..\..\..\..\Tests\RACC\test_seq"
     let testFile = ref "test_seq.yrd"
 

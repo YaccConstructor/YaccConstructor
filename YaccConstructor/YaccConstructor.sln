@@ -8,9 +8,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Main", "Main\Main.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
-	ProjectSection(ProjectDependencies) = postProject
-		{894323B6-EBCC-41D7-B4D1-E701466B1914} = {894323B6-EBCC-41D7-B4D1-E701466B1914}
-	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject
@@ -28,19 +25,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55E40801
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tester", "Tester\Tester.fsproj", "{574E1121-922C-4132-920C-98B5E4ADD5A3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC_new", "RACC_new", "{5B0AD554-6DB3-43CA-878A-58874B89CAE2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{5B0AD554-6DB3-43CA-878A-58874B89CAE2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCCore", "_RACCCore\_RACCCore.fsproj", "{18C1EA93-AFBD-45D6-B8AB-E8D17FF53D19}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCore", "_RACCCore\RACCCore.fsproj", "{18C1EA93-AFBD-45D6-B8AB-E8D17FF53D19}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCGenerator", "_RACCGenerator\_RACCGenerator.fsproj", "{D497F18A-2C35-4D21-A0CA-01E20ED9A537}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCGenerator", "_RACCGenerator\RACCGenerator.fsproj", "{D497F18A-2C35-4D21-A0CA-01E20ED9A537}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCCommon", "_RACCCommon\_RACCCommon.fsproj", "{EB0A41F1-11DC-4F49-BBB6-6825A0EE576F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCommon", "_RACCCommon\RACCCommon.fsproj", "{EB0A41F1-11DC-4F49-BBB6-6825A0EE576F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCFiniteAutomata", "RACCFiniteAutomata\_RACCFiniteAutomata.fsproj", "{79A37C58-942E-47E9-9C12-DC1DEE00E52E}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCFiniteAutomata", "RACCFiniteAutomata\RACCFiniteAutomata.fsproj", "{79A37C58-942E-47E9-9C12-DC1DEE00E52E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCUserApplication", "RACCUserApplication\_RACCUserApplication.fsproj", "{41F3C60A-2738-44FE-9889-D666C7E046C2}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCUserApplication", "RACCUserApplication\RACCUserApplication.fsproj", "{41F3C60A-2738-44FE-9889-D666C7E046C2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "_RACCTester", "TempTester\_RACCTester.fsproj", "{A63CA12D-76B0-4739-A076-76F62030E6B0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCTester", "TempTester\RACCTester.fsproj", "{A63CA12D-76B0-4739-A076-76F62030E6B0}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject
@@ -49,11 +46,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C606E7BF-43A2-474B-8121-CA27405A5ED7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{229E26F1-6FBF-4045-82BF-64550AE5FF2C}"
-	ProjectSection(SolutionItems) = preProject
-		..\Tests\Tests\test_alt\test_alt.yrd = ..\Tests\Tests\test_alt\test_alt.yrd
-		..\Tests\Tests\test_alt\test_alt_1.in = ..\Tests\Tests\test_alt\test_alt_1.in
-		..\Tests\Tests\test_alt\test_alt_2.in = ..\Tests\Tests\test_alt\test_alt_2.in
-	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrToYard", "AntlrToYard\AntlrToYard.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject

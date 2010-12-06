@@ -60,6 +60,7 @@ type CodeGenerator(outPath: string) =
             let lAltFName = "yardLAltAction"
             let rAltFName = "yardRAltAction"
             let elemFName = "yardElemAction"
+            let clsFName = "yardClsAction"
             let indentString l = 
                 List.init l (fun i -> "    ")
                 |> String.concat ""                 
@@ -113,8 +114,8 @@ type CodeGenerator(outPath: string) =
             | PMany(expr) ->
                  indentString indentSize + "match expr with\n"
                + indentString indentSize + "| REClosure(lst) -> \n" 
-               + indentString (indentSize + 1) + "let " + lAltFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
-               + indentString (indentSize + 1) + lAltFName + " x \n"
+               + indentString (indentSize + 1) + "let " + clsFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
+               + indentString (indentSize + 1) + "List.map (fun x -> (" + clsFName + " x) :?>_) lst \n"
                
             | _ -> "NotSupported"
                     

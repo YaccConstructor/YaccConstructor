@@ -1,12 +1,12 @@
     YaccConstructor
     Copyright (C) 2009,2010  
     Jake Kirilenko <jake.kirilenko@gmail.com>, 
-    Iiya Chemodanov <>,
+    Iiya Chemodanov <>,                 
+    Alexander Lukichev <alexander.s.lukichev@gmail.com>,
     Semen Grigorev <rsdpisuy@gmail.com>, 
-    Konstantin Ulitin <ulitin.k@gmail.com>, 
-    Anastasia Nishnevich <Anastasia.Nishnevich@gmail.com> 
-    Alexander Lukichev <alexander.s.lukichev@gmail.com>
-    Dmitriy 
+    Konstantin Ulitin <ulitin.k@gmail.com>,
+    Anastasia Nishnevich <Anastasia.Nishnevich@gmail.com>,
+    Dmitry Avdyukhin <dimonbv@gmail.com>    
     
 
     This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+______________________________________________________________________________
+_____________________________Web Resources____________________________________
+http://www.code.google.com/p/recursive-ascent
 
+______________________________________________________________________________
+_____________________________Development______________________________________
 IDE : Microsoft Visual Studio 2010. 
 F# version: 2.0.0.0
 startup project - Main
-Tests folder contains test YARD grammars 

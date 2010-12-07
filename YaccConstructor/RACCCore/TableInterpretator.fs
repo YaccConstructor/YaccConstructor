@@ -106,15 +106,15 @@ module  TableInterpreter =
                         s
                 let gotoSet = goto tables parserState.statesSet parserState.inpSymbol        
                 
-                let getTrace state inpSymbol fromID toID = 
+                let getTrace state inpSymbol fromID toID addLabelFromDummy = 
                     let dfa = getDFA tables state.itemName
                     dfa.DRules
                     |> Set.filter
                            (fun rule -> rule.FromStateID = fromID && rule.ToStateID = toID && rule.Symbol = DSymbol(inpSymbol))
                     |> Set.maxElement
                     |> fun rule -> 
-                        if Seq.exists ((=)rule.ToStateID) dfa.DFinaleStates
-                        then rule.Label :: [Set.filter (fun r -> r.FromStateID = rule.ToStateID) dfa.DRules |> Set.maxElement |> fun x -> x.Label]
+                        if Seq.exists ((=)rule.ToStateID) dfa.DFinaleStates && addLabelFromDummy
+                        then rule.Label :: [Set.filter (fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy) dfa.DRules |> Set.maxElement |> fun x -> x.Label]
                         else [rule.Label]
                 let res = 
                     (parse()) tables {parserState with statesSet = gotoSet}
@@ -137,11 +137,14 @@ module  TableInterpreter =
                                         parserState.statesSet            
                                         |> Set.map
                                             (fun state ->
-                                                let trace = getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
+                                                let trace = 
+                                                    state.forest @ res.rItem.forest |> List.length  = 1
+                                                    |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position 
+                                                        
                                                 {
                                                     rItem  = {itm.state with 
                                                                     forest = state.forest @ res.rItem.forest
-                                                                    sTrace = trace @ itm.state.sTrace
+                                                                    sTrace = trace @ res.rItem.sTrace                                                                                     
                                                                             }
                                                     rI     = res.rI
                                                     rLexer = parserState.lexer
@@ -157,8 +160,8 @@ module  TableInterpreter =
                                                     Set.map 
                                                         (fun stt -> 
                                                             let trace = 
-                                                                getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
-                                                                @ res.rItem.sTrace                                                             
+                                                                getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position false
+                                                                @ res.rItem.sTrace                                                                 
                                                             {stt with forest = [stt.forest @ res.rItem.forest |> node trace]
                                                                       sTrace = trace})
                                                         parserState.statesSet
@@ -217,7 +220,7 @@ module  TableInterpreter =
                             parserState with 
                                 statesSet = 
                                     parserState.statesSet 
-                                    |> Set.map (fun stt -> {stt with forest =  leaf stt})
+                                    |> Set.map (fun stt -> {stt with forest =  leaf stt; sTrace=[]})
                                 inpSymbol = nextLexeme
                                 i         = parserState.i + 1
                         }
@@ -231,7 +234,14 @@ module  TableInterpreter =
         let res = 
             (parse()) tables
                 {
-                    statesSet = Set.singleton {itemName = Constants.raccStartRuleName; position = (getDFA tables Constants.raccStartRuleName).DStartState; forest=[]; sTrace = []}
+                    statesSet =
+                        {
+                            itemName = Constants.raccStartRuleName
+                            position = (getDFA tables Constants.raccStartRuleName).DStartState
+                            forest=[]
+                            sTrace = []
+                        }
+                        |> Set.singleton 
                     inpSymbol = {name = "";value =""}                                    
                     i         = 1
                     lexer     = lexer
@@ -257,4 +267,4 @@ module  TableInterpreter =
                 Set.empty
 
         Set.iter PrintTree res
-        res        
+        res

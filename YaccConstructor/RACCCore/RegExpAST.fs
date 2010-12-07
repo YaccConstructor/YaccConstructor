@@ -111,6 +111,15 @@ type RegExpAST() =
                         | FATrace (TSeqE y)::tl -> r::buf |> List.rev |> RESeq, tl, _val
                         | _          -> inner (r::buf) _tl _val                                  
                     inner [] tl values
+
+                | FATrace (TClsS x)->
+                    let rec inner buf tl vals =
+                        let r,_tl,_val = buildREAST tl vals                        
+                        match _tl with
+                        | FATrace (TClsE y)::tl -> r::buf |> List.rev |> REClosure, tl, _val
+                        | _          -> inner (r::buf) _tl _val                                  
+                    inner [] tl values 
+                
                 | _    -> RELeaf null,[],[]
                     
             | []     -> RELeaf null,[],[]

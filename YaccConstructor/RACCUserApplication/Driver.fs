@@ -48,7 +48,7 @@ let run path =
     let trees = TableInterpreter.run l tables
     let r = 
         1
-    //    Seq.collect (fun e -> e.rItem.forest |> List.map (ASTInterpretator.interp RACC.Actions.ruleToAction)) trees
+        //Seq.collect (fun e -> e.rItem.forest |> List.map (ASTInterpretator.interp RACC.Actions.ruleToAction)) (Set.singleton trees.MaximumElement)
         
     printf "\nResult %A\n" r
     trees        

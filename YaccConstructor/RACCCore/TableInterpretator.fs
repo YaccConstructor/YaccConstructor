@@ -93,8 +93,7 @@ module  TableInterpreter =
                 printfn "\n Climb \n" 
                 print parserState
 #endif                
-                
-                
+                                
                 let buildRes s = 
                     Set.map
                         (fun  state ->                                                                        
@@ -148,9 +147,7 @@ module  TableInterpreter =
                                                     rLexer = parserState.lexer
                                                 })                                        
                                         |> Set.union buf
-                                    else
-                               
-                                //    |> Set.union                                             
+                                    else                                                                                                          
                                         ({
                                             parserState with
                                                 inpSymbol = {name = res.rItem.itemName; value = ""} 
@@ -162,19 +159,17 @@ module  TableInterpreter =
                                                             let trace = 
                                                                 getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
                                                                 @ res.rItem.sTrace                                                             
-                                                            {stt with forest = 
-                                                                        (*printfn "\n FOREST = \n"
-                                                                        List.iter PrintTree [stt.forest @ res.rItem.forest |> node trace]
-                                                                        printfn " \n"*)
-                                                                        [stt.forest @ res.rItem.forest |> node trace]
-                                                                        
+                                                            {stt with forest = [stt.forest @ res.rItem.forest |> node trace]
                                                                       sTrace = trace})
                                                         parserState.statesSet
                                         }
                                         |> 
                                             fun ps ->
-                                                if itm.state.itemName = "e"
-                                                then buildRes ps.statesSet
+                                                if itm.state.itemName = Constants.raccStartRuleName
+                                                then 
+                                                    if (ps.lexer.Get ps.i).name = "EOF"
+                                                    then buildRes ps.statesSet
+                                                    else Set.empty
                                                 else (climb()) tables  ps
                                         |> Set.union  buf)
                                 )
@@ -205,13 +200,8 @@ module  TableInterpreter =
                     |> Set.map buildResult
                
                 let resPart2 =                                                                               
-                    let nextLexeme =  
-                        try
-                            parserState.lexer.Get(parserState.i)                        
-                        with 
-                        |_ -> {name = "eee";value = ""}
-                    if  //false
-                        nextLexeme.name = "eee"
+                    let nextLexeme = parserState.lexer.Get(parserState.i)                                                                        
+                    if  nextLexeme.name = "EOF"
                     then 
                         Set.empty
                     else
@@ -231,8 +221,7 @@ module  TableInterpreter =
                                 inpSymbol = nextLexeme
                                 i         = parserState.i + 1
                         }
-                        |> (climb()) tables 
-                        //|> Set.filter (fun res -> not (isFinaleState res.rItem))
+                        |> (climb()) tables                         
                 let res = resPart1 + resPart2
                 printfn "\n parser result = %A" res
                 res)
@@ -242,14 +231,30 @@ module  TableInterpreter =
         let res = 
             (parse()) tables
                 {
-                    statesSet = Set.singleton {itemName = "e"; position = (getDFA tables "e").DStartState; forest=[]; sTrace = []}
+                    statesSet = Set.singleton {itemName = Constants.raccStartRuleName; position = (getDFA tables Constants.raccStartRuleName).DStartState; forest=[]; sTrace = []}
                     inpSymbol = {name = "";value =""}                                    
                     i         = 1
                     lexer     = lexer
                 }
-        Set.iter 
-            (fun x -> 
-                printfn "\n result %A \n\n pos: %A \n" x.rItem.itemName x.rI
-                List.iter PrintTree x.rItem.forest)
-            res
-        res
+            |> Set.fold
+                (fun buf r -> 
+                    let forest = r.rItem.forest
+                    if List.length  forest = 1 && r.rItem.itemName = Constants.raccStartRuleName
+                    then 
+                        let getUserTree tree =
+                            match tree with
+                            | Node (childs,name,value) as n -> 
+                                Some (List.head childs)
+                            | _ -> None
+
+                        List.head forest 
+                        |> fun x -> 
+                            let y = getUserTree x
+                            if y.IsSome 
+                            then Set.add y.Value buf
+                            else buf
+                    else buf)
+                Set.empty
+
+        Set.iter PrintTree res
+        res        

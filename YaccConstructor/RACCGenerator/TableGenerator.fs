@@ -22,6 +22,7 @@ namespace  Yard.Generators.RACCGenerator
 open Yard.Core.IL.Definition
 open Yard.Core.IL.Production
 open Yard.Core.IL
+open Yard.Core.IL.Rule
 
 type TableGenerator(outPath: string) = 
     class
@@ -132,9 +133,19 @@ type TableGenerator(outPath: string) =
 
 
         let genearte (grammar:Yard.Core.IL.Definition.t<_,_>) =
-            generatePreheader grammar.info.fileName            
+            generatePreheader grammar.info.fileName
+            let publicRule = List.find (fun (rule: Rule.t<_,_>) -> rule._public) grammar.grammar
+            let startRule = 
+                {
+                    name    = Constants.raccStartRuleName
+                    args    = []
+                    body    = PRef((publicRule.name,(0,0)),None)
+                    _public = true
+                    metaArgs= []
+                }
             let dlfaMap = 
-                List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body) grammar.grammar                            
+                startRule :: grammar.grammar
+                |> List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body)
             let str = "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
             write str
             let items = items dlfaMap

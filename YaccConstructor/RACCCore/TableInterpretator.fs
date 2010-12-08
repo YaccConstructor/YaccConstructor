@@ -19,7 +19,6 @@ type Item<'state, 'symbol, 'tree> =
 
 module  TableInterpreter = 
     let goto tables states symbol = 
-        //printfn "GOTO:\n from state : %A \nby symbol : %A \n \n" states symbol
         let res = 
             Set.fold 
                 (fun buf state -> 
@@ -31,7 +30,7 @@ module  TableInterpreter =
                     with _ -> buf)
                 Set.empty
                 states
-        printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res
+        //printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res
         res
 
     let private getDFA tables itemName = tables.automataDict.[itemName]
@@ -160,8 +159,10 @@ module  TableInterpreter =
                                                     Set.map 
                                                         (fun stt -> 
                                                             let trace = 
-                                                                getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position false
-                                                                @ res.rItem.sTrace                                                                 
+                                                                getTrace 
+                                                                    itm.state parserState.inpSymbol.name itm.state.position res.rItem.position 
+                                                                    (stt.forest @ res.rItem.forest |> List.length = 1)
+                                                                @ res.rItem.sTrace
                                                             {stt with forest = [stt.forest @ res.rItem.forest |> node trace]
                                                                       sTrace = trace})
                                                         parserState.statesSet

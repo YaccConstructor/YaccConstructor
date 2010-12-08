@@ -2,4 +2,5 @@
 let value x =
     ((x:>Lexeme<string>).value)
 }
-+s: res = (MINUS|PLUS)* {List.map value res};
+
++s: res = (m = MINUS {m} | p = PLUS {p})* {List.map value res|> String.concat ";"};

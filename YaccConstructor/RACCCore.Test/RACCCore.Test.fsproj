@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RACCCore.Test</RootNamespace>
+    <AssemblyName>RACCCore.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>RACCCore.Test</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\RACCCore.Test.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\RACCCore.Test.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FsCheck">
+      <HintPath>..\..\3rd Party\lib\FsCheck.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FsUnit.NUnit">
+      <HintPath>..\..\3rd Party\lib\FsUnit.NUnit.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="test_alt.yrd.actions.fs" />
+    <Compile Include="test_alt.yrd.tables.fs" />
+    <Compile Include="test_cls.yrd.actions.fs" />
+    <Compile Include="test_cls.yrd.tables.fs" />
+    <Compile Include="test_seq.yrd.actions.fs" />
+    <Compile Include="test_seq.yrd.tables.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
+      <Name>RACCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCore\RACCCore.fsproj">
+      <Name>RACCCore</Name>
+      <Project>{18c1ea93-afbd-45d6-b8ab-e8d17ff53d19}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCFiniteAutomata\RACCFiniteAutomata.fsproj">
+      <Name>RACCFiniteAutomata</Name>
+      <Project>{79a37c58-942e-47e9-9c12-dc1dee00e52e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	     Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>

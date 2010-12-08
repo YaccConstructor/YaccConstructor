@@ -41,12 +41,8 @@ type CodeGenerator(outPath: string) =
             write ""
             write ("open Yard.Generators.RACCGenerator")
 
-        let notMatched = 
-            let msg =
-#if DEBUG
-                "1"
-#endif
-            "| x -> Unexpected "
+        let notMatched expectedType = 
+            "| x -> \"Unexpected type of node\\nType \" + x.ToString() + \" is not expected in this position\\n" + expectedType + " was expected.\" |> failwith"
 
         let generateHeader header = 
             if (Option.isSome header)
@@ -93,7 +89,8 @@ type CodeGenerator(outPath: string) =
                 + indentString (indentSize + 1)
                 + if expr.IsSome
                   then "box (" + Source.toString expr.Value + ")\n"
-                  else "box ()"
+                  else "box ()\n"
+                + indentString indentSize + notMatched "RESeq" + "\n"
                  
             | PAlt(alt1,alt2)  -> 
                  let lFun = generateBody (indentSize + 2) alt1
@@ -105,17 +102,20 @@ type CodeGenerator(outPath: string) =
                + indentString indentSize + "| REAlt(None, Some(x)) -> \n"
                + indentString (indentSize + 1) + "let " + rAltFName + " expr = \n" + rFun + "\n"
                + indentString (indentSize + 1) + rAltFName + " x \n"
+               + indentString indentSize + notMatched "REAlt" + "\n"
 
             | PToken (x)
             | PRef(x,_) ->
                  indentString indentSize + "match expr with\n" 
                + indentString indentSize + "| RELeaf " + Source.toString x + " -> " + Source.toString x + " :?> 'a\n"
+               + indentString indentSize + notMatched "RELeaf" + "\n"
                
             | PMany(expr) ->
                  indentString indentSize + "match expr with\n"
                + indentString indentSize + "| REClosure(lst) -> \n" 
                + indentString (indentSize + 1) + "let " + clsFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
                + indentString (indentSize + 1) + "List.map (fun x -> (" + clsFName + " x) :?>_) lst \n"
+               + indentString indentSize + notMatched "REClosure" + "\n"
                
             | _ -> "NotSupported"
                     

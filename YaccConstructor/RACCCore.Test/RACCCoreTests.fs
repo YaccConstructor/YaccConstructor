@@ -39,11 +39,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_1.yrd.in"
                 rightValue = seq ["-" |> box]  
             })
@@ -51,11 +51,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_2.yrd.in"
                 rightValue = seq ["-;-" |> box]  
             })
@@ -63,11 +63,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_3.yrd.in"
                 rightValue = seq ["+" |> box]  
             })
@@ -75,11 +75,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_4.yrd.in"
                 rightValue = seq ["+;+" |> box]  
             })
@@ -87,11 +87,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_5.yrd.in"
                 rightValue = seq ["-;+" |> box]  
             })
@@ -99,11 +99,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_6.yrd.in"
                 rightValue = seq ["+;-" |> box]  
             })
@@ -111,11 +111,11 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables.gotoSet
-                        automataDict = Tables.autumataDict
-                        items = Tables.items
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
                     }
-                actionsMap = RACC.Actions.ruleToAction
+                actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_7.yrd.in"
                 rightValue = seq ["-;+;+;-;+;-;-" |> box]  
             })

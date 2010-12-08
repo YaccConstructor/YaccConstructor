@@ -59,7 +59,7 @@ type AST<'lexeme, 'nodeVal, 'trace, 'nodeId
         | Leaf  of string * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
              
 let rec dumpTree i item =
-    let rec iter i = (function 0 -> "" | x -> ("    "+(iter (x-1))))i
+    let iter i = String.replicate i "    "
     match item with
         Node (lst,name,value) -> 
                 let trace = 

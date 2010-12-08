@@ -55,7 +55,7 @@
     <Compile Include="test_seq.yrd.actions.fs" />
     <Compile Include="test_seq.yrd.tables.fs" />
     <Compile Include="Lexer.fs" />
-    <Compile Include="Main.fs" />
+    <Compile Include="RACCCoreTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">

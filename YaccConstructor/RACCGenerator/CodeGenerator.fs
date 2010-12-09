@@ -107,7 +107,7 @@ type CodeGenerator(outPath: string) =
             | PToken (x)
             | PRef(x,_) ->
                  indentString indentSize + "match expr with\n" 
-               + indentString indentSize + "| RELeaf " + Source.toString x + " -> " + Source.toString x + " :?> 'a\n"
+               + indentString indentSize + "| RELeaf " + "t" + Source.toString x + " -> " + "t" + Source.toString x + " :?> 'a\n"
                + indentString indentSize + notMatched "RELeaf" + "\n"
                
             | PMany(expr) ->

@@ -68,7 +68,7 @@ type ``YARD frontend Tests`` ()=
         
        
         [<Test>] member test.``tagOfToken test`` () =
-                    let tagOfTokenProp (t:token)=  (tagOfToken t >= 0) && (tagOfToken t <= 19)
+                    let tagOfTokenProp (t:token) = (tagOfToken t >= 0) && (tagOfToken t <= 19)
                     Check.Quick  tagOfTokenProp
 
 

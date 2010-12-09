@@ -37,12 +37,14 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
+    <Compile Include="BasicUnitTest.fs" />
     <Compile Include="Tester.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -54,9 +56,19 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
+      <Name>RACCCore.Test</Name>
+      <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\TempTester\RACCTester.fsproj">
       <Name>RACCTester</Name>
       <Project>{a63ca12d-76b0-4739-a076-76f62030e6b0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\UnitTests\YardFrontend.Test.fsproj">
+      <Name>YardFrontend.Test</Name>
+      <Project>{5936d84d-a842-43b3-97fd-e2c6990e77db}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

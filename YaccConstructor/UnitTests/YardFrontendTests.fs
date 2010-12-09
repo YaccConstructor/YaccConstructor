@@ -1,4 +1,4 @@
-﻿//  Program.fs
+﻿//  YardFrontendTests.fs contains unuit test for Yard frontend
 //
 //  Copyright 2010 Anastasia Nishnevich <Anastasia.Nishnevich@gmail.com>
 //
@@ -18,7 +18,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-module Program
+module YardFrontendTester
 
 
 open FsCheck
@@ -28,14 +28,7 @@ open Yard.Core.Main
 open Main.Program
 open Yard.Core.GrammarParser
 open NUnit.Framework
-
-
-
-[<TestFixture>]
-type ``RACC core tests`` () =    
-    inherit RACCCoreTests.``RACC core tests``()
-        
-
+     
 
 [<TestFixture>]
 type ``YARD frontend Tests`` ()=    

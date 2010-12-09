@@ -39,84 +39,84 @@ let tests =
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_1.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_1.yrd.in"
                 rightValue = seq ["-" |> box]  
             })
         (2,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_2.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_2.yrd.in"
                 rightValue = seq ["-;-" |> box]  
             })
         (3,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_3.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_3.yrd.in"
                 rightValue = seq ["+" |> box]  
             })
         (4,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_4.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_4.yrd.in"
                 rightValue = seq ["+;+" |> box]  
             })
         (5,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_5.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_5.yrd.in"
                 rightValue = seq ["-;+" |> box]  
             })
         (6,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_6.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_6.yrd.in"
                 rightValue = seq ["+;-" |> box]  
             })
         (7,
             {
                 tables     =
                     {
-                        gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        items = Tables_Cls.items
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict
+                        items = Tables_alt_in_cls.items
                     }
-                actionsMap = RACC.Actions_Cls.ruleToAction
-                path       = "test_cls\\test_cls_7.yrd.in"
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_7.yrd.in"
                 rightValue = seq ["-;+;+;-;+;-;-" |> box]  
             })
         (8,
@@ -220,43 +220,43 @@ let run path tables actions =
 [<TestFixture>]
 type ``RACC core tests`` ()=    
     [<Test>] 
-    member test.``Closure test 1`` () =
+    member test.``Alt in closure test 1`` () =
         let test = tests.[1]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 2`` () =
+    member test.``Alt in closure test 2`` () =
         let test = tests.[2]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 3`` () =
+    member test.``Alt in closure test 3`` () =
         let test = tests.[3]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 4`` () =
+    member test.``Alt in closure test 4`` () =
         let test = tests.[4]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 5`` () =
+    member test.``Alt in closure test 5`` () =
         let test = tests.[5]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 6`` () =
+    member test.``Alt in closure test 6`` () =
         let test = tests.[6]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
-    member test.``Closure test 7`` () =
+    member test.``Alt in closure test 7`` () =
         let test = tests.[7]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

@@ -203,6 +203,42 @@ let tests =
                 path       = "test_cls_with_head\\test_cls_with_head_2.yrd.in"
                 rightValue = seq ["Head minus;list minus" |> box]  
             })
+        (15,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
+                    }
+                actionsMap = RACC.Actions_Cls.ruleToAction
+                path       = "test_cls\\test_cls_1.yrd.in"
+                rightValue = seq ["" |> box]  
+            })
+        (16,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
+                    }
+                actionsMap = RACC.Actions_Cls.ruleToAction
+                path       = "test_cls\\test_cls_2.yrd.in"
+                rightValue = seq ["*" |> box]  
+            })
+        (17,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls.gotoSet
+                        automataDict = Tables_Cls.autumataDict
+                        items = Tables_Cls.items
+                    }
+                actionsMap = RACC.Actions_Cls.ruleToAction
+                path       = "test_cls\\test_cls_3.yrd.in"
+                rightValue = seq ["*;*" |> box]  
+            })
     ]
     |> dict
 
@@ -300,5 +336,23 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Closure with head test 2`` () =
         let test = tests.[14]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure test 1`` () =
+        let test = tests.[15]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure test 2`` () =
+        let test = tests.[16]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure test 3`` () =
+        let test = tests.[17]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

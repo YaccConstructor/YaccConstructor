@@ -52,6 +52,8 @@
     <Compile Include="test_alt.yrd.tables.fs" />
     <Compile Include="test_alt_in_cls.yrd.actions.fs" />
     <Compile Include="test_alt_in_cls.yrd.tables.fs" />
+    <Compile Include="test_cls.yrd.actions.fs" />
+    <Compile Include="test_cls.yrd.tables.fs" />
     <Compile Include="test_cls_with_head.yrd.actions.fs" />
     <Compile Include="test_cls_with_head.yrd.tables.fs" />
     <Compile Include="test_cls_with_tail.yrd.actions.fs" />

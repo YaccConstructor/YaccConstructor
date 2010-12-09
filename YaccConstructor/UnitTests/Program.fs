@@ -31,14 +31,19 @@ open NUnit.Framework
 
 
 
+[<TestFixture>]
+type ``RACC core tests`` () =    
+    inherit RACCCoreTests.``RACC core tests``()
+        
 
-    [<TestFixture>]
-    type ``Frontend Tests`` ()=    
+
+[<TestFixture>]
+type ``YARD frontend Tests`` ()=    
     
            
 //FrontEnd 
 //main tests
-        let fpars = ParseFile @"..\..\..\..\Tests\test002.yrd" 
+        (*let fpars = ParseFile @"..\..\..\..\Tests\test002.yrd" 
         [<Test>] member test.``Run_Common test`` () = 
                    let rcom = run_common @"..\..\..\..\Tests\test002.yrd"
                    Assert.AreEqual(rcom.ToString(), "Microsoft.FSharp.Text.Lexing.LexBuffer`1[System.Char]") 
@@ -53,7 +58,7 @@ open NUnit.Framework
 
         [<Test>] member test.``ApplyConvertion Test`` () = 
                    let s = ApplyConvertion fpars (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
-                   Assert.AreEqual(s.ToString(),"")
+                   Assert.AreEqual(s.ToString(),"")*)
                    
 // FrontEnd 
 // Parser tests 

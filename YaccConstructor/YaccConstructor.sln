@@ -60,7 +60,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls", "test_cls", "{64
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls_with_head", "test_cls_with_head", "{53281A66-089D-493D-9771-1445D5D7E87A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EFFFAB46-943F-496D-87B5-EE72AB9E11F7}"
+	ProjectSection(SolutionItems) = preProject
+		YaccConstructor.vsmdi = YaccConstructor.vsmdi
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = YaccConstructor.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

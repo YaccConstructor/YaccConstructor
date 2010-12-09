@@ -155,6 +155,54 @@ let tests =
                 path       = "test_seq\\test_seq_1.yrd.in"
                 rightValue = seq [3.0 |> box]  
             })
+        (11,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls_tail.gotoSet
+                        automataDict = Tables_Cls_tail.autumataDict
+                        items = Tables_Cls_tail.items
+                    }
+                actionsMap = RACC.Actions_Cls_tail.ruleToAction
+                path       = "test_cls_with_tail\\test_cls_with_tail_1.yrd.in"
+                rightValue = seq ["tail minus" |> box]  
+            })
+        (12,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls_tail.gotoSet
+                        automataDict = Tables_Cls_tail.autumataDict
+                        items = Tables_Cls_tail.items
+                    }
+                actionsMap = RACC.Actions_Cls_tail.ruleToAction
+                path       = "test_cls_with_tail\\test_cls_with_tail_2.yrd.in"
+                rightValue = seq ["list minus;tail minus" |> box]  
+            })
+        (13,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls_head.gotoSet
+                        automataDict = Tables_Cls_head.autumataDict
+                        items = Tables_Cls_head.items
+                    }
+                actionsMap = RACC.Actions_Cls_head.ruleToAction
+                path       = "test_cls_with_head\\test_cls_with_head_1.yrd.in"
+                rightValue = seq ["Head minus" |> box]  
+            })
+        (14,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Cls_head.gotoSet
+                        automataDict = Tables_Cls_head.autumataDict
+                        items = Tables_Cls_head.items
+                    }
+                actionsMap = RACC.Actions_Cls_head.ruleToAction
+                path       = "test_cls_with_head\\test_cls_with_head_2.yrd.in"
+                rightValue = seq ["Head minus;list minus" |> box]  
+            })
     ]
     |> dict
 
@@ -228,5 +276,29 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Seq test 1`` () =
         let test = tests.[10]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure with tail test 1`` () =
+        let test = tests.[11]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure with tail test 2`` () =
+        let test = tests.[12]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure with head test 1`` () =
+        let test = tests.[13]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Closure with head test 2`` () =
+        let test = tests.[14]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

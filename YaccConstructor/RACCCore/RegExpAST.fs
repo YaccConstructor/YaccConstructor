@@ -126,10 +126,13 @@ type RegExpAST() =
 
                 | FATrace (TClsS x)->
                     let rec inner buf tl vals =
-                        let r,_tl,_val = buildREAST tl vals                        
-                        match _tl with
-                        | FATrace (TClsE y)::tl -> r::buf |> List.rev |> REClosure, tl, _val
-                        | _          -> inner (r::buf) _tl _val                                  
+                        match tl with
+                        | FATrace (TClsE y)::tl -> buf |> List.rev |> REClosure, tl, vals
+                        | _ ->
+                            let r,_tl,_val = buildREAST tl vals                        
+                            match _tl with                        
+                            | FATrace (TClsE y)::tl -> r::buf |> List.rev |> REClosure, tl, _val
+                            | _          -> inner (r::buf) _tl _val                                  
                     inner [] tl values 
                 
                 | _    -> RELeaf null,[],[]

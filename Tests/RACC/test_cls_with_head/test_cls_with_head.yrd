@@ -1,0 +1,5 @@
+{
+let value x =
+    ((x:>Lexeme<string>).value)
+}
++s: oneMinus = MINUS lst = (MINUS {"list minus"})* {lst |> fun x -> "Head minus" :: x |> String.concat ";"};

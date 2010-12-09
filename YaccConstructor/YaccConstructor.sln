@@ -43,13 +43,22 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TempTests", "TempTests", "{12060C25-C65C-445E-AE07-EB2780B57AE9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests (2)", "Tests (2)", "{C606E7BF-43A2-474B-8121-CA27405A5ED7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{C606E7BF-43A2-474B-8121-CA27405A5ED7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{229E26F1-6FBF-4045-82BF-64550AE5FF2C}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tests\RACC\test_alt\test_alt.yrd = ..\Tests\RACC\test_alt\test_alt.yrd
+		..\Tests\RACC\test_alt\test_alt_1.yrd.in = ..\Tests\RACC\test_alt\test_alt_1.yrd.in
+		..\Tests\RACC\test_alt\test_alt_2.yrd.in = ..\Tests\RACC\test_alt\test_alt_2.yrd.in
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrToYard", "AntlrToYard\AntlrToYard.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCore.Test", "RACCCore.Test\RACCCore.Test.fsproj", "{A4A7A18D-971E-46AA-BD73-18AE9234F450}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls", "test_cls", "{644C6234-BBD8-4E22-AB92-6AEEC4B54895}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls_with_head", "test_cls_with_head", "{53281A66-089D-493D-9771-1445D5D7E87A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -262,5 +271,7 @@ Global
 		{A63CA12D-76B0-4739-A076-76F62030E6B0} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
 		{A4A7A18D-971E-46AA-BD73-18AE9234F450} = {5B0AD554-6DB3-43CA-878A-58874B89CAE2}
 		{229E26F1-6FBF-4045-82BF-64550AE5FF2C} = {C606E7BF-43A2-474B-8121-CA27405A5ED7}
+		{644C6234-BBD8-4E22-AB92-6AEEC4B54895} = {C606E7BF-43A2-474B-8121-CA27405A5ED7}
+		{53281A66-089D-493D-9771-1445D5D7E87A} = {C606E7BF-43A2-474B-8121-CA27405A5ED7}
 	EndGlobalSection
 EndGlobal

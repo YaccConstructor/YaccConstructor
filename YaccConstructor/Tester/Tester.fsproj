@@ -66,7 +66,7 @@
       <Project>{a63ca12d-76b0-4739-a076-76f62030e6b0}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\UnitTests\YardFrontend.Test.fsproj">
+    <ProjectReference Include="..\YardFrontend.Test\YardFrontend.Test.fsproj">
       <Name>YardFrontend.Test</Name>
       <Project>{5936d84d-a842-43b3-97fd-e2c6990e77db}</Project>
       <Private>True</Private>

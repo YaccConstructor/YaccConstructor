@@ -4,6 +4,7 @@ Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls.yrd --testp
 Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yrd --testpath ..\Tests\RACC\test_alt_in_cls\
 Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
 Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
+Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests
@@ -13,6 +14,7 @@ move ..\Tests\RACC\test_cls\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_alt_in_cls\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_tail\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_head\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\test_arithm_glr\*.fs  RACCGeneratedTests/
 
 del RACCCore.Test\test_*
 
@@ -33,3 +35,6 @@ call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls_head RACC
 
 call BatchSubstitute.cmd RACC.Actions RACC.Actions_Cls_tail RACCGeneratedTests\test_cls_with_tail.yrd.actions.fs >> RACCCore.Test\test_cls_with_tail.yrd.actions.fs
 call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls_tail RACCGeneratedTests\test_cls_with_tail.yrd.tables.fs >> RACCCore.Test\test_cls_with_tail.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Aritm_glr RACCGeneratedTests\test_arithm_glr.yrd.actions.fs >> RACCCore.Test\test_arithm_glr.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Aritm_glr RACCGeneratedTests\test_arithm_glr.yrd.tables.fs >> RACCCore.Test\test_arithm_glr.yrd.tables.fs

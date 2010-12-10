@@ -239,6 +239,67 @@ let tests =
                 path       = "test_cls\\test_cls_3.yrd.in"
                 rightValue = seq ["*;*" |> box]  
             })
+        (18,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict
+                        items = Tables_Aritm_glr.items
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_1.yrd.in"
+                rightValue = seq ["1" |> box]  
+            })
+        (19,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict
+                        items = Tables_Aritm_glr.items
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_2.yrd.in"
+                rightValue = seq ["3" |> box]  
+            })
+        (20,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict
+                        items = Tables_Aritm_glr.items
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_3.yrd.in"
+                rightValue = seq ["6" |> box]  
+            })
+        (21,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict
+                        items = Tables_Aritm_glr.items
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_4.yrd.in"
+                rightValue = seq ["2" |> box]  
+            })
+        (22,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict
+                        items = Tables_Aritm_glr.items
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
+                rightValue = seq ["5" |> box]  
+            })
+
     ]
     |> dict
 
@@ -354,5 +415,35 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Closure test 3`` () =
         let test = tests.[17]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr test 2`` () =
+        let test = tests.[19]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr test 3`` () =
+        let test = tests.[20]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr test 4`` () =
+        let test = tests.[21]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr test 5`` () =
+        let test = tests.[22]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr test 1`` () =
+        let test = tests.[18]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

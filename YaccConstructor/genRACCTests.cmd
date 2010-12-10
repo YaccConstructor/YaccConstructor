@@ -13,3 +13,23 @@ move ..\Tests\RACC\test_cls\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_alt_in_cls\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_tail\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_head\*.fs  RACCGeneratedTests/
+
+del RACCCore.Test\test_*
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Alt RACCGeneratedTests\test_alt.yrd.actions.fs >> RACCCore.Test\test_alt.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Alt RACCGeneratedTests\test_alt.yrd.tables.fs >> RACCCore.Test\test_alt.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Seq RACCGeneratedTests\test_seq.yrd.actions.fs >> RACCCore.Test\test_seq.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Seq RACCGeneratedTests\test_seq.yrd.tables.fs >> RACCCore.Test\test_seq.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Cls RACCGeneratedTests\test_cls.yrd.actions.fs >> RACCCore.Test\test_cls.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls RACCGeneratedTests\test_cls.yrd.tables.fs >> RACCCore.Test\test_cls.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_alt_in_cls RACCGeneratedTests\test_alt_in_cls.yrd.actions.fs >> RACCCore.Test\test_alt_in_cls.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_alt_in_cls RACCGeneratedTests\test_alt_in_cls.yrd.tables.fs >> RACCCore.Test\test_alt_in_cls.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Cls_head RACCGeneratedTests\test_cls_with_head.yrd.actions.fs >> RACCCore.Test\test_cls_with_head.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls_head RACCGeneratedTests\test_cls_with_head.yrd.tables.fs >> RACCCore.Test\test_cls_with_head.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Cls_tail RACCGeneratedTests\test_cls_with_tail.yrd.actions.fs >> RACCCore.Test\test_cls_with_tail.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls_tail RACCGeneratedTests\test_cls_with_tail.yrd.tables.fs >> RACCCore.Test\test_cls_with_tail.yrd.tables.fs

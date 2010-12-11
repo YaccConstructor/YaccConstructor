@@ -7,17 +7,25 @@ module AntlrToYard.Lexer
 open AntlrToYard.Tokens
 
 let comment_depth = ref 0
+
 }
 
+let eol = "\r\n" | '\n'
+
 rule main = parse
-  | "/*" { comment_depth := 1; comment lexbuf }
+  | "/*" { comment_depth := 1; multiline_comment lexbuf }
+  | "//" { singleline_comment lexbuf }
   | eof { EOF }
-  | _ { CHAR }
-and comment = parse
+  | _ { main lexbuf }
+and multiline_comment = parse
   | "/*"
-    { incr comment_depth; comment lexbuf }
+    { incr comment_depth; multiline_comment lexbuf }
   | "*/"
     { decr comment_depth;
-      if !comment_depth = 0 then COMMENT else comment lexbuf }
+      if !comment_depth = 0 then MULTILINE_COMMENT else multiline_comment lexbuf }
   | eof { EOF }
-  | _ { comment lexbuf }
+  | _ { multiline_comment lexbuf }
+and singleline_comment = parse
+  | eol { SINGLELINE_COMMENT }
+  | _ { singleline_comment lexbuf }
+  | eof { EOF }

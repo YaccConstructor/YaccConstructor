@@ -1,6 +1,7 @@
 ﻿module AntlrToYard.Tokens
 
 type token = 
-  | COMMENT
+  | MULTILINE_COMMENT
+  | SINGLELINE_COMMENT
   | CHAR
   | EOF

@@ -15,7 +15,7 @@ let testParser = function
 let () =
 
     let testPath = ref @"..\.."
-    let testFile = ref "test.g"
+    let testFile = ref "C.g"
 
     let commandLineSpecs =
         ["--testpath", ArgType.String (fun s -> testPath := s), "Directory where test files are placed"

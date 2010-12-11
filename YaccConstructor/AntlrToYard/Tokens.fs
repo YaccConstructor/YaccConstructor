@@ -3,3 +3,4 @@
 type token = 
   | COMMENT
   | CHAR
+  | EOF

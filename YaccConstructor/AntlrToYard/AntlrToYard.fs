@@ -1,6 +1,9 @@
-﻿open AntlrToYard.Lexer
+﻿module AntlrToYard.Parser
+
 open Microsoft.FSharp.Text.Lexing
 open FParsec.CharParsers
+
+open AntlrToYard.Lexer
 open AntlrToYard.Tokens
 
 let testParser = function
@@ -26,10 +29,10 @@ let () =
     let lexbuf = LexBuffer<_>.FromTextReader reader//LexBuffer<_>.FromChars  ("abc/* def */foo".ToCharArray())
     let lexems = seq {
                        while not lexbuf.IsPastEndOfStream do
-                             yield AntlrLexer.main lexbuf  
+                             yield AntlrToYard.Lexer.main lexbuf  
                       }
     //let token = AntlrLexer.main lexbuf
     //testParser k
-    let a = (sprintf "%A" lexems)
-    let b =1
-    printf "%s" a
+    let a = Seq.toList lexems
+    let b = sprintf "%A" a
+    printf "%s" b

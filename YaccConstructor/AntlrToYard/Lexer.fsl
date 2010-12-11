@@ -1,0 +1,23 @@
+{
+(* Run with fslex.exe --unicode Lexer.fsl *)
+#light "off"
+
+module AntlrToYard.Lexer
+
+open AntlrToYard.Tokens
+
+let comment_depth = ref 0
+}
+
+rule main = parse
+  | "/*" { comment_depth := 1; comment lexbuf }
+  | eof { EOF }
+  | _ { CHAR }
+and comment = parse
+  | "/*"
+    { incr comment_depth; comment lexbuf }
+  | "*/"
+    { decr comment_depth;
+      if !comment_depth = 0 then COMMENT else comment lexbuf }
+  | eof { EOF }
+  | _ { comment lexbuf }

@@ -1,0 +1,21 @@
+{
+(* Run with fslex.exe --unicode Lexer.fsl *)
+#light "off"
+
+module AntlrToYard.Lexer
+
+let comment_depth = ref 0
+}
+
+rule main = parse
+  | "/*" { printf "%A" "/*"; comment_depth := 1; comment lexbuf; main lexbuf }
+  | eof { () }
+  | _ { printf "%A" "a"; main lexbuf }
+and comment = parse
+  | "/*"
+    { printf "%A" "/*"; incr comment_depth; comment lexbuf }
+  | "*/"
+    { printf "%A" "*/"; decr comment_depth;
+      if !comment_depth = 0 then () else comment lexbuf }
+  | eof { () }
+  | _ { printf "%A" "b"; comment lexbuf }

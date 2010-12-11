@@ -37,13 +37,15 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
-    <Compile Include="lexer.fs" />
-    <Compile Include="ANTLR_expand_mlc.fs" />
-    <Compile Include="AntlrToYard.fs" />
     <None Include="ANTLR_expand_mlc.yrd" />
-    <None Include="C.g" />
+    <Compile Include="Tokens.fs" />
+    <Compile Include="AntlrToYard.fs" />
     <None Include="compile_grammars.bat" />
+    <None Include="C.g" />
     <None Include="css21.g" />
+    <None Include="Lexer.fsl" />
+    <Compile Include="Lexer.fs" />
+    <None Include="ANTLR.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

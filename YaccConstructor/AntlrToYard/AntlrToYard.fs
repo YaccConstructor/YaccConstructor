@@ -15,7 +15,7 @@ let testParser = function
 let () =
 
     let testPath = ref @"..\.."
-    let testFile = ref "C.g"
+    let testFile = ref "test.g"
 
     let commandLineSpecs =
         ["--testpath", ArgType.String (fun s -> testPath := s), "Directory where test files are placed"
@@ -25,11 +25,12 @@ let () =
     ArgParser.Parse commandLineSpecs
 
     let content = System.IO.File.ReadAllText(!testPath + "\\" + !testFile)
+    Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader//LexBuffer<_>.FromChars  ("abc/* def */foo".ToCharArray())
-    let lexems = seq {
+    let lexems = seq { 
                        while not lexbuf.IsPastEndOfStream do
-                             yield AntlrToYard.Lexer.main lexbuf  
+                             yield Lexer.main lexbuf  
                       }
     //let token = AntlrLexer.main lexbuf
     //testParser k

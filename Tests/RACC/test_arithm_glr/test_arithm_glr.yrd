@@ -1,5 +1,5 @@
 {
-let value x = x.value
+let value x = (x:>Lexeme<string>).value
 }
 +s: res = e {res};
 e: n = NUMBER {value n |> int}

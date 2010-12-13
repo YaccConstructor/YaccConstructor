@@ -290,14 +290,6 @@ module  TableInterpreter =
                             then Set.add y.Value buf
                             else buf
                     else buf)
-                Set.empty
-
-        let f = (res |> seq |> set)
-        let g = f.MaximumElement = f.MinimumElement
-        let w1 = f.MaximumElement |> hash
-        let w2 = f.MinimumElement |> hash
-
-        let h = w1 = w2
-        
-        Set.iter PrintTree f
+                Set.empty               
+        Set.iter PrintTree res
         res

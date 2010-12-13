@@ -1,10 +1,10 @@
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_seq.yrd --testpath ..\Tests\RACC\test_seq\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_alt.yrd --testpath ..\Tests\RACC\test_alt\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls.yrd --testpath ..\Tests\RACC\test_cls\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yrd --testpath ..\Tests\RACC\test_alt_in_cls\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
-Main\bin\Debug\Main.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_seq.yrd --testpath ..\Tests\RACC\test_seq\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_alt.yrd --testpath ..\Tests\RACC\test_alt\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls.yrd --testpath ..\Tests\RACC\test_cls\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yrd --testpath ..\Tests\RACC\test_alt_in_cls\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests

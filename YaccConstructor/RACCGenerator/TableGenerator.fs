@@ -102,12 +102,18 @@ type TableGenerator(outPath: string) =
                                     |> Set.filter (fun rule -> 
                                                     rule.FromStateID = snd elt
                                                     && rule.Symbol = smb)                                              
-                                    |> Set.map (fun rule -> hash (item, smb), (fst elt, rule.ToStateID)))
+                                    |> Set.map (fun rule -> hash (item, smb), (fst elt, rule.ToStateID)))                                    
                             |>Set.unionMany)                        
                         items
                         |>Set.unionMany)
                 symbols
-            |>Set.unionMany
+            |> Set.unionMany
+            (*|> fun a -> 
+                a
+                |> Set.map (fun (x,y) -> x)
+                |> Set.map 
+                    (fun x -> x, Set.filter (fun (a,b) -> x = a) a |> Set.map snd)*)
+            
         
         let items dlfaMap =
             List.map 
@@ -152,7 +158,7 @@ type TableGenerator(outPath: string) =
             let str2 = "let items = \n" + ToString.listToString items + "\n"
             write str2
             let goto = goto items (dict dlfaMap)
-            let str3 = "let gotoSet = \n" + ToString.setToString goto + "\n"
+            let str3 = "let gotoSet = \n" + ToString.setToString goto + "\n"  //|> dict"
             write str3
             textWriter.CloseOutStream ()
                 

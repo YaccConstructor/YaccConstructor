@@ -1,5 +1,4 @@
 {
-let value x =
-    ((x:>Lexeme<string>).value)
+let value x = x.value
 }
 +s: res = (MINUS {"list minus"})* oneMinus = MINUS {res |> fun x -> x @ ["tail minus"] |> String.concat ";"};

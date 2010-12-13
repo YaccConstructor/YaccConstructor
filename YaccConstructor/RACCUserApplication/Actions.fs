@@ -6,8 +6,7 @@ module RACC.Actions
 
 open Yard.Generators.RACCGenerator
 
-let value x =
-    ((x:>Lexeme<string>).value)
+let value x = x.value
 
 let s0 expr = 
     let inner () = 

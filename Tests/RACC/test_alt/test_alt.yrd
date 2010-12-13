@@ -1,6 +1,5 @@
 {
-let value x =
-    ((x:>Lexeme<string>).value)
+let value x = x.value
 }
 +s: p = PLUS {"Detected: " + (value p)} 
   | m = MULT {"Detected: " + (value m)};

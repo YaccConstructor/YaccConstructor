@@ -249,7 +249,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_1.yrd.in"
-                rightValue = seq ["1" |> box]  
+                rightValue = seq [1 |> box]  
             })
         (19,
             {
@@ -261,7 +261,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_2.yrd.in"
-                rightValue = seq ["3" |> box]  
+                rightValue = seq [3 |> box]  
             })
         (20,
             {
@@ -273,7 +273,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_3.yrd.in"
-                rightValue = seq ["6" |> box]  
+                rightValue = seq [6 |> box]  
             })
         (21,
             {
@@ -285,7 +285,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_4.yrd.in"
-                rightValue = seq ["2" |> box]  
+                rightValue = seq [2 |> box]  
             })
         (22,
             {
@@ -297,7 +297,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
-                rightValue = seq ["5" |> box]  
+                rightValue = seq [5 |> box; 3 |> box; -3 |> box; 3 |> box; -1 |> box]  
             })
 
     ]

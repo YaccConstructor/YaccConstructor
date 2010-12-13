@@ -3,7 +3,7 @@
 //date:12/13/2010 12:14:15
 
 #light "off"
-module Yard.Generators.RACCGenerator.Tables_Aritm_glr
+module Yard.Generators.RACCGenerator.Tables
 
 open Yard.Generators.RACCGenerator
 

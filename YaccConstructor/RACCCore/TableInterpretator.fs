@@ -36,12 +36,22 @@ module  TableInterpreter =
                 (fun buf state -> 
                     try 
                         Set.filter (fun (x,y) -> x = hash ((state.itemName,state.position),DSymbol(symbol.name))) tables.gotoSet
-                        |> Set.map snd
-                        |> Set.map (fun gt -> Set.add  {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace} buf)
-                        |> Set.unionMany
-                    with _ -> buf)
+                        |> fun x -> 
+                            if x.IsEmpty 
+                            then 
+                                buf
+                            else
+                                Set.map snd x
+                                |> Set.map (fun gt -> Set.add  {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace} buf)
+                                |> Set.unionMany
+                    with _ -> 
+                        printfn "\n\n\FAIL!!!\n\n"
+                        buf)
                 Set.empty
-                states        
+                states   
+#if DEBUG
+        printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res     
+#endif
         res
 
     let private getDFA tables itemName = tables.automataDict.[itemName]
@@ -282,5 +292,12 @@ module  TableInterpreter =
                     else buf)
                 Set.empty
 
-        Set.iter PrintTree res
+        let f = (res |> seq |> set)
+        let g = f.MaximumElement = f.MinimumElement
+        let w1 = f.MaximumElement |> hash
+        let w2 = f.MinimumElement |> hash
+
+        let h = w1 = w2
+        
+        Set.iter PrintTree f
         res

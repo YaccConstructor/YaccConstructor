@@ -57,9 +57,8 @@ type CodeGenerator(outPath: string) =
             let rAltFName = "yardRAltAction"
             let elemFName = "yardElemAction"
             let clsFName = "yardClsAction"
-            let indentString l = 
-                List.init l (fun i -> "    ")
-                |> String.concat ""                 
+            let indentString l = String.replicate l "    "
+                
             match body with 
             | PSeq(elems,expr) -> 
                 let num = Enumerator()
@@ -88,8 +87,8 @@ type CodeGenerator(outPath: string) =
                 + "\n"
                 + indentString (indentSize + 1)
                 + if expr.IsSome
-                  then "box (" + Source.toString expr.Value + ")\n"
-                  else "box ()\n"
+                  then "(" + Source.toString expr.Value + ")\n"
+                  else "()\n"
                 + indentString indentSize + notMatched "RESeq" + "\n"
                  
             | PAlt(alt1,alt2)  -> 
@@ -114,7 +113,7 @@ type CodeGenerator(outPath: string) =
                  indentString indentSize + "match expr with\n"
                + indentString indentSize + "| REClosure(lst) -> \n" 
                + indentString (indentSize + 1) + "let " + clsFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
-               + indentString (indentSize + 1) + "List.map (fun x -> (" + clsFName + " x) :?>_) lst \n"
+               + indentString (indentSize + 1) + "List.map " + clsFName + " lst \n"
                + indentString indentSize + notMatched "REClosure" + "\n"
                
             | _ -> "NotSupported"
@@ -125,7 +124,7 @@ type CodeGenerator(outPath: string) =
             let genRule rule =
                 let actName =  rule.name + enum.Next().ToString()
                 ruleToAction := (rule.name, actName) :: !ruleToAction
-                "let " + actName + " expr = \n" + generateBody 1 rule.body
+                "let " + actName + " expr = \n    let inner () = \n" + generateBody 2 rule.body + "    box (inner ())"
             List.map genRule rules
 
         let genearte grammar= 

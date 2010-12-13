@@ -2,7 +2,7 @@
 //source grammar:..\Tests\RACC\test_arithm_glr\\test_arithm_glr.yrd
 //date:12/13/2010 12:14:16
 
-module RACC.Actions_Aritm_glr
+module RACC.Actions
 
 open Yard.Generators.RACCGenerator
 

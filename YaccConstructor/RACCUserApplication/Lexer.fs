@@ -1,19 +1,32 @@
-# 1 "userlexer.fsl"
+# 1 "UserLexer.fsl"
  
-// UserLexer.fs
+//  UserLexer.fs contains simple lexer for testing.
 //
-// Copyright 2009-2010 Semen Grigorev
+//  for build:  fslex UserLexer.fsl --unicode -o Lexer.fs
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation.
+//  Copyright 2010 Semen Grigorev <rsdpisuy@gmail.com>
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software:you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module UserLexer
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Yard.Generators.RACCGenerator
  
-# 16 "lexer.fs"
+# 29 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -46,49 +59,50 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 21 "userlexer.fsl"
-                        {name = "NUMBER"; value = LexBuffer.LexemeString(lexbuf)}
-# 51 "lexer.fs"
+# 34 "UserLexer.fsl"
+                        {name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 64 "Lexer.fs"
           )
   | 1 -> ( 
-# 23 "userlexer.fsl"
-                        {name = "PLUS"; value = LexBuffer.LexemeString(lexbuf)}
-# 56 "lexer.fs"
+# 36 "UserLexer.fsl"
+                        {name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 69 "Lexer.fs"
           )
   | 2 -> ( 
-# 25 "userlexer.fsl"
-                        {name = "MINUS"; value = LexBuffer.LexemeString(lexbuf)}
-# 61 "lexer.fs"
+# 38 "UserLexer.fsl"
+                        {name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 74 "Lexer.fs"
           )
   | 3 -> ( 
-# 27 "userlexer.fsl"
-                        {name = "MULT"; value = LexBuffer.LexemeString(lexbuf)}
-# 66 "lexer.fs"
+# 40 "UserLexer.fsl"
+                        {name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 79 "Lexer.fs"
           )
   | 4 -> ( 
-# 29 "userlexer.fsl"
-                        {name = "DIV"; value = LexBuffer.LexemeString(lexbuf)}
-# 71 "lexer.fs"
+# 42 "UserLexer.fsl"
+                        {name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 84 "Lexer.fs"
           )
   | 5 -> ( 
-# 31 "userlexer.fsl"
-                        {name = "LBR"; value = LexBuffer.LexemeString(lexbuf)}
-# 76 "lexer.fs"
+# 44 "UserLexer.fsl"
+                        {name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 89 "Lexer.fs"
           )
   | 6 -> ( 
-# 33 "userlexer.fsl"
-                        {name = "RBR"; value = LexBuffer.LexemeString(lexbuf)}
-# 81 "lexer.fs"
+# 46 "UserLexer.fsl"
+                        {name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 94 "Lexer.fs"
           )
   | 7 -> ( 
-# 34 "userlexer.fsl"
-                        {name = "EOF"; value = LexBuffer.LexemeString(lexbuf)}
-# 86 "lexer.fs"
+# 47 "UserLexer.fsl"
+                        {name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 99 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 36 "userlexer.fsl"
+# 49 "UserLexer.fsl"
   
+
 type Lexer(lb) = 
     let locBuf = ref []
     interface ILexer<string> with        
@@ -109,4 +123,4 @@ type Lexer(lb) =
     end
 
  
-# 3000000 "lexer.fs"
+# 3000000 "Lexer.fs"

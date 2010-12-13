@@ -1,5 +1,7 @@
 ﻿{
-// UserLexer.fs
+//  UserLexer.fs contains simple lexer for testing.
+//
+//  for build:  fslex UserLexer.fsl --unicode -o Lexer.fs
 //
 //  Copyright 2010 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -29,24 +31,24 @@ open Yard.Generators.RACCGenerator
 
  rule tokens = parse
  | digit+ 
-        {{name = "NUMBER"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "+" 
-        {{name = "PLUS"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "-" 
-        {{name = "MINUS"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "*" 
-        {{name = "MULT"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "/" 
-        {{name = "DIV"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "(" 
-        {{name = "LBR"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | ")" 
-        {{name = "RBR"; value = LexBuffer.LexemeString(lexbuf)}}
- | eof  {{name = "EOF"; value = LexBuffer.LexemeString(lexbuf)}}
+        {{name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | eof  {{name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}}
 
  {
 
- type Lexer(lb) = 
+type Lexer(lb) = 
     let locBuf = ref []
     interface ILexer<string> with        
     

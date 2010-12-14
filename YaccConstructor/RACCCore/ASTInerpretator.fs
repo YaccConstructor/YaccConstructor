@@ -21,13 +21,18 @@ namespace Yard.Generators.RACCGenerator
 
 open Yard.Generators.RACCGenerator.AST
 
+type Status =
+    | Success of obj
+    | DelByFilter
+    | Fail
+    
 
 module ASTInterpretator = 
-    let rec interp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) tree = 
+    let rec lInterp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) tree = 
         let reast = RegExpAST()
         match tree with        
         | Node (childs,name,value) ->
-            List.map (interp ruleToActon) childs
+            List.map (lInterp ruleToActon) childs
             |> (Set.minElement value.trace.Head |> reast.BuildREAST)
             |> fun x -> 
                    match x with 
@@ -36,5 +41,14 @@ module ASTInterpretator =
             match value.value with
             | LeafV(v) -> box v
             | _        -> failwith "AST is incorrect. Leaf contains NodeV value."
+
+    let interp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) tree = 
+        try
+            Success(lInterp ruleToActon tree)
+        with 
+        | Constants.CheckerFalse -> DelByFilter
+        | _ -> Fail
+
+
 
         

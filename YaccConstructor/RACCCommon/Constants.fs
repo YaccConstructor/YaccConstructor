@@ -22,3 +22,5 @@ namespace  Yard.Generators.RACCGenerator
 module Constants =
     let raccStartRuleName = "raccStart"
 
+    exception CheckerFalse
+

@@ -299,6 +299,42 @@ let tests =
                 path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
                 rightValue = seq [5 |> box; 3 |> box; -3 |> box; 3 |> box; -1 |> box]  
             })
+        (23,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_L_attr.gotoSet
+                        automataDict = Tables_L_attr.autumataDict
+                        items = Tables_L_attr.items
+                    }
+                actionsMap = RACC.Actions_L_attr.ruleToAction
+                path       = "test_l_attr\\test_l_attr_1.yrd.in"
+                rightValue = seq [3 |> box]  
+            })
+        (24,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Simple_checker.gotoSet
+                        automataDict = Tables_Simple_checker.autumataDict
+                        items = Tables_Simple_checker.items
+                    }
+                actionsMap = RACC.Actions_Simple_checker.ruleToAction
+                path       = "test_simple_checker\\test_simple_checker_1.yrd.in"
+                rightValue = seq ["First alt. Value = 3.0" |> box]  
+            })
+        (25,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Simple_checker.gotoSet
+                        automataDict = Tables_Simple_checker.autumataDict
+                        items = Tables_Simple_checker.items
+                    }
+                actionsMap = RACC.Actions_Simple_checker.ruleToAction
+                path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
+                rightValue = seq ["Second alt. Value = 7.0" |> box]  
+            })
 
     ]
     |> dict
@@ -312,7 +348,9 @@ let run path tables actions =
     let buf = run_common path 
     let l = UserLexer.Lexer(buf)        
     let trees = TableInterpreter.run l tables            
-    Seq.map (fun tree -> ASTInterpretator.interp actions tree) trees    
+    Seq.map (fun tree -> ASTInterpretator.interp actions tree) trees
+    |> Seq.filter (function | Success _ -> true | _ -> false)
+    |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")  
 
 [<TestFixture>]
 type ``RACC core tests`` ()=    
@@ -445,5 +483,23 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Arithm glr test 1`` () =
         let test = tests.[18]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``L attribute test 1`` () =
+        let test = tests.[23]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Simple checker test 1`` () =
+        let test = tests.[24]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Simple checker test 2`` () =
+        let test = tests.[25]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

@@ -37,9 +37,11 @@ type CodeGenerator(outPath: string) =
             write ("//source grammar:" + grammarName )
             write ("//date:" + System.DateTime.Now.ToString())
             write ""
-            write ("module RACC.Actions")
+            write "module RACC.Actions"
             write ""
-            write ("open Yard.Generators.RACCGenerator")
+            write "open Yard.Generators.RACCGenerator"
+            write ""
+            write "exception CheckerFalse"
 
         let notMatched expectedType = 
             "| x -> \"Unexpected type of node\\nType \" + x.ToString() + \" is not expected in this position\\n" + expectedType + " was expected.\" |> failwith"
@@ -71,6 +73,15 @@ type CodeGenerator(outPath: string) =
                         elems
                     
                 let namesMap = dict namesPair
+                                
+                let checkersMap =
+                    List.map 
+                        (fun elem -> 
+                            if Option.isSome elem.checker
+                            then  Source.toString elem.binding.Value, "if not (" + Source.toString elem.checker.Value + ") then raise Constants.CheckerFalse\n"
+                            else "_","")
+                        elems
+                    |> dict
 
                 let genElem elem =
                     if Option.isSome elem.binding
@@ -80,7 +91,12 @@ type CodeGenerator(outPath: string) =
                         + indentString (indentSize + 2) + "let " + elemFName + " expr = \n" + eFun + "\n"
                         + indentString (indentSize + 2) + elemFName + "(" + namesMap.[Source.toString elem.binding.Value] + ")"
                     else ""
-                                        
+                    + try 
+                        "\n"+indentString (indentSize + 1) + checkersMap.[Source.toString elem.binding.Value]
+                      with _ -> ""
+
+                        
+                                           
                 indentString indentSize + "match expr with\n"
                 + indentString indentSize + "| RESeq [" + (List.unzip namesPair |> snd |> String.concat "; ") + "] -> \n"
                 + (List.map genElem elems |> String.concat "\n")
@@ -102,9 +118,14 @@ type CodeGenerator(outPath: string) =
                + indentString (indentSize + 1) + "let " + rAltFName + " expr = \n" + rFun + "\n"
                + indentString (indentSize + 1) + rAltFName + " x \n"
                + indentString indentSize + notMatched "REAlt" + "\n"
+            
+            | PRef(x,arg) ->
+                 indentString indentSize + "match expr with\n" 
+               + indentString indentSize + "| RELeaf " + Source.toString x + " -> (" + Source.toString x + " :?> _ )" 
+               + (if arg.IsSome then Source.toString arg.Value else "") + " \n"
+               + indentString indentSize + notMatched "RELeaf" + "\n"
 
-            | PToken (x)
-            | PRef(x,_) ->
+            | PToken (x) ->
                  indentString indentSize + "match expr with\n" 
                + indentString indentSize + "| RELeaf " + "t" + Source.toString x + " -> " + "t" + Source.toString x + " :?> 'a\n"
                + indentString indentSize + notMatched "RELeaf" + "\n"
@@ -123,8 +144,13 @@ type CodeGenerator(outPath: string) =
         let generateRules rules =            
             let genRule rule =
                 let actName =  rule.name + enum.Next().ToString()
+                let args = 
+                    rule.args
+                    |> List.map Source.toString
+                    |> String.concat ") ("
+                    |> fun x -> if x.Trim() = "" then "" else "(" + x + ")"
                 ruleToAction := (rule.name, actName) :: !ruleToAction
-                "let " + actName + " expr = \n    let inner () = \n" + generateBody 2 rule.body + "    box (inner ())"
+                "let " + actName + " expr = \n    let inner " + args + " = \n" + generateBody 2 rule.body + "    box (inner)"
             List.map genRule rules
 
         let genearte grammar= 

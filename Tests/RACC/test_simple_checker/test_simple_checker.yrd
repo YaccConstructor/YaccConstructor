@@ -1,0 +1,7 @@
+{
+let value x = (x:>Lexeme<string>).value
+}
++s : l=NUMBER PLUS r=NUMBER 
+      =>{(value l |> float) + (value r |> float) < 5.0}=> 
+      lst = (PLUS n=NUMBER {value n |> float})* {"First alt. Value = " + string ((value l |> float) + (value r |> float))}
+   | l=NUMBER PLUS r=NUMBER PLUS s=NUMBER {"Second alt. Value = " + string ((value l |> float) + (value r |> float))} ;

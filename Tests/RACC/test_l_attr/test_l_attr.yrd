@@ -1,0 +1,5 @@
+{
+let value x = (x:>Lexeme<string>).value         
+}
++s: <res:int> = e[1] {res};
+e[i]: n=NUMBER {(value n |> int) + i};

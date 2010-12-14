@@ -5,6 +5,8 @@ Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yr
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_l_attr.yrd --testpath ..\Tests\RACC\test_l_attr\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_simple_checker.yrd --testpath ..\Tests\RACC\test_simple_checker\
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests
@@ -15,6 +17,8 @@ move ..\Tests\RACC\test_alt_in_cls\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_tail\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_cls_with_head\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_arithm_glr\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\test_l_attr\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\test_simple_checker\*.fs  RACCGeneratedTests/
 
 del RACCCore.Test\test_*
 
@@ -38,3 +42,9 @@ call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Cls_tail RACC
 
 call BatchSubstitute.cmd RACC.Actions RACC.Actions_Aritm_glr RACCGeneratedTests\test_arithm_glr.yrd.actions.fs >> RACCCore.Test\test_arithm_glr.yrd.actions.fs
 call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Aritm_glr RACCGeneratedTests\test_arithm_glr.yrd.tables.fs >> RACCCore.Test\test_arithm_glr.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_L_attr RACCGeneratedTests\test_l_attr.yrd.actions.fs >> RACCCore.Test\test_l_attr.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_L_attr RACCGeneratedTests\test_l_attr.yrd.tables.fs >> RACCCore.Test\test_l_attr.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Simple_checker RACCGeneratedTests\test_simple_checker.yrd.actions.fs >> RACCCore.Test\test_simple_checker.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Simple_checker RACCGeneratedTests\test_simple_checker.yrd.tables.fs >> RACCCore.Test\test_simple_checker.yrd.tables.fs

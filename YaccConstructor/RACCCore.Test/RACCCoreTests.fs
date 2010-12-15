@@ -321,7 +321,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_1.yrd.in"
-                rightValue = seq ["First alt. Value = 3.0" |> box]  
+                rightValue = seq [7 |> box]  
             })
         (25,
             {
@@ -333,7 +333,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
-                rightValue = seq ["Second alt. Value = 7.0" |> box]  
+                rightValue = seq [12 |> box; 12 |> box]  
             })
 
     ]

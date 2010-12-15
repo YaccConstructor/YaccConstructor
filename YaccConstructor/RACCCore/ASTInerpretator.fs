@@ -24,7 +24,7 @@ open Yard.Generators.RACCGenerator.AST
 type Status =
     | Success of obj
     | DelByFilter
-    | Fail
+    | Fail of string
     
 
 module ASTInterpretator = 
@@ -47,7 +47,7 @@ module ASTInterpretator =
             Success(lInterp ruleToActon tree)
         with 
         | Constants.CheckerFalse -> DelByFilter
-        | _ -> Fail
+        | e -> Fail e.Message
 
 
 

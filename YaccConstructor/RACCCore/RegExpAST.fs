@@ -39,60 +39,7 @@ type RegExpAST() =
                 | TAlt2S x, TAlt2E y 
                 | TClsS x, TClsE y  when x=y -> true
                 | _                          -> false
-            | _ -> false
-
-        let rec verifyTrace trace =
-            match trace with
-            | hd::tl ->                 
-                match hd with
-                | FATrace (TSmbS x) ->                                         
-                    match tl with 
-                    | _hd::tl ->                   
-                        match _hd with
-                        | FATrace (TSmbE y)-> true,tl
-                        | _             -> false,[]
-                    | _   -> false,[]
-                | FATrace (TAlt1S x)->
-                    let r,_tl = verifyTrace tl 
-                    if r
-                    then
-                        match _tl with
-                        | FATrace (TAlt1E y)::tl -> verifyTrace tl
-                        | _          -> false,[]
-                    else false,[]
-                | FATrace (TAlt2S x) ->
-                    let r,_tl = verifyTrace tl
-                    if r
-                    then
-                        match _tl with
-                        | FATrace (TAlt2E y)::tl -> verifyTrace tl
-                        | _          -> false,[]
-                    else false,[]
-
-                | FATrace (TSeqS x) ->
-                    let rec inner tl =
-                        let r,_tl = verifyTrace tl
-                        if r
-                        then
-                            match _tl with
-                            | FATrace (TSeqE y)::tl -> true, tl
-                            | _          -> inner _tl                    
-                        else false,[]
-                    inner tl
-
-                 | FATrace (TClsS x) ->
-                    let rec inner tl =
-                        let r,_tl = verifyTrace tl
-                        if r
-                        then
-                            match _tl with
-                            | FATrace (TClsE y)::tl -> true, tl
-                            | _          -> inner _tl                    
-                        else false,[]
-                    inner tl
-                | _    -> false,[]
-                    
-            | []     -> true,[]
+            | _ -> false        
 
         let rec buildREAST trace values =
             match trace with
@@ -103,25 +50,25 @@ type RegExpAST() =
                     | _hd::tl ->                   
                         match _hd with
                         | FATrace (TSmbE y) -> List.head values |> RELeaf, tl, List.tail values
-                        | _             -> RELeaf null,[],[]
+                        | _                 -> RELeaf null,[],[]
                     | _   -> RELeaf null,[],[]
                 | FATrace (TAlt1S x) ->
                     let r,_tl,_val = buildREAST tl values
                     match _tl with
                     | FATrace (TAlt1E y)::tl -> REAlt (Some(r),None), tl, _val
-                    | _          -> RELeaf null,[],[]                
+                    | _                      -> RELeaf null,[],[]                
                 | FATrace (TAlt2S x)->
                     let r,_tl,_val = buildREAST tl values
                     match _tl with
                     | FATrace (TAlt2E y)::tl -> REAlt (None,Some(r)), tl, _val
-                    | _          -> RELeaf null,[],[]   
+                    | _                      -> RELeaf null,[],[]   
 
                 | FATrace (TSeqS x)->
                     let rec inner buf tl vals =
                         let r,_tl,_val = buildREAST tl vals                        
                         match _tl with
                         | FATrace (TSeqE y)::tl -> r::buf |> List.rev |> RESeq, tl, _val
-                        | _          -> inner (r::buf) _tl _val                                  
+                        | _                     -> inner (r::buf) _tl _val                                  
                     inner [] tl values
 
                 | FATrace (TClsS x)->
@@ -132,12 +79,12 @@ type RegExpAST() =
                             let r,_tl,_val = buildREAST tl vals                        
                             match _tl with                        
                             | FATrace (TClsE y)::tl -> r::buf |> List.rev |> REClosure, tl, _val
-                            | _          -> inner (r::buf) _tl _val                                  
+                            | _                     -> inner (r::buf) _tl _val                                  
                     inner [] tl values 
                 
                 | _    -> RELeaf null,[],[]
                     
-            | []     -> RELeaf null,[],[]
+            | []  -> RELeaf null,[],[]
 
         let rec buildCorrectTrace trace =
             match trace with

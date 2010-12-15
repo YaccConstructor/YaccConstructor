@@ -1,4 +1,4 @@
-﻿// CodeGenerator.fs contains functions for action code generation
+﻿//  CodeGenerator.fs contains functions for action code generation
 //
 //  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -90,7 +90,7 @@ type CodeGenerator(outPath: string) =
                         + indentString (indentSize + 2) + elemFName + "(" + namesMap.[Source.toString elem.binding.Value] + ")"
                     else ""
                     + try 
-                        "\n"+indentString (indentSize + 1) + checkersMap.[Source.toString elem.binding.Value]
+                        "\n" + indentString (indentSize + 1) + checkersMap.[Source.toString elem.binding.Value]
                       with _ -> ""
 
                         

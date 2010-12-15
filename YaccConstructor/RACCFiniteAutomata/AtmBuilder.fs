@@ -94,8 +94,7 @@ type AtmBuilder(enumerator:Enumerator) =
             {        
             
                 NIDToStateMap = 
-                    let d = 
-                        atm.NIDToStateMap
+                    let d = atm.NIDToStateMap
                     d.Add(startStateID,startStateID)
                     d.Add(finaleStateID,finaleStateID)
                     d
@@ -204,5 +203,5 @@ type AtmBuilder(enumerator:Enumerator) =
         member self.Cls  atm clsSlbl clsElbl = cls atm clsSlbl clsElbl
         member self.AddInHead sttInfo smb lbl atm = addInHead sttInfo smb lbl atm
         member self.Append sttInfo smb lbl atm = append sttInfo smb lbl atm
-        member self.Trivial sttInfo1 sttInfo2 smb lbl =trivial sttInfo1 sttInfo2 smb lbl
+        member self.Trivial sttInfo1 sttInfo2 smb lbl = trivial sttInfo1 sttInfo2 smb lbl
     end

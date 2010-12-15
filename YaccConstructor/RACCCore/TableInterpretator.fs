@@ -175,8 +175,7 @@ module  TableInterpreter =
                                             parserState with
                                                 inpSymbol = {name = res.rItem.itemName; value = ""} 
                                                 i         = res.rI
-                                                statesSet = 
-                                                
+                                                statesSet =                                                 
                                                     Set.map 
                                                         (fun stt -> 
                                                             let trace = 

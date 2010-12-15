@@ -1,4 +1,4 @@
-﻿// TableGenerator.fs contains functions for tables generation (goto, items, etc)
+﻿//  TableGenerator.fs contains functions for tables generation (goto, items, LFA data, etc)
 //
 //  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
 //

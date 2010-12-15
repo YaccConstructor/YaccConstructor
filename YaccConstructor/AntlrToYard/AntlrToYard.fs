@@ -1,15 +1,9 @@
 ﻿module AntlrToYard.Parser
 
 open Microsoft.FSharp.Text.Lexing
-open FParsec.CharParsers
 
 open AntlrToYard.Lexer
 open AntlrToYard.Tokens
-
-let testParser = function
-    | Success (v, _, _)  -> printfn "%s" (v.ToString())
-    | Failure (msg, err, _) -> printf "%s" msg
-    | _ -> printf "???"
 
 
 let () =

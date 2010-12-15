@@ -1,7 +1,15 @@
 {
 let value x = (x:>Lexeme<string>).value
+
+type OpType =
+   | Undef
+   | Mult
+   | Plus
+   | Minus
 }
-+s : l=NUMBER PLUS r=NUMBER 
-      =>{(value l |> float) + (value r |> float) < 5.0}=> 
-      lst = (PLUS n=NUMBER {value n |> float})* {"First alt. Value = " + string ((value l |> float) + (value r |> float))}
-   | l=NUMBER PLUS r=NUMBER PLUS s=NUMBER {"Second alt. Value = " + string ((value l |> float) + (value r |> float))} ;
++s : <res:int> = e[Undef] {res};
+e[prevOp] : n = NUMBER {value n |> int}
+          | l = e[Undef] <op,opType> = (PLUS { (+),Plus } | MULT { ( * ),Mult } | MINUS { (-),Minus }) 
+            =>{match prevOp,opType with | Undef,_ | _,Mult | ((Plus|Minus),(Plus|Minus)) -> true | _,_ -> false}=>
+            r = e[opType] {op l r} 
+          ;

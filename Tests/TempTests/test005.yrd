@@ -1,2 +1,0 @@
-t: NUMBER{};
-+expr:x = t y = (PLUS t)* {x,y};

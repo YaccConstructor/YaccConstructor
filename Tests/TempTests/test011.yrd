@@ -1,4 +1,0 @@
-+s : res = e { res };
-e : <r:float>=e op=(PLUS {( + )} | MINUS {( - )} | MULT {( * )} | DIV {( / )} ) <l:float>=e {op r l}
-  | LEFT res=e RIGHT {res}  
-  | <n:string>=NUMBER {float n};

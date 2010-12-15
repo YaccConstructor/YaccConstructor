@@ -1,7 +1,6 @@
 # 1 "Lexer.fsl"
  
 (* Run with fslex.exe --unicode Lexer.fsl *)
-#light "off"
 
 module AntlrToYard.Lexer
 

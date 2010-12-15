@@ -138,9 +138,9 @@ type TableGenerator(outPath: string) =
             write ("")
 
 
-        let genearte (grammar:Yard.Core.IL.Definition.t<_,_>) =
+        let genearte grammar =
             generatePreheader grammar.info.fileName
-            let publicRule = List.find (fun (rule: Rule.t<_,_>) -> rule._public) grammar.grammar
+            let publicRule = List.find (fun rule -> rule._public) grammar.grammar
             let startRule = 
                 {
                     name    = Constants.raccStartRuleName
@@ -151,15 +151,15 @@ type TableGenerator(outPath: string) =
                 }
             let dlfaMap = 
                 startRule :: grammar.grammar
-                |> List.map (fun (x:Rule.t<_,_>) ->x.name, buildDLFA x.body)
-            let str = "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
-            write str
+                |> List.map (fun x -> x.name, buildDLFA x.body)
+            "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
+            |> write
             let items = items dlfaMap
-            let str2 = "let items = \n" + ToString.listToString items + "\n"
-            write str2
+            "let items = \n" + ToString.listToString items + "\n"
+            |> write
             let goto = goto items (dict dlfaMap)
-            let str3 = "let gotoSet = \n" + ToString.setToString goto + "\n"  //|> dict"
-            write str3
+            "let gotoSet = \n" + ToString.setToString goto + "\n"  //|> dict"
+            |> write
             textWriter.CloseOutStream ()
                 
         member self.Gemerate grammar = genearte grammar

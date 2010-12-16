@@ -1,0 +1,19 @@
+{
+let value x = (x:>Lexeme<string>).value
+
+type OpPrior =
+   | T
+   | B
+
+let checker curOp lNextOp rNextOp =
+    match curOp, lNextOp, rNextOp with 
+    | B,_,T 
+    | T,T,T -> true 
+    | _,_,_ -> false
+}
++s : <res:int,nextOp:OpPrior> = e {res};
+e : n = NUMBER {value n |> int, T}
+  | <l,lNextOp> = e <op,curOp> = (PLUS { (+),B } | MULT { ( * ),T } | MINUS { (-),B }) <r,rNextOp> = e 
+    =>{checker curOp lNextOp rNextOp}=>
+    {(op l r),curOp} 
+  ;

@@ -75,19 +75,25 @@ module  TableInterpreter =
     let getPrevItems tables smb state =
         (getDFA tables state.itemName).DRules
         |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
-        |> buildItem state
+        |> buildItem state    
+
+    let cash = new System.Collections.Generic.Dictionary<_,_>()
 
     let memoize f = 
-        let t = new System.Collections.Generic.Dictionary<_,_>()
+        
         fun tables parserState ->        
-            let id = hash(parserState)
-            let key = parserState
-            if t.ContainsKey(key)       
-            then             
-                t.[key] 
-            else     
+            let id = hash(parserState)            
+            let key = id//(parserState.i, parserState.inpSymbol, parserState.statesSet)
+            if cash.ContainsKey(key)       
+            then                        
+                cash.[key] 
+            else                
                 let res = f tables parserState
-                t.Add(key,res)
+                try
+                    cash.Add(key,res)
+                with 
+                | :? System.ArgumentException -> ()
+
                 res                     
 
     let print ps =
@@ -134,8 +140,13 @@ module  TableInterpreter =
                     |> Set.maxElement
                     |> fun rule -> 
                         if Seq.exists ((=)rule.ToStateID) dfa.DFinaleStates && addLabelFromDummy
-                        then rule.Label :: [Set.filter (fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy) dfa.DRules |> Set.maxElement |> fun x -> x.Label]
-                        else [rule.Label]
+                        then 
+                            rule.Label 
+                            :: [Set.filter (fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy) dfa.DRules
+                                |> Set.maxElement 
+                                |> fun x -> x.Label]
+                        else 
+                            [rule.Label]
                 let res = 
                     (parse()) tables {parserState with statesSet = gotoSet}
                     |> Set.map
@@ -214,7 +225,7 @@ module  TableInterpreter =
 #endif                        
                 let isFinaleState state= 
                     let dfa = tables.automataDict.[state.itemName]
-                    Set.exists ((=) (state.position)) dfa.DFinaleStates
+                    Set.exists ((=) state.position) dfa.DFinaleStates
                 let resPart1 =
                     let buildResult item =                        
                         {
@@ -226,7 +237,7 @@ module  TableInterpreter =
                     |> Set.map buildResult
                
                 let resPart2 =                                                                               
-                    let nextLexeme = parserState.lexer.Get(parserState.i)                                                                        
+                    let nextLexeme = parserState.lexer.Get parserState.i
                     if  nextLexeme.name = "EOF"
                     then 
                         Set.empty
@@ -247,7 +258,7 @@ module  TableInterpreter =
                                 inpSymbol = nextLexeme
                                 i         = parserState.i + 1
                         }
-                        |> (climb()) tables                         
+                        |> (climb()) tables
                 let res = resPart1 + resPart2
 #if DEBUG
                 printfn "\n parser result = %A" res
@@ -291,4 +302,5 @@ module  TableInterpreter =
                     else buf)
                 Set.empty               
         Set.iter PrintTree res
+        cash.Clear()
         res

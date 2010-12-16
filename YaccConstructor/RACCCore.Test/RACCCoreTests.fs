@@ -335,6 +335,54 @@ let tests =
                 path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
                 rightValue = seq [12 |> box; 12 |> box]  
             })
+        (26,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Checker_on_glr.gotoSet
+                        automataDict = Tables_Checker_on_glr.autumataDict
+                        items = Tables_Checker_on_glr.items
+                    }
+                actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
+                path       = "test_checker_on_glr\\test_checker_on_glr_1.yrd.in"
+                rightValue = seq [3 |> box]  
+            })
+        (27,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Checker_on_glr.gotoSet
+                        automataDict = Tables_Checker_on_glr.autumataDict
+                        items = Tables_Checker_on_glr.items
+                    }
+                actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
+                path       = "test_checker_on_glr\\test_checker_on_glr_2.yrd.in"
+                rightValue = seq [10 |> box]  
+            })
+        (28,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Checker_on_glr.gotoSet
+                        automataDict = Tables_Checker_on_glr.autumataDict
+                        items = Tables_Checker_on_glr.items
+                    }
+                actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
+                path       = "test_checker_on_glr\\test_checker_on_glr_3.yrd.in"
+                rightValue = seq [11 |> box]  
+            })
+        (29,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Checker_on_glr.gotoSet
+                        automataDict = Tables_Checker_on_glr.autumataDict
+                        items = Tables_Checker_on_glr.items
+                    }
+                actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
+                path       = "test_checker_on_glr\\test_checker_on_glr_4.yrd.in"
+                rightValue = seq [40 |> box]  
+            })
 
     ]
     |> dict
@@ -495,6 +543,30 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Simple checker test 1`` () =
         let test = tests.[24]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Checker in glr arithmetic test 1`` () =
+        let test = tests.[26]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Checker in glr arithmetic test 2`` () =
+        let test = tests.[27]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Checker in glr arithmetic test 3`` () =
+        let test = tests.[28]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Checker in glr arithmetic test 4`` () =
+        let test = tests.[29]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
 

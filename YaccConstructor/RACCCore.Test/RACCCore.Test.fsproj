@@ -48,6 +48,8 @@
     <Compile Include="test_alt_in_cls.yrd.tables.fs" />
     <Compile Include="test_arithm_glr.yrd.actions.fs" />
     <Compile Include="test_arithm_glr.yrd.tables.fs" />
+    <Compile Include="test_checker_on_glr.yrd.actions.fs" />
+    <Compile Include="test_checker_on_glr.yrd.tables.fs" />
     <Compile Include="test_cls.yrd.actions.fs" />
     <Compile Include="test_cls.yrd.tables.fs" />
     <Compile Include="test_cls_with_head.yrd.actions.fs" />

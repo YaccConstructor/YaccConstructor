@@ -28,12 +28,12 @@ type Status =
     
 
 module ASTInterpretator = 
-    let rec lInterp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) tree = 
+    let rec lInterp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) (traceCache:System.Collections.Generic.IDictionary<_,_>) tree = 
         let reast = RegExpAST()
         match tree with        
         | Node (childs,name,value) ->
-            List.map (lInterp ruleToActon) childs
-            |> (Set.minElement value.trace.Head |> reast.BuildREAST)
+            List.map (lInterp ruleToActon traceCache ) childs
+            |> (traceCache.[value.trace] |> Set.minElement |> reast.BuildREAST)
             |> fun x -> 
                    match x with 
                    | (t,_,_) -> ruleToActon.[name] t                  
@@ -42,9 +42,9 @@ module ASTInterpretator =
             | LeafV(v) -> box v
             | _        -> failwith "AST is incorrect. Leaf contains NodeV value."
 
-    let interp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) tree = 
+    let interp ruleToActon traceCache tree = 
         try
-            Success(lInterp ruleToActon tree)
+            Success(lInterp ruleToActon traceCache tree)
         with 
         | Constants.CheckerFalse -> DelByFilter
         | e -> Fail e.Message

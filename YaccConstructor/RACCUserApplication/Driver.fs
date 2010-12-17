@@ -45,9 +45,9 @@ let run path =
             items = items
         }
     
-    let trees = TableInterpreter.run l tables
+    let trees,cache = TableInterpreter.run l tables
     let r =         
-        Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction tree) trees        
+        Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees        
     printf "\nResult %A\n" r
     trees        
     

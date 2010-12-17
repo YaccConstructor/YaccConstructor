@@ -34,7 +34,7 @@ type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> =
     override self.ToString() = 
         match self with 
         | NodeV(x) -> x.ToString()
-        | LeafV(x) -> x.ToString()//x.value.ToString()
+        | LeafV(x) -> x.ToString()
       
     override self.Equals y = equalsOn self.GetValue self y
     override self.GetHashCode() = hashOn self.GetValue self 
@@ -45,7 +45,7 @@ type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> =
 type value<'lexeme,'b, 'trace, 'id when 'lexeme : equality and 'lexeme : comparison and 'trace : equality> = 
     {
         id      : 'id;
-        trace   : List<'trace> 
+        trace   : 'trace 
         value   : _value<'lexeme,'b>;    
     }
 
@@ -70,31 +70,15 @@ type AST<'lexeme, 'nodeVal, 'trace, 'nodeId
 let rec dumpTree i item =
     let iter i = String.replicate i "    "
     match item with
-        Node (lst,name,value) -> 
-                let trace = 
-                    List.map 
-                        (fun x -> 
-                            Set.map 
-                                (fun y -> 
-                                    List.map 
-                                        (fun z -> z.ToString())
-                                        y
-                                    |> String.concat ";"
-                                    |> fun x -> "[" + x + "]")
-                                x
-                            |> String.concat ";"
-                            |> fun x -> "{" + x + "}")
-                        value.trace
-                    |> String.concat ";"
-                    |> fun x -> "[" + x + "]"
-                let s = value.id.ToString() + ";" + value.value.ToString()
-                [iter i;"<NODE name=\""; name; "\" value=\""; s; "\" trace=\""; trace; "\">\n"]
-                @(List.map (dumpTree (i+1)) lst)
-                @[iter i;"</NODE>\n"]
-                |> String.concat "" 
+    | Node (lst,name,value) -> 
+        let trace = value.trace.ToString()                    
+        let s = value.id.ToString() + ";" + value.value.ToString()
+        [iter i;"<NODE name=\""; name; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
+        @(List.map (dumpTree (i+1)) lst)
+        @[iter i;"</NODE>\n"]
+        |> String.concat "" 
 
-      | Leaf (name,value)     ->             
-            String.concat "" [iter i;"<LEAF name=\""; name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
+    | Leaf (name,value)     ->
+        String.concat "" [iter i;"<LEAF name=\""; name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
 
-        
 let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)

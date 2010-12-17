@@ -34,19 +34,21 @@ module  TableInterpreter =
         let res = 
             Set.fold 
                 (fun buf state -> 
-                    try 
-                        Set.filter (fun (x,y) -> x = hash ((state.itemName,state.position),DSymbol(symbol.name))) tables.gotoSet
-                        |> fun x -> 
-                            if x.IsEmpty 
-                            then 
-                                buf
-                            else
-                                Set.map snd x
-                                |> Set.map (fun gt -> Set.add  {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace} buf)
-                                |> Set.unionMany
-                    with _ -> 
-                        printfn "\n\n\FAIL!!!\n\n"
-                        buf)
+                    let local = ref Set.empty                    
+                    tables.gotoSet.TryGetValue(hash ((state.itemName,state.position),DSymbol(symbol.name)),local)
+                    |> fun x -> 
+                        if (not x) || Set.isEmpty (!local)
+                        then 
+                            buf
+                        else
+                            !local
+                            |> (fun gt -> 
+                                    Set.add 
+                                        {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace}
+                                        buf
+                                |> Set.map)
+                            |> Set.unionMany
+                 )
                 Set.empty
                 states   
 #if DEBUG
@@ -77,20 +79,24 @@ module  TableInterpreter =
         |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
         |> buildItem state    
 
-    let cash = new System.Collections.Generic.Dictionary<_,_>()
+    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()
 
-    let memoize f = 
-        
-        fun tables parserState ->        
-            let id = hash(parserState)            
-            let key = id//(parserState.i, parserState.inpSymbol, parserState.statesSet)
-            if cash.ContainsKey(key)       
-            then                        
-                cash.[key] 
+    let traceBuilderCache = new System.Collections.Generic.Dictionary<int, int>()
+
+    let traceEnumerator = new Enumerator()
+
+    let cache = new System.Collections.Generic.Dictionary<_,_>()
+
+    let memoize f =         
+        fun tables parserState ->                    
+            let key = hash (parserState.i, parserState.inpSymbol, parserState.statesSet)
+            if cache.ContainsKey(key)       
+            then                
+                cache.[key] 
             else                
                 let res = f tables parserState
                 try
-                    cash.Add(key,res)
+                    cache.Add(key,res)
                 with 
                 | :? System.ArgumentException -> ()
 
@@ -156,9 +162,18 @@ module  TableInterpreter =
                                 (fun buf itm ->
                                     let rAST =  RegExpAST()                           
                                     let _val trace =
+                                        let _trace =
+                                            if traceBuilderCache.ContainsKey(hash trace)
+                                            then traceBuilderCache.[hash trace]
+                                            else                                                                                                                                
+                                                //printf "\nT NO\n" 
+                                                let key = traceEnumerator.Next()
+                                                traceBuilderCache.Add(hash trace, key)
+                                                traceCache.Add(rAST.BuilCorrectTrace trace,key)
+                                                key
                                         {
                                             id    = itm.state.itemName
-                                            trace = [rAST.BuilCorrectTrace trace]
+                                            trace = _trace
                                             value = NodeV 1
                                         }
                                     let node trace forest = (forest , itm.state.itemName, _val trace) |> Node
@@ -175,7 +190,7 @@ module  TableInterpreter =
                                                 {
                                                     rItem  = {itm.state with 
                                                                     forest = state.forest @ res.rItem.forest
-                                                                    sTrace = trace @ res.rItem.sTrace                                                                                     
+                                                                    sTrace = trace @ res.rItem.sTrace
                                                              }
                                                     rI     = res.rI
                                                     rLexer = parserState.lexer
@@ -194,7 +209,7 @@ module  TableInterpreter =
                                                                 |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position                                                                     
                                                                 |> fun x -> x @ res.rItem.sTrace
                                                             {stt with forest = [stt.forest @ res.rItem.forest |> node trace]
-                                                                      sTrace = trace
+                                                                      sTrace = []
                                                             })
                                                         parserState.statesSet
                                         }
@@ -244,8 +259,8 @@ module  TableInterpreter =
                     else
                         let _val item =
                             {
-                                id    = item.itemName
-                                trace = []
+                                id    = ""
+                                trace = -1
                                 value = LeafV nextLexeme
                             }
                         let leaf item = [(nextLexeme.name, _val item) |> Leaf]
@@ -300,7 +315,14 @@ module  TableInterpreter =
                             then Set.add y.Value buf
                             else buf
                     else buf)
-                Set.empty               
+                Set.empty
+#if DEBUG
         Set.iter PrintTree res
-        cash.Clear()
-        res
+#endif
+        cache.Clear()
+        traceBuilderCache.Clear()
+        let trC = 
+            seq {for s in traceCache -> s.Value,s.Key}
+            |> dict
+        traceCache.Clear()
+        res,trC

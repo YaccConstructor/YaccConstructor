@@ -85,7 +85,7 @@ type RegExpAST() =
                 | _    -> RELeaf null,[],[]
                     
             | []  -> RELeaf null,[],[]
-
+        
         let rec buildCorrectTrace trace =
             match trace with
             | hd1::hd2::tl1 -> 

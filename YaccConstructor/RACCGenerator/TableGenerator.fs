@@ -108,11 +108,11 @@ type TableGenerator(outPath: string) =
                         |>Set.unionMany)
                 symbols
             |> Set.unionMany
-            (*|> fun a -> 
+            |> fun a -> 
                 a
                 |> Set.map (fun (x,y) -> x)
                 |> Set.map 
-                    (fun x -> x, Set.filter (fun (a,b) -> x = a) a |> Set.map snd)*)
+                    (fun x -> x, Set.filter (fun (a,b) -> x = a) a |> Set.map snd)
             
         
         let items dlfaMap =
@@ -158,10 +158,10 @@ type TableGenerator(outPath: string) =
             "let items = \n" + ToString.listToString items + "\n"
             |> write
             let goto = goto items (dict dlfaMap)
-            "let gotoSet = \n" + ToString.setToString goto + "\n"  //|> dict"
+            "let gotoSet = \n    " + ToString.setToString goto + "\n    |> dict"
             |> write
             textWriter.CloseOutStream ()
                 
         member self.Gemerate grammar = genearte grammar
-                
+
     end

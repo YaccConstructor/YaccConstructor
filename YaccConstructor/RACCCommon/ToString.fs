@@ -39,6 +39,10 @@ let rec toString (_val:obj) =
             "(" + "(" + toString p1 + D.ToString() + ")," + toString p2 + ")"
     | :? List<'a> -> listToString (_val:?>List<'a>)
     | :? List<FATrace> -> _listToString (_val:?>List<FATrace>)
+    | :? (int*(Set<string*int>)) -> 
+        let l = fst (_val :?> (int*(Set<string*int>)))
+        let r = snd (_val :?> (int*(Set<string*int>)))
+        "(" + toString l + "," + __setToString r + ")"    
     | :? Set<List<FATrace>> -> _setToString (_val:?>(Set<List<FATrace>>))    
     | _          -> _val.ToString()
 
@@ -56,5 +60,8 @@ and setToString (_set:Set<'a>) =
     "Set.ofArray [|" + (String.concat ";" (Set.map toString _set)) + "|]"    
 
 and _setToString _set =
+    "Set.ofArray [|" + (String.concat ";" (Set.map toString _set)) + "|]"  
+
+and __setToString _set =
     "Set.ofArray [|" + (String.concat ";" (Set.map toString _set)) + "|]"    
 

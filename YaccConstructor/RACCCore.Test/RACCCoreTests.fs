@@ -24,7 +24,7 @@ open Yard.Generators.RACCGenerator
 module Lexer = UserLexer
 open NUnit.Framework
 
-type Test<'a,'b,'c,'d,'f,'g,'h when 'a:comparison and 'f:comparison and 'g:comparison> =
+type Test<'a,'b,'c,'d,'f,'g,'h when 'f:comparison and 'g:comparison> =
     {
         tables     : Tables<'a,'b,'c,'d,'f,'g>
         actionsMap : System.Collections.Generic.IDictionary<string,'h>
@@ -395,8 +395,8 @@ let run_common path =
 let run path tables actions =
     let buf = run_common path 
     let l = UserLexer.Lexer(buf)        
-    let trees = TableInterpreter.run l tables            
-    Seq.map (fun tree -> ASTInterpretator.interp actions tree) trees
+    let trees,cache = TableInterpreter.run l tables            
+    Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees
     |> Seq.filter (function | Success _ -> true | _ -> false)
     |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")  
 

@@ -33,6 +33,7 @@ type Test<'a,'b,'c,'d,'f,'g,'h when 'f:comparison and 'g:comparison> =
     }
 
 let testPath = "..\\..\\..\\..\\Tests\\RACC\\"
+let performanceFolder = "Performance"
 
 let tests =
     [   (1,
@@ -399,6 +400,14 @@ let run path tables actions =
     Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees
     |> Seq.filter (function | Success _ -> true | _ -> false)
     |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")  
+
+type RACCPerformanceTests () =
+    static member Test1 = 
+        let test = tests.[1] 
+        fun x -> run x test.tables test.actionsMap |> ignore
+        , testPath + "/test_alt_in_cls/" + performanceFolder
+
+     
 
 [<TestFixture>]
 type ``RACC core tests`` ()=    

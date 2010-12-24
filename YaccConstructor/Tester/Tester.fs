@@ -10,6 +10,7 @@ open System.Diagnostics
 open System.Text.RegularExpressions
 open System.Configuration
 open Yard.Core
+open Microsoft.FSharp.Text
 
 type Target =
     {
@@ -22,6 +23,7 @@ let mainApp = ConfigurationManager.AppSettings.["mainApp"].ToString()
 let mainPath = ConfigurationManager.AppSettings.["mainPath"].ToString()
 let testsPath = ConfigurationManager.AppSettings.["testsPath"].ToString()
 let tmpPath = ConfigurationManager.AppSettings.["tmpPath"].ToString()
+
 let targets =
     let _targets = ConfigurationManager.AppSettings.["targets"].ToString()
     _targets.Split [|';'|]
@@ -134,7 +136,7 @@ let formatTestResults target feRes compileRes testRes grammarName =
     res
          
 
-let () = 
+let f () = 
     targets
     |> Seq.iter
         (fun target ->
@@ -180,3 +182,50 @@ let () =
                         |> write
             ) testFiles)
     closeOutStream ()   
+
+let () = 
+    let command = ref "gi"
+    let baseString = ref ""
+    let increment = ref ""
+    let outFolder = ref "PerformanceTests"
+    let outFile = ref "in"
+    let counter = ref 0
+
+    let commandLineSpecs =
+        ["-cmd",  ArgType.String (fun s -> command := s), "Command"    
+         "-base", ArgType.String (fun s -> baseString := s), "Base string"
+         "-is", ArgType.String (fun s -> increment := s), "Increment"
+         "-of", ArgType.String (fun s -> outFolder := s), "Name of output folder"
+         "-o", ArgType.String (fun s -> outFile := s), "Name prefix of output file"
+         "-cnt", ArgType.Int (fun i -> counter := i), "Repeat counter"
+        ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+    let commandLineArgs = System.Environment.GetCommandLineArgs()
+    ArgParser.Parse commandLineSpecs
+
+    let (|Gi|Pt|Other|) input =
+        match input with
+        | "gi" | "GI" | "Gi" | "gI" -> Gi
+        | "pt" -> Pt
+        | _    -> Other
+
+    let generateTests () = 
+        for i in [0..!counter] do
+            let str = !baseString + String.replicate i !increment
+            let fileName = !outFile + "_" + i.ToString() + ".in"
+            System.IO.Directory.CreateDirectory(!outFolder) |> ignore
+            let outPath = !outFolder + "/" + fileName
+            let outStrieam =         
+                try
+                    let t = new FileInfo(outPath)
+                    let writer = t.CreateText()             
+                    writer     
+                with e -> failwith ("Writer Exception:" + e.ToString())
+                         
+            outStrieam.Write(str)
+
+            outStrieam.Close()
+
+    match !command with
+    | Gi    -> generateTests ()
+    | Pt    -> PerformanceTests.Run()
+    | Other -> printf "Incorrect command" 

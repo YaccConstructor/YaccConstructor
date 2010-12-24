@@ -162,13 +162,13 @@ module  TableInterpreter =
                                 (fun buf itm ->
                                     let rAST =  RegExpAST()                           
                                     let _val trace =
+                                        let id = hash trace
                                         let _trace =
-                                            if traceBuilderCache.ContainsKey(hash trace)
-                                            then traceBuilderCache.[hash trace]
-                                            else                                                                                                                                
-                                                //printf "\nT NO\n" 
+                                            if traceBuilderCache.ContainsKey(id)
+                                            then traceBuilderCache.[id]
+                                            else                                                
                                                 let key = traceEnumerator.Next()
-                                                traceBuilderCache.Add(hash trace, key)
+                                                traceBuilderCache.Add(id, key)
                                                 traceCache.Add(rAST.BuilCorrectTrace trace,key)
                                                 key
                                         {
@@ -220,7 +220,7 @@ module  TableInterpreter =
                                                     if (ps.lexer.Get ps.i).name = "EOF"
                                                     then buildRes ps.statesSet
                                                     else Set.empty
-                                                else (climb()) tables  ps
+                                                else climb () tables  ps
                                         |> Set.union  buf)
                                 )
                                 Set.empty
@@ -231,7 +231,7 @@ module  TableInterpreter =
 #endif
                 res)
         
-    and parse ()= 
+    and parse () = 
         memoize
             (fun tables parserState ->
 #if DEBUG
@@ -304,9 +304,8 @@ module  TableInterpreter =
                     then 
                         let getUserTree tree =
                             match tree with
-                            | Node (childs,name,value) as n -> 
-                                Some (List.head childs)
-                            | _ -> None
+                            | Node (childs,name,value) -> Some (List.head childs)
+                            | _                        -> None
 
                         List.head forest 
                         |> fun x -> 

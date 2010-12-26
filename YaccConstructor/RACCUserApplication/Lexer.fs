@@ -108,9 +108,8 @@ type Lexer(lb) =
     interface ILexer<string> with        
     
        member self.Get pos = 
-        let l = !locBuf |> List.length
-        if l >= pos
-        then (!locBuf).[l - pos + 2]
+        if !locBuf |> List.length >= pos
+        then ((!locBuf) |> List.rev).[pos-1]
         else
             let t = tokens lb
             locBuf := t :: !locBuf

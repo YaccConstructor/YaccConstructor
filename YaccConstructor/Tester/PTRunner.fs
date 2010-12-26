@@ -23,13 +23,18 @@ let run testFun inFolder =
             files
         |> Seq.sortBy fst
 
+    let d = ref []
     Seq.map 
         (fun (id,path) -> 
             startTime := System.DateTime.Now
-            testFun path
+            let r,cc = testFun path
+            d := [id.ToString();cc.ToString()]::!d
             endTime := System.DateTime.Now
             let t = (!endTime - !startTime)
-            [id.ToString();t.Minutes*60*1000 +  t.Seconds*1000 + t.Milliseconds |> string])
+            printf "\n%A" path
+            [id.ToString();t.Hours*3600*1000 + t.Minutes*60*1000 +  t.Seconds*1000 + t.Milliseconds |> string])
         idToFileMap
     |> PrintCSV.print (inFolder  + "/testRes_" + System.DateTime.Now.ToString().Replace('/','_').Replace(':','_') + ".out")  " " 
+
+    PrintCSV.print (inFolder  + "/testRes_" + System.DateTime.Now.ToString().Replace('/','_').Replace(':','_') + ".cc.out")  " " !d
     

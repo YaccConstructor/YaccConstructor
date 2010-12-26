@@ -62,6 +62,8 @@
     <Compile Include="test_seq.yrd.tables.fs" />
     <Compile Include="test_simple_checker.yrd.actions.fs" />
     <Compile Include="test_simple_checker.yrd.tables.fs" />
+    <Compile Include="test_summator_1.yrd.actions.fs" />
+    <Compile Include="test_summator_1.yrd.tables.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="RACCCoreTests.fs" />
   </ItemGroup>

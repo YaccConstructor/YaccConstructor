@@ -42,10 +42,12 @@ let run path =
         {
             gotoSet = gotoSet
             automataDict = autumataDict
-            items = items
+            //items = items
         }
     
-    let trees,cache = TableInterpreter.run l tables
+    TableInterpreter.actions := RACC.Actions.ruleToAction
+    let trees,cache,result,cc = TableInterpreter.run l tables
+    printfn "\n %A \n" result
     let r =         
         Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees        
     printf "\nResult %A\n" r

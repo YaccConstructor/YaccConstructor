@@ -118,7 +118,9 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
     done
 
     let newAutomata = 
-        let states = List.ofSeq (List.fold (fun buf (_from,_,_to) ->  (Set.add _from buf) |> Set.add _to) Set.empty (!newRules))
+        let states = 
+            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)
+            |> List.ofSeq
 
         let alterNames = dict (List.zip states [0..(List.length states)-1])
         let getAlterName s = alterNames.[s]            

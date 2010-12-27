@@ -18,23 +18,25 @@ let run testFun inFolder =
                 |> fun (s:string) -> s.Split '.'
                 |> fun x -> x.[0]
                 |> int
-                |> fun id -> (id,x)                           
+                |> fun id -> (id,x)
             ) 
             files
         |> Seq.sortBy fst
 
-    let d = ref []
+    let resultBuf = ref []
+    let formatDataTime dt =
+        dt.ToString().Replace('/','_').Replace(':','_')
     Seq.map 
         (fun (id,path) -> 
             startTime := System.DateTime.Now
-            let r,cc = testFun path
-            d := [id.ToString();cc.ToString()]::!d
+            let result = testFun path
+            resultBuf := [id.ToString();result.ToString()]::!resultBuf
             endTime := System.DateTime.Now
             let t = (!endTime - !startTime)
             printf "\n%A" path
             [id.ToString();t.Hours*3600*1000 + t.Minutes*60*1000 +  t.Seconds*1000 + t.Milliseconds |> string])
         idToFileMap
-    |> PrintCSV.print (inFolder  + "/testRes_" + System.DateTime.Now.ToString().Replace('/','_').Replace(':','_') + ".out")  " " 
+    |> PrintCSV.print (inFolder  + "/testRes_" + formatDataTime System.DateTime.Now + ".out")  " " 
 
-    PrintCSV.print (inFolder  + "/testRes_" + System.DateTime.Now.ToString().Replace('/','_').Replace(':','_') + ".cc.out")  " " !d
+    PrintCSV.print (inFolder  + "/testRes_" + formatDataTime System.DateTime.Now + ".result.out")  " " !resultBuf
     

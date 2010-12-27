@@ -155,8 +155,6 @@ type TableGenerator(outPath: string) =
             "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
             |> write
             let items = items dlfaMap
-            (*"let items = \n" + ToString.listToString items + "\n"
-            |> write*)
             let goto = goto items (dict dlfaMap)
             "let gotoSet = \n    " + ToString.setToString goto + "\n    |> dict"
             |> write

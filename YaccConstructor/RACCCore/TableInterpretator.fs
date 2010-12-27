@@ -40,7 +40,7 @@ module  TableInterpreter =
         let getTables () =  (!Tables).Value
         getTables , fun t -> Tables:=t
 
-    let goto (*tables*) states symbol = 
+    let goto states symbol = 
         let res = 
             Set.fold 
                 (fun buf state -> 
@@ -66,41 +66,9 @@ module  TableInterpreter =
 #endif
         res
 
-    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()
-
-    let actions = ref (dict ["",(fun (x:REAST) -> box 1)])
-
-    let result = ref []
-
-    let processForest forest = 
-        let _forest = 
-            forest
-            |> Set.fold
-                (fun buf r -> 
-                    let forest = r.rItem.forest
-                    if List.length  forest = 1 && r.rItem.itemName = Constants.raccStartRuleName
-                    then 
-                        let getUserTree tree =
-                            match tree with
-                            | Node (childs,name,value) as n -> 
-                                Some (List.head childs)
-                            | _ -> None
-
-                        List.head forest 
-                        |> fun x -> 
-                            let y = getUserTree x
-                            if y.IsSome 
-                            then Set.add y.Value buf
-                            else buf
-                    else buf)
-                Set.empty
-        let trC = 
-            seq {for s in traceCache -> s.Value,s.Key}
-            |> dict
-
-        result:= (Seq.map (fun tree -> ASTInterpretator.interp !actions trC tree) _forest)::(!result)
+    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()    
     
-    let private getDFA (*tables*) itemName = tables().automataDict.[itemName]
+    let private getDFA itemName = tables().automataDict.[itemName]
 
     let buildItem state= 
         Set.map
@@ -113,7 +81,7 @@ module  TableInterpreter =
                         | _           -> failwith "Error 01"
                 })
 
-    let getPrevItems (*tables*) smb state =
+    let getPrevItems smb state =
                 (getDFA state.itemName).DRules
                 |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
                 |> buildItem state
@@ -125,13 +93,13 @@ module  TableInterpreter =
     let cache = new System.Collections.Generic.Dictionary<_,_>()
 
     let memoize f =         
-        fun (*tables*) parserState ->                    
+        fun parserState ->                    
             let key = hash (parserState.i, parserState.inpSymbol, parserState.statesSet)
             if cache.ContainsKey(key)       
             then                
                 cache.[key] 
             else                
-                let res = f (*tables*) parserState
+                let res = f parserState
                 try
                     cache.Add(key,res)
                 with 
@@ -157,7 +125,7 @@ module  TableInterpreter =
 
     let rec climb() = 
         memoize
-            (fun (*tables*) parserState ->
+            (fun parserState ->
 #if DEBUG
                 printfn "\n Climb \n" 
                 print parserState
@@ -169,15 +137,14 @@ module  TableInterpreter =
                         (fun  state ->                                                                        
                             {
                                 rItem  = state
-                                rI     = parserState.i
-                                //rLexer = (!Lexer).Value //parserState.lexer
+                                rI     = parserState.i                                
                             }                    
                         )   
                         s
-                let gotoSet = goto (*tables*) parserState.statesSet parserState.inpSymbol        
+                let gotoSet = goto parserState.statesSet parserState.inpSymbol        
                 
                 let getTrace state inpSymbol fromID toID addLabelFromDummy = 
-                    let dfa = getDFA (*tables*) state.itemName
+                    let dfa = getDFA state.itemName
                     dfa.DRules
                     |> Set.filter
                            (fun rule -> rule.FromStateID = fromID && rule.ToStateID = toID && rule.Symbol = DSymbol(inpSymbol))
@@ -193,10 +160,10 @@ module  TableInterpreter =
                             [rule.Label]
                 let res = 
                     ///printf "parserState.statesSet length = %A \n" parserState.statesSet.Count
-                    (parse()) (*tables*) {parserState with statesSet = gotoSet}                     
+                    (parse()) {parserState with statesSet = gotoSet}                     
                     |> Set.map
                         (fun res ->                                
-                            let l = getPrevItems (*tables*) parserState.inpSymbol.name res.rItem
+                            let l = getPrevItems parserState.inpSymbol.name res.rItem
                             //printf "Prev Items length = %A \n" l.Count
                             l
                             |> Set.fold
@@ -218,7 +185,7 @@ module  TableInterpreter =
                                             value = NodeV 1
                                         }
                                     let node trace forest = (forest , itm.state.itemName, _val trace) |> Node
-                                    let dfa = getDFA (*tables*) itm.state.itemName
+                                    let dfa = getDFA itm.state.itemName
                                     if itm.state.position <> dfa.DStartState
                                     then
                                         parserState.statesSet            
@@ -233,8 +200,7 @@ module  TableInterpreter =
                                                                     forest = state.forest @ res.rItem.forest
                                                                     sTrace = trace @ res.rItem.sTrace
                                                              }
-                                                    rI     = res.rI
-                                                    //rLexer = parserState.lexer
+                                                    rI     = res.rI                                                    
                                                 })                                        
                                         |> Set.union buf
                                     else                                                                                                          
@@ -258,10 +224,10 @@ module  TableInterpreter =
                                             fun ps ->
                                                 if itm.state.itemName = Constants.raccStartRuleName
                                                 then 
-                                                    if ((*ps.lexer.Get*)(!Lexer).Value.Get ps.i).name = "EOF"
-                                                    then (processForest (buildRes ps.statesSet); Set.empty)
+                                                    if ((!Lexer).Value.Get ps.i).name = "EOF"
+                                                    then (buildRes ps.statesSet)
                                                     else Set.empty
-                                                else climb () (*tables*)  ps
+                                                else climb () ps
                                         |> Set.union  buf)
                                 )
                                 Set.empty
@@ -274,7 +240,7 @@ module  TableInterpreter =
         
     and parse () = 
         memoize
-            (fun (*tables*) parserState ->
+            (fun parserState ->
 #if DEBUG
                 printfn "\n Parse \n" 
                 print parserState
@@ -287,14 +253,13 @@ module  TableInterpreter =
                     let buildResult item =                        
                         {
                             rItem  = {item with forest = [];sTrace = []}
-                            rI     = parserState.i
-                            //rLexer = parserState.lexer
+                            rI     = parserState.i                            
                         }
                     Set.filter isFinaleState parserState.statesSet
                     |> Set.map buildResult
                
                 let resPart2 =                                                                               
-                    let nextLexeme = (*parserState.lexer.Get*) (!Lexer).Value.Get parserState.i
+                    let nextLexeme = (!Lexer).Value.Get parserState.i
                     if  nextLexeme.name = "EOF"
                     then 
                         Set.empty
@@ -315,7 +280,7 @@ module  TableInterpreter =
                                 inpSymbol = nextLexeme
                                 i         = parserState.i + 1
                         }
-                        |> (climb()) (*tables*)
+                        |> climb()
                 let res = resPart1 + resPart2
 #if DEBUG
                 printfn "\n parser result = %A" res
@@ -327,19 +292,18 @@ module  TableInterpreter =
         Lexer := Some lexer
         setTables (Some tables)
         let res = 
-            (parse()) (*tables*)
+            parse()
                 {
                     statesSet =
                         {
                             itemName = Constants.raccStartRuleName
-                            position = (getDFA (*tables*) Constants.raccStartRuleName).DStartState
+                            position = (getDFA Constants.raccStartRuleName).DStartState
                             forest   = []
                             sTrace   = []
                         }
                         |> Set.singleton 
                     inpSymbol = {name = "";value =""}                                    
                     i         = 1
-                    //lexer     = lexer
                 }
             |> Set.fold
                 (fun buf r -> 
@@ -368,7 +332,4 @@ module  TableInterpreter =
             seq {for s in traceCache -> s.Value,s.Key}
             |> dict
         traceCache.Clear()        
-        let resCopy = !result |> List.rev
-        printf "Result = %A \n" resCopy
-        result:=[]
-        res,trC,resCopy,!CallCount
+        res,trC,!CallCount

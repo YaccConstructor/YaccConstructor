@@ -41,8 +41,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_1.yrd.in"
@@ -53,8 +52,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_2.yrd.in"
@@ -65,8 +63,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_3.yrd.in"
@@ -77,8 +74,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                       
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_4.yrd.in"
@@ -89,8 +85,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_5.yrd.in"
@@ -101,8 +96,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_6.yrd.in"
@@ -113,8 +107,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_alt_in_cls.gotoSet
-                        automataDict = Tables_alt_in_cls.autumataDict
-                        //items = Tables_alt_in_cls.items
+                        automataDict = Tables_alt_in_cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_7.yrd.in"
@@ -125,8 +118,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Alt.gotoSet
-                        automataDict = Tables_Alt.autumataDict
-                        //items = Tables_Alt.items
+                        automataDict = Tables_Alt.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_1.yrd.in"
@@ -137,8 +129,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Alt.gotoSet
-                        automataDict = Tables_Alt.autumataDict
-                        //items = Tables_Alt.items
+                        automataDict = Tables_Alt.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_2.yrd.in"
@@ -149,8 +140,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Seq.gotoSet
-                        automataDict = Tables_Seq.autumataDict
-                        //items = Tables_Seq.items
+                        automataDict = Tables_Seq.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Seq.ruleToAction
                 path       = "test_seq\\test_seq_1.yrd.in"
@@ -161,8 +151,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls_tail.gotoSet
-                        automataDict = Tables_Cls_tail.autumataDict
-                        //items = Tables_Cls_tail.items
+                        automataDict = Tables_Cls_tail.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls_tail.ruleToAction
                 path       = "test_cls_with_tail\\test_cls_with_tail_1.yrd.in"
@@ -173,8 +162,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls_tail.gotoSet
-                        automataDict = Tables_Cls_tail.autumataDict
-                        //items = Tables_Cls_tail.items
+                        automataDict = Tables_Cls_tail.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls_tail.ruleToAction
                 path       = "test_cls_with_tail\\test_cls_with_tail_2.yrd.in"
@@ -185,8 +173,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls_head.gotoSet
-                        automataDict = Tables_Cls_head.autumataDict
-                        //items = Tables_Cls_head.items
+                        automataDict = Tables_Cls_head.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls_head.ruleToAction
                 path       = "test_cls_with_head\\test_cls_with_head_1.yrd.in"
@@ -197,8 +184,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls_head.gotoSet
-                        automataDict = Tables_Cls_head.autumataDict
-                        //items = Tables_Cls_head.items
+                        automataDict = Tables_Cls_head.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls_head.ruleToAction
                 path       = "test_cls_with_head\\test_cls_with_head_2.yrd.in"
@@ -209,8 +195,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        //items = Tables_Cls.items
+                        automataDict = Tables_Cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_1.yrd.in"
@@ -221,8 +206,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        //items = Tables_Cls.items
+                        automataDict = Tables_Cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_2.yrd.in"
@@ -233,8 +217,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Cls.gotoSet
-                        automataDict = Tables_Cls.autumataDict
-                        //items = Tables_Cls.items
+                        automataDict = Tables_Cls.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_3.yrd.in"
@@ -245,8 +228,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Aritm_glr.gotoSet
-                        automataDict = Tables_Aritm_glr.autumataDict
-                        //items = Tables_Aritm_glr.items
+                        automataDict = Tables_Aritm_glr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_1.yrd.in"
@@ -257,8 +239,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Aritm_glr.gotoSet
-                        automataDict = Tables_Aritm_glr.autumataDict
-                        //items = Tables_Aritm_glr.items
+                        automataDict = Tables_Aritm_glr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_2.yrd.in"
@@ -269,8 +250,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Aritm_glr.gotoSet
-                        automataDict = Tables_Aritm_glr.autumataDict
-                        //items = Tables_Aritm_glr.items
+                        automataDict = Tables_Aritm_glr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_3.yrd.in"
@@ -281,8 +261,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Aritm_glr.gotoSet
-                        automataDict = Tables_Aritm_glr.autumataDict
-                        //items = Tables_Aritm_glr.items
+                        automataDict = Tables_Aritm_glr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_4.yrd.in"
@@ -293,8 +272,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Aritm_glr.gotoSet
-                        automataDict = Tables_Aritm_glr.autumataDict
-                        //items = Tables_Aritm_glr.items
+                        automataDict = Tables_Aritm_glr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
@@ -305,8 +283,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_L_attr.gotoSet
-                        automataDict = Tables_L_attr.autumataDict
-                        //items = Tables_L_attr.items
+                        automataDict = Tables_L_attr.autumataDict                        
                     }
                 actionsMap = RACC.Actions_L_attr.ruleToAction
                 path       = "test_l_attr\\test_l_attr_1.yrd.in"
@@ -317,8 +294,7 @@ let tests =
                 tables     =
                     {
                         gotoSet = Tables_Simple_checker.gotoSet
-                        automataDict = Tables_Simple_checker.autumataDict
-                        //items = Tables_Simple_checker.items
+                        automataDict = Tables_Simple_checker.autumataDict                       
                     }
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_1.yrd.in"
@@ -330,7 +306,6 @@ let tests =
                     {
                         gotoSet = Tables_Simple_checker.gotoSet
                         automataDict = Tables_Simple_checker.autumataDict
-                        //items = Tables_Simple_checker.items
                     }
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
@@ -342,7 +317,6 @@ let tests =
                     {
                         gotoSet = Tables_Checker_on_glr.gotoSet
                         automataDict = Tables_Checker_on_glr.autumataDict
-                        //items = Tables_Checker_on_glr.items
                     }
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_1.yrd.in"
@@ -354,7 +328,6 @@ let tests =
                     {
                         gotoSet = Tables_Checker_on_glr.gotoSet
                         automataDict = Tables_Checker_on_glr.autumataDict
-                        //items = Tables_Checker_on_glr.items
                     }
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_2.yrd.in"
@@ -366,7 +339,6 @@ let tests =
                     {
                         gotoSet = Tables_Checker_on_glr.gotoSet
                         automataDict = Tables_Checker_on_glr.autumataDict
-                        //items = Tables_Checker_on_glr.items
                     }
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_3.yrd.in"
@@ -381,7 +353,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_4.yrd.in"
-                rightValue = seq [80 |> box]  
+                rightValue = seq [40 |> box]  
             })
 
         (30,
@@ -393,7 +365,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_1.yrd.in"
-                rightValue = seq [3.0 |> box]  
+                rightValue = seq [1.0 |> box]  
             })
 
         (31,
@@ -405,9 +377,20 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_2.yrd.in"
-                rightValue = seq [6.0 |> box]  
+                rightValue = seq [3.0 |> box]  
             })
 
+        (32,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Summator_1.gotoSet
+                        automataDict = Tables_Summator_1.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Summator_1.ruleToAction
+                path       = "test_summator_1\\test_summator_1_3.yrd.in"
+                rightValue = seq [6.0 |> box]  
+            })
     ]
     |> dict
 
@@ -416,38 +399,34 @@ let run_common path =
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 
-let run path tables actions =
+let runMain path tables actions =
     let buf = run_common path 
-    let l = UserLexer.Lexer(buf) 
-    TableInterpreter.actions := actions      
-    let trees,cache,result,cc = TableInterpreter.run l tables
-    //Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees    
-    result
-    |> Seq.concat
-    |> Seq.filter (function | Success _ -> true | _ -> false)
-    |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")      
-
-let pRun path tables actions =
-    let buf = run_common path 
-    let l = UserLexer.Lexer(buf) 
-    TableInterpreter.actions := actions      
-    let trees,cache,result,cc = TableInterpreter.run l tables
-    //Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees    
-    result
-    |> Seq.concat
+    let l = UserLexer.Lexer(buf)     
+    let trees,cache,cc = TableInterpreter.run l tables
+    Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees    
     |> Seq.filter (function | Success _ -> true | _ -> false)
     |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
-    ,cc
+    ,cache
+    ,cc      
+
+let run path tables actions = 
+    match runMain path tables actions with
+    | (r,_,_) -> r
+
+
+let pRun path tables actions =
+    match runMain path tables actions with
+    | (_,_,cc) -> cc
 
 type RACCPerformanceTests () =
     static member Test1 = 
         let test = tests.[1] 
-        fun x -> pRun x test.tables test.actionsMap //|> ignore
+        fun x -> pRun x test.tables test.actionsMap
         , testPath + "/test_alt_in_cls/" + performanceFolder
 
     static member Test2 = 
         let test = tests.[30] 
-        fun x -> pRun x test.tables test.actionsMap //|> ignore
+        fun x -> pRun x test.tables test.actionsMap
         , testPath + "/test_summator_1/" + performanceFolder
 
      
@@ -637,5 +616,11 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Summator_1 2`` () =
         let test = tests.[31]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Summator_1 3`` () =
+        let test = tests.[32]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

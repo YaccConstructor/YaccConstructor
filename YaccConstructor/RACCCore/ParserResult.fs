@@ -22,11 +22,10 @@ namespace Yard.Generators.RACCGenerator
 open Yard.Core.CompareHelper
 
 [<CustomEquality; CustomComparison>]
-type ParserResult<'item(*, 'value*) when 'item : comparison> =
+type ParserResult<'item when 'item : comparison> =
     {
         rItem      : 'item
-        rI         : int
-        //rLexer     : ILexer<'value>
+        rI         : int        
     }
       
      member self.GetValue (x:ParserResult<_>) =

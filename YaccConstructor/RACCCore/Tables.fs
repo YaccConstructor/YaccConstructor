@@ -19,12 +19,11 @@
 
 namespace Yard.Generators.RACCGenerator
 
-type Tables<'gt, (*'item,*) 'atmDictKey, 'stateVal, 'lbl 
+type Tables<'gt, 'atmDictKey, 'stateVal, 'lbl 
              when                 
                'stateVal : comparison 
                 and 'lbl : comparison> =
     {
         gotoSet      : System.Collections.Generic.IDictionary<int,'gt> 
-        automataDict : System.Collections.Generic.IDictionary<'atmDictKey,DLFA<int, 'stateVal, 'lbl>>
-        //items        : List<'item>
+        automataDict : System.Collections.Generic.IDictionary<'atmDictKey,DLFA<int, 'stateVal, 'lbl>>        
     }

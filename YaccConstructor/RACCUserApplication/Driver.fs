@@ -1,4 +1,4 @@
-﻿// Driver.fs
+﻿// Driver.fs contains main functions for test user application.
 //
 //  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -25,15 +25,9 @@ open Yard.Generators.RACCGenerator.Tables
 module Lexer = UserLexer
 
 let run_common path = 
-    let content = System.IO.File.ReadAllText(path)    
+    let content = System.IO.File.ReadAllText(path)
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
-
-type t<'buf,'a,'b> = 
-    {
-        buf   : 'buf
-        lexer : ILexer<'a>
-    }
 
 let run path =
     let buf = run_common path 
@@ -42,16 +36,13 @@ let run path =
         {
             gotoSet = gotoSet
             automataDict = autumataDict
-            //items = items
         }
-    
-    TableInterpreter.actions := RACC.Actions.ruleToAction
-    let trees,cache,result,cc = TableInterpreter.run l tables
-    printfn "\n %A \n" result
-    let r =         
-        Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees        
+        
+    let trees,cache,cc = TableInterpreter.run l tables
+    let r =
+        Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees
     printf "\nResult %A\n" r
-    trees        
+    trees
     
 let main path = run path
 

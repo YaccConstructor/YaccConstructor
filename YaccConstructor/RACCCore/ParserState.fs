@@ -23,7 +23,6 @@ type ParserState<'state, 'value, 'lb when 'state :comparison> =
     {
         statesSet : Set<'state>
         inpSymbol : Lexeme<'value>
-        i         : int
-        //lexer     : ILexer<'value>
+        i         : int        
     }
 

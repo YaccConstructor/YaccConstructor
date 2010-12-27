@@ -18,7 +18,7 @@ let run testFun inFolder =
                 |> fun (s:string) -> s.Split '.'
                 |> fun x -> x.[0]
                 |> int
-                |> fun id -> (id,x)
+                |> fun id -> (id,x) 
             ) 
             files
         |> Seq.sortBy fst

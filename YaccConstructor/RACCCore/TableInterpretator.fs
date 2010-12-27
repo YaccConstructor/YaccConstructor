@@ -123,6 +123,26 @@ module  TableInterpreter =
             ps.statesSet
         printfn "     ]\n" 
 
+
+
+    let rAST =  RegExpAST()
+
+    let nodeVal trace itm =
+        let id = hash trace
+        let _trace =
+            if traceBuilderCache.ContainsKey(id)
+            then traceBuilderCache.[id]
+            else                                                
+                let key = traceEnumerator.Next()
+                traceBuilderCache.Add(id, key)
+                traceCache.Add(rAST.BuilCorrectTrace trace,key)
+                key
+        {
+            id    = itm.state.itemName
+            trace = _trace
+            value = NodeV 1
+        }
+
     let rec climb() = 
         memoize
             (fun parserState ->
@@ -158,81 +178,59 @@ module  TableInterpreter =
                                 |> fun x -> x.Label]
                         else 
                             [rule.Label]
-                let res = 
-                    ///printf "parserState.statesSet length = %A \n" parserState.statesSet.Count
-                    (parse()) {parserState with statesSet = gotoSet}                     
-                    |> Set.map
-                        (fun res ->                                
-                            let l = getPrevItems parserState.inpSymbol.name res.rItem
-                            //printf "Prev Items length = %A \n" l.Count
-                            l
-                            |> Set.fold
-                                (fun buf itm ->
-                                    let rAST =  RegExpAST()                           
-                                    let _val trace =
-                                        let id = hash trace
-                                        let _trace =
-                                            if traceBuilderCache.ContainsKey(id)
-                                            then traceBuilderCache.[id]
-                                            else                                                
-                                                let key = traceEnumerator.Next()
-                                                traceBuilderCache.Add(id, key)
-                                                traceCache.Add(rAST.BuilCorrectTrace trace,key)
-                                                key
+                let res =                     
+                    {parserState with statesSet = gotoSet} 
+                    |> parse ()
+                    |> Set.fold 
+                        (fun buf res ->                                
+                            getPrevItems parserState.inpSymbol.name res.rItem
+                            |> Set.map (fun x -> res,x)                          
+                            |> (+) buf)
+                        Set.empty
+                    |> Set.fold
+                        (fun buf (res,itm) ->
+                            let node trace forest = (forest, itm.state.itemName, nodeVal trace itm) |> Node
+                            let dfa = getDFA itm.state.itemName
+                            let trace state =
+                                state.forest @ res.rItem.forest |> List.length = 1
+                                |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
+                                |> fun x -> x @ res.rItem.sTrace
+                            if itm.state.position <> dfa.DStartState
+                            then
+                                parserState.statesSet            
+                                |> Set.map
+                                    (fun state ->
                                         {
-                                            id    = itm.state.itemName
-                                            trace = _trace
-                                            value = NodeV 1
-                                        }
-                                    let node trace forest = (forest , itm.state.itemName, _val trace) |> Node
-                                    let dfa = getDFA itm.state.itemName
-                                    if itm.state.position <> dfa.DStartState
-                                    then
-                                        parserState.statesSet            
-                                        |> Set.map
-                                            (fun state ->
-                                                let trace = 
-                                                    state.forest @ res.rItem.forest |> List.length  = 1
-                                                    |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
-                                                        
-                                                {
-                                                    rItem  = {itm.state with 
-                                                                    forest = state.forest @ res.rItem.forest
-                                                                    sTrace = trace @ res.rItem.sTrace
-                                                             }
-                                                    rI     = res.rI                                                    
-                                                })                                        
-                                        |> Set.union buf
-                                    else                                                                                                          
-                                        ({
-                                            parserState with
-                                                inpSymbol = {name = res.rItem.itemName; value = ""} 
-                                                i         = res.rI
-                                                statesSet =                                                 
-                                                    Set.map 
-                                                        (fun stt -> 
-                                                            let trace = 
-                                                                stt.forest @ res.rItem.forest |> List.length = 1
-                                                                |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position                                                                     
-                                                                |> fun x -> x @ res.rItem.sTrace
-                                                            {stt with forest = [stt.forest @ res.rItem.forest |> node trace]
-                                                                      sTrace = []
-                                                            })
-                                                        parserState.statesSet
-                                        }
-                                        |> 
-                                            fun ps ->
-                                                if itm.state.itemName = Constants.raccStartRuleName
-                                                then 
-                                                    if ((!Lexer).Value.Get ps.i).name = "EOF"
-                                                    then (buildRes ps.statesSet)
-                                                    else Set.empty
-                                                else climb () ps
-                                        |> Set.union  buf)
-                                )
-                                Set.empty
+                                            rItem  = {itm.state with 
+                                                        forest = state.forest @ res.rItem.forest
+                                                        sTrace = trace state
+                                                     }
+                                            rI     = res.rI                                                    
+                                        })                                        
+                            else
+                                ({
+                                    parserState with
+                                        inpSymbol = {name = res.rItem.itemName; value = ""} 
+                                        i         = res.rI
+                                        statesSet =
+                                            parserState.statesSet
+                                            |> Set.map 
+                                                (fun stt -> 
+                                                    {stt with forest = [stt.forest @ res.rItem.forest |> node (trace stt)]
+                                                              sTrace = []
+                                                    })                                                
+                                }
+                                |> fun ps ->
+                                   if itm.state.itemName = Constants.raccStartRuleName
+                                   then 
+                                       if ((!Lexer).Value.Get ps.i).name = "EOF"
+                                       then buildRes ps.statesSet
+                                       else Set.empty
+                                   else climb () ps)
+                            |> Set.union  buf
                         )
-                    |> Set.unionMany
+                        Set.empty
+                                    
 #if DEBUG
                 printfn "\n climb result = %A" res
 #endif
@@ -247,12 +245,12 @@ module  TableInterpreter =
 #endif                    
                 incr CallCount    
                 let isFinaleState state= 
-                    let dfa = tables().automataDict.[state.itemName]
+                    let dfa = getDFA state.itemName
                     Set.exists ((=) state.position) dfa.DFinaleStates
                 let resPart1 =
                     let buildResult item =                        
                         {
-                            rItem  = {item with forest = [];sTrace = []}
+                            rItem  = {item with forest = []; sTrace = []}
                             rI     = parserState.i                            
                         }
                     Set.filter isFinaleState parserState.statesSet
@@ -290,7 +288,7 @@ module  TableInterpreter =
         
     let run lexer tables= 
         Lexer := Some lexer
-        setTables (Some tables)
+        Some tables |> setTables
         let res = 
             parse()
                 {
@@ -323,9 +321,9 @@ module  TableInterpreter =
                             else buf
                     else buf)
                 Set.empty
-//#if DEBUG
+#if DEBUG
         Set.iter PrintTree res
-//#endif
+#endif
         cache.Clear()
         traceBuilderCache.Clear()
         let trC = 

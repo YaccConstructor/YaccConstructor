@@ -10,4 +10,3 @@ type ``RACC core tests`` () =
 [<TestFixture>]
 type ``Yard frontend tests`` () =    
     inherit YardFrontendTester .``YARD frontend Tests``()
-

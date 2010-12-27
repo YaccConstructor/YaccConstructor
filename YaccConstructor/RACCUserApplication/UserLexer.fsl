@@ -55,7 +55,7 @@ type Lexer(lb) =
        member self.Get pos = 
         let l = !locBuf |> List.length
         if l >= pos
-        then (!locBuf).[l - pos + 2]
+        then (!locBuf).[l - pos]
         else
             let t = tokens lb
             locBuf := t :: !locBuf

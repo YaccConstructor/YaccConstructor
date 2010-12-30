@@ -117,10 +117,71 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                 symbols
     done
 
-    let newAutomata = 
+    let minimaze () =
+        let states = 
+            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)           
+        Set.map 
+            (fun state ->
+                Set.map
+                    (fun symbol ->
+                        List.filter
+                            (fun (f,s,t) -> s = symbol && t = state)
+                            !newRules
+                        |> fun lst ->
+                            let newRulesSet =
+                                List.fold
+                                    (fun buf elt -> Set.remove elt buf)
+                                    (Set.ofList !newRules)
+                                    lst
+                                |> ref
+                            if List.length lst > 1
+                            then 
+                                let newState = 
+                                    List.map (fun (f,s,t) -> f) lst
+                                    |> Set.unionMany
+                                (newState,symbol,state)
+                                ::
+                                (List.collect 
+                                    (fun (f,s,t) ->                                        
+                                        List.filter
+                                            (fun (f2,s2,t2) -> t2 = f)
+                                            !newRules
+                                        |> List.map 
+                                            (fun ((f,s,t) as x) -> newRulesSet := Set.remove x (!newRulesSet); f,s,newState))
+                                    lst)
+                                |> fun x -> newRules := List.ofSeq !newRulesSet @ x
+                            else
+                                ())
+                    symbols)
+            states
+
+
+    let newAutomata  = 
         let states = 
             List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)
+            (*|> fun x -> 
+                Set.fold
+                    (fun buf elt -> 
+                        if Set.exists (fun e -> Set.intersect e elt |> Set.isEmpty |> not) buf
+                        then 
+                            Set.remove elt buf 
+                            |> fun x -> 
+                                Set.filter (fun e -> Set.intersect e elt |> Set.isEmpty |> not) buf
+                                |> Set.map (Set.union elt)
+                                |> (+) x 
+                        else buf)
+                    x
+                    x
+            |> fun x -> 
+                Set.fold
+                    (fun buf elt -> if Set.exists (Set.isProperSubset elt) buf then Set.remove elt buf else buf)
+                    x
+                    x*)
             |> List.ofSeq
+
+        printf "States set: \n"
+        List.iter (fun s -> printf "["; Set.iter (printf "%A;") s; printf"];") states
+        printf "\n"
 
         let alterNames = dict (List.zip states [0..(List.length states)-1])
         let getAlterName s = alterNames.[s]            
@@ -196,4 +257,4 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
             DRules        = Set.ofList rules
         }
 
-    newAutomata
+    newAutomata 

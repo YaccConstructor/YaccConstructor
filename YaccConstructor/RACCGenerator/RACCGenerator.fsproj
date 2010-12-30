@@ -50,6 +50,11 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Convertions\Convertions.fsproj">
+      <Name>Convertions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RACCFiniteAutomata\RACCFiniteAutomata.fsproj">
       <Name>RACCFiniteAutomata</Name>
       <Project>{79a37c58-942e-47e9-9c12-dc1dee00e52e}</Project>

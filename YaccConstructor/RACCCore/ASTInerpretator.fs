@@ -26,7 +26,6 @@ type Status =
     | DelByFilter
     | Fail of string
     
-
 module ASTInterpretator = 
     let rec lInterp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) (traceCache:System.Collections.Generic.IDictionary<_,_>) tree = 
         let reast = RegExpAST()

@@ -46,16 +46,15 @@ open Yard.Generators.RACCGenerator
         {{name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | eof  {{name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}}
 
- {
+{
 
 type Lexer(lb) = 
     let locBuf = ref []
     interface ILexer<string> with        
     
        member self.Get pos = 
-        let l = !locBuf |> List.length
-        if l >= pos
-        then (!locBuf).[l - pos]
+        if !locBuf |> List.length >= pos
+        then ((!locBuf) |> List.rev).[pos-1]
         else
             let t = tokens lb
             locBuf := t :: !locBuf
@@ -68,4 +67,4 @@ type Lexer(lb) =
                 t.name = "EOF"
     end
 
- }
+}

@@ -42,6 +42,7 @@
     <Compile Include="LFA.fs" />
     <Compile Include="NLFAToDLFA.fs" />
     <Compile Include="AtmBuilder.fs" />
+    <Compile Include="MinimazeLFA.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">

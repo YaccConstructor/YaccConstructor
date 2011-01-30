@@ -24,25 +24,32 @@ open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
 module Lexer = UserLexer
 
-let run_common path = 
-    let content = System.IO.File.ReadAllText(path)
-    let reader = new System.IO.StringReader(content) in
-    LexBuffer<_>.FromTextReader reader
-
+//path -- path to input file
 let run path =
-    let buf = run_common path 
+    //Create lexer
+    let content = System.IO.File.ReadAllText(path)
+    let reader = new System.IO.StringReader(content)    
+    let buf = LexBuffer<_>.FromTextReader reader
     let l = UserLexer.Lexer(buf)
+
+    //Create tables
     let tables =
         {
             gotoSet = gotoSet
             automataDict = autumataDict
         }
         
+    //Run parser
+    // trees -- dirivation forest
+    // cache -- trace cache
+    // cc -- some additional debug info
     let trees,cache,cc = TableInterpreter.run l tables
-    let r =
+
+    //run forest interpretation (action code calculation)
+    let res =
         Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees
-    printf "\nResult %A\n" r
+
+    printf "\nResult %A\n" res
     trees
     
 let main path = run path
-

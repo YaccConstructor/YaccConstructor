@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{79a37c58-942e-47e9-9c12-dc1dee00e52e}</ProjectGuid>
+    <ProjectGuid>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RACCFiniteAutomata</RootNamespace>
-    <AssemblyName>RACCFiniteAutomata</AssemblyName>
+    <RootNamespace>IronyFrontend.Test</RootNamespace>
+    <AssemblyName>IronyFrontend.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RACCFiniteAutomata</Name>
+    <Name>IronyFrontend.Test</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\RACCFiniteAutomata.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\IronyFrontend.Test.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,35 +29,43 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\RACCFiniteAutomata.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\IronyFrontend.Test.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LFA.fs" />
-    <Compile Include="NLFAToDLFA.fs" />
-    <Compile Include="AtmBuilder.fs" />
-    <!--Compile Include="MinimazeLFA.fs" /-->
+    <Compile Include="IronyFrontendTests.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
-      <Name>RACCCommon</Name>
-      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\IronyFrontendTests\IronyFrontendTests.csproj">
+      <Name>IronyFrontendTests</Name>
+      <Project>{61b73de1-f585-488d-b842-923cbfcd092c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\IronyFrontend\IronyFrontend.fsproj">
+      <Name>IronyFrontend (Frontends\IronyFrontend)</Name>
+      <Project>{0ddc2026-fa70-405a-b3a5-39c1886afa15}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-             Other similar extension points exist, see Microsoft.Common.targets.
-        <Target Name="BeforeBuild">
-        </Target>
-        <Target Name="AfterBuild">
-        </Target>
-        -->
+	     Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
 </Project>

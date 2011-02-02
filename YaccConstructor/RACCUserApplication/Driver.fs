@@ -22,6 +22,7 @@ module m1
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
+//UserLexer -- your lexer
 module Lexer = UserLexer
 
 //path -- path to input file
@@ -38,7 +39,11 @@ let run path =
             gotoSet = gotoSet
             automataDict = autumataDict
         }
-        
+    
+    //Run parser
+    // trees -- dirivation forest
+    // cache -- trace cache
+    // cc -- some additional debug info        
     //Run parser
     // trees -- dirivation forest
     // cache -- trace cache
@@ -51,5 +56,6 @@ let run path =
 
     printf "\nResult %A\n" res
     trees
+
     
 let main path = run path

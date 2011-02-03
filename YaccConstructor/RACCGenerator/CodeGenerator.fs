@@ -57,6 +57,7 @@ type CodeGenerator(outPath: string) =
             let rAltFName = "yardRAltAction"
             let elemFName = "yardElemAction"
             let clsFName = "yardClsAction"
+            let optFName = "yardOptAction"
             let indentString l = String.replicate l "    "
                 
             match body with 
@@ -134,6 +135,13 @@ type CodeGenerator(outPath: string) =
                + indentString (indentSize + 1) + "let " + clsFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
                + indentString (indentSize + 1) + "List.map " + clsFName + " lst \n"
                + indentString indentSize + notMatched "REClosure" + "\n"
+
+            | POpt(expr) ->
+                 indentString indentSize + "match expr with\n"
+               + indentString indentSize + "| REOpt(opt) -> \n" 
+               + indentString (indentSize + 1) + "let " + optFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
+               + indentString (indentSize + 1) + "if opt.IsSome then Some (" + optFName + " opt) else None \n"
+               + indentString indentSize + notMatched "REOpt" + "\n"
                
             | _ -> "NotSupported"
                     

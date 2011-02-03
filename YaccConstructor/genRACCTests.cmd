@@ -9,6 +9,7 @@ Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_l_attr.yrd --
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_simple_checker.yrd --testpath ..\Tests\RACC\test_simple_checker\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_checker_on_glr.yrd --testpath ..\Tests\RACC\test_checker_on_glr\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_summator_1.yrd --testpath ..\Tests\RACC\test_summator_1\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_opt.yrd --testpath ..\Tests\RACC\test_opt\
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests
@@ -23,6 +24,7 @@ move ..\Tests\RACC\test_l_attr\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_simple_checker\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_checker_on_glr\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_summator_1\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\test_opt\*.fs  RACCGeneratedTests/
 
 del RACCCore.Test\test_*
 
@@ -58,3 +60,6 @@ call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Checker_on_gl
 
 call BatchSubstitute.cmd RACC.Actions RACC.Actions_Summator_1 RACCGeneratedTests\test_summator_1.yrd.actions.fs >> RACCCore.Test\test_summator_1.yrd.actions.fs
 call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Summator_1 RACCGeneratedTests\test_summator_1.yrd.tables.fs >> RACCCore.Test\test_summator_1.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_Opt RACCGeneratedTests\test_opt.yrd.actions.fs >> RACCCore.Test\test_opt.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Opt RACCGeneratedTests\test_opt.yrd.tables.fs >> RACCCore.Test\test_opt.yrd.tables.fs

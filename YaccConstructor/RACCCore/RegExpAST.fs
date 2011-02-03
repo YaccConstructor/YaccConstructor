@@ -24,6 +24,7 @@ namespace Yard.Generators.RACCGenerator
 type REAST = 
    | RESeq of List<REAST>
    | REClosure of List<REAST>
+   | REOpt of Option<REAST>
    | REAlt of Option<REAST>*Option<REAST>
    | RELeaf of obj
 
@@ -37,6 +38,7 @@ type RegExpAST() =
                 | TSeqS x, TSeqE y 
                 | TAlt1S x, TAlt1E y
                 | TAlt2S x, TAlt2E y 
+                | TOptS x, TOptE y 
                 | TClsS x, TClsE y  when x=y -> true
                 | _                          -> false
             | _ -> false        
@@ -81,6 +83,14 @@ type RegExpAST() =
                             | FATrace (TClsE y)::tl -> r::buf |> List.rev |> REClosure, tl, _val
                             | _                     -> inner (r::buf) _tl _val                                  
                     inner [] tl values 
+
+                | FATrace (TOptS x)->                    
+                    match tl with
+                    | FATrace (TOptE y)::tl -> REOpt None, tl, values
+                    | _ -> let r,_tl,_val = buildREAST tl values                            
+                           match _tl with                        
+                           | FATrace (TOptE y)::tl -> REOpt (Some r), tl, _val
+                           | _                     -> RELeaf null,[],[]                    
                 
                 | _    -> RELeaf null,[],[]
                     

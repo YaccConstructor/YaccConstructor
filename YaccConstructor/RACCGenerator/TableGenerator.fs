@@ -54,6 +54,10 @@ type TableGenerator(outPath: string) =
                     let clsNum = enumerator.Next()
                     builder.Cls (build expr) (FATrace (TClsS clsNum)) (FATrace (TClsE clsNum))
 
+                | POpt(expr)        ->
+                    let clsNum = enumerator.Next()
+                    builder.Opt (build expr) (FATrace (TOptS clsNum)) (FATrace (TOptE clsNum))
+
                 | PRef(ch,_)
                 | PToken(ch)        -> 
                     let smbNum = enumerator.Next()

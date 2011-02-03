@@ -132,6 +132,45 @@ type AtmBuilder(enumerator:Enumerator) =
                                     ]                                         
             }
 
+        let opt atm clsSlbl clsElbl =
+            let startStateID = enumerator.Next()
+            let finaleStateID = enumerator.Next()
+            {        
+            
+                NIDToStateMap = 
+                    let d = atm.NIDToStateMap
+                    d.Add(startStateID,startStateID)
+                    d.Add(finaleStateID,finaleStateID)
+                    d
+                        
+
+                NStartState   = startStateID
+                NFinaleState  = finaleStateID
+                NRules        =   atm.NRules
+                                + set
+                                    [
+                                        {
+                                            FromStateID = atm.NStartState
+                                            ToStateID   = atm.NFinaleState
+                                            Label       = Omega
+                                            Symbol      = Epsilon
+                                        }                                        
+                                        ;{
+                                            FromStateID = startStateID
+                                            ToStateID   = atm.NStartState
+                                            Label       = clsSlbl
+                                            Symbol      = Epsilon
+                                        }
+                                        ;{
+                                            FromStateID = atm.NFinaleState
+                                            ToStateID   = finaleStateID
+                                            Label       = clsElbl
+                                            Symbol      = Epsilon
+                                        }
+                                    ]                                         
+            }
+
+
         let addInHead sttInfo smb lbl atm =
             let stateID = enumerator.Next()
             let stateVal = if Option.isNone sttInfo then stateID else Option.get sttInfo
@@ -201,6 +240,7 @@ type AtmBuilder(enumerator:Enumerator) =
         member self.Alt atm1 atm2 alt1Slbl alt1Elbl alt2Slbl alt2Elbl = 
             alt atm1 atm2 alt1Slbl alt1Elbl alt2Slbl alt2Elbl
         member self.Cls  atm clsSlbl clsElbl = cls atm clsSlbl clsElbl
+        member self.Opt  atm clsSlbl clsElbl = opt atm clsSlbl clsElbl
         member self.AddInHead sttInfo smb lbl atm = addInHead sttInfo smb lbl atm
         member self.Append sttInfo smb lbl atm = append sttInfo smb lbl atm
         member self.Trivial sttInfo1 sttInfo2 smb lbl = trivial sttInfo1 sttInfo2 smb lbl

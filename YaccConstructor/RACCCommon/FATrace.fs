@@ -30,6 +30,8 @@ type TStep =
     | TAlt2E of int
     | TClsS of int
     | TClsE of int
+    | TOptS of int
+    | TOptE of int
     override self.ToString () =
         match self with
         | TSmbS x  -> "(TSmbS " + x.ToString() + ")"
@@ -42,6 +44,8 @@ type TStep =
         | TAlt2E x -> "(TAlt2E " + x.ToString() + ")"
         | TClsS  x -> "(TClsS " + x.ToString() + ")"
         | TClsE  x -> "(TClsE " + x.ToString() + ")"
+        | TOptS  x -> "(TOptS " + x.ToString() + ")"
+        | TOptE  x -> "(TOptE " + x.ToString() + ")"
 
 type FATrace = 
     | Omega
@@ -50,6 +54,3 @@ type FATrace =
         match self with
         | Omega      -> "Omega"
         | FATrace(s) -> "(FATrace " + s.ToString() + ")"
-
-
-

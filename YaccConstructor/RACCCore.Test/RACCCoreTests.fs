@@ -391,6 +391,30 @@ let tests =
                 path       = "test_summator_1\\test_summator_1_3.yrd.in"
                 rightValue = seq [6.0 |> box]  
             })
+
+        (33,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Opt.gotoSet
+                        automataDict = Tables_Opt.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Opt.ruleToAction
+                path       = "test_opt\\test_opt_1.yrd.in"
+                rightValue = seq ["1 +" |> box]  
+            })
+
+        (33,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Opt.gotoSet
+                        automataDict = Tables_Opt.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Opt.ruleToAction
+                path       = "test_opt\\test_opt_2.yrd.in"
+                rightValue = seq ["1" |> box]  
+            })
     ]
     |> dict
 
@@ -622,5 +646,17 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Summator_1 3`` () =
         let test = tests.[32]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Option 1`` () =
+        let test = tests.[32]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Option 2`` () =
+        let test = tests.[33]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

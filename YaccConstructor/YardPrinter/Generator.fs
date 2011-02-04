@@ -94,7 +94,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         // Alternatives
         | PAlt(alt1, alt2) ->
             if not wasAlt then seq {yield Tabbed(seq {yield Str (" "); yield! printProduction production true})}
-            else seq {yield StrSeq(printProduction alt1 false); yield Line (seq {yield Str ("|"); yield! printProduction alt2 true})} 
+            else seq {yield StrSeq(printProduction alt1 true); yield Line (seq {yield Str ("|"); yield! printProduction alt2 true})} 
         // Sequence * attribute.(attribute is always applied to sequence) 
         | PSeq(elem_seq, attr_option) -> seq {yield! (Seq.collect printElem elem_seq); yield Str(printAttr attr_option)}
         // Token
@@ -117,7 +117,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | _ -> to_seq <| Str("ERROR")
 
     seq {yield Line(seq{yield! to_seq <| Str(startSign + rule.name + (printMetaArgs rule.metaArgs) + (printArgs rule.args) + ":");
-        yield Str(" "); yield! printProduction rule.body false; yield Str(";")})}
+        yield Str(" "); yield! printProduction rule.body false; yield Str(";\n")})}
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     let tbSeq = Seq.collect (fun rule -> printRule rule) input_grammar.grammar

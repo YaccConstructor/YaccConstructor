@@ -34,10 +34,10 @@ type AtmBuilder(enumerator:Enumerator) =
                 NRules        = lAtm.NRules + rAtm.NRules 
                                 |> Set.add
                                         {
-                                        FromStateID = lAtm.NFinaleState
-                                        ToStateID   = rAtm.NStartState
-                                        Label       = lbl
-                                        Symbol      = Epsilon
+                                            FromStateID = lAtm.NFinaleState
+                                            ToStateID   = rAtm.NStartState
+                                            Label       = lbl
+                                            Symbol      = Epsilon
                                         }
             }
 

@@ -129,6 +129,7 @@ type CodeGenerator(outPath: string) =
                + indentString indentSize + "| RELeaf " + "t" + Source.toString x + " -> " + "t" + Source.toString x + " :?> 'a\n"
                + indentString indentSize + notMatched "RELeaf" + "\n"
                
+            | PSome(expr)
             | PMany(expr) ->
                  indentString indentSize + "match expr with\n"
                + indentString indentSize + "| REClosure(lst) -> \n" 
@@ -140,7 +141,7 @@ type CodeGenerator(outPath: string) =
                  indentString indentSize + "match expr with\n"
                + indentString indentSize + "| REOpt(opt) -> \n" 
                + indentString (indentSize + 1) + "let " + optFName + " expr = \n" + (generateBody (indentSize + 2) expr) + "\n"
-               + indentString (indentSize + 1) + "if opt.IsSome then Some (" + optFName + " opt) else None \n"
+               + indentString (indentSize + 1) + "if opt.IsSome then Some (" + optFName + " opt.Value) else None \n"
                + indentString indentSize + notMatched "REOpt" + "\n"
                
             | _ -> "NotSupported"

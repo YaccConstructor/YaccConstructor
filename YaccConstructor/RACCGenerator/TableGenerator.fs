@@ -50,16 +50,24 @@ type TableGenerator(outPath: string) =
                     let alt1Num, alt2Num = enumerator.Next(), enumerator.Next()
                     builder.Alt lAtm rAtm (FATrace (TAlt1S alt1Num)) (FATrace (TAlt1E alt1Num)) (FATrace (TAlt2S alt2Num)) (FATrace (TAlt2E alt2Num))
 
+                | PSome (expr)     ->
+                    let clsNum = enumerator.Next()
+                    let atm = build expr                    
+                    builder.Cls (build expr) Omega Omega
+                    |> fun x -> builder.Concat atm x Omega
+                    |> builder.AddInHead None Epsilon (FATrace (TClsS clsNum))
+                    |> builder.Append None Epsilon (FATrace (TClsE clsNum))
+
                 | PMany (expr)      -> 
                     let clsNum = enumerator.Next()
                     builder.Cls (build expr) (FATrace (TClsS clsNum)) (FATrace (TClsE clsNum))
 
-                | POpt(expr)        ->
+                | POpt (expr)        ->
                     let clsNum = enumerator.Next()
                     builder.Opt (build expr) (FATrace (TOptS clsNum)) (FATrace (TOptE clsNum))
 
-                | PRef(ch,_)
-                | PToken(ch)        -> 
+                | PRef (ch,_)
+                | PToken (ch)        -> 
                     let smbNum = enumerator.Next()
                     builder.Trivial None None (NSymbol (Source.toString ch)) Omega
                     |> builder.AddInHead None Epsilon (FATrace (TSmbS smbNum))

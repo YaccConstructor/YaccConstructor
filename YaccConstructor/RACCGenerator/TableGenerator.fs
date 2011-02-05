@@ -48,7 +48,9 @@ type TableGenerator(outPath: string) =
                     let lAtm = build l
                     let rAtm = build r
                     let alt1Num, alt2Num = enumerator.Next(), enumerator.Next()
-                    builder.Alt lAtm rAtm (FATrace (TAlt1S alt1Num)) (FATrace (TAlt1E alt1Num)) (FATrace (TAlt2S alt2Num)) (FATrace (TAlt2E alt2Num))
+                    builder.Alt lAtm rAtm 
+                        (FATrace (TAlt1S alt1Num)) (FATrace (TAlt1E alt1Num)) 
+                        (FATrace (TAlt2S alt2Num)) (FATrace (TAlt2E alt2Num))
 
                 | PSome (expr)     ->
                     let clsNum = enumerator.Next()

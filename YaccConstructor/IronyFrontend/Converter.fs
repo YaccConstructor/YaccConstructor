@@ -28,6 +28,18 @@ open Microsoft.FSharp.Collections
 
 module Converter =
 
+    let formatTermName termName = 
+        String.collect (
+            function
+            | '>' -> "GREATER"
+            | '=' -> "EQUAL"
+            | '<' -> "LESS"
+            | c   -> string (System.Char.ToLower c) 
+            )
+            termName
+
+    let formatNontermName = String.uncapitalize
+            
     let Convert (ironyGrammar : Irony.Parsing.Grammar) = 
         let refTerms = ref [ironyGrammar.Root :> BnfTerm]
         let rec findBnfTerms (start:NonTerminal) = 
@@ -58,8 +70,8 @@ module Converter =
                                             (fun (bnfTerm : BnfTerm)-> 
                                                 ({omit = false; 
                                                 rule = match bnfTerm with
-                                                        | :? NonTerminal as term -> PRef((term.Name, (-419,-419)), None)
-                                                        | :? Terminal as term -> PToken(term.Name, (-419,-419))
+                                                        | :? NonTerminal as term -> PRef((formatNontermName term.Name, (-419,-419)), None)
+                                                        | :? Terminal as term -> PToken(formatTermName term.Name, (-419,-419))
                                                         | _ -> failwith "Not supported BnfTerm type"
                                                         ;
                                                 binding=None; 
@@ -72,7 +84,7 @@ module Converter =
                             None
                             nt.Rule.Data
                     match productionOpt with
-                    | Some(pr)  -> {name = nt.Name; args = []; body = pr; metaArgs = []; _public = (nt = (ironyGrammar.Root))}
+                    | Some(pr)  -> {name = formatNontermName nt.Name; args = []; body = pr; metaArgs = []; _public = (nt = (ironyGrammar.Root))}
                     | None      -> failwith "minimum 1 alternative is required" )
                 nonTerminals
         grammar

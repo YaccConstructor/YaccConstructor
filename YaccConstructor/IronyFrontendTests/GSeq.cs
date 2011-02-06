@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Irony.Parsing;
 
 namespace IronyFrontendTests
@@ -23,6 +20,27 @@ namespace IronyFrontendTests
             this.LanguageFlags |= LanguageFlags.NewLineBeforeEOF;
 
         }//constructor
+    }
+
+    public class TermName : Grammar
+    {
+      public TermName()
+      {
+        this.GrammarComments = @"Test TermName grammar";
+        //Terminals
+        KeyTerm greater = ToTerm(">");
+        KeyTerm less = ToTerm("<");
+        KeyTerm equal = ToTerm("=");
+
+        var s = new NonTerminal("Start");
+
+        //Rules
+        s.Rule = greater | less | equal;
+
+        this.Root = s;
+        this.LanguageFlags |= LanguageFlags.NewLineBeforeEOF;
+
+      }//constructor
 
     }
 }

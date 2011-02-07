@@ -34,7 +34,7 @@ module Converter =
             | '>' -> "GREATER"
             | '=' -> "EQUAL"
             | '<' -> "LESS"
-            | c   -> string (System.Char.ToLower c) 
+            | c   -> string (System.Char.ToUpper c) 
             )
             termName
 

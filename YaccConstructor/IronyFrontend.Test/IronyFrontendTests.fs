@@ -19,10 +19,10 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
   [{name = "s";
     args = [];
     body = PSeq ([{omit = false;
-                   rule = PToken ("mult", (-419, -419));
+                   rule = PToken ("MULT", (-419, -419));
                    binding = None;
                    checker = None;}; {omit = false;
-                                      rule = PToken ("plus", (-419, -419));
+                                      rule = PToken ("PLUS", (-419, -419));
                                       binding = None;
                                       checker = None;}],None);
     _public = true;
@@ -56,6 +56,19 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
         metaArgs = [];}];
      foot = None;}
 
+let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
+    {info = {fileName = "";};
+     head = None;
+     grammar = [{name = "myNonTerm";
+                 args = [];
+                 body = PSeq ([{omit = false;
+                                rule = PToken ("LESS", (-419, -419));
+                                binding = None;
+                                checker = None;}],None);
+                 _public = true;
+                 metaArgs = [];}];
+     foot = None;}
+
 [<TestFixture>]
 type ``Irony frontend tests`` () =
     [<Test>]
@@ -73,3 +86,11 @@ type ``Irony frontend tests`` () =
         printfn "tree: %A" res        
         #endif
         Assert.AreEqual(res,i22_res)
+
+    [<Test>] 
+    member test.``Issue22 test non term name`` () =
+        let res = run (new NTermName())
+        #if DEBUG
+        printfn "tree: %A" res        
+        #endif
+        Assert.AreEqual(res,nTermName_res)

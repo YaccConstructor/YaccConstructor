@@ -1,4 +1,4 @@
-# 1 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 1 "Lexer.fsl"
  
 //  UserLexer.fs contains simple lexer for testing.
 //
@@ -26,7 +26,7 @@ open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Yard.Generators.RACCGenerator
  
-# 29 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 29 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -59,48 +59,48 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 34 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 34 "Lexer.fsl"
                         {name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 64 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 64 "Lexer.fs"
           )
   | 1 -> ( 
-# 36 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 36 "Lexer.fsl"
                         {name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 69 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 69 "Lexer.fs"
           )
   | 2 -> ( 
-# 38 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 38 "Lexer.fsl"
                         {name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 74 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 74 "Lexer.fs"
           )
   | 3 -> ( 
-# 40 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 40 "Lexer.fsl"
                         {name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 79 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 79 "Lexer.fs"
           )
   | 4 -> ( 
-# 42 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 42 "Lexer.fsl"
                         {name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 84 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 84 "Lexer.fs"
           )
   | 5 -> ( 
-# 44 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 44 "Lexer.fsl"
                         {name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 89 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 89 "Lexer.fs"
           )
   | 6 -> ( 
-# 46 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 46 "Lexer.fsl"
                         {name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 94 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 94 "Lexer.fs"
           )
   | 7 -> ( 
-# 47 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 47 "Lexer.fsl"
                         {name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 99 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 99 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 49 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\UserLexer.fsl"
+# 49 "Lexer.fsl"
  
 
 type Lexer(lb) = 
@@ -123,4 +123,4 @@ type Lexer(lb) =
     end
 
 
-# 3000000 "D:\rec_ascent\trunk\YaccConstructor\RACCUserApplication\Lexer.fs"
+# 3000000 "Lexer.fs"

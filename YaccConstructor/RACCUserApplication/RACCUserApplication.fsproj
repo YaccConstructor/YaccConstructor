@@ -31,13 +31,18 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\RACCUserApplication.XML</DocumentationFile>
   </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+
   <ItemGroup>
+    <FsLex Include="Lexer.fsl">
+        <OtherFlags>--unicode</OtherFlags>
+    </FsLex>     
     <Compile Include="Tables.fs" />
     <Compile Include="Actions.fs" />
-    <Compile Include="Lexer.fs" />
-    <None Include="UserLexer.fsl" />
+    <Compile Include="Lexer.fs" />  
     <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>

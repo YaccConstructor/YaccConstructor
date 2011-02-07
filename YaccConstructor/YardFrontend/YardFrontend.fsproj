@@ -52,14 +52,23 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
+
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+
   <ItemGroup>
+    <FsLex Include="Lexer.fsl">
+        <OtherFlags>--unicode --light-off</OtherFlags>
+    </FsLex>
+    <FsYacc Include="Parser.fsy">
+        <OtherFlags>--module Yard.Core.GrammarParser --open Yard.Core --light-off</OtherFlags>
+    </FsYacc>
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="YardFrontend.fs" />
-    <FsYacc Include="parser.fsy" />
-    <FsLex Include="lexer.fsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
@@ -67,8 +76,6 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!--PropertyGroup>
     <PreBuildEvent>fslex - -unicode - -light-off -o Lexer.fs $(SolutionDir)YardFrontend\lexer.fsl</PreBuildEvent>
   </PropertyGroup-->

@@ -39,10 +39,13 @@ type CodeGenerator(outPath: string) =
             write ""
             write "module RACC.Actions"
             write ""
-            write "open Yard.Generators.RACCGenerator"            
+            write "open Yard.Generators.RACCGenerator"
+            write ""
+            write "let getUnmatched x expectedType ="
+            write "    \"Unexpected type of node\\nType \" + x.ToString() + \" is not expected in this position\\n\" + expectedType + \" was expected.\" |> failwith"
 
         let notMatched expectedType = 
-            "| x -> \"Unexpected type of node\\nType \" + x.ToString() + \" is not expected in this position\\n" + expectedType + " was expected.\" |> failwith"
+            "| x -> getUnmatched x \"" + expectedType + "\""
 
         let generateHeader header = 
             if (Option.isSome header)

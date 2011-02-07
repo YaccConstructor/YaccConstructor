@@ -1,25 +1,75 @@
-﻿module Main
+﻿module IronyFrontendTests
 
 open IronyFrontendTests
 open Yard.Frontends.IronyFrontend
 open Yard.Core
 open NUnit.Framework
+open Yard.Core.IL.Definition
+open Yard.Core.IL.Production
 
 let run ironyGrammar =
     let frontend = new IronyFrontend() :> IFrontend
     let ilTree = frontend.ParseGrammar ironyGrammar
     ilTree
 
+let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
+ {info = {fileName = "";};
+ head = None;
+ grammar =
+  [{name = "s";
+    args = [];
+    body = PSeq ([{omit = false;
+                   rule = PToken ("mult", (-419, -419));
+                   binding = None;
+                   checker = None;}; {omit = false;
+                                      rule = PToken ("plus", (-419, -419));
+                                      binding = None;
+                                      checker = None;}],None);
+    _public = true;
+    metaArgs = [];}];
+ foot = None;}
+
+
+
+let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
+    {info = {fileName = "";};
+     head = None;
+     grammar =
+      [{name = "start";
+        args = [];
+        body =
+         PAlt
+           (PAlt
+              (PSeq ([{omit = false;
+                       rule = PToken ("GREATER", (-419, -419));
+                       binding = None;
+                       checker = None;}],None),
+               PSeq ([{omit = false;
+                       rule = PToken ("LESS", (-419, -419));
+                       binding = None;
+                       checker = None;}],None)),
+            PSeq ([{omit = false;
+                    rule = PToken ("EQUAL", (-419, -419));
+                    binding = None;
+                    checker = None;}],None));
+        _public = true;
+        metaArgs = [];}];
+     foot = None;}
+
 [<TestFixture>]
 type ``Irony frontend tests`` () =
     [<Test>]
     member test.``Seq test 1`` () =
         let res = run (new GSeq())
+        #if DEBUG
         printfn "tree: %A" res
-        Assert.AreEqual(1,1)
+        #endif
+        Assert.AreEqual(res,seq_res)
         
     [<Test>] 
     member test.``Issue22 test`` () =
         let res = run (new TermName())
-        printfn "tree: %A" res
-        Assert.AreEqual(1,1)
+        #if DEBUG
+        printfn "tree: %A" res        
+        #endif
+        Assert.AreEqual(res,i22_res)

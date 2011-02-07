@@ -1,0 +1,71 @@
+﻿{
+//  UserLexer.fs contains simple lexer for testing.
+//
+//  for build:  fslex UserLexer.fsl --unicode -o Lexer.fs
+//
+//  Copyright 2010 Semen Grigorev <rsdpisuy@gmail.com>
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software:you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+module UserLexer
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Yard.Generators.RACCGenerator
+
+ }
+ 
+
+ let digit = ['0'-'9']
+
+ rule tokens = parse
+ | digit+ 
+        {{name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | "+" 
+        {{name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | "-" 
+        {{name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | "*" 
+        {{name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | "/" 
+        {{name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | "(" 
+        {{name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | ")" 
+        {{name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | eof  {{name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+
+{
+
+type Lexer(lb) = 
+    let locBuf = ref []
+    interface ILexer<string> with        
+    
+       member self.Get pos = 
+        if !locBuf |> List.length >= pos
+        then ((!locBuf) |> List.rev).[pos-1]
+        else
+            let t = tokens lb
+            locBuf := t :: !locBuf
+            t
+       member self.IsEnd () =
+            lb.IsPastEndOfStream 
+            ||
+                let t = tokens lb
+                locBuf := t :: !locBuf
+                t.name = "EOF"
+    end
+
+}

@@ -48,14 +48,19 @@ let run path =
     // trees -- dirivation forest
     // cache -- trace cache
     // cc -- some additional debug info
-    let trees,cache,cc = TableInterpreter.run l tables
+    let parseRes,cache,cc = TableInterpreter.run l tables
 
+    let forest = 
+        match parseRes with
+        | PSuccess (forest) -> forest
+        | PError (pos) -> Set.empty
     //run forest interpretation (action code calculation)
     let res =
-        Seq.map (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) trees
-
+        Seq.map 
+            (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) forest
+            
     printf "\nResult %A\n" res
-    trees
+    forest
 
     
 let main path = run path

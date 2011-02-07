@@ -415,8 +415,36 @@ let tests =
                 path       = "test_opt\\test_opt_2.yrd.in"
                 rightValue = seq ["1" |> box]  
             })
+
+        (34,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Alt.gotoSet
+                        automataDict = Tables_Alt.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Alt.ruleToAction
+                path       = "test_alt\\test_alt_3.yrd.in"
+                rightValue = seq ["1"]  
+            })
+
+        (35,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_alt_in_cls.gotoSet
+                        automataDict = Tables_alt_in_cls.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_alt_in_cls.ruleToAction
+                path       = "test_alt_in_cls\\test_alt_in_cls_8.yrd.in"
+                rightValue = seq ["2"]  
+            })
     ]
     |> dict
+
+type TestStatus =
+    | TSuccess of seq<obj>
+    | TError of string
 
 let run_common path = 
     let content = System.IO.File.ReadAllText(path)    
@@ -425,18 +453,30 @@ let run_common path =
 
 let runMain path tables actions =
     let buf = run_common path 
-    let l = UserLexer.Lexer(buf)     
-    let trees,cache,cc = TableInterpreter.run l tables
-    Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) trees    
-    |> Seq.filter (function | Success _ -> true | _ -> false)
-    |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
-    ,cache
-    ,cc      
+    let l = UserLexer.Lexer(buf)    
+    let parseRes,cache,cc = TableInterpreter.run l tables
+    let res  = 
+        match parseRes with
+        | PSuccess (forest) -> 
+            Seq.map (fun tree -> ASTInterpretator.interp actions cache tree) forest    
+            |> Seq.filter (function | Success _ -> true | _ -> false)
+            |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
+            |> TSuccess
+        | PError (pos) -> TError(pos.ToString())
+
+    res,cache,cc      
 
 let run path tables actions = 
     match runMain path tables actions with
-    | (r,_,_) -> r
+    | (TSuccess(r),_,_) -> r
+    | _                 -> Seq.empty
 
+let eRun path tables actions = 
+    match runMain path tables actions with
+    | (TError(r),_,_) -> 
+        printf "Error: %A" r
+        r
+    | _               -> ""
 
 let pRun path tables actions =
     match runMain path tables actions with
@@ -460,7 +500,7 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Alt in closure test 1`` () =
         let test = tests.[1]
-        let res = run (testPath + test.path) test.tables test.actionsMap
+        let res = run (testPath + test.path) test.tables test.actionsMap        
         Assert.AreEqual(test.rightValue,res)
 
     [<Test>] 
@@ -659,4 +699,16 @@ type ``RACC core tests`` ()=
     member test.``Option 2`` () =
         let test = tests.[33]
         let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Alt error`` () =
+        let test = tests.[34]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Alt in cls error`` () =
+        let test = tests.[35]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

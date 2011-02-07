@@ -29,8 +29,14 @@ type Item<'state, 'symbol, 'tree> =
         symbol : 'symbol        
     }
 
+type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality> = 
+    | PSuccess of Set<AST<'a,'b,'c,'d>>
+    | PError   of int
+
 module  TableInterpreter =     
     
+    let maxCorrPos = ref 0
+
     let Lexer: Option<ILexer<_>>  ref = ref None
 
     let CallCount = ref 0
@@ -182,22 +188,22 @@ module  TableInterpreter =
                                 let node trace forest = (forest, itm.state.itemName, nodeVal trace itm) |> Node
                                 let dfa = getDFA itm.state.itemName
                                 let trace state =
-                                    state.forest @ res.rItem.forest 
+                                    state.forest @ res.rItem.forest
                                     |> List.length = 1
                                     |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
                                     |> fun x -> x @ res.rItem.sTrace
                                 if itm.state.position <> dfa.DStartState
                                 then
-                                    parserState.statesSet            
+                                    parserState.statesSet
                                     |> Set.map
                                         (fun state ->
                                             {
-                                                rItem  = {itm.state with 
+                                                rItem  = {itm.state with
                                                             forest = state.forest @ res.rItem.forest
                                                             sTrace = trace state
-                                                            }
-                                                rI     = res.rI                                                    
-                                            })                                
+                                                         }
+                                                rI     = res.rI
+                                            })
                                 else
                                     ({
                                         parserState with
@@ -205,15 +211,15 @@ module  TableInterpreter =
                                             i         = res.rI
                                             statesSet =
                                                 parserState.statesSet
-                                                |> Set.map 
-                                                    (fun stt -> 
+                                                |> Set.map
+                                                    (fun stt ->
                                                         {stt with forest = [stt.forest @ res.rItem.forest |> node (trace stt)]
                                                                   sTrace = []
-                                                        })                                                
+                                                        })
                                     }
                                     |> fun ps ->
                                         if itm.state.itemName = Constants.raccStartRuleName
-                                        then 
+                                        then
                                             if ((!Lexer).Value.Get ps.i).name = "EOF"
                                             then buildRes ps.statesSet
                                             else Set.empty
@@ -221,13 +227,13 @@ module  TableInterpreter =
                                 |> Set.union  buf
                             )
                             Set.empty)
-                |> Set.unionMany                                    
+                |> Set.unionMany
 #if DEBUG
                 |> fun res -> printfn "\n climb result = %A" res; res
 #endif
                 |> fun res -> res)
         
-    and parse () = 
+    and parse () =
         memoize
             (fun parserState ->
 #if DEBUG
@@ -271,6 +277,8 @@ module  TableInterpreter =
                         }
                         |> climb()
                 let res = resPart1 + resPart2
+                if res.Count <> 0 && !maxCorrPos < parserState.i
+                then maxCorrPos := parserState.i
 #if DEBUG
                 printfn "\n parser result = %A" res
 #endif
@@ -290,24 +298,24 @@ module  TableInterpreter =
                             forest   = []
                             sTrace   = []
                         }
-                        |> Set.singleton 
-                    inpSymbol = {name = "";value =""}                                    
+                        |> Set.singleton
+                    inpSymbol = {name = "";value =""}
                     i         = 1
                 }
             |> Set.fold
-                (fun buf r -> 
+                (fun buf r ->
                     let forest = r.rItem.forest
                     if List.length  forest = 1 && r.rItem.itemName = Constants.raccStartRuleName
-                    then 
+                    then
                         let getUserTree tree =
                             match tree with
                             | Node (childs,name,value) -> Some (List.head childs)
                             | _                        -> None
 
-                        List.head forest 
-                        |> fun x -> 
+                        List.head forest
+                        |> fun x ->
                             let y = getUserTree x
-                            if y.IsSome 
+                            if y.IsSome
                             then Set.add y.Value buf
                             else buf
                     else buf)
@@ -317,8 +325,14 @@ module  TableInterpreter =
 #endif
         cache.Clear()
         traceBuilderCache.Clear()
-        let trC = 
+        let trC =
             seq {for s in traceCache -> s.Value,s.Key}
             |> dict
-        traceCache.Clear()        
-        res,trC,!CallCount
+        traceCache.Clear()
+        let res = 
+            if res.Count > 0
+            then PSuccess res
+            else PError !maxCorrPos 
+             ,trC,!CallCount
+        maxCorrPos := 0
+        res

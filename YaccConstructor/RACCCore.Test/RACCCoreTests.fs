@@ -425,7 +425,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_3.yrd.in"
-                rightValue = seq ["1"]  
+                rightValue = seq ["0 NUMBER 1"]  
             })
 
         (35,
@@ -437,7 +437,31 @@ let tests =
                     }
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_8.yrd.in"
-                rightValue = seq ["2"]  
+                rightValue = seq ["5 NUMBER 2"]  
+            })
+
+        (36,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Summator_1.gotoSet
+                        automataDict = Tables_Summator_1.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Summator_1.ruleToAction
+                path       = "test_summator_1\\test_summator_1_4.yrd.in"
+                rightValue = seq ["4 PLUS +"]  
+            })
+
+        (37,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Aritm_glr.gotoSet
+                        automataDict = Tables_Aritm_glr.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Aritm_glr.ruleToAction
+                path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
+                rightValue = seq ["5 MINUS -"]  
             })
     ]
     |> dict
@@ -454,7 +478,7 @@ let run_common path =
 let runMain path tables actions =
     let buf = run_common path 
     let l = UserLexer.Lexer(buf)    
-    let parseRes,cache,cc = TableInterpreter.run l tables
+    let parseRes,cache,cc = TableInterpreter.run l tables    
     let res  = 
         match parseRes with
         | PSuccess (forest) -> 
@@ -462,7 +486,9 @@ let runMain path tables actions =
             |> Seq.filter (function | Success _ -> true | _ -> false)
             |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
             |> TSuccess
-        | PError (pos) -> TError(pos.ToString())
+        | PError (pos) -> 
+            TError((l:>ILexer<string>).Get(if pos = 0 then 1 else pos) 
+            |> fun x -> (String.concat " " [pos.ToString(); x.name; x.value]))
 
     res,cache,cc      
 
@@ -475,8 +501,8 @@ let eRun path tables actions =
     match runMain path tables actions with
     | (TError(r),_,_) -> 
         printf "Error: %A" r
-        r
-    | _               -> ""
+        Seq.singleton r
+    | _               -> Seq.empty
 
 let pRun path tables actions =
     match runMain path tables actions with
@@ -710,5 +736,17 @@ type ``RACC core tests`` ()=
     [<Test>] 
     member test.``Alt in cls error`` () =
         let test = tests.[35]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Summator 1 error`` () =
+        let test = tests.[36]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr error`` () =
+        let test = tests.[37]
         let res = eRun (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

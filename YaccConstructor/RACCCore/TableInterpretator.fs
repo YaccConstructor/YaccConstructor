@@ -221,7 +221,7 @@ module  TableInterpreter =
                                         if itm.state.itemName = Constants.raccStartRuleName
                                         then
                                             if ((!Lexer).Value.Get ps.i).name = "EOF"
-                                            then buildRes ps.statesSet
+                                            then buildRes ((ps.statesSet.MaximumElement)|>Set.singleton)
                                             else Set.empty
                                         else climb () ps)
                                 |> Set.union  buf

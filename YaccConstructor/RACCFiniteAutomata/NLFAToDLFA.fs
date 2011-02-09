@@ -71,11 +71,12 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
 
     let move stateSet symbol = 
         Set.map 
-            (fun state -> Set.map 
-                               (fun rule -> rule.ToStateID)
-                               (Set.filter 
-                                     (fun rule -> rule.FromStateID = state && rule.Symbol = symbol) 
-                                     nlfa.NRules))
+            (fun state -> 
+                Set.map 
+                    (fun rule -> rule.ToStateID)
+                    (Set.filter 
+                            (fun rule -> rule.FromStateID = state && rule.Symbol = symbol) 
+                            nlfa.NRules))
             stateSet
             |> Set.unionMany
 
@@ -117,77 +118,76 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                 symbols
     done
 
-    let minimaze () =
+    let revert rules = 
+        List.map (fun (x,y,z) -> (z,y,x)) rules
+
+    let minimaze z =
         let states = 
-            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)           
-        Set.map 
-            (fun state ->
-                Set.map
+            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)
+            |> List.ofSeq
+
+        let startStates = 
+            (List.filter (Set.exists (fun x -> (=) x  z)) states)
+
+        
+        let rules = revert (!newRules) |> Set.ofList
+
+        let lMove stateSet symbol rules = 
+            Set.map 
+                (fun state -> 
+                    Set.map 
+                        (fun (f,s,t) -> t)
+                        (Set.filter 
+                                (fun (f,s,t) -> f = state && s = symbol) 
+                                rules))
+                stateSet
+                |> Set.unionMany
+                
+                           
+        let visitedNewStates = ref []
+        let notVisitedNewStates = List.map Set.singleton startStates |> ref
+        let lNewRules = ref []
+
+        
+        while not (List.isEmpty !notVisitedNewStates) do
+            let T = (!notVisitedNewStates).Head
+            visitedNewStates :=  T :: !visitedNewStates
+            notVisitedNewStates := (!notVisitedNewStates).Tail
+            Set.iter
                     (fun symbol ->
-                        List.filter
-                            (fun (f,s,t) -> s = symbol && t = state)
-                            !newRules
-                        |> fun lst ->
-                            let newRulesSet =
-                                List.fold
-                                    (fun buf elt -> Set.remove elt buf)
-                                    (Set.ofList !newRules)
-                                    lst
-                                |> ref
-                            if List.length lst > 1
+                    let U = lMove T symbol rules
+                    if not (Set.isEmpty U)
+                        then
+                            if  not ((List.exists ((=)U) !notVisitedNewStates)  || (List.exists ((=)U) !visitedNewStates))
                             then 
-                                let newState = 
-                                    List.map (fun (f,s,t) -> f) lst
-                                    |> Set.unionMany
-                                (newState,symbol,state)
-                                ::
-                                (List.collect 
-                                    (fun (f,s,t) ->                                        
-                                        List.filter
-                                            (fun (f2,s2,t2) -> t2 = f)
-                                            !newRules
-                                        |> List.map 
-                                            (fun ((f,s,t) as x) -> newRulesSet := Set.remove x (!newRulesSet); f,s,newState))
-                                    lst)
-                                |> fun x -> newRules := List.ofSeq !newRulesSet @ x
-                            else
-                                ())
-                    symbols)
-            states
+                                notVisitedNewStates := U :: !notVisitedNewStates
+                            lNewRules := (T,symbol,U)::!lNewRules)
+                    symbols
+        done
+        
+        newRules := List.map (fun (a,b,c) -> Set.unionMany a , b , Set.unionMany c) !lNewRules
 
 
     let newAutomata  = 
+        //minimaze nlfa.NFinaleState
+        //printf "First Minimize end\n"
+        //minimaze nlfa.NStartState
+        //printf "Second Minimize end\n"
         let states = 
-            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)
-            (*|> fun x -> 
-                Set.fold
-                    (fun buf elt -> 
-                        if Set.exists (fun e -> Set.intersect e elt |> Set.isEmpty |> not) buf
-                        then 
-                            Set.remove elt buf 
-                            |> fun x -> 
-                                Set.filter (fun e -> Set.intersect e elt |> Set.isEmpty |> not) buf
-                                |> Set.map (Set.union elt)
-                                |> (+) x 
-                        else buf)
-                    x
-                    x
-            |> fun x -> 
-                Set.fold
-                    (fun buf elt -> if Set.exists (Set.isProperSubset elt) buf then Set.remove elt buf else buf)
-                    x
-                    x*)
+            List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)            
             |> List.ofSeq
 
         printf "States set: \n"
         List.iter (fun s -> printf "["; Set.iter (printf "%A;") s; printf"];") states
         printf "\n"
 
+        printf "is printed \n"
+         
         let alterNames = dict (List.zip states [0..(List.length states)-1])
         let getAlterName s = alterNames.[s]            
 
         let startState = getAlterName (List.find (Set.exists ((=)nlfa.NStartState)) states)
-        let finaleStates = (List.filter (Set.exists (fun x -> (=) x  nlfa.NFinaleState)) states)
+        let finaleStates = List.filter (Set.exists (fun x -> (=) x  nlfa.NFinaleState)) states
         let alterFinaleStates = List.map getAlterName finaleStates
         let dummyStates = 
             let l = List.length states
@@ -218,7 +218,14 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
                             else elt::buf)
                         []
                         lst
-                |> Set.ofList
+                |> List.sortBy List.length
+                |> fun lst ->
+                    let buf = Set.ofList lst |> ref
+                    List.iter (fun x -> 
+                        if Set.exists (fun y -> Set.isProperSubset (Set.ofList x) (Set.ofList y)) !buf
+                        then buf := Set.remove x !buf) lst
+                    !buf
+                //|> Set.ofList
 
             let _rules =
                 List.map 

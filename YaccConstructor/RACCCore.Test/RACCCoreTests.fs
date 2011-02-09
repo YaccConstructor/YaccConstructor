@@ -461,7 +461,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
-                rightValue = seq ["5 MINUS -"]  
+                rightValue = seq ["4 MULT *"]  
             })
     ]
     |> dict
@@ -500,7 +500,9 @@ let run path tables actions =
 let eRun path tables actions = 
     match runMain path tables actions with
     | (TError(r),_,_) -> 
+    #if debug
         printf "Error: %A" r
+    #endif
         Seq.singleton r
     | _               -> Seq.empty
 

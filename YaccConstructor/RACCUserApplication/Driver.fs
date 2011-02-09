@@ -63,4 +63,5 @@ let run path =
     forest
 
     
-let main path = run path
+//let main path = run path
+do run @"W:\Users\gsv2\Diploma\trunk\Tests\RACC\test_alt_in_cls\test_alt_in_cls_5.yrd.in"

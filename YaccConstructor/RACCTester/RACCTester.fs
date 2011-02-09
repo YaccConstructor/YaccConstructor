@@ -47,4 +47,4 @@ type RACCTester() =
                  }]
     end
 
-do ConfigurationManager.AppSettings.["testsPath"].ToString() |> m1.main |> ignore
+do ()//ConfigurationManager.AppSettings.["testsPath"].ToString() |> m1.main |> ignore

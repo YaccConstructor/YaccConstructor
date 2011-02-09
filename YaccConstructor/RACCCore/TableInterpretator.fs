@@ -279,7 +279,7 @@ module  TableInterpreter =
                         }
                         |> climb()
                 let res = resPart1 + resPart2
-                if res.Count <> 0 && !maxCorrPos < parserState.i
+                if resPart1.Count > 0 && !maxCorrPos < parserState.i
                 then maxCorrPos := parserState.i
 #if DEBUG
                 printfn "\n parser result = %A" res
@@ -322,9 +322,9 @@ module  TableInterpreter =
                             else buf
                     else buf)
                 Set.empty
-//#if DEBUG
+#if DEBUG
         Set.iter PrintTree res
-//#endif
+#endif
         cache.Clear()
         traceBuilderCache.Clear()
         let trC =

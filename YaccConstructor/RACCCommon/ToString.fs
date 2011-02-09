@@ -47,10 +47,10 @@ let rec toString (_val:obj) =
     | _          -> _val.ToString()
 
 and listToString _list =
-     "List.ofArray [|" + (String.concat ";" (List.map toString _list)) + "|]"    
+     "List.ofArray [|" + (String.concat ";" (List.map toString _list)) + "|]\n"    
 
 and _listToString _list =
-     "List.ofArray [|" + (String.concat ";" (List.map toString _list)) + "|]"    
+     "List.ofArray [|" + (String.concat ";" (List.map toString _list)) + "|]\n"    
 
 and dictToString (_dict:System.Collections.Generic.IDictionary<_,_>) =
     "dict [|" + (String.concat ";" (Seq.map

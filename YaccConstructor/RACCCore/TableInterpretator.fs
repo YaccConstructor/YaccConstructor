@@ -192,38 +192,40 @@ module  TableInterpreter =
                                     |> List.length = 1
                                     |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
                                     |> fun x -> x @ res.rItem.sTrace
+                                let s = parserState.statesSet.MaximumElement
                                 if itm.state.position <> dfa.DStartState
-                                then
-                                    parserState.statesSet
-                                    |> Set.map
-                                        (fun state ->
-                                            {
-                                                rItem  = {itm.state with
-                                                            forest = state.forest @ res.rItem.forest
-                                                            sTrace = trace state
-                                                         }
-                                                rI     = res.rI
-                                            })
+                                then                                   
+                                    {
+                                        rItem  = {itm.state with
+                                                    forest = s.forest @ res.rItem.forest
+                                                    sTrace = trace s
+                                                    }
+                                        rI     = res.rI
+                                    } 
+                                    |> Set.singleton                                   
                                 else
-                                    ({
-                                        parserState with
+                                    if itm.state.itemName = Constants.raccStartRuleName
+                                    then
+                                        if ((!Lexer).Value.Get res.rI).name = "EOF"
+                                        then                                                                                         
+                                            {s with forest = [s.forest @ res.rItem.forest |> node (trace s)]
+                                                    sTrace = []
+                                            }
+                                            |> Set.singleton
+                                            |> buildRes 
+                                        else Set.empty
+                                    else 
+                                        {                                            
                                             inpSymbol = {name = res.rItem.itemName; value = ""} 
                                             i         = res.rI
-                                            statesSet =
-                                                parserState.statesSet
-                                                |> Set.map
-                                                    (fun stt ->
-                                                        {stt with forest = [stt.forest @ res.rItem.forest |> node (trace stt)]
-                                                                  sTrace = []
-                                                        })
-                                    }
-                                    |> fun ps ->
-                                        if itm.state.itemName = Constants.raccStartRuleName
-                                        then
-                                            if ((!Lexer).Value.Get ps.i).name = "EOF"
-                                            then buildRes ((ps.statesSet.MaximumElement)|>Set.singleton)
-                                            else Set.empty
-                                        else climb () ps)
+                                            statesSet =                                               
+                                                {s with forest = [s.forest @ res.rItem.forest |> node (trace s)]
+                                                        sTrace = []
+                                                }
+                                                |> Set.singleton
+                                                
+                                        }
+                                        |>climb ()
                                 |> Set.union  buf
                             )
                             Set.empty)
@@ -270,7 +272,7 @@ module  TableInterpreter =
                         {
                             parserState with 
                                 statesSet = 
-                                    parserState.statesSet
+                                    parserState.statesSet                                    
                                     |> Set.map (fun stt -> {stt with forest = leaf stt; sTrace=[]})
                                 inpSymbol = nextLexeme
                                 i         = parserState.i + 1
@@ -320,9 +322,9 @@ module  TableInterpreter =
                             else buf
                     else buf)
                 Set.empty
-#if DEBUG
+//#if DEBUG
         Set.iter PrintTree res
-#endif
+//#endif
         cache.Clear()
         traceBuilderCache.Clear()
         let trC =

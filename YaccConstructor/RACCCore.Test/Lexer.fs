@@ -26,8 +26,9 @@ open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Yard.Generators.RACCGenerator
 
+
  
-# 30 "Lexer.fs"
+# 31 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -60,48 +61,48 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 35 "Lexer.fsl"
+# 36 "Lexer.fsl"
                         {name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 65 "Lexer.fs"
+# 66 "Lexer.fs"
           )
   | 1 -> ( 
-# 37 "Lexer.fsl"
+# 38 "Lexer.fsl"
                         {name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 70 "Lexer.fs"
+# 71 "Lexer.fs"
           )
   | 2 -> ( 
-# 39 "Lexer.fsl"
+# 40 "Lexer.fsl"
                         {name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 75 "Lexer.fs"
+# 76 "Lexer.fs"
           )
   | 3 -> ( 
-# 41 "Lexer.fsl"
+# 42 "Lexer.fsl"
                         {name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 80 "Lexer.fs"
+# 81 "Lexer.fs"
           )
   | 4 -> ( 
-# 43 "Lexer.fsl"
+# 44 "Lexer.fsl"
                         {name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 85 "Lexer.fs"
+# 86 "Lexer.fs"
           )
   | 5 -> ( 
-# 45 "Lexer.fsl"
+# 46 "Lexer.fsl"
                         {name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 90 "Lexer.fs"
+# 91 "Lexer.fs"
           )
   | 6 -> ( 
-# 47 "Lexer.fsl"
+# 48 "Lexer.fsl"
                         {name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 95 "Lexer.fs"
+# 96 "Lexer.fs"
           )
   | 7 -> ( 
-# 48 "Lexer.fsl"
+# 49 "Lexer.fsl"
                         {name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 100 "Lexer.fs"
+# 101 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 50 "Lexer.fsl"
+# 51 "Lexer.fsl"
  
 
 type Lexer(lb) = 
@@ -109,8 +110,9 @@ type Lexer(lb) =
     interface ILexer<string> with        
     
        member self.Get pos = 
-        if !locBuf |> List.length >= pos
-        then ((!locBuf) |> List.rev).[pos-1]
+        let l = !locBuf |> List.length
+        if l >= pos
+        then (!locBuf).[l-pos]
         else
             let t = tokens lb
             locBuf := t :: !locBuf

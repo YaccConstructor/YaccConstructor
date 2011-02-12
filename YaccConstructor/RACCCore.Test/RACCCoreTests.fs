@@ -463,6 +463,18 @@ let tests =
                 path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
                 rightValue = seq ["4 MULT *"]  
             })
+
+        (38,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_Rdc_Rdc.gotoSet
+                        automataDict = Tables_Rdc_Rdc.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_Rdc_Rdc.ruleToAction
+                path       = "test_reduce_reduce\\test_reduce_reduce_1.yrd.in"
+                rightValue = seq ["A" |> box; "B" |> box]  
+            })
     ]
     |> dict
 
@@ -751,4 +763,10 @@ type ``RACC core tests`` ()=
     member test.``Arithm glr error`` () =
         let test = tests.[37]
         let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Reduce reduce conflict 1`` () =
+        let test = tests.[38]
+        let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

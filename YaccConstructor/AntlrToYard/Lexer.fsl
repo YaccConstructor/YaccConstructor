@@ -4,6 +4,7 @@
 module AntlrToYard.Lexer
 
 open AntlrToYard.Tokens
+open AntlrToYard.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
 
 let comment_depth = ref 0
@@ -40,6 +41,7 @@ rule main = parse
   | ':' { COLON }
   | ';' { SEMICOLON }
   | '?' { QUESTION }
+  | '!' { EXCLAMATION }
   | '~' { TILDE }
   | ".." { DOUBLE_DOT }
   | eof { EOF }

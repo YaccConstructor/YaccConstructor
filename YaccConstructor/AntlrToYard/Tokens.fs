@@ -2,6 +2,7 @@
 
 type Lexeme = string * (int * int) 
 
+(*
 type token = 
   | MULTILINE_COMMENT of Lexeme
   | SINGLELINE_COMMENT of Lexeme
@@ -24,3 +25,4 @@ type token =
   | QUESTION
   | TILDE
   | DOUBLE_DOT
+*)

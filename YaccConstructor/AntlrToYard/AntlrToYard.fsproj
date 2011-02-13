@@ -38,6 +38,9 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="Tokens.fs" />
+    <Compile Include="IL.fs" />
+    <Compile Include="Parser.fsi" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="AntlrToYard.fs" />
     <None Include="compile_grammars.bat" />
@@ -45,6 +48,9 @@
     <None Include="css21.g" />
     <None Include="ANTLR.yrd" />
     <None Include="Lexer.fsl" />
+    <None Include="Parser.fsy" />
+    <None Include="URL.g" />
+    <None Include="calc.g" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />

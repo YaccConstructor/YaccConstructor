@@ -1,15 +1,14 @@
-﻿module AntlrToYard.Parser
+﻿module AntlrToYard.Main
 
 open Microsoft.FSharp.Text.Lexing
 
 open AntlrToYard.Lexer
 open AntlrToYard.Tokens
-
+open AntlrToYard.Parser
 
 let () =
-
     let testPath = ref @"..\.."
-    let testFile = ref "test.g"
+    let testFile = ref "calc.g"
 
     let commandLineSpecs =
         ["--testpath", ArgType.String (fun s -> testPath := s), "Directory where test files are placed"
@@ -28,6 +27,9 @@ let () =
                       }
     //let token = AntlrLexer.main lexbuf
     //testParser k
-    let a = Seq.toList lexems
-    let b = sprintf "%A" a
-    printf "%s" b
+//    let a = Seq.toList lexems
+//    let b = sprintf "%A" a
+//    printf "%s" b
+    lexems |> Seq.iter (fun x -> printf "%A\n" x)
+    let c = ParseAntlr Lexer.main lexbuf
+    ()

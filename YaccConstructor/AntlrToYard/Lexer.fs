@@ -5,6 +5,7 @@
 module AntlrToYard.Lexer
 
 open AntlrToYard.Tokens
+open AntlrToYard.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
 
 let comment_depth = ref 0

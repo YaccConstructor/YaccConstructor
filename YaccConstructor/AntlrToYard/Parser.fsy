@@ -1,5 +1,8 @@
 ﻿%{
-(* Run with fsyacc.exe --module AntlrToYard.Parser --open AntlrToYard.IL --open AntlrToYard.Tokens Parser.fsy *)
+
+open Yard.Core.IL.Production
+
+(* Run with fsyacc.exe --module AntlrToYard.Parser --open Yard.Core.IL Parser.fsy *)
 
 
 (*
@@ -18,22 +21,32 @@ Expr: ID { Val($1) }
 
 
  StmtList: Stmt { [$1] }
-        | StmtList SEMI Stmt { $3 :: $1  }
+        | StmtList SEMI Stmt { $3 :: $1  } asdfasdf
 
 *)
 
+let makeModifiedRule innerProduction modifier =
+    match modifier with
+    | "+" -> PSome(innerProduction)
+    | "*" -> PMany(innerProduction)
+    | "?" -> POpt(innerProduction)
+    | "!" -> innerProduction // TODO ???
+    | "" -> innerProduction
+
+let makePSeq productionList =
+    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , None )
 %}
 
-%token <Lexeme> MULTILINE_COMMENT
-%token <Lexeme> SINGLELINE_COMMENT
-%token <Lexeme> SCOPE_NAME
-%token <Lexeme> ACTION_NAME
-%token <Lexeme> ACTION_CODE
+%token <Source.t> MULTILINE_COMMENT
+%token <Source.t> SINGLELINE_COMMENT
+%token <Source.t> SCOPE_NAME
+%token <Source.t> ACTION_NAME
+%token <Source.t> ACTION_CODE
 %token EOF
 %token T_GRAMMAR
 %token T_OPTIONS
-%token <Lexeme> IDENTIFIER
-%token <Lexeme> LITERAL
+%token <Source.t> IDENTIFIER
+%token <Source.t> LITERAL
 %token LPAREN 
 %token RPAREN
 %token BAR
@@ -48,23 +61,34 @@ Expr: ID { Val($1) }
 %token DOUBLE_DOT
 
 %start ParseAntlr
-%type <Prog> ParseAntlr
+%type <(Source.t, Source.t)Grammar.t> ParseAntlr
 
 
 %%
 
 //file: GrammarDeclaration Options GlobalScope Header Members Rules { Prog() }
 
-ParseAntlr: Rules EOF { {yo = "sdfdsf"} }
+ParseAntlr: Rules EOF { $1 }
 
-Rules: Rule {}
-    | Rules Rule {}
+Rules: Rule { [$1] }
+    | Rules Rule { $2 :: $1 }
     
-Rule: IDENTIFIER Options COLON RuleBody SEMICOLON {}
+Rule: IDENTIFIER Options COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $4 and _public = false and metaArgs = [] } }
 
 Options: {} | T_OPTIONS ACTION_CODE {}
 
-RuleBody: RulePart {} | RuleBody RulePart {}
+RuleBody: Alt { makePSeq ($1) } | RuleBody BAR Alt { PAlt($1, makePSeq ($3)) }
+
+Alt: Seq { [$1] } | Alt Seq { $2 :: $1 }
+
+Seq: LPAREN RuleBody RPAREN Modifier { makeModifiedRule $2 $4 }
+    | IDENTIFIER Modifier { makeModifiedRule (PToken($1)) $2 }
+
+Modifier: PLUS { "+" }
+    | STAR { "*" }
+    | QUESTION { "?" }
+    | EXCLAMATION { "!" }
+    | { "" }
 
 RulePart: 
   DOUBLE_DOT {}

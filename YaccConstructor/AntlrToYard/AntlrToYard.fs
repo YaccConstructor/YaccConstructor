@@ -3,8 +3,8 @@
 open Microsoft.FSharp.Text.Lexing
 
 open AntlrToYard.Lexer
-open AntlrToYard.Tokens
 open AntlrToYard.Parser
+open Yard.Core.IL
 
 let () =
     let testPath = ref @"..\.."
@@ -21,15 +21,11 @@ let () =
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader//LexBuffer<_>.FromChars  ("abc/* def */foo".ToCharArray())
-    let lexems = seq { 
-                       while not lexbuf.IsPastEndOfStream do
-                             yield Lexer.main lexbuf  
-                      }
-    //let token = AntlrLexer.main lexbuf
-    //testParser k
-//    let a = Seq.toList lexems
-//    let b = sprintf "%A" a
-//    printf "%s" b
-    lexems |> Seq.iter (fun x -> printf "%A\n" x)
+//    let lexems = seq { 
+//                       while not lexbuf.IsPastEndOfStream do
+//                             yield Lexer.main lexbuf  
+//                      }
+//    lexems |> Seq.iter (fun x -> printf "%A\n" x)
     let c = ParseAntlr Lexer.main lexbuf
+    printfn "%A" c
     ()

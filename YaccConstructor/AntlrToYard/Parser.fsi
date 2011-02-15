@@ -52,13 +52,16 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startParseAntlr
     | NONTERM_ParseAntlr
-    | NONTERM_Rules
+    | NONTERM_TopLevelDefs
+    | NONTERM_TopLevelDef
     | NONTERM_Rule
     | NONTERM_Options
     | NONTERM_RuleBody
     | NONTERM_Alt
+    | NONTERM_ActionCodeOptional
     | NONTERM_Seq
     | NONTERM_Modifier
+    | NONTERM_SimpleProduction
     | NONTERM_RulePart
 /// This function maps integers indexes to symbolic token ids
 val tagOfToken: token -> int

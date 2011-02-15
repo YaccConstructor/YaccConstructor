@@ -17,6 +17,7 @@ let () =
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
+    printfn "Start.."
     let content = System.IO.File.ReadAllText(!testPath + "\\" + !testFile)
     Lexer.source := content
     let reader = new System.IO.StringReader(content)

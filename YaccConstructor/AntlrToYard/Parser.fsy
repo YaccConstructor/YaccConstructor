@@ -21,7 +21,7 @@ Expr: ID { Val($1) }
 
 
  StmtList: Stmt { [$1] }
-        | StmtList SEMI Stmt { $3 :: $1  } asdfasdf
+        | StmtList SEMI Stmt { $3 :: $1  }
 
 *)
 

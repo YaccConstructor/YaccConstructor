@@ -17,30 +17,10 @@
     <SccLocalPath>Svn</SccLocalPath>
     <UsePartialTypes>false</UsePartialTypes>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\YardFrontend.XML</DocumentationFile>
-    <GenerateDebugInfo>false</GenerateDebugInfo>
-    <OptimizeCode>false</OptimizeCode>
-    <GenerateXmlDoc>false</GenerateXmlDoc>
-    <GenerateTailCalls>false</GenerateTailCalls>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
+  <PropertyGroup>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\YardFrontend.XML</DocumentationFile>
     <GenerateDebugInfo>false</GenerateDebugInfo>
-    <OptimizeCode>true</OptimizeCode>
-    <GenerateXmlDoc>false</GenerateXmlDoc>
     <GenerateTailCalls>true</GenerateTailCalls>
   </PropertyGroup>
   <ItemGroup>

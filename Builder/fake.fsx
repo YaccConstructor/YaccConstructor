@@ -1,4 +1,4 @@
-#I "D:/soft/FAKE/"
+#I "e:/fake/FAKE/"
 #r "FakeLib.dll"
 
 open Fake
@@ -19,7 +19,7 @@ let shellExecute program args =
 let buildDir = @".\bin\"
 
 #load "solution.fsx"
-#load "project.fsx"
+// load "project.fsx"
 
 Target "GetCommonSrc"
     (fun _ ->
@@ -29,7 +29,7 @@ Target "GetCommonSrc"
 
 Target "BuildCommon" 
    (fun _ -> 
-       MSBuildRelease buildDir "Build" [Solution.Common.Path]
+       MSBuild buildDir "Build" Solution.Common.BuildProperties [Solution.Common.Path]
        |> Log "AppBuild-Output: ")
 
 Target "CommonSendLib"
@@ -41,8 +41,14 @@ Target "CommonSendLib"
         |> fun x -> 
             CopyTo Solution.Main.LibPath x
             x
+        |> fun x -> 
+            CopyTo Solution.RACCGenerator.LibPath x
+            x
         |> CopyTo Solution.Yard.LibPath
     )
+
+Target "CreateLibFolder" 
+    (fun _ -> List.iter (fun (p:Projects.Project) -> CreateDir p.LibPath) (!Solution.projects))
 
 Target "GetConvertionsSrc"
     (fun _ ->
@@ -52,13 +58,16 @@ Target "GetConvertionsSrc"
 
 Target "BuildConvertions"
     (fun _ ->
-       MSBuildRelease buildDir "Build" [Solution.Convertions.Path]
+       MSBuild buildDir "Build" Solution.Convertions.BuildProperties [Solution.Convertions.Path]
        |> Log "AppBuild-Output: "    
     )               
 
 Target "ConvertionsSendLib"
     ( fun _ ->        
         [@"./bin/Convertions.dll"] 
+        |> fun x -> 
+            CopyTo Solution.RACCGenerator.LibPath x
+            x
         |> CopyTo Solution.Main.LibPath
     )
 
@@ -76,7 +85,7 @@ Target "GetMainSrc"
 
 Target "BuildMain"
     (fun _ ->
-       MSBuildRelease buildDir "Build" [Solution.Main.Path]
+       MSBuild buildDir "Build" Solution.Main.BuildProperties [Solution.Main.Path]
        |> Log "AppBuild-Output: "    
     )               
 
@@ -101,9 +110,70 @@ Target "GetYardSrc"
 
 Target "BuildYard"
     (fun _ ->
-       MSBuildRelease buildDir "Build" [Solution.Yard.Path]
+       MSBuild buildDir "Build" Solution.Yard.BuildProperties [Solution.Yard.Path]
        |> Log "AppBuild-Output: "    
     )               
+
+
+Target "GetRACCSrc"
+    (fun _ ->
+        Directory.GetFiles(Solution.RACCCommon.SvnSrcFolder,"*.fs")
+        |> CopyTo Solution.RACCCommon.Folder
+
+        Directory.GetFiles(Solution.RACCFA.SvnSrcFolder,"*.fs")
+        |> CopyTo Solution.RACCFA.Folder
+
+        Directory.GetFiles(Solution.RACCCore.SvnSrcFolder,"*.fs")
+        |> CopyTo Solution.RACCCore.Folder
+
+        Directory.GetFiles(Solution.RACCGenerator.SvnSrcFolder,"*.fs")
+        |> CopyTo Solution.RACCGenerator.Folder
+    )
+
+Target "BuildRACCCommon"
+    (fun _ ->
+       MSBuild buildDir "Build" Solution.RACCCommon.BuildProperties [Solution.RACCCommon.Path]
+       |> Log "AppBuild-Output: "    
+    )               
+
+Target "BuildRACCCore"
+    (fun _ ->
+       MSBuild buildDir "Build" Solution.RACCCore.BuildProperties [Solution.RACCCore.Path]
+       |> Log "AppBuild-Output: "    
+    )               
+
+Target "BuildRACCFA"
+    (fun _ ->
+       MSBuild buildDir "Build" Solution.RACCFA.BuildProperties [Solution.RACCFA.Path]
+       |> Log "AppBuild-Output: "    
+    )               
+
+Target "BuildRACCGenerator"
+    (fun _ ->
+       MSBuild buildDir "Build" Solution.RACCGenerator.BuildProperties [Solution.RACCGenerator.Path]
+       |> Log "AppBuild-Output: "    
+    )               
+
+Target "RACCCommonSendLib"
+    ( fun _ ->        
+        [@"./bin/RACCCommon.dll"] 
+        |> fun x -> 
+            CopyTo Solution.RACCGenerator.LibPath x
+            x
+        |> fun x -> 
+            CopyTo Solution.RACCCore.LibPath x
+            x
+        |> CopyTo Solution.RACCFA.LibPath
+    )
+
+Target "RACCFASendLib"
+    ( fun _ ->        
+        [@"./bin/RACCFiniteAutomata.dll"] 
+        |> fun x -> 
+            CopyTo Solution.RACCGenerator.LibPath x
+            x
+        |> CopyTo Solution.RACCCore.LibPath
+    )
 
 
 Target "Clean" 
@@ -114,12 +184,23 @@ Target "Clean"
 
 Target "BuildAll" (fun _ -> ())
 
+Target "BuildRACC" (fun _ -> ())
+
 // Dependencies
-"BuildCommon" <== ["GetCommonSrc"; "Clean"]
+"BuildCommon" <== ["GetCommonSrc"; "Clean"; "CreateLibFolder"]
 "CommonSendLib" <== ["BuildCommon"]
 "BuildConvertions" <== ["GetConvertionsSrc"; "CommonSendLib"]
 "ConvertionsSendLib" <== ["BuildConvertions"]
 "BuildMain" <== ["GetMainSrc"; "ConvertionsSendLib"; "CommonSendLib"]
+
+"RACCFASendLib" <== ["BuildRACCFA"]
+"RACCCommonSendLib" <== ["BuildRACCCommon"]
+"BuildRACCGenerator" <== ["CommonSendLib";"RACCFASendLib";"RACCCommonSendLib"; "ConvertionsSendLib"]
+"BuildRACCFA" <== ["RACCCommonSendLib"]
+"BuildRACCCore" <== ["RACCFASendLib";"RACCCommonSendLib"]
+"BuildRACCCommon" <== ["GetRACCSrc"; "CreateLibFolder"]
+"BuildRACC" <== ["BuildRACCFA";"BuildRACCCommon";"BuildRACCCore";"BuildRACCGenerator"]
+
 
 "BuildYard" <== ["BuildCommon"; "GetYardSrc"]
 
@@ -127,4 +208,15 @@ Target "BuildAll" (fun _ -> ())
 
 // Run
 //Run "BuildAll"
-printfn "param:  %A" (getBuildParam "mode")
+Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "net")
+//Solution.SetMode 
+  //  (let mode =  getBuildParam "mode"
+    // if mode = "" 
+   //  then Projects.Mode.Release 
+    // else 
+     //   if mode.ToLower() = "debug"
+     //   then Projects.Mode.Debug
+     //   else Projects.Mode.Release
+     //)
+
+Run (getBuildParam "target")

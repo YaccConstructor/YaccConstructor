@@ -1,4 +1,4 @@
-#I "e:/fake/FAKE/"
+#I "d:/soft/FAKE/"
 #r "FakeLib.dll"
 
 open Fake
@@ -178,8 +178,15 @@ Target "RACCFASendLib"
 
 Target "Clean" 
     (fun _ -> 
-        [buildDir; Solution.Main.LibPath; Solution.Convertions.LibPath; Solution.Yard.LibPath]
+        buildDir :: List.map (fun (p:Projects.Project) -> p.LibPath) !(Solution.projects)
         |> CleanDirs
+        Directory.GetFiles("./","*.fs",SearchOption.AllDirectories)
+        |> Seq.iter (fun x -> File.Delete(x))
+        Directory.GetFiles("./","*.dll",SearchOption.AllDirectories)
+        |> Seq.iter (fun x -> File.Delete(x))
+        Directory.GetFiles("./","*.exe",SearchOption.AllDirectories)
+        |> Seq.iter (fun x -> File.Delete(x))
+
     )
 
 Target "BuildAll" (fun _ -> ())
@@ -187,27 +194,25 @@ Target "BuildAll" (fun _ -> ())
 Target "BuildRACC" (fun _ -> ())
 
 // Dependencies
-"BuildCommon" <== ["GetCommonSrc"; "Clean"; "CreateLibFolder"]
-"CommonSendLib" <== ["BuildCommon"]
-"BuildConvertions" <== ["GetConvertionsSrc"; "CommonSendLib"]
+"BuildCommon"        <== ["GetCommonSrc"; "CreateLibFolder"]
+"CommonSendLib"      <== ["BuildCommon"]
+"BuildConvertions"   <== ["GetConvertionsSrc"; "CommonSendLib"]
 "ConvertionsSendLib" <== ["BuildConvertions"]
-"BuildMain" <== ["GetMainSrc"; "ConvertionsSendLib"; "CommonSendLib"]
+"BuildMain"          <== ["GetMainSrc"; "ConvertionsSendLib"; "CommonSendLib"]
 
-"RACCFASendLib" <== ["BuildRACCFA"]
-"RACCCommonSendLib" <== ["BuildRACCCommon"]
+"RACCFASendLib"      <== ["BuildRACCFA"]
+"RACCCommonSendLib"  <== ["BuildRACCCommon"]
 "BuildRACCGenerator" <== ["CommonSendLib";"RACCFASendLib";"RACCCommonSendLib"; "ConvertionsSendLib"]
-"BuildRACCFA" <== ["RACCCommonSendLib"]
-"BuildRACCCore" <== ["RACCFASendLib";"RACCCommonSendLib"]
-"BuildRACCCommon" <== ["GetRACCSrc"; "CreateLibFolder"]
-"BuildRACC" <== ["BuildRACCFA";"BuildRACCCommon";"BuildRACCCore";"BuildRACCGenerator"]
-
+"BuildRACCFA"        <== ["RACCCommonSendLib"]
+"BuildRACCCore"      <== ["RACCFASendLib";"RACCCommonSendLib"]
+"BuildRACCCommon"    <== ["GetRACCSrc"; "CreateLibFolder"]
+"BuildRACC"          <== ["BuildRACCFA";"BuildRACCCommon";"BuildRACCCore";"BuildRACCGenerator"]
 
 "BuildYard" <== ["BuildCommon"; "GetYardSrc"]
 
-"BuildAll" <== ["BuildMain"; "BuildYard"]
+"BuildAll"  <== ["BuildMain"; "BuildYard"; "BuildRACC"]
 
-// Run
-//Run "BuildAll"
+//Set build params
 Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "net")
 //Solution.SetMode 
   //  (let mode =  getBuildParam "mode"
@@ -219,4 +224,6 @@ Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "n
      //   else Projects.Mode.Release
      //)
 
-Run (getBuildParam "target")
+
+// Run
+(getBuildParam "targets")|> fun x -> x.Split(';') |> Seq.iter (fun x -> Run x)

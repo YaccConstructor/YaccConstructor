@@ -1,4 +1,4 @@
-#I "d:/soft/FAKE/"
+#I "e:/fake/FAKE/"
 #r "FakeLib.dll"
 
 open Fake
@@ -17,9 +17,12 @@ let shellExecute program args =
 
 
 let buildDir = @".\bin\"
+let distrDir = @".\distr\"
+let productName = "YaccConstructor"
+let version = "0.0.0.536"
+let prdNameSuffix = ref ""
 
 #load "solution.fsx"
-// load "project.fsx"
 
 Target "GetCommonSrc"
     (fun _ ->
@@ -189,6 +192,20 @@ Target "Clean"
 
     )
 
+Target "Distribute"
+    (fun _ ->
+         ["../COPYING";"../README"]
+         |> CopyTo  buildDir
+         CreateDir distrDir 
+         !+ (buildDir + "/*.dll") 
+         ++ (buildDir + "/*.exe") 
+         ++ (buildDir + "/COPYING") 
+         ++ (buildDir + "/README")
+         |> Scan
+         |> Zip buildDir (distrDir + productName + !prdNameSuffix + version + ".zip")
+
+    )
+
 Target "BuildAll" (fun _ -> ())
 
 Target "BuildRACC" (fun _ -> ())
@@ -226,4 +243,14 @@ Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "n
 
 
 // Run
-(getBuildParam "targets")|> fun x -> x.Split(';') |> Seq.iter (fun x -> Run x)
+(getBuildParam "targets")
+|> fun x -> x.Split(';') 
+|> fun x ->
+   Seq.iter 
+       (fun (x:string) -> 
+           x.Replace("Clean","").Replace("Distribute","").Replace("Build","")
+           |> fun y -> prdNameSuffix := ((!prdNameSuffix) + "_" + y)
+       )
+       x
+   x
+|> Seq.iter (fun x -> Run x)

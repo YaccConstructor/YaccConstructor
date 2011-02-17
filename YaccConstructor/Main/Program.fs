@@ -25,13 +25,16 @@ let () =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
 //         "-c", ArgType.String (fun s -> 
          "-g", ArgType.String (fun s -> generatorName := s), "Generator name"
-         "--testpath", ArgType.String (fun s -> testsPath := s), "Directory where test files are placed"
-         "-t", ArgType.String (fun s -> testFile := s), "Name of test file"
+         "-i", ArgType.String (fun s -> 
+                                   testFile := System.IO.Path.GetFileName(s);
+                                   testsPath := System.IO.Path.GetDirectoryName(s)), "Input grammar"
+         "--testpath", ArgType.String (fun s -> testsPath := s), "[DEBUG] Directory where test files are placed"
+         "-t", ArgType.String (fun s -> testFile := s), "[DEBUG] Name of test file"
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
-    let grammarFilePath = !testsPath + "\\" + !testFile
+    let grammarFilePath = System.IO.Path.Combine(!testsPath, !testFile)
 
 
     // Load frontends assemblies dlls - get them from file, current folder or command line
@@ -39,17 +42,17 @@ let () =
         let assembly = System.Reflection.Assembly.Load(!feName)
         let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
         FrontendsManager.Register(inst :?> IFrontend);
-    with _ -> eprintf "%A is not correct frontend name" !feName
+    with _ -> printf "%A is not correct frontend name" !feName
     
     // Load generator assemblies dlls - get them from file, current folder or command line
     try
         let assembly = System.Reflection.Assembly.Load(!generatorName)
         let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
         GeneratorsManager.Register(inst :?> IGenerator);
-    with _ -> eprintf "%A is not correct generator name" !generatorName
+    with _ -> printf "%A is not correct generator name" !generatorName
     
     // Parse grammar    
-    let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath
+    let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath        
 
     // Apply convertions
     let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
@@ -61,5 +64,5 @@ let () =
     printf "%A" s
     //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
   with 
-  | :? System.IO.IOException -> eprintf "Could not read file"
-  | x -> eprintf "%A" x // program should terminate correctly. Writing to error stream for Tester
+  | :? System.IO.IOException -> printf "Could not read file"
+  | x -> printf "%A" x // program should terminate correctly. Writing to error stream for Tester

@@ -58,8 +58,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -95,11 +93,6 @@
       <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
       <Private>True</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
              Other similar extension points exist, see Microsoft.Common.targets.

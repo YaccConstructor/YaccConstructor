@@ -180,10 +180,9 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
         #if DEBUG
         printf "States set: \n"
         List.iter (fun s -> printf "["; Set.iter (printf "%A;") s; printf"];") states
-        printf "\n"
-        #endif
-
+        printf "\n"        
         printf "is printed \n"
+        #endif
          
         let alterNames = dict (List.zip states [0..(List.length states)-1])
         let getAlterName s = alterNames.[s]            

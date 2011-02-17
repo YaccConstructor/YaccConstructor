@@ -177,9 +177,11 @@ let NLFAToDLFA (nlfa:NLFA<_,_,_>) eLineFilter =
             List.fold (fun buf (_from,_,_to) ->  Set.add _from buf |> Set.add _to) Set.empty (!newRules)            
             |> List.ofSeq
 
+        #if DEBUG
         printf "States set: \n"
         List.iter (fun s -> printf "["; Set.iter (printf "%A;") s; printf"];") states
         printf "\n"
+        #endif
 
         printf "is printed \n"
          

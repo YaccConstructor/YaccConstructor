@@ -2,9 +2,9 @@
  
 (* Run with fslex.exe --unicode Lexer.fsl *)
 
-module AntlrToYard.Lexer
+module Yard.Frontends.AntlrFrontend.Lexer
 
-open AntlrToYard.Parser // using tokens type 
+open Yard.Frontends.AntlrFrontend.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
 
 let comment_depth = ref 0

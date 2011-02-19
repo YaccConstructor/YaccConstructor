@@ -1,4 +1,3 @@
-fragment
 LETTER
 	:	'$'
 	|	'A'..'Z'

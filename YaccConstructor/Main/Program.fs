@@ -15,12 +15,21 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
 
 let () =   
   try 
+  
+//    let feName = ref "YardFrontend"
+//    let generatorName = ref "YardPrinter"
+//    let testsPath = ref @"..\..\..\..\Tests\RACC\test_opt"
+//    let testFile = ref "test_opt.yrd"
+      
+    let feName = ref "AntlrFrontend"
+    let generatorName = ref "YardPrinter"
+    let testsPath = ref @"..\..\..\..\Tests\ANTLR"
+    let testFile = ref "calc.g"
 
-    let feName = ref "YardFrontend"
-    let generatorName = ref "RACCGenerator"
-    let testsPath = ref @"..\..\..\..\Tests\RACC\test_opt"
-    let testFile = ref "test_opt.yrd"
-
+//    let feName = ref "YardFrontend"
+//    let generatorName = ref "RACCGenerator"
+//    let testsPath = ref @"..\..\..\..\Tests\RACC\test_opt"
+//    let testFile = ref "test_opt.yrd"
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
 //         "-c", ArgType.String (fun s -> 
@@ -42,7 +51,7 @@ let () =
         let assembly = System.Reflection.Assembly.Load(!feName)
         let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
         FrontendsManager.Register(inst :?> IFrontend);
-    with _ -> printf "%A is not correct frontend name" !feName
+    with ex -> printf "%A is not correct frontend name\n\n%A\n" !feName ex
     
     // Load generator assemblies dlls - get them from file, current folder or command line
     try

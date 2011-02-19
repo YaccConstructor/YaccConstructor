@@ -6,12 +6,13 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b75aec02-64bd-4b31-8115-6708c64ee5dc}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>AntlrToYard</RootNamespace>
-    <AssemblyName>AntlrToYard</AssemblyName>
+    <AssemblyName>AntlrFrontend</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <Name>AntlrToYard</Name>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <Name>AntlrFrontend</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\AntlrToYard.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
@@ -50,18 +51,14 @@
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module AntlrToYard.Parser --open Yard.Core.IL</OtherFlags>
+      <OtherFlags>--module Yard.Frontends.AntlrFrontend.Parser --open Yard.Core.IL</OtherFlags>
     </FsYacc>
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="AntlrToYard.fs" />
-    <None Include="compile_grammars.bat" />
-    <None Include="C.g" />
-    <None Include="css21.g" />
+    <Compile Include="AntlrFrontend.fs" />
     <None Include="ANTLR.yrd" />
-    <None Include="URL.g" />
-    <None Include="calc.g" />
     <None Include="Lexer.fsl" />
     <None Include="Parser.fsy" />
   </ItemGroup>

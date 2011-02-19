@@ -1,2 +1,0 @@
-+start: (multiline_comment | c=CHAR{printf "%c" c})*;
-multiline_comment: "/*" CHAR* "*/";

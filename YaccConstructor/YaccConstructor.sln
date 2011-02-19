@@ -52,7 +52,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{22
 		..\Tests\RACC\test_alt\test_alt_2.yrd.in = ..\Tests\RACC\test_alt\test_alt_2.yrd.in
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrToYard", "AntlrToYard\AntlrToYard.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrToYard\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RACCCore.Test", "RACCCore.Test\RACCCore.Test.fsproj", "{A4A7A18D-971E-46AA-BD73-18AE9234F450}"
 EndProject

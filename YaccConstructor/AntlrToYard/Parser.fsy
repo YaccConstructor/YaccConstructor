@@ -2,7 +2,7 @@
 
 open Yard.Core.IL.Production
 
-(* Run with fsyacc.exe --module AntlrToYard.Parser --open Yard.Core.IL Parser.fsy *)
+(* Run with fsyacc.exe --module Yard.Frontends.AntlrFrontend.Parser --open Yard.Core.IL Parser.fsy *)
 
 
 (*

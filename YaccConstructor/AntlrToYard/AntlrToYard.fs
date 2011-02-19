@@ -1,12 +1,23 @@
-﻿module AntlrToYard.Main
+﻿module Yard.Frontends.AntlrFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
 
-open AntlrToYard.Lexer
-open AntlrToYard.Parser
+open Yard.Frontends.AntlrFrontend.Lexer
+open Yard.Frontends.AntlrFrontend.Parser
 open Yard.Core.IL
 
-let () =
+
+
+let ParseFile fileName =
+    let content = System.IO.File.ReadAllText(fileName)
+    Lexer.source := content
+    let reader = new System.IO.StringReader(content)
+    let lexbuf = LexBuffer<_>.FromTextReader reader
+    let (grammar, terminals) = ParseAntlr Lexer.main lexbuf
+    let terminalsDescr = (terminals |> Seq.fold (fun acc (KeyValue(k,v)) -> acc + (sprintf "%s :\n%s\n\n"  k v)) "(*\nYou need to describe following terminals in lexer:\n") + "*)"
+    {new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = Some(terminalsDescr, (0,0)) and grammar = grammar and foot = None}
+
+let run =
     let testPath = ref @"..\.."
     let testFile = ref "calc.g"
 

@@ -1,6 +1,6 @@
 %{
 // Copyright 2009 Jake Kirilenko
-//
+// 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
@@ -28,6 +28,7 @@
 %token PLUS
 %token MINUS
 %token QUESTION
+%token EXCLAMATION
 %token LPAREN
 %token RPAREN
 %token DGREAT

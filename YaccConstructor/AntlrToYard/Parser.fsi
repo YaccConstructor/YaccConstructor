@@ -14,6 +14,7 @@ type token =
   | BAR
   | RPAREN
   | LPAREN
+  | TERMINAL of (Source.t)
   | LITERAL of (Source.t)
   | IDENTIFIER of (Source.t)
   | T_OPTIONS
@@ -37,6 +38,7 @@ type tokenId =
     | TOKEN_BAR
     | TOKEN_RPAREN
     | TOKEN_LPAREN
+    | TOKEN_TERMINAL
     | TOKEN_LITERAL
     | TOKEN_IDENTIFIER
     | TOKEN_T_OPTIONS
@@ -55,6 +57,7 @@ type nonTerminalId =
     | NONTERM_TopLevelDefs
     | NONTERM_TopLevelDef
     | NONTERM_Rule
+    | NONTERM_TerminalRule
     | NONTERM_Options
     | NONTERM_RuleBody
     | NONTERM_Alt
@@ -62,6 +65,7 @@ type nonTerminalId =
     | NONTERM_Seq
     | NONTERM_Modifier
     | NONTERM_SimpleProduction
+    | NONTERM_RuleString
     | NONTERM_RulePart
 /// This function maps integers indexes to symbolic token ids
 val tagOfToken: token -> int
@@ -74,4 +78,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val ParseAntlr : (Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> ((Source.t, Source.t)Grammar.t) 
+val ParseAntlr : (Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> ((Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary) 

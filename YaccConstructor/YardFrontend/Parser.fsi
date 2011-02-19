@@ -15,6 +15,7 @@ type token =
   | DGREAT
   | RPAREN
   | LPAREN
+  | EXCLAMATION
   | QUESTION
   | MINUS
   | PLUS
@@ -37,6 +38,7 @@ type tokenId =
     | TOKEN_DGREAT
     | TOKEN_RPAREN
     | TOKEN_LPAREN
+    | TOKEN_EXCLAMATION
     | TOKEN_QUESTION
     | TOKEN_MINUS
     | TOKEN_PLUS

@@ -35,7 +35,17 @@ let makeModifiedRule innerProduction modifier =
 
 let makePSeq (productionList, actionCode) =
     PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode )
-    
+
+let termCount = ref 0
+let generateNewName =
+    termCount := !termCount + 1
+    sprintf "TERMINAL_%i" !termCount 
+let terminals = new System.Collections.Generic.Dictionary<string, string>()
+let makeToken (identifier, pos) descr =
+    let newName = if identifier="" then generateNewName else identifier
+    terminals.[newName] <- descr
+    PToken(identifier, pos)
+        
 %}
 
 %token <Source.t> MULTILINE_COMMENT
@@ -48,6 +58,7 @@ let makePSeq (productionList, actionCode) =
 %token T_OPTIONS
 %token <Source.t> IDENTIFIER
 %token <Source.t> LITERAL
+%token <Source.t> TERMINAL
 %token LPAREN 
 %token RPAREN
 %token BAR
@@ -62,22 +73,25 @@ let makePSeq (productionList, actionCode) =
 %token DOUBLE_DOT
 
 %start ParseAntlr
-%type <(Source.t, Source.t)Grammar.t> ParseAntlr
+%type <(Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary> ParseAntlr
 
 
 %%
 
 //file: GrammarDeclaration Options GlobalScope Header Members Rules { Prog() }
 
-ParseAntlr: TopLevelDefs EOF { $1 }
+ParseAntlr: TopLevelDefs EOF { (($1), terminals)  }
 
 TopLevelDefs: TopLevelDef { $1 }
     | TopLevelDefs TopLevelDef { $1 @ $2 }
 
 TopLevelDef: Rule { [$1] }
+    | TerminalRule { [] }
     | T_OPTIONS ACTION_CODE { [] }
     
 Rule: IDENTIFIER Options COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $4 and _public = false and metaArgs = [] } }
+
+TerminalRule: TERMINAL Options COLON RuleString SEMICOLON { makeToken ($1) (List.fold (fun acc elem -> acc+" "+elem) "" ($4)); }
 
 Options: {} | T_OPTIONS ACTION_CODE {}
 
@@ -100,28 +114,33 @@ Modifier: PLUS { "+" }
 SimpleProduction: IDENTIFIER { PRef($1, None) }
     | LITERAL DOUBLE_DOT LITERAL { 
         match (($1), ($3)) with
-        | (("0",_), ("9", _)) -> PToken("NUMBER", (0,0))
-        | (("\\0",_), ("\\255", _)) -> PToken("CHAR", (0,0))
-        | (("a",_), ("z", _)) -> PToken("LOWER_LATIN", (0,0))
-        | (("A",_), ("Z", _)) -> PToken("UPPER_LATIN", (0,0))
-        | x -> failwith (sprintf "unsupported interval %A" x)
+        | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0)) "'0'..'9'"
+        | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0))  "'\\0'..'\\255'"
+        | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0)) "'a'..'z'"
+        | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0)) "'A'..'Z'"
+        | ((a,_), (b, _)) -> makeToken ("", (0,0)) (a+".."+b)
         }
     | LITERAL { PLiteral($1) }
+    | TERMINAL { PToken($1) }
 
+
+RuleString : RulePart { [$1] }
+    | RulePart RuleString  { $1 :: $2 }
 
 RulePart: 
-  DOUBLE_DOT {}
-  | TILDE {}
-  | QUESTION {}
-  | EXCLAMATION {}
-  | PLUS {}
-  | STAR {}
-  | EQUAL {}
-  | BAR {}
-  | RPAREN {}
-  | LPAREN {}
-  | LITERAL {}
-  | IDENTIFIER {}
-  | ACTION_CODE {}
-  | ACTION_NAME {}
-  | SCOPE_NAME {}
+  DOUBLE_DOT { ".." }
+  | TILDE { "~" }
+  | QUESTION {"?" }
+  | EXCLAMATION { "!" }
+  | PLUS { "+" }
+  | STAR { "*" }
+  | EQUAL { "=" }
+  | BAR { "|" }
+  | RPAREN { ")" }
+  | LPAREN { "(" }
+  | LITERAL { fst($1) }
+  | IDENTIFIER { fst($1) }
+  | TERMINAL { fst($1) }
+  | ACTION_CODE { "{"+fst($1)+"}" }
+  | ACTION_NAME { fst($1) }
+  | SCOPE_NAME { fst($1) }

@@ -27,6 +27,7 @@ let () =
 //                             yield Lexer.main lexbuf  
 //                      }
 //    lexems |> Seq.iter (fun x -> printf "%A\n" x)
-    let c = ParseAntlr Lexer.main lexbuf
-    printfn "%A" c
+    let (a,b) = ParseAntlr Lexer.main lexbuf
+    b |> Seq.iter (fun x -> printf "%A\n" x)
+//    printfn "%A" b
     ()

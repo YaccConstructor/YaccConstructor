@@ -19,11 +19,22 @@
 
 namespace Yard.Generators.RACCGenerator
 
-type StateInfo<'position, 'tree, 'itemName, 'traceStep> =
+open Yard.Core.CompareHelper
+
+[<ReferenceEquality>]
+type StateInfo<'position, 'tree, 'itemName, 'traceStep 
+                when 'itemName : equality 
+                and 'position : equality
+                and 'tree : equality> =
     {
         position : 'position
         forest   : List<'tree>
         itemName : 'itemName    
-        sTrace    : List<'traceStep>
+        sTrace   : List<'traceStep>
     }
+     member self.GetValue (x:StateInfo<_,_,_,_>) =
+        x.position, x.itemName , (x.forest)     
+     interface System.Collections.IStructuralComparable with
+            member self.CompareTo (y,c) = -1
+                
 

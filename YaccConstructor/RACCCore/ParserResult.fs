@@ -21,16 +21,8 @@ namespace Yard.Generators.RACCGenerator
 
 open Yard.Core.CompareHelper
 
-[<CustomEquality; CustomComparison>]
 type ParserResult<'item when 'item : comparison> =
     {
         rItem      : 'item
-        rI         : int        
+        rI         : int
     }
-      
-     member self.GetValue (x:ParserResult<_>) =
-        x.rItem, x.rI
-     override self.Equals y = equalsOn self.GetValue self y
-     override self.GetHashCode() = hashOn self.GetValue self
-     interface System.Collections.IStructuralComparable with
-            member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> ParserResult<'item>))

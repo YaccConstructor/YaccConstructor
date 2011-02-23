@@ -64,4 +64,8 @@ let run path =
 
     
 //let main path = run path
-do run @"W:\Users\gsv2\Diploma\trunk\Tests\RACC\test_alt_in_cls\test_alt_in_cls_5.yrd.in"
+do 
+    run @"D:\rec_ascent\trunk\Tests\RACC\test_alt_in_cls\Performance\test_9.in"
+    |> ignore
+    System.Console.ReadLine()
+    |> ignore

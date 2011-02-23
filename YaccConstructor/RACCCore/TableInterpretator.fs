@@ -23,7 +23,7 @@ namespace Yard.Generators.RACCGenerator
 
 open Yard.Generators.RACCGenerator.AST
 
-type Item<'state, 'symbol, 'tree> =
+type Item<'state, 'symbol> =
     {
         state  : 'state
         symbol : 'symbol        
@@ -33,8 +33,10 @@ type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality> =
     | PSuccess of Set<AST<'a,'b,'c,'d>>
     | PError   of int
 
-module  TableInterpreter =     
+module TableInterpreter =     
     
+    let forest = ref []
+
     let maxCorrPos = ref 0
 
     let Lexer: Option<ILexer<_>>  ref = ref None
@@ -57,13 +59,13 @@ module  TableInterpreter =
                         then 
                             buf
                         else
-                            !local
-                            |> (fun gt -> 
-                                    Set.add 
-                                        {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace}
-                                        buf
-                                |> Set.map)
-                            |> Set.unionMany
+                            set(seq{
+                            yield!
+                                seq { for gt in !local do                                         
+                                         yield {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace}
+                                         yield! buf
+                                    }})
+                            
                  )
                 Set.empty
                 states   
@@ -76,16 +78,19 @@ module  TableInterpreter =
     
     let private getDFA itemName = tables().automataDict.[itemName]
 
-    let buildItem state= 
-        Set.map
-            (fun rule -> 
+    let buildItem state = 
+        fun x -> 
+            seq 
+             {
+              for rule in x do
+               yield
                 {
                     state =  {state with position = rule.FromStateID}
                     symbol = 
                         match rule.Symbol with
                         | DSymbol (s) -> s
                         | _           -> failwith "Error 01"
-                })
+                }}
 
     let getPrevItems smb state =
                 (getDFA state.itemName).DRules
@@ -119,7 +124,7 @@ module  TableInterpreter =
                 printfn 
                     "         State:\n             item = %A\n             position = %A\n             forest = <<\n" 
                     s.itemName s.position                
-                List.iter PrintTree s.forest
+                List.iter PrintTree (List.map (fun x -> !x)(s.forest))
                 printfn "             >>\n")
             ps.statesSet
         printfn "     ]\n" 
@@ -159,20 +164,22 @@ module  TableInterpreter =
                                 rI     = parserState.i                                
                             }                    
                         )   
-                        s                
-                
+                        s
+
+                if parserState.statesSet.IsEmpty
+                then buildRes Set.empty
+                else                
                 let getTrace state inpSymbol fromID toID addLabelFromDummy = 
                     let dfa = getDFA state.itemName
                     dfa.DRules
                     |> Set.filter
                            (fun rule -> rule.FromStateID = fromID && rule.ToStateID = toID && rule.Symbol = DSymbol(inpSymbol))
-                    |> Set.maxElement
+                    |> System.Linq.Enumerable.First
                     |> fun rule -> 
                         if Seq.exists ((=)rule.ToStateID) dfa.DFinaleStates && addLabelFromDummy
                         then 
                             rule.Label 
-                            :: [Set.filter (fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy) dfa.DRules
-                                |> Set.maxElement 
+                            :: [System.Linq.Enumerable.First (dfa.DRules, fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy)                                
                                 |> fun x -> x.Label]
                         else 
                             [rule.Label]
@@ -180,12 +187,15 @@ module  TableInterpreter =
                 let gotoSet = goto parserState.statesSet parserState.inpSymbol
                 {parserState with statesSet = gotoSet} 
                 |> parse ()
-                |> Set.map 
-                    (fun res ->                                
-                        getPrevItems parserState.inpSymbol.name res.rItem                            
-                        |> Set.fold
-                            (fun buf itm ->
-                                let node trace forest = (forest, itm.state.itemName, nodeVal trace itm) |> Node
+                |> fun s ->
+                   seq 
+                    { 
+                      for res in s do
+                          yield!                       
+                            seq 
+                             {
+                               for itm in getPrevItems parserState.inpSymbol.name res.rItem  do
+                                let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm) |> Node
                                 let dfa = getDFA itm.state.itemName
                                 let trace state =
                                     state.forest @ res.rItem.forest
@@ -194,42 +204,47 @@ module  TableInterpreter =
                                     |> fun x -> x @ res.rItem.sTrace
                                 let s = parserState.statesSet.MaximumElement
                                 if itm.state.position <> dfa.DStartState
-                                then                                   
-                                    {
-                                        rItem  = {itm.state with
-                                                    forest = s.forest @ res.rItem.forest
-                                                    sTrace = trace s
-                                                    }
-                                        rI     = res.rI
-                                    } 
-                                    |> Set.singleton                                   
+                                then
+                                    yield
+                                        {
+                                            rItem  = {itm.state with
+                                                        forest = s.forest @ res.rItem.forest
+                                                        sTrace = trace s
+                                                        }
+                                            rI     = res.rI
+                                        }                            
                                 else
+                                    let n =
+                                        let node = s.forest @ res.rItem.forest |> node (trace s)
+                                        forest := node :: ! forest
+                                        [ref node]
                                     if itm.state.itemName = Constants.raccStartRuleName
                                     then
                                         if ((!Lexer).Value.Get res.rI).name = "EOF"
-                                        then                                                                                         
-                                            {s with forest = [s.forest @ res.rItem.forest |> node (trace s)]
+                                        then
+                                         yield!
+                                            {s with forest = n
                                                     sTrace = []
                                             }
                                             |> Set.singleton
-                                            |> buildRes 
-                                        else Set.empty
+                                            |> buildRes                                         
                                     else 
+                                      yield!
                                         {                                            
-                                            inpSymbol = {name = res.rItem.itemName; value = ""} 
+                                            inpSymbol = {name = res.rItem.itemName; value = null} 
                                             i         = res.rI
                                             statesSet =                                               
-                                                {s with forest = [s.forest @ res.rItem.forest |> node (trace s)]
+                                                {s with forest = n
                                                         sTrace = []
                                                 }
                                                 |> Set.singleton
                                                 
                                         }
                                         |>climb ()
-                                |> Set.union  buf
-                            )
-                            Set.empty)
-                |> Set.unionMany
+                          }
+                        }
+                        |> set                                                        
+                
 #if DEBUG
                 |> fun res -> printfn "\n climb result = %A" res; res
 #endif
@@ -261,13 +276,16 @@ module  TableInterpreter =
                     then 
                         Set.empty
                     else
-                        let _val item =
+                        let inline _val item =
                             {
                                 id    = ""
                                 trace = -1
                                 value = LeafV nextLexeme
                             }
-                        let leaf item = [(nextLexeme.name, _val item) |> Leaf]
+                        let leaf item = 
+                            let l = (nextLexeme.name, _val item) |> Leaf
+                            forest := l :: !forest
+                            [ref l]
                                                         
                         {
                             parserState with 
@@ -279,8 +297,11 @@ module  TableInterpreter =
                         }
                         |> climb()
                 let res = resPart1 + resPart2
-                if resPart1.Count > 0 && !maxCorrPos < parserState.i
+
+                if res.Count > 0 && !maxCorrPos < parserState.i
                 then maxCorrPos := parserState.i
+                
+
 #if DEBUG
                 printfn "\n parser result = %A" res
 #endif
@@ -306,7 +327,7 @@ module  TableInterpreter =
                 }
             |> Set.fold
                 (fun buf r ->
-                    let forest = r.rItem.forest
+                    let forest = List.map (fun x -> !x) (r.rItem.forest)
                     if List.length  forest = 1 && r.rItem.itemName = Constants.raccStartRuleName
                     then
                         let getUserTree tree =
@@ -334,7 +355,7 @@ module  TableInterpreter =
         let res = 
             if res.Count > 0
             then PSuccess res
-            else PError !maxCorrPos 
+            else PError (!maxCorrPos + 1)
              ,trC,!CallCount
         maxCorrPos := 0
         res

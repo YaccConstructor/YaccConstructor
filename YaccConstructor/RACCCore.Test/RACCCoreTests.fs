@@ -425,7 +425,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_3.yrd.in"
-                rightValue = seq ["0 NUMBER 1"]  
+                rightValue = seq ["1 NUMBER 1"]  
             })
 
         (35,
@@ -449,7 +449,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_4.yrd.in"
-                rightValue = seq ["4 PLUS +"]  
+                rightValue = seq ["5 PLUS +"]  
             })
 
         (37,
@@ -461,7 +461,7 @@ let tests =
                     }
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
-                rightValue = seq ["4 MULT *"]  
+                rightValue = seq ["5 MINUS -"]  
             })
 
         (38,
@@ -499,7 +499,7 @@ let runMain path tables actions =
             |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
             |> TSuccess
         | PError (pos) -> 
-            TError((l:>ILexer<string>).Get(if pos = 0 then 1 else pos) 
+            TError((l:>ILexer<string>).Get(pos) 
             |> fun x -> (String.concat " " [pos.ToString(); x.name; x.value]))
 
     res,cache,cc      
@@ -512,9 +512,9 @@ let run path tables actions =
 let eRun path tables actions = 
     match runMain path tables actions with
     | (TError(r),_,_) -> 
-    #if debug
-        printf "Error: %A" r
-    #endif
+    //#if debug
+        printf "\nError: %A \n" r
+    //#endif
         Seq.singleton r
     | _               -> Seq.empty
 
@@ -534,9 +534,36 @@ type RACCPerformanceTests () =
         , testPath + "/test_summator_1/" + performanceFolder
 
      
+[<TestFixture>]
+type ``RACC parse error position tests`` () =
+
+    [<Test>] 
+    member test.``Alt error`` () =
+        let test = tests.[34]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Alt in cls error`` () =
+        let test = tests.[35]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Summator 1 error`` () =
+        let test = tests.[36]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``Arithm glr error`` () =
+        let test = tests.[37]
+        let res = eRun (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
 
 [<TestFixture>]
-type ``RACC core tests`` ()=    
+type ``RACC core tests`` () =
     [<Test>] 
     member test.``Alt in closure test 1`` () =
         let test = tests.[1]
@@ -740,31 +767,7 @@ type ``RACC core tests`` ()=
         let test = tests.[33]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Alt error`` () =
-        let test = tests.[34]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Alt in cls error`` () =
-        let test = tests.[35]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Summator 1 error`` () =
-        let test = tests.[36]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Arithm glr error`` () =
-        let test = tests.[37]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
+    
     [<Test>] 
     member test.``Reduce reduce conflict 1`` () =
         let test = tests.[38]

@@ -24,7 +24,7 @@ let () =
     let feName = ref "AntlrFrontend"
     let generatorName = ref "YardPrinter"
     let testsPath = ref @"..\..\..\..\Tests\ANTLR"
-    let testFile = ref "calc.g"
+    let testFile = ref "url.g"
 
 //    let feName = ref "YardFrontend"
 //    let generatorName = ref "RACCGenerator"

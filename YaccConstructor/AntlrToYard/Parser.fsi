@@ -17,12 +17,14 @@ type token =
   | TERMINAL of (Source.t)
   | LITERAL of (Source.t)
   | IDENTIFIER of (Source.t)
+  | T_SCOPE
+  | T_FRAGMENT
   | T_OPTIONS
   | T_GRAMMAR
   | EOF
   | ACTION_CODE of (Source.t)
   | ACTION_NAME of (Source.t)
-  | SCOPE_NAME of (Source.t)
+  | CAT_CODE of (Source.t)
   | SINGLELINE_COMMENT of (Source.t)
   | MULTILINE_COMMENT of (Source.t)
 type tokenId = 
@@ -41,12 +43,14 @@ type tokenId =
     | TOKEN_TERMINAL
     | TOKEN_LITERAL
     | TOKEN_IDENTIFIER
+    | TOKEN_T_SCOPE
+    | TOKEN_T_FRAGMENT
     | TOKEN_T_OPTIONS
     | TOKEN_T_GRAMMAR
     | TOKEN_EOF
     | TOKEN_ACTION_CODE
     | TOKEN_ACTION_NAME
-    | TOKEN_SCOPE_NAME
+    | TOKEN_CAT_CODE
     | TOKEN_SINGLELINE_COMMENT
     | TOKEN_MULTILINE_COMMENT
     | TOKEN_end_of_input
@@ -54,14 +58,19 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startParseAntlr
     | NONTERM_ParseAntlr
+    | NONTERM_GrammarName
     | NONTERM_TopLevelDefs
     | NONTERM_TopLevelDef
+    | NONTERM_ActionNameOpt
     | NONTERM_Rule
+    | NONTERM_ScopeOpt
+    | NONTERM_CatOpt
     | NONTERM_TerminalRule
-    | NONTERM_Options
+    | NONTERM_FragmentOpt
+    | NONTERM_OptionsOpt
     | NONTERM_RuleBody
     | NONTERM_Alt
-    | NONTERM_ActionCodeOptional
+    | NONTERM_ActionCodeOpt
     | NONTERM_Seq
     | NONTERM_Modifier
     | NONTERM_SimpleProduction

@@ -50,12 +50,14 @@ let makeToken (identifier, pos) descr =
 
 %token <Source.t> MULTILINE_COMMENT
 %token <Source.t> SINGLELINE_COMMENT
-%token <Source.t> SCOPE_NAME
+%token <Source.t> CAT_CODE
 %token <Source.t> ACTION_NAME
 %token <Source.t> ACTION_CODE
 %token EOF
 %token T_GRAMMAR
 %token T_OPTIONS
+%token T_FRAGMENT
+%token T_SCOPE
 %token <Source.t> IDENTIFIER
 %token <Source.t> LITERAL
 %token <Source.t> TERMINAL
@@ -80,7 +82,11 @@ let makeToken (identifier, pos) descr =
 
 //file: GrammarDeclaration Options GlobalScope Header Members Rules { Prog() }
 
-ParseAntlr: TopLevelDefs EOF { (($1), terminals)  }
+ParseAntlr: GrammarName TopLevelDefs EOF { (($2), terminals)  }
+
+GrammarName: T_GRAMMAR TERMINAL SEMICOLON { }
+    | T_GRAMMAR IDENTIFIER SEMICOLON { }
+    | { }
 
 TopLevelDefs: TopLevelDef { $1 }
     | TopLevelDefs TopLevelDef { $1 @ $2 }
@@ -88,18 +94,33 @@ TopLevelDefs: TopLevelDef { $1 }
 TopLevelDef: Rule { [$1] }
     | TerminalRule { [] }
     | T_OPTIONS ACTION_CODE { [] }
+    | T_SCOPE TERMINAL ACTION_CODE { [] }
+    | CAT_CODE ActionNameOpt ACTION_CODE { [] }
+
+ActionNameOpt: ACTION_NAME { }
+    | { }
     
-Rule: IDENTIFIER Options COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $4 and _public = false and metaArgs = [] } }
+Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
 
-TerminalRule: TERMINAL Options COLON RuleString SEMICOLON { makeToken ($1) (List.fold (fun acc elem -> acc+" "+elem) "" ($4)); }
+ScopeOpt: T_SCOPE TERMINAL SEMICOLON { }
+    | { }
 
-Options: {} | T_OPTIONS ACTION_CODE {}
+CatOpt: CAT_CODE ACTION_CODE { }
+    | { }
+
+TerminalRule: FragmentOpt TERMINAL OptionsOpt COLON RuleString SEMICOLON { makeToken ($2) (List.fold (fun acc elem -> acc+" "+elem) "" ($5)); }
+
+FragmentOpt: T_FRAGMENT { }
+    | { }
+
+OptionsOpt: T_OPTIONS ACTION_CODE { }
+    | { }
 
 RuleBody: Alt { makePSeq ($1) } | RuleBody BAR Alt { PAlt($1, makePSeq ($3)) }
 
-Alt: Seq ActionCodeOptional { ([$1], $2) } | Seq Alt { $1 :: fst($2), None }
+Alt: Seq ActionCodeOpt { ([$1], $2) } | Seq Alt { $1 :: fst($2), None }
 
-ActionCodeOptional: { None }
+ActionCodeOpt: { None }
     | ACTION_CODE { Some($1) }
 
 Seq: LPAREN RuleBody RPAREN Modifier { makeModifiedRule $2 $4 }
@@ -143,4 +164,4 @@ RulePart:
   | TERMINAL { fst($1) }
   | ACTION_CODE { "{"+fst($1)+"}" }
   | ACTION_NAME { fst($1) }
-  | SCOPE_NAME { fst($1) }
+  | CAT_CODE { fst($1) }

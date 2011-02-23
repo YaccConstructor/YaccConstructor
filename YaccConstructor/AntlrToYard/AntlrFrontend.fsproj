@@ -58,7 +58,6 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="AntlrToYard.fs" />
     <Compile Include="AntlrFrontend.fs" />
-    <None Include="ANTLR.yrd" />
     <None Include="Lexer.fsl" />
     <None Include="Parser.fsy" />
   </ItemGroup>

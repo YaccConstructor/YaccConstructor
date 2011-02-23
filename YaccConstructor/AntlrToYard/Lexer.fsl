@@ -17,6 +17,8 @@ let identifier lexeme =
   match fst(lexeme) with
   | "grammar" -> T_GRAMMAR
   | "options" -> T_OPTIONS
+  | "fragment" -> T_FRAGMENT
+  | "scope" -> T_SCOPE
   | s when System.Char.IsUpper s.[0]-> TERMINAL(lexeme)
   | s when System.Char.IsLower s.[0]-> IDENTIFIER(lexeme)
 }
@@ -28,7 +30,7 @@ let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\2
 
 rule main = parse
   | "{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf }
-  | '@' identchar* { SCOPE_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset)) }
+  | '@' identchar* { CAT_CODE(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset)) }
   | "::" identchar* { ACTION_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+2, lexbuf.EndPos.AbsoluteOffset)) }
   | "/*" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; multiline_comment lexbuf }
   | "//" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; singleline_comment lexbuf }

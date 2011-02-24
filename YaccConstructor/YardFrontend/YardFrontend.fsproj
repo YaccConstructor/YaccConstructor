@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,10 +11,14 @@
     <AssemblyName>YardFrontend</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>YardFrontend</Name>
-    <SccProjectName>Svn</SccProjectName>
-    <SccProvider>SubversionScc</SccProvider>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccLocalPath>Svn</SccLocalPath>
+    <SccProjectName>
+    </SccProjectName>
+    <SccProvider>
+    </SccProvider>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>
+    </SccLocalPath>
     <UsePartialTypes>false</UsePartialTypes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -52,17 +56,15 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
-
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
-
   <ItemGroup>
     <FsLex Include="Lexer.fsl">
-        <OtherFlags>--unicode --light-off</OtherFlags>
+      <OtherFlags>--unicode --light-off</OtherFlags>
     </FsLex>
     <FsYacc Include="Parser.fsy">
-        <OtherFlags>--module Yard.Core.GrammarParser --open Yard.Core --light-off</OtherFlags>
+      <OtherFlags>--module Yard.Core.GrammarParser --open Yard.Core --light-off</OtherFlags>
     </FsYacc>
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />

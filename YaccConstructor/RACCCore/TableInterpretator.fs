@@ -62,7 +62,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                             set(seq{
                             yield!
                                 seq { for gt in !local do                                         
-                                         yield {itemName = fst gt; position = snd gt; forest=state.forest; sTrace = state.sTrace}
+                                         yield {itemName = fst gt; position = snd gt; forest = state.forest; sTrace = state.sTrace}
                                          yield! buf
                                     }})
                             
@@ -97,7 +97,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
         |> buildItem state
 
-    let traceBuilderCache = new System.Collections.Generic.Dictionary<int, int>()
+    let traceBuilderCache = new System.Collections.Generic.Dictionary<_, int>()
 
     let traceEnumerator = new Enumerator()
 
@@ -154,7 +154,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                 printfn "\n Climb \n" 
                 print parserState
 #endif                
-                               
+                printfn "\n Climb \n"               
                 incr CallCount 
                 let buildRes s = 
                     Set.map
@@ -240,8 +240,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                 {s with forest = n
                                                         sTrace = []
                                                 }
-                                                |> Set.singleton
-                                                
+                                                |> Set.singleton                                                
                                         }
                                         |>climb ()
                           }
@@ -253,13 +252,14 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 #endif
                 |> fun res -> res)
         
-    and parse () =
-        memoize
+    and parse () = 
+        memoize 
             (fun parserState ->
 #if DEBUG
                 printfn "\n Parse \n" 
                 print parserState
-#endif                    
+#endif          
+                printfn "\n Parse \n"          
                 incr CallCount    
                 let isFinaleState state= 
                     let dfa = getDFA state.itemName

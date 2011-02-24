@@ -19,7 +19,7 @@
 
 namespace Yard.Generators.RACCGenerator
 
-type ParserState<'state, 'value, 'lb when 'state :comparison> =
+type ParserState<'state, 'value, 'lb when 'state: comparison> =
     {
         statesSet : Set<'state>
         inpSymbol : Lexeme<'value>

@@ -69,6 +69,6 @@ let run path =
     
 
 do 
-    run @"W:\Users\gsv2\Diploma\trunk\Tests\RACC\test_alt_in_cls\Performance\test_3.in"
+    run @"D:\rec_ascent\trunk\Tests\RACC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

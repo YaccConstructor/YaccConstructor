@@ -31,9 +31,7 @@ type StateInfo<'position, 'tree, 'itemName, 'traceStep
         forest   : List<'tree>
         itemName : 'itemName    
         sTrace   : List<'traceStep>
-    }
-     member self.GetValue (x:StateInfo<_,_,_,_>) =
-        x.position, x.itemName , (x.forest)     
+    }    
      interface System.Collections.IStructuralComparable with
             member self.CompareTo (y,c) = -1
                 

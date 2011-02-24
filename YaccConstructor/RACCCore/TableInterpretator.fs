@@ -33,13 +33,13 @@ type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality> =
     | PSuccess of Set<AST<'a,'b,'c,'d>>
     | PError   of int
 
-module TableInterpreter =     
+type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeValue: null>() = class
     
     let forest = ref []
 
     let maxCorrPos = ref 0
 
-    let Lexer: Option<ILexer<_>>  ref = ref None
+    let Lexer: Option<ILexer<'lexemeValue>>  ref = ref None
 
     let CallCount = ref 0
 
@@ -76,12 +76,12 @@ module TableInterpreter =
 
     let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()    
     
-    let private getDFA itemName = tables().automataDict.[itemName]
+    let getDFA itemName = tables().automataDict.[itemName]
 
     let buildItem state = 
         fun x -> 
             seq 
-             {
+                {
               for rule in x do
                yield
                 {
@@ -93,9 +93,9 @@ module TableInterpreter =
                 }}
 
     let getPrevItems smb state =
-                (getDFA state.itemName).DRules
-                |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
-                |> buildItem state
+        (getDFA state.itemName).DRules
+        |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
+        |> buildItem state
 
     let traceBuilderCache = new System.Collections.Generic.Dictionary<int, int>()
 
@@ -185,6 +185,9 @@ module TableInterpreter =
                             [rule.Label]
 
                 let gotoSet = goto parserState.statesSet parserState.inpSymbol
+                if parserState.statesSet.IsEmpty
+                then Set.empty
+                else
                 {parserState with statesSet = gotoSet} 
                 |> parse ()
                 |> fun s ->
@@ -206,13 +209,13 @@ module TableInterpreter =
                                 if itm.state.position <> dfa.DStartState
                                 then
                                     yield
-                                        {
-                                            rItem  = {itm.state with
-                                                        forest = s.forest @ res.rItem.forest
-                                                        sTrace = trace s
-                                                        }
-                                            rI     = res.rI
-                                        }                            
+                                     {
+                                        rItem  = {itm.state with
+                                                    forest = s.forest @ res.rItem.forest
+                                                    sTrace = trace s
+                                                 }
+                                        rI     = res.rI
+                                     } 
                                 else
                                     let n =
                                         let node = s.forest @ res.rItem.forest |> node (trace s)
@@ -243,7 +246,7 @@ module TableInterpreter =
                                         |>climb ()
                           }
                         }
-                        |> set                                                        
+                        |> set
                 
 #if DEBUG
                 |> fun res -> printfn "\n climb result = %A" res; res
@@ -262,7 +265,7 @@ module TableInterpreter =
                     let dfa = getDFA state.itemName
                     Set.exists ((=) state.position) dfa.DFinaleStates
                 let resPart1 =
-                    let buildResult item =                        
+                    let buildResult item =
                         {
                             rItem  = {item with forest = []; sTrace = []}
                             rI     = parserState.i                            
@@ -308,7 +311,7 @@ module TableInterpreter =
                 res)
 
         
-    let run lexer tables= 
+    let run lexer tables = 
         Lexer := Some lexer
         Some tables |> setTables
         let res = 
@@ -322,7 +325,7 @@ module TableInterpreter =
                             sTrace   = []
                         }
                         |> Set.singleton
-                    inpSymbol = {name = "";value =""}
+                    inpSymbol = {name = "";value =null}
                     i         = 1
                 }
             |> Set.fold
@@ -357,5 +360,8 @@ module TableInterpreter =
             then PSuccess res
             else PError (!maxCorrPos + 1)
              ,trC,!CallCount
+        CallCount := 0
         maxCorrPos := 0
         res
+    member self.Run lexer tables = run lexer tables
+end

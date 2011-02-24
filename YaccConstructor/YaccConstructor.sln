@@ -66,6 +66,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IronyFrontend", "IronyFront
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronyFrontendTests", "IronyFrontendTests\IronyFrontendTests.csproj", "{61B73DE1-F585-488D-B842-923CBFCD092C}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "YaccConstructor", "YaccConstructor\YaccConstructor.vdproj", "{33A45619-5B6C-4378-8942-176C85EC0F0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -294,6 +296,12 @@ Global
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|x86.ActiveCfg = Release|Any CPU
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Debug|Any CPU.ActiveCfg = Debug
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Debug|x86.ActiveCfg = Debug
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Release|Any CPU.ActiveCfg = Release
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Release|Mixed Platforms.ActiveCfg = Release
+		{33A45619-5B6C-4378-8942-176C85EC0F0D}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,7 +18,6 @@ let comment_depth = ref 0
 let ang_br_depth = ref 0
 let commut_depth = ref 0
 
-
 let currentFileContent = ref ""
 
 exception Lexical_error of string * int

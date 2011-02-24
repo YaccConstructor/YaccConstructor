@@ -43,12 +43,10 @@ let run path =
     //Run parser
     // trees -- dirivation forest
     // cache -- trace cache
-    // cc -- some additional debug info        
-    //Run parser
-    // trees -- dirivation forest
-    // cache -- trace cache
     // cc -- some additional debug info
-    let parseRes,cache,cc = TableInterpreter.run l tables
+    let parseRes,cache,cc = 
+        let ti = new TableInterpreter<string>()
+        ti.Run l tables
 
     let forest = 
         match parseRes with
@@ -62,10 +60,7 @@ let run path =
     printf "\nResult %A\n" res
     forest
 
-    
-//let main path = run path
 do 
-    run @"D:\rec_ascent\trunk\Tests\RACC\test_alt_in_cls\Performance\test_9.in"
+    run @"W:\Users\gsv2\Diploma\trunk\Tests\RACC\test_alt_in_cls\Performance\test_3.in"
     |> ignore
-    System.Console.ReadLine()
-    |> ignore
+    System.Console.ReadLine() |> ignore

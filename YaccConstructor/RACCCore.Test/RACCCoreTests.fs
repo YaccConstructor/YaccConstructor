@@ -490,7 +490,9 @@ let run_common path =
 let runMain path tables actions =
     let buf = run_common path 
     let l = UserLexer.Lexer(buf)    
-    let parseRes,cache,cc = TableInterpreter.run l tables    
+    let parseRes,cache,cc = 
+        let ti = new TableInterpreter<string>()
+        ti.Run l tables    
     let res  = 
         match parseRes with
         | PSuccess (forest) -> 

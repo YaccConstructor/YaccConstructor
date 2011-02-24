@@ -42,16 +42,13 @@ let () =
             let str = !baseString + String.replicate i !increment
             let fileName = !outFile + "_" + i.ToString() + ".in"
             System.IO.Directory.CreateDirectory(!outFolder) |> ignore
-            let outPath = !outFolder + "/" + fileName
-            let outStrieam =         
-                try
-                    let t = new FileInfo(outPath)
-                    use writer = t.CreateText()             
-                    writer     
-                with e -> failwith ("Writer Exception:" + e.ToString())
-                         
-            outStrieam.Write(str)
-            outStrieam.Close()
+            let outPath = !outFolder + "/" + fileName            
+            try
+                let t = new FileInfo(outPath)
+                use writer = t.CreateText()
+                writer.Write(str)
+                writer.Close()
+            with e -> failwith ("Writer Exception:" + e.ToString())            
 
     match !command with
     | Gi    -> generateTests ()

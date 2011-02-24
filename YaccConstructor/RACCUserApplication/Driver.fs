@@ -48,17 +48,25 @@ let run path =
         let ti = new TableInterpreter<string>()
         ti.Run l tables
 
-    let forest = 
+    let result = 
         match parseRes with
-        | PSuccess (forest) -> forest
-        | PError (pos) -> Set.empty
-    //run forest interpretation (action code calculation)
-    let res =
-        Seq.map 
-            (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree) forest
+        //Parse success
+        | PSuccess (forest) -> 
+        //run forest interpretation (action code calculation)
+            Seq.map 
+             (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree)
+             forest
+        //Error handling
+        | PError (pos) -> 
+            //Error handling
+            //If you create lexeme with position in stream, you can not only provide error lexeme
+            // but also navigate in error position
+            let errLexeme = (l :> ILexer<string>).Get(pos)
+            "Incorrect input. Unexpected lexeme: " + errLexeme.name + " with value = " + errLexeme.value
+            |> failwith
             
-    printf "\nResult %A\n" res
-    forest
+    printf "\nResult %A\n" result
+    
 
 do 
     run @"W:\Users\gsv2\Diploma\trunk\Tests\RACC\test_alt_in_cls\Performance\test_3.in"

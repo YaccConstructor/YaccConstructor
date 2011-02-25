@@ -22,14 +22,17 @@ let () =
     let testsPath = ref @"..\..\..\..\Tests\ANTLR"
     let testFile = ref "url.g"    
 
+    let printItems iName items = 
+        fun _ ->
+            printfn "\nAvailable %s: " iName                                    
+            items
+            |> String.concat ",\n    " 
+            |> fun x -> printf "    %s" (x + "\n") 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
-         "-af", ArgType.Unit (fun _ ->
-                                   printfn "\nAvailable frontands: "                                    
-                                   FrontendsManager.AvailableFrontends 
-                                   |> String.concat ",\n    " 
-                                   |> fun x -> printf "    %s" (x + "\n") ),"Available frontands"
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends),"Available frontends"
          "-g", ArgType.String (fun s -> generatorName := s), "Generator name"
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators),"Available generators"
          "-i", ArgType.String (fun s -> 
                                    testFile := System.IO.Path.GetFileName(s);
                                    testsPath := System.IO.Path.GetDirectoryName(s)), "Input grammar"         
@@ -41,21 +44,6 @@ let () =
 
     let grammarFilePath = System.IO.Path.Combine(!testsPath, !testFile)
 
-
-    // Load frontends assemblies dlls - get them from file, current folder or command line
-    try
-        let assembly = System.Reflection.Assembly.Load(!feName)
-        let inst = assembly.CreateInstance("Yard.Frontends." + !feName + "." + !feName)
-        FrontendsManager.Register(inst :?> IFrontend);
-    with ex -> printf "%A is not correct frontend name\n\n%A\n" !feName ex
-    
-    // Load generator assemblies dlls - get them from file, current folder or command line
-    try
-        let assembly = System.Reflection.Assembly.Load(!generatorName)
-        let inst = assembly.CreateInstance("Yard.Generators." + !generatorName + "." + !generatorName)
-        GeneratorsManager.Register(inst :?> IGenerator);
-    with _ -> printf "%A is not correct generator name" !generatorName
-    
     // Parse grammar    
     let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath        
 
@@ -67,11 +55,7 @@ let () =
     let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
        
     printf "%A" s
-
-//    let fi = new FileInfo("output.yrd")
-//    let writer = fi.CreateText() 
-//    fprintf writer "%A" s
-    //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
+    
     ()
   with 
   | :? System.IO.IOException -> printf "Could not read file"

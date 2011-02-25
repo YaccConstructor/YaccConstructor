@@ -2,6 +2,7 @@
 module Yard.Frontends.AntlrFrontend.Parser
 open Yard.Core.IL
 type token = 
+  | HENCE
   | DOUBLE_DOT
   | TILDE
   | EXCLAMATION
@@ -28,6 +29,7 @@ type token =
   | SINGLELINE_COMMENT of (Source.t)
   | MULTILINE_COMMENT of (Source.t)
 type tokenId = 
+    | TOKEN_HENCE
     | TOKEN_DOUBLE_DOT
     | TOKEN_TILDE
     | TOKEN_EXCLAMATION
@@ -72,6 +74,7 @@ type nonTerminalId =
     | NONTERM_Alt
     | NONTERM_ActionCodeOpt
     | NONTERM_Seq
+    | NONTERM_PredicateOpt
     | NONTERM_Modifier
     | NONTERM_SimpleProduction
     | NONTERM_RuleString

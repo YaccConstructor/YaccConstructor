@@ -73,6 +73,7 @@ let makeToken (identifier, pos) descr =
 %token EXCLAMATION
 %token TILDE
 %token DOUBLE_DOT
+%token HENCE
 
 %start ParseAntlr
 %type <(Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary> ParseAntlr
@@ -124,7 +125,10 @@ ActionCodeOpt: { None }
     | ACTION_CODE { Some($1) }
 
 Seq: LPAREN RuleBody RPAREN Modifier { makeModifiedRule $2 $4 }
-    | SimpleProduction Modifier { makeModifiedRule ($1) $2 }
+    | PredicateOpt SimpleProduction Modifier { makeModifiedRule ($2) $3 }
+
+PredicateOpt: LPAREN RuleBody RPAREN HENCE { }
+    | { }
 
 Modifier: PLUS { "+" }
     | STAR { "*" }

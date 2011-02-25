@@ -40,6 +40,7 @@ rule main = parse
   | '(' { LPAREN }
   | ')' { RPAREN }
   | '|' { BAR }
+  | "=>" { HENCE }
   | '=' { EQUAL }
   | '*' { STAR }
   | '+' { PLUS }

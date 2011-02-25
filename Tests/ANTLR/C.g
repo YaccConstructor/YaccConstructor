@@ -98,9 +98,6 @@ scope Symbols; // put parameters and locals into same scope for now
 	;
 
 declaration
-scope {
-  boolean isTypedef;
-}
 @init {
   $declaration::isTypedef = false;
 }
@@ -539,7 +536,7 @@ WS  :  (' '|'\r'|'\t'|'\u000C'|'\n') {$channel=HIDDEN;}
     ;
 
 COMMENT
-    :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+    :   '/*' (  options {greedy=false;} : . )* */' {$channel=HIDDEN;}
     ;
 
 LINE_COMMENT

@@ -3,6 +3,7 @@
 open Yard.Core
 open Yard.Core.IL
 open Microsoft.FSharp.Text
+open System.IO
 
 //TODO: move it to ConvertionManager
 let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) = 
@@ -66,7 +67,12 @@ let () =
     let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
        
     printf "%A" s
+
+//    let fi = new FileInfo("output.yrd")
+//    let writer = fi.CreateText() 
+//    fprintf writer "%A" s
     //printf "file Name \n %A \n" <| System.IO.Path.ChangeExtension(ilTree.info.fileName,".fs")
+    ()
   with 
   | :? System.IO.IOException -> printf "Could not read file"
   | x -> printf "%A" x // program should terminate correctly. Writing to error stream for Tester

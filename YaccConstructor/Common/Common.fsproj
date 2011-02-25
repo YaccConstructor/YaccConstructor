@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="IL.fs" />
     <Compile Include="IGenerator.fs" />
+    <Compile Include="ComponentsLoader.fs" />
     <Compile Include="GeneratorsManager.fs" />
     <Compile Include="IFrontend.fs" />
     <Compile Include="FrontendsManager.fs" />

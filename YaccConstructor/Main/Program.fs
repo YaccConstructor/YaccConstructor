@@ -14,9 +14,7 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
         and  foot = ilTree.foot
     }
 
-let () =   
-  try 
-  
+let () =     
     let feName = ref "AntlrFrontend"
     let generatorName = ref "YardPrinter"
     let testsPath = ref @"..\..\..\..\Tests\ANTLR"
@@ -28,6 +26,7 @@ let () =
             items
             |> String.concat ",\n    " 
             |> fun x -> printf "    %s" (x + "\n") 
+
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := s), "Frontend name"
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends),"Available frontends"
@@ -42,21 +41,20 @@ let () =
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
-    let grammarFilePath = System.IO.Path.Combine(!testsPath, !testFile)
+    try 
+        let grammarFilePath = System.IO.Path.Combine(!testsPath, !testFile)
 
-    // Parse grammar    
-    let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath        
+        // Parse grammar    
+        let ilTree = (FrontendsManager.Frontend !feName).ParseGrammar grammarFilePath        
 
-    // Apply convertions
-    let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
+        // Apply convertions
+        let ilTreeExpandedMeta = ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
 
-    // Generate something
-    let gen = GeneratorsManager.Generator(!generatorName)
-    let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
-       
-    printf "%A" s
-    
-    ()
-  with 
-  | :? System.IO.IOException -> printf "Could not read file"
-  | x -> printf "%A" x // program should terminate correctly. Writing to error stream for Tester
+        // Generate something
+        let gen = GeneratorsManager.Generator(!generatorName)
+        let s = gen.Generate (ilTree) // дерево передается без конвертации для FParsecGenerator
+
+        printf "%A" s        
+    with 
+    | :? System.IO.IOException -> printf "Could not read file"
+    | x -> printf "%A" x

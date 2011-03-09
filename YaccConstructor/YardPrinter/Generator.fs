@@ -14,14 +14,13 @@ type TextBox =
 with 
   member x.IsTab with get() = match x with Tabbed _ -> true | _ -> false
   
-let to_seq x = seq { yield x }
 let printTextBox tabSize windowSize tbSeq =
 
     /// Return new sequence, what has the same elements, what tbSeq has,
     ///    with proper indent before each element.
     let rec printIndentedSeq tbSeq indent =
         Seq.collect (function
-            | Str s -> to_seq (s, indent)
+            | Str s -> Seq.singleton (s, indent)
             | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq (indent)}
             | Tabbed tbSeq | Line tbSeq as x -> 
              seq { yield ("\n", indent);
@@ -98,15 +97,15 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         // Sequence * attribute.(attribute is always applied to sequence) 
         | PSeq(elem_seq, attr_option) -> seq {yield! (Seq.collect printElem elem_seq); yield Str(printAttr attr_option)}
         // Token
-        | PToken(source) -> to_seq <| Str (Source.toString source)
+        | PToken(source) -> Seq.singleton <| Str (Source.toString source)
         // Vanilla rule reference with an optional args list.
-        | PRef(source, attr_option) -> to_seq <| Str (Source.toString source + printArg attr_option)
+        | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
         // expr*
         | PMany(many) -> seq { yield! bracketsIf (priority many < 50) (printProduction many false) ; yield Str "*"}
         // Metarule reference like in "a: mr<x> y z"
-        | PMetaRef(rule_name, opt_arg, metaArgs) -> to_seq <| Str((Source.toString rule_name)+(printMetaArgs metaArgs)+(printArg opt_arg))
+        | PMetaRef(rule_name, opt_arg, metaArgs) -> Seq.singleton <| Str((Source.toString rule_name)+(printMetaArgs metaArgs)+(printArg opt_arg))
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
-        | PLiteral(source) -> to_seq <| Str ("'" + Source.toString source + "'") 
+        | PLiteral(source) -> Seq.singleton <| Str ("'" + Source.toString source + "'") 
 //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
 //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
 ///// The following are obsolete and reduction to PRepet should be discussed.
@@ -114,10 +113,10 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | PSome(some) -> seq {yield! (bracketsIf (priority some<50) (printProduction some false)); yield Str("+")}
         // expr?
         | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction opt false)); yield Str("?")}
-        | _ -> to_seq <| Str("ERROR")
+        | _ -> Seq.singleton <| Str("ERROR")
 
-    seq {yield Line(seq{yield! to_seq <| Str(startSign + rule.name + (printMetaArgs rule.metaArgs) + (printArgs rule.args) + ":");
-        yield Str(" "); yield! printProduction rule.body false; yield Str(";\n")})}
+    seq {yield Line(seq{yield Str(startSign + rule.name + (printMetaArgs rule.metaArgs) + (printArgs rule.args) + ":");
+         yield Str(" "); yield! printProduction rule.body false; yield Str(";\n")})}
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     let tbSeq = Seq.collect (fun rule -> printRule rule) input_grammar.grammar

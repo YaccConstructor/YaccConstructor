@@ -17,21 +17,50 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module m1
+//module m1
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
+open Microsoft.FSharp.Text.Lexing
 //UserLexer -- your lexer
-module Lexer = UserLexer
+//module Lexer = UserLexer
+
+let smallBraces = seq{yield {name = "LBRACE"; value = "("};
+                      yield {name = "RBRACE"; value = ")"};
+                      yield {name = "LBRACE"; value = "("};
+                      yield {name = "LBRACE"; value = "("};
+                      yield {name = "RBRACE"; value = ")"};
+                      yield {name = "RBRACE"; value = ")"};
+                      yield {name = "LBRACE"; value = "("};
+                      yield {name = "RBRACE"; value = ")"};
+                      yield {name = "EOF"; value = "EOF"}}
+
+type SeqLexer(seqTok:array<_>) = 
+    class
+        
+        (*let locbuf _ = 
+            printfn "%A\n" seqTok
+            Seq.toArray seqTok*)
+        let mutable ind = 0
+        interface ILexer<string> with
+            member self.Get pos =
+                seqTok.[pos-1]
+            member self.IsEnd () =
+                true
+    //            ind <- ind + 1
+      //          printfn "Ind++ = %d" ind
+        //        ind >= locbuf.Length
+    end
 
 //path -- path to input file
 let run path =
     //Create lexer
-    let content = System.IO.File.ReadAllText(path)
-    let reader = new System.IO.StringReader(content)    
-    let buf = LexBuffer<_>.FromTextReader reader
-    let l = UserLexer.Lexer(buf)
+    //let content = System.IO.File.ReadAllText(path)
+    //let reader = new System.IO.StringReader(content)    
+    //let buf = LexBuffer<_>.FromTextReader reader
+    //let l = UserLexer.Lexer(buf)
+    let l = SeqLexer (Seq.toArray smallBraces)
 
     //Create tables
     let tables =
@@ -53,6 +82,7 @@ let run path =
         //Parse success
         | PSuccess (forest) -> 
         //run forest interpretation (action code calculation)
+            printf "\nForest %A\n" forest
             Seq.map 
              (fun tree -> ASTInterpretator.interp RACC.Actions.ruleToAction cache tree)
              forest

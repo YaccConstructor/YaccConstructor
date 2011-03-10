@@ -11,6 +11,8 @@ Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_checker_on_gl
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_summator_1.yrd --testpath ..\Tests\RACC\test_summator_1\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_opt.yrd --testpath ..\Tests\RACC\test_opt\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_reduce_reduce.yrd --testpath ..\Tests\RACC\test_reduce_reduce\
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "E:\semen\Diploma\trunk\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "E:\semen\Diploma\trunk\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests
@@ -27,6 +29,8 @@ move ..\Tests\RACC\test_checker_on_glr\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_summator_1\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_opt\*.fs  RACCGeneratedTests/
 move ..\Tests\RACC\test_reduce_reduce\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\claret\braces_1\*.fs  RACCGeneratedTests/
+move ..\Tests\RACC\claret\braces_2\*.fs  RACCGeneratedTests/
 
 del RACCCore.Test\test_*
 
@@ -68,3 +72,9 @@ call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Opt RACCGener
 
 call BatchSubstitute.cmd RACC.Actions RACC.Actions_Rdc_Rdc RACCGeneratedTests\test_reduce_reduce.yrd.actions.fs >> RACCCore.Test\test_reduce_reduce.yrd.actions.fs
 call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_Rdc_Rdc RACCGeneratedTests\test_reduce_reduce.yrd.tables.fs >> RACCCore.Test\test_reduce_reduce.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_claret_1 RACCGeneratedTests\test_simple_braces.yrd.actions.fs >> RACCCore.Test\test_simple_braces.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_claret_1 RACCGeneratedTests\test_simple_braces.yrd.tables.fs >> RACCCore.Test\test_simple_braces.yrd.tables.fs
+
+call BatchSubstitute.cmd RACC.Actions RACC.Actions_claret_2 RACCGeneratedTests\test_simple_braces_2.yrd.actions.fs >> RACCCore.Test\test_simple_braces_2.yrd.actions.fs
+call BatchSubstitute.cmd RACCGenerator.Tables RACCGenerator.Tables_claret_2 RACCGeneratedTests\test_simple_braces_2.yrd.tables.fs >> RACCCore.Test\test_simple_braces_2.yrd.tables.fs

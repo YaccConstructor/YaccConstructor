@@ -71,6 +71,10 @@
     <Compile Include="test_reduce_reduce.yrd.tables.fs" />
     <Compile Include="test_seq.yrd.actions.fs" />
     <Compile Include="test_seq.yrd.tables.fs" />
+    <Compile Include="test_simple_braces.yrd.actions.fs" />
+    <Compile Include="test_simple_braces.yrd.tables.fs" />
+    <Compile Include="test_simple_braces_2.yrd.actions.fs" />
+    <Compile Include="test_simple_braces_2.yrd.tables.fs" />
     <Compile Include="test_simple_checker.yrd.actions.fs" />
     <Compile Include="test_simple_checker.yrd.tables.fs" />
     <Compile Include="test_summator_1.yrd.actions.fs" />

@@ -1,6 +1,6 @@
 ﻿//  CodeGenerator.fs contains functions for action code generation
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -71,7 +71,12 @@ type CodeGenerator(outPath: string) =
                         (fun elem -> 
                             if Option.isSome elem.binding
                             then  Source.toString elem.binding.Value, "x" + num.Next().ToString()
-                            else "_","_")
+                            else 
+                                if elem.omit
+                                then "_","_"
+                                else 
+                                    let x = "racc_x" + num.Next().ToString()
+                                    hash elem |> string,x)
                         elems
                     
                 let namesMap = dict namesPair
@@ -92,7 +97,14 @@ type CodeGenerator(outPath: string) =
                           indentString (indentSize + 1) + "let (" + Source.toString elem.binding.Value + ") =\n"
                         + indentString (indentSize + 2) + "let " + elemFName + " expr = \n" + eFun + "\n"
                         + indentString (indentSize + 2) + elemFName + "(" + namesMap.[Source.toString elem.binding.Value] + ")"
-                    else ""
+                    else 
+                        if elem.omit
+                        then ""
+                        else
+                            let eFun = generateBody (indentSize + 3) elem.rule
+                            indentString (indentSize + 1) + "let (" + namesMap.[hash elem |> string] + ") =\n"
+                            + indentString (indentSize + 2) + "let " + elemFName + " expr = \n" + eFun + "\n"
+                            + indentString (indentSize + 2) + elemFName + "(" + namesMap.[hash elem |> string] + ")"
                     + try 
                         "\n" + indentString (indentSize + 1) + checkersMap.[Source.toString elem.binding.Value]
                       with _ -> ""
@@ -106,7 +118,7 @@ type CodeGenerator(outPath: string) =
                 + indentString (indentSize + 1)
                 + if expr.IsSome
                   then "(" + Source.toString expr.Value + ")\n"
-                  else "()\n"
+                  else "(" + (List.unzip namesPair |> snd |> List.filter ((<>)"_") |> String.concat ",") + " )\n"
                 + indentString indentSize + notMatched "RESeq" + "\n"
                  
             | PAlt(alt1,alt2)  -> 

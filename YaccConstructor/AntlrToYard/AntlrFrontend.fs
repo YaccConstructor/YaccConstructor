@@ -12,3 +12,7 @@ type AntlrFrontend() =
         member this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
     end
 
+
+module Run = 
+
+Yard.Frontends.AntlrFrontend.Main.run ()

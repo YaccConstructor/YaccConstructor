@@ -82,7 +82,7 @@ scope Symbols; // entire file is a scope
  */
 external_declaration
 options {k=1;}
-	: ( declaration_specifiers? declarator declaration* '{' )=> function_definition
+	: function_definition
 	| declaration
 	;
 
@@ -101,7 +101,7 @@ declaration
 @init {
   $declaration::isTypedef = false;
 }
-	: 'typedef' declaration_specifiers? {$declaration::isTypedef=true;}
+	: 'typedef' declaration_specifiers? 
 	  init_declarator_list ';' // special case, looking for typedef	
 	| declaration_specifiers init_declarator_list? ';'
 	;
@@ -144,7 +144,7 @@ type_specifier
 	;
 
 type_id
-    :   {isTypeName(input.LT(1).getText())}? IDENTIFIER
+    :   IDENTIFIER
 //    	{System.out.println($IDENTIFIER.text+" is a type");}
     ;
 
@@ -210,14 +210,7 @@ declarator
 	;
 
 direct_declarator
-	:   (	IDENTIFIER
-			{
-			if ($declaration.size()>0&&$declaration::isTypedef) {
-				$Symbols::types.add($IDENTIFIER.text);
-				System.out.println("define type "+$IDENTIFIER.text);
-			}
-			}
-		|	'(' declarator ')'
+	:   (	IDENTIFIER	|	'(' declarator ')'
 		)
         declarator_suffix*
 	;
@@ -536,7 +529,7 @@ WS  :  (' '|'\r'|'\t'|'\u000C'|'\n') {$channel=HIDDEN;}
     ;
 
 COMMENT
-    :   '/*' (  options {greedy=false;} : . )* */' {$channel=HIDDEN;}
+    :   '/*' (  options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
     ;
 
 LINE_COMMENT

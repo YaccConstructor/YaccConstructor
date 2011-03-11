@@ -74,6 +74,7 @@ type nonTerminalId =
     | NONTERM_Alt
     | NONTERM_ActionCodeOpt
     | NONTERM_Seq
+    | NONTERM_BodyOptionsOpt
     | NONTERM_PredicateOpt
     | NONTERM_Modifier
     | NONTERM_SimpleProduction

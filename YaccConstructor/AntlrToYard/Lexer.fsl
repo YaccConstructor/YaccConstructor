@@ -50,6 +50,7 @@ rule main = parse
   | '!' { EXCLAMATION }
   | '~' { TILDE }
   | ".." { DOUBLE_DOT }
+  | '.' { TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
   | eof { EOF }
   | _ { main lexbuf }
 and multiline_comment = parse

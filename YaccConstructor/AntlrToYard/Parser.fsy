@@ -117,15 +117,18 @@ FragmentOpt: T_FRAGMENT { }
 OptionsOpt: T_OPTIONS ACTION_CODE { }
     | { }
 
-RuleBody: Alt { makePSeq ($1) } | RuleBody BAR Alt { PAlt($1, makePSeq ($3)) }
+RuleBody: Alt { makePSeq ($1, None) } | RuleBody BAR Alt { PAlt($1, makePSeq ($3, None)) }
 
-Alt: Seq ActionCodeOpt { ([$1], $2) } | Seq Alt { $1 :: fst($2), None }
+Alt: Seq ActionCodeOpt { [$1] } | Seq Alt { $1 :: $2 }
 
 ActionCodeOpt: { None }
     | ACTION_CODE { Some($1) }
 
 Seq: LPAREN RuleBody RPAREN Modifier { makeModifiedRule $2 $4 }
-    | PredicateOpt SimpleProduction Modifier { makeModifiedRule ($2) $3 }
+    | BodyOptionsOpt PredicateOpt SimpleProduction Modifier { makeModifiedRule ($3) $4 }
+
+BodyOptionsOpt: T_OPTIONS ACTION_CODE COLON { }
+    | { }
 
 PredicateOpt: LPAREN RuleBody RPAREN HENCE { }
     | { }
@@ -169,3 +172,6 @@ RulePart:
   | ACTION_CODE { "{"+fst($1)+"}" }
   | ACTION_NAME { fst($1) }
   | CAT_CODE { fst($1) }
+  | T_OPTIONS { "options" }
+  | COLON { ":" }
+  | HENCE { "=>" }

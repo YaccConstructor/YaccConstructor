@@ -141,7 +141,7 @@ let trans : uint16[] array =
     (* State 56 *)
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 56us; 65535us; 65535us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 65535us; 65535us; 65535us; 65535us; 56us; 65535us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 56us; 65535us; 65535us; 65535us; 65535us; 65535us; 192us; 56us; 193us; 56us; 194us; 56us; 195us; 56us; 196us; 56us; 197us; 56us; 198us; 56us; 199us; 56us; 200us; 56us; 201us; 56us; 202us; 56us; 203us; 56us; 204us; 56us; 205us; 56us; 206us; 56us; 207us; 56us; 208us; 56us; 209us; 56us; 210us; 56us; 211us; 56us; 212us; 56us; 213us; 56us; 214us; 56us; 216us; 56us; 217us; 56us; 218us; 56us; 219us; 56us; 220us; 56us; 221us; 56us; 222us; 56us; 223us; 56us; 224us; 56us; 225us; 56us; 226us; 56us; 227us; 56us; 228us; 56us; 229us; 56us; 230us; 56us; 231us; 56us; 232us; 56us; 233us; 56us; 234us; 56us; 235us; 56us; 236us; 56us; 237us; 56us; 238us; 56us; 239us; 56us; 240us; 56us; 241us; 56us; 242us; 56us; 243us; 56us; 244us; 56us; 245us; 56us; 246us; 56us; 248us; 56us; 249us; 56us; 250us; 56us; 251us; 56us; 252us; 56us; 253us; 56us; 254us; 56us; 255us; 56us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
-let actions : uint16[] = [|65535us; 0us; 1us; 1us; 65535us; 0us; 1us; 1us; 65535us; 0us; 1us; 2us; 3us; 4us; 5us; 65535us; 1us; 0us; 1us; 2us; 0us; 65535us; 3us; 3us; 2us; 3us; 1us; 0us; 7us; 0us; 1us; 15us; 22us; 5us; 6us; 7us; 8us; 9us; 10us; 12us; 13us; 14us; 16us; 17us; 18us; 19us; 22us; 21us; 22us; 20us; 11us; 7us; 3us; 4us; 2us; 2us; 1us; |]
+let actions : uint16[] = [|65535us; 0us; 1us; 1us; 65535us; 0us; 1us; 1us; 65535us; 0us; 1us; 2us; 3us; 4us; 5us; 65535us; 1us; 0us; 1us; 2us; 0us; 65535us; 3us; 3us; 2us; 3us; 1us; 0us; 7us; 0us; 1us; 15us; 23us; 5us; 6us; 7us; 8us; 9us; 10us; 12us; 13us; 14us; 16us; 17us; 18us; 19us; 21us; 22us; 23us; 20us; 11us; 7us; 3us; 4us; 2us; 2us; 1us; |]
 let _fslex_tables = Microsoft.FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule main *)
@@ -266,123 +266,128 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 21 -> ( 
 # 53 "Lexer.fsl"
-                         EOF 
+                         TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) 
 # 270 "Lexer.fs"
           )
   | 22 -> ( 
 # 54 "Lexer.fsl"
-                       main lexbuf 
+                         EOF 
 # 275 "Lexer.fs"
+          )
+  | 23 -> ( 
+# 55 "Lexer.fsl"
+                       main lexbuf 
+# 280 "Lexer.fs"
           )
   | _ -> failwith "main"
 (* Rule multiline_comment *)
 and _fslex_multiline_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 57 "Lexer.fsl"
+# 58 "Lexer.fsl"
                      incr comment_depth; multiline_comment lexbuf 
-# 284 "Lexer.fs"
+# 289 "Lexer.fs"
           )
   | 1 -> ( 
-# 59 "Lexer.fsl"
+# 60 "Lexer.fsl"
                      decr comment_depth;
                      if !comment_depth = 0 then main lexbuf else multiline_comment lexbuf 
-# 290 "Lexer.fs"
-          )
-  | 2 -> ( 
-# 61 "Lexer.fsl"
-                         EOF 
 # 295 "Lexer.fs"
           )
-  | 3 -> ( 
+  | 2 -> ( 
 # 62 "Lexer.fsl"
-                       multiline_comment lexbuf 
+                         EOF 
 # 300 "Lexer.fs"
+          )
+  | 3 -> ( 
+# 63 "Lexer.fsl"
+                       multiline_comment lexbuf 
+# 305 "Lexer.fs"
           )
   | _ -> failwith "multiline_comment"
 (* Rule singleline_comment *)
 and _fslex_singleline_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 64 "Lexer.fsl"
-                         main lexbuf 
-# 309 "Lexer.fs"
-          )
-  | 1 -> ( 
 # 65 "Lexer.fsl"
-                       singleline_comment lexbuf 
+                         main lexbuf 
 # 314 "Lexer.fs"
           )
-  | 2 -> ( 
+  | 1 -> ( 
 # 66 "Lexer.fsl"
-                         EOF 
+                       singleline_comment lexbuf 
 # 319 "Lexer.fs"
+          )
+  | 2 -> ( 
+# 67 "Lexer.fsl"
+                         EOF 
+# 324 "Lexer.fs"
           )
   | _ -> failwith "singleline_comment"
 (* Rule action_code *)
 and _fslex_action_code  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 70 "Lexer.fsl"
+# 71 "Lexer.fsl"
                      incr comment_depth; action_code lexbuf 
-# 328 "Lexer.fs"
+# 333 "Lexer.fs"
           )
   | 1 -> ( 
-# 72 "Lexer.fsl"
+# 73 "Lexer.fsl"
                      decr comment_depth;
                      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf 
-# 334 "Lexer.fs"
-          )
-  | 2 -> ( 
-# 74 "Lexer.fsl"
-                          literal lexbuf; action_code lexbuf 
 # 339 "Lexer.fs"
           )
-  | 3 -> ( 
+  | 2 -> ( 
 # 75 "Lexer.fsl"
-                         literal2 lexbuf; action_code lexbuf 
+                          literal lexbuf; action_code lexbuf 
 # 344 "Lexer.fs"
           )
-  | 4 -> ( 
+  | 3 -> ( 
 # 76 "Lexer.fsl"
-                         EOF 
+                         literal2 lexbuf; action_code lexbuf 
 # 349 "Lexer.fs"
           )
-  | 5 -> ( 
+  | 4 -> ( 
 # 77 "Lexer.fsl"
-                       action_code lexbuf 
+                         EOF 
 # 354 "Lexer.fs"
+          )
+  | 5 -> ( 
+# 78 "Lexer.fsl"
+                       action_code lexbuf 
+# 359 "Lexer.fs"
           )
   | _ -> failwith "action_code"
 (* Rule literal *)
 and _fslex_literal  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 79 "Lexer.fsl"
+# 80 "Lexer.fsl"
                           LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
-# 363 "Lexer.fs"
+# 368 "Lexer.fs"
           )
   | 1 -> ( 
-# 80 "Lexer.fsl"
+# 81 "Lexer.fsl"
                                         literal lexbuf 
-# 368 "Lexer.fs"
+# 373 "Lexer.fs"
           )
   | _ -> failwith "literal"
 (* Rule literal2 *)
 and _fslex_literal2  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 82 "Lexer.fsl"
+# 83 "Lexer.fsl"
                          LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
-# 377 "Lexer.fs"
+# 382 "Lexer.fs"
           )
   | 1 -> ( 
-# 83 "Lexer.fsl"
+# 84 "Lexer.fsl"
                                          literal2 lexbuf 
-# 382 "Lexer.fs"
+# 387 "Lexer.fs"
           )
   | _ -> failwith "literal2"
 
-# 84 "Lexer.fsl"
+# 85 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

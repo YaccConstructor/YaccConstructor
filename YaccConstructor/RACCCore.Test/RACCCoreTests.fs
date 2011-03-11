@@ -1,6 +1,6 @@
 ﻿// RACCCoreTests.fs contains unit tests for RACCCore
 //
-//  Copyright 2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -475,6 +475,79 @@ let tests =
                 path       = "test_reduce_reduce\\test_reduce_reduce_1.yrd.in"
                 rightValue = seq ["A" |> box; "B" |> box]  
             })
+
+        (39,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_1.gotoSet
+                        automataDict = Tables_claret_1.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_1.ruleToAction
+                path       = "\claret\\braces_1\\test_simple_braces_1.yrd.in"
+                rightValue = seq [1 |> box]  
+            })
+
+        (40,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_1.gotoSet
+                        automataDict = Tables_claret_1.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_1.ruleToAction
+                path       = "\claret\\braces_1\\test_simple_braces_2.yrd.in"
+                rightValue = seq [2 |> box]  
+            })
+
+        (41,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_1.gotoSet
+                        automataDict = Tables_claret_1.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_1.ruleToAction
+                path       = "\claret\\braces_1\\test_simple_braces_3.yrd.in"
+                rightValue = seq [3 |> box]  
+            })
+
+        (42,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_2.gotoSet
+                        automataDict = Tables_claret_2.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_2.ruleToAction
+                path       = "\claret\\braces_2\\test_simple_braces_2_1.yrd.in"
+                rightValue = seq [1 |> box]  
+            })
+
+        (43,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_2.gotoSet
+                        automataDict = Tables_claret_2.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_2.ruleToAction
+                path       = "\claret\\braces_2\\test_simple_braces_2_2.yrd.in"
+                rightValue = seq [2 |> box]  
+            })
+
+        (44,
+            {
+                tables     =
+                    {
+                        gotoSet = Tables_claret_2.gotoSet
+                        automataDict = Tables_claret_2.autumataDict                        
+                    }
+                actionsMap = RACC.Actions_claret_2.ruleToAction
+                path       = "\claret\\braces_2\\test_simple_braces_2_3.yrd.in"
+                rightValue = seq [3 |> box]  
+            })
+
     ]
     |> dict
 
@@ -773,5 +846,41 @@ type ``RACC core tests`` () =
     [<Test>] 
     member test.``Reduce reduce conflict 1`` () =
         let test = tests.[38]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b1 1`` () =
+        let test = tests.[39]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b1 2`` () =
+        let test = tests.[40]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b1 3`` () =
+        let test = tests.[41]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b2 1`` () =
+        let test = tests.[42]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b2 2`` () =
+        let test = tests.[43]
+        let res = run (testPath + test.path) test.tables test.actionsMap
+        Assert.AreEqual(test.rightValue,res)
+
+    [<Test>] 
+    member test.``claret b2 3`` () =
+        let test = tests.[44]
         let res = run (testPath + test.path) test.tables test.actionsMap
         Assert.AreEqual(test.rightValue,res)

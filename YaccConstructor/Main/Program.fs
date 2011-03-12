@@ -21,23 +21,34 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
     }
 
 let () =     
+    let defaultFE = "YardFrontend"
+    let defaultGen = "RACCGenerator" 
+
     let feName = ref None
     let generatorName = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
 
-    let printItems iName items = 
-        fun _ ->
-            printfn "\nAvailable %s: " iName                                    
-            items
-            |> String.concat ",\n    " 
-            |> fun x -> printf "    %s" (x + "\n") 
+    if Seq.exists ((=) defaultFE) FrontendsManager.AvailableFrontends then
+        feName := Some(defaultFE)
+    if Seq.exists ((=) defaultGen) GeneratorsManager.AvailableGenerators then
+        generatorName := Some(defaultGen)
+
+    let generateSomething = ref true
+
+    let printItems iName items deft = 
+        fun _ ->                 
+            generateSomething := false                
+            printfn "\nAvailable %s: " iName 
+            Seq.map (fun x -> x + (if x=deft then " (default)" else "")) items
+            |> String.concat "\n    " 
+            |> fun x -> printf "    %s\n" x
 
     let commandLineSpecs =
-        ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name"
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends),"Available frontends"
-         "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name"
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators),"Available generators"
+        ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends defaultFE), "Available frontends"
+         "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators defaultGen), "Available generators"
          "-i", ArgType.String (fun s -> 
                                    testFile := System.IO.Path.GetFileName(s) |> Some 
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -49,7 +60,6 @@ let () =
     
     let run () =
         match !testFile, !feName , !generatorName with
-        | None, None, None                               -> ()
         | Some(fName), Some(feName), Some(generatorName) -> 
             let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
             let fe =
@@ -93,12 +103,12 @@ let () =
             printf "%A" result
 #endif
             ()
-        | None , _, _         -> EmptyArg "file name" |>raise 
-        | _, None, _          -> EmptyArg "frontend name" |> raise
-        | _, _, None          -> EmptyArg "genearator name" |> raise
-                
+        | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
+        | _, _, None          -> EmptyArg "generator name (-g)" |> raise
+        | None , _, _         -> EmptyArg "file name (-t)" |> raise 
     try
-        run ()
+        if !generateSomething = true then 
+            run ()
     with 
     | InvalidFEName (feName)   -> 
         "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
@@ -107,8 +117,9 @@ let () =
         "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
         |> System.Console.WriteLine
     | EmptyArg (argName)       ->
-        "Argument can not be empty: " + argName + "\n"
-        |> System.Console.WriteLine
+         printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+Main.exe -f AntlrFrontend -g YardPrinter -t ../../../../Tests/ANTLR/C.g > C.yrd\n
+List of available frontends and generators can be obtained by -af -ag keys" argName
     | FEError (error)          ->
         "Frontend error: " + error + "\n"
         |> System.Console.WriteLine

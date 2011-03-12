@@ -21,18 +21,25 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
     }
 
 let () =     
-    let defaultFE = "YardFrontend"
-    let defaultGen = "RACCGenerator" 
-
     let feName = ref None
     let generatorName = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
 
-    if Seq.exists ((=) defaultFE) FrontendsManager.AvailableFrontends then
-        feName := Some(defaultFE)
-    if Seq.exists ((=) defaultGen) GeneratorsManager.AvailableGenerators then
-        generatorName := Some(defaultGen)
+    let defaultFE = ref ""
+    let defaultGen = ref "" 
+
+    defaultFE :=
+        if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
+            "YardFrontend"
+        else
+            Seq.find (fun _ -> true) FrontendsManager.AvailableFrontends
+
+    defaultGen :=  
+        if Seq.exists ((=) "RACCGenerator") GeneratorsManager.AvailableGenerators then
+            "RACCGenerator"
+        else
+            Seq.find (fun _ -> true) GeneratorsManager.AvailableGenerators
 
     let generateSomething = ref true
 
@@ -46,9 +53,9 @@ let () =
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends defaultFE), "Available frontends"
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !defaultFE), "Available frontends"
          "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators defaultGen), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !defaultGen), "Available generators"
          "-i", ArgType.String (fun s -> 
                                    testFile := System.IO.Path.GetFileName(s) |> Some 
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         

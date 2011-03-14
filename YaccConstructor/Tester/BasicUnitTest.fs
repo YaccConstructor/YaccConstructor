@@ -10,9 +10,9 @@ type ``RACC core tests`` () =
 type ``RACC parse error position tests`` () =    
     inherit RACCCoreTests.``RACC parse error position tests``()
 
-[<TestFixture>]
+(*[<TestFixture>]
 type ``Yard frontend tests`` () =    
-    inherit YardFrontendTester .``YARD frontend Tests``()
+    inherit YardFrontendTester .``YARD frontend Tests``()*)
 
 [<TestFixture>]
 type ``Irony frontend tests`` () =    

@@ -29,6 +29,13 @@ let rec toString (_val:obj) =
         let l = fst (_val :?> (string*int))
         let r = snd (_val :?> (string*int))
         "(" + toString l + "," + toString r + ")"
+
+    | :? ((string * int * string)*(Set<string*int>))    ->
+        match _val :?> ((string * int * string)*(Set<string*int>)) with
+        | (l,r,m),s -> 
+        
+            "((" + toString l + "," + toString r + "," + toString m + ")," + __setToString s + ")"
+
     | :? (int*(string * int)) -> 
         let l = fst (_val :?> (int*(string * int)))
         let r = snd (_val :?> (int*(string * int)))

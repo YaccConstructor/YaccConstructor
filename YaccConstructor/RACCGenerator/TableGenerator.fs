@@ -115,8 +115,9 @@ type TableGenerator(outPath: string) =
                                     dlfaMap.[fst elt].DRules
                                     |> Set.filter (fun rule -> 
                                                     rule.FromStateID = snd elt
-                                                    && rule.Symbol = smb)                                              
-                                    |> Set.map (fun rule -> hash (item, smb), (fst elt, rule.ToStateID)))                                    
+                                                    && rule.Symbol = smb)
+                                    |> Set.map 
+                                        (fun rule -> (fst item, snd item, match smb with DSymbol(x) -> x | Dummy  -> "Dummy"), (fst elt, rule.ToStateID)))                                    
                             |>Set.unionMany)                        
                         items
                         |>Set.unionMany)

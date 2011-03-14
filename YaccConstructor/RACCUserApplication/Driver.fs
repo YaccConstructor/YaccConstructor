@@ -65,7 +65,7 @@ let run path =
     //Create tables
     let tables =
         {
-            gotoSet = gotoSet
+            gotoSet = dict[]//gotoSet
             automataDict = autumataDict
         }
     

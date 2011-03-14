@@ -11,8 +11,8 @@ Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_checker_on_gl
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_summator_1.yrd --testpath ..\Tests\RACC\test_summator_1\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_opt.yrd --testpath ..\Tests\RACC\test_opt\
 Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_reduce_reduce.yrd --testpath ..\Tests\RACC\test_reduce_reduce\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "E:\semen\Diploma\trunk\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "E:\semen\Diploma\trunk\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
+Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests

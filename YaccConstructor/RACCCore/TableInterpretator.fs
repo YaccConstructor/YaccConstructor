@@ -53,7 +53,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
             Set.fold 
                 (fun buf state -> 
                     let local = ref Set.empty                    
-                    tables().gotoSet.TryGetValue(hash ((state.itemName,state.position),DSymbol(symbol.name)),local)
+                    tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.name),local)
                     |> fun x -> 
                         if (not x) || Set.isEmpty (!local)
                         then 

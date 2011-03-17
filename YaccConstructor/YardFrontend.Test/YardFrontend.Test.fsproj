@@ -57,11 +57,6 @@
       <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
-      <Name>RACCCore.Test</Name>
-      <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
       <Name>YardFrontend</Name>
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>

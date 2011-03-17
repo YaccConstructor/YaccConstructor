@@ -7,9 +7,10 @@
 // as published by the Free Software Foundation.
 
 #light
-module Yard.Core.Main
+module Yard.Frontends.YardFrontend.Main
+
 open Microsoft.FSharp.Text.Lexing
-module Lexer = Yard.Core.GrammarLexer
+module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
 let run_common path = 
     let content = System.IO.File.ReadAllText(path)
@@ -29,9 +30,6 @@ let run path =
 let ParseFile path = 
     let buf = run_common path
     let res = GrammarParser.file Lexer.main buf
-#if DEBUG
-    //printf "%A\n" <|res
-#endif    
     {res with Yard.Core.IL.Definition.info = {fileName = path}}
     
 #if DEBUG

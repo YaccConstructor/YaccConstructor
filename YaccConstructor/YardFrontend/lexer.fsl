@@ -5,9 +5,9 @@
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
 
- module internal Yard.Core.GrammarLexer
+ module Yard.Frontends.YardFrontend.GrammarLexer
  open Microsoft.FSharp.Text.Lexing
- open Yard.Core.GrammarParser
+ open Yard.Frontends.YardFrontend.GrammarParser
  open Microsoft.FSharp.Text
 
 (* Auxiliaries for the lexical analyzer *)

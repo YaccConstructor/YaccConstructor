@@ -64,7 +64,7 @@
       <OtherFlags>--unicode --light-off</OtherFlags>
     </FsLex>
     <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Core.GrammarParser --open Yard.Core --light-off</OtherFlags>
+      <OtherFlags>--module Yard.Frontends.YardFrontend.GrammarParser --open Yard.Core --light-off</OtherFlags>
     </FsYacc>
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />

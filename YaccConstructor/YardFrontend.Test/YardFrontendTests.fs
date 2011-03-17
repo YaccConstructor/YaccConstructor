@@ -21,13 +21,46 @@
 module YardFrontendTester
 
 open Microsoft.FSharp.Text.Lexing
-open Yard.Core.Main
-open Main.Program
-open Yard.Core.GrammarParser
+open Yard.Frontends.YardFrontend
+open Yard.Frontends.YardFrontend.GrammarParser
+open Yard.Core.IL.Definition
 open NUnit.Framework
-     
+
+module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
+
 
 [<TestFixture>]
-type ``YARD frontend Tests`` ()=    
-    class
-    end
+type ``YardFrontend lexer tests`` ()=    
+    [<Test>]
+    member test.``Lexer seq test 1`` () =
+        let buf = LexBuffer<_>.FromString "+" //: NUMBER PLUS NUMBER;\n
+        let lexemsSeq = seq {
+            while not buf.IsPastEndOfStream do
+                yield Lexer.main buf  
+        } 
+        let lexemsSeqCorrect = [ PLUS; EOF ] |> Seq.ofList
+//        #if DEBUG
+//        printfn "lexems seq:"
+//        lexemsSeq |> Seq.iter (fun x -> printf "%A\n" x)
+//        #endif
+//        printfn "%A" (Seq.toList lexemsSeq)
+        Assert.AreEqual(lexemsSeq, lexemsSeqCorrect)
+
+[<TestFixture>]
+type ``YardFrontend Parser tests`` ()=    
+    [<Test>]
+    member test.``Seq test 1`` () =
+        let buf = LexBuffer<_>.FromString "+s: NUMBER PLUS NUMBER;\n" //
+        let ilDef = GrammarParser.file Lexer.main buf
+        let ilDefCorrect = {
+            info = { fileName = "" };
+            head = None;
+            grammar = [
+                
+            ];
+            foot = None;
+        }
+        #if DEBUG
+        printfn "tree: %A" res
+        #endif
+        Assert.AreEqual(ilDef,ilDefCorrect)

@@ -45,12 +45,7 @@ type SeqLexer(seqTok:array<_>) =
         let mutable ind = 0
         interface ILexer<string> with
             member self.Get pos =
-                seqTok.[pos-1]
-            member self.IsEnd () =
-                true
-    //            ind <- ind + 1
-      //          printfn "Ind++ = %d" ind
-        //        ind >= locbuf.Length
+                seqTok.[pos-1]           
     end
 
 //path -- path to input file

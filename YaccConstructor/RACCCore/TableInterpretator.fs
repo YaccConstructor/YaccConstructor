@@ -114,16 +114,16 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let memoize f =         
         fun parserState ->                    
-            //let key = hash (parserState.i, parserState.inpSymbol, parserState.statesSet)
-            //if false//cache.ContainsKey(key)       
-            //then                
-                //cache.[key] 
-           // else                
+            let key = parserState//.i, parserState.inpSymbol, parserState.statesSet
+            if cache.ContainsKey(key)       
+            then                
+                cache.[key] 
+            else                
                 let res = f parserState
-                //try
-                    //cache.Add(key,res)
-                //with 
-                //| :? System.ArgumentException -> ()
+                try
+                    cache.Add(key,res)
+                with 
+                | :? System.ArgumentException -> ()
                 res
 
     let print ps =

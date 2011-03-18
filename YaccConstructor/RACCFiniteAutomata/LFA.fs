@@ -1,6 +1,6 @@
 ﻿//  LFA.fs contains implementation of LFA
 //
-//  Copyright 2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //

@@ -1,6 +1,6 @@
 ﻿//  TableGenerator.fs contains functions for tables generation (goto, items, LFA data, etc)
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -167,11 +167,13 @@ type TableGenerator(outPath: string) =
             let dlfaMap = 
                 startRule :: grammar.grammar
                 |> List.map (fun x -> x.name, buildDLFA x.body)
-            "let autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
+            "let private autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
             |> write
             let items = items dlfaMap
             let goto = goto items (dict dlfaMap)
-            "let gotoSet = \n    " + ToString.setToString goto + "\n    |> dict"
+            "let private gotoSet = \n    " + ToString.setToString goto + "\n    |> dict"
+            |> write
+            "let tables = { gotoSet = gotoSet; automataDict = autumataDict }\n"
             |> write
             textWriter.CloseOutStream ()
                 

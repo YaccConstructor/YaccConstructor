@@ -39,9 +39,9 @@ type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> =
     override self.Equals y = equalsOn self.GetValue self y
     override self.GetHashCode() = hashOn self.GetValue self 
     interface System.Collections.IStructuralComparable with      
-        member self.CompareTo (y,c) = -1
+        member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> _value<'lexeme,'nodeVal>))
      
-[<CustomEquality; CustomComparison>]          
+//[<CustomEquality; CustomComparison>]          
 type value<'lexeme,'b, 'trace, 'id when 'lexeme : equality and 'lexeme : comparison and 'trace : equality> = 
     {
         id      : 'id;
@@ -50,11 +50,11 @@ type value<'lexeme,'b, 'trace, 'id when 'lexeme : equality and 'lexeme : compari
     }
 
     member self.GetValue x = 
-        x.trace 
-    override self.Equals y = equalsOn self.GetValue self y
-    override self.GetHashCode() = hashOn self.GetValue self 
-    interface System.Collections.IStructuralComparable with      
-        member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'lexeme,'b, 'trace, 'id>))
+        x.trace,x.id 
+    //override self.Equals y = equalsOn self.GetValue self y
+    //override self.GetHashCode() = hashOn self.GetValue self 
+    //interface System.Collections.IStructuralComparable with      
+      //  member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'lexeme,'b, 'trace, 'id>))
 
 
 type AST<'lexeme, 'nodeVal, 'trace, 'nodeId 

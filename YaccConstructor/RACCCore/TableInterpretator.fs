@@ -29,7 +29,7 @@ type Item<'state, 'symbol> =
         symbol : 'symbol        
     }
 
-type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality> = 
+type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality and 'c: comparison and 'd : comparison> = 
     | PSuccess of Set<AST<'a,'b,'c,'d>>
     | PError   of int
 
@@ -48,40 +48,36 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         let getTables () =  (!Tables).Value
         getTables , fun t -> Tables:=t
 
-    let goto states symbol = 
-        let res = 
-            Set.fold 
-                (fun buf state -> 
-                    let local = ref Set.empty                    
-                    tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.name),local)
-                    |> fun x -> 
-                        if (not x) || Set.isEmpty (!local)
-                        then 
-                            buf
-                        else
-                            set(seq{
-                            yield!
-                                seq { for gt in !local do                                         
-                                         yield {itemName = fst gt; position = snd gt; forest = state.forest; sTrace = state.sTrace}
-                                         yield! buf
-                                    }})
+    let goto states symbol =         
+        Set.fold
+            (fun buf state -> 
+                let local = ref Set.empty                    
+                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.name),local)
+                |> fun x -> 
+                    if (not x) || Set.isEmpty (!local)
+                    then 
+                        buf
+                    else
+                        set(seq{
+                        yield!
+                            seq { for gt in !local do                                         
+                                        yield {itemName = fst gt; position = snd gt; forest = state.forest; sTrace = state.sTrace}
+                                        yield! buf
+                                }})
                             
-                 )
-                Set.empty
-                states   
+                )
+            Set.empty
+            states   
 #if DEBUG
-        printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res     
+        |> fun res -> printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res; res
 #endif
-        res
-
-    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()    
+        |> fun res -> set res    
     
     let getDFA itemName = tables().automataDict.[itemName]
 
     let buildItem state = 
         fun x -> 
-            seq 
-                {
+            seq {
               for rule in x do
                yield
                 {
@@ -90,12 +86,14 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                         match rule.Symbol with
                         | DSymbol (s) -> s
                         | _           -> failwith "Error 01"
-                }}
+            }}
 
     let getPrevItems smb state =
         (getDFA state.itemName).DRules
         |> Set.filter (fun rule -> rule.ToStateID = state.position && rule.Symbol = DSymbol smb)
         |> buildItem state
+
+    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()
 
     let traceBuilderCache = new System.Collections.Generic.Dictionary<_, int>()
 
@@ -104,7 +102,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
     let cache = new System.Collections.Generic.Dictionary<_,_>()
 
     let pEpsBuf = ref None
-    let pEpsilon () =        
+    let pEpsilon () =
         if (!pEpsBuf).IsNone
         then  
             List.ofSeq (tables().automataDict)
@@ -116,16 +114,16 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let memoize f =         
         fun parserState ->                    
-            let key = hash (parserState.i, parserState.inpSymbol, parserState.statesSet)
-            if cache.ContainsKey(key)       
-            then                
-                cache.[key] 
-            else                
+            //let key = hash (parserState.i, parserState.inpSymbol, parserState.statesSet)
+            //if false//cache.ContainsKey(key)       
+            //then                
+                //cache.[key] 
+           // else                
                 let res = f parserState
-                try
-                    cache.Add(key,res)
-                with 
-                | :? System.ArgumentException -> ()
+                //try
+                    //cache.Add(key,res)
+                //with 
+                //| :? System.ArgumentException -> ()
                 res
 
     let print ps =
@@ -165,16 +163,14 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                 printfn "\n Climb \n" 
                 print parserState
 #endif 
-                incr CallCount 
-                let buildRes s = 
-                    Set.map
-                        (fun  state ->                                                                        
-                            {
-                                rItem  = state
-                                rI     = parserState.i                                
-                            }                    
-                        )   
-                        s
+                incr CallCount
+                let buildRes =                    
+                    fun  state ->
+                        {
+                            rItem  = state
+                            rI     = parserState.i
+                        }
+                    |> Set.map    
 
                 if parserState.statesSet.IsEmpty
                 then buildRes Set.empty
@@ -203,57 +199,50 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                 |> fun s ->
                    seq 
                     { 
-                      for res in s do
-                          yield!                       
-                            seq 
-                             {
-                               for itm in getPrevItems parserState.inpSymbol.name res.rItem  do
-                                let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
-                                let dfa = getDFA itm.state.itemName
-                                let trace state =
-                                    state.forest @ res.rItem.forest
-                                    |> List.length = 1
-                                    |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
-                                    |> fun x -> x @ res.rItem.sTrace
-                                let s = parserState.statesSet.MaximumElement
-                                if itm.state.position <> dfa.DStartState
+                      for res in s do                          
+                        for itm in getPrevItems parserState.inpSymbol.name res.rItem  do
+                        let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
+                        let dfa = getDFA itm.state.itemName
+                        let trace state =
+                            state.forest @ res.rItem.forest
+                            |> List.length = 1
+                            |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
+                            |> fun x -> x @ res.rItem.sTrace
+                        let s = parserState.statesSet.MaximumElement
+                        if itm.state.position <> dfa.DStartState
+                        then
+                            yield
+                                {
+                                rItem  = {itm.state with
+                                            forest = s.forest @ res.rItem.forest
+                                            sTrace = trace s
+                                         }
+                                rI     = res.rI
+                                } 
+                        else
+                            let n =
+                                let node = s.forest @ res.rItem.forest |> node (trace s)
+                                forest := node :: ! forest
+                                [ref node]
+                            yield!
+                                if itm.state.itemName = Constants.raccStartRuleName && ((!Lexer).Value.Get res.rI).name = "EOF"
                                 then
-                                    yield
-                                     {
-                                        rItem  = {itm.state with
-                                                    forest = s.forest @ res.rItem.forest
-                                                    sTrace = trace s
-                                                 }
-                                        rI     = res.rI
-                                     } 
-                                else
-                                    let n =
-                                        let node = s.forest @ res.rItem.forest |> node (trace s)
-                                        forest := node :: ! forest
-                                        [ref node]
-                                    if itm.state.itemName = Constants.raccStartRuleName
-                                    then
-                                        if ((!Lexer).Value.Get res.rI).name = "EOF"
-                                        then
-                                         yield!
+                                    {s with forest = n
+                                            sTrace = []
+                                    }
+                                    |> Set.singleton
+                                    |> buildRes                                         
+                                else                             
+                                    {                                            
+                                        inpSymbol = {name = res.rItem.itemName; value = null} 
+                                        i         = res.rI
+                                        statesSet =                                               
                                             {s with forest = n
                                                     sTrace = []
                                             }
-                                            |> Set.singleton
-                                            |> buildRes                                         
-                                    else 
-                                      yield!
-                                        {                                            
-                                            inpSymbol = {name = res.rItem.itemName; value = null} 
-                                            i         = res.rI
-                                            statesSet =                                               
-                                                {s with forest = n
-                                                        sTrace = []
-                                                }
-                                                |> Set.singleton                                                
-                                        }
-                                        |>climb ()
-                          }
+                                            |> Set.singleton                                                
+                                    }
+                                    |> climb ()                          
                         }
                         |> set
                 

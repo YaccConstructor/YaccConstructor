@@ -25,14 +25,20 @@ open Yard.Core.CompareHelper
 type StateInfo<'position, 'tree, 'itemName, 'traceStep 
                 when 'itemName : equality 
                 and 'position : equality
+                and 'traceStep : equality
                 and 'tree : equality> =
     {
         position : 'position
         forest   : List<'tree>
         itemName : 'itemName    
         sTrace   : List<'traceStep>
-    }    
-     interface System.Collections.IStructuralComparable with
-            member self.CompareTo (y,c) = -1
+    }
+    member self.GetValue x = 
+        x.position,x.sTrace,x.itemName,x.forest 
+    //override self.Equals y = equalsOn self.GetValue self y
+    //override self.GetHashCode() = hashOn self.GetValue self     
+    interface System.Collections.IStructuralComparable with
+            member self.CompareTo (y,c) = //c.Compare(self.GetValue self ,self.GetValue (y :?> StateInfo<'position, 'tree, 'itemName, 'traceStep>))
+            1
                 
 

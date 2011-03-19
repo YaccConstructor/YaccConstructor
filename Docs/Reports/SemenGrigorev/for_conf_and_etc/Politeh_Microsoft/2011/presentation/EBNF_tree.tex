@@ -1,0 +1,90 @@
+\begin{center}
+\begin{center}
+	\begin{tabular}{ll}
+		Ожидания пользователя: & Результат: \\
+		\begin{dot2tex}[dot,autosize]
+     digraph G
+      {
+         A1[label = "A"];
+         p[label = "+"];
+         A2[label = "A"];
+         a1[label = "a"];
+         a2[label = "a"];
+         S -> A1 -> a1;
+         S -> p;
+         S -> A2 -> a2;
+      }
+      \end{dot2tex} 
+    & 
+          \begin{dot2tex}[dot,autosize]
+
+      digraph G
+      {
+         A1[label = "A"];
+         p[label = "+"];
+         A2[label = "A"];
+         a1[label = "a"];
+         a2[label = "a"];         
+         B1[label = "B"];
+         B2[label = "B"];
+
+         S -> A1 -> a1;
+         S -> B1 -> p;
+         B1 -> A2 ->a2;
+         B1 -> B2 -> e;
+       
+      }
+      \end{dot2tex} 
+ \\
+	\end{tabular}
+	\label{tab:}
+\end{center}
+	%\begin{columns}
+   %\begin{column}{5cm}
+    % Ожидания пользователя:
+     %\vspace{2cm}
+		 %\begin{dot2tex}[dot,autosize]
+
+%     digraph G
+ %     {
+  %       A1[label = "A"];
+   %      p[label = "+"];
+    %     A2[label = "A"];
+     %    a1[label = "a"];
+      %   a2[label = "a"];
+       %  S -> A1 -> a1;
+        % S -> p;
+         %S -> A2 -> a2;
+%      }
+ %     \end{dot2tex}
+  %  \end{column}
+    %\pause
+   % \begin{column}{5cm}
+    % Результат: \\
+    %
+     % \begin{dot2tex}[dot,autosize]
+%
+ %     digraph G
+  %    {
+   %      A1[label = "A"];
+    %     p[label = "+"];
+     %    A2[label = "A"];
+      %   a1[label = "a"];
+       %  a2[label = "a"];         
+        % B1[label = "B"];
+         %B2[label = "B"];
+%
+ %        S -> A1 -> a1;
+  %       S -> B1 -> p;
+   %      B1 -> A2 ->a2;
+    %     B1 -> B2 -> e;
+     %  
+      %}
+      %\end{dot2tex} 
+ % \\
+ % \end{column}
+%	\end{columns}
+	%\label{tab:}
+\end{center}
+
+

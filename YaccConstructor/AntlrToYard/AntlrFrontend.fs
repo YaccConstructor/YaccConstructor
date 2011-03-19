@@ -13,6 +13,7 @@ type AntlrFrontend() =
     end
 
 
+// For testing switch to Console App and then switch back to Class Library
 module Run = 
 
-Yard.Frontends.AntlrFrontend.Main.run ()
+    Yard.Frontends.AntlrFrontend.Main.run ()

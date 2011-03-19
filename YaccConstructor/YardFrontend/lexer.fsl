@@ -125,10 +125,13 @@ and  main = parse
        }
      | identstart identbody *
        {  let text = lex2source lexbuf in
-          match (fst text).[0] with
-          | c when List.contains c ['a'..'z'] -> LIDENT text
-          | c when List.contains c ['A'..'Z'] -> UIDENT text
-          |_       -> failwith "Incorrect indentStart" 
+          match (fst text) with
+          | "include" -> INCLUDE
+          | _ -> 
+                match (fst text).[0] with
+                | c when List.contains c ['a'..'z'] -> LIDENT text
+                | c when List.contains c ['A'..'Z'] -> UIDENT text
+                |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF}
      | '{'
@@ -154,7 +157,7 @@ and  main = parse
         let string_start = lexbuf.StartPos in
         string lexbuf;
         lexbuf.StartPos <- string_start;
-        STRING (from_lexbuf lexbuf (string_start.pos_cnum, lexbuf.EndPos.AbsoluteOffset))
+        STRING (from_lexbuf lexbuf (string_start.pos_cnum + 1, lexbuf.EndPos.AbsoluteOffset - 1))
       }
     | "(" {LPAREN}
     | ")" {RPAREN}

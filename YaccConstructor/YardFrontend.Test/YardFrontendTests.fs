@@ -75,6 +75,14 @@ type ``YardFrontend lexer tests`` () =
             [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN; UIDENT ("MINUS", (5, 10)); BAR;
                 UIDENT ("PLUS", (11, 15)); RPAREN; STAR; SEMICOLON; EOF]
 
+    [<Test>]            
+    member test.``Include test`` () =
+        lexerTest @"
+include ""test_included.yrd""
++s:PLUS;"
+            [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33));
+                COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON; EOF]
+
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    
     [<Test>]

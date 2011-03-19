@@ -26,20 +26,17 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
 
-    let defaultFE = ref ""
-    let defaultGen = ref "" 
-
-    defaultFE :=
+    feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
-            "YardFrontend"
+            Some("YardFrontend")
         else
-            Seq.find (fun _ -> true) FrontendsManager.AvailableFrontends
+            Seq.tryFind (fun _ -> true) FrontendsManager.AvailableFrontends
 
-    defaultGen :=  
+    generatorName :=
         if Seq.exists ((=) "RACCGenerator") GeneratorsManager.AvailableGenerators then
-            "RACCGenerator"
+            Some("RACCGenerator")
         else
-            Seq.find (fun _ -> true) GeneratorsManager.AvailableGenerators
+            Seq.tryFind (fun _ -> true) GeneratorsManager.AvailableGenerators
 
     let generateSomething = ref true
 
@@ -47,15 +44,15 @@ let () =
         fun _ ->                 
             generateSomething := false                
             printfn "\nAvailable %s: " iName 
-            Seq.map (fun x -> x + (if x=deft then " (default)" else "")) items
+            Seq.map (fun x -> x + (if Some(x)=deft then " (default)" else "")) items
             |> String.concat "\n    " 
             |> fun x -> printf "    %s\n" x
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !defaultFE), "Available frontends"
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
          "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !defaultGen), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
          "-i", ArgType.String (fun s -> 
                                    testFile := System.IO.Path.GetFileName(s) |> Some 
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -135,3 +132,8 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
         |> System.Console.WriteLine
     | :? System.IO.IOException -> printf "Could not read input file\n"
     | x -> printf "%A\n" x
+
+
+//Tests. Please do not remove
+//Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_include/test_include_main.yrd
+//Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_seq/test_seq.yrd

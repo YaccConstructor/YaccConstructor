@@ -10,6 +10,7 @@ type token =
   | STRING of (IL.Source.t)
   | LIDENT of (IL.Source.t)
   | UIDENT of (IL.Source.t)
+  | INCLUDE
   | COMMUT
   | DLESS
   | DGREAT
@@ -33,6 +34,7 @@ type tokenId =
     | TOKEN_STRING
     | TOKEN_LIDENT
     | TOKEN_UIDENT
+    | TOKEN_INCLUDE
     | TOKEN_COMMUT
     | TOKEN_DLESS
     | TOKEN_DGREAT

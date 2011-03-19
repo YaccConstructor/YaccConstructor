@@ -12,3 +12,8 @@ type YardFrontend() =
         member this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
     end
 
+// For testing switch to Console App and then switch back to Class Library
+module Run = 
+    FrontendsManager.Register(new YardFrontend()) // Not register itself automatically
+    let filename = @"..\..\..\..\Tests\Basic\test_include\test_include_main.yrd" 
+    printf "%A\n" <| Yard.Frontends.YardFrontend.Main.ParseFile filename

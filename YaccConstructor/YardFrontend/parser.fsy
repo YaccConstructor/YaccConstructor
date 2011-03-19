@@ -1,22 +1,35 @@
 %{
-// Copyright 2009 Jake Kirilenko
+// Copyright 2009-2011 Jake Kirilenko
 // 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation.
+
 #nowarn "62";; 
-  open Microsoft.FSharp.Text
-  open Yard.Core.IL
-  open Yard.Core.IL.Production
+open Microsoft.FSharp.Text
+open Yard.Core.IL
+open Yard.Core.IL.Production
   
-  exception Parse_error
+exception Parse_error
   
-  let o2l = function Some x -> [x] | None -> []
-  let getList = function Some x -> x | None -> []
-  (*let parse_error (s:string):unit = ()*)
-  let missing name = System.Console.WriteLine("Missing " + name)
-  let createSeqElem bnd omitted r check =
-      { binding = bnd; omit = omitted; rule = r; checker = check }
+let currentFilename = ref ""
+let o2l = function Some x -> [x] | None -> []
+let getList = function Some x -> x | None -> []
+(*let parse_error (s:string):unit = ()*)
+let missing name = System.Console.WriteLine("Missing " + name)
+let createSeqElem bnd omitted r check =
+    { binding = bnd; omit = omitted; rule = r; checker = check }
+let parseRules (filename:string) =
+    let ext = filename.Substring(filename.LastIndexOf(".") + 1) in
+    let frontend = FrontendsManager.GetByExtension ext in
+    let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
+    match FrontendsManager.GetByExtension ext with
+    | Some(frontend) -> 
+        let def = frontend.ParseGrammar sameDirFilename in
+        def.grammar
+    | None -> 
+        failwith (sprintf "Not supported extension %s in file %s" ext filename )
+        
 %}
 
 %token EOF
@@ -34,6 +47,7 @@
 %token DGREAT
 %token DLESS
 %token COMMUT
+%token INCLUDE
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
@@ -48,10 +62,12 @@ file: action_opt
       rule_nlist
       action_opt
       EOF
-      { { Definition.empty with
-          Definition.head=$1
-        ; Definition.grammar=$2
-        ; Definition.foot=$3
+      { 
+        { Definition.empty with
+            Definition.info = { fileName = !currentFilename }
+        ; Definition.head = $1
+        ; Definition.grammar = $2
+        ; Definition.foot = $3
         }
       }
 
@@ -59,7 +75,8 @@ action_opt: ACTION { Some $1 }
           | /* empty */ { None }
 
 rule_nlist: rule SEMICOLON rule_nlist { $1 :: $3 }
-          | rule SEMICOLON { [$1] }
+          | INCLUDE STRING rule_nlist { (parseRules (fst $2)) @ $3 }
+          | { [] }
           | rule error { missing "SEMI"; raise Parse_error  }
 
 rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON alts

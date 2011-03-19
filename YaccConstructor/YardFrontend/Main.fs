@@ -1,6 +1,6 @@
 ﻿// Main.fs
 //
-// Copyright 2009 Jake Kirilenko
+// Copyright 2009-2011 Jake Kirilenko
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,12 +29,7 @@ let run path =
 
 let ParseFile path = 
     let buf = run_common path
-    let res = GrammarParser.file Lexer.main buf
-    {res with Yard.Core.IL.Definition.info = {fileName = path}}
+    GrammarParser.currentFilename := path
+    GrammarParser.file Lexer.main buf
     
-#if DEBUG
-let main =
-    printf "%A\n" <| ParseFile @"..\..\..\..\Tests\test001.yrd"
-#endif    
-
-//(new Microsoft.FSharp.Text.Lexing.LexBuffer<_>()).
+      

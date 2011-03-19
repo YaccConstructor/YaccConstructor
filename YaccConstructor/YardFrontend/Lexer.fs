@@ -457,327 +457,330 @@ and _fslex_main  _fslex_state lexbuf =
   | 14 -> ( 
 # 127 "Lexer.fsl"
                          let text = lex2source lexbuf in
-                         match (fst text).[0] with
-                         | c when List.contains c ['a'..'z'] -> LIDENT text
-                         | c when List.contains c ['A'..'Z'] -> UIDENT text
-                         |_       -> failwith "Incorrect indentStart" 
+                         match (fst text) with
+                         | "include" -> INCLUDE
+                         | _ -> 
+                               match (fst text).[0] with
+                               | c when List.contains c ['a'..'z'] -> LIDENT text
+                               | c when List.contains c ['A'..'Z'] -> UIDENT text
+                               |_       -> failwith "Incorrect indentStart" 
                       
-# 465 "Lexer.fs"
+# 468 "Lexer.fs"
           )
   | 15 -> ( 
-# 133 "Lexer.fsl"
+# 136 "Lexer.fsl"
                            EOF
-# 470 "Lexer.fs"
+# 473 "Lexer.fs"
           )
   | 16 -> ( 
-# 135 "Lexer.fsl"
+# 138 "Lexer.fsl"
                         let n1 = lexbuf.EndPos.AbsoluteOffset in
                         brace_depth := 1;
                         let n2 = handle_lexical_error action lexbuf in
                          ACTION (from_lexbuf lexbuf (n1,n2))
                       
-# 479 "Lexer.fs"
+# 482 "Lexer.fs"
           )
   | 17 -> ( 
-# 141 "Lexer.fsl"
+# 144 "Lexer.fsl"
                         let n1 = lexbuf.EndPos.AbsoluteOffset in
                         ang_br_depth := 1;
                         let n2 = handle_lexical_error pattern lexbuf in
                         PATTERN (from_lexbuf lexbuf (n1,n2))
                       
-# 488 "Lexer.fs"
+# 491 "Lexer.fs"
           )
   | 18 -> ( 
-# 147 "Lexer.fsl"
+# 150 "Lexer.fsl"
                         let n1 = lexbuf.EndPos.AbsoluteOffset in
                         sq_br_depth := 1;
                         let n2 = handle_lexical_error param lexbuf in
                         PARAM (from_lexbuf lexbuf (n1,n2))
                       
-# 497 "Lexer.fs"
+# 500 "Lexer.fs"
           )
   | 19 -> ( 
-# 153 "Lexer.fsl"
+# 156 "Lexer.fsl"
                        reset_string_buffer();
                        let string_start = lexbuf.StartPos in
                        string lexbuf;
                        lexbuf.StartPos <- string_start;
-                       STRING (from_lexbuf lexbuf (string_start.pos_cnum, lexbuf.EndPos.AbsoluteOffset))
+                       STRING (from_lexbuf lexbuf (string_start.pos_cnum + 1, lexbuf.EndPos.AbsoluteOffset - 1))
                      
-# 507 "Lexer.fs"
+# 510 "Lexer.fs"
           )
   | 20 -> ( 
-# 159 "Lexer.fsl"
+# 162 "Lexer.fsl"
                           LPAREN
-# 512 "Lexer.fs"
+# 515 "Lexer.fs"
           )
   | 21 -> ( 
-# 160 "Lexer.fsl"
+# 163 "Lexer.fsl"
                           RPAREN
-# 517 "Lexer.fs"
+# 520 "Lexer.fs"
           )
   | 22 -> ( 
-# 162 "Lexer.fsl"
+# 165 "Lexer.fsl"
                         raise(Lexical_error
                                ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
                                  lexbuf.StartPos.AbsoluteOffset)) 
-# 524 "Lexer.fs"
+# 527 "Lexer.fs"
           )
   | _ -> failwith "main"
 (* Rule predicate *)
 and _fslex_predicate  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 168 "Lexer.fsl"
+# 171 "Lexer.fsl"
                               lexbuf.StartPos.AbsoluteOffset  
-# 533 "Lexer.fs"
+# 536 "Lexer.fs"
           )
   | 1 -> ( 
-# 169 "Lexer.fsl"
+# 172 "Lexer.fsl"
                          reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      predicate lexbuf 
-# 541 "Lexer.fs"
+# 544 "Lexer.fs"
           )
   | 2 -> ( 
-# 174 "Lexer.fsl"
+# 177 "Lexer.fsl"
                      comment_depth := 1;
                      comment lexbuf;
                      predicate lexbuf 
-# 548 "Lexer.fs"
+# 551 "Lexer.fs"
           )
   | 3 -> ( 
-# 178 "Lexer.fsl"
+# 181 "Lexer.fsl"
                      raise (Lexical_error("unterminated predicate", lexbuf.StartPos.AbsoluteOffset)) 
-# 553 "Lexer.fs"
+# 556 "Lexer.fs"
           )
   | 4 -> ( 
-# 180 "Lexer.fsl"
+# 183 "Lexer.fsl"
                        predicate lexbuf
-# 558 "Lexer.fs"
+# 561 "Lexer.fs"
           )
   | _ -> failwith "predicate"
 (* Rule action *)
 and _fslex_action  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 183 "Lexer.fsl"
+# 186 "Lexer.fsl"
                      incr brace_depth;
                      action lexbuf 
-# 568 "Lexer.fs"
+# 571 "Lexer.fs"
           )
   | 1 -> ( 
-# 186 "Lexer.fsl"
+# 189 "Lexer.fsl"
                      decr brace_depth;
                      if !brace_depth = 0 then lexbuf.StartPos.AbsoluteOffset else action lexbuf 
-# 574 "Lexer.fs"
+# 577 "Lexer.fs"
           )
   | 2 -> ( 
-# 188 "Lexer.fsl"
+# 191 "Lexer.fsl"
                          reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      action lexbuf 
-# 582 "Lexer.fs"
+# 585 "Lexer.fs"
           )
   | 3 -> ( 
-# 193 "Lexer.fsl"
+# 196 "Lexer.fsl"
                      comment_depth := 1;
                      comment lexbuf;
                      action lexbuf 
-# 589 "Lexer.fs"
+# 592 "Lexer.fs"
           )
   | 4 -> ( 
-# 197 "Lexer.fsl"
+# 200 "Lexer.fsl"
                      raise (Lexical_error("unterminated action", lexbuf.StartPos.AbsoluteOffset)) 
-# 594 "Lexer.fs"
+# 597 "Lexer.fs"
           )
   | 5 -> ( 
-# 199 "Lexer.fsl"
+# 202 "Lexer.fsl"
                        action lexbuf
-# 599 "Lexer.fs"
+# 602 "Lexer.fs"
           )
   | _ -> failwith "action"
 (* Rule pattern *)
 and _fslex_pattern  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 203 "Lexer.fsl"
+# 206 "Lexer.fsl"
                      incr ang_br_depth;
                      pattern lexbuf 
-# 609 "Lexer.fs"
+# 612 "Lexer.fs"
           )
   | 1 -> ( 
-# 206 "Lexer.fsl"
+# 209 "Lexer.fsl"
                      decr ang_br_depth;
                      if !ang_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else pattern lexbuf 
-# 615 "Lexer.fs"
+# 618 "Lexer.fs"
           )
   | 2 -> ( 
-# 208 "Lexer.fsl"
+# 211 "Lexer.fsl"
                          reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      pattern lexbuf 
-# 623 "Lexer.fs"
+# 626 "Lexer.fs"
           )
   | 3 -> ( 
-# 213 "Lexer.fsl"
+# 216 "Lexer.fsl"
                      comment_depth := 1;
                      comment lexbuf;
                      pattern lexbuf 
-# 630 "Lexer.fs"
+# 633 "Lexer.fs"
           )
   | 4 -> ( 
-# 217 "Lexer.fsl"
+# 220 "Lexer.fsl"
                      raise (Lexical_error("unterminated pattern", lexbuf.StartPos.AbsoluteOffset)) 
-# 635 "Lexer.fs"
+# 638 "Lexer.fs"
           )
   | 5 -> ( 
-# 219 "Lexer.fsl"
+# 222 "Lexer.fsl"
                        pattern lexbuf
-# 640 "Lexer.fs"
+# 643 "Lexer.fs"
           )
   | _ -> failwith "pattern"
 (* Rule param *)
 and _fslex_param  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 224 "Lexer.fsl"
+# 227 "Lexer.fsl"
                      incr sq_br_depth;
                      param lexbuf 
-# 650 "Lexer.fs"
+# 653 "Lexer.fs"
           )
   | 1 -> ( 
-# 227 "Lexer.fsl"
+# 230 "Lexer.fsl"
                      decr sq_br_depth;
                      if !sq_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else param lexbuf 
-# 656 "Lexer.fs"
+# 659 "Lexer.fs"
           )
   | 2 -> ( 
-# 229 "Lexer.fsl"
+# 232 "Lexer.fsl"
                          reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      param lexbuf 
-# 664 "Lexer.fs"
+# 667 "Lexer.fs"
           )
   | 3 -> ( 
-# 234 "Lexer.fsl"
+# 237 "Lexer.fsl"
                      comment_depth := 1;
                      comment lexbuf;
                      param lexbuf 
-# 671 "Lexer.fs"
+# 674 "Lexer.fs"
           )
   | 4 -> ( 
-# 238 "Lexer.fsl"
+# 241 "Lexer.fsl"
                      raise (Lexical_error("unterminated param",  lexbuf.StartPos.AbsoluteOffset)) 
-# 676 "Lexer.fs"
+# 679 "Lexer.fs"
           )
   | 5 -> ( 
-# 240 "Lexer.fsl"
+# 243 "Lexer.fsl"
                        param lexbuf
-# 681 "Lexer.fs"
+# 684 "Lexer.fs"
           )
   | _ -> failwith "param"
 (* Rule string *)
 and _fslex_string  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 244 "Lexer.fsl"
+# 247 "Lexer.fsl"
                      () 
-# 690 "Lexer.fs"
+# 693 "Lexer.fs"
           )
   | 1 -> ( 
-# 246 "Lexer.fsl"
+# 249 "Lexer.fsl"
                      store_string_char(char_for_backslash(lexbuf.LexemeChar 1));
                      string lexbuf 
-# 696 "Lexer.fs"
+# 699 "Lexer.fs"
           )
   | 2 -> ( 
-# 249 "Lexer.fsl"
+# 252 "Lexer.fsl"
                      store_string_char(char_for_decimal_code lexbuf 1);
                      string lexbuf 
-# 702 "Lexer.fs"
+# 705 "Lexer.fs"
           )
   | 3 -> ( 
-# 252 "Lexer.fsl"
+# 255 "Lexer.fsl"
                      raise(Lexical_error("unterminated string", lexbuf.StartPos.AbsoluteOffset)) 
-# 707 "Lexer.fs"
+# 710 "Lexer.fs"
           )
   | 4 -> ( 
-# 254 "Lexer.fsl"
+# 257 "Lexer.fsl"
                      warning lexbuf
                              (Printf.sprintf "illegal backslash escape in string: `\\%c'"
                                              (lexbuf.LexemeChar 1));
                      store_string_char(lexbuf.LexemeChar 0);
                      store_string_char(lexbuf.LexemeChar 1);
                      string lexbuf 
-# 717 "Lexer.fs"
+# 720 "Lexer.fs"
           )
   | 5 -> ( 
-# 261 "Lexer.fsl"
+# 264 "Lexer.fsl"
                      store_string_char(lexbuf.LexemeChar 0);
                      string lexbuf 
-# 723 "Lexer.fs"
+# 726 "Lexer.fs"
           )
   | _ -> failwith "string"
 (* Rule comment *)
 and _fslex_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 266 "Lexer.fsl"
+# 269 "Lexer.fsl"
                      incr comment_depth; comment lexbuf 
-# 732 "Lexer.fs"
+# 735 "Lexer.fs"
           )
   | 1 -> ( 
-# 268 "Lexer.fsl"
+# 271 "Lexer.fsl"
                      decr comment_depth;
                      if !comment_depth = 0 then () else comment lexbuf 
-# 738 "Lexer.fs"
+# 741 "Lexer.fs"
           )
   | 2 -> ( 
-# 271 "Lexer.fsl"
+# 274 "Lexer.fsl"
                      reset_string_buffer();
                      string lexbuf;
                      reset_string_buffer();
                      comment lexbuf 
-# 746 "Lexer.fs"
+# 749 "Lexer.fs"
           )
   | 3 -> ( 
-# 276 "Lexer.fsl"
+# 279 "Lexer.fsl"
                        comment lexbuf 
-# 751 "Lexer.fs"
+# 754 "Lexer.fs"
           )
   | 4 -> ( 
-# 278 "Lexer.fsl"
+# 281 "Lexer.fsl"
                        comment lexbuf 
-# 756 "Lexer.fs"
+# 759 "Lexer.fs"
           )
   | 5 -> ( 
-# 280 "Lexer.fsl"
+# 283 "Lexer.fsl"
                        comment lexbuf 
-# 761 "Lexer.fs"
+# 764 "Lexer.fs"
           )
   | 6 -> ( 
-# 282 "Lexer.fsl"
+# 285 "Lexer.fsl"
                        comment lexbuf 
-# 766 "Lexer.fs"
+# 769 "Lexer.fs"
           )
   | 7 -> ( 
-# 284 "Lexer.fsl"
+# 287 "Lexer.fsl"
                      raise(Lexical_error("unterminated comment", lexbuf.StartPos.AbsoluteOffset)) 
-# 771 "Lexer.fs"
+# 774 "Lexer.fs"
           )
   | 8 -> ( 
-# 286 "Lexer.fsl"
+# 289 "Lexer.fsl"
                      comment lexbuf 
-# 776 "Lexer.fs"
+# 779 "Lexer.fs"
           )
   | _ -> failwith "comment"
 
-# 288 "Lexer.fsl"
+# 291 "Lexer.fsl"
  
 
 # 3000000 "Lexer.fs"

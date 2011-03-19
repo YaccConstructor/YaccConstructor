@@ -1,0 +1,4 @@
+include "test_included.yrd"
+include "test_included_antlr.g"
+
++s:PLUS;

@@ -30,6 +30,9 @@ type TableGenerator(outPath: string) =
         let textWriter = TextWriter outPath                                
         let write str = textWriter.Write(str)
 
+        let symbolsEnumerator = new Enumerator()
+        let symbols = ref []        
+
         let enumerator = new Enumerator()
          
         let buildDLFA production =
@@ -69,9 +72,14 @@ type TableGenerator(outPath: string) =
                     builder.Opt (build expr) (FATrace (TOptS clsNum)) (FATrace (TOptE clsNum))
 
                 | PRef (ch,_)
-                | PToken (ch)        -> 
+                | PToken (ch) as x   ->
+                    let prefix = 
+                        x |> function |PRef(_,_) -> "NT_" | PToken(_) -> "T_" | _ -> ""
+                    let smbName = Source.toString ch
+                    if List.exists (fst >> (=) (prefix + smbName)) !symbols |> not
+                    then symbols := (prefix + smbName , symbolsEnumerator.Next()) :: !symbols
                     let smbNum = enumerator.Next()
-                    builder.Trivial None None (NSymbol (Source.toString ch)) Omega
+                    builder.Trivial None None (NSymbol smbName) Omega
                     |> builder.AddInHead None Epsilon (FATrace (TSmbS smbNum))
                     |> builder.Append None Epsilon (FATrace (TSmbE smbNum))
 
@@ -104,10 +112,12 @@ type TableGenerator(outPath: string) =
                 |> Seq.concat
                 |> Seq.map (fun rule -> rule.Symbol)
                 |> Set.ofSeq
-            
-            Set.map 
+
+            symbols
+            |> Set.map
                 (fun smb ->
-                    List.map
+                    items
+                    |> List.map
                         (fun item -> 
                             cls (Set.singleton item)
                             |> Set.map 
@@ -118,10 +128,8 @@ type TableGenerator(outPath: string) =
                                                     && rule.Symbol = smb)
                                     |> Set.map 
                                         (fun rule -> (fst item, snd item, match smb with DSymbol(x) -> x | Dummy  -> "Dummy"), (fst elt, rule.ToStateID)))                                    
-                            |>Set.unionMany)                        
-                        items
+                            |>Set.unionMany)
                         |>Set.unionMany)
-                symbols
             |> Set.unionMany
             |> fun a -> 
                 a
@@ -131,13 +139,11 @@ type TableGenerator(outPath: string) =
             
         
         let items dlfaMap =
-            List.map 
-                (fun (name,dlfa) -> 
-                    Seq.map 
-                        (fun stateID ->                         
-                            name,stateID)
-                        dlfa.DIDToStateMap.Keys)
-                dlfaMap
+            dlfaMap
+            |> List.map 
+                (fun (name,dlfa) ->
+                    dlfa.DIDToStateMap.Keys
+                    |> Seq.map (fun stateID -> name,stateID))
             |> Seq.concat 
             |> List.ofSeq 
             
@@ -152,6 +158,19 @@ type TableGenerator(outPath: string) =
             write ("open Yard.Generators.RACCGenerator")
             write ("")
 
+        let tab = "    " 
+        let genType symbols =
+            write "type symbol ="
+            symbols
+            |> Seq.iter (fst >> sprintf "%s| %s" tab >> write)
+
+        let genTypeToTag symbols =
+            write "let getTag smb ="
+            sprintf "%smatch smb with" tab
+            |> write
+                         
+            symbols
+            |> Seq.iter (fun x -> sprintf "%s| %s -> %i" tab (fst x) (snd x) |> write)
 
         let genearte grammar =
             generatePreheader grammar.info.fileName
@@ -167,6 +186,8 @@ type TableGenerator(outPath: string) =
             let dlfaMap = 
                 startRule :: grammar.grammar
                 |> List.map (fun x -> x.name, buildDLFA x.body)
+            genType !symbols
+            genTypeToTag !symbols
             "let private autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
             |> write
             let items = items dlfaMap

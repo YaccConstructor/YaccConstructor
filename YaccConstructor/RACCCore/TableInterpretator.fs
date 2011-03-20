@@ -114,17 +114,14 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let memoize f =         
         fun parserState ->                    
-            let key = parserState//.i, parserState.inpSymbol, parserState.statesSet
-            if cache.ContainsKey(key)       
-            then                
-                cache.[key] 
+            let key = parserState
+            let flg,res = cache.TryGetValue key
+            if flg then res
             else                
-                let res = f parserState
-                try
-                    cache.Add(key,res)
-                with 
-                | :? System.ArgumentException -> ()
-                res
+                let calculated = f parserState
+                let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
+                if not flg then cache.Add(key,calculated)                
+                calculated
 
     let print ps =
         printfn "ParseState:\n     i = %A\n     symbol = %A\n     statesSet = [\n" ps.i ps.inpSymbol        
@@ -180,12 +177,12 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     dfa.DRules
                     |> Set.filter
                            (fun rule -> rule.FromStateID = fromID && rule.ToStateID = toID && rule.Symbol = DSymbol(inpSymbol))
-                    |> System.Linq.Enumerable.First
+                    |> Seq.nth 0
                     |> fun rule -> 
                         if Seq.exists ((=)rule.ToStateID) dfa.DFinaleStates && addLabelFromDummy
                         then 
                             rule.Label 
-                            :: [System.Linq.Enumerable.First (dfa.DRules, fun r -> r.FromStateID = rule.ToStateID && r.Symbol = Dummy)                                
+                            :: [Seq.pick  (fun r -> if r.FromStateID = rule.ToStateID && r.Symbol = Dummy then Some r else None) dfa.DRules
                                 |> fun x -> x.Label]
                         else 
                             [rule.Label]

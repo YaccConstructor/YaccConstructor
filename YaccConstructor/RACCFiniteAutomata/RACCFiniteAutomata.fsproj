@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RACCFiniteAutomata</RootNamespace>
     <AssemblyName>RACCFiniteAutomata</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <Name>RACCFiniteAutomata</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

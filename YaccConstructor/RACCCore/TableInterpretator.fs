@@ -52,7 +52,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         Set.fold
             (fun buf state -> 
                 let local = ref Set.empty                    
-                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.name),local)
+                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.tag),local)
                 |> fun x -> 
                     if (not x) || Set.isEmpty (!local)
                     then 
@@ -107,7 +107,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         then  
             List.ofSeq (tables().automataDict)
             |> Seq.filter (fun x -> Set.exists ((=)x.Value.DStartState) x.Value.DFinaleStates)
-            |> Seq.map (fun x -> {name = x.Key; value = null})
+            |> Seq.map (fun x -> {tag = x.Key; value = null})
             |> fun x -> pEpsBuf := Some x
         (!pEpsBuf).Value
         
@@ -197,13 +197,13 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                    seq 
                     { 
                       for res in s do                          
-                        for itm in getPrevItems parserState.inpSymbol.name res.rItem  do
-                        let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
+                        for itm in getPrevItems parserState.inpSymbol.tag res.rItem  do
+                        let node trace forest = (List.map (fun x -> !x)forest, (*itm.state.itemName*)"", nodeVal trace (*itm.state.itemName*)"") |> Node
                         let dfa = getDFA itm.state.itemName
                         let trace state =
                             state.forest @ res.rItem.forest
                             |> List.length = 1
-                            |> getTrace itm.state parserState.inpSymbol.name itm.state.position res.rItem.position
+                            |> getTrace itm.state parserState.inpSymbol.tag itm.state.position res.rItem.position
                             |> fun x -> x @ res.rItem.sTrace
                         let s = parserState.statesSet.MaximumElement
                         if itm.state.position <> dfa.DStartState
@@ -222,7 +222,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                 forest := node :: ! forest
                                 [ref node]
                             yield!
-                                if itm.state.itemName = Constants.raccStartRuleName && ((!Lexer).Value.Get res.rI).name = "EOF"
+                                if itm.state.itemName = (*Constants.raccStartRuleName*)0 && ((!Lexer).Value.Get res.rI).tag = -1
                                 then
                                     {s with forest = n
                                             sTrace = []
@@ -231,7 +231,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                     |> buildRes                                         
                                 else                             
                                     {                                            
-                                        inpSymbol = {name = res.rItem.itemName; value = null} 
+                                        inpSymbol = {tag = res.rItem.itemName; value = null} 
                                         i         = res.rI
                                         statesSet =                                               
                                             {s with forest = n
@@ -273,7 +273,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     |> Seq.map 
                         (fun nextLexeme ->
                             let trace = 
-                                let dfa = getDFA nextLexeme.name
+                                let dfa = getDFA nextLexeme.tag
                                 dfa.DRules
                                 |> Set.filter (fun x -> x.FromStateID = dfa.DStartState && x.Symbol = Dummy)
                                 |> Set.map (fun x -> x.Label)
@@ -282,7 +282,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                         |[FATrace(TSeqS _);FATrace(TOptS _);FATrace(TOptE _);FATrace(TSeqE _)] -> true | _ -> false)                                
 
                             let emptyNode = 
-                                ([],nextLexeme.name,nodeVal [trace] nextLexeme.name)
+                                ([],(*nextLexeme.tag*)"",nodeVal [trace] (*nextLexeme.tag*)"")
                                 |> Node
                             forest := emptyNode :: ! forest
                             {
@@ -298,7 +298,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
                 let resPart2 =                                                                               
                     let nextLexeme = (!Lexer).Value.Get parserState.i
-                    if  nextLexeme.name = "EOF"
+                    if  nextLexeme.tag = -1
                     then 
                         Set.empty
                     else
@@ -309,7 +309,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                 value = LeafV nextLexeme
                             }
                         let leaf item = 
-                            let l = (nextLexeme.name, _val item) |> Leaf
+                            let l = ((*nextLexeme.tag*)"", _val item) |> Leaf
                             forest := l :: !forest
                             [ref l]
                                                         
@@ -342,19 +342,19 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                 {
                     statesSet =
                         {
-                            itemName = Constants.raccStartRuleName
-                            position = (getDFA Constants.raccStartRuleName).DStartState
+                            itemName = 0(*Constants.raccStartRuleName*)
+                            position = (getDFA 0(*Constants.raccStartRuleName*)).DStartState
                             forest   = []
                             sTrace   = []
                         }
                         |> Set.singleton
-                    inpSymbol = {name = "";value =null}
+                    inpSymbol = {tag = -2;value =null}
                     i         = 1
                 }
             |> Set.fold
                 (fun buf r ->
                     let forest = List.map (fun x -> !x) (r.rItem.forest)
-                    if List.length  forest = 1 && r.rItem.itemName = Constants.raccStartRuleName
+                    if List.length  forest = 1 && r.rItem.itemName = 0(*Constants.raccStartRuleName*)
                     then
                         let getUserTree tree =
                             match tree with

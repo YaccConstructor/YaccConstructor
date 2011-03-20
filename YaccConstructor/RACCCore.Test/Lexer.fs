@@ -62,42 +62,42 @@ and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 36 "Lexer.fsl"
-                        {name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 1; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 66 "Lexer.fs"
           )
   | 1 -> ( 
 # 38 "Lexer.fsl"
-                        {name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 2; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 71 "Lexer.fs"
           )
   | 2 -> ( 
 # 40 "Lexer.fsl"
-                        {name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 3; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 76 "Lexer.fs"
           )
   | 3 -> ( 
 # 42 "Lexer.fsl"
-                        {name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 4; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 81 "Lexer.fs"
           )
   | 4 -> ( 
 # 44 "Lexer.fsl"
-                        {name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 5; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 86 "Lexer.fs"
           )
   | 5 -> ( 
 # 46 "Lexer.fsl"
-                        {name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 6; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 91 "Lexer.fs"
           )
   | 6 -> ( 
 # 48 "Lexer.fsl"
-                        {name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = 7; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 96 "Lexer.fs"
           )
   | 7 -> ( 
 # 49 "Lexer.fsl"
-                        {name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}
+                        {tag = -1; value = LexBuffer<_>.LexemeString(lexbuf)}
 # 101 "Lexer.fs"
           )
   | _ -> failwith "tokens"

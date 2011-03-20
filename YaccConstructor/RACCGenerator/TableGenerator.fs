@@ -31,7 +31,8 @@ type TableGenerator(outPath: string) =
         let write str = textWriter.Write(str)
 
         let symbolsEnumerator = new Enumerator()
-        let symbols = ref []        
+        let symbols = ref [("NT_"+Constants.raccStartRuleName,symbolsEnumerator.Next())]
+        let getTag name = !symbols |> Seq.find (fst >> (=)name) |> snd
 
         let enumerator = new Enumerator()
          
@@ -76,10 +77,11 @@ type TableGenerator(outPath: string) =
                     let prefix = 
                         x |> function |PRef(_,_) -> "NT_" | PToken(_) -> "T_" | _ -> ""
                     let smbName = Source.toString ch
+                    let tag = symbolsEnumerator.Next()
                     if List.exists (fst >> (=) (prefix + smbName)) !symbols |> not
-                    then symbols := (prefix + smbName , symbolsEnumerator.Next()) :: !symbols
+                    then symbols := (prefix + smbName , tag) :: !symbols
                     let smbNum = enumerator.Next()
-                    builder.Trivial None None (NSymbol smbName) Omega
+                    builder.Trivial None None (NSymbol tag) Omega
                     |> builder.AddInHead None Epsilon (FATrace (TSmbS smbNum))
                     |> builder.Append None Epsilon (FATrace (TSmbE smbNum))
 
@@ -96,13 +98,13 @@ type TableGenerator(outPath: string) =
                     for (fa,st) in !q' 
                         do for (fa',st') in items
                                do 
-                                let rules = Set.filter (fun rule -> rule.FromStateID = st) (dlfaMap.[fa]).DRules
+                                let rules = Set.filter (fun rule -> rule.FromStateID = st && rule.Symbol <> Dummy) (dlfaMap.[fa]).DRules
                                 let isEq rule = 
-                                    let symbStr = 
+                                    let symbTag = 
                                         match rule.Symbol with
                                         |DSymbol(s) -> s
-                                        | _         -> ""
-                                    fa' = symbStr
+                                        | _         -> failwith "Incorrect DFA."
+                                    fa' = symbTag
                                 if (Set.exists isEq rules)&&((dlfaMap.[fa]).DStartState = st')
                                 then q':= Set.add (fa',st') !q'                       
                 !q'
@@ -125,9 +127,10 @@ type TableGenerator(outPath: string) =
                                     dlfaMap.[fst elt].DRules
                                     |> Set.filter (fun rule -> 
                                                     rule.FromStateID = snd elt
-                                                    && rule.Symbol = smb)
+                                                    && rule.Symbol = smb
+                                                    && rule.Symbol <> Dummy)
                                     |> Set.map 
-                                        (fun rule -> (fst item, snd item, match smb with DSymbol(x) -> x | Dummy  -> "Dummy"), (fst elt, rule.ToStateID)))                                    
+                                        (fun rule -> (fst item, snd item, match smb with DSymbol(x) -> x | Dummy  -> -1), (fst elt, rule.ToStateID)))                                    
                             |>Set.unionMany)
                         |>Set.unionMany)
             |> Set.unionMany
@@ -172,6 +175,14 @@ type TableGenerator(outPath: string) =
             symbols
             |> Seq.iter (fun x -> sprintf "%s| %s -> %i" tab (fst x) (snd x) |> write)
 
+        let genTagToName symbols =
+            write "let getName tag ="
+            sprintf "%smatch tag with" tab
+            |> write
+                         
+            symbols
+            |> Seq.iter (fun x -> sprintf "%s| %i -> %s" tab (snd x) (fst x) |> write)
+
         let genearte grammar =
             generatePreheader grammar.info.fileName
             let publicRule = List.find (fun rule -> rule._public) grammar.grammar
@@ -183,11 +194,13 @@ type TableGenerator(outPath: string) =
                     _public = true
                     metaArgs= []
                 }
-            let dlfaMap = 
-                startRule :: grammar.grammar
-                |> List.map (fun x -> x.name, buildDLFA x.body)
+            let dlfaMap =                 
+                startRule :: grammar.grammar                
+                |> List.map (fun x -> x.name,buildDLFA x.body)
+                |> List.map (fun (x,y) -> "NT_" + x |> getTag , y)            
             genType !symbols
             genTypeToTag !symbols
+            genTagToName !symbols
             "let private autumataDict = \n" + ToString.dictToString (dict dlfaMap) + "\n"
             |> write
             let items = items dlfaMap

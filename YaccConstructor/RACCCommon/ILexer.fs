@@ -20,7 +20,7 @@
 namespace Yard.Generators.RACCGenerator
 
 type Lexeme<'value> = {
-    name : string;
+    tag : int;
     value: 'value;     
   }
  

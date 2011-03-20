@@ -24,27 +24,18 @@ module UserLexer
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Yard.Generators.RACCGenerator
+open Yard.Generators.RACCGenerator.Tables
  }
  
 
  let digit = ['0'-'9']
 
- rule tokens = parse
- | digit+ 
-        {{name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | "+" 
-        {{name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | "-" 
-        {{name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | "*" 
-        {{name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | "/" 
-        {{name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ rule tokens = parse 
  | "(" 
-        {{name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = getTag T_LBR; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | ")" 
-        {{name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | eof  {{name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = getTag T_RBR; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | eof  {{tag = -1; value = LexBuffer<_>.LexemeString(lexbuf)}}
 
 {
 

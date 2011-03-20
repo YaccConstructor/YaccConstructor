@@ -31,22 +31,22 @@ open Yard.Generators.RACCGenerator
 
  let digit = ['0'-'9']
 
- rule tokens = parse
+rule tokens = parse
  | digit+ 
-        {{name = "NUMBER"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 1; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "+" 
-        {{name = "PLUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 2; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "-" 
-        {{name = "MINUS"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 3; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "*" 
-        {{name = "MULT"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 4; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "/" 
-        {{name = "DIV"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 5; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "(" 
-        {{name = "LBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 6; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | ")" 
-        {{name = "RBR"; value = LexBuffer<_>.LexemeString(lexbuf)}}
- | eof  {{name = "EOF"; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = 7; value = LexBuffer<_>.LexemeString(lexbuf)}}
+ | eof  {{tag = -1; value = LexBuffer<_>.LexemeString(lexbuf)}}
 
 {
 

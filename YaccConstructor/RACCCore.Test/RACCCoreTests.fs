@@ -395,7 +395,7 @@ let runMain path tables actions =
             |> TSuccess
         | PError (pos) -> 
             TError((l:>ILexer<string>).Get(pos) 
-            |> fun x -> (String.concat " " [pos.ToString(); x.name; x.value]))
+            |> fun x -> (String.concat " " [pos.ToString(); string x.tag; x.value]))
 
     res,cache,cc      
 

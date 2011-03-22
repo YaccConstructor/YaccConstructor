@@ -63,9 +63,9 @@ type AST<'lexeme, 'nodeVal, 'trace, 'nodeId
         and 'trace : equality> =
          
         | Node  of   List<AST<'lexeme, 'nodeVal, 'trace, 'nodeId>>
-                   * string
+                   * int
                    * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
-        | Leaf  of string * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
+        | Leaf  of int * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
              
 let rec dumpTree i item =
     let iter i = String.replicate i "    "
@@ -73,12 +73,12 @@ let rec dumpTree i item =
     | Node (lst,name,value) -> 
         let trace = value.trace.ToString()                    
         let s = value.id.ToString() + ";" + value.value.ToString()
-        [iter i;"<NODE name=\""; name; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
+        [iter i;"<NODE name=\""; string name; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
         @(List.map (dumpTree (i+1)) lst)
         @[iter i;"</NODE>\n"]
         |> String.concat "" 
 
     | Leaf (name,value)     ->
-        String.concat "" [iter i;"<LEAF name=\""; name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
+        String.concat "" [iter i;"<LEAF name=\""; string name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
 
 let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)

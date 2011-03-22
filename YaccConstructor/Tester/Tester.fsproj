@@ -69,6 +69,11 @@
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
+      <Name>RACCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
       <Name>RACCCore.Test</Name>
       <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>

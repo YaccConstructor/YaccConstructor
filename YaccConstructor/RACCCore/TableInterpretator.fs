@@ -114,13 +114,13 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let memoize f =         
         fun parserState ->                    
-            let key = parserState
-            let flg,res = cache.TryGetValue key
-            if flg then res
-            else                
+            //let key = parserState
+            //let flg,res = cache.TryGetValue key
+            //if flg then res
+            //else                
                 let calculated = f parserState
-                let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
-                if not flg then cache.Add(key,calculated)                
+              //  let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
+                //if not flg then cache.Add(key,calculated)                
                 calculated
 
     let print ps =
@@ -198,7 +198,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     { 
                       for res in s do                          
                         for itm in getPrevItems parserState.inpSymbol.tag res.rItem  do
-                        let node trace forest = (List.map (fun x -> !x)forest, (*itm.state.itemName*)"", nodeVal trace (*itm.state.itemName*)"") |> Node
+                        let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
                         let dfa = getDFA itm.state.itemName
                         let trace state =
                             state.forest @ res.rItem.forest
@@ -282,7 +282,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                         |[FATrace(TSeqS _);FATrace(TOptS _);FATrace(TOptE _);FATrace(TSeqE _)] -> true | _ -> false)                                
 
                             let emptyNode = 
-                                ([],(*nextLexeme.tag*)"",nodeVal [trace] (*nextLexeme.tag*)"")
+                                ([],nextLexeme.tag, nodeVal [trace] nextLexeme.tag)
                                 |> Node
                             forest := emptyNode :: ! forest
                             {
@@ -304,12 +304,12 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     else
                         let inline _val item =
                             {
-                                id    = ""
+                                id    = -1
                                 trace = -1
                                 value = LeafV nextLexeme
                             }
                         let leaf item = 
-                            let l = ((*nextLexeme.tag*)"", _val item) |> Leaf
+                            let l = (nextLexeme.tag, _val item) |> Leaf
                             forest := l :: !forest
                             [ref l]
                                                         

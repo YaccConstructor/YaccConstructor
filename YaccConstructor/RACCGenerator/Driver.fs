@@ -32,8 +32,8 @@ type RACCGenerator() =
             let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
             let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
             let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
-            tableGenerator.Gemerate transformedGrammar
-            codeGenerator.Gemerate transformedGrammar :> obj
+            let typeToTag = tableGenerator.Gemerate transformedGrammar
+            codeGenerator.Gemerate transformedGrammar typeToTag :> obj
         member this.AcceptableProductionTypes = 
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) 
             |> List.map (fun unionCase -> unionCase.Name)

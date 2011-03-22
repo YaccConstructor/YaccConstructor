@@ -17,14 +17,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//module m1
-
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
 open Microsoft.FSharp.Text.Lexing
-//UserLexer -- your lexer
-//module Lexer = UserLexer
 
 let smallBraces = seq{(*yield {tag = "LBRACE"; value = "("};
                       yield {tag = "RBRACE"; value = ")"};

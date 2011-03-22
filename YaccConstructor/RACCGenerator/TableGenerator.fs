@@ -210,6 +210,7 @@ type TableGenerator(outPath: string) =
             "let tables = { gotoSet = gotoSet; automataDict = autumataDict }\n"
             |> write
             textWriter.CloseOutStream ()
+            !symbols |> dict
                 
         member self.Gemerate grammar = genearte grammar
 

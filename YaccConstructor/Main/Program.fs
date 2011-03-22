@@ -20,7 +20,7 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) 
         and  foot = ilTree.foot
     }
 
-let () =     
+let () =
     let feName = ref None
     let generatorName = ref None
     let testsPath = ref <| Some ""
@@ -40,12 +40,12 @@ let () =
 
     let generateSomething = ref true
 
-    let printItems iName items deft = 
-        fun _ ->                 
-            generateSomething := false                
-            printfn "\nAvailable %s: " iName 
+    let printItems iName items deft =
+        fun _ ->
+            generateSomething := false
+            printfn "\nAvailable %s: " iName
             Seq.map (fun x -> x + (if Some(x)=deft then " (default)" else "")) items
-            |> String.concat "\n    " 
+            |> String.concat "\n    "
             |> fun x -> printf "    %s\n" x
 
     let commandLineSpecs =
@@ -53,9 +53,9 @@ let () =
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
          "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
-         "-i", ArgType.String (fun s -> 
-                                   testFile := System.IO.Path.GetFileName(s) |> Some 
-                                   testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
+         "-i", ArgType.String (fun s ->
+                                   testFile := System.IO.Path.GetFileName(s) |> Some
+                                   testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"
          "--testpath", ArgType.String (fun s -> testsPath := Some s), "[DEBUG] Directory where test files are placed"
          "-t", ArgType.String (fun s -> testFile := Some s), "[DEBUG] Name of test file"
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
@@ -64,7 +64,7 @@ let () =
     
     let run () =
         match !testFile, !feName , !generatorName with
-        | Some(fName), Some(feName), Some(generatorName) -> 
+        | Some(fName), Some(feName), Some(generatorName) ->
             let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
@@ -122,7 +122,7 @@ let () =
         |> System.Console.WriteLine
     | EmptyArg (argName)       ->
          printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
-Main.exe -f AntlrFrontend -g YardPrinter -t ../../../../Tests/ANTLR/C.g > C.yrd\n
+Main.exe -f AntlrFrontend -g YardPrinter -i ../../../../Tests/ANTLR/C.g > C.yrd\n
 List of available frontends and generators can be obtained by -af -ag keys" argName
     | FEError (error)          ->
         "Frontend error: " + error + "\n"

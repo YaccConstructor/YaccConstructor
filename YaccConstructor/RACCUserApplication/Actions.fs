@@ -39,5 +39,5 @@ let start0 expr =
         | x -> getUnmatched x "RESeq"
     box (inner)
 
-let ruleToAction = dict [|("start",start0)|]
+let ruleToAction = dict [|(1,start0)|]
 

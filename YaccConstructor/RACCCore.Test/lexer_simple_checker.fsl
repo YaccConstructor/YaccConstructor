@@ -40,7 +40,7 @@ rule tokens = parse
  | "-" 
         {{tag = getTag T_MINUS; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | "*" 
-        {{tag = getTag T_MINUS; value = LexBuffer<_>.LexemeString(lexbuf)}}
+        {{tag = getTag T_MULT; value = LexBuffer<_>.LexemeString(lexbuf)}}
  | eof  {{tag = -1; value = LexBuffer<_>.LexemeString(lexbuf)}}
 
 {

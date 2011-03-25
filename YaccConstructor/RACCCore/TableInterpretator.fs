@@ -369,9 +369,9 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                             else buf
                     else buf)
                 Set.empty
-//#if DEBUG
+#if DEBUG
         Set.iter PrintTree res
-//#endif
+#endif
         cache.Clear()
         traceBuilderCache.Clear()
         let trC =

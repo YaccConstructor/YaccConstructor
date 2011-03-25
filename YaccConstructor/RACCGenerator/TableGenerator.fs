@@ -77,9 +77,13 @@ type TableGenerator(outPath: string) =
                     let prefix = 
                         x |> function |PRef(_,_) -> "NT_" | PToken(_) -> "T_" | _ -> ""
                     let smbName = Source.toString ch
-                    let tag = symbolsEnumerator.Next()
-                    if List.exists (fst >> (=) (prefix + smbName)) !symbols |> not
-                    then symbols := (prefix + smbName , tag) :: !symbols
+                    let tag = 
+                        if List.exists (fst >> (=) (prefix + smbName)) !symbols |> not
+                        then
+                            let tag = (symbolsEnumerator.Next()) 
+                            symbols := (prefix + smbName , tag) :: !symbols
+                            tag
+                        else (List.find (fst >> (=) (prefix + smbName)) !symbols) |> snd
                     let smbNum = enumerator.Next()
                     builder.Trivial None None (NSymbol tag) Omega
                     |> builder.AddInHead None Epsilon (FATrace (TSmbS smbNum))

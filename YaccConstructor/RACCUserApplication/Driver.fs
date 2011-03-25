@@ -47,11 +47,11 @@ type SeqLexer(seqTok:array<_>) =
 //path -- path to input file
 let run path =
     //Create lexer
-    //let content = System.IO.File.ReadAllText(path)
-    //let reader = new System.IO.StringReader(content)    
-    //let buf = LexBuffer<_>.FromTextReader reader
-    //let l = UserLexer.Lexer(buf)
-    let l = SeqLexer (Seq.toArray smallBraces)
+    let content = System.IO.File.ReadAllText(path)
+    let reader = new System.IO.StringReader(content)    
+    let buf = LexBuffer<_>.FromTextReader reader
+    let l = Lexer_arithm_glr.Lexer(buf)
+    //let l = SeqLexer (Seq.toArray smallBraces)
 
     //Create tables
     let tables = tables
@@ -87,6 +87,6 @@ let run path =
     
 
 do 
-    run @"D:\rec_ascent\trunk\Tests\RACC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"
+    run @"..\..\..\..\Tests\RACC\test_arithm_glr\test_arithm_glr_3.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

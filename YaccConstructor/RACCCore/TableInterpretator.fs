@@ -114,13 +114,13 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let memoize f =         
         fun parserState ->                    
-            //let key = parserState
-            //let flg,res = cache.TryGetValue key
-            //if flg then res
-            //else                
+            let key = parserState
+            let flg,res = cache.TryGetValue key
+            if flg then res
+            else                
                 let calculated = f parserState
-              //  let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
-                //if not flg then cache.Add(key,calculated)                
+                let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
+                if not flg then cache.Add(key,calculated)                
                 calculated
 
     let print ps =
@@ -304,8 +304,8 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     else
                         let inline _val item =
                             {
-                                id    = -1
-                                trace = -1
+                                id    = -2
+                                trace = -2
                                 value = LeafV nextLexeme
                             }
                         let leaf item = 
@@ -369,9 +369,9 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                             else buf
                     else buf)
                 Set.empty
-#if DEBUG
+//#if DEBUG
         Set.iter PrintTree res
-#endif
+//#endif
         cache.Clear()
         traceBuilderCache.Clear()
         let trC =

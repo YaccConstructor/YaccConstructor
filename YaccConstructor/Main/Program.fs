@@ -137,3 +137,15 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Tests. Please do not remove
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_include/test_include_main.yrd
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_seq/test_seq.yrd
+
+(*
+let () = 
+// TODO where is metarule yard_list<<>>?
+    let filename = @"..\..\..\..\Tests\RACC\test_cls\test_cls.yrd" 
+    let ilTree = ref (Yard.Frontends.YardFrontend.Main.ParseFile filename)
+    ilTree := ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandEBNF.ExpandEBNF())
+//    ilTree := ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
+    printfn "%A" <| (GeneratorsManager.Generator "YardPrinter").Generate(!ilTree)
+    //printfn "%A" ilTreeExpandedEBNF
+    ()
+*)

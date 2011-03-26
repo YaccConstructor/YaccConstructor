@@ -133,36 +133,37 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 open Yard.Core.IL.Production
 
 let () = 
-    let filename = @"..\..\..\..\Tests\TempTests\test_expand_brackets_2.yrd" 
-//    let ilTree = ref (Yard.Frontends.YardFrontend.Main.ParseFile filename)\
-    let ilTree = ref { new Definition.t<Source.t, Source.t> with
-        info = { fileName = "" } 
-        and head = None 
-        and foot = None 
-        and grammar = [
-            { new Rule.t<Source.t, Source.t> with 
-                name = "s"
-                and args = []
-                and metaArgs = []
-                and _public = true
-                and body = PAlt(
-                    PSeq([
-                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PToken("NUMBER",(0,0))};
-                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
-                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PToken("CHUMBER",(0,0))};
-                        ], None),
-                    PToken("OUTER",(0,0))
-                )
-            }
-        ]
-    }
+    let filename = @"..\..\..\..\Tests\TempTests\test_cls.yrd" 
+    let ilTree = ref (Yard.Frontends.YardFrontend.Main.ParseFile filename)
+//    let ilTree = ref { new Definition.t<Source.t, Source.t> with
+//        info = { fileName = "" } 
+//        and head = None 
+//        and foot = None 
+//        and grammar = [
+//            { new Rule.t<Source.t, Source.t> with 
+//                name = "s"
+//                and args = []
+//                and metaArgs = []
+//                and _public = true
+//                and body = PAlt(
+//                    PSeq([
+//                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PToken("NUMBER",(0,0))};
+//                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
+//                        {new elem<Source.t, Source.t> with omit=false and binding=None and checker=None and rule=PToken("CHUMBER",(0,0))};
+//                        ], None),
+//                    PToken("OUTER",(0,0))
+//                )
+//            }
+//        ]
+//    }
 
     printfn "Before:\n%A\n" <| (GeneratorsManager.Generator "YardPrinter").Generate(!ilTree)
 //    printfn "%A\n" !ilTree
 //    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandEBNF.ExpandEBNF())
 //    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
-    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandBrackets.ExpandBrackets())
-    printfn "After\n%A\n" <| (GeneratorsManager.Generator "YardPrinter").Generate(!ilTree)
+//    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandBrackets.ExpandBrackets())
+    printfn "FsYaccPrinter\n%A\n" <| (GeneratorsManager.Generator "FsYaccPrinter").Generate(!ilTree)
 //    printfn "%A" !ilTree
     ()
+
 *)

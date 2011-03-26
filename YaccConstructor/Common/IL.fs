@@ -17,7 +17,7 @@ module Source =
 module Production = begin
     type IRuleType = interface end
     type elem<'patt,'expr> = {
-        omit:bool; //Вычитание
+        omit:bool; //Вычитание - не включать в AST
         rule:(t<'patt,'expr>);//Правило
         binding:'patt option; //замыкание :) f:F ну или f:=F...
         checker:'expr option //"почти" резольвер

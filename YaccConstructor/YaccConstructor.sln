@@ -64,6 +64,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IronyFrontend", "IronyFront
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronyFrontendTests", "IronyFrontendTests\IronyFrontendTests.csproj", "{61B73DE1-F585-488D-B842-923CBFCD092C}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Convertions.Test", "Convertions.Test\Convertions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -302,6 +304,16 @@ Global
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|x86.ActiveCfg = Release|Any CPU
 		{61B73DE1-F585-488D-B842-923CBFCD092C}.Release|x86.Build.0 = Release|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,34 +26,34 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
+let nameIndex = ref 0
+let createName() = nameIndex := !nameIndex + 1 ;sprintf "yard_exp_brackets_%d" !nameIndex
+let getLastName() = sprintf "yard_exp_brackets_%d" !nameIndex
+    
 let expandBrackets (ruleList: Rule.t<'patt, 'expr> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>(List.toArray ruleList)
+    let expanded = ref []
     while toExpand.Count > 0 do
-        let expandedRule = 
-            match toExpand.Dequeue().body with
+        let toExpandRule = toExpand.Dequeue()
+        let rec expandBody = function
             | PSeq(elements, actionCode) -> PSeq((List.map (fun elem ->
                 match elem.rule with 
                 | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None -> 
-                    toExpand.Enqueue({new Rule.t<'patt,'expr> with name="seq" and args=[] and body=elem.rule and _public=false and metaArgs=[]})
-                    { elem with rule = PRef(("seq",(0,0)), None) }
+                    toExpand.Enqueue({new Rule.t<'patt,'expr> with name=createName() and args=[] and body=elem.rule and _public=false and metaArgs=[]})
+                    { elem with rule = PRef((getLastName(),(0,0)), None) }
                 | PAlt(_,_) -> 
-                    toExpand.Enqueue({new Rule.t<'patt,'expr> with name="alt" and args=[] and body=elem.rule and _public=false and metaArgs=[]})
-                    { elem with rule = PRef(("alt",(0,0)), None) }
+                    toExpand.Enqueue({new Rule.t<'patt,'expr> with name=createName() and args=[] and body=elem.rule and _public=false and metaArgs=[]})
+                    { elem with rule = PRef((getLastName(),(0,0)), None) }
                 | x -> elem
                 )
                 elements), actionCode)
+            | PAlt(left, right) -> PAlt(expandBody left, expandBody right)
             | x -> x
-        printf "sdf"
-    (*
-    List.collect (fun (rule:Rule.t<'patt, 'expr>) ->
-        match rule.body with
-        | PSeq(elements, actionCode) -> List.map (function 
-            | PSeq(subelements, subActionCode) -> elements
-//             | PAlt(x,y) -> [{rule with body=PRef(("aa",(0,0)), None)}; {new Rule.t<'patt, 'expr> with name="aa" and args=[] and body=PAlt(x,y) and _public=false and metaArgs=[]}]
-             | _ -> []
-        )
-        ruleList*)
-    []
+        
+        let expandedRule = expandBody toExpandRule.body
+        expanded := { toExpandRule with body=expandedRule } :: !expanded
+        ()
+    List.rev !expanded
 
 type ExpandBrackets() = 
     interface IConvertion with

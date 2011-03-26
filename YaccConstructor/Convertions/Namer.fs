@@ -39,7 +39,7 @@ let createName ((n:string), (l, c)) =
     let addPrefix = 
       try
         let yardPrefix = withPrefix "" in         
-        if (n.Substring (0,(yardPrefix.Length))) = yardPrefix 
+        if (n.Substring (0, System.Math.Min(n.Length, yardPrefix.Length))) = yardPrefix 
         then fun x->x 
         else withPrefix
       with (*Invalid_argument*) _ -> withPrefix

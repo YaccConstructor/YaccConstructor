@@ -9,7 +9,7 @@ open Yard.Generators.RACCGenerator
 let getUnmatched x expectedType =
     "Unexpected type of node\nType " + x.ToString() + " is not expected in this position\n" + expectedType + " was expected." |> failwith
 
-let value x = (x:>Lexeme<string>).value
+let value x = (x:>Lexer_arithm_glr.MyLexeme).MValue
 
 let s0 expr = 
     let inner  = 

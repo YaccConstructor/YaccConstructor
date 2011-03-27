@@ -1,5 +1,5 @@
 {
-let value x = (x:>Lexeme<string>).value
+let value x = (x:>Lexer_checker_in_glr.MyLexeme).MValue
 
 type OpPrior =
    | T

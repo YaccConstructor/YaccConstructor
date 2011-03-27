@@ -1,6 +1,6 @@
 ﻿//  AST.fs contains description of AST built with RACC
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -24,11 +24,11 @@ open Yard.Core.CompareHelper
 
 [<CustomEquality; CustomComparison>] 
 type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> = 
-| LeafV of Lexeme<'lexeme> 
+| LeafV of ILexeme
 | NodeV of 'nodeVal    
     member self.GetValue x = 
         match x with 
-        | LeafV(y) -> Some(y)
+        | LeafV(y) -> Some(y.tag)
         | NodeV(y) -> None 
            
     override self.ToString() = 
@@ -79,6 +79,6 @@ let rec dumpTree i item =
         |> String.concat "" 
 
     | Leaf (name,value)     ->
-        String.concat "" [iter i;"<LEAF name=\""; string name; "\" value=\""; (value.value.GetValue (value.value)).Value.value.ToString(); "\"/>\n"]        
+        String.concat "" [iter i;"<LEAF name=\""; string name; "\"/>\n"]        
 
 let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)

@@ -1,5 +1,5 @@
 {
-let value x = (x:>Lexeme<string>).value
+let value x = (x:>Lexer_summator_1.MyLexeme).MValue
 }
 +s: res = e {res};
 e : n = NUMBER {value n |> float}

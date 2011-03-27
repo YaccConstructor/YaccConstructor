@@ -1,7 +1,7 @@
 ﻿// RegExpAST.fs contains types and functions for trace manipulations and 
 // trace to tree transformation
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //

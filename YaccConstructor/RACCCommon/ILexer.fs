@@ -1,6 +1,6 @@
 ﻿//  ILexer.fs contains interface of  lexer which is compatible with RACC. 
 //
-//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -19,11 +19,10 @@
 
 namespace Yard.Generators.RACCGenerator
 
-type Lexeme<'value> = {
-    tag : int;
-    value: 'value;     
-  }
+type ILexeme = interface
+        abstract tag : int
+end
  
 type ILexer<'lexemeValue> = interface
-    abstract Get : int -> Lexeme<'lexemeValue>     
+    abstract Get : int -> ILexeme
 end

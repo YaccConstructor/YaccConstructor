@@ -1,6 +1,6 @@
 ﻿// ParserState.fs contains ParserState type
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -22,7 +22,7 @@ namespace Yard.Generators.RACCGenerator
 type ParserState<'state, 'value, 'lb when 'state: comparison> =
     {
         statesSet : Set<'state>
-        inpSymbol : Lexeme<'value>
+        inpSymbol : int
         i         : int        
     }
 

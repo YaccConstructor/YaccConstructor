@@ -27,9 +27,14 @@ open Microsoft.FSharp.Text
 open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
 
+type MyLexeme (tag,_value) =
+    member self.MValue = _value
+    interface ILexeme with    
+       member self.tag = tag
+    end    
 
  
-# 32 "Lexer.fs"
+# 37 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -56,33 +61,33 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 37 "Lexer.fsl"
-                        {tag = getTag T_NUMBER; value = LexBuffer<_>.LexemeString(lexbuf)}
-# 61 "Lexer.fs"
-          )
-  | 1 -> ( 
-# 39 "Lexer.fsl"
-                        {tag = getTag T_PLUS; value = LexBuffer<_>.LexemeString(lexbuf)}
+# 42 "Lexer.fsl"
+                        MyLexeme (getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))
 # 66 "Lexer.fs"
           )
-  | 2 -> ( 
-# 41 "Lexer.fsl"
-                        {tag = getTag T_MINUS; value = LexBuffer<_>.LexemeString(lexbuf)}
+  | 1 -> ( 
+# 44 "Lexer.fsl"
+                        MyLexeme (getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))
 # 71 "Lexer.fs"
           )
-  | 3 -> ( 
-# 43 "Lexer.fsl"
-                        {tag = getTag T_MINUS; value = LexBuffer<_>.LexemeString(lexbuf)}
+  | 2 -> ( 
+# 46 "Lexer.fsl"
+                        MyLexeme (getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))
 # 76 "Lexer.fs"
           )
-  | 4 -> ( 
-# 44 "Lexer.fsl"
-                        {tag = -1; value = LexBuffer<_>.LexemeString(lexbuf)}
+  | 3 -> ( 
+# 48 "Lexer.fsl"
+                        MyLexeme (getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))
 # 81 "Lexer.fs"
+          )
+  | 4 -> ( 
+# 49 "Lexer.fsl"
+                        MyLexeme (-1, LexBuffer<_>.LexemeString(lexbuf))
+# 86 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 46 "Lexer.fsl"
+# 51 "Lexer.fsl"
  
 
 type Lexer(lb) = 
@@ -94,7 +99,7 @@ type Lexer(lb) =
         if l >= pos
         then (!locBuf).[l-pos]
         else
-            let t = tokens lb
+            let t = (tokens lb) :> ILexeme
             locBuf := t :: !locBuf
             t      
     end

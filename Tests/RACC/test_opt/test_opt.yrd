@@ -1,5 +1,5 @@
 {
-let value x = x.value
+let value x = (x:>Lexer_opt.MyLexeme).MValue
 
 let getStr x y =
     let s = 

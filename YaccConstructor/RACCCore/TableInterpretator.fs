@@ -1,7 +1,7 @@
 ﻿// TableInterpretator.fs contains core functions of recursive-ascent algorithm:
 //    parse and climb
 //
-//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -48,11 +48,11 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         let getTables () =  (!Tables).Value
         getTables , fun t -> Tables:=t
 
-    let goto states symbol =         
+    let goto states symbol=         
         Set.fold
             (fun buf state -> 
                 let local = ref Set.empty                    
-                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol.tag),local)
+                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol),local)
                 |> fun x -> 
                     if (not x) || Set.isEmpty (!local)
                     then 
@@ -107,7 +107,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         then  
             List.ofSeq (tables().automataDict)
             |> Seq.filter (fun x -> Set.exists ((=)x.Value.DStartState) x.Value.DFinaleStates)
-            |> Seq.map (fun x -> {tag = x.Key; value = null})
+            |> Seq.map (fun x -> x.Key)
             |> fun x -> pEpsBuf := Some x
         (!pEpsBuf).Value
         
@@ -197,13 +197,13 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                    seq 
                     { 
                       for res in s do                          
-                        for itm in getPrevItems parserState.inpSymbol.tag res.rItem  do
+                        for itm in getPrevItems parserState.inpSymbol res.rItem  do
                         let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
                         let dfa = getDFA itm.state.itemName
                         let trace state =
                             state.forest @ res.rItem.forest
                             |> List.length = 1
-                            |> getTrace itm.state parserState.inpSymbol.tag itm.state.position res.rItem.position
+                            |> getTrace itm.state parserState.inpSymbol itm.state.position res.rItem.position
                             |> fun x -> x @ res.rItem.sTrace
                         let s = parserState.statesSet.MaximumElement
                         if itm.state.position <> dfa.DStartState
@@ -231,7 +231,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                     |> buildRes                                         
                                 else                             
                                     {                                            
-                                        inpSymbol = {tag = res.rItem.itemName; value = null} 
+                                        inpSymbol = res.rItem.itemName 
                                         i         = res.rI
                                         statesSet =                                               
                                             {s with forest = n
@@ -273,7 +273,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     |> Seq.map 
                         (fun nextLexeme ->
                             let trace = 
-                                let dfa = getDFA nextLexeme.tag
+                                let dfa = getDFA nextLexeme
                                 dfa.DRules
                                 |> Set.filter (fun x -> x.FromStateID = dfa.DStartState && x.Symbol = Dummy)
                                 |> Set.map (fun x -> x.Label)
@@ -282,7 +282,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                         |[FATrace(TSeqS _);FATrace(TOptS _);FATrace(TOptE _);FATrace(TSeqE _)] -> true | _ -> false)                                
 
                             let emptyNode = 
-                                ([],nextLexeme.tag, nodeVal [trace] nextLexeme.tag)
+                                ([],nextLexeme, nodeVal [trace] nextLexeme)
                                 |> Node
                             forest := emptyNode :: ! forest
                             {
@@ -318,7 +318,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                 statesSet = 
                                     parserState.statesSet                                    
                                     |> Set.map (fun stt -> {stt with forest = leaf stt; sTrace=[]})
-                                inpSymbol = nextLexeme
+                                inpSymbol = nextLexeme.tag
                                 i         = parserState.i + 1
                         }
                         |> climb()
@@ -348,7 +348,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                             sTrace   = []
                         }
                         |> Set.singleton
-                    inpSymbol = {tag = -2;value =null}
+                    inpSymbol = -2
                     i         = 1
                 }
             |> Set.fold

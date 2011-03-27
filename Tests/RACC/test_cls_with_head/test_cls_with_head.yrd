@@ -1,4 +1,4 @@
 {
-let value x = x.value
+let value x = (x:>Lexer_cls_with_head.MyLexeme).MValue
 }
 +s: oneMinus = MINUS lst = (MINUS {"list minus"})* {lst |> fun x -> "Head minus" :: x |> String.concat ";"};

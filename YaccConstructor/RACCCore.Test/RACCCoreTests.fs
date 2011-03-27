@@ -21,7 +21,6 @@ module RACCCoreTests
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RACCGenerator
-module Lexer = UserLexer
 open NUnit.Framework
 
 type Test<'a,'b,'c,'d,'h, 'lexer when 'c:comparison and 'd:comparison> =
@@ -441,9 +440,9 @@ let runMain path tables actions lexerF =
             |> TSuccess
         | PError (pos) -> 
             TError((l:>ILexer<string>).Get(pos) 
-            |> fun x -> (String.concat " " [pos.ToString(); string x.tag; x.value]))
+            |> fun x -> (String.concat " " [pos.ToString(); string x.tag]))
 
-    res,cache,cc      
+    res,cache,cc
 
 let run path tables actions lexerF  = 
     match runMain path tables actions lexerF with

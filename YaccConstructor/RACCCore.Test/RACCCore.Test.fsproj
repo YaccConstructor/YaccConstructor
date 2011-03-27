@@ -46,9 +46,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags> --unicode </OtherFlags>
-    </FsLex>
     <FsLex Include="Lexer_alt.fsl">
       <OtherFlags> --unicode </OtherFlags>
     </FsLex>
@@ -94,53 +91,51 @@
     <FsLex Include="Lexer_summator_1.fsl">
       <OtherFlags> --unicode </OtherFlags>
     </FsLex>
-    
-    <Compile Include="test_alt.yrd.actions.fs" />
     <Compile Include="test_alt.yrd.tables.fs" />
     <Compile Include="Lexer_alt.fs" />
-    <Compile Include="test_alt_in_cls.yrd.actions.fs" />
+    <Compile Include="test_alt.yrd.actions.fs" />
     <Compile Include="test_alt_in_cls.yrd.tables.fs" />
     <Compile Include="Lexer_alt_in_cls.fs" />
-    <Compile Include="test_arithm_glr.yrd.actions.fs" />
+    <Compile Include="test_alt_in_cls.yrd.actions.fs" />
     <Compile Include="test_arithm_glr.yrd.tables.fs" />
     <Compile Include="Lexer_arithm_glr.fs" />
-    <Compile Include="test_checker_on_glr.yrd.actions.fs" />
+    <Compile Include="test_arithm_glr.yrd.actions.fs" />
     <Compile Include="test_checker_on_glr.yrd.tables.fs" />
     <Compile Include="Lexer_checker_on_glr.fs" />
-    <Compile Include="test_cls.yrd.actions.fs" />
+    <Compile Include="test_checker_on_glr.yrd.actions.fs" />
     <Compile Include="test_cls.yrd.tables.fs" />
     <Compile Include="Lexer_cls.fs" />
-    <Compile Include="test_cls_with_head.yrd.actions.fs" />
+    <Compile Include="test_cls.yrd.actions.fs" />
     <Compile Include="test_cls_with_head.yrd.tables.fs" />
     <Compile Include="Lexer_cls_with_head.fs" />
-    <Compile Include="test_cls_with_tail.yrd.actions.fs" />
+    <Compile Include="test_cls_with_head.yrd.actions.fs" />
     <Compile Include="test_cls_with_tail.yrd.tables.fs" />
     <Compile Include="Lexer_cls_with_tail.fs" />
-    <Compile Include="test_l_attr.yrd.actions.fs" />
+    <Compile Include="test_cls_with_tail.yrd.actions.fs" />
     <Compile Include="test_l_attr.yrd.tables.fs" />
     <Compile Include="Lexer_l_attr.fs" />
-    <Compile Include="test_opt.yrd.actions.fs" />
+    <Compile Include="test_l_attr.yrd.actions.fs" />
     <Compile Include="test_opt.yrd.tables.fs" />
     <Compile Include="Lexer_opt.fs" />
-    <Compile Include="test_reduce_reduce.yrd.actions.fs" />
+    <Compile Include="test_opt.yrd.actions.fs" />
     <Compile Include="test_reduce_reduce.yrd.tables.fs" />
     <Compile Include="Lexer_reduce_reduce.fs" />
-    <Compile Include="test_seq.yrd.actions.fs" />
+    <Compile Include="test_reduce_reduce.yrd.actions.fs" />
     <Compile Include="test_seq.yrd.tables.fs" />
     <Compile Include="Lexer_seq.fs" />
-    <Compile Include="test_simple_braces.yrd.actions.fs" />
+    <Compile Include="test_seq.yrd.actions.fs" />
     <Compile Include="test_simple_braces.yrd.tables.fs" />
     <Compile Include="Lexer_simple_braces.fs" />
-    <Compile Include="test_simple_braces_2.yrd.actions.fs" />
+    <Compile Include="test_simple_braces.yrd.actions.fs" />
     <Compile Include="test_simple_braces_2.yrd.tables.fs" />
     <Compile Include="Lexer_simple_braces_2.fs" />
-    <Compile Include="test_simple_checker.yrd.actions.fs" />
+    <Compile Include="test_simple_braces_2.yrd.actions.fs" />
     <Compile Include="test_simple_checker.yrd.tables.fs" />
     <Compile Include="Lexer_simple_checker.fs" />
-    <Compile Include="test_summator_1.yrd.actions.fs" />
+    <Compile Include="test_simple_checker.yrd.actions.fs" />
     <Compile Include="test_summator_1.yrd.tables.fs" />
     <Compile Include="Lexer_summator_1.fs" />
-    <Compile Include="Lexer.fs" />
+    <Compile Include="test_summator_1.yrd.actions.fs" />
     <Compile Include="RACCCoreTests.fs" />
   </ItemGroup>
   <ItemGroup>

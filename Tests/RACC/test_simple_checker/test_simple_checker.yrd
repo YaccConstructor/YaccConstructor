@@ -1,5 +1,5 @@
 {
-let value x = (x:>Lexeme<string>).value
+let value x = (x:>Lexer_simple_checker.MyLexeme).MValue
 
 type OpType =
    | Undef

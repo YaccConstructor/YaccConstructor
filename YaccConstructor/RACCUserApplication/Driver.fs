@@ -1,6 +1,6 @@
 ﻿// Driver.fs contains main functions for test user application.
 //
-//  Copyright 2009,2010 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -22,7 +22,7 @@ open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
 open Microsoft.FSharp.Text.Lexing
 
-let smallBraces = seq{(*yield {tag = "LBRACE"; value = "("};
+(*let smallBraces = seq{(*yield {tag = "LBRACE"; value = "("};
                       yield {tag = "RBRACE"; value = ")"};
                       yield {tag = "LBRACE"; value = "("};
                       yield {tag = "LBRACE"; value = "("};
@@ -30,8 +30,8 @@ let smallBraces = seq{(*yield {tag = "LBRACE"; value = "("};
                       yield {tag = "RBRACE"; value = ")"};
                       yield {tag = "LBRACE"; value = "("};
                       yield {tag = "RBRACE"; value = ")"};*)
-                      yield {tag = -1; value = "EOF"}}
-
+                      (*yield {tag = -1; value = "EOF"}*)}
+                      *)
 type SeqLexer(seqTok:array<_>) = 
     class
         
@@ -80,7 +80,7 @@ let run path =
             //If you create lexeme with position in stream, you can not only provide error lexeme
             // but also navigate in error position
             let errLexeme = (l :> ILexer<string>).Get(pos)
-            "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.value
+            "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.ToString()
             |> failwith
             
     printf "\nResult %A\n" result

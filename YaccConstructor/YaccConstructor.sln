@@ -326,6 +326,7 @@ Global
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|x86.ActiveCfg = Release|Any CPU
+		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

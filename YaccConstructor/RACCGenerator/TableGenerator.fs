@@ -186,6 +186,7 @@ type TableGenerator(outPath: string) =
                          
             symbols
             |> Seq.iter (fun x -> sprintf "%s| %i -> %s" tab (snd x) (fst x) |> write)
+            tab + "| _ -> failwith \"getName: bad tag.\"" |> write
 
         let genearte grammar =
             generatePreheader grammar.info.fileName

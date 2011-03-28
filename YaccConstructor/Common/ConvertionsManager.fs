@@ -17,9 +17,15 @@
 
 module Yard.Core.ConvertionsManager
 
-
 open Yard.Core
 open Yard.Core.IL
+
+let private convertionsCollection: ResizeArray<IConvertion> = 
+    new ResizeArray<IConvertion>(ComponentsLoader.LoadComponents(typeof<IConvertion>) |> Seq.map (fun x -> x :?> IConvertion))
+
+let AvailableConvertions = Seq.map (fun (x:IConvertion) -> x.Name) convertionsCollection
+
+let Convertion name = convertionsCollection.Find (fun convertion -> convertion.Name = name)
 
 let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (conv:IConvertion) = 
     {   new Definition.t<Source.t,Source.t>

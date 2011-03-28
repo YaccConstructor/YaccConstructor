@@ -52,6 +52,7 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
                 if !lineNumber = 1 then wordL ":" else wordL "|"
                 ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
                 @ (if actionCode = None then [] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
+        | PRef(("empty",_),_) -> leftL ""
         | PToken(src) | PRef(src, _) -> wordL (fst src)
         | _ -> wordL "UNEXPECTED"
     let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)
@@ -63,7 +64,7 @@ let generate (ilDef:Definition.t<Source.t, Source.t>) =
     let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token %s\n" text token) "" tokens)
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
-    let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <string> %s\n" text start) "" startRules)
+    let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)
     let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar))
     let footerSection = if ilDef.foot.IsSome then sprintf "%%%%\n%s\n" (fst ilDef.foot.Value) else ""
     headerSection + tokensSection + startRulesSection + typesSection + rulesSection + footerSection

@@ -16,6 +16,7 @@ let () =
     let generatorName = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
+    let convertions = new ResizeArray<IConvertion>()
 
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
@@ -44,6 +45,8 @@ let () =
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
          "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
+         "-c", ArgType.String (fun s -> convertions.Add(ConvertionsManager.Convertion s)), "Convertion applied in order. Use -ac to list available."
+         "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"
@@ -70,12 +73,13 @@ let () =
             // Parse grammar    
             let ilTree =                
                 try
-                    fe.ParseGrammar grammarFilePath
+                    ref (fe.ParseGrammar grammarFilePath)
                 with
                 | e -> FEError e.Message |> raise
 
             // Apply convertions
-            let ilTreeExpandedMeta = ConvertionsManager.ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
+            Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion !ilTree conv)) convertions
+//            let ilTreeExpandedMeta = ConvertionsManager.ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
 
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
@@ -90,7 +94,7 @@ let () =
             // Generate something
             let result =            
                 try
-                    gen.Generate (ilTree)
+                    gen.Generate (!ilTree)
                 with
                 | e -> GenError e.Message |> raise
 
@@ -128,7 +132,8 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Tests. Please do not remove
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_include/test_include_main.yrd
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_seq/test_seq.yrd
-//Main.exe -g FsYaccPrinter -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//Main.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
 
 (*
 open Yard.Core.IL.Production

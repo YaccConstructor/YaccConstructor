@@ -21,6 +21,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
+open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 let findTokens (grammar:Rule.t<Source.t, Source.t> list) = 
     let rec _findTokens productions = 
@@ -32,13 +33,27 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
             | _ -> []
             )
             productions
-    _findTokens (grammar |> List.map (fun rule -> rule.body)) 
+    let allTokens = _findTokens (grammar |> List.map (fun rule -> rule.body)) 
+    List.fold (fun unique token -> if List.exists ((=) token) unique then unique else token::unique) [] allTokens
 
 let findStartRules (grammar:Rule.t<Source.t, Source.t> list) = grammar |> List.choose (fun rule -> if rule._public then Some(rule.name) else None)
+   
+let indentedListL = List.reduce (---) 
 
-    
 let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) = 
-    yardRule.name + ": TODO\n"
+    let lineNumber = ref 0
+    let rec layoutProduction = function
+        | PAlt(left, right) -> aboveL (layoutProduction left) (layoutProduction right)
+        | PSeq(elements, actionCode) -> 
+            lineNumber := !lineNumber + 1
+            indentedListL (
+                if !lineNumber = 1 then wordL ":" else wordL "|"
+                ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
+                @ (if actionCode = None then [] else [wordL ("{"+fst actionCode.Value+"}")]))
+        | PToken(src) | PRef(src, _) -> wordL (fst src)
+        | _ -> wordL "UNEXPECTED"
+    let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)
+    Display.layout_to_string FormatOptions.Default layout
 
 let generate (ilDef:Definition.t<Source.t, Source.t>) = 
     let headerSection = if ilDef.head.IsSome then sprintf "%%{\n%s\n%%}\n" (fst ilDef.head.Value) else ""
@@ -47,6 +62,6 @@ let generate (ilDef:Definition.t<Source.t, Source.t>) =
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <string> %s\n" text start) "" startRules)
-    let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n" (List.map fsYaccRule ilDef.grammar))
+    let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar))
     let footerSection = if ilDef.foot.IsSome then sprintf "%%%%\n%s\n" (fst ilDef.foot.Value) else ""
     headerSection + tokensSection + startRulesSection + typesSection + rulesSection + footerSection

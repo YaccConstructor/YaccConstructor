@@ -45,11 +45,13 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
     let rec layoutProduction = function
         | PAlt(left, right) -> aboveL (layoutProduction left) (layoutProduction right)
         | PSeq(elements, actionCode) -> 
+            let bindings = List.filter (fun (_,elem) -> elem.binding.IsSome) <| List.mapi (fun i x -> (i+1,x)) elements
+            let actionCodePrefix = bindings |> List.fold (fun state (i, elem) -> sprintf "%slet %s=$%d in " state (fst elem.binding.Value) i) ""
             lineNumber := !lineNumber + 1
             indentedListL (
                 if !lineNumber = 1 then wordL ":" else wordL "|"
                 ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
-                @ (if actionCode = None then [] else [wordL ("{"+fst actionCode.Value+"}")]))
+                @ (if actionCode = None then [] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
         | PToken(src) | PRef(src, _) -> wordL (fst src)
         | _ -> wordL "UNEXPECTED"
     let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)

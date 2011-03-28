@@ -128,6 +128,7 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Tests. Please do not remove
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_include/test_include_main.yrd
 //Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_seq/test_seq.yrd
+//Main.exe -g FsYaccPrinter -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
 
 (*
 open Yard.Core.IL.Production

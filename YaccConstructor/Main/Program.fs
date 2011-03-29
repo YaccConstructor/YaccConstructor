@@ -11,6 +11,18 @@ exception EmptyArg of string
 exception FEError of string
 exception GenError of string
 
+type TreeDump() = 
+    interface IGenerator with
+        member this.Name = "TreeDump"
+        member this.Generate t = (sprintf "%A" t) :> obj
+        member this.AcceptableProductionTypes = 
+            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
+            |> List.map (fun unionCase -> unionCase.Name)
+    end
+
+let() = 
+    GeneratorsManager.Register (new TreeDump())
+
 let () =
     let feName = ref None
     let generatorName = ref None
@@ -130,10 +142,12 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 
 
 //Tests. Please do not remove
-//Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_include/test_include_main.yrd
-//Main.exe -g YardPrinter -t ../../../../Tests/Basic/test_seq/test_seq.yrd
-//Main.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
-//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -t ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//Main.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g
+//Main.exe -g YardPrinter -i ../../../../Tests/Basic/test_include/test_include_main.yrd
+//Main.exe -g YardPrinter -i ../../../../Tests/Basic/test_seq/test_seq.yrd
+//Main.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//Main.exe -g TreeDump -c AddEOF -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
 
 (*
 open Yard.Core.IL.Production

@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f AntlrFrontend -g YardPrinter -t ..\..\..\..\Tests\ANTLR\test.g</StartArguments>
+    <StartArguments>-g YardPrinter -c AddEOF -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

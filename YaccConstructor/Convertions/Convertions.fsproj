@@ -46,6 +46,7 @@
     <Compile Include="ExpandEBNF.fs" />
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandBrackets.fs" />
+    <Compile Include="AddEOF.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

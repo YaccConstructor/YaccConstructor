@@ -47,6 +47,7 @@
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />
+    <Compile Include="ReplaceLiterals.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

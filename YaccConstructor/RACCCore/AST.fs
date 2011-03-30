@@ -23,7 +23,7 @@ open Yard.Core.CompareHelper
 
 
 [<CustomEquality; CustomComparison>] 
-type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> = 
+type value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> = 
 | LeafV of ILexeme
 | NodeV of 'nodeVal    
     member self.GetValue x = 
@@ -39,46 +39,31 @@ type _value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> =
     override self.Equals y = equalsOn self.GetValue self y
     override self.GetHashCode() = hashOn self.GetValue self 
     interface System.Collections.IStructuralComparable with      
-        member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> _value<'lexeme,'nodeVal>))
-     
-//[<CustomEquality; CustomComparison>]          
-type value<'lexeme,'b, 'trace, 'id when 'lexeme : equality and 'lexeme : comparison and 'trace : equality> = 
-    {
-        id      : 'id;
-        trace   : 'trace 
-        value   : _value<'lexeme,'b>;    
-    }
+        member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'lexeme,'nodeVal>))
 
-    member self.GetValue x = 
-        x.trace,x.id 
-    //override self.Equals y = equalsOn self.GetValue self y
-    //override self.GetHashCode() = hashOn self.GetValue self 
-    //interface System.Collections.IStructuralComparable with      
-      //  member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'lexeme,'b, 'trace, 'id>))
-
-
-type AST<'lexeme, 'nodeVal, 'trace, 'nodeId 
+type AST<'lexeme, 'nodeVal, 'trace 
         when 'lexeme : equality 
-        and 'lexeme : comparison
-        and 'trace : equality> =
+        and  'lexeme : comparison
+        and  'trace  : equality> =
          
-        | Node  of   List<AST<'lexeme, 'nodeVal, 'trace, 'nodeId>>
+        | Node  of   List<AST<'lexeme, 'nodeVal, 'trace> ref>
                    * int
-                   * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
-        | Leaf  of int * value<'lexeme, 'nodeVal, 'trace, 'nodeId>
+                   *'trace
+                   * value<'lexeme, 'nodeVal>
+        | Leaf  of int * value<'lexeme, 'nodeVal>
              
 let rec dumpTree i item =
     let iter i = String.replicate i "    "
     match item with
-    | Node (lst,name,value) -> 
-        let trace = value.trace.ToString()                    
-        let s = value.id.ToString() + ";" + value.value.ToString()
-        [iter i;"<NODE name=\""; string name; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
-        @(List.map (dumpTree (i+1)) lst)
+    | Node (lst, tag, trace, value) -> 
+        let trace = trace.ToString()                    
+        let s = value.ToString()
+        [iter i;"<NODE name=\""; string tag; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
+        @(List.map (fun x -> dumpTree (i+1) !x) lst)
         @[iter i;"</NODE>\n"]
         |> String.concat "" 
 
-    | Leaf (name,value)     ->
-        String.concat "" [iter i;"<LEAF name=\""; string name; "\"/>\n"]        
+    | Leaf (tag, value)     ->
+        String.concat "" [iter i;"<LEAF name=\""; string tag; "\"/>\n"]        
 
 let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)

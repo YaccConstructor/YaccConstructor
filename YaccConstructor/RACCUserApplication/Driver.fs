@@ -51,6 +51,7 @@ let run path =
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
     let l = Lexer_arithm_glr.Lexer(buf)
+    
     //let l = SeqLexer (Seq.toArray smallBraces)
 
     //Create tables

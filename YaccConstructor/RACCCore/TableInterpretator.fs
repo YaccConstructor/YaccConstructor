@@ -29,8 +29,8 @@ type Item<'state, 'symbol> =
         symbol : 'symbol        
     }
 
-type ParseStatus<'a,'b,'c,'d when 'a: comparison and 'c: equality and 'c: comparison and 'd : comparison> = 
-    | PSuccess of Set<AST<'a,'b,'c,'d>>
+type ParseStatus<'a,'b,'c when 'a: comparison and 'c: equality and 'c: comparison> = 
+    | PSuccess of Set<AST<'a,'b,'c>>
     | PError   of int
 
 type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeValue: null>() = class
@@ -117,10 +117,10 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
             let key = parserState
             let flg,res = cache.TryGetValue key
             if flg then res
-            else                
+            else
                 let calculated = f parserState
                 let flg,stored = cache.TryGetValue key // value can be inserted in the cache by recursive call of f 
-                if not flg then cache.Add(key,calculated)                
+                if not flg then cache.Add(key,calculated)
                 calculated
 
     let print ps =
@@ -137,21 +137,15 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
 
     let rAST =  RegExpAST()
 
-    let nodeVal trace name =
-        let id = hash trace
-        let _trace =
-            if traceBuilderCache.ContainsKey(id)
-            then traceBuilderCache.[id]
-            else                                                
-                let key = traceEnumerator.Next()
-                traceBuilderCache.Add(id, key)
-                traceCache.Add(rAST.BuilCorrectTrace trace,key)
-                key
-        {
-            id    = name
-            trace = _trace
-            value = NodeV 1
-        }
+    let buildCorrectTrace trace =
+        let id = hash trace        
+        if traceBuilderCache.ContainsKey(id)
+        then traceBuilderCache.[id]
+        else                                                
+            let key = traceEnumerator.Next()
+            traceBuilderCache.Add(id, key)
+            traceCache.Add(rAST.BuilCorrectTrace trace,key)
+            key                    
 
     let rec climb() = 
         memoize
@@ -198,7 +192,9 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     { 
                       for res in s do                          
                         for itm in getPrevItems parserState.inpSymbol res.rItem  do
-                        let node trace forest = (List.map (fun x -> !x)forest, itm.state.itemName, nodeVal trace itm.state.itemName) |> Node
+                        let node trace forest =
+                            (forest, itm.state.itemName, buildCorrectTrace trace, NodeV 1) 
+                            |> Node
                         let dfa = getDFA itm.state.itemName
                         let trace state =
                             state.forest @ res.rItem.forest
@@ -282,7 +278,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                         |[FATrace(TSeqS _);FATrace(TOptS _);FATrace(TOptE _);FATrace(TSeqE _)] -> true | _ -> false)                                
 
                             let emptyNode = 
-                                ([],nextLexeme, nodeVal [trace] nextLexeme)
+                                ([],nextLexeme, buildCorrectTrace [trace], NodeV nextLexeme)
                                 |> Node
                             forest := emptyNode :: ! forest
                             {
@@ -301,15 +297,9 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     if  nextLexeme.tag = -1
                     then 
                         Set.empty
-                    else
-                        let inline _val item =
-                            {
-                                id    = -2
-                                trace = -2
-                                value = LeafV nextLexeme
-                            }
+                    else                   
                         let leaf item = 
-                            let l = (nextLexeme.tag, _val item) |> Leaf
+                            let l = (nextLexeme.tag, LeafV nextLexeme) |> Leaf
                             forest := l :: !forest
                             [ref l]
                                                         
@@ -358,14 +348,14 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     then
                         let getUserTree tree =
                             match tree with
-                            | Node (childs,name,value) -> Some (List.head childs)
+                            | Node (childs,_,_,_) -> Some (List.head childs)
                             | _                        -> None
 
                         List.head forest
                         |> fun x ->
                             let y = getUserTree x
                             if y.IsSome
-                            then Set.add y.Value buf
+                            then Set.add !y.Value buf
                             else buf
                     else buf)
                 Set.empty

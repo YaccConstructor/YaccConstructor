@@ -31,10 +31,11 @@ type MyLexeme (tag,_value) =
     member self.MValue = _value
     interface ILexeme with    
        member self.tag = tag
+       member self.CompareTo x =  compare (hash self) (hash x)
     end    
 
  
-# 37 "Lexer.fs"
+# 38 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -61,33 +62,33 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 42 "Lexer.fsl"
+# 43 "Lexer.fsl"
                         MyLexeme (getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))
-# 66 "Lexer.fs"
+# 67 "Lexer.fs"
           )
   | 1 -> ( 
-# 44 "Lexer.fsl"
+# 45 "Lexer.fsl"
                         MyLexeme (getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))
-# 71 "Lexer.fs"
+# 72 "Lexer.fs"
           )
   | 2 -> ( 
-# 46 "Lexer.fsl"
+# 47 "Lexer.fsl"
                         MyLexeme (getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))
-# 76 "Lexer.fs"
+# 77 "Lexer.fs"
           )
   | 3 -> ( 
-# 48 "Lexer.fsl"
+# 49 "Lexer.fsl"
                         MyLexeme (getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))
-# 81 "Lexer.fs"
+# 82 "Lexer.fs"
           )
   | 4 -> ( 
-# 49 "Lexer.fsl"
+# 50 "Lexer.fsl"
                         MyLexeme (-1, LexBuffer<_>.LexemeString(lexbuf))
-# 86 "Lexer.fs"
+# 87 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 51 "Lexer.fsl"
+# 52 "Lexer.fsl"
  
 
 type Lexer(lb) = 

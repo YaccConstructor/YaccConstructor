@@ -321,6 +321,7 @@ Global
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Debug|x86.Build.0 = Debug|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2238E587-6FAA-4A07-A665-AA7FCC9B5602}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU

@@ -21,26 +21,6 @@ module Yard.Generators.RACCGenerator.AST
 
 open Yard.Core.CompareHelper
 
-
-[<CustomEquality; CustomComparison>] 
-type value<'lexeme,'nodeVal when 'lexeme : equality and 'lexeme : comparison> = 
-| LeafV of ILexeme
-| NodeV of 'nodeVal    
-    member self.GetValue x = 
-        match x with 
-        | LeafV(y) -> Some(y.tag)
-        | NodeV(y) -> None 
-           
-    override self.ToString() = 
-        match self with 
-        | NodeV(x) -> x.ToString()
-        | LeafV(x) -> x.ToString()
-      
-    override self.Equals y = equalsOn self.GetValue self y
-    override self.GetHashCode() = hashOn self.GetValue self 
-    interface System.Collections.IStructuralComparable with      
-        member self.CompareTo (y,c) = c.Compare(self.GetValue self ,self.GetValue (y :?> value<'lexeme,'nodeVal>))
-
 type AST<'lexeme, 'nodeVal, 'trace 
         when 'lexeme : equality 
         and  'lexeme : comparison
@@ -48,17 +28,15 @@ type AST<'lexeme, 'nodeVal, 'trace
          
         | Node  of   List<AST<'lexeme, 'nodeVal, 'trace> ref>
                    * int
-                   *'trace
-                   * value<'lexeme, 'nodeVal>
-        | Leaf  of int * value<'lexeme, 'nodeVal>
+                   *'trace                   
+        | Leaf  of int * 'lexeme
              
 let rec dumpTree i item =
     let iter i = String.replicate i "    "
     match item with
-    | Node (lst, tag, trace, value) -> 
-        let trace = trace.ToString()                    
-        let s = value.ToString()
-        [iter i;"<NODE name=\""; string tag; "\" value=\""; s; "\" trace=\""; trace ; "\">\n"]
+    | Node (lst, tag, trace) -> 
+        let trace = trace.ToString()
+        [iter i;"<NODE name=\""; string tag; "\" trace=\""; trace ; "\">\n"]
         @(List.map (fun x -> dumpTree (i+1) !x) lst)
         @[iter i;"</NODE>\n"]
         |> String.concat "" 

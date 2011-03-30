@@ -30,6 +30,7 @@ type MyLexeme (tag,_value) =
     member self.MValue = _value
     interface ILexeme with    
        member self.tag = tag
+       member self.CompareTo x =  compare (hash self) (hash x)
     end
 
  }

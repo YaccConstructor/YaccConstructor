@@ -51,7 +51,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
     let goto states symbol =
         seq{for state in states do                
                 let x,(local:Set<_>) = tables().gotoSet.TryGetValue((state.itemName,state.position,symbol))
-                if x
+                if x 
                 then
                   yield!
                     seq{for gt in local ->
@@ -135,7 +135,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
             let key = traceEnumerator.Next()
             traceBuilderCache.Add(id, key)
             traceCache.Add(rAST.BuilCorrectTrace trace,key)
-            key                    
+            key
 
     let rec climb() = 
         memoize
@@ -183,7 +183,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                       for res in s do                          
                         for itm in getPrevItems parserState.inpSymbol res.rItem  do
                         let node trace forest =
-                            (forest, itm.state.itemName, buildCorrectTrace trace, NodeV 1) 
+                            (forest, itm.state.itemName, buildCorrectTrace trace) 
                             |> Node
                         let dfa = getDFA itm.state.itemName
                         let trace state =
@@ -268,9 +268,9 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                                                         |[FATrace(TSeqS _);FATrace(TOptS _);FATrace(TOptE _);FATrace(TSeqE _)] -> true | _ -> false)                                
 
                             let emptyNode = 
-                                ([],nextLexeme, buildCorrectTrace [trace], NodeV nextLexeme)
+                                ([],nextLexeme, buildCorrectTrace [trace])
                                 |> Node
-                            forest := emptyNode :: ! forest
+                            forest := emptyNode :: !forest
                             {
                                 parserState with 
                                     statesSet = 
@@ -289,7 +289,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                         Set.empty
                     else                   
                         let leaf item = 
-                            let l = (nextLexeme.tag, LeafV nextLexeme) |> Leaf
+                            let l = (nextLexeme.tag, nextLexeme) |> Leaf
                             forest := l :: !forest
                             [ref l]
                                                         
@@ -338,7 +338,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                     then
                         let getUserTree tree =
                             match tree with
-                            | Node (childs,_,_,_) -> Some (List.head childs)
+                            | Node (childs,_,_) -> Some (List.head childs)
                             | _                   -> None
 
                         List.head forest

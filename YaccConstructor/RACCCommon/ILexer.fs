@@ -20,6 +20,7 @@
 namespace Yard.Generators.RACCGenerator
 
 type ILexeme = interface
+        inherit System.IComparable
         abstract tag : int
 end
  

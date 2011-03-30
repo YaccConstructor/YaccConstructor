@@ -116,7 +116,7 @@ let () =
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise
-        | None , _, _         -> EmptyArg "file name (-t)" |> raise 
+        | None , _, _         -> EmptyArg "file name (-i)" |> raise 
     try
         if !generateSomething = true then 
             run ()
@@ -150,8 +150,8 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Main.exe -g TreeDump -c AddEOF -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
 //Main.exe -g YardPrinter -c ReplaceLiterals -i ../../../../Tests/TempTests/test1.yrd
 
-(*
-open Yard.Core.IL.Production
+
+(*open Yard.Core.IL.Production
 
 let () = 
     let filename = @"..\..\..\..\Tests\RACC\claret\braces_1\test_simple_braces.yrd" 
@@ -164,5 +164,4 @@ let () =
     ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandBrackets.ExpandBrackets())
     printfn "FsYaccPrinter:\n%A\n" <| (GeneratorsManager.Generator "FsYaccPrinter").Generate(!ilTree)
 //    printfn "%A" !ilTree
-    ()
-*)
+    ()*)

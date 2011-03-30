@@ -48,26 +48,16 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
         let getTables () =  (!Tables).Value
         getTables , fun t -> Tables:=t
 
-    let goto states symbol=         
-        Set.fold
-            (fun buf state -> 
-                let local = ref Set.empty                    
-                tables().gotoSet.TryGetValue( (state.itemName,state.position,symbol),local)
-                |> fun x -> 
-                    if (not x) || Set.isEmpty (!local)
-                    then 
-                        buf
-                    else
-                        set(seq{
-                        yield!
-                            seq { for gt in !local do                                         
-                                        yield {itemName = fst gt; position = snd gt; forest = state.forest; sTrace = state.sTrace}
-                                        yield! buf
-                                }})
-                            
-                )
-            Set.empty
-            states   
+    let goto states symbol =
+        seq{for state in states do                
+                let x,(local:Set<_>) = tables().gotoSet.TryGetValue((state.itemName,state.position,symbol))
+                if x
+                then
+                  yield!
+                    seq{for gt in local ->
+                            {itemName = fst gt; position = snd gt; forest = state.forest; sTrace = state.sTrace}}
+           }
+
 #if DEBUG
         |> fun res -> printfn "GOTO:\n from state : %A \nby symbol : %A \n resultset : %A\n" states symbol res; res
 #endif
@@ -349,7 +339,7 @@ type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeVal
                         let getUserTree tree =
                             match tree with
                             | Node (childs,_,_,_) -> Some (List.head childs)
-                            | _                        -> None
+                            | _                   -> None
 
                         List.head forest
                         |> fun x ->

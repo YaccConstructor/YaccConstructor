@@ -42,7 +42,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_1.yrd.in"
                 rightValue = seq ["-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
             })
         (2,
             {
@@ -50,7 +50,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_2.yrd.in"
                 rightValue = seq ["-;-" |> box] 
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>   
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
             })
         (3,
             {
@@ -58,7 +58,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_3.yrd.in"
                 rightValue = seq ["+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>    
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
             })
         (4,
             {
@@ -66,7 +66,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_4.yrd.in"
                 rightValue = seq ["+;+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>    
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
             })
         (5,
             {
@@ -74,7 +74,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_5.yrd.in"
                 rightValue = seq ["-;+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>    
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
             })
         (6,
             {
@@ -82,7 +82,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_6.yrd.in"
                 rightValue = seq ["+;-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>    
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
             })
         (7,
             {
@@ -90,7 +90,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_7.yrd.in"
                 rightValue = seq ["-;+;+;-;+;-;-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer  
             })
         (8,
             {
@@ -98,7 +98,7 @@ let tests =
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_1.yrd.in"
                 rightValue = seq ["Detected: +" |> box]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer<_>
+                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer
             })
         (9,
             {
@@ -106,7 +106,7 @@ let tests =
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_2.yrd.in"
                 rightValue = seq ["Detected: *" |> box]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer  
             })
         (10,
             {
@@ -114,7 +114,7 @@ let tests =
                 actionsMap = RACC.Actions_Seq.ruleToAction
                 path       = "test_seq\\test_seq_1.yrd.in"
                 rightValue = seq [3.0 |> box]
-                lexer      = fun buf -> Lexer_seq.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_seq.Lexer(buf):>ILexer 
             })
         (11,
             {
@@ -122,7 +122,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls_tail.ruleToAction
                 path       = "test_cls_with_tail\\test_cls_with_tail_1.yrd.in"
                 rightValue = seq ["tail minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
             })
         (12,
             {
@@ -130,7 +130,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls_tail.ruleToAction
                 path       = "test_cls_with_tail\\test_cls_with_tail_2.yrd.in"
                 rightValue = seq ["list minus;tail minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
             })
         (13,
             {
@@ -138,7 +138,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls_head.ruleToAction
                 path       = "test_cls_with_head\\test_cls_with_head_1.yrd.in"
                 rightValue = seq ["Head minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
             })
         (14,
             {
@@ -146,7 +146,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls_head.ruleToAction
                 path       = "test_cls_with_head\\test_cls_with_head_2.yrd.in"
                 rightValue = seq ["Head minus;list minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
             })
         (15,
             {
@@ -154,7 +154,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_1.yrd.in"
                 rightValue = seq ["" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
             })
         (16,
             {
@@ -162,7 +162,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_2.yrd.in"
                 rightValue = seq ["*" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
             })
         (17,
             {
@@ -170,7 +170,7 @@ let tests =
                 actionsMap = RACC.Actions_Cls.ruleToAction
                 path       = "test_cls\\test_cls_3.yrd.in"
                 rightValue = seq ["*;*" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
             })
         (18,
             {
@@ -178,7 +178,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_1.yrd.in"
                 rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (19,
             {
@@ -186,7 +186,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_2.yrd.in"
                 rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (20,
             {
@@ -194,7 +194,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_3.yrd.in"
                 rightValue = seq [6 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (21,
             {
@@ -202,7 +202,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_4.yrd.in"
                 rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (22,
             {
@@ -210,7 +210,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
                 rightValue = seq [5 |> box; 3 |> box; -3 |> box; 3 |> box; -1 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (23,
             {
@@ -218,7 +218,7 @@ let tests =
                 actionsMap = RACC.Actions_L_attr.ruleToAction
                 path       = "test_l_attr\\test_l_attr_1.yrd.in"
                 rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_L_attr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_L_attr.Lexer(buf):>ILexer
             })
         (24,
             {
@@ -226,7 +226,7 @@ let tests =
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_1.yrd.in"
                 rightValue = seq [7 |> box]
-                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
             })
         (25,
             {
@@ -234,7 +234,7 @@ let tests =
                 actionsMap = RACC.Actions_Simple_checker.ruleToAction
                 path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
                 rightValue = seq [12 |> box; 12 |> box]
-                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
             })
         (26,
             {
@@ -242,7 +242,7 @@ let tests =
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_1.yrd.in"
                 rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
             })
         (27,
             {
@@ -250,7 +250,7 @@ let tests =
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_2.yrd.in"
                 rightValue = seq [10 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
             })
         (28,
             {
@@ -258,7 +258,7 @@ let tests =
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_3.yrd.in"
                 rightValue = seq [11 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
             })
         (29,
             {
@@ -266,7 +266,7 @@ let tests =
                 actionsMap = RACC.Actions_Checker_on_glr.ruleToAction
                 path       = "test_checker_on_glr\\test_checker_on_glr_4.yrd.in"
                 rightValue = seq [40 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
             })
 
         (30,
@@ -275,7 +275,7 @@ let tests =
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_1.yrd.in"
                 rightValue = seq [1.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
             })
 
         (31,
@@ -284,7 +284,7 @@ let tests =
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_2.yrd.in"
                 rightValue = seq [3.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
             })
 
         (32,
@@ -293,7 +293,7 @@ let tests =
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_3.yrd.in"
                 rightValue = seq [6.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
             })
 
         (33,
@@ -302,7 +302,7 @@ let tests =
                 actionsMap = RACC.Actions_Opt.ruleToAction
                 path       = "test_opt\\test_opt_1.yrd.in"
                 rightValue = seq ["1 +" |> box]
-                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer  
             })
 
         (333,
@@ -311,7 +311,7 @@ let tests =
                 actionsMap = RACC.Actions_Opt.ruleToAction
                 path       = "test_opt\\test_opt_2.yrd.in"
                 rightValue = seq ["1" |> box]
-                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer  
             })
 
         (34,
@@ -320,7 +320,7 @@ let tests =
                 actionsMap = RACC.Actions_Alt.ruleToAction
                 path       = "test_alt\\test_alt_3.yrd.in"
                 rightValue = seq ["1 NUMBER 1"]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer  
             })
 
         (35,
@@ -329,7 +329,7 @@ let tests =
                 actionsMap = RACC.Actions_alt_in_cls.ruleToAction
                 path       = "test_alt_in_cls\\test_alt_in_cls_8.yrd.in"
                 rightValue = seq ["5 NUMBER 2"]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer  
             })
 
         (36,
@@ -338,7 +338,7 @@ let tests =
                 actionsMap = RACC.Actions_Summator_1.ruleToAction
                 path       = "test_summator_1\\test_summator_1_4.yrd.in"
                 rightValue = seq ["5 PLUS +"]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer  
             })
 
         (37,
@@ -347,7 +347,7 @@ let tests =
                 actionsMap = RACC.Actions_Aritm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
                 rightValue = seq ["5 MINUS -"]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer  
             })
 
         (38,
@@ -356,7 +356,7 @@ let tests =
                 actionsMap = RACC.Actions_Rdc_Rdc.ruleToAction
                 path       = "test_reduce_reduce\\test_reduce_reduce_1.yrd.in"
                 rightValue = seq ["A" |> box; "B" |> box]
-                lexer      = fun buf -> Lexer_reduce_reduce.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_reduce_reduce.Lexer(buf):>ILexer  
             })
 
         (39,
@@ -365,7 +365,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_1.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_1.yrd.in"
                 rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
             })
 
         (40,
@@ -374,7 +374,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_1.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_2.yrd.in"
                 rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
             })
 
         (41,
@@ -383,7 +383,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_1.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_3.yrd.in"
                 rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
             })
 
         (42,
@@ -392,7 +392,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_2.ruleToAction
                 path       = "\claret\\braces_2\\test_simple_braces_2_1.yrd.in"
                 rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
             })
 
         (43,
@@ -401,7 +401,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_2.ruleToAction
                 path       = "\claret\\braces_2\\test_simple_braces_2_2.yrd.in"
                 rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
             })
 
         (44,
@@ -410,7 +410,7 @@ let tests =
                 actionsMap = RACC.Actions_claret_2.ruleToAction
                 path       = "\claret\\braces_2\\test_simple_braces_2_3.yrd.in"
                 rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer<_>  
+                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
             })
 
     ]
@@ -429,7 +429,7 @@ let runMain path tables actions lexerF =
     let buf = run_common path 
     let l = lexerF buf
     let parseRes,cache,cc = 
-        let ti = new TableInterpreter<string>()
+        let ti = new TableInterpreter()
         ti.Run l tables    
     let res  = 
         match parseRes with
@@ -439,7 +439,7 @@ let runMain path tables actions lexerF =
             |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
             |> TSuccess
         | PError (pos) -> 
-            TError((l:>ILexer<string>).Get(pos) 
+            TError((l:>ILexer).Get(pos) 
             |> fun x -> (String.concat " " [pos.ToString(); string x.tag]))
 
     res,cache,cc

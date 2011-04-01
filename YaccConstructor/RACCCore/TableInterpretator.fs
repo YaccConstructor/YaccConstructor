@@ -33,13 +33,13 @@ type ParseStatus<'a,'b,'c when 'a: comparison and 'c: equality and 'c: compariso
     | PSuccess of Set<AST<'a,'b,'c>>
     | PError   of int
 
-type  TableInterpreter<'lexemeValue when 'lexemeValue: comparison and 'lexemeValue: null>() = class
+type  TableInterpreter() = class
     
     let forest = ref []
 
     let maxCorrPos = ref 0
 
-    let Lexer: Option<ILexer<'lexemeValue>>  ref = ref None
+    let Lexer: Option<ILexer>  ref = ref None
 
     let CallCount = ref 0
 

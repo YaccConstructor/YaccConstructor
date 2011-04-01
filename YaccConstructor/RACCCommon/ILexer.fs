@@ -24,6 +24,6 @@ type ILexeme = interface
         abstract tag : int
 end
  
-type ILexer<'lexemeValue> = interface
+type ILexer = interface
     abstract Get : int -> ILexeme
 end

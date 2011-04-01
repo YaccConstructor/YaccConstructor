@@ -93,7 +93,7 @@ and _fslex_tokens  _fslex_state lexbuf =
 
 type Lexer(lb) = 
     let locBuf = ref []
-    interface ILexer<string> with        
+    interface ILexer with        
     
        member self.Get pos = 
         let l = !locBuf |> List.length

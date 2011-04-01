@@ -39,7 +39,7 @@ type SeqLexer(seqTok:array<_>) =
             printfn "%A\n" seqTok
             Seq.toArray seqTok*)
         let mutable ind = 0
-        interface ILexer<string> with
+        interface ILexer with
             member self.Get pos =
                 seqTok.[pos-1]           
     end
@@ -63,7 +63,7 @@ let run path =
     // cache -- trace cache
     // cc -- some additional debug info
     let parseRes,cache,cc = 
-        let ti = new TableInterpreter<string>()
+        let ti = new TableInterpreter()
         ti.Run l tables
 
     let result = 
@@ -80,7 +80,7 @@ let run path =
             //Error handling
             //If you create lexeme with position in stream, you can not only provide error lexeme
             // but also navigate in error position
-            let errLexeme = (l :> ILexer<string>).Get(pos)
+            let errLexeme = (l :> ILexer).Get(pos)
             "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.ToString()
             |> failwith
             

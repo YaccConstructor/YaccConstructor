@@ -22,27 +22,6 @@ open Yard.Generators.RACCGenerator
 open Yard.Generators.RACCGenerator.Tables
 open Microsoft.FSharp.Text.Lexing
 
-(*let smallBraces = seq{(*yield {tag = "LBRACE"; value = "("};
-                      yield {tag = "RBRACE"; value = ")"};
-                      yield {tag = "LBRACE"; value = "("};
-                      yield {tag = "LBRACE"; value = "("};
-                      yield {tag = "RBRACE"; value = ")"};
-                      yield {tag = "RBRACE"; value = ")"};
-                      yield {tag = "LBRACE"; value = "("};
-                      yield {tag = "RBRACE"; value = ")"};*)
-                      (*yield {tag = -1; value = "EOF"}*)}
-                      *)
-type SeqLexer(seqTok:array<_>) = 
-    class
-        
-        (*let locbuf _ = 
-            printfn "%A\n" seqTok
-            Seq.toArray seqTok*)
-        let mutable ind = 0
-        interface ILexer with
-            member self.Get pos =
-                seqTok.[pos-1]           
-    end
 
 //path -- path to input file
 let run path =
@@ -51,12 +30,9 @@ let run path =
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
     let l = Lexer_arithm_glr.Lexer(buf)
-    
-    //let l = SeqLexer (Seq.toArray smallBraces)
 
     //Create tables
     let tables = tables
-        
     
     //Run parser
     // trees -- dirivation forest

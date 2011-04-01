@@ -1,0 +1,16 @@
+{
+module Lexer
+
+open Microsoft.FSharp.Text.Lexing
+
+open Parser
+}
+
+let whitespace = [' ' '\n' '\t' '\r']
+let digit = ['0'-'9']
+
+rule main = parse
+  | whitespace { main lexbuf }
+  | digit+ { INT(System.Int32.Parse(LexBuffer.LexemeString(lexbuf))) }
+  | eof { EOF }
+  | _ { main lexbuf }

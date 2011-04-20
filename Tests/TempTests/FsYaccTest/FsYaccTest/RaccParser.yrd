@@ -3,6 +3,7 @@
 //let print l = (l:>MyLexeme).MValue |> sprintf "%A"
 let value l = (l:>RaccLexer.MyLexeme).MValue
 let f list =
+  printfn "f start::"
   match list with
   | elem::t -> 
       List.fold
@@ -14,6 +15,6 @@ let f list =
 
 +start: list = list { list } ;
 
-list: list = (elem = list_elem { elem })+ {f list};
+list: list = (elem = list_elem { printfn "ELEM %A" elem; elem })+ {f list};
 
 list_elem: x=INT { printfn "int %A" (value x); value x } ;

@@ -1,0 +1,13 @@
+﻿+s:  HEAD? token* assoc* start typedef+ DOUBLE_PERC rule* DOUBLE_PERC? ;
+
+token: TOKEN_KW TYPE? UIDENT+ ;
+
+assoc: ASSOC_KW UIDENT+ ; 
+
+start: START_KW LIDENT+ ;
+
+typedef: TYPE_KW TYPE LIDENT ;
+
+rule: LIDENT COLON alternative (BAR alternative)* ;
+
+alternative: (LIDENT | UIDENT)*  ACTION_CODE ;

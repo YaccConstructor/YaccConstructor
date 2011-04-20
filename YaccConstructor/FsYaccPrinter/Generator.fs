@@ -51,7 +51,7 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
             indentedListL (
                 if !lineNumber = 1 then wordL ":" else wordL "|"
                 ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
-                @ (if actionCode = None then [] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
+                @ (if actionCode = None then [wordL "{ }"] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
         | PRef(("empty",_),_) -> leftL ""
         | PToken(src) | PRef(src, _) -> wordL (fst src)
         | _ -> wordL "UNEXPECTED"

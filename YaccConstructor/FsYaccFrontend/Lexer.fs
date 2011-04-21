@@ -2,7 +2,7 @@
  
 module Yard.Frontends.FsYaccFrontend.Lexer
 
-open Yard.Frontends.FsYaccFrontend.TokenType // using tokens type 
+open Yard.Frontends.FsYaccFrontend.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
 
 let comment_depth = ref 0

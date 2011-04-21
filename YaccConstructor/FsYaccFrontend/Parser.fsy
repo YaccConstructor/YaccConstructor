@@ -1,15 +1,16 @@
-%token ACTION_CODE
-%token UIDENT
-%token COLON
-%token BAR
-%token LIDENT
-%token TYPE
-%token TYPE_KW
-%token START_KW
-%token ASSOC_KW
-%token TOKEN_KW
 %token EOF
 %token DOUBLE_PERC
+%token TOKEN_KW
+%token ASSOC_KW
+%token START_KW
+%token <string> TYPE
+%token TYPE_KW
+%token BAR
+%token COLON
+%token <string> UIDENT
+%token <string> LIDENT
+%token <string> ACTION_CODE
+%token <string> HEAD
 
 %start s
 
@@ -17,155 +18,63 @@
 
 %%
 
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_list_5 : { [] }
-            | assoc yard_list_5
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_list_5 : { [] }
-            | assoc yard_list_5
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_nlist_6 : typedef {let yard_h=$1 in  [yard_h] }
-             | typedef yard_nlist_6
-               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_list_5 : { [] }
-            | assoc yard_list_5
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_list_4 : { [] }
-            | token yard_list_4
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_list_5 : { [] }
-            | assoc yard_list_5
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_nlist_6 : typedef {let yard_h=$1 in  [yard_h] }
-             | typedef yard_nlist_6
-               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_list_7 : { [] }
-            | rule yard_list_7
-              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_option_8 : DOUBLE_PERC {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-s : yard_option_3 yard_list_4 yard_list_5 start yard_nlist_6 DOUBLE_PERC
-    yard_list_7 yard_option_8 EOF { }
-
-yard_option_9 : TYPE {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_option_9 : TYPE {let yard_item=$1 in  Some yard_item }
-              | { None }
-
-yard_nlist_10 : UIDENT {let yard_h=$1 in  [yard_h] }
-              | UIDENT yard_nlist_10
-                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-token : TOKEN_KW yard_option_9 yard_nlist_10 { }
-
-assoc : ASSOC_KW yard_nlist_10 { }
-
-yard_nlist_11 : LIDENT {let yard_h=$1 in  [yard_h] }
-              | LIDENT yard_nlist_11
-                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-start : START_KW yard_nlist_11 { }
-
-typedef : TYPE_KW TYPE LIDENT { }
-
-yard_item_1 : BAR alternative { }
-
-yard_list_12 : { [] }
-             | yard_item_1 yard_list_12
-               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-rule : LIDENT COLON alternative yard_list_12 { }
-
-yard_item_2 : LIDENT { }
-            | UIDENT { }
+alternative : yard_list_13 ACTION_CODE { }
 
 yard_list_13 : { [] }
              | yard_item_2 yard_list_13
                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
 
-alternative : yard_list_13 ACTION_CODE { }
+yard_item_2 : LIDENT { }
+            | UIDENT { }
+
+rule : LIDENT COLON alternative yard_list_12 { }
+
+yard_list_12 : { [] }
+             | yard_item_1 yard_list_12
+               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_item_1 : BAR alternative { }
+
+typedef : TYPE_KW TYPE LIDENT { }
+
+start : START_KW yard_nlist_11 { }
+
+yard_nlist_11 : LIDENT {let yard_h=$1 in  [yard_h] }
+              | LIDENT yard_nlist_11
+                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+assoc : ASSOC_KW yard_nlist_10 { }
+
+token : TOKEN_KW yard_option_9 yard_nlist_10 { }
+
+yard_nlist_10 : UIDENT {let yard_h=$1 in  [yard_h] }
+              | UIDENT yard_nlist_10
+                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_option_9 : TYPE {let yard_item=$1 in  Some yard_item }
+              | { None }
+
+s : yard_option_3 yard_list_4 yard_list_5 start yard_nlist_6 DOUBLE_PERC
+    yard_list_7 yard_option_8 EOF { }
+
+yard_option_8 : DOUBLE_PERC { }
+              | { }
+
+yard_list_7 : { [] }
+            | rule yard_list_7
+              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_nlist_6 : typedef {let yard_h=$1 in  [yard_h] }
+             | typedef yard_nlist_6
+               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_list_5 : { [] }
+            | assoc yard_list_5
+              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_list_4 : { [] }
+            | token yard_list_4
+              {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_option_3 : HEAD {let yard_item=$1 in  Some yard_item }
+              | { None }

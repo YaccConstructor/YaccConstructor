@@ -48,6 +48,7 @@
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />
     <Compile Include="ReplaceLiterals.fs" />
+    <Compile Include="LeaveLast.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

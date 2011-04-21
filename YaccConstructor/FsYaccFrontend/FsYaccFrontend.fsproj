@@ -35,16 +35,17 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <Compile Include="TokenType.fs" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <CompileYard Include="fsyacc.yrd" />
     <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.GrammarParser --open Yard.Core --light-off</OtherFlags>
+      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core --light-off</OtherFlags>
     </FsYacc>
     <None Include="fsyacc.yrd" />
+    <Compile Include="Main.fs" />
     <Compile Include="FsYaccFrontend.fs" />
     <None Include="Parser.fsy" />
   </ItemGroup>
@@ -61,7 +62,7 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)Main\Bin\Debug\Main.exe" -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i "$(SolutionDir)FsYaccFrontend\fsyacc.yrd" &gt; "$(SolutionDir)FsYaccFrontend\Parser.fsy"</PreBuildEvent>
-  </PropertyGroup>
+  <!--PropertyGroup>
+    <PreBuildEvent>"$(SolutionDir)Main\Bin\Debug\Main.exe" -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c LeaveLast -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i "$(SolutionDir)FsYaccFrontend\fsyacc.yrd" &gt; "$(SolutionDir)FsYaccFrontend\Parser.fsy"</PreBuildEvent>
+  </PropertyGroup-->
 </Project>

@@ -5,8 +5,7 @@ open Yard.Core
 type token = 
   | HEAD of (string)
   | ACTION_CODE of (string)
-  | LIDENT of (string)
-  | UIDENT of (string)
+  | IDENT of (string)
   | COLON
   | BAR
   | TYPE_KW
@@ -19,8 +18,7 @@ type token =
 type tokenId = 
     | TOKEN_HEAD
     | TOKEN_ACTION_CODE
-    | TOKEN_LIDENT
-    | TOKEN_UIDENT
+    | TOKEN_IDENT
     | TOKEN_COLON
     | TOKEN_BAR
     | TOKEN_TYPE_KW
@@ -35,14 +33,13 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__starts
     | NONTERM_alternative
-    | NONTERM_yard_list_13
+    | NONTERM_yard_list_12
     | NONTERM_yard_item_2
     | NONTERM_rule
-    | NONTERM_yard_list_12
+    | NONTERM_yard_list_11
     | NONTERM_yard_item_1
     | NONTERM_typedef
     | NONTERM_start
-    | NONTERM_yard_nlist_11
     | NONTERM_assoc
     | NONTERM_token
     | NONTERM_yard_nlist_10

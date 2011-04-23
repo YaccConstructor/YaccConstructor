@@ -1,0 +1,3 @@
+%start s
+%type <string> s
+%%

@@ -11,9 +11,10 @@ let lexeme_start = ref 0
 let make_lexeme (n1, n2) = source.Value.Substring(n1, n2-n1) //, (n1, n2)
 
 // checks if the given identifier is keyword
-let identifier (lexeme:string) = match lexeme with
-  | s when System.Char.IsUpper s.[0]-> UIDENT(s)
-  | s when System.Char.IsLower s.[0]-> LIDENT(s)
+let identifier (lexeme:string) = IDENT(lexeme)
+//  match lexeme with
+//  | s when System.Char.IsUpper s.[0]-> UIDENT(s)
+//  | s when System.Char.IsLower s.[0]-> LIDENT(s)
 }
 
 let eol = "\r\n" | '\n'

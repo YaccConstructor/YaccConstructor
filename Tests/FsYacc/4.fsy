@@ -1,0 +1,5 @@
+%start s
+%type <string> s
+%%
+
+s: a b {}

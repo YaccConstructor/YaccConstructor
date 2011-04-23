@@ -1,0 +1,8 @@
+%{                                  
+%}
+                
+%start ParseAntlr
+%type <(Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary> ParseAntlr
+
+
+%%

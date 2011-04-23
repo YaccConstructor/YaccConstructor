@@ -1,3 +1,9 @@
+%{
+
+open Yard.Core.IL
+open Yard.Core.IL.Production
+
+%}
 %token EOF
 %token DOUBLE_PERC
 %token TOKEN_KW
@@ -7,8 +13,7 @@
 %token TYPE_KW
 %token BAR
 %token COLON
-%token <string> UIDENT
-%token <string> LIDENT
+%token <string> IDENT
 %token <string> ACTION_CODE
 %token <string> HEAD
 
@@ -18,44 +23,47 @@
 
 %%
 
-alternative : yard_list_13 ACTION_CODE { }
-
-yard_list_13 : { [] }
-             | yard_item_2 yard_list_13
-               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
-
-yard_item_2 : LIDENT { }
-            | UIDENT { }
-
-rule : LIDENT COLON alternative yard_list_12 { }
+alternative : yard_list_12 ACTION_CODE
+              {let lst=$1 in let ac=$2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0))) }
 
 yard_list_12 : { [] }
-             | yard_item_1 yard_list_12
+             | yard_item_2 yard_list_12
                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
 
-yard_item_1 : BAR alternative { }
+yard_item_2 : IDENT {let s=$1 in  PRef((s,(0,0)), None) }
 
-typedef : TYPE_KW TYPE LIDENT { }
+rule : IDENT COLON alternative yard_list_11
+       {let name=$1 in let alt=$3 in let opt_alts=$4 in  { new Rule.t<Source.t, Source.t> with 
+            name=name 
+            and args=[] 
+            and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(prod, alt)) opt_alts)
+            and _public=false
+            and metaArgs=[] } }
 
-start : START_KW yard_nlist_11 { }
+yard_list_11 : { [] }
+             | yard_item_1 yard_list_11
+               {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
 
-yard_nlist_11 : LIDENT {let yard_h=$1 in  [yard_h] }
-              | LIDENT yard_nlist_11
-                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+yard_item_1 : BAR alternative {let alt=$2 in alt}
+
+typedef : TYPE_KW TYPE IDENT { }
+
+start : START_KW yard_nlist_10 {let name=$2 in  name }
 
 assoc : ASSOC_KW yard_nlist_10 { }
 
-token : TOKEN_KW yard_option_9 yard_nlist_10 { }
+token : TOKEN_KW yard_option_9 yard_nlist_10 {let tokens=$3 in  tokens }
 
-yard_nlist_10 : UIDENT {let yard_h=$1 in  [yard_h] }
-              | UIDENT yard_nlist_10
+yard_nlist_10 : IDENT {let yard_h=$1 in  [yard_h] }
+              | IDENT yard_nlist_10
                 {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
 
 yard_option_9 : TYPE {let yard_item=$1 in  Some yard_item }
               | { None }
 
 s : yard_option_3 yard_list_4 yard_list_5 start yard_nlist_6 DOUBLE_PERC
-    yard_list_7 yard_option_8 EOF { }
+    yard_list_7 yard_option_8 EOF
+    {let h=$1 in let tokens=$2 in let st=$4 in let rules=$7 in  h, List.concat tokens, st, rules }
 
 yard_option_8 : DOUBLE_PERC { }
               | { }

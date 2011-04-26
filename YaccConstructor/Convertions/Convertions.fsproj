@@ -49,6 +49,7 @@
     <Compile Include="AddEOF.fs" />
     <Compile Include="ReplaceLiterals.fs" />
     <Compile Include="LeaveLast.fs" />
+    <Compile Include="BuildAST.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

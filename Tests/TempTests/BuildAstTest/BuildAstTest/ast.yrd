@@ -1,0 +1,8 @@
++s:  <_S0> = e {Node("s", [Some(_S0)] |> List.choose (fun x -> x) )};
+
+e: 
+      <_S0> = NUMBER
+        {Node("e_inner", [Some(Leaf("NUMBER", _S0))] |> List.choose (fun x -> x) )}
+    | <_S0> = NUMBER <_S1> = PLUS <_S2> = e
+        {Node("e_inner", [Some(Leaf("NUMBER", _S0)); Some(Leaf("PLUS", _S1)); Some(_S2)] |> List.choose (fun x -> x) )}
+    ;

@@ -1,0 +1,14 @@
+{
+module Lexer
+
+open Parser
+open Microsoft.FSharp.Text.Lexing
+
+let source = ref ""
+}
+
+rule token = parse
+    | ['0'-'9']+ { NUMBER(LexBuffer.LexemeString(lexbuf)) }
+    | "+" { PLUS }
+    | eof { EOF }
+    | _ { token lexbuf }

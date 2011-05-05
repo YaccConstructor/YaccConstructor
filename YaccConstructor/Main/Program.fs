@@ -110,9 +110,9 @@ let () =
                 with
                 | e -> GenError e.Message |> raise
 
-#if DEBUG               
+//#if DEBUG               
             printf "%s" (result :?> string)
-#endif
+//#endif
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise
@@ -153,6 +153,7 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ..\..\..\FsYaccFrontend\fsyacc.yrd
 //Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/antlr.fsy
 //Main.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Basic/test_summator_1/test_summator_1.yrd
+//Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
 
 
 (*open Yard.Core.IL.Production

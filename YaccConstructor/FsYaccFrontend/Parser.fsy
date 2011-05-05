@@ -9,13 +9,13 @@ open Yard.Core.IL.Production
 %token TOKEN_KW
 %token ASSOC_KW
 %token START_KW
-%token <string> TYPE
 %token TYPE_KW
 %token BAR
 %token COLON
 %token <string> IDENT
 %token <string> ACTION_CODE
 %token <string> HEAD
+%token <string> TYPE
 
 %start s
 
@@ -23,30 +23,33 @@ open Yard.Core.IL.Production
 
 %%
 
-alternative : yard_list_12 ACTION_CODE
+alternative : yard_list_13 ACTION_CODE
               {let lst=$1 in let ac=$2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0))) }
 
-yard_list_12 : { [] }
-             | yard_item_2 yard_list_12
+yard_list_13 : { [] }
+             | yard_item_2 yard_list_13
                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
 
 yard_item_2 : IDENT {let s=$1 in  PRef((s,(0,0)), None) }
 
-rule : IDENT COLON alternative yard_list_11
-       {let name=$1 in let alt=$3 in let opt_alts=$4 in  { new Rule.t<Source.t, Source.t> with 
+rule : IDENT COLON yard_option_11 alternative yard_list_12
+       {let name=$1 in let alt=$4 in let opt_alts=$5 in  { new Rule.t<Source.t, Source.t> with 
             name=name 
             and args=[] 
             and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(prod, alt)) opt_alts)
             and _public=false
             and metaArgs=[] } }
 
-yard_list_11 : { [] }
-             | yard_item_1 yard_list_11
+yard_list_12 : { [] }
+             | yard_item_1 yard_list_12
                {let yard_h=$1 in let yard_t=$2 in  yard_h::yard_t }
+
+yard_option_11 : BAR { }
+               | { }
 
 yard_item_1 : BAR alternative {let alt=$2 in alt}
 
-typedef : TYPE_KW TYPE IDENT { }
+typedef : TYPE_KW TYPE yard_nlist_10 { }
 
 start : START_KW yard_nlist_10 {let name=$2 in  name }
 

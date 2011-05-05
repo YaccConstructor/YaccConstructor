@@ -3,26 +3,26 @@
 module Yard.Frontends.FsYaccFrontend.Parser
 open Yard.Core
 type token = 
+  | TYPE of (string)
   | HEAD of (string)
   | ACTION_CODE of (string)
   | IDENT of (string)
   | COLON
   | BAR
   | TYPE_KW
-  | TYPE of (string)
   | START_KW
   | ASSOC_KW
   | TOKEN_KW
   | DOUBLE_PERC
   | EOF
 type tokenId = 
+    | TOKEN_TYPE
     | TOKEN_HEAD
     | TOKEN_ACTION_CODE
     | TOKEN_IDENT
     | TOKEN_COLON
     | TOKEN_BAR
     | TOKEN_TYPE_KW
-    | TOKEN_TYPE
     | TOKEN_START_KW
     | TOKEN_ASSOC_KW
     | TOKEN_TOKEN_KW
@@ -33,10 +33,11 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__starts
     | NONTERM_alternative
-    | NONTERM_yard_list_12
+    | NONTERM_yard_list_13
     | NONTERM_yard_item_2
     | NONTERM_rule
-    | NONTERM_yard_list_11
+    | NONTERM_yard_list_12
+    | NONTERM_yard_option_11
     | NONTERM_yard_item_1
     | NONTERM_typedef
     | NONTERM_start

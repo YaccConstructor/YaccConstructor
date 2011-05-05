@@ -20,7 +20,7 @@ let identifier (lexeme:string) = IDENT(lexeme)
 let eol = "\r\n" | '\n'
 let lowerchar = ['a'-'z']
 let upperchar = ['A'-'Z']
-let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\255' '0'-'9']
+let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '0'-'9']
 
 rule token = parse
   | "{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf }

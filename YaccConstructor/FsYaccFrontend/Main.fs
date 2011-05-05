@@ -38,7 +38,7 @@ let ParseFile fileName =
         let (res:System.Tuple<string option, string list, string list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = match res.Item1 with Some(str) -> Some(str, (0,0)) | _ -> None
         { new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = defHead and grammar = addBindings (addStarts res.Item3 res.Item4) and foot = None }
-    with e when e.Message="parse error" -> 
+    with e -> // when e.Message="parse error" -> 
         let pos = lexbuf.EndPos
         let extendedMessage = sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage

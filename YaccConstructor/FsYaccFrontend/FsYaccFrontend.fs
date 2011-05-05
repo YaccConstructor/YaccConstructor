@@ -13,6 +13,11 @@ type FsYaccFrontend() =
     end
 
 // For testing switch to Console App and then switch back to Class Library
+// Delete action code from yard_option_8
+// Add %token HEAD
+// Add <string> to some terminals
+// Remove %prec TOKEN
+
 module Run = 
 
     open Microsoft.FSharp.Text.Lexing

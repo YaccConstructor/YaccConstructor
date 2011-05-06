@@ -33,6 +33,7 @@ let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (convNameWithParams
         and  head = ilTree.head
         and  grammar = 
             match Array.toList (convNameWithParams.Split(' ')) with
+            | name::[] -> (Convertion name).ConvertList ilTree.grammar
             | name::parameters -> (Convertion name).ConvertList (ilTree.grammar, String.concat " " parameters)
             | _ -> failwith "You need to specify convertion name"
         and  foot = ilTree.foot

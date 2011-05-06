@@ -59,9 +59,8 @@ let buildAST (ruleList: Rule.t<Source.t, Source.t> list) =
     ruleList |> List.map (fun rule -> {rule with body=(_buildAST rule.name rule.body) } )
 
 type BuildAST() = 
-    interface IConvertion with
-        member this.Name = "BuildAST"
-        member this.ConvertList ruleList = buildAST ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "BuildAST"
+        override this.ConvertList ruleList = buildAST ruleList
+        override this.EliminatedProductionTypes = [""]
 

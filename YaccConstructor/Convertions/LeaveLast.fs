@@ -32,8 +32,7 @@ let leaveLast (ruleList: Rule.t<Source.t, Source.t> list) =
     
 
 type LeaveLast() = 
-    interface IConvertion with
-        member this.Name = "LeaveLast"
-        member this.ConvertList ruleList = leaveLast ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "LeaveLast"
+        override this.ConvertList ruleList = leaveLast ruleList
+        override this.EliminatedProductionTypes = [""]

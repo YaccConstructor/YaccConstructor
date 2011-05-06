@@ -133,8 +133,7 @@ let convertEBNFtoMeta l =
 (* end of converting EBNF to metarules *)
 
 type ExpandEBNF() = 
-    interface IConvertion with
-        member this.Name = "ExpandEBNF"
-        member this.ConvertList ruleList = convertEBNFtoMeta ruleList
-        member this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]
-    end
+    inherit Convertion()
+        override this.Name = "ExpandEBNF"
+        override this.ConvertList ruleList = convertEBNFtoMeta ruleList
+        override this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]

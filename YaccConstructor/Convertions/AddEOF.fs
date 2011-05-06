@@ -85,8 +85,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
         )  
 
 type AddEOF() = 
-    interface IConvertion with
-        member this.Name = "AddEOF"
-        member this.ConvertList ruleList = addEOF ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "AddEOF"
+        override this.ConvertList ruleList = addEOF ruleList
+        override this.EliminatedProductionTypes = [""]

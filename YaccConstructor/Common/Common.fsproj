@@ -54,7 +54,7 @@
     <Compile Include="GeneratorsManager.fs" />
     <Compile Include="IFrontend.fs" />
     <Compile Include="FrontendsManager.fs" />
-    <Compile Include="IConvertion.fs" />
+    <Compile Include="Convertion.fs" />
     <Compile Include="ConvertionsManager.fs" />
     <Compile Include="ITester.fs" />
   </ItemGroup>

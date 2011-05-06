@@ -27,7 +27,7 @@ open Yard.Core.IL.Production
 
 open System.Collections.Generic
 
-let tokenName literal =
+let tokenName literal token_format=
     let upper = 
         String.collect 
             (function
@@ -41,7 +41,11 @@ let tokenName literal =
             | _ -> ""
             )
             literal
-    if upper.Length=0 then "EMPTY" else upper
+    if upper.Length=0 then 
+        "EMPTY" 
+    else 
+        let format = Printf.StringFormat<string->string>(token_format)
+        sprintf format upper
 
 let rec eachProduction f productionList =
     List.iter 
@@ -55,7 +59,7 @@ let rec eachProduction f productionList =
         )
         productionList 
 
-let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, string>) (grammarTokens:HashSet<string>)= 
+let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, string>) (grammarTokens:HashSet<string>) token_format= 
     let rec _replaceLiterals = function
         | PSeq(elements, actionCode) -> PSeq(
             elements |> List.map (fun elem -> {elem with rule=(_replaceLiterals elem.rule)}),
@@ -68,7 +72,7 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, 
             if (replacedLiterals.ContainsKey str) then
                 PToken(replacedLiterals.[str], (0,0))
             else
-                let token = ref(tokenName str)
+                let token = ref(tokenName str token_format)
                 while grammarTokens.Contains(!token) do
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
@@ -77,20 +81,21 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, 
     _replaceLiterals production
     
 
-let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) = 
+let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) (token_format:string) = 
+    
     let grammarTokens = new HashSet<string>()
     eachProduction 
         (function
-        | PToken(name,_) -> grammarTokens.Add(name);()
+        | PToken(name,_) -> grammarTokens.Add(name) |> ignore ; ()
         | _ -> ()
         )
         (ruleList |> List.map (fun rule -> rule.body) )
     let replacedLiterals = new Dictionary<string, string>() // <literal text, token>
-    ruleList |> List.map (fun rule -> {rule with body=replaceLiteralsInProduction rule.body replacedLiterals grammarTokens} )  
+    ruleList |> List.map (fun rule -> {rule with body=replaceLiteralsInProduction rule.body replacedLiterals grammarTokens token_format} )  
 
 type ReplaceLiterals() = 
-    interface IConvertion with
-        member this.Name = "ReplaceLiterals"
-        member this.ConvertList ruleList = replaceLiterals ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "ReplaceLiterals"
+        override this.ConvertList ruleList = replaceLiterals ruleList "%s"
+        override this.ConvertList(ruleList, token_format) =  replaceLiterals ruleList token_format
+        override this.EliminatedProductionTypes = [""]

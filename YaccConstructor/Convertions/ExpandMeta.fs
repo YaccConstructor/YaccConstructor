@@ -220,8 +220,7 @@ let expandMetaRules rules =
     handleMeta rules (metaRulesTbl,refsTbl) []
 
 type ExpandMeta() = 
-    interface IConvertion with
-        member this.Name = "ExpandMeta"
-        member this.ConvertList ruleList = expandMetaRules ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "ExpandMeta"
+        override this.ConvertList ruleList = expandMetaRules ruleList
+        override this.EliminatedProductionTypes = [""]

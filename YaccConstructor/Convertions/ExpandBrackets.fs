@@ -56,8 +56,7 @@ let expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
     List.rev !expanded
 
 type ExpandBrackets() = 
-    interface IConvertion with
-        member this.Name = "ExpandBrackets"
-        member this.ConvertList ruleList = expandBrackets ruleList
-        member this.EliminatedProductionTypes = [""]
-    end
+    inherit Convertion()
+        override this.Name = "ExpandBrackets"
+        override this.ConvertList ruleList = expandBrackets ruleList
+        override this.EliminatedProductionTypes = [""]

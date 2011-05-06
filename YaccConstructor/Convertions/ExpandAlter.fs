@@ -27,8 +27,7 @@ let extract_one_rule (rule:Rule.t<'a,'b>) =
     expand rule.body |> List.map (fun x -> {rule with body = x})
 
 type ExpandAlter() = 
-    interface IConvertion with
-        member this.Name = "ExpandAlter"
-        member this.ConvertList ruleList = List.collect extract_one_rule ruleList
-        member this.EliminatedProductionTypes = ["PAlt"]
-    end
+    inherit Convertion()
+        override this.Name = "ExpandAlter"
+        override this.ConvertList ruleList = List.collect extract_one_rule ruleList
+        override this.EliminatedProductionTypes = ["PAlt"]

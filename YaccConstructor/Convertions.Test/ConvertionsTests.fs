@@ -51,7 +51,7 @@ type ``ExpandBrackets tests`` () =
                 }
             ]
         }
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandBrackets.ExpandBrackets())
+        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandBrackets")
         printfn "%A" ilTreeConverted
         let correctConverted = { new Definition.t<Source.t, Source.t> with
             info = {fileName = "";}

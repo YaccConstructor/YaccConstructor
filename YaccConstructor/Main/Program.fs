@@ -28,7 +28,7 @@ let () =
     let generatorName = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
-    let convertions = new ResizeArray<IConvertion>()
+    let convertions = new ResizeArray<string>()
 
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
@@ -57,7 +57,7 @@ let () =
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
          "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
-         "-c", ArgType.String (fun s -> convertions.Add(ConvertionsManager.Convertion s)), "Convertion applied in order. Use -ac to list available."
+         "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
@@ -154,6 +154,7 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/antlr.fsy
 //Main.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Basic/test_summator_1/test_summator_1.yrd
 //Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
+//Main.exe -c "ReplaceLiterals KW_%s" -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
 
 
 (*open Yard.Core.IL.Production

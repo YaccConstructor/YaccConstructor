@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-c ReplaceLiterals -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd</StartArguments>
+    <StartArguments>-f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/8.fsy</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>

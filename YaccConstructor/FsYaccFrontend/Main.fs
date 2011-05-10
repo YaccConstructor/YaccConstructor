@@ -15,7 +15,7 @@ let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) =
 let rec _addBindings = function
     | PSeq(elements, Some(ac,_)) -> PSeq(List.mapi (
         fun i elem -> 
-            if Regex.Match(ac, sprintf "\\$%d[^d]" (i+1)).Success then 
+            if Regex.Match(ac, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
                 { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0)) } 
             else 
                 { elem with rule=_addBindings elem.rule} 

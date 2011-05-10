@@ -73,13 +73,15 @@ let printSeqProduction binding = function
 
 let rec _buildAST ruleName (production: t<Source.t, Source.t>) = 
     let isRef (elem:Production.elem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false
+    let isToken (elem:Production.elem<Source.t, Source.t>) = match elem.rule with PToken(_) -> true | _ -> false
     match production with
     | PSeq(elements, _) -> 
         if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
             PSeq(elements, Some("Leaf(\"empty\")", (0,0)))
         else
             PSeq(elements |> List.mapi (fun i elem -> 
-                if elem.omit || not (isRef elem) then { elem with binding=None ; rule=(_buildAST (ruleName+"_inner") elem.rule) } else { elem with binding=Some((sprintf "_S%d" i),(0,0)) ; rule=(_buildAST (ruleName+"_inner") elem.rule) }
+                //Don't add bindings to omit or tokens
+                if elem.omit || (isToken elem) then { elem with binding=None ; rule=(_buildAST (ruleName+"_inner") elem.rule) } else { elem with binding=Some((sprintf "_S%d" i),(0,0)) ; rule=(_buildAST (ruleName+"_inner") elem.rule) }
             ), 
             Some(sprintf "Node(\"%s\", [%s] |> List.choose (fun x -> x) )" ruleName (elements |> List.mapi (fun i elem -> (i, elem)) |> List.choose (fun (i, elem) -> if elem.omit then None else Some(printSeqProduction (sprintf "_S%d" i) elem.rule)) |> String.concat "; "), (0,0)))
     | PAlt(left, right) -> PAlt(_buildAST (ruleName+"_inner") left, _buildAST (ruleName+"_inner") right)

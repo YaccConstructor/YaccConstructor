@@ -18,7 +18,7 @@ rule: name=IDENT COLON BAR? alt=alternative opt_alts=(BAR alt=alternative {alt})
     { { new Rule.t<Source.t, Source.t> with 
             name=name 
             and args=[] 
-            and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(prod, alt)) opt_alts)
+            and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
             and _public=false
             and metaArgs=[] } } ;
 

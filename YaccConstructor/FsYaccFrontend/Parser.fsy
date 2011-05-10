@@ -9,13 +9,13 @@ open Yard.Core.IL.Production
 %token TOKEN_KW
 %token ASSOC_KW
 %token START_KW
+%token <string> TYPE
 %token TYPE_KW
 %token BAR
 %token COLON
 %token <string> IDENT
 %token <string> ACTION_CODE
 %token <string> HEAD
-%token <string> TYPE
 
 %start s
 
@@ -36,7 +36,7 @@ rule : IDENT COLON yard_option_11 alternative yard_list_12
        {let name=$1 in let alt=$4 in let opt_alts=$5 in  { new Rule.t<Source.t, Source.t> with 
             name=name 
             and args=[] 
-            and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(prod, alt)) opt_alts)
+            and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
             and _public=false
             and metaArgs=[] } }
 
@@ -69,7 +69,7 @@ s : yard_option_3 yard_list_4 yard_list_5 start yard_nlist_6 DOUBLE_PERC
     {let h=$1 in let tokens=$2 in let st=$4 in let rules=$7 in  h, List.concat tokens, st, rules }
 
 yard_option_8 : DOUBLE_PERC { }
-              | { }
+              | {  }
 
 yard_list_7 : { [] }
             | rule yard_list_7

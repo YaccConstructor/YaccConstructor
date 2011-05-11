@@ -75,7 +75,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
             match elem.binding with
             | Some(_) -> 10
             | None -> priority elem.rule
-        | PSeq(_) -> 10
+        | PSeq(_) -> 1
         | PToken(_) | PRef(_) | PMetaRef(_) | PLiteral(_) -> 100
         | PMany(_) | POpt(_) | PSome(_) -> 50
         | _ -> -1
@@ -87,7 +87,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
                 | Some x  -> "<" + Source.toString x + "> ="
                 | None -> ""
             let omit = if elem.omit then "-" else ""
-            let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio = 1
+            let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1
             seq { yield Str(omit + binding elem.binding); yield! bracketsIf needBrackets (printProduction elem.rule false) }
         match production with
         // Alternatives

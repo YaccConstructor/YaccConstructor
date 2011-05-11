@@ -59,6 +59,7 @@
     <None Include="test.in" />
     <None Include="RaccParser.yrd" />
     <None Include="RACC_LExer.fsl" />
+    <None Include="RaccParserExpanded.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">

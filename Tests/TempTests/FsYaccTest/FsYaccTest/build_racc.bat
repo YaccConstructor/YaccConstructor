@@ -1,0 +1,1 @@
+..\..\..\..\YaccConstructor\Main\bin\Release\Main.exe -c ExpandEBNF -c ExpandMeta -i RaccParser.yrd

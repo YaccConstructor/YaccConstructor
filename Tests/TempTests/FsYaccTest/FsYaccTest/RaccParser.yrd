@@ -11,10 +11,23 @@ let f list =
         (printfn "list_start from %A" elem; [elem] )
         t
   | [] -> failwith "Expected 1 or more elements"
-} 
+
+(* NotExpanded 
 
 +start: list = list { list } ;
 
 list: list = (elem = list_elem { printfn "ELEM %A" elem; elem })+ {f list};
 
 list_elem: x=INT { printfn "int %A" (value x); value x } ;
+
+*)
+
+}         
+
+
++start: s1=list { s1 } ;
+
+list: s1=list_elem { printfn "list_start from %A" s1; [s1] }
+  | s1=list s2=list_elem { printfn "%A %A" s1 s2; s2::s1 } ;
+
+list_elem: s1=INT { printfn "int %A" (value s1); (value s1) } ;

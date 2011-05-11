@@ -2,7 +2,8 @@
 
 open Yard.Generators.RACCGenerator
 
-//Main.exe -i ../../RaccParser.yrd
+//Main.exe -i ../../RaccParser.yrd - resultNotExpanded.txt
+//Main.exe -c ExpandEBNF -c ExpandMeta -i ../../RaccParser.yrd - resultExpanded.txt
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value

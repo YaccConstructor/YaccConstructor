@@ -45,40 +45,45 @@ let default_elem = {new elem<Source.t, Source.t> with omit=false and rule=PRef(s
 let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
 //    let addedBnfRules = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>()
     let addedBnfRules = ref []
-    let rec replaceEbnf production = 
+    let sourceIf cond s = if cond then Some(s2source s) else None
+    // if production is not binded then don't add semantic action in generated rules
+    let rec replaceEbnf production binded = 
         match production with
-        | PSeq(elem_list, ac) -> PSeq(elem_list |> List.map (fun elem -> {elem with rule=replaceEbnf elem.rule}), ac) 
-        | PAlt(left, right) -> PAlt(replaceEbnf left, replaceEbnf right)
+        | PSeq(elem_list, ac) -> PSeq(elem_list |> List.map (fun elem -> {elem with rule=replaceEbnf elem.rule (elem.binding.IsSome)}), ac) 
+        | PAlt(left, right) -> PAlt(replaceEbnf left binded, replaceEbnf right binded)
         | PSome(p) -> 
             let generatedName = genSomeName()
-            let expandedBody = replaceEbnf p
-            addedBnfRules := (
-                {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
-                 and args=[] 
-                 and body=
-                    PAlt(expandedBody, PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=None and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=None and checker=None}
-                    ], None)) 
-                 and _public=false
-                 and metaArgs=[]
-                }) :: !addedBnfRules
-            PRef(s2source generatedName, None)
-        | PMany(p) -> 
-            let generatedName = genManyName()
-            let expandedBody = replaceEbnf p
+            let expandedBody = replaceEbnf p binded
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
                  with name=generatedName 
                  and args=[] 
                  and body=
                     PAlt(
-                        PSeq([{default_elem with rule=PRef(s2source "empty", None)}], Some(s2source "[]")) ,
+                        PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "[elem]") ,
                         PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=None and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=None and checker=None}
-                        ], Some(s2source ""))
+                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None};
+                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None}
+                        ], sourceIf binded "head::tail")
+                    ) 
+                 and _public=false
+                 and metaArgs=[]
+                }) :: !addedBnfRules
+            PRef(s2source generatedName, None)
+        | PMany(p) -> 
+            let generatedName = genManyName()
+            let expandedBody = replaceEbnf p binded
+            addedBnfRules := (
+                {new Rule.t<Source.t,Source.t> 
+                 with name=generatedName 
+                 and args=[] 
+                 and body=
+                    PAlt(
+                        PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "[]") ,
+                        PSeq([
+                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None};
+                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None}
+                        ], sourceIf binded "head::tail")
                     ) 
                  and _public=false
                  and metaArgs=[]
@@ -86,22 +91,22 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             PRef(s2source generatedName, None)
         | POpt(p) -> 
             let generatedName = genOptName()
-            let expandedBody = replaceEbnf p
+            let expandedBody = replaceEbnf p binded
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
                  with name=generatedName 
                  and args=[] 
                  and body=
                     PAlt(
-                        PRef(s2source "empty", None), PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody and binding=None and checker=None}
-                    ], None)) 
+                        PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "None"),
+                        PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "Some(elem)")
+                    ) 
                  and _public=false
                  and metaArgs=[]
                 }) :: !addedBnfRules
             PRef(s2source generatedName, None)
         | x -> x
-    {rule with body=replaceEbnf rule.body}::!addedBnfRules
+    {rule with body=replaceEbnf rule.body false}::(List.rev !addedBnfRules)
 
 type ExpandEbnfStrict() = 
     inherit Convertion()

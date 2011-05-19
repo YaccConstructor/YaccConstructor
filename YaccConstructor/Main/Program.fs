@@ -159,6 +159,7 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 //Main.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd
 //Main.exe -g YardPrinter  -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Convertions/buildast_1.yrd
 //Main.exe -g YardPrinter  -c ExpandEbnfStrict -i ../../../../Tests/Convertions/expandebnfstrict_1.yrd
+//Main.exe -g YardPrinter  -c "BuildAST typed"-i ../../../../Tests/Convertions/buildast_1.yrd
 
 
 (*open Yard.Core.IL.Production

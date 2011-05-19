@@ -61,14 +61,17 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
     | x -> x
 *)
 
+// different logic for untyped and typed AST
+let isTyped = ref false
+let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
+
 let seqify = function
     | PSeq(x, y) -> PSeq(x, y)
     | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None)
 
 let printSeqProduction binding = function
     | POpt(x) -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
-    | PToken(s,_) -> sprintf "Leaf(\"%s\")" s
-    | PLiteral(s,_) -> sprintf "Leaf(\"%s\")" s
+    | PToken(s,_) | PLiteral(s,_) -> !leafConstr s binding
     | PSome(p) -> sprintf "Node(\"some\", %s)" binding
     | PMany(p) -> sprintf "Node(\"many\", %s)" binding
     | _ -> binding
@@ -78,17 +81,16 @@ let printSeqProduction binding = function
 
 let rec _buildAST ruleName (production: t<Source.t, Source.t>) = 
     let isRef (elem:Production.elem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false
-    let isBindingOmit (elem:Production.elem<Source.t, Source.t>) = elem.omit || match elem.rule with PToken(_) | PLiteral(_) -> true | _ -> false
     match production with
     | PSeq(elements, _) -> 
         if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
-            PSeq(elements, Some("Leaf(\"empty\")", (0,0)))
+            PSeq(elements, Some("Node(\"empty\", [])", (0,0)))
         else
             PSeq(elements |> List.mapi (fun i elem -> 
                 //Don't add bindings to omit or tokens or literals
                 //TODO add omit check
                 match elem.rule with
-                | PToken _ | PLiteral _ -> { elem with binding=None }
+                | PToken _ | PLiteral _ -> { elem with binding=if !isTyped then Some((sprintf "S%d" (i+1)), (0,0)) else None }
                 | PRef _ ->  { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)) }
                 | PAlt(left,right) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,_buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
                 | PMany(p) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
@@ -99,12 +101,16 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
             Some(sprintf "Node(\"%s\", [%s])" ruleName (elements |> List.mapi (fun i elem -> (i, elem)) |> List.choose (fun (i, elem) -> if elem.omit then None else Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule)) |> String.concat "; "), (0,0)))
     | x -> _buildAST ruleName (seqify x)
 
-let buildAST (ruleList: Rule.t<Source.t, Source.t> list) = 
+let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType = 
+    if tokenType <> "" then 
+        leafConstr := (sprintf "Leaf(\"%s\", %s)");
+        isTyped := true
     ruleList |> List.map (fun rule -> {rule with body=(_buildAST rule.name rule.body) } )
 
 type BuildAST() = 
     inherit Convertion()
         override this.Name = "BuildAST"
-        override this.ConvertList ruleList = buildAST ruleList
+        override this.ConvertList ruleList = buildAST ruleList "" 
+        override this.ConvertList(ruleList, tokenType) = buildAST ruleList tokenType
         override this.EliminatedProductionTypes = [""]
 

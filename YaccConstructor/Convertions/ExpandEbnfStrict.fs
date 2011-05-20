@@ -62,8 +62,8 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     PAlt(
                         PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "[elem]") ,
                         PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None}
+                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None};
+                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None}
                         ], sourceIf binded "head::tail")
                     ) 
                  and _public=false
@@ -81,8 +81,8 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     PAlt(
                         PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "[]") ,
                         PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None}
+                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None};
+                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None}
                         ], sourceIf binded "head::tail")
                     ) 
                  and _public=false

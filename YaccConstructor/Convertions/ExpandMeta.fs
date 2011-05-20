@@ -184,7 +184,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
             let (b, res') = expandMeta h.rule mRulesTbl rfsTbl rs
             let (b', res'') = expandSeq mRulesTbl rfsTbl res' t
             //it is hack for filtering similar results.
-            ({ h with rule = b }::b', res'' (*|> set |> List.ofSeq*))
+            ({ h with rule = b }::b', res'' |> set |> List.ofSeq)
           | [] -> ([], rs)
           in let (eSeq, res') = expandSeq metaRulesTbl refsTbl res seq      
              in (PSeq (eSeq, a), res')

@@ -19,7 +19,7 @@ let shellExecute program args =
 let buildDir = @".\bin\"
 let distrDir = @".\distr\"
 let productName = "YaccConstructor"
-let version = "0.0.0.536"
+let version = "0.0.1.548"
 let prdNameSuffix = ref ""
 
 #load "solution.fsx"
@@ -253,4 +253,4 @@ Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "n
        )
        x
    x
-|> Seq.iter (fun x -> Run x)
+|> Seq.iter (fun x -> printfn"%A\n" x;Run x)

@@ -1,5 +1,22 @@
 # 1 "Lexer.fsl"
  
+//  Copyright 2010-2011 Konstantin Ulitin
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 (* Run with fslex.exe --unicode Lexer.fsl *)
 
 module Yard.Frontends.AntlrFrontend.Lexer
@@ -23,7 +40,7 @@ let identifier lexeme =
   | s when System.Char.IsUpper s.[0]-> TERMINAL(lexeme)
   | s when System.Char.IsLower s.[0]-> IDENTIFIER(lexeme)
 
-# 26 "Lexer.fs"
+# 43 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -160,234 +177,234 @@ and literal2  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_lite
 and _fslex_main  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 32 "Lexer.fsl"
+# 49 "Lexer.fsl"
                          lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf 
-# 165 "Lexer.fs"
+# 182 "Lexer.fs"
           )
   | 1 -> ( 
-# 33 "Lexer.fsl"
+# 50 "Lexer.fsl"
                                     CAT_CODE(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset)) 
-# 170 "Lexer.fs"
+# 187 "Lexer.fs"
           )
   | 2 -> ( 
-# 34 "Lexer.fsl"
+# 51 "Lexer.fsl"
                                      ACTION_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+2, lexbuf.EndPos.AbsoluteOffset)) 
-# 175 "Lexer.fs"
+# 192 "Lexer.fs"
           )
   | 3 -> ( 
-# 35 "Lexer.fsl"
+# 52 "Lexer.fsl"
                           lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; multiline_comment lexbuf 
-# 180 "Lexer.fs"
+# 197 "Lexer.fs"
           )
   | 4 -> ( 
-# 36 "Lexer.fsl"
+# 53 "Lexer.fsl"
                           lexeme_start := lexbuf.EndPos.AbsoluteOffset; singleline_comment lexbuf 
-# 185 "Lexer.fs"
+# 202 "Lexer.fs"
           )
   | 5 -> ( 
-# 37 "Lexer.fsl"
+# 54 "Lexer.fsl"
                           lexeme_start := lexbuf.EndPos.AbsoluteOffset; literal lexbuf 
-# 190 "Lexer.fs"
+# 207 "Lexer.fs"
           )
   | 6 -> ( 
-# 38 "Lexer.fsl"
+# 55 "Lexer.fsl"
                          lexeme_start := lexbuf.EndPos.AbsoluteOffset; literal2 lexbuf 
-# 195 "Lexer.fs"
+# 212 "Lexer.fs"
           )
   | 7 -> ( 
-# 39 "Lexer.fsl"
+# 56 "Lexer.fsl"
                                 identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) 
-# 200 "Lexer.fs"
+# 217 "Lexer.fs"
           )
   | 8 -> ( 
-# 40 "Lexer.fsl"
+# 57 "Lexer.fsl"
                          LPAREN 
-# 205 "Lexer.fs"
+# 222 "Lexer.fs"
           )
   | 9 -> ( 
-# 41 "Lexer.fsl"
+# 58 "Lexer.fsl"
                          RPAREN 
-# 210 "Lexer.fs"
+# 227 "Lexer.fs"
           )
   | 10 -> ( 
-# 42 "Lexer.fsl"
+# 59 "Lexer.fsl"
                          BAR 
-# 215 "Lexer.fs"
+# 232 "Lexer.fs"
           )
   | 11 -> ( 
-# 43 "Lexer.fsl"
+# 60 "Lexer.fsl"
                           HENCE 
-# 220 "Lexer.fs"
+# 237 "Lexer.fs"
           )
   | 12 -> ( 
-# 44 "Lexer.fsl"
+# 61 "Lexer.fsl"
                          EQUAL 
-# 225 "Lexer.fs"
+# 242 "Lexer.fs"
           )
   | 13 -> ( 
-# 45 "Lexer.fsl"
+# 62 "Lexer.fsl"
                          STAR 
-# 230 "Lexer.fs"
+# 247 "Lexer.fs"
           )
   | 14 -> ( 
-# 46 "Lexer.fsl"
+# 63 "Lexer.fsl"
                          PLUS 
-# 235 "Lexer.fs"
+# 252 "Lexer.fs"
           )
   | 15 -> ( 
-# 47 "Lexer.fsl"
+# 64 "Lexer.fsl"
                          COLON 
-# 240 "Lexer.fs"
+# 257 "Lexer.fs"
           )
   | 16 -> ( 
-# 48 "Lexer.fsl"
+# 65 "Lexer.fsl"
                          SEMICOLON 
-# 245 "Lexer.fs"
+# 262 "Lexer.fs"
           )
   | 17 -> ( 
-# 49 "Lexer.fsl"
+# 66 "Lexer.fsl"
                          QUESTION 
-# 250 "Lexer.fs"
+# 267 "Lexer.fs"
           )
   | 18 -> ( 
-# 50 "Lexer.fsl"
+# 67 "Lexer.fsl"
                          EXCLAMATION 
-# 255 "Lexer.fs"
+# 272 "Lexer.fs"
           )
   | 19 -> ( 
-# 51 "Lexer.fsl"
+# 68 "Lexer.fsl"
                          TILDE 
-# 260 "Lexer.fs"
+# 277 "Lexer.fs"
           )
   | 20 -> ( 
-# 52 "Lexer.fsl"
+# 69 "Lexer.fsl"
                           DOUBLE_DOT 
-# 265 "Lexer.fs"
+# 282 "Lexer.fs"
           )
   | 21 -> ( 
-# 53 "Lexer.fsl"
+# 70 "Lexer.fsl"
                          TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) 
-# 270 "Lexer.fs"
+# 287 "Lexer.fs"
           )
   | 22 -> ( 
-# 54 "Lexer.fsl"
+# 71 "Lexer.fsl"
                          EOF 
-# 275 "Lexer.fs"
+# 292 "Lexer.fs"
           )
   | 23 -> ( 
-# 55 "Lexer.fsl"
+# 72 "Lexer.fsl"
                        main lexbuf 
-# 280 "Lexer.fs"
+# 297 "Lexer.fs"
           )
   | _ -> failwith "main"
 (* Rule multiline_comment *)
 and _fslex_multiline_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 58 "Lexer.fsl"
+# 75 "Lexer.fsl"
                      incr comment_depth; multiline_comment lexbuf 
-# 289 "Lexer.fs"
+# 306 "Lexer.fs"
           )
   | 1 -> ( 
-# 60 "Lexer.fsl"
+# 77 "Lexer.fsl"
                      decr comment_depth;
                      if !comment_depth = 0 then main lexbuf else multiline_comment lexbuf 
-# 295 "Lexer.fs"
+# 312 "Lexer.fs"
           )
   | 2 -> ( 
-# 62 "Lexer.fsl"
+# 79 "Lexer.fsl"
                          EOF 
-# 300 "Lexer.fs"
+# 317 "Lexer.fs"
           )
   | 3 -> ( 
-# 63 "Lexer.fsl"
+# 80 "Lexer.fsl"
                        multiline_comment lexbuf 
-# 305 "Lexer.fs"
+# 322 "Lexer.fs"
           )
   | _ -> failwith "multiline_comment"
 (* Rule singleline_comment *)
 and _fslex_singleline_comment  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 65 "Lexer.fsl"
+# 82 "Lexer.fsl"
                          main lexbuf 
-# 314 "Lexer.fs"
+# 331 "Lexer.fs"
           )
   | 1 -> ( 
-# 66 "Lexer.fsl"
+# 83 "Lexer.fsl"
                        singleline_comment lexbuf 
-# 319 "Lexer.fs"
+# 336 "Lexer.fs"
           )
   | 2 -> ( 
-# 67 "Lexer.fsl"
+# 84 "Lexer.fsl"
                          EOF 
-# 324 "Lexer.fs"
+# 341 "Lexer.fs"
           )
   | _ -> failwith "singleline_comment"
 (* Rule action_code *)
 and _fslex_action_code  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 71 "Lexer.fsl"
+# 88 "Lexer.fsl"
                      incr comment_depth; action_code lexbuf 
-# 333 "Lexer.fs"
+# 350 "Lexer.fs"
           )
   | 1 -> ( 
-# 73 "Lexer.fsl"
+# 90 "Lexer.fsl"
                      decr comment_depth;
                      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf 
-# 339 "Lexer.fs"
+# 356 "Lexer.fs"
           )
   | 2 -> ( 
-# 75 "Lexer.fsl"
+# 92 "Lexer.fsl"
                           literal lexbuf; action_code lexbuf 
-# 344 "Lexer.fs"
+# 361 "Lexer.fs"
           )
   | 3 -> ( 
-# 76 "Lexer.fsl"
+# 93 "Lexer.fsl"
                          literal2 lexbuf; action_code lexbuf 
-# 349 "Lexer.fs"
+# 366 "Lexer.fs"
           )
   | 4 -> ( 
-# 77 "Lexer.fsl"
+# 94 "Lexer.fsl"
                          EOF 
-# 354 "Lexer.fs"
+# 371 "Lexer.fs"
           )
   | 5 -> ( 
-# 78 "Lexer.fsl"
+# 95 "Lexer.fsl"
                        action_code lexbuf 
-# 359 "Lexer.fs"
+# 376 "Lexer.fs"
           )
   | _ -> failwith "action_code"
 (* Rule literal *)
 and _fslex_literal  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 80 "Lexer.fsl"
+# 97 "Lexer.fsl"
                           LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
-# 368 "Lexer.fs"
+# 385 "Lexer.fs"
           )
   | 1 -> ( 
-# 81 "Lexer.fsl"
+# 98 "Lexer.fsl"
                                         literal lexbuf 
-# 373 "Lexer.fs"
+# 390 "Lexer.fs"
           )
   | _ -> failwith "literal"
 (* Rule literal2 *)
 and _fslex_literal2  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 83 "Lexer.fsl"
+# 100 "Lexer.fsl"
                          LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
-# 382 "Lexer.fs"
+# 399 "Lexer.fs"
           )
   | 1 -> ( 
-# 84 "Lexer.fsl"
+# 101 "Lexer.fsl"
                                          literal2 lexbuf 
-# 387 "Lexer.fs"
+# 404 "Lexer.fs"
           )
   | _ -> failwith "literal2"
 
-# 85 "Lexer.fsl"
+# 102 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

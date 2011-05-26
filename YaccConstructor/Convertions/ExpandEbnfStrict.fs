@@ -1,7 +1,7 @@
 ﻿//  Module ExpandEbnf contains:
 //  - functions for rules convertion from EBNF to BNF 
 //
-//  Copyright 2009-2011 by Konstantin Ulitin
+//  Copyright 2011 by Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

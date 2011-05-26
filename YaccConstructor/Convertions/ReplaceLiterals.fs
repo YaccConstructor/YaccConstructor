@@ -1,4 +1,4 @@
-﻿//  Module AddEOF contains:
+﻿//  Module ReplaceLiterals contains:
 //  - function, which replaces all literals in grammar by tokens and
 //  writes a comment to header about them.
 //

@@ -22,10 +22,7 @@
 module Yard.Core.Namer
 
 open IL
-//open Misc
-//open Generation
 open Production
-//open Diagnostics
 
 (** prefix for all items created by Yard *)
 let withPrefix s = "yard_" + s

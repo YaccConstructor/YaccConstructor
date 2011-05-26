@@ -1,4 +1,4 @@
-﻿//  Module ExpandEbnfToMeta contains:
+﻿//  Module ExpandEBNF contains:
 //  - functions for rules convertion from EBNF to metarules 
 //    (rules parametrized by other rules)
 //
@@ -132,6 +132,8 @@ let convertEBNFtoMeta l =
 
 (* end of converting EBNF to metarules *)
 
+/// Convert rules from EBNF to metarules 
+/// (rules parametrized by other rules)
 type ExpandEbnf() = 
     inherit Convertion()
         override this.Name = "ExpandEbnf"

@@ -60,11 +60,3 @@ let ParseFile fileName =
         let extendedMessage = sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage
         
-    
-    
-//    let a = fst res
-//    let a = Parser.s Lexer.token lexbuf
-//    let terminalsDescr = (terminals |> Seq.fold (fun acc (KeyValue(k,v)) -> acc + (sprintf "%s :\n%s\n\n"  k v)) "(*\nYou need to describe following terminals in lexer:\n") + "*)"
-
-//    {new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = None and grammar = [] and foot = None}
-

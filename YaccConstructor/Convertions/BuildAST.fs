@@ -29,37 +29,17 @@ open System.Collections.Generic
 (* You need to add following code in grammar header 
 type AST<'token> =
     | Node of string * AST<'token> list
-    | Leaf of string * 'token *)
+    | Leaf of string * 'token
+
+OR
 
 type AST =
     | Node of string * AST list
-    | Leaf of string
-
-(* End of header *)
-
-(*
-let seqify = function
-    | PSeq(x, y) -> PSeq(x, y)
-    | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None)
-
-let printSeqProduction binding = function
-    | POpt(x) -> sprintf "%s" binding
-    | PToken(s,_) -> sprintf "Some(Leaf(\"%s\", %s))" s binding
-    //| PSome(x) | PMany (x) | PRef((r,_),_) | PAlt(_)-> sprintf "Some(%s)" binding
-    | _ -> sprintf "Some(%s)" binding
-
-let rec _buildAST ruleName (production: t<Source.t, Source.t>) = 
-    match production with
-    | PSeq(elements, _) -> PSeq(elements |> List.mapi (fun i elem -> 
-            if elem.omit then { elem with binding=None ; rule=(_buildAST (ruleName+"_inner") elem.rule) } else { elem with binding=Some((sprintf "_S%d" i),(0,0)) ; rule=(_buildAST (ruleName+"_inner") elem.rule) }
-        ), 
-        Some(sprintf "Node(\"%s\", [%s] |> List.choose (fun x -> x) )" ruleName (elements |> List.mapi (fun i elem -> (i, elem)) |> List.choose (fun (i, elem) -> if elem.omit then None else Some(printSeqProduction (sprintf "_S%d" i) elem.rule)) |> String.concat "; "), (0,0)))
-    | PAlt(left, right) -> PAlt(_buildAST (ruleName+"_inner") left, _buildAST (ruleName+"_inner") right)
-    | PSome(x) -> PSome(_buildAST (ruleName+"_inner") x)
-    | PMany(x) -> PMany(_buildAST (ruleName+"_inner") x)
-    | POpt(x) -> POpt(_buildAST (ruleName+"_inner") x)
-    | x -> x
+    | Leaf of string 
+    
+Type is defined by tokenType parameter of rule application
 *)
+
 
 // different logic for untyped and typed AST
 let isTyped = ref false
@@ -75,9 +55,6 @@ let printSeqProduction binding = function
     | PSome(p) -> sprintf "Node(\"some\", %s)" binding
     | PMany(p) -> sprintf "Node(\"many\", %s)" binding
     | _ -> binding
-
-    //| PSome(x) | PMany (x) | PRef((r,_),_) | PAlt(_)-> sprintf "Some(%s)" binding
-//    | _ -> sprintf "Some(%s)" binding
 
 let rec _buildAST ruleName (production: t<Source.t, Source.t>) = 
     let isRef (elem:Production.elem<Source.t, Source.t>) = match elem.rule with PRef(_,_) -> true | _ -> false

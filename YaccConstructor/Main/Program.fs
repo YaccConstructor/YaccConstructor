@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Main.Program
+module YaccConstructor.Program
 
 open Yard.Core
 open Yard.Core.IL
@@ -108,7 +108,6 @@ let () =
 
             // Apply convertions
             Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion !ilTree conv)) convertions
-//            let ilTreeExpandedMeta = ConvertionsManager.ApplyConvertion ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
 
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
@@ -146,8 +145,8 @@ let () =
         |> System.Console.WriteLine
     | EmptyArg (argName)       ->
          printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
-Main.exe -f AntlrFrontend -g YardPrinter -i ../../../../Tests/ANTLR/C.g > C.yrd\n
-List of available frontends and generators can be obtained by -af -ag keys" argName
+YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd \n
+List of available frontends, generators and convertions can be obtained by -af -ag -ac keys" argName
     | FEError (error)          ->
         "Frontend error: " + error + "\n"
         |> System.Console.WriteLine
@@ -159,38 +158,23 @@ List of available frontends and generators can be obtained by -af -ag keys" argN
 
 
 //Tests. Please do not remove
-//Main.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g
-//Main.exe -g YardPrinter -i ../../../../Tests/Basic/test_include/test_include_main.yrd
-//Main.exe -g YardPrinter -i ../../../../Tests/Basic/test_seq/test_seq.yrd
-//Main.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
-//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
-//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
-//Main.exe -g TreeDump -c AddEOF -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
-//Main.exe -g YardPrinter -c ReplaceLiterals -i ../../../../Tests/TempTests/test1.yrd
-//Main.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ..\..\..\FsYaccFrontend\fsyacc.yrd
-//Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/antlr.fsy
-//Main.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Basic/test_summator_1/test_summator_1.yrd
-//Main.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
-//Main.exe -c "ReplaceLiterals KW_%s" -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
-//Main.exe -c ReplaceLiterals -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
-//Main.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd
-//Main.exe -g YardPrinter -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Convertions/buildast_1.yrd
-//Main.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Convertions/expandebnfstrict_1.yrd
-//Main.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Convertions/buildast_1.yrd
-//Main.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Convertions/mergealter_1.yrd
+//YaccConstructor.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g
+//YaccConstructor.exe -g YardPrinter -i ../../../../Tests/Basic/test_include/test_include_main.yrd
+//YaccConstructor.exe -g YardPrinter -i ../../../../Tests/Basic/test_seq/test_seq.yrd
+//YaccConstructor.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g TreeDump -c AddEOF -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g YardPrinter -c ReplaceLiterals -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ..\..\..\FsYaccFrontend\fsyacc.yrd
+//YaccConstructor.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/antlr.fsy
+//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Basic/test_summator_1/test_summator_1.yrd
+//YaccConstructor.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
+//YaccConstructor.exe -c "ReplaceLiterals KW_%s" -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -c ReplaceLiterals -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Convertions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Convertions/expandebnfstrict_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Convertions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Convertions/mergealter_1.yrd
 
-
-(*open Yard.Core.IL.Production
-
-let () = 
-    let filename = @"..\..\..\..\Tests\RACC\claret\braces_1\test_simple_braces.yrd" 
-    let ilTree = ref (Yard.Frontends.YardFrontend.Main.ParseFile filename)
-
-    printfn "Before:\n%A\n" <| (GeneratorsManager.Generator "YardPrinter").Generate(!ilTree)
-//    printfn "%A\n" !ilTree
-    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandEBNF.ExpandEBNF())
-    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandMeta.ExpandMeta())
-    ilTree := ConvertionsManager.ApplyConvertion !ilTree (new Yard.Core.Convertions.ExpandBrackets.ExpandBrackets())
-    printfn "FsYaccPrinter:\n%A\n" <| (GeneratorsManager.Generator "FsYaccPrinter").Generate(!ilTree)
-//    printfn "%A" !ilTree
-    ()*)

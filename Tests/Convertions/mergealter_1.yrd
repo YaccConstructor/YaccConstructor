@@ -1,0 +1,5 @@
+op: PLUS { (+) } ;
+
+expr: n1=NUMBER op=op n2=NUMBER {op n1 n2} ;
+
+op: MINUS { (-) } ;

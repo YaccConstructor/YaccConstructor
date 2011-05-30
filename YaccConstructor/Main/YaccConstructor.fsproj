@@ -8,11 +8,11 @@
     <ProjectGuid>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Main</RootNamespace>
-    <AssemblyName>Main</AssemblyName>
+    <AssemblyName>YaccConstructor</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <Name>Main</Name>
+    <Name>YaccConstructor</Name>
     <SccProjectName>
     </SccProjectName>
     <SccProvider>

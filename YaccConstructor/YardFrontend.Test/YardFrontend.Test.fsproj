@@ -52,8 +52,8 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Main\Main.fsproj">
-      <Name>Main</Name>
+    <ProjectReference Include="..\Main\YaccConstructor.fsproj">
+      <Name>YaccConstructor</Name>
       <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
       <Private>True</Private>
     </ProjectReference>

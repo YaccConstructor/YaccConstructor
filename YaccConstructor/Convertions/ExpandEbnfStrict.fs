@@ -43,7 +43,6 @@ let genOptName () =
 let default_elem = {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source "empty", None) and binding=None and checker=None}
 
 let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
-//    let addedBnfRules = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>()
     let addedBnfRules = ref []
     let sourceIf cond s = if cond then Some(s2source s) else None
     // if production is not binded then don't add semantic action in generated rules

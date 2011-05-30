@@ -25,17 +25,19 @@ open IL
 open Production
 
 (** prefix for all items created by Yard *)
-let withPrefix s = "yard_" + s
+let private withPrefix s = "yard_" + s
 
 (** global variable for number of current generated rule *)
 let curNum = ref 1
 
-let genYardName n (l, c) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c)
+let resetRuleEnumerator () = curNum := 1
+
+let private genYardName n (l, c) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c)
 
 let createName ((n:string), (l, c)) =     
     let addPrefix = 
       try
-        let yardPrefix = withPrefix "" in         
+        let yardPrefix = withPrefix ""
         if (n.Substring (0, System.Math.Min(n.Length, yardPrefix.Length))) = yardPrefix 
         then fun x->x 
         else withPrefix
@@ -43,7 +45,7 @@ let createName ((n:string), (l, c)) =
     in sprintf "%s_%d" (addPrefix n) !curNum, (l, c)
 
 let createNewName name = 
-    let newName = createName name in (curNum := (!curNum) + 1 ; newName)
+    let newName = createName name in (incr curNum; newName)
 
 module Names =
  begin
@@ -70,6 +72,7 @@ module Names =
    let seq  = x "seq"
    let alt  = x "alt"
    let predicate = x "predicate"
+   let brackets = x "exp_brackets"
 end 
 
 (** returns true if given name is metarule name for EBNF *)

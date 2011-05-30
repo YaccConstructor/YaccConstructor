@@ -43,6 +43,7 @@ type TreeDump() =
 type ``Convertions tests`` () =
     [<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
+        Namer.resetRuleEnumerator()
         let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
         let ilTree = 
             {
@@ -68,7 +69,7 @@ type ``Convertions tests`` () =
                 ]
             }
         let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandBrackets")
-#if DRBUG
+#if DEBUG
         printfn "%A" ilTreeConverted
 #endif
         let correctConverted:t<Source.t,Source.t> = {
@@ -102,6 +103,7 @@ type ``Convertions tests`` () =
 
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 1.`` () =
+        Namer.resetRuleEnumerator()
         let frontend = FrontendsManager.Frontend "YardFrontend"        
         let ilTree:t<Source.t,Source.t> = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_1.yrd")
@@ -136,6 +138,7 @@ type ``Convertions tests`` () =
 
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 2.`` () =
+        Namer.resetRuleEnumerator()
         GeneratorsManager.Register (new TreeDump())
         let frontend = FrontendsManager.Frontend "YardFrontend"        
         let ilTree = 

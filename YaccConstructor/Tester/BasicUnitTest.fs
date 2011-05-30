@@ -17,3 +17,7 @@ type ``Yard frontend tests`` () =
 [<TestFixture>]
 type ``Irony frontend tests`` () =    
     inherit  IronyFrontendTests.``Irony frontend tests``()
+
+[<TestFixture>]
+type ``Convertions tests`` () =    
+    inherit  ConvertionsTests.``Convertions tests``()

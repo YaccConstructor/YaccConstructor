@@ -199,10 +199,12 @@ type TableGenerator(outPath: string) =
                     _public = true
                     metaArgs= []
                 }
-            let dlfaMap =                 
-                startRule :: grammar.grammar                
-                |> List.map (fun x -> x.name,buildDLFA x.body)
-                |> List.map (fun (x,y) -> "NT_" + x |> getTag , y)            
+            let dlfaMap =  
+                let g =               
+                    startRule :: grammar.grammar                
+                    |> List.map (fun x -> x.name,buildDLFA x.body)
+                let f = g |>  List.map (fun (x,y) -> "NT_" + x |> getTag , y)            
+                f
             genType !symbols
             genTypeToTag !symbols
             genTagToName !symbols

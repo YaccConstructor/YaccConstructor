@@ -64,6 +64,16 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Convertions.Test\Convertions.Test.fsproj">
+      <Name>Convertions.Test</Name>
+      <Project>{8eaac2a1-d03a-4f42-9182-d294a3db9fdf}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Convertions\Convertions.fsproj">
+      <Name>Convertions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
       <Name>IronyFrontend.Test</Name>
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
@@ -82,6 +92,11 @@
     <ProjectReference Include="..\YardFrontend.Test\YardFrontend.Test.fsproj">
       <Name>YardFrontend.Test</Name>
       <Project>{5936d84d-a842-43b3-97fd-e2c6990e77db}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

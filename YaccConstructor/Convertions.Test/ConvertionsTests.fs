@@ -68,7 +68,9 @@ type ``Convertions tests`` () =
                 ]
             }
         let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandBrackets")
+#if DRBUG
         printfn "%A" ilTreeConverted
+#endif
         let correctConverted:t<Source.t,Source.t> = {
             info = {fileName = ""}
             head = None;
@@ -100,14 +102,13 @@ type ``Convertions tests`` () =
 
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 1.`` () =
-        let frontend = FrontendsManager.Frontend "YardFrontend"
-        //let generator = GeneratorsManager.Generator ""
-        let ilTree = 
+        let frontend = FrontendsManager.Frontend "YardFrontend"        
+        let ilTree:t<Source.t,Source.t> = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_1.yrd")
             |> frontend.ParseGrammar 
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
+        let ilTreeConverted:t<Source.t,Source.t> = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
         let expectedResult:t<Source.t,Source.t> =
-            {info = {fileName = "..\..\..\..\Tests\Convertions\ptoken_to_pref_1.yrd";};
+            {info = {fileName = "../../../../Tests/Convertions/PToken_to_PRef_1.yrd";};
              head = None;
              grammar =
               [{name = "yard_metar_1";
@@ -127,13 +128,16 @@ type ``Convertions tests`` () =
                 _public = true;
                 metaArgs = [];}];
              foot = None;}
+#if DEBUG
+        let generator = GeneratorsManager.Generator "TreeDump"
+        printfn "%A\n" (generator.Generate ilTreeConverted)
+#endif
         Assert.AreEqual(expectedResult, ilTreeConverted)
 
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 2.`` () =
         GeneratorsManager.Register (new TreeDump())
-        let frontend = FrontendsManager.Frontend "YardFrontend"
-        let generator = GeneratorsManager.Generator "TreeDump"
+        let frontend = FrontendsManager.Frontend "YardFrontend"        
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_2.yrd")
             |> frontend.ParseGrammar 
@@ -167,6 +171,9 @@ type ``Convertions tests`` () =
                 metaArgs = [];}];
              foot = None;}
 
+#if DEBUG
+        let generator = GeneratorsManager.Generator "TreeDump"
         printfn "%A\n" (generator.Generate ilTreeConverted)
+#endif
         Assert.AreEqual( expectedResult, ilTreeConverted)
 

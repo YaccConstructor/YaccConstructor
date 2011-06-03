@@ -28,25 +28,29 @@ open Yard.Core.IL.Production
 
 let private newName () = (Namer.Names.brackets,(0,0)) |> Namer.createNewName |> fst
     
-let expandBrackets (ruleList: Rule.t<'patt, 'expr> list) = 
+let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>(List.toArray ruleList)
     let expanded = ref []
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody = function
-            | PSeq(elements, actionCode) -> PSeq((List.map (fun elem ->
-                match elem.rule with 
-                | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
-                    let newName = newName()
-                    toExpand.Enqueue({name = newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                    { elem with rule = PRef((newName,(0,0)), None) }
-                | PAlt(_,_) -> 
-                    let newName = newName()
-                    toExpand.Enqueue({name=newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                    { elem with rule = PRef((newName,(0,0)), None) }
-                | x -> elem
-                )
-                elements), actionCode)
+            | PSeq(elements, actionCode) -> 
+                (elements
+                 |>List.map 
+                    (fun elem ->
+                        match elem.rule with 
+                        | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
+                            let newName = newName()
+                            toExpand.Enqueue({name = newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
+                            { elem with rule = PRef((newName,(0,0)), None) }
+                        | PAlt(_,_) -> 
+                            let newName = newName()
+                            toExpand.Enqueue({name=newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
+                            { elem with rule = PRef((newName,(0,0)), None) }
+                        | _ -> elem
+                    )                
+                ,actionCode)
+                |> PSeq
             | PAlt(left, right) -> PAlt(expandBody left, expandBody right)
             | x -> x
         

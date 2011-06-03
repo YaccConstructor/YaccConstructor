@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend -g RACCGenerator -c ExpandMeta -c "ReplaceLiterals KW_%s" -i E:\semen\SQLMigration\SqlParser\SqlParser\parser.yrd</StartArguments>
+    <StartArguments>-f YardFrontend -g YardPrinter -c ExpandMeta -i "E:\semen\Diploma\trunk\Tests\Convertions\smalltest.yrd"</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>

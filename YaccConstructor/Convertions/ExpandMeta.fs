@@ -77,7 +77,7 @@ let getKey metaName metaArgs =
  *)
 let getActualParam formalName args = List.tryPick (fun (x,y) -> if x = formalName then Some y else None) args
 let replaceFormal args formal = 
-    let act = getActualParam (getText formal) args in
+    let act = getActualParam (getText formal) args
     match act with
     | Some x -> createSource x
     | None   -> formal
@@ -132,72 +132,70 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
           let mRuleName' = getText n'
           let p' = updateActParams (isEBNFmeta mRuleName') actParams p
           let mArgs' = replaceFormals mArgs args
-          let (b', nRules') = expandMetaRef n' p' mArgs'
-          b', nRules @ nRules'     
+          let (b', nRules') = expandMetaRef nRules n' p' mArgs'
+          b', nRules'     
         | POpt r -> 
           let (b', nRules') = transformBody ruleName actParams args nRules r
-          in (POpt b', nRules')
+          (POpt b', nRules')
         | PSome r -> 
           let (b', nRules') = transformBody ruleName actParams args nRules r
-          in (PSome b', nRules')
+          (PSome b', nRules')
         | PMany r -> 
           let (b', nRules') = transformBody ruleName actParams args nRules r
-          in (PMany b', nRules')
+          (PMany b', nRules')
         | PPerm _ | PRepet _ -> raise (new System.NotImplementedException())
     (*    | other -> reportError "EBNF construction has already be transformed" 
           ; (other, nRules)
     *)
     and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
-        let       
-          args = createPairsList metaRule.name metaRule.metaArgs metaArgs 
-        in 
+        let args = createPairsList metaRule.name metaRule.metaArgs metaArgs
         let fArgs = getFormalArgs metaRule.name _params metaRule.args
         let args' = list2opt fArgs
         let (b, newRules) = transformBody rName args' args [] metaRule.body 
         ( newRules @ [ createRule rName fArgs b metaRule._public [] ] )
 
     and genNewRule rName args' mRulesTbl metaName' metaArgs =
-        let res = findMetaRule mRulesTbl metaName' in 
+        let res = findMetaRule mRulesTbl metaName'
         match res with 
         | Some metaRule -> transformRule rName args' metaRule metaArgs
         | None -> []
 
-    and expandMetaRef metaName _params metaArgs' = 
+    and expandMetaRef res metaName _params metaArgs' = 
         let key = getKey metaName metaArgs'
         if refsTbl.ContainsKey(key)
         then (PRef (refsTbl.Item key, _params), res)
         else
           let rName = createNewName metaName
-          let eRules = refsTbl.Add(key,rName) ;
-                       genNewRule (getText rName) _params 
-                                  metaRulesTbl (getText metaName) metaArgs' 
+          let eRules = 
+            refsTbl.Add(key,rName)
+            genNewRule (getText rName) _params 
+                        metaRulesTbl (getText metaName) metaArgs' 
           let b = PRef (rName, _params) 
           (b, res @ eRules)
         
 
     in
         match body with
-        | PMetaRef (mn, p, mArgs) -> expandMetaRef mn p mArgs
+        | PMetaRef (mn, p, mArgs) -> expandMetaRef res mn p mArgs
         | PSeq (seq, a) -> 
           let rec expandSeq mRulesTbl rfsTbl rs = function
           | h::t ->                         
             let (b, res') = expandMeta h.rule mRulesTbl rfsTbl rs
-            let (b', res'') = expandSeq mRulesTbl rfsTbl res' t
-            //it is hack for filtering similar results.
-            ({ h with rule = b }::b', res'' |> set |> List.ofSeq)
+            let (b', res'') = expandSeq mRulesTbl rfsTbl res' t            
+            ({ h with rule = b }::b', res'')
           | [] -> ([], rs)
-          in let (eSeq, res') = expandSeq metaRulesTbl refsTbl res seq      
-             in (PSeq (eSeq, a), res')
+          let (eSeq, res') = expandSeq metaRulesTbl refsTbl res seq      
+          (PSeq (eSeq, a), res')
         
         | PAlt (l, r) -> let (l', res') = expandMeta l metaRulesTbl refsTbl res                         
                          let (r', res'') = expandMeta r metaRulesTbl refsTbl res'
                          (PAlt(l', r'), res'')
         | POpt r  -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                     in (POpt r', res')
+                     (POpt r', res')
         | PSome r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                     in (PSome r', res')
+                     (PSome r', res')
         | PMany r -> let (r', res') = expandMeta r metaRulesTbl refsTbl res 
-                     in (PMany r', res')
+                     (PMany r', res')
         | other -> (other, res)
 
 (** grammar processing:
@@ -209,11 +207,11 @@ let rec handleMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source
     | [] -> res
     | h::t -> 
       if (isMetaRule h) then 
-        metaRulesTbl.Add(h.name,h);
+        metaRulesTbl.Add(h.name,h)        
         handleMeta t (metaRulesTbl,refsTbl) res      
       else 
-        let (b, rules) = expandMeta (h:Rule.t<Source.t,Source.t>).body metaRulesTbl refsTbl [] in 
-        let r = { h with Rule.body = b } in 
+        let (b, rules) = expandMeta (h:Rule.t<Source.t,Source.t>).body metaRulesTbl refsTbl []
+        let r = { h with Rule.body = b }
         handleMeta t (metaRulesTbl,refsTbl) (res @ rules @ [r])
 
 (** main function 
@@ -222,9 +220,9 @@ let rec handleMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source
  *)
 let expandMetaRules rules =
     (** hash table for metarules *)
-    let metaRulesTbl = new Dictionary<string,Rule.t<Source.t,Source.t> >(200) in
+    let metaRulesTbl = new Dictionary<string,Rule.t<Source.t,Source.t> >(200)
     (** hash table for references to expanded metarules *)
-    let refsTbl = new Dictionary<string,Source.t>(200) in
+    let refsTbl = new Dictionary<string,Source.t>(200)
     handleMeta rules (metaRulesTbl,refsTbl) []
 
 type ExpandMeta() = 

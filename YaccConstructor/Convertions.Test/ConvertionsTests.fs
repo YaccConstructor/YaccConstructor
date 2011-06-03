@@ -128,8 +128,7 @@ type ``Convertions tests`` () =
 
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 2.`` () =
-        Namer.resetRuleEnumerator()
-        GeneratorsManager.Register (new Yard.Generators.TreeDump.TreeDump())
+        Namer.resetRuleEnumerator()        
         let frontend = FrontendsManager.Frontend "YardFrontend"        
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_2.yrd")
@@ -170,3 +169,71 @@ type ``Convertions tests`` () =
 #endif
         Assert.AreEqual( expectedResult, ilTreeConverted)
 
+    [<Test>]
+    member test.``Expand Meta. Duplicate rules generation test.``()=
+        Namer.resetRuleEnumerator()
+        let frontend = FrontendsManager.Frontend "YardFrontend"        
+        let ilTree = 
+            System.IO.Path.Combine(convertionTestPath,"ExpandMeta_DuplicateRules.yrd")
+            |> frontend.ParseGrammar 
+        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
+        let expectedResult = 
+            {info =
+              {fileName = "../../../../Tests/Convertions/ExpandMeta_DuplicateRules.yrd";};
+             head = None;
+             grammar =
+              [{name = "yard_yardOption_1";
+                args = [];
+                body = PSeq ([{omit = false;
+                               rule = PToken ("NUM", (40, 44));
+                               binding = Some ("yard_item", (28, 37));
+                               checker = None;}],Some (" Some yard_item ", (46, 62)));
+                _public = false;
+                metaArgs = [];};
+               {name = "yard_yardOption_2";
+                args = [];
+                body = PSeq ([{omit = false;
+                               rule = PToken ("STRING", (40, 44));
+                               binding = Some ("yard_item", (28, 37));
+                               checker = None;}],Some (" Some yard_item ", (46, 62)));
+                _public = false;
+                metaArgs = [];};
+               {name = "yard_yardOption_4";
+                args = [];
+                body = PSeq ([{omit = false;
+                               rule = PToken ("SEMI", (40, 44));
+                               binding = Some ("yard_item", (28, 37));
+                               checker = None;}],Some (" Some yard_item ", (46, 62)));
+                _public = false;
+                metaArgs = [];};
+               {name = "yard_o_3";
+                args = [];
+                body = PSeq ([{omit = false;
+                               rule = PRef (("yard_yardOption_4", (103, 113)),None);
+                               binding = Some ("yard_item", (91, 100));
+                               checker = None;}],Some (" Some yard_item ", (123, 139)));
+                _public = false;
+                metaArgs = [];};
+               {name = "s";
+                args = [];
+                body =
+                 PSeq
+                   ([{omit = false;
+                      rule = PRef (("yard_yardOption_1", (152, 162)),None);
+                      binding = None;
+                      checker = None;};
+                     {omit = false;
+                      rule = PRef (("yard_yardOption_2", (170, 180)),None);
+                      binding = None;
+                      checker = None;}; {omit = false;
+                                         rule = PRef (("yard_o_3", (191, 192)),None);
+                                         binding = None;
+                                         checker = None;}],None);
+                _public = true;
+                metaArgs = [];}];
+             foot = None;}
+#if DEBUG
+        let generator = GeneratorsManager.Generator "TreeDump"
+        printfn "%A\n" (generator.Generate ilTreeConverted)
+#endif
+        Assert.AreEqual( expectedResult, ilTreeConverted)

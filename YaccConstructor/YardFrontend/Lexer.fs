@@ -22,7 +22,7 @@
  open Microsoft.FSharp.Text.Lexing
  open Yard.Frontends.YardFrontend.GrammarParser
  open Microsoft.FSharp.Text
-
+ 
 (* Auxiliaries for the lexical analyzer *)
 
 let brace_depth = ref 1

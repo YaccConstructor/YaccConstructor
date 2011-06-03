@@ -28,18 +28,6 @@ exception EmptyArg of string
 exception FEError of string
 exception GenError of string
 
-type TreeDump() = 
-    interface IGenerator with
-        member this.Name = "TreeDump"
-        member this.Generate t = (sprintf "%A" t) :> obj
-        member this.AcceptableProductionTypes = 
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)
-    end
-
-let() = 
-    GeneratorsManager.Register (new TreeDump())
-
 let () =
     let feName = ref None
     let generatorName = ref None

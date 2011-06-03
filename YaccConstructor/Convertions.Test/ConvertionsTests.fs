@@ -29,16 +29,6 @@ open NUnit.Framework
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 
-type TreeDump() = 
-    interface IGenerator with
-        member this.Name = "TreeDump"
-        member this.Generate t = (sprintf "%A" t) :> obj
-        member this.AcceptableProductionTypes = 
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)
-    end
-
-
 [<TestFixture>]
 type ``Convertions tests`` () =
     [<Test>]
@@ -139,7 +129,7 @@ type ``Convertions tests`` () =
     [<Test>]
     member test.``Expand Meta. PToken to PRef replacement test 2.`` () =
         Namer.resetRuleEnumerator()
-        GeneratorsManager.Register (new TreeDump())
+        GeneratorsManager.Register (new Yard.Generators.TreeDump.TreeDump())
         let frontend = FrontendsManager.Frontend "YardFrontend"        
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_2.yrd")

@@ -27,7 +27,7 @@ let AvailableConvertions = Seq.map (fun (x:Convertion) -> x.Name) convertionsCol
 
 let Convertion name = convertionsCollection.Find (fun convertion -> convertion.Name = name)
 
-let ApplyConvertion (ilTree:Definition.t<Source.t,Source.t>) (convNameWithParams:string) = 
+let ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
     {   new Definition.t<Source.t,Source.t>
         with info = ilTree.info
         and  head = ilTree.head

@@ -36,18 +36,22 @@ let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
         let rec expandBody = function
             | PSeq(elements, actionCode) -> 
                 (elements
-                 |>List.map 
+                 |>List.choose 
                     (fun elem ->
                         match elem.rule with 
+                        | PSeq(subelements, None) when List.length subelements = 1 && (match (List.head subelements).rule with PRef(("empty",_),_) -> true | _ -> false) -> 
+                            None
+                        | PSeq(subelements, None) when List.length subelements = 1 -> 
+                             Some { elem with rule = (List.head subelements).rule }
                         | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
                             let newName = newName()
                             toExpand.Enqueue({name = newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                            { elem with rule = PRef((newName,(0,0)), None) }
+                            Some { elem with rule = PRef((newName,(0,0)), None) }
                         | PAlt(_,_) -> 
                             let newName = newName()
                             toExpand.Enqueue({name=newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                            { elem with rule = PRef((newName,(0,0)), None) }
-                        | _ -> elem
+                            Some { elem with rule = PRef((newName,(0,0)), None) }
+                        | _ -> Some elem
                     )                
                 ,actionCode)
                 |> PSeq

@@ -58,7 +58,7 @@ type ``Convertions tests`` () =
                     }
                 ]
             }
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandBrackets")
+        let ilTreeConverted = ConvertionsManager.ApplyConvertion "ExpandBrackets" ilTree
 #if DEBUG
         printfn "%A" ilTreeConverted
 #endif
@@ -98,7 +98,7 @@ type ``Convertions tests`` () =
         let ilTree:t<Source.t,Source.t> = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_1.yrd")
             |> frontend.ParseGrammar 
-        let ilTreeConverted:t<Source.t,Source.t> = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
+        let ilTreeConverted:t<Source.t,Source.t> = ConvertionsManager.ApplyConvertion "ExpandMeta" ilTree
         let expectedResult:t<Source.t,Source.t> =
             {info = {fileName = "../../../../Tests/Convertions/PToken_to_PRef_1.yrd";};
              head = None;
@@ -133,7 +133,7 @@ type ``Convertions tests`` () =
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_2.yrd")
             |> frontend.ParseGrammar 
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
+        let ilTreeConverted = ConvertionsManager.ApplyConvertion "ExpandMeta" ilTree
         let expectedResult:t<Source.t,Source.t> =
             {info = {fileName = "../../../../Tests/Convertions/PToken_to_PRef_2.yrd";};
              head = None;
@@ -176,7 +176,7 @@ type ``Convertions tests`` () =
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"ExpandMeta_DuplicateRules.yrd")
             |> frontend.ParseGrammar 
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ilTree ("ExpandMeta")
+        let ilTreeConverted = ConvertionsManager.ApplyConvertion ("ExpandMeta") ilTree
         let expectedResult = 
             {info =
               {fileName = "../../../../Tests/Convertions/ExpandMeta_DuplicateRules.yrd";};
@@ -235,5 +235,34 @@ type ``Convertions tests`` () =
 #if DEBUG
         let generator = GeneratorsManager.Generator "TreeDump"
         printfn "%A\n" (generator.Generate ilTreeConverted)
-#endif
+#endif      
         Assert.AreEqual( expectedResult, ilTreeConverted)
+
+    [<Test>]
+    member test.``ExpandBrackets. Sequence as sequence element test.``()=
+        Namer.resetRuleEnumerator()
+        let frontend = FrontendsManager.Frontend "YardFrontend"        
+        let ilTree = 
+            System.IO.Path.Combine(convertionTestPath,"expandbrackets_1.yrd")
+            |> frontend.ParseGrammar 
+        let ilTreeConverted = 
+            ilTree 
+            |> ConvertionsManager.ApplyConvertion "ExpandMeta"   
+            |> ConvertionsManager.ApplyConvertion "ExpandEbnfStrict"   
+            |> ConvertionsManager.ApplyConvertion "ExpandBrackets"   
+        let hasNotInnerSeq = 
+            ilTreeConverted.grammar 
+            |> List.forall 
+                (fun rule ->
+                    let rec eachProd = function
+                        | PAlt(a,b) -> eachProd a && eachProd b
+                        | PSeq(elements, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
+                        | _ -> true
+                    eachProd rule.body
+                )
+            
+#if DEBUG
+        let generator = GeneratorsManager.Generator "TreeDump"
+        printfn "%A\n" (generator.Generate ilTreeConverted)
+#endif
+        Assert.True(hasNotInnerSeq)  

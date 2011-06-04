@@ -95,7 +95,7 @@ let () =
                 | e -> FEError e.Message |> raise
 
             // Apply convertions
-            Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion !ilTree conv)) convertions
+            Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion conv !ilTree)) convertions
 
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
@@ -165,4 +165,5 @@ List of available frontends, generators and convertions can be obtained by -af -
 //YaccConstructor.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Convertions/expandebnfstrict_1.yrd
 //YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Convertions/buildast_1.yrd
 //YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Convertions/mergealter_1.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandMeta -c ExpandEbnfStrict -c ExpandBrackets -c AddEOF -i ../../../../Tests/Convertions/expandbrackets_1.yrd
 

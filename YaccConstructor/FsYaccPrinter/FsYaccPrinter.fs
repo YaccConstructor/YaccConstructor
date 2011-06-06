@@ -23,5 +23,6 @@ open Yard.Core
 type FsYaccPrinter() = 
     inherit Generator()
         override this.Name = "FsYaccPrinter"
-        override this.Generate t = Generator.generate t :> obj
+        override this.Generate t = Generator.generate t "" :> obj
+        override this.Generate(t, tokenType) = Generator.generate t tokenType :> obj
         override this.AcceptableProductionTypes = ["PAlt"; "PSeq"; "PRef"; "PToken"]

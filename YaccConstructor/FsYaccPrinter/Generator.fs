@@ -58,10 +58,11 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
     let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
-let generate (ilDef:Definition.t<Source.t, Source.t>) = 
+let generate (ilDef:Definition.t<Source.t, Source.t>) tokenType = 
     let headerSection = if ilDef.head.IsSome then sprintf "%%{\n%s\n%%}\n" (fst ilDef.head.Value) else ""
     let tokens = findTokens ilDef.grammar
-    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token %s\n" text token) "" tokens)
+    let tokenTypeStr = if tokenType="" then "" else sprintf " <%s>" tokenType
+    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token%s %s\n" text tokenTypeStr token) "" tokens)
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)

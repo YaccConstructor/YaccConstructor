@@ -31,6 +31,7 @@ exception GenError of string
 let () =
     let feName = ref None
     let generatorName = ref None
+    let generatorParams = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
     let convertions = new ResizeArray<string>()
@@ -60,7 +61,13 @@ let () =
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
-         "-g", ArgType.String (fun s -> generatorName := Some s), "Generator name. Use -ag to list available."
+         "-g", ArgType.String 
+            (fun s -> 
+                match Array.toList (s.Split(' ')) with
+                | name::[] -> generatorName := Some(name); generatorParams := None
+                | name::parameters -> generatorName := Some(name); generatorParams := Some(String.concat " " parameters)
+                | _ -> failwith "You need to specify generator name"
+            ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
@@ -110,7 +117,9 @@ let () =
             // Generate something
             let result =            
                 try
-                    gen.Generate (!ilTree)
+                    match !generatorParams with
+                    | None -> gen.Generate (!ilTree)
+                    | Some(genParams) -> gen.Generate(!ilTree, genParams)
                 with
                 | e -> GenError e.Message |> raise
 

@@ -21,8 +21,7 @@ open Yard.Core
 
 
 type FsYaccPrinter() = 
-    interface IGenerator with
-        member this.Name = "FsYaccPrinter"
-        member this.Generate t = Generator.generate t :> obj
-        member this.AcceptableProductionTypes = ["PAlt"; "PSeq"; "PRef"; "PToken"]
-    end
+    inherit Generator()
+        override this.Name = "FsYaccPrinter"
+        override this.Generate t = Generator.generate t :> obj
+        override this.AcceptableProductionTypes = ["PAlt"; "PSeq"; "PRef"; "PToken"]

@@ -19,8 +19,10 @@ namespace Yard.Core
 
 open Yard.Core.IL
 
-type IGenerator = interface
+[<AbstractClass>]
+type Generator() =
     abstract Name : string
     abstract Generate : Definition.t<Source.t,Source.t> -> obj
+    abstract Generate : Definition.t<Source.t,Source.t> * string -> obj
+    default this.Generate(grammar, string) = this.Generate(grammar)
     abstract AcceptableProductionTypes : string list
-end

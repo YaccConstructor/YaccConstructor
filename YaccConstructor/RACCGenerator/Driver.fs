@@ -23,9 +23,9 @@ namespace Yard.Generators.RACCGenerator
 open Yard.Core
 
 type RACCGenerator() = 
-    interface IGenerator with        
-        member this.Name = "RACCGenerator"
-        member this.Generate t = 
+    inherit Generator()
+        override this.Name = "RACCGenerator"
+        override this.Generate t = 
             let extension = ".fs"
             let tablesStr = ".tables"
             let actionsStr = ".actions"
@@ -34,7 +34,6 @@ type RACCGenerator() =
             let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
             let typeToTag = tableGenerator.Gemerate transformedGrammar
             codeGenerator.Gemerate transformedGrammar typeToTag :> obj
-        member this.AcceptableProductionTypes = 
+        override this.AcceptableProductionTypes = 
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) 
             |> List.map (fun unionCase -> unionCase.Name)
-    end

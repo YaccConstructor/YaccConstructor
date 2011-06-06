@@ -21,10 +21,9 @@ namespace Yard.Generators.TreeDump
 open Yard.Core
 
 type TreeDump() = 
-    interface IGenerator with
-        member this.Name = "TreeDump"
-        member this.Generate t = (sprintf "%A" t) :> obj
-        member this.AcceptableProductionTypes = 
+    inherit Generator()
+        override this.Name = "TreeDump"
+        override this.Generate t = (sprintf "%A" t) :> obj
+        override this.AcceptableProductionTypes = 
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)
-    end

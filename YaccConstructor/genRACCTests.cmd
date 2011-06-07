@@ -1,18 +1,18 @@
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_seq.yrd --testpath ..\Tests\RACC\test_seq\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_alt.yrd --testpath ..\Tests\RACC\test_alt\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls.yrd --testpath ..\Tests\RACC\test_cls\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yrd --testpath ..\Tests\RACC\test_alt_in_cls\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_l_attr.yrd --testpath ..\Tests\RACC\test_l_attr\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_simple_checker.yrd --testpath ..\Tests\RACC\test_simple_checker\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_checker_on_glr.yrd --testpath ..\Tests\RACC\test_checker_on_glr\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_summator_1.yrd --testpath ..\Tests\RACC\test_summator_1\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_opt.yrd --testpath ..\Tests\RACC\test_opt\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -t test_reduce_reduce.yrd --testpath ..\Tests\RACC\test_reduce_reduce\
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
-Main\bin\Release\Main.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_seq.yrd --testpath ..\Tests\RACC\test_seq\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_alt.yrd --testpath ..\Tests\RACC\test_alt\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_cls.yrd --testpath ..\Tests\RACC\test_cls\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_alt_in_cls.yrd --testpath ..\Tests\RACC\test_alt_in_cls\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_cls_with_tail.yrd --testpath ..\Tests\RACC\test_cls_with_tail\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_cls_with_head.yrd --testpath ..\Tests\RACC\test_cls_with_head\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_arithm_glr.yrd --testpath ..\Tests\RACC\test_arithm_glr\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_l_attr.yrd --testpath ..\Tests\RACC\test_l_attr\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_simple_checker.yrd --testpath ..\Tests\RACC\test_simple_checker\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_checker_on_glr.yrd --testpath ..\Tests\RACC\test_checker_on_glr\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_summator_1.yrd --testpath ..\Tests\RACC\test_summator_1\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_opt.yrd --testpath ..\Tests\RACC\test_opt\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_reduce_reduce.yrd --testpath ..\Tests\RACC\test_reduce_reduce\
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
+Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
 
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests

@@ -90,35 +90,36 @@ type ``YardFrontend Parser tests`` () =
         parserTest
             "+s: NUMBER PLUS NUMBER;" 
             { new Definition.t<Source.t, Source.t> with
-                info = {fileName = "";} 
+                info = {fileName = ""} 
                 and head = None  
-                and grammar = [{ 
-                    name = "s";
-                    args = [];
-                    body =
-                        PSeq(
-                            [{ 
-                                omit = false;
-                                rule = PToken ("NUMBER", (4, 10));
-                                binding = None;
-                                checker = None;
-                            }; { 
-                                omit = false;
-                                rule = PToken ("PLUS", (11, 15));
-                                binding = None;
-                                checker = None;
-                            }; {
-                                omit = false;
-                                rule = PToken ("NUMBER", (16, 22));
-                                binding = None;
-                                checker = None;
-                            }],
-                            None
-                        );
-                    _public = true;
-                    metaArgs = [];
-                }] 
-                and foot = None;
+                and grammar = 
+                    [{ 
+                        name = "s"
+                        args = []
+                        body =
+                            PSeq(
+                                [{ 
+                                    omit = false
+                                    rule = PToken ("NUMBER", (4, 10))
+                                    binding = None
+                                    checker = None
+                                }; { 
+                                    omit = false
+                                    rule = PToken ("PLUS", (11, 15))
+                                    binding = None
+                                    checker = None
+                                }; {
+                                    omit = false
+                                    rule = PToken ("NUMBER", (16, 22))
+                                    binding = None
+                                    checker = None
+                                }],
+                                None
+                            );
+                        _public = true
+                        metaArgs = []
+                    }] 
+                and foot = None
             } 
                 
 [<TestFixture>]
@@ -143,36 +144,37 @@ let value x = (x:>Lexeme<string>).value
             { new Definition.t<Source.t, Source.t> with 
                 info = { fileName = ""; }
                 and head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
-                and grammar = [{ 
-                    name = "s";
-                    args = [];
-                    body = 
-                        PSeq (
-                            [{
-                                omit = false;
-                                rule = PRef (("e", (65, 66)),Some ("1", (67, 68)));
-                                binding = Some ("res:int", (54, 61));
-                                checker = None;
-                            }],
-                            Some ("res", (71, 74))
-                        );
-                    _public = true;
-                    metaArgs = [];
-                  }; { 
-                    name = "e";
-                    args = [("i", (80, 81))];
-                    body = 
-                        PSeq (
-                            [{
-                                omit = false;
-                                rule = PToken ("NUMBER", (86, 92));
-                                binding = Some ("n", (84, 85));
-                                checker = None;
-                            }],
-                            Some ("(value n |> int) + i", (94, 114))
-                        );
-                    _public = false;
-                    metaArgs = [];
-                }];
+                and grammar = 
+                    [{ 
+                        name = "s"
+                        args = []
+                        body = 
+                            PSeq (
+                                [{
+                                    omit = false;
+                                    rule = PRef (("e", (65, 66)),Some ("1", (67, 68)))
+                                    binding = Some ("res:int", (54, 61))
+                                    checker = None;
+                                }],
+                                Some ("res", (71, 74))
+                            );
+                        _public = true
+                        metaArgs = []
+                      }; { 
+                        name = "e"
+                        args = [("i", (80, 81))]
+                        body = 
+                            PSeq (
+                                [{
+                                    omit = false;
+                                    rule = PToken ("NUMBER", (86, 92))
+                                    binding = Some ("n", (84, 85))
+                                    checker = None
+                                }],
+                                Some ("(value n |> int) + i", (94, 114))
+                            );
+                        _public = false
+                        metaArgs = []
+                    }]
                 and foot = None
             }

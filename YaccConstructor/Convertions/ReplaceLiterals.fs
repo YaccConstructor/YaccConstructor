@@ -61,9 +61,13 @@ let rec eachProduction f productionList =
 
 let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, string>) (grammarTokens:HashSet<string>) token_format= 
     let rec _replaceLiterals = function
-        | PSeq(elements, actionCode) -> PSeq(
-            elements |> List.map (fun elem -> {elem with rule=(_replaceLiterals elem.rule)}),
-            actionCode)
+        | PSeq(elements, actionCode) -> 
+            (
+                elements 
+                |> List.map (fun elem -> {elem with rule=(_replaceLiterals elem.rule)})
+                ,actionCode
+            )
+            |> PSeq
         | PAlt(left, right) -> PAlt(_replaceLiterals left, _replaceLiterals right)
         | PMany(x) -> PMany(_replaceLiterals x)
         | PSome(x) -> PSome(_replaceLiterals x)

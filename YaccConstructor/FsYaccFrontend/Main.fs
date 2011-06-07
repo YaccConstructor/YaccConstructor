@@ -30,13 +30,18 @@ let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) =
     grammar |> List.map (fun rule -> if List.exists ((=) rule.name) starts then { rule with _public=true } else rule)
 
 let rec _addBindings = function
-    | PSeq(elements, Some(ac,_)) -> PSeq(List.mapi (
-        fun i elem -> 
-            if Regex.Match(ac, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
-                { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0)) } 
-            else 
-                { elem with rule=_addBindings elem.rule} 
-        ) elements, Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0)))
+    | PSeq(elements, Some(ac,_)) -> 
+        (elements
+         |> List.mapi 
+            (
+                fun i elem -> 
+                    if Regex.Match(ac, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
+                        { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0)) } 
+                    else 
+                        { elem with rule=_addBindings elem.rule} 
+            ) 
+        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0)))
+        |> PSeq
     | PSeq(elements, None) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
     | PSome(x) -> PSome(_addBindings x)

@@ -39,6 +39,6 @@ type StateInfo<'position, 'tree, 'itemName, 'traceStep
     //override self.GetHashCode() = hashOn self.GetValue self     
     interface System.Collections.IStructuralComparable with
             member self.CompareTo (y,c) = //c.Compare(self.GetValue self ,self.GetValue (y :?> StateInfo<'position, 'tree, 'itemName, 'traceStep>))
-            1
+                1
                 
 

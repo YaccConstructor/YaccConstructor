@@ -63,19 +63,33 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
         if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
             PSeq(elements, Some("Node(\"empty\", [])", (0,0)))
         else
-            PSeq(elements |> List.mapi (fun i elem -> 
+            PSeq(
+                elements 
+                |> List.mapi 
+                    (fun i elem -> 
                 //Don't add bindings to omit or tokens or literals
                 //TODO add omit check
-                match elem.rule with
-                | PToken _ | PLiteral _ -> { elem with binding=if !isTyped then Some((sprintf "S%d" (i+1)), (0,0)) else None }
-                | PRef _ ->  { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)) }
-                | PAlt(left,right) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,_buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
-                | PMany(p) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
-                | PSome(p) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PSome(_buildAST (sprintf "%s_Some%d" ruleName (i+1)) p) }
-                | POpt(p)  -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
-                | x -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=_buildAST (sprintf "%s_INNER%d" ruleName (i+1)) elem.rule }
-            ), 
-            Some(sprintf "Node(\"%s\", [%s])" ruleName (elements |> List.mapi (fun i elem -> (i, elem)) |> List.choose (fun (i, elem) -> if elem.omit then None else Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule)) |> String.concat "; "), (0,0)))
+                        match elem.rule with
+                        | PToken _ | PLiteral _ -> { elem with binding=if !isTyped then Some((sprintf "S%d" (i+1)), (0,0)) else None }
+                        | PRef _ ->  { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)) }
+                        | PAlt(left,right) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,_buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
+                        | PMany(p) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
+                        | PSome(p) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PSome(_buildAST (sprintf "%s_Some%d" ruleName (i+1)) p) }
+                        | POpt(p)  -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
+                        | x -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=_buildAST (sprintf "%s_INNER%d" ruleName (i+1)) elem.rule }
+                    )
+                ,(                    
+                    elements
+                    |> List.mapi (fun i elem -> (i, elem)) 
+                    |> List.choose 
+                        (fun (i, elem) -> 
+                            if elem.omit
+                            then None 
+                            else Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule))
+                    |> String.concat "; "
+                    |> sprintf "Node(\"%s\", [%s])" ruleName
+                    , (0,0)
+                )|> Some)
     | x -> _buildAST ruleName (seqify x)
 
 let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType = 

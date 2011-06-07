@@ -44,21 +44,29 @@ let rec eachProduction f productionList =
         productionList 
 
 let addEOFToProduction = function
-    | PSeq(elements, actionCode) -> PSeq(
-        elements @ [{new elem<Source.t, Source.t> with omit=true and rule=PToken("EOF",(0,0)) and binding=None and checker=None}], 
-        actionCode)
-    | x -> PSeq([
-            {new elem<Source.t, Source.t> with omit=false and rule=x and binding=None and checker=None}; 
-            {new elem<Source.t, Source.t> with omit=true and rule=PToken("EOF",(0,0)) and binding=None and checker=None}],
-        None)
+    | PSeq(elements, actionCode) -> 
+        (
+            elements 
+            @ [{omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}]
+            ,actionCode
+        ) 
+        |> PSeq
+    | x -> (
+                [
+                    {omit=false; rule=x; binding=None; checker=None}; 
+                    {omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}
+                ]
+                ,None
+           )
+           |> PSeq
 
 let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
     let startRules = new HashSet<string>()
-    ruleList |> List.iter (fun rule -> if rule._public then startRules.Add(rule.name);() )
+    ruleList |> List.iter (fun rule -> if rule._public then startRules.Add(rule.name)|>ignore )
     let usedRules = new HashSet<string>()
     eachProduction 
         (function
-        | PRef((name,_),_) -> usedRules.Add(name);()
+        | PRef((name,_),_) -> usedRules.Add(name)|>ignore
         | _ -> ()
         )
         (ruleList |> List.map (fun rule -> rule.body) )
@@ -69,13 +77,16 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
             if rule._public then
                 if usedStartRules.Contains(rule.name) then
                     [{rule with _public=false}; 
-                    {new Rule.t<Source.t, Source.t> with 
-                        name=createName() and args=[] and _public=true and metaArgs=[] 
-                        and body=PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef((rule.name, (0,0)), None) and binding=Some(getLastName(), (0,0)) and checker=None}; 
-                            {new elem<Source.t, Source.t> with omit=false and rule=PToken("EOF", (0,0)) and binding=None and checker=None}
-                            ],
-                            Some(getLastName(),(0,0))
+                    {
+                        name=createName()
+                        args=[]
+                        _public=true
+                        metaArgs=[] 
+                        body=PSeq([
+                                    {omit=false; rule=PRef((rule.name, (0,0)), None); binding=Some(getLastName(), (0,0)); checker=None}; 
+                                    {omit=false; rule=PToken("EOF", (0,0)); binding=None; checker=None}
+                                  ]
+                                  ,Some(getLastName(),(0,0))
                         )
                     }]
                 else

@@ -40,7 +40,7 @@ let genOptName () =
     generatedOptsCount := !generatedOptsCount + 1
     sprintf "yard_opt_%d" !generatedOptsCount
 
-let default_elem = {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source "empty", None) and binding=None and checker=None}
+let default_elem = {omit=false; rule=PRef(s2source "empty", None); binding=None; checker=None}
 
 let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
     let addedBnfRules = ref []
@@ -61,9 +61,10 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     PAlt(
                         PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "[elem]") ,
                         PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None}
-                        ], sourceIf binded "head::tail")
+                                {omit=false; rule=expandedBody; binding=sourceIf binded "head"; checker=None};
+                                {omit=false; rule=PRef(s2source generatedName, None); binding=sourceIf binded "tail"; checker=None}
+                             ]
+                             , sourceIf binded "head::tail")
                     ) 
                  and _public=false
                  and metaArgs=[]
@@ -80,9 +81,10 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     PAlt(
                         PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "[]") ,
                         PSeq([
-                            {new elem<Source.t, Source.t> with omit=false and rule=expandedBody                       and binding=sourceIf binded "head" and checker=None};
-                            {new elem<Source.t, Source.t> with omit=false and rule=PRef(s2source generatedName, None) and binding=sourceIf binded "tail" and checker=None}
-                        ], sourceIf binded "head::tail")
+                                {omit=false; rule=expandedBody; binding=sourceIf binded "head"; checker=None};
+                                {omit=false; rule=PRef(s2source generatedName, None); binding=sourceIf binded "tail"; checker=None}
+                             ]
+                             , sourceIf binded "head::tail")
                     ) 
                  and _public=false
                  and metaArgs=[]

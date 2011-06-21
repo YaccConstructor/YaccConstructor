@@ -40,7 +40,7 @@ module Production = begin
         |PToken   of Source.t //собственно токен
         |PRef     of Source.t * 'expr option // Vanilla rule reference with an optional args list.
         |PMany    of (t<'patt,'expr>) //expr*
-        |PMetaRef of Source.t * 'expr option * 'expr list // Metarule reference like in "a: mr<x> y z"
+        |PMetaRef of Source.t * 'expr option * t<'patt,'expr> list // Metarule reference like in "a: mr<x> y z"
         |PLiteral of Source.t //Литерал. Хочется в правилах явно писать ,например, .."if" expr "then" expr...
         |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
         |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   

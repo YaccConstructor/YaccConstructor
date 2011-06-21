@@ -60,7 +60,7 @@ let rec printBody indent body  =
     |PToken a ->  "Lexer.p" + Source.toString a
     |PRef (r,arg)->  sprintf "%s %s" (Source.toString r)  (printArg arg)
     |PMany a -> sprintf "many ( attempt(%s))" <| printBody (indent +  "") a
-    |PMetaRef (a,b,c)->sprintf "%s %s %s" (Source.toString a) (printArgs " " c) ( printArg b)   
+//    |PMetaRef (a,b,c)->sprintf "%s %s %s" (Source.toString a) (printArgs " " c) ( printArg b)   
     |PLiteral a -> "Lexer.literal " +  Source.toString a  
 //What about following items
     |PSome a -> sprintf "many1 ( attempt(%s))" <| printBody (indent +  "") a

@@ -43,7 +43,7 @@ let invalidArgs name =
 
 (** create list of pairs: (<formal parameter>, <actual parameter>) *)
 let createPairsList name l1 l2 =
-     try List.map2(fun x  y -> getText x, getText y ) l1 l2 
+     try List.map2(fun x  y -> getText x, y ) l1 l2 
      with :? System.ArgumentException -> invalidArgs  name
     
 
@@ -65,8 +65,8 @@ let getFormalArgs name actParams formalArgs =
          | Some x -> [x]         
     else formalArgs
 
-(** create list of strings from list of Source *)
-let createStrList = List.map (fun x -> getText x) 
+(** create list of strings from list of productions *)
+let createStrList = List.map (fun x -> getTextIL x) 
 
 (** key for hash table *)
 let getKey metaName metaArgs = 
@@ -75,22 +75,20 @@ let getKey metaName metaArgs =
 (** returns actual parameter (if given list contains it with given formal) 
  *  (args is list of pairs (<formal>, <actual>) )
  *)
+
+/// args - list of parameters name and their values, which is searched for formalName
 let getActualParam formalName args = List.tryPick (fun (x,y) -> if x = formalName then Some y else None) args
-let replaceFormal args formal = 
-    let act = getActualParam (getText formal) args
-    match act with
-    | Some x -> createSource x
-    | None   -> formal
 
-(** replace formal metaparameters with actual *)
-let replaceFormals mArgs args =
-     List.map (replaceFormal args) mArgs
-
-(** expand references to metarules 
- *  and generate new rules every such reference 
- *)
+/// expand references to metarules 
+/// and generate new rules for every such reference
+/// body:t - production which can contain metareferences
+/// metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t>> - table, which contains expanding metareferences rules 
+/// refsTbl:Dictionary<string,Source.t> - map of metareference with actual params to generated rule name
+/// res:Rule.t list - generated rules from body
+/// returns (new body, generated rules)
 let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) (refsTbl:Dictionary<string,Source.t>) res = 
-    let rec transformBody ruleName actParams args nRules = 
+    // replaces all metarule parameters in body with given args
+    let rec transformBody (ruleName:string) actParams (args:(string * t<Source.t, Source.t>) list) nRules = 
         function
         | PRef (r, p) -> 
           let rName = getText r
@@ -102,11 +100,13 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
           let (|Terminal|NonTerminal|) (name:string) = 
             if name.[0] = name.ToLower().[0] then NonTerminal else Terminal
 
+          // test if param is replaced with actual param
           match param with          
           | Some n -> 
             match n with
-            | NonTerminal -> PRef (getNewSource r n, aParams), nRules
-            | Terminal    -> PToken (getNewSource r n), nRules
+            | PRef(actR, actP) -> PRef (actR, aParams), nRules
+            | PToken(actR)     -> PToken (actR), nRules
+            | x -> x, nRules
           | None   -> PRef (r, p), nRules
           
         | PAlt (l, r) -> 
@@ -128,7 +128,22 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
 
         | PMetaRef (n, p, mArgs) -> 
           (** we accept other metarule as parameter *)
-          let n' = (*printPairList args ;*) replaceFormal args n
+
+          let replaceFormal args formal = 
+            let act = getActualParam (getText formal) args
+            match act with
+            | Some x -> x
+//                match x with
+//                | PRef(s,None) -> s
+//                | x -> failwith <| "metaparam substitution "+(Source.toString formal)+"->"+(getTextIL x)+" expected to be ref"
+            | None   -> PRef(formal,None)
+        (** replace formal metaparameters with actual *)
+          let replaceFormals mArgs args =
+            List.map (function PRef(s,p) -> replaceFormal args s | x -> x) mArgs
+          let n' = (*printPairList args ;*) 
+            match replaceFormal args n with
+            | PRef(s, None) -> s
+            | x -> failwith <| "metaparam substitution "+(Source.toString n)+"->"+(getTextIL x)+" expected to be ref"
           let mRuleName' = getText n'
           let p' = updateActParams (isEBNFmeta mRuleName') actParams p
           let mArgs' = replaceFormals mArgs args
@@ -147,21 +162,26 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
     (*    | other -> reportError "EBNF construction has already be transformed" 
           ; (other, nRules)
     *)
-    and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) metaArgs =
+    /// transforms rule with
+    and transformRule rName _params (metaRule: Rule.t<Source.t,Source.t>) (metaArgs:t<Source.t, Source.t> list) =
         let args = createPairsList metaRule.name metaRule.metaArgs metaArgs
+        // probably equal to metaRule.args(L-attributes)
         let fArgs = getFormalArgs metaRule.name _params metaRule.args
         let args' = list2opt fArgs
         let (b, newRules) = transformBody rName args' args [] metaRule.body 
         ( newRules @ [ createRule rName fArgs b metaRule._public [] ] )
 
+    /// creates 
     and genNewRule rName args' mRulesTbl metaName' metaArgs =
         let res = findMetaRule mRulesTbl metaName'
         match res with 
         | Some metaRule -> transformRule rName args' metaRule metaArgs
         | None -> []
-
-    and expandMetaRef res metaName _params metaArgs' = 
+ 
+    /// returns (ref to new rule, list of generated rules)
+    and expandMetaRef res (metaName:Source.t) _params (metaArgs':t<Source.t, Source.t> list) = 
         let key = getKey metaName metaArgs'
+        // checks if we already expanded rule with given name and meta args
         if refsTbl.ContainsKey(key)
         then (PRef (refsTbl.Item key, _params), res)
         else
@@ -230,3 +250,7 @@ type ExpandMeta() =
         override this.Name = "ExpandMeta"
         override this.ConvertList ruleList = expandMetaRules ruleList
         override this.EliminatedProductionTypes = [""]
+
+
+
+//let expandMetaRules = id

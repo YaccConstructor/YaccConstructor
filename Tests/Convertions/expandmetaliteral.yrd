@@ -1,0 +1,2 @@
+doubled<<param>>: param param;
++s: doubled<<"kva"?>>;

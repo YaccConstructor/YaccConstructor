@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+
 module Yard.Core.Convertions.ExpandEbnf
 
 open Yard.Core
@@ -30,7 +32,7 @@ open TransformAux
 let createBinding bindName = Some ( createSource bindName )
 
 let createMetaRef name = 
-    PMetaRef (createSource name, None, [ createSource getItem ])
+    PMetaRef (createSource name, None, [ PRef(createSource getItem, None) ])
 
 let createMetaRule name body = 
     createRule name [] body false [ createSource getItem ]
@@ -84,14 +86,14 @@ let getMetaMany = createMetaRule Names.many getManyBody
 let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) = 
     let rec getMeta nr paramList metaName = 
         function
-        | PRef (rName, _params) -> (PMetaRef (createSource metaName, _params, [rName]), nr)
+        | PRef (rName, _params) -> (PMetaRef (createSource metaName, _params, [PRef(rName, None)]), nr)
         | PToken t 
-        | PLiteral t            -> (PMetaRef (createSource metaName, None, [t]), nr)
+        | PLiteral t            -> (PMetaRef (createSource metaName, None, [PRef(t, None)]), nr)
         | other                 -> let newName = createNewName (createSource getItem) in
                                    let _params = createParams paramList in
                                    let newRule = createSimpleRule (getText newName) _params other in
                                    let rules = convertToMeta newRule in 
-                                   (PMetaRef (createSource metaName, list2opt _params, [newName]), nr @ rules)
+                                   (PMetaRef (createSource metaName, list2opt _params, [PRef(newName, None)]), nr @ rules)
     and bodyToMeta rs     (** new rules *) 
                   _params (** rule parameters and bindings *) =     
         let nameOf = function 
@@ -139,3 +141,4 @@ type ExpandEbnf() =
         override this.Name = "ExpandEbnf"
         override this.ConvertList ruleList = convertEBNFtoMeta ruleList
         override this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]
+

@@ -140,9 +140,7 @@ prim: prim STAR           {PMany $1}
     | call                {$1}
     | STRING              {PLiteral $1}
 
-meta_param: LIDENT {$1}
-          | UIDENT {$1}
-          | STRING {$1}
+meta_param: prim {$1}
 
 meta_params: meta_param {[$1]}
            | meta_param meta_params {$1 :: $2}

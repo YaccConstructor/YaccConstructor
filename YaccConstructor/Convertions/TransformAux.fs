@@ -25,6 +25,15 @@ open Production
 open Yard.Core.Namer
 
 let getText = Source.toString
+let rec getTextIL = function
+    | PRef(s,None) -> getText s
+    | PToken(s) -> getText s
+    | PLiteral(s) -> getText s
+    | POpt(p) -> "(" + getTextIL p + ")?"
+    | PSome(p) -> "(" + getTextIL p + ")*"
+    | PMany(p) -> "(" + getTextIL p + ")+"
+    | PAlt(l,r) -> "(" + getTextIL l + ")|(" + getTextIL r + ")"
+    | _ -> failwith "Unsupported meta param construct"
 
 let createSimpleElem rulProd bind = 
     { omit = false; rule = rulProd; binding = bind; checker = None }

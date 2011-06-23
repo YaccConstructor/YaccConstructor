@@ -29,6 +29,47 @@ open NUnit.Framework
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 
+let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
+    let srcEquals (a:Source.t) (b:Source.t) = (fst a = fst b)
+    let srcOptEquals a b =
+        match a,b with
+        | Some(sa), Some(sb) -> srcEquals sa sb
+        | None, None -> true
+        | _ -> false
+
+    let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
+        match (il1,il2) with
+        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
+            List.length elems1 = List.length elems2 &&
+                List.zip elems1 elems2 
+                |> List.forall 
+                    (fun (elem1, elem2) ->
+                        srcOptEquals elem1.binding elem2.binding && srcOptEquals elem1.checker elem2.checker &&
+                            elem1.omit = elem2.omit && ilTreeEqualsWithoutLineNumbers elem1.rule elem2.rule
+                    )
+        | PAlt(left1, right1), PAlt(left2, right2) -> 
+            ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
+        | PToken(t1), PToken(t2) -> srcEquals t1 t2
+        | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
+        | PMany(t1), PMany(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PSome(t1), PSome(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | POpt(t1), POpt(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
+            srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
+                List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
+        | PLiteral(s1), PLiteral(s2) -> srcEquals s1 s2
+        | _ -> false
+
+    List.forall2  
+        (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
+            rule1._public = rule2._public &&
+            List.forall2 srcEquals rule1.args rule2.args &&
+            ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
+            List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
+            rule1.name = rule2.name
+        ) g1 g2
+ 
+
 [<TestFixture>]
 type ``Convertions tests`` () =
     [<Test>]
@@ -269,3 +310,40 @@ type ``Convertions tests`` () =
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif
         Assert.True(hasNotInnerSeq)  
+
+    [<Test>]
+    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
+    /// Expected result 'sourceFileName.res'
+    member test.``Batch tests in Tests\Convertions\Batch .``()=
+        let frontend = FrontendsManager.Frontend "YardFrontend"
+        let generator = GeneratorsManager.Generator "YardPrinter"
+        printfn "hello"
+        System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
+            |> Seq.iter 
+                (fun srcFile ->  
+                    Namer.resetRuleEnumerator()
+                    printfn "file %s" srcFile
+                    let srcFileName = System.IO.Path.GetFileName(srcFile)
+                    let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
+                    let prefixSplitted = srcPrefix.Split('_')
+                    printfn "1"
+                    let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
+                    printfn "2: %A" convertions
+                    let ilTree = srcFile |> frontend.ParseGrammar 
+                    printfn "3"
+                    let reorder f a b = f b a
+                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
+                    printfn "4"
+//                    try 
+//                    let aaa = generator.Generate ilTreeConverted
+                    printfn "aaa"
+//                    let generated = aaa :?> string
+                    printfn "generated"
+                    let expected = srcFile + ".res" |> frontend.ParseGrammar 
+                    printfn "expected"
+                    Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+//                     with e ->
+//                        printfn "%A" e 
+
+                )
+        Assert.True(true)

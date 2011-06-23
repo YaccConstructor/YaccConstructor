@@ -106,7 +106,7 @@ type ``Convertions tests`` () =
               [{name = "yard_metar_1";
                 args = [];
                 body = PSeq ([{omit = false;
-                               rule = PToken ("NUMBER", (16, 20));
+                               rule = PToken ("NUMBER", (36, 42));
                                binding = None;
                                checker = None;}],None);
                 _public = false;
@@ -120,6 +120,7 @@ type ``Convertions tests`` () =
                 _public = true;
                 metaArgs = [];}];
              foot = None;}
+
 #if DEBUG
         let generator = GeneratorsManager.Generator "TreeDump"
         printfn "%A\n" (generator.Generate ilTreeConverted)
@@ -148,7 +149,7 @@ type ``Convertions tests`` () =
                 metaArgs = [];}; {name = "yard_metar_1";
                                   args = [];
                                   body = PSeq ([{omit = false;
-                                                 rule = PRef (("mrArg", (36, 41)),None);
+                                                 rule = PRef (("mrArg", (58, 63)),None);
                                                  binding = None;
                                                  checker = None;}],None);
                                   _public = false;
@@ -162,6 +163,7 @@ type ``Convertions tests`` () =
                 _public = true;
                 metaArgs = [];}];
              foot = None;}
+
 
 #if DEBUG
         let generator = GeneratorsManager.Generator "TreeDump"
@@ -185,7 +187,7 @@ type ``Convertions tests`` () =
               [{name = "yard_yardOption_1";
                 args = [];
                 body = PSeq ([{omit = false;
-                               rule = PToken ("NUM", (40, 44));
+                               rule = PToken ("NUM", (164, 167));
                                binding = Some ("yard_item", (28, 37));
                                checker = None;}],Some (" Some yard_item ", (46, 62)));
                 _public = false;
@@ -193,7 +195,7 @@ type ``Convertions tests`` () =
                {name = "yard_yardOption_2";
                 args = [];
                 body = PSeq ([{omit = false;
-                               rule = PToken ("STRING", (40, 44));
+                               rule = PToken ("STRING", (182, 188));
                                binding = Some ("yard_item", (28, 37));
                                checker = None;}],Some (" Some yard_item ", (46, 62)));
                 _public = false;
@@ -201,7 +203,7 @@ type ``Convertions tests`` () =
                {name = "yard_yardOption_4";
                 args = [];
                 body = PSeq ([{omit = false;
-                               rule = PToken ("SEMI", (40, 44));
+                               rule = PToken ("SEMI", (194, 198));
                                binding = Some ("yard_item", (28, 37));
                                checker = None;}],Some (" Some yard_item ", (46, 62)));
                 _public = false;
@@ -232,6 +234,7 @@ type ``Convertions tests`` () =
                 _public = true;
                 metaArgs = [];}];
              foot = None;}
+
 #if DEBUG
         let generator = GeneratorsManager.Generator "TreeDump"
         printfn "%A\n" (generator.Generate ilTreeConverted)

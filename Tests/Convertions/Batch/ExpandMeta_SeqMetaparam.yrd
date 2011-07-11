@@ -1,0 +1,6 @@
+
+expression<<expr_part>> : expr_part bin_op expr_part;
+
+expression_extended<<expr_part_extended>>: expression<< (expr_part|expr_part_extended) >> ;
+
++s: expression_extended<<NUMBER>> ;

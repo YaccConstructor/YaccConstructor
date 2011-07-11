@@ -137,9 +137,20 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
 //                | PRef(s,None) -> s
 //                | x -> failwith <| "metaparam substitution "+(Source.toString formal)+"->"+(getTextIL x)+" expected to be ref"
             | None   -> PRef(formal,None)
-        (** replace formal metaparameters with actual *)
-          let replaceFormals mArgs args =
-            List.map (function PRef(s,p) -> replaceFormal args s | x -> x) mArgs
+        (** replace formal metaparameters with actual for inner meta param*)
+          let rec replaceFormals mArgs args =
+            let rec replaceFormalInProd = 
+                function
+                | PSeq(elements, ac) -> PSeq(elements |> List.map (fun elem -> {elem with rule = replaceFormalInProd elem.rule}), ac) 
+                | PAlt(l, r) -> PAlt(replaceFormalInProd l, replaceFormalInProd r) 
+                | PSome(x) -> PSome(replaceFormalInProd x)
+                | POpt(x) -> POpt(replaceFormalInProd x)
+                | PMany(x) -> PMany(replaceFormalInProd x)
+                | PRef(s,p) -> replaceFormal args s 
+                | x -> x
+
+            List.map replaceFormalInProd mArgs
+                        
           let n' = (*printPairList args ;*) 
             match replaceFormal args n with
             | PRef(s, None) -> s

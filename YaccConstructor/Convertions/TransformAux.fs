@@ -33,6 +33,8 @@ let rec getTextIL = function
     | PSome(p) -> "(" + getTextIL p + ")*"
     | PMany(p) -> "(" + getTextIL p + ")+"
     | PAlt(l,r) -> "(" + getTextIL l + ")|(" + getTextIL r + ")"
+    | PSeq(elements, ac) -> "(" + (elements |> List.map (fun elem -> getTextIL elem.rule) |> String.concat " ") + "){" + 
+        (match ac with Some(t) -> getText t | None -> "") + "}"
     | _ -> failwith "Unsupported meta param construct"
 
 let createSimpleElem rulProd bind = 

@@ -326,7 +326,7 @@ type ``Convertions tests`` () =
                     let srcFileName = System.IO.Path.GetFileName(srcFile)
                     let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
                     let prefixSplitted = srcPrefix.Split('_')
-                    printfn "1"
+                    printfn "1" 
                     let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
                     printfn "2: %A" convertions
                     let ilTree = srcFile |> frontend.ParseGrammar 
@@ -334,13 +334,9 @@ type ``Convertions tests`` () =
                     let reorder f a b = f b a
                     let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
                     printfn "4"
-//                    try 
-//                    let aaa = generator.Generate ilTreeConverted
-                    printfn "aaa"
-//                    let generated = aaa :?> string
-                    printfn "generated"
+                    Namer.resetRuleEnumerator()
                     let expected = srcFile + ".res" |> frontend.ParseGrammar 
-                    printfn "expected"
+                    printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
                     Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 //                     with e ->
 //                        printfn "%A" e 

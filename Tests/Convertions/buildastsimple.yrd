@@ -1,0 +1,13 @@
+set_stmt: 
+    "set" 
+        (IDENT table_name?  ("on" | "off") 
+        | "transaction" "isolation" "level" ident = IDENT "read" 
+        )
+       ;
+
+hack_rule : COMMENT { }
+          | BACKSLASH { }
+          | COLON { }
+          | UNRECOGNIZED { };
+
+yo: "hello"+;

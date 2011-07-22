@@ -32,16 +32,16 @@ type AST<'token> =
     | Leaf of string * 'token
 *)
 
-let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
+let leafConstr = sprintf "Leaf(\"%s\", %s)"
 let seqify = function
     | PSeq(x, y) -> PSeq(x, y)
     | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None)
 
 let printSeqProduction binding = function
     | POpt(x) -> sprintf "(match %s with None -> [] | Some(ast) -> ast)" binding 
-    | PToken(s,_) | PLiteral(s,_) -> !leafConstr s binding
-    | PSome(p) -> sprintf "%s" binding
-    | PMany(p) -> sprintf "%s" binding
+    | PToken(s,_) | PLiteral(s,_) -> leafConstr s binding
+    | PSome(p) -> sprintf "List.concat %s" binding
+    | PMany(p) -> sprintf "List.concat %s" binding
     | _ -> binding
 
 /// ruleName is empty when production is inner and action code returns list of nodes
@@ -66,7 +66,8 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                         | PMany(p) -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
                         | PSome(p) -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
                         | POpt(p)  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
-                        | x -> { elem with binding=Some((sprintf "EPICFAIL_S%d" (i+1)), (0,0)); rule=_buildAstSimple ruleName elem.rule }
+                        | PSeq([elem_inner],None) -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
+                        | x -> { elem with binding=Some((sprintf "FAIL(%A)_S%d" x (i+1)), (0,0)); rule=_buildAstSimple ruleName elem.rule }
                     )
                 ,(                    
                     elements

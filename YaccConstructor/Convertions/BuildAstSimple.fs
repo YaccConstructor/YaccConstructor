@@ -57,26 +57,31 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                 elements 
                 |> List.mapi 
                     (fun i elem -> 
-                //TODO add omit check
-                        let binding = Some((sprintf "S%d" (i+1)), (0,0))
-                        match elem.rule with
-                        | PToken _ | PLiteral _ -> { elem with binding=binding }
-                        | PRef _ ->  { elem with binding=binding }
-                        | PAlt(left,right) -> { elem with binding=binding; rule=PAlt(_buildAstSimple "" left,_buildAstSimple "" right) }
-                        | PMany(p) -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
-                        | PSome(p) -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
-                        | POpt(p)  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
-                        | PSeq([elem_inner],None) -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
-                        | x -> { elem with binding=Some((sprintf "FAIL(%A)_S%d" x (i+1)), (0,0)); rule=_buildAstSimple ruleName elem.rule }
+                        if elem.omit then 
+                            elem
+                        else
+                            let binding = Some((sprintf "S%d" (i+1)), (0,0))
+                            match elem.rule, elem.binding with
+                            | PToken _, None | PLiteral _, None | PRef _, None -> { elem with binding=binding }
+                            | PToken _, Some((userBinding, _)) ->  { elem with binding=binding }
+                            | PAlt(left,right), _ -> { elem with binding=binding; rule=PAlt(_buildAstSimple "" left,_buildAstSimple "" right) }
+                            | PMany(p), _ -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
+                            | PSome(p), _ -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
+                            | POpt(p), _  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
+                            | PSeq([elem_inner],None), _ -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
+                            | x, _ -> { elem with binding=Some((sprintf "FAIL(%A)_S%d" x (i+1)), (0,0)); rule=_buildAstSimple ruleName elem.rule }
                     )
                 ,(                    
                     elements
                     |> List.mapi (fun i elem -> (i, elem)) 
                     |> List.choose 
                         (fun (i, elem) -> 
-                            match elem.rule with
-                            | PToken _ | PLiteral _ | PRef _ -> Some("["+ printSeqProduction (sprintf "S%d" (i+1)) elem.rule + "]") //returns one element
-                            | _ -> Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule) //returns list
+                            if elem.omit then 
+                                None
+                            else
+                                match elem.rule with
+                                | PToken _ | PLiteral _ | PRef _ -> Some("["+ printSeqProduction (sprintf "S%d" (i+1)) elem.rule + "]") //returns one element
+                                | _ -> Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule) //returns list
                         )
                     |> String.concat "; "
                     |> if ruleName="" then sprintf "List.concat [%s]" else sprintf "Node(\"%s\", List.concat [%s])" ruleName

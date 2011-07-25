@@ -1,8 +1,9 @@
 set_stmt: 
     "set" 
-        (IDENT table_name?  ("on" | "off") 
-        | "transaction" "isolation" "level" ident = IDENT "read" 
+        (set_peram=IDENT tableName=table_name?  action=("on" | "off") {  } 
+        | "transaction" "isolation" "level" ident = IDENT "read" {}
         )
+{new SetStmt (ast.start,ast.end) }
        ;
 
 hack_rule : COMMENT { }
@@ -10,4 +11,4 @@ hack_rule : COMMENT { }
           | COLON { }
           | UNRECOGNIZED { };
 
-yo: "hello"+;
+yo: -(LBRACE blabla)? "hello"+ -RBRACE hr=hack_rule;

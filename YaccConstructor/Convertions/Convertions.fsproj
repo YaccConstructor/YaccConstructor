@@ -53,6 +53,7 @@
     <Compile Include="ExpandEbnf.fs" />
     <Compile Include="MergeAlter.fs" />
     <Compile Include="BuildAstSimple.fs" />
+    <Compile Include="AddDefaultAC.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

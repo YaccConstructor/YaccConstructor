@@ -69,7 +69,10 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
-        if not(updatedRules.Contains(bfsFor)) then             
+        if not(updatedRules.Contains(bfsFor)) then    
+            if bfsFor="column_definition" then
+                printfn "yo" 
+            updatedRules.Add(bfsFor) |> ignore        
             let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None); Rule.t._public=false; Rule.t.metaArgs=[]}
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then

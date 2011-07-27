@@ -23,11 +23,11 @@ module Yard.Core.Convertions.AddDefaultAC
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
-
 open System.Collections.Generic
 
 /// Adds action code to production considering it is used somewhere
-let rec addAcToProduction neededRules = function
+let rec addAcToProduction neededRules ruleBody = 
+    match ruleBody with
     | PSeq(elements, Some(ac)) -> 
         PSeq(
             elements 
@@ -52,9 +52,9 @@ let rec addAcToProduction neededRules = function
     | PRef((ref,(_,_)), _) as x -> neededRules := ref::!neededRules; x
     | PLiteral _ as x -> x
     | PToken _ as x -> x
-    | PSome _ as x -> x
-    | PMany _ as x -> x
-    | POpt _ as x -> x
+    | PSome p -> PSome(addAcToProduction neededRules p)
+    | PMany p -> PMany(addAcToProduction neededRules p)
+    | POpt p -> POpt(addAcToProduction neededRules p)
     | _ -> failwith "EORRR"
 
 
@@ -69,12 +69,14 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
-        if not(updatedRules.Contains(bfsFor)) then 
-            let ruleFor = rulesMap.[bfsFor]
-            let neededRules = ref []
-            let updatedBody = addAcToProduction neededRules (ruleFor.body)
-            !neededRules |> List.iter (fun r -> if not (updatedRules.Contains(r)) then rulesQueueBfs.Enqueue(r))
-            rulesMap.[bfsFor] <- { ruleFor with body=updatedBody}
+        if not(updatedRules.Contains(bfsFor)) then             
+            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None); Rule.t._public=false; Rule.t.metaArgs=[]}
+            let ruleFor = ref emptyRule
+            if rulesMap.TryGetValue(bfsFor, ruleFor) then
+                let neededRules = ref []
+                let updatedBody = addAcToProduction neededRules ((!ruleFor).body)
+                !neededRules |> List.iter (fun r -> if not (updatedRules.Contains(r)) then rulesQueueBfs.Enqueue(r))
+                rulesMap.[bfsFor] <- { !ruleFor with body=updatedBody}
     ruleList |> List.map (fun rule -> let ruleRef = ref rule in rulesMap.TryGetValue(rule.name ,ruleRef) |> ignore; !ruleRef)
 
 type AddDefaultAC() = 

@@ -1,0 +1,7 @@
+{
+let value x = (x:>Lexer_seq.MyLexeme).MValue
+}
++s: l=NUMBER PLUS r=NUMBER {(value l |> float) + (value r |> float)};
+{
+//test footer
+}

@@ -1,0 +1,15 @@
+{
+let value x = (x:>Lexer_simple_checker.MyLexeme).MValue
+
+type OpType =
+   | Undef
+   | Mult
+   | Plus
+   | Minus
+}
++s : <res:int> = e[Undef] {res};
+e[prevOp] : n = NUMBER {value n |> int}
+          | l = e[Undef] <op,opType> = (PLUS { (+),Plus } | MULT { ( * ),Mult } | MINUS { (-),Minus }) 
+            =>{match prevOp,opType with | Undef,_ | _,Mult | ((Plus|Minus),(Plus|Minus)) -> true | _,_ -> false}=>
+            r = e[opType] {op l r} 
+          ;

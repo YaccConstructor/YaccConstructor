@@ -1,0 +1,1 @@
++start: cntList=(-LBR start -RBR)* { cntList.Length + List.sum cntList } ;

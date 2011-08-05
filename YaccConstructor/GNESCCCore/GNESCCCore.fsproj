@@ -5,21 +5,14 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</ProjectGuid>
+    <ProjectGuid>{18c1ea93-afbd-45d6-b8ab-e8d17ff53d19}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
+    <RootNamespace>RACCCore</RootNamespace>
+    <AssemblyName>GNESCCCore</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Common</Name>
-    <SccProjectName>
-    </SccProjectName>
-    <SccProvider>
-    </SccProvider>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccLocalPath>
-    </SccLocalPath>
-    <TargetFrameworkProfile />
+    <Name>GNESCCCore</Name>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\RACCCore.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,7 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\RACCCore.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
@@ -49,24 +42,30 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IL.fs" />
-    <Compile Include="Generator.fs" />
-    <Compile Include="ComponentsLoader.fs" />
-    <Compile Include="GeneratorsManager.fs" />
-    <Compile Include="IFrontend.fs" />
-    <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Convertion.fs" />
-    <Compile Include="ConvertionsManager.fs" />
-    <Compile Include="ITester.fs" />
-    <Compile Include="Layouts.fs" />
+    <Compile Include="Tables.fs" />
+    <Compile Include="StateInfo.fs" />
+    <Compile Include="AST.fs" />
+    <Compile Include="RegExpAST.fs" />
+    <Compile Include="ParserState.fs" />
+    <Compile Include="ParserResult.fs" />
+    <Compile Include="ASTInerpretator.fs" />
+    <Compile Include="TableInterpretator.fs" />
+    <Compile Include="Driver.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
+      <Name>GNESCCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+             Other similar extension points exist, see Microsoft.Common.targets.
+        <Target Name="BeforeBuild">
+        </Target>
+        <Target Name="AfterBuild">
+        </Target>
+        -->
 </Project>

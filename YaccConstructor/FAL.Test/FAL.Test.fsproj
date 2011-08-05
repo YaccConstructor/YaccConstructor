@@ -5,21 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</ProjectGuid>
+    <ProjectGuid>{f9edef43-8a01-42e2-bd3c-daac07a68293}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
+    <RootNamespace>FAL.Test</RootNamespace>
+    <AssemblyName>FAL.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Common</Name>
-    <SccProjectName>
-    </SccProjectName>
-    <SccProvider>
-    </SccProvider>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccLocalPath>
-    </SccLocalPath>
-    <TargetFrameworkProfile />
+    <Name>FAL.Test</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FAL.Test.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,27 +29,30 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FAL.Test.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\3rd Party\QuickGraph\QuickGraph.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IL.fs" />
-    <Compile Include="Generator.fs" />
-    <Compile Include="ComponentsLoader.fs" />
-    <Compile Include="GeneratorsManager.fs" />
-    <Compile Include="IFrontend.fs" />
-    <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Convertion.fs" />
-    <Compile Include="ConvertionsManager.fs" />
-    <Compile Include="ITester.fs" />
-    <Compile Include="Layouts.fs" />
+    <Compile Include="TestFAs.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="eClosureTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FAL\FAL.fsproj">
+      <Name>FAL</Name>
+      <Project>{87813c95-a950-43cd-a783-3b71c51b852a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

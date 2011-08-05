@@ -44,6 +44,7 @@
     <Compile Include="PerformanceTests.fs" />
     <Compile Include="Tester.fs" />
     <None Include="App.config" />
+    <None Include="GenRACCTests.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
@@ -77,21 +78,29 @@
     <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
       <Name>IronyFrontend.Test</Name>
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
+    <ProjectReference Include="..\FAL.Test\FAL.Test.fsproj">
+      <Name>FAL.Test</Name>
+      <Project>{f9edef43-8a01-42e2-bd3c-daac07a68293}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
-      <Name>RACCCommon</Name>
+    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
+      <Name>GNESCCCommon</Name>
       <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
-      <Name>RACCCore.Test</Name>
+    <ProjectReference Include="..\GNESCCCore.Test\GNESCCCore.Test.fsproj">
+      <Name>GNESCCCore.Test</Name>
       <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
+      <Name>IronyFrontend.Test</Name>
+      <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardFrontend.Test\YardFrontend.Test.fsproj">

@@ -45,8 +45,8 @@ let () =
             Seq.tryFind (fun _ -> true) FrontendsManager.AvailableFrontends
             
     generatorName :=
-        if Seq.exists ((=) "RACCGenerator") GeneratorsManager.AvailableGenerators then
-            Some("RACCGenerator")
+        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.AvailableGenerators then
+            Some("GNESCCGenerator")
         else
             Seq.tryFind (fun _ -> true) GeneratorsManager.AvailableGenerators
 
@@ -75,9 +75,7 @@ let () =
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
-                                   testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"
-         "--testpath", ArgType.String (fun s -> testsPath := Some s), "[DEBUG] Directory where test files are placed"
-         "-t", ArgType.String (fun s -> testFile := Some s), "[DEBUG] Name of test file"
+                                   testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs

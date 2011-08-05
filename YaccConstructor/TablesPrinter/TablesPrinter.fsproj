@@ -5,21 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</ProjectGuid>
+    <ProjectGuid>{c64ed336-25f3-4618-ac96-9bfe839010ff}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
+    <RootNamespace>TablesPrinter</RootNamespace>
+    <AssemblyName>TablesPrinter</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Common</Name>
-    <SccProjectName>
-    </SccProjectName>
-    <SccProvider>
-    </SccProvider>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccLocalPath>
-    </SccLocalPath>
-    <TargetFrameworkProfile />
+    <Name>TablesPrinter</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\TablesPrinter.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,27 +29,59 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\TablesPrinter.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="Microsoft.GLEE">
+      <HintPath>..\..\3rd Party\MS_GLEE\Microsoft.GLEE.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.GLEE.Drawing">
+      <HintPath>..\..\3rd Party\MS_GLEE\Microsoft.GLEE.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Glee.GraphViewerGDI">
+      <HintPath>..\..\3rd Party\MS_GLEE\Microsoft.GLEE.GraphViewerGDI.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\3rd Party\QuickGraph\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Data">
+      <HintPath>..\..\3rd Party\QuickGraph\QuickGraph.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Glee">
+      <HintPath>..\..\3rd Party\QuickGraph\QuickGraph.Glee.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IL.fs" />
-    <Compile Include="Generator.fs" />
-    <Compile Include="ComponentsLoader.fs" />
-    <Compile Include="GeneratorsManager.fs" />
-    <Compile Include="IFrontend.fs" />
-    <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Convertion.fs" />
-    <Compile Include="ConvertionsManager.fs" />
-    <Compile Include="ITester.fs" />
-    <Compile Include="Layouts.fs" />
+    <Compile Include="Module1.fs" />
+    <None Include="Script.fsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FAL\FAL.fsproj">
+      <Name>FAL</Name>
+      <Project>{87813c95-a950-43cd-a783-3b71c51b852a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
+      <Name>GNESCCCommon</Name>
+      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
+      <Name>GNESCCGenerator</Name>
+      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

@@ -23,20 +23,21 @@ namespace Yard.Generators.GNESCCGenerator
 open Yard.Core
 
 type GNESCCGenerator() =
-    member this.DbgGenerate (t:IL.Definition.t<_,_>) = 
-            let extension = ".fs"
-            let tablesStr = ".tables"
-            let actionsStr = ".actions"
-            let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
-            let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
-            let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
-            let tgRes = tableGenerator.DbgGemerate transformedGrammar
-            let typeToTag = fst tgRes
-            codeGenerator.Gemerate transformedGrammar typeToTag
-            tgRes 
-    interface IGenerator with        
-        member this.Name = "GNESCCGenerator"
-        member this.Generate t = 
+    inherit Generator() 
+        member this.DbgGenerate (t:IL.Definition.t<_,_>) = 
+                let extension = ".fs"
+                let tablesStr = ".tables"
+                let actionsStr = ".actions"
+                let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
+                let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
+                let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
+                let tgRes = tableGenerator.DbgGemerate transformedGrammar
+                let typeToTag = fst tgRes
+                codeGenerator.Gemerate transformedGrammar typeToTag
+                tgRes 
+    
+        override this.Name = "GNESCCGenerator"
+        override this.Generate t = 
             let extension = ".fs"
             let tablesStr = ".tables"
             let actionsStr = ".actions"
@@ -45,8 +46,6 @@ type GNESCCGenerator() =
             let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
             let typeToTag = tableGenerator.Gemerate transformedGrammar
             codeGenerator.Gemerate transformedGrammar typeToTag :> obj
-        member this.AcceptableProductionTypes = 
+        override this.AcceptableProductionTypes = 
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) 
             |> List.map (fun unionCase -> unionCase.Name)
-        
-    end

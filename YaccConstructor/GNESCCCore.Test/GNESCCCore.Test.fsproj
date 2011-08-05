@@ -136,7 +136,7 @@
     <Compile Include="test_summator_1.yrd.tables.fs" />
     <Compile Include="Lexer_summator_1.fs" />
     <Compile Include="test_summator_1.yrd.actions.fs" />
-    <Compile Include="RACCCoreTests.fs" />
+    <Compile Include="GNESCCCoreTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

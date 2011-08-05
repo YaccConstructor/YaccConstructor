@@ -24,8 +24,8 @@
 module Lexer_seq
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
-open Yard.Generators.RACCGenerator
-open Yard.Generators.RACCGenerator.Tables_Seq
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables_seq
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value

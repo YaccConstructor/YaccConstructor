@@ -24,8 +24,8 @@
 module Lexer_simple_braces_2
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
-open Yard.Generators.RACCGenerator
-open Yard.Generators.RACCGenerator.Tables_claret_2
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables_simple_braces_2
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value

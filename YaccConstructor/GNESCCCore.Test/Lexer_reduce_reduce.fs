@@ -24,8 +24,8 @@
 module Lexer_reduce_reduce
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
-open Yard.Generators.RACCGenerator
-open Yard.Generators.RACCGenerator.Tables_Rdc_Rdc
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables_reduce_reduce
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value

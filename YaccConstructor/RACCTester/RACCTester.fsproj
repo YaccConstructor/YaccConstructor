@@ -44,19 +44,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RACCUserApplication\RACCUserApplication.fsproj">
-      <Name>RACCUserApplication</Name>
-      <Project>{41f3c60a-2738-44fe-9889-d666c7e046c2}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
       <Name>RACCCommon</Name>
-      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
+      <Project>{3a217e72-934e-436c-b104-d9a9db22569b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RACCCore\RACCCore.fsproj">
       <Name>RACCCore</Name>
-      <Project>{18c1ea93-afbd-45d6-b8ab-e8d17ff53d19}</Project>
+      <Project>{7074a0b2-a3d6-4bc4-ba0f-c89118d76c7b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCUserApplication\RACCUserApplication.fsproj">
+      <Name>RACCUserApplication</Name>
+      <Project>{dacdfa46-d766-41e7-a692-2e86f968b0f3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="mscorlib" />

@@ -23,8 +23,8 @@
 module Lexer_arithm_glr
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
-open Yard.Generators.RACCGenerator
-open Yard.Generators.RACCGenerator.Tables_Arithm_glr
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables_arithm_glr
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value

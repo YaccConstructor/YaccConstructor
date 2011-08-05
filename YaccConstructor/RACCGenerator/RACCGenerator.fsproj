@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</ProjectGuid>
+    <ProjectGuid>{a1086e68-33a9-41f8-bf49-42c7c3afe6cb}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RACCGenerator</RootNamespace>
     <AssemblyName>RACCGenerator</AssemblyName>

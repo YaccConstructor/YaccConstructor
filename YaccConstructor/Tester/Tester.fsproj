@@ -78,6 +78,8 @@
     <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
       <Name>IronyFrontend.Test</Name>
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FAL.Test\FAL.Test.fsproj">
       <Name>FAL.Test</Name>
       <Project>{f9edef43-8a01-42e2-bd3c-daac07a68293}</Project>
@@ -91,6 +93,16 @@
     <ProjectReference Include="..\GNESCCCore.Test\GNESCCCore.Test.fsproj">
       <Name>GNESCCCore.Test</Name>
       <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
+      <Name>RACCCommon</Name>
+      <Project>{3a217e72-934e-436c-b104-d9a9db22569b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
+      <Name>RACCCore.Test</Name>
+      <Project>{a03e9238-9c7c-43a3-afef-cd87313f7b2e}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">

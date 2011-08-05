@@ -75,7 +75,7 @@ type CodeGenerator(outPath: string) =
                                 if elem.omit
                                 then "_","_"
                                 else 
-                                    let x = "GNESCC_x" + num.Next().ToString()
+                                    let x = "gnescc_x" + num.Next().ToString()
                                     hash elem |> string,x)
                         elems
                     

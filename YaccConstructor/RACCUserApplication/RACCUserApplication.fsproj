@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{41f3c60a-2738-44fe-9889-d666c7e046c2}</ProjectGuid>
+    <ProjectGuid>{dacdfa46-d766-41e7-a692-2e86f968b0f3}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RACCUserApplication</RootNamespace>
     <AssemblyName>RACCUserApplication</AssemblyName>

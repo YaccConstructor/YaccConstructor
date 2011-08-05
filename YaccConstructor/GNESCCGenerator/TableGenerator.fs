@@ -41,8 +41,7 @@ type TableGenerator(outPath: string) =
             enum.Reset Constants.gnesccSymbolEnumeratorFrom
             enum
 
-        let symbols = ref [("NT_"+Constants.gnesccStartRuleName,Constants.gnesccStartRuleTag)]
-        let getTag name = !symbols |> Seq.find (fst >> (=)name) |> snd
+        let symbols = ref [("NT_"+Constants.gnesccStartRuleName,Constants.gnesccStartRuleTag)]        
 
         let rec getAllSymbols production = 
             match production with
@@ -183,6 +182,13 @@ type TableGenerator(outPath: string) =
                 |> Async.RunSynchronously
 
             let symbolIdx = dict !symbols |> ref
+            let getTag name = 
+                let flg,res = (!symbolIdx).TryGetValue name
+                if flg 
+                then Some res 
+                else
+                    printfn "Seems that nonterminal %s is described but never used." name
+                    None
 
             let dlfaMap =                 
                 startRule :: grammar.grammar                
@@ -191,7 +197,11 @@ type TableGenerator(outPath: string) =
                     symbolIdx := dict !symbols
                     x
                 |> pmap (fun x -> x.name,buildDLFA !symbolIdx x.body)                
-                |> Seq.map (fun (x,y) -> "NT_" + x |> getTag , y)
+                |> Seq.choose 
+                    (fun (x,y) -> 
+                        match "NT_" + x |> getTag with
+                        | Some i -> Some (i,y)
+                        | None   -> None)
                 |> List.ofSeq
 
             let terminals,nonTerminals = 

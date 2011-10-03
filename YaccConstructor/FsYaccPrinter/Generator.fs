@@ -53,8 +53,16 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
                 ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
                 @ (if actionCode = None then [wordL "{ }"] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
         | PRef(("empty",_),_) -> leftL ""
-        | PToken(src) | PRef(src, _) -> wordL (fst src)
-        | _ -> wordL "$UNEXPECTED$"
+        | PToken(src)
+        | PRef(src, _) -> wordL (fst src)
+        | PMany _ -> wordL "$UNEXPECTED MANY$"
+        | PMetaRef _ -> wordL "$UNEXPECTED META_REF$"
+        | PLiteral _ -> wordL "$UNEXPECTED LITERAL$"
+        | PRepet _ -> wordL "$UNEXPECTED REPET$"
+        | PPerm _ -> wordL "$UNEXPECTED PERM$"
+        | PSome _ -> wordL "$UNEXPECTED SOME$"
+        | POpt _ -> wordL "$UNEXPECTED OPT$"
+//        | _ -> wordL "$UNEXPECTED$"
     let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 

@@ -84,6 +84,9 @@ let getMetaMany = createMetaRule Names.many getManyBody
 //let transformError () = reportError "in transforming EBNF to metarules"
 
 let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) = 
+    let insideArguments =
+        r.metaArgs
+        |> List.map (fun x -> PRef (x, None))
     let rec getMeta nr paramList metaName = 
         function
         | PRef (rName, _params) -> (PMetaRef (createSource metaName, _params, [PRef(rName, None)]), nr)
@@ -91,9 +94,10 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
         | PLiteral t            -> (PMetaRef (createSource metaName, None, [PRef(t, None)]), nr)
         | other                 -> let newName = createNewName (createSource getItem) in
                                    let _params = createParams paramList in
-                                   let newRule = createSimpleRule (getText newName) _params other in
+//                                   let newRule = createSimpleRule (getText newName) _params other in
+                                   let newRule = createRule (getText newName) _params other false r.metaArgs in
                                    let rules = convertToMeta newRule in 
-                                   (PMetaRef (createSource metaName, list2opt _params, [PRef(newName, None)]), nr @ rules)
+                                   (PMetaRef (createSource metaName, list2opt _params, [PMetaRef(newName, None, insideArguments)]), nr @ rules)
     and bodyToMeta rs     (** new rules *) 
                   _params (** rule parameters and bindings *) =     
         let nameOf = function 

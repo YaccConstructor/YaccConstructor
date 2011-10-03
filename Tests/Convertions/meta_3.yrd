@@ -1,0 +1,3 @@
+do<<op1 op2>>[a b] : (op1[a] | op2[b])*;
+
++s : do<<NUMBER IDENT>>[0 1] ;

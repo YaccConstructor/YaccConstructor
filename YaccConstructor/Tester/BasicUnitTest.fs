@@ -21,3 +21,7 @@ type ``Irony frontend tests`` () =
 [<TestFixture>]
 type ``Convertions tests`` () =    
     inherit  ConvertionsTests.``Convertions tests``()
+
+[<TestFixture>]
+type ``GNESCC generator tests`` () =    
+    inherit  GNESCGeneratorTests.``GNESCC generator test``()

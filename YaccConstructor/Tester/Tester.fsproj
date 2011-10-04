@@ -75,6 +75,11 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\GNESCCGenerator.Test\GNESCCGenerator.Test.fsproj">
+      <Name>GNESCCGenerator.Test</Name>
+      <Project>{47a4bcb4-06e1-4217-8935-ac751985d647}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
       <Name>IronyFrontend.Test</Name>
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>

@@ -14,6 +14,9 @@ Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -t test_re
 Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_1\test_simple_braces.yrd"
 Main\bin\Release\YaccConstructor.exe -f YardFrontend -g RACCGenerator -i "..\Tests\RACC\claret\braces_2\test_simple_braces_2.yrd"
 
+
+
+
 RD /S /Q RACCGeneratedTests
 mkdir RACCGeneratedTests
 move ..\Tests\RACC\test_seq\*.fs  RACCGeneratedTests/

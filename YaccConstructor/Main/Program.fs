@@ -121,6 +121,9 @@ let () =
                     | None -> gen.Generate (!ilTree)
                     | Some(genParams) -> gen.Generate(!ilTree, genParams)
                 with
+                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
+                    -> GenError "Strat rule cannot be found in input grammar. Please, specify start rule."
+                       |> raise
                 | e -> GenError e.Message |> raise
 
 //#if DEBUG               

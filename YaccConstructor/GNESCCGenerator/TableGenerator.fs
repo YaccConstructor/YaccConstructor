@@ -166,7 +166,13 @@ type TableGenerator(outPath: string) =
     
         let genearte grammar =
             generatePreheader grammar.info.fileName
-            let publicRule = List.find (fun rule -> rule._public) grammar.grammar
+            let publicRule = 
+                try
+                    List.find (fun rule -> rule._public) grammar.grammar
+                with
+                | :? System.Collections.Generic.KeyNotFoundException ->
+                    raise StartRuleNotFound
+                    
             let startRule = 
                 {
                     name    = Constants.gnesccStartRuleName

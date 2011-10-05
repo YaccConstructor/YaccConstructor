@@ -4,7 +4,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER procedure [sys].[sp_tables_ex]
+CREATE procedure [sys].[sp_tables_ex]
 (
     @table_server       sysname,
     @table_name         sysname = null,

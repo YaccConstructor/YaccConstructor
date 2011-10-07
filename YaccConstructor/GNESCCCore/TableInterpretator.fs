@@ -100,7 +100,8 @@ type  TableInterpreter (tables:Tables) = class
             key
 
     let rec step stack state i =
-        let curLexeme = ((!Lexer).Value.Get i).tag
+        let curLexeme = (!Lexer).Value.Get i
+        let curLexemeTag = curLexeme.tag
         let reduce ps =
             let rec inner buf stack = 
                 match stack with
@@ -116,13 +117,13 @@ type  TableInterpreter (tables:Tables) = class
                 | _            ->  s
             clerStack stack |> inner [] 
 
-        tables.ActionTable.[state].[tables.SymbolIdx.[curLexeme]]
+        tables.ActionTable.[state].[tables.SymbolIdx.[curLexemeTag]]
         |> List.map (
             function
             | CommonTypes.Accept    -> [stack]
             | CommonTypes.Error     -> failwith "Parser error"
             | CommonTypes.Shift s   -> 
-                let stk = State s :: Symbol (curLexeme,(Leaf(curLexeme,curLexeme))):: stack
+                let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
                 step (getLabels s @ stk) s (i+1)
             | CommonTypes.Reduce ps -> 
                 let forest,nStack = reduce ps

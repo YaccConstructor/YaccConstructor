@@ -164,7 +164,7 @@ type TableGenerator(outPath: string) =
             |> Seq.iter (fun x -> sprintf "%s| %i -> %s" tab (snd x) (fst x) |> write)
             tab + "| _ -> failwith \"getName: bad tag.\"" |> write
     
-        let genearte grammar =
+        let generate grammar =
             generatePreheader grammar.info.fileName
             let publicRule = 
                 try
@@ -347,10 +347,10 @@ type TableGenerator(outPath: string) =
             !symbols |> dict
             ,resLALR
 
-        member self.Gemerate grammar =
-            genearte grammar
+        member self.Generate grammar =
+            generate grammar
             |> fst
 
-        member self.DbgGemerate grammar  = 
-            genearte grammar
+        member self.DbgGenerate grammar  = 
+            generate grammar
     end

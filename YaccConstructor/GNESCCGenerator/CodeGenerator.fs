@@ -175,7 +175,7 @@ type CodeGenerator(outPath: string) =
                 "let " + actName + " expr = \n    let inner " + args + " = \n" + generateBody 2 rule.body + "    box (inner)"
             List.map genRule rules
 
-        let genearte grammar (typeToTagMap: System.Collections.Generic.IDictionary<string,int>)= 
+        let generate grammar (typeToTagMap: System.Collections.Generic.IDictionary<string,int>)= 
             generatePreheader grammar.info.fileName
             generateHeader grammar.head
             generateRules grammar.grammar |> String.concat "\n" |> write
@@ -188,6 +188,6 @@ type CodeGenerator(outPath: string) =
             generateFooter grammar.foot
             textWriter.CloseOutStream()
                 
-        member self.Gemerate grammar typeToTagMap  = genearte grammar typeToTagMap
+        member self.Generate grammar typeToTagMap  = generate grammar typeToTagMap
                 
     end

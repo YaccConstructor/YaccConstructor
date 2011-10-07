@@ -51,6 +51,7 @@
     <Compile Include="CodeGenerator.fs" />
     <Compile Include="LALR1Tables.fs" />
     <Compile Include="TableGenerator.fs" />
+    <Compile Include="RegexpGenerator.fs" />
     <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -27,20 +27,24 @@ type Status =
     | Fail of string
     
 module ASTInterpretator = 
-    let rec lInterp (ruleToActon:System.Collections.Generic.IDictionary<_,_>) (traceCache:System.Collections.Generic.IDictionary<_,_>) tree = 
+    let rec lInterp 
+        (ruleToActon:System.Collections.Generic.IDictionary<_,_>)
+        (ruleToRegexp:System.Collections.Generic.IDictionary<_,_>) tree = 
         let reast = RegExpAST()
         match tree with        
         | Node (childs, name, trace) ->
-            List.map (fun x -> lInterp ruleToActon traceCache x) childs
-            |> (traceCache.[trace] |> Set.minElement |> reast.BuildREAST)
-            |> fun x -> 
-                   match x with 
-                   | (t,_,_) -> ruleToActon.[name] t                  
+            List.map (fun x -> lInterp ruleToActon ruleToRegexp x) childs
+            |> fun x -> List.map2 (fun ch x -> match ch with Node(_,name,_) | Leaf(name,_) -> string name, x) childs x
+            |> ruleToRegexp.[name] //(traceCache.[trace] |> Set.minElement |> reast.BuildREAST)
+            |> ruleToActon.[name]
+//             fun x -> 
+//                   match x with 
+//                   | (t,_,_) -> ruleToActon.[name] t                  
         | Leaf (name, value)        -> box value            
 
-    let interp ruleToActon traceCache tree = 
+    let interp ruleToActon ruleToRegexp (tree(*:AST<ILexeme,_,List<_>>*)) = 
         try
-            Success(lInterp ruleToActon traceCache tree)
+            Success(lInterp ruleToActon ruleToRegexp tree)
         with 
         | Constants.CheckerFalse -> DelByFilter
         | e -> Fail e.Message

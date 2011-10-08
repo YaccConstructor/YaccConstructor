@@ -262,10 +262,10 @@ type TableGenerator(outPath: string) =
                 |> fun l -> (wordL tabName) @@-- l
                 |> Display.layout_to_string {FormatOptions.Default with PrintWidth = 500}
 
-            do match resLALR with
+            let nameToIdx = 
+               match resLALR with
                |(prodTab, states, startKernelIdxs, actionTable, gotoTable, etIdx, nonTerminals, symbolIdx, kernlToItemIdx, ntTab)
-                -> 
-                    let isStart =
+                ->  let isStart =
                         states
                         |> Array.mapi 
                             (fun i s ->                                 
@@ -275,8 +275,7 @@ type TableGenerator(outPath: string) =
                                          , Set.exists 
                                             (fun i -> 
                                                   let dot = dotIdx_of_item0 i
-                                                  let pri = prodIdx_of_item0 i
-                                                  //printfn "prod: %A, dot: %A" pri dot
+                                                  let pri = prodIdx_of_item0 i                                                  
                                                   pri = pi 
                                                   &&
                                                   dot = 0) kernlToItemIdx.[i])
@@ -342,9 +341,16 @@ type TableGenerator(outPath: string) =
                     |> fun l -> (wordL "let tables = ") @@-- l
                     |> Display.layout_to_string {FormatOptions.Default with PrintWidth = 40}
                     |> write
+                    !symbols
+                    |> Seq.map 
+                        (fun (x,y) -> 
+                            if x.StartsWith "NT_" 
+                            then x,prodTab.NonTerminal(ntTab.ToIndex(y))
+                            else x,y) 
+                    |> dict
                                          
             textWriter.CloseOutStream ()
-            !symbols |> dict
+            nameToIdx
             ,resLALR
 
         member self.Generate grammar =

@@ -41,6 +41,7 @@
     <Compile Include="Tables.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Actions.fs" />
+    <Compile Include="Regexp.fs" />
     <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>

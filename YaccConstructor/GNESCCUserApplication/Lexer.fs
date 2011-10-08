@@ -21,11 +21,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lexer
+module Lexer_seq
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Yard.Generators.GNESCCGenerator
-open Yard.Generators.GNESCCGenerator.Tables
+open Yard.Generators.GNESCCGenerator.Tables_seq
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value
@@ -33,9 +33,8 @@ type MyLexeme (tag,_value) =
        member self.tag = tag
        member self.CompareTo x =  compare (hash self) (hash x)
     end
-
  
-# 38 "Lexer.fs"
+# 37 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -58,23 +57,23 @@ and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens
 and _fslex_tokens  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 43 "Lexer.fsl"
+# 42 "Lexer.fsl"
                         MyLexeme( getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))
-# 63 "Lexer.fs"
+# 62 "Lexer.fs"
           )
   | 1 -> ( 
-# 45 "Lexer.fsl"
+# 44 "Lexer.fsl"
                         MyLexeme( getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))
-# 68 "Lexer.fs"
+# 67 "Lexer.fs"
           )
   | 2 -> ( 
-# 46 "Lexer.fsl"
-                        MyLexeme( 1, LexBuffer<_>.LexemeString(lexbuf))
-# 73 "Lexer.fs"
+# 45 "Lexer.fsl"
+                        MyLexeme( Yard.Generators.GNESCCGenerator.Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))
+# 72 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 
-# 48 "Lexer.fsl"
+# 47 "Lexer.fsl"
  
 
 type Lexer(lb) = 

@@ -19,7 +19,7 @@
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.GNESCCGenerator
-open Yard.Generators.GNESCCGenerator.Tables
+open Yard.Generators.GNESCCGenerator.Tables_seq
 open Microsoft.FSharp.Text.Lexing
 
 
@@ -29,7 +29,7 @@ let run path =
     let content = System.IO.File.ReadAllText(path)
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
-    let l = Lexer.Lexer(buf)
+    let l = Lexer_seq.Lexer(buf)
 
     //Create tables
     let tables = tables
@@ -41,7 +41,12 @@ let run path =
     let parseRes(*,cache,cc*) = 
         let ti = new TableInterpreter(tables)
         ti.Run l 
-
+    let res =
+        let r = 
+            Seq.map 
+                (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToAction)
+                parseRes
+        r
 //    let result = 
 //        match parseRes with
 //        //Parse success
@@ -61,9 +66,9 @@ let run path =
 //            |> failwith
             
     printf "\nResult %A\n" parseRes
+    printf "\nFull Result %A\n" res
     
-
 do 
-    run @"..\..\..\..\Tests\RACC\test_reduce_reduce\test_reduce_reduce_1.yrd.in"
+    run @"..\..\..\..\Tests\RACC\test_seq\test_seq_1.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

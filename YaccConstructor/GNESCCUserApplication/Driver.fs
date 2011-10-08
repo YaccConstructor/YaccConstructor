@@ -44,7 +44,7 @@ let run path =
     let res =
         let r = 
             Seq.map 
-                (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToAction)
+                (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToRegex)
                 parseRes
         r
 //    let result = 
@@ -69,6 +69,6 @@ let run path =
     printf "\nFull Result %A\n" res
     
 do 
-    run @"..\..\..\..\Tests\RACC\test_seq\test_seq_1.yrd.in"
+    run @"..\..\..\..\Tests\GNESCC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

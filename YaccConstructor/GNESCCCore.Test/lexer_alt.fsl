@@ -41,7 +41,7 @@ rule tokens = parse
         {MyLexeme(getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))}
  | "*" 
         {MyLexeme(getTag T_MULT, LexBuffer<_>.LexemeString(lexbuf))}
- | eof  {MyLexeme( -1, LexBuffer<_>.LexemeString(lexbuf))}
+ | eof  {MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 
 {
 

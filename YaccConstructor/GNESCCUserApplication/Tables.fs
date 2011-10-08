@@ -9,19 +9,19 @@ open Yard.Generators.GNESCCGenerator.CommonTypes
 
 type symbol =
     | T_PLUS
-    | T_NUMBER
+    | T_MINUS
     | NT_s
     | NT_gnesccStart
 let getTag smb =
     match smb with
     | T_PLUS -> 6
-    | T_NUMBER -> 5
+    | T_MINUS -> 5
     | NT_s -> 4
     | NT_gnesccStart -> 2
 let getName tag =
     match tag with
     | 6 -> T_PLUS
-    | 5 -> T_NUMBER
+    | 5 -> T_MINUS
     | 4 -> NT_s
     | 2 -> NT_gnesccStart
     | _ -> failwith "getName: bad tag."
@@ -34,20 +34,17 @@ let isStart =
   [| [| true; true |];
      [| false; false |];
      [| false; false |];
-     [| false; false |];
      [| false; false |]; |]
 let gotoTable =
   [| [| Some 1; None |];
      [| None; None |];
      [| None; None |];
-     [| None; None |];
      [| None; None |]; |]
 let actionTable = 
-  [| [| [Error]; [Shift 2]; [Error]; [Error] |];
+  [| [| [Shift 3]; [Shift 2]; [Error]; [Reduce 1] |];
      [| [Error]; [Error]; [Error]; [Accept] |];
-     [| [Shift 3]; [Error]; [Error]; [Error] |];
-     [| [Error]; [Shift 4]; [Error]; [Error] |];
-     [| [Error]; [Error]; [Error]; [Reduce 1] |]; |]
+     [| [Shift 3]; [Shift 2]; [Error]; [Reduce 1] |];
+     [| [Shift 3]; [Shift 2]; [Error]; [Reduce 1] |]; |]
 let tables = 
   {StartIdx=startKernelIdxs
    SymbolIdx=symbolIdx

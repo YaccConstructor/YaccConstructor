@@ -83,7 +83,7 @@ and _fslex_tokens  _fslex_state lexbuf =
           )
   | 4 -> ( 
 # 50 "Lexer_checker_on_glr.fsl"
-                        MyLexeme( -1, LexBuffer<_>.LexemeString(lexbuf))
+                        MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))
 # 87 "Lexer_checker_on_glr.fs"
           )
   | _ -> failwith "tokens"

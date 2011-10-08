@@ -32,17 +32,15 @@ type MyLexeme (tag,_value) =
        member self.tag = tag
        member self.CompareTo x =  compare (hash self) (hash x)
     end
- }
- 
 
-let digit = ['0'-'9']
+ }
 
 rule tokens = parse
- | digit+ 
-        {MyLexeme( getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))}
  | "+" 
         {MyLexeme( getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))}
- | eof  {MyLexeme( Yard.Generators.GNESCCGenerator.Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
+ | "-" 
+        {MyLexeme(getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))}
+ | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 
 {
 

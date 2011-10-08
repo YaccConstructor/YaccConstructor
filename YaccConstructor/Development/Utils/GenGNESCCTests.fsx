@@ -20,11 +20,12 @@ let gtPath = "../../GNESCCGeneratedTests"
 let targetPath = "../../GNESCCCore.Test"
 let ARf = "GNESCC.Actions"
 let TRf = "GNESCCGenerator.Tables"
+let RRf = "GNESCC.Regexp"
 
 
 let generate test = 
     printfn "geterate test: %A\n" test.FullGrammarPath
-    (fe:>IFrontend).ParseGrammar test.FullGrammarPath |> (be:>IGenerator).Generate |> ignore
+    (fe:>IFrontend).ParseGrammar test.FullGrammarPath |> (be:>Generator).Generate |> ignore
 
 let move () =
     try     
@@ -54,7 +55,9 @@ let replace () =
             let newContent = 
                 if info.[2] = "actions" 
                 then content.Replace (ARf, snd test.ActionReplacement) 
-                else content.Replace (TRf, snd test.TablesReplacement)
+                elif info.[2] = "regexp" 
+                   then content.Replace (RRf, snd test.RegexpReplacement) 
+                   else content.Replace (TRf, snd test.TablesReplacement)
             let outStrieam =         
                 try
                     let t = new FileInfo(Path.Combine (targetPath, Path.GetFileName path))

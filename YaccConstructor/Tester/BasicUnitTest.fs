@@ -23,5 +23,9 @@ type ``Convertions tests`` () =
     inherit  ConvertionsTests.``Convertions tests``()
 
 [<TestFixture>]
+type ``GNESCC core tests`` () =    
+    inherit GNESCCCoreTests.``GNESCC core tests``()
+
+[<TestFixture>]
 type ``GNESCC generator tests`` () =    
     inherit  GNESCGeneratorTests.``GNESCC generator test``()

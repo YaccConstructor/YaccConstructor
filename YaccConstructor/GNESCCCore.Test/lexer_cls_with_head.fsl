@@ -38,7 +38,7 @@ type MyLexeme (tag,_value) =
 rule tokens = parse
  | "-" 
         {MyLexeme( getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))}
- | eof  {MyLexeme( -1, LexBuffer<_>.LexemeString(lexbuf))}
+ | eof  {MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 
 {
 

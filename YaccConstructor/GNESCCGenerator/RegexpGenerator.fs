@@ -78,7 +78,7 @@ type RegexpGenerator(outPath: string) =
                 let genElem i gNum elem =                    
                     generateBody typeToTagMap gNum (indentSize + 1) elem asFun
                     |> fun (body, re, gNum) -> 
-                        indentString indentSize + "let e" + i.ToString() + (if asFun then " i" else "") + " =\n"
+                        indentString indentSize + "let e" + i.ToString() (*+ (if asFun then " i" else ""*) + " =\n"
                         + body
                         ,re
                         ,gNum
@@ -102,7 +102,7 @@ type RegexpGenerator(outPath: string) =
                         ,gn
                         
                 body + "\n"
-                + indentString indentSize + "RESeq [" + (List.mapi (fun i gn -> "e" + string i + (if asFun then " i" else "")) gns |> String.concat "; ") + "]"
+                + indentString indentSize + "RESeq [" + (List.mapi (fun i gn -> "e" + string i (*+ (if asFun then " i" else ""*)) gns |> String.concat "; ") + "]"
                 ,regexp
                 ,gn
                  
@@ -110,7 +110,7 @@ type RegexpGenerator(outPath: string) =
                  let genAltItem i gNum elem =
                     generateBody typeToTagMap gNum (indentSize + 2) elem asFun
                     |> fun (body, re, gNum) -> 
-                        indentString (indentSize + 1) + "let e" + i.ToString() + (if asFun then " i" else "") + " =\n"
+                        indentString (indentSize + 1) + "let e" + i.ToString() (*+ (if asFun then " i" else ""*) + " =\n"
                         + body
                         ,re
                         ,gNum
@@ -124,44 +124,52 @@ type RegexpGenerator(outPath: string) =
                  + "if elts.[" + (lAltGn |> string) + "].Value = \"\"\n" 
                  + indentString indentSize + "then\n"
                  + rAltB + "\n" 
-                 + indentString (indentSize + 1) + "None, Some (e2"  + (if asFun then " i" else "") + ")\n"
+                 + indentString (indentSize + 1) + "None, Some (e2"  (*+ (if asFun then " i" else ""*) + ")\n"
                  + indentString indentSize + "else\n"
                  + lAltB + "\n"
-                 + indentString (indentSize + 1) + "Some (e1"  + (if asFun then " i" else "") + "),None\n"
+                 + indentString (indentSize + 1) + "Some (e1"  (*+ (if asFun then " i" else ""*) + "),None\n"
                  + indentString indentSize + "|> REAlt\n"
                  , regexp
                  , rAltGn
             
             | PRef(x,_) ->
-                indentString (indentSize + 1) + "idxValMap.[elts.[" + (groupNum + 1).ToString() + "].Captures.[" + (if asFun then "i" else "0") + "].Index] |> RELeaf"
+                indentString (indentSize) + "idxValMap.[" +  (if asFun then "!ofset + " else "") + "elts.[" + (groupNum + 1).ToString() + "].Captures.[" (*+ (if asFun then "i" else "0"*) + "0].Index] |> RELeaf"
                 , "(;" + typeToTagMap.["NT_" + Source.toString x].ToString() + ";)"
                 , groupNum + 1
 
             | PToken (x) ->
-                indentString (indentSize + 1) + "idxValMap.[elts.[" + (groupNum + 1).ToString() + "].Captures.[" + (if asFun then "i" else "0") + "].Index] |> RELeaf"
+                indentString (indentSize) + "idxValMap.[" +  (if asFun then "!ofset + " else "") + "elts.[" + (groupNum + 1).ToString() + "].Captures.[" (*+ (if asFun then "i" else "0"*) + "0].Index] |> RELeaf"
                 , "(;" + typeToTagMap.[ "T_" + Source.toString x].ToString() + ";)"
                 , groupNum + 1
                
             | PSome(expr)
             | PMany(expr) as x ->
                let body,re,gn = 
-                   generateBody typeToTagMap groupNum (indentSize + 1) expr true
-               indentString indentSize + "let e i =\n" + body + "\n" 
+                   generateBody typeToTagMap (*groupNum + 1*)0 (indentSize + 2) expr true
+               indentString indentSize + "let ofset = ref 0\n"
+               + indentString indentSize + "let e i =\n" 
+               + indentString (indentSize + 1) + "let str = elts.[" + string (groupNum + 1) + "].Captures.[i].Value\n"
+               + indentString (indentSize + 1) + "let re = new Regex(\"" + re + "\")\n"
+               + indentString (indentSize + 1) + "let elts = re.Match(str).Groups\n"
+               + indentString (indentSize + 1) + "let res =\n"
+               + body + "\n" 
+               + indentString (indentSize + 1) + "ofset := !ofset + str.Length\n"
+               + indentString (indentSize + 1) + "res\n"
                + indentString indentSize + "REClosure ["
-               + "for i in [0..elts.[" + gn.ToString() + "].Captures.Count-1] -> e i]\n"
-               , re + match x with PSome _ -> "+"| PMany _ -> "*" | _ -> failwith "Expected PSome or PMany but get " + x.ToString()
-               , gn
+               + "for i in [0..elts.[" + string (groupNum + 1) + "].Captures.Count-1] -> e i]\n"
+               , "(" + re + ")" + match x with PSome _ -> "+"| PMany _ -> "*" | _ -> failwith "Expected PSome or PMany but get " + x.ToString()
+               , gn 
 
             | POpt(expr) ->
                let body,re,gn = 
-                   generateBody typeToTagMap groupNum (indentSize + 1) expr true
+                   generateBody typeToTagMap groupNum (indentSize + 2) expr asFun
                
                indentString indentSize + "if elts.[" + (gn |> string) + "].Value <> \"\"\n" 
                + indentString indentSize + "then\n"
-               + indentString (indentSize + 1) + "let e " + (if asFun then "i" else "") + " =\n" + body + "\n"                
-               + indentString (indentSize + 1) + "Some (e " + (if asFun then "i" else "") + ")\n"
-               + indentString (indentSize + 1) + "else None \n"
-               + indentString indentSize + "REOpt e " + (if asFun then "i" else "") + "\n"
+               + indentString (indentSize + 1) + "let e " (*+ (if asFun then "i" else ""*) + " =\n" + body + "\n"                
+               + indentString (indentSize + 1) + "Some (e" (*+ (if asFun then " i" else ""*) + ")\n"
+               + indentString (indentSize) + "else None \n"
+               + indentString indentSize + "|>REOpt\n"
                , re + "?"
                , gn
                
@@ -189,7 +197,7 @@ type RegexpGenerator(outPath: string) =
                 (fun r2a -> "(" + (typeToTagMap.["NT_" + fst r2a] |> string) + "," + snd r2a + ")")
                 !ruleToAction
             |> String.concat "; "
-            |> fun x -> "\nlet ruleToAction = dict [|" + x + "|]\n"
+            |> fun x -> "\nlet ruleToRegex = dict [|" + x + "|]\n"
             |> write
             textWriter.CloseOutStream()
 

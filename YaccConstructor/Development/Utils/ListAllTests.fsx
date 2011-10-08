@@ -18,6 +18,7 @@ open Test
 let basePath = "../../../Tests/GNESCC"
 let ARf = "GNESCC.Actions"
 let TRf = "GNESCCGenerator.Tables"
+let RRf = "GNESCC.Regexp"
 
 
 let listAllFiles ext = 
@@ -44,6 +45,7 @@ let composeTests =
                 FullInputFilesPaths = inputs
                 ActionReplacement   = ARf,ARf + suffix
                 TablesReplacement   = TRf,TRf + suffix
+                RegexpReplacement   = RRf,RRf + suffix
             })
 
 let layoutTest test = 
@@ -77,6 +79,14 @@ let layoutTest test =
          ]
          |> spaceListL
         ;
+         [ wordL "RegexpReplacement = " 
+          ; [ wordL ("\"" + fst test.RegexpReplacement + "\"")                     
+            ; wordL ("\"" + snd test.RegexpReplacement + "\"")
+            ] |> tupleL
+         ]
+         |> spaceListL
+        ;
+
          [ wordL "TablesReplacement = "
           ; [ wordL ("\"" + fst test.TablesReplacement + "\"")                     
             ; wordL ("\"" + snd test.TablesReplacement + "\"")

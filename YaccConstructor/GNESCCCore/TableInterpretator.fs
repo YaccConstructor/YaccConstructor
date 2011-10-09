@@ -121,7 +121,7 @@ type  TableInterpreter (tables:Tables) = class
         |> List.map (
             function
             | CommonTypes.Accept    -> [stack]
-            | CommonTypes.Error     -> failwith "Parser error"
+            | CommonTypes.Error     -> []//failwith "Parser error"
             | CommonTypes.Shift s   -> 
                 let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
                 step (getLabels s @ stk) s (i+1)

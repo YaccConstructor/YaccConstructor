@@ -150,7 +150,11 @@ type RegexpGenerator(outPath: string) =
                + indentString indentSize + "let e i =\n" 
                + indentString (indentSize + 1) + "let str = elts.[" + string (groupNum + 1) + "].Captures.[i].Value\n"
                + indentString (indentSize + 1) + "let re = new Regex(\"" + re + "\")\n"
-               + indentString (indentSize + 1) + "let elts = re.Match(str).Groups\n"
+               + indentString (indentSize + 1) + "let elts =\n"
+               + indentString (indentSize + 2) + "let res = re.Match(str)\n"
+               + indentString (indentSize + 2) + "if Seq.fold (&&) true [for g in res.Groups -> g.Success]\n"
+               + indentString (indentSize + 2) + "then res.Groups\n"
+               + indentString (indentSize + 2) + "else (new Regex(\"" + re + "\",RegexOptions.RightToLeft)).Match(str).Groups\n"                
                + indentString (indentSize + 1) + "let res =\n"
                + body + "\n" 
                + indentString (indentSize + 1) + "ofset := !ofset + str.Length\n"
@@ -185,7 +189,11 @@ type RegexpGenerator(outPath: string) =
                 + " = \n    let str = buildStr " + arg 
                 + "\n    let idxValMap = buildIndexMap " + arg                
                 + "\n    let re = new Regex(\"" + regexp + "\")"
-                + "\n    let elts = re.Match(str).Groups" 
+                + "\n    let elts ="
+                + "\n        let res = re.Match(str)"
+                + "\n        if Seq.fold (&&) true [for g in res.Groups -> g.Success]"
+                + "\n        then res.Groups"
+                + "\n        else (new Regex(\"" + regexp + "\",RegexOptions.RightToLeft)).Match(str).Groups"
                 + "\n" + body
 
             List.map genRule rules

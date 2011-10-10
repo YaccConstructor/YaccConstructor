@@ -48,9 +48,11 @@ let createRule name args body _public mArgs =
     ; Rule._public = _public ; Rule.metaArgs = mArgs
     }
 
+/// Non-start rule with empty meta-arguments list
 let createSimpleRule name args body =
     createRule name args body false []
 
+/// Replace first (name) field in Source.t with new source 
 let getNewSource (_, (l, c)) n = (n, (l, c))
 
 let createSource n = (n, (0, 0))
@@ -59,6 +61,7 @@ let createRef ruleName _params = PRef (createSource ruleName, _params)
 
 let addBinding _params = function None -> _params | Some x -> x::_params
 
+/// Reduce param list to string. Arguments are separated by spaces
 let createParams = 
     function
     | []         -> []
@@ -66,7 +69,7 @@ let createParams =
     | h ::_ as l -> let _params = String.concat " " (List.map getText l) 
                     in [getNewSource h _params]
 
-(** create option from empty or one element list *)
+/// Create option from empty or one element list
 let list2opt = function
     | []     -> None
     | [h]    -> Some h (** list contains only one element!!! *)

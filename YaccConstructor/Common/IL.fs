@@ -16,63 +16,98 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 module Yard.Core.IL
-module Source = 
-  begin
-   type t = string * (int * int) 
-// TODO: make something with toString overriding of Source.t   
-   let toString ((r,_):t):string = r
-
-  end
+module Source = begin
+    /// Type of elementary part of source grammar
+    type t = string * (int * int) 
+    // TODO: make something with toString overriding of Source.t   
+    let toString ((r,_):t):string = r
+end
   
 module Production = begin
     type IRuleType = interface end
     type elem<'patt,'expr> = {
-        omit:bool; //Вычитание - не включать в AST
-        rule:(t<'patt,'expr>);//Правило
-        binding:'patt option; //замыкание :) f:F ну или f:=F...
-        checker:'expr option //"почти" резольвер
+        /// Don't include rule into AST
+        omit:bool;
+        /// Production rule itself.
+        rule:(t<'patt,'expr>);
+        /// Binding :) like f:F or f:=F.... Seal 
+        binding:'patt option;
+        /// Almost resolver (condition in production).
+        checker:'expr option
     }
+    /// <summary>
+    /// <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
+    /// <para>  'patt - type of attributes (arguments). </para>
+    /// <para>  'expr - type of expressions in action code. </para>
+    /// </summary>
     and t<'patt,'expr> = 
-        |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)//Альтернатива
-        |PSeq     of (elem<'patt,'expr>) list * 'expr option //Последовательность * атрибут.(атрибут всегда применяется к последовательности) 
-        |PToken   of Source.t //собственно токен
-        |PRef     of Source.t * 'expr option // Vanilla rule reference with an optional args list.
-        |PMany    of (t<'patt,'expr>) //expr*
-        |PMetaRef of Source.t * 'expr option * t<'patt,'expr> list // Metarule reference like in "a: mr<x> y z"
-        |PLiteral of Source.t //Литерал. Хочется в правилах явно писать ,например, .."if" expr "then" expr...
-        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
-        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
-/// The following are obsolete and reduction to PRepet should be discussed.
-        |PSome    of (t<'patt,'expr>) //expr+
-        |POpt     of (t<'patt,'expr>) //expr?
+        /// Alternative (e1 | e2)
+        |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
+        /// Sequence * attribute. (Attribute is always applied to sequence) 
+        |PSeq     of (elem<'patt,'expr>) list * 'expr option
+        /// Token itself. Final element of parsing.
+        |PToken   of Source.t 
+        /// Reference to other rule inside production. With an optional args list.
+        |PRef     of Source.t * 'expr option
+        /// expr*
+        |PMany    of (t<'patt,'expr>)
+        /// Reference to metarule inside production (mr<x> in rule "a: mr<x> y z")
+        |PMetaRef of Source.t * 'expr option * t<'patt,'expr> list
+        /// Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...')
+        |PLiteral of Source.t 
+        /// Extended regexp repetition, "man egrep" for details
+        |PRepet   of (t<'patt,'expr>) * int option * int option
+        /// Permutation (A || B || C)
+        |PPerm    of (t<'patt,'expr>) list
+        // The following are obsolete and reduction to PRepet should be discussed.
+        /// expr+
+        |PSome    of (t<'patt,'expr>)
+        /// expr?
+        |POpt     of (t<'patt,'expr>) 
 end
 
 module Rule = begin
-   type t<'patt,'expr> = { 
-    name    : string;
-    args    : 'patt list;
-    body    : (Production.t<'patt,'expr>);
-    _public : bool; //Стартовый нетерминал (иногда их хочется иметь много...)
-    metaArgs: 'patt list
-   }
-  end
+    /// <summary>
+    /// <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
+    /// <para>  'patt - type of attributes (arguments). </para>
+    /// <para>  'expr - type of expressions in action code. </para>
+    /// <para>Rule have the following format: </para>
+    /// <para>  [+]name&lt;&lt; metaArgs &gt;&gt;[args] : body; </para>
+    /// </summary>
+    type t<'patt,'expr> = {
+        /// Rule name. Used to start from this or to be referenced to from other rules.
+        name    : string;
+        /// Heritable arguments of rule
+        args    : 'patt list;
+        /// Rule body (production).
+        body    : (Production.t<'patt,'expr>);
+        /// Is this rule a start non-terminal (in this case '+' is used before rule)
+        _public : bool;
+        /// List of meta-arguments - names of rules, parametrizing this rule.
+        metaArgs: 'patt list
+    }
+end
 
 
-module Grammar = 
-  begin
-    type t<'patt,'expr> = (Rule.t<'patt,'expr>) list //грамматика - список правил.
-  end 
+module Grammar =  begin
+    /// Grammar is a list of rules
+    type t<'patt,'expr> = (Rule.t<'patt,'expr>) list
+end 
 
 module Definition = begin
     type info = { fileName: string}
     type t<'patt,'expr>  = { 
+     /// Contains information (e.g. origin) about this grammar description
      info    : info;
-     head    :'expr option; //текст до грамматики, который потом просто копируеться(всякие open-ы)
-     grammar : Grammar.t<'patt,'expr>;//грамматика
-     foot    :'expr option //текст после грамматики
+     /// Text before a grammar description ( e.g. some open-s), what will be simply copied
+     head    :'expr option; 
+     /// Grammar description itself
+     grammar : Grammar.t<'patt,'expr>;
+     /// Text after a grammar description, what will be simply copied
+     foot    :'expr option
     }    
     
+    /// Empty grammar
     let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []}
 end

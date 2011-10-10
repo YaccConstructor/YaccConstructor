@@ -26,6 +26,7 @@ open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
 open NUnit.Framework
 
+exception FEError of string
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 
@@ -317,29 +318,38 @@ type ``Convertions tests`` () =
     member test.``Batch tests in Tests\Convertions\Batch .``()=
         let frontend = FrontendsManager.Frontend "YardFrontend"
         let generator = GeneratorsManager.Generator "YardPrinter"
-        printfn "hello"
+        printfn "%A" generator
         System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
-            |> Seq.iter 
-                (fun srcFile ->  
-                    Namer.resetRuleEnumerator()
-                    printfn "file %s" srcFile
-                    let srcFileName = System.IO.Path.GetFileName(srcFile)
-                    let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
-                    let prefixSplitted = srcPrefix.Split('_')
-                    printfn "1" 
-                    let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
-                    printfn "2: %A" convertions
-                    let ilTree = srcFile |> frontend.ParseGrammar 
-                    printfn "3"
-                    let reorder f a b = f b a
-                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                    printfn "4"
-                    Namer.resetRuleEnumerator()
-                    let expected = srcFile + ".res" |> frontend.ParseGrammar 
-                    printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                    Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+        |> Seq.iter 
+            (fun srcFile ->  
+                Namer.resetRuleEnumerator()
+                printfn "file %s" srcFile
+                let srcFileName = System.IO.Path.GetFileName(srcFile)
+                let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
+                let prefixSplitted = srcPrefix.Split('_')
+                printfn "1" 
+                // all convertions are in name without descr.yrd
+                let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
+                printfn "2: %A" convertions
+                Namer.resetRuleEnumerator()
+                let ilTree = (srcFile |> frontend.ParseGrammar)
+                printfn "3"
+                let reorder f a b = f b a
+//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
+                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
+                printfn "4"
+                Namer.resetRuleEnumerator()
+                let expected =
+                    try
+                        srcFile + ".res" |> frontend.ParseGrammar 
+                    with
+                        | e -> printfn "%s" e.Message
+                               raise <| FEError e.Message
+                printfn "5"
+                printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
+                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 //                     with e ->
 //                        printfn "%A" e 
 
-                )
+            )
         Assert.True(true)

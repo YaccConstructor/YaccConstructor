@@ -33,7 +33,7 @@ module Production = begin
         rule:(t<'patt,'expr>);//Правило
         binding:'patt option; //замыкание :) f:F ну или f:=F...
         checker:'expr option //"почти" резольвер
-    }   
+    }
     and t<'patt,'expr> = 
         |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)//Альтернатива
         |PSeq     of (elem<'patt,'expr>) list * 'expr option //Последовательность * атрибут.(атрибут всегда применяется к последовательности) 

@@ -35,38 +35,20 @@ let run path =
     let tables = tables
     
     //Run parser
-    // trees -- dirivation forest
-    // cache -- trace cache
-    // cc -- some additional debug info
-    let parseRes(*,cache,cc*) = 
+    // forest -- dirivation forest    
+    let forest = 
         let ti = new TableInterpreter(tables)
-        ti.Run l 
-    let res =
+        ti.Run l
+
+    let result =
+        //run forest interpretation (action code calculation)
         let r = 
             Seq.map 
                 (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToRegex)
-                parseRes
+                forest
         r
-//    let result = 
-//        match parseRes with
-//        //Parse success
-//        | PSuccess (forest) -> 
-//        //run forest interpretation (action code calculation)
-//            printf "\nForest %A\n" forest
-//            Seq.map 
-//             (fun tree -> ASTInterpretator.interp GNESCC.Actions.ruleToAction cache tree)
-//             forest
-//        //Error handling
-//        | PError (pos) -> 
-//            //Error handling
-//            //If you create lexeme with position in stream, you can not only provide error lexeme
-//            // but also navigate in error position
-//            let errLexeme = (l :> ILexer).Get(pos)
-//            "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.ToString()
-//            |> failwith
-            
-    printf "\nResult %A\n" parseRes
-    printf "\nFull Result %A\n" res
+                
+    printfn "Result %A\n" result
     
 do 
     run @"..\..\..\..\Tests\GNESCC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"

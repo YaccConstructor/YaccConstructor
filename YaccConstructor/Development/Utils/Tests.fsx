@@ -62,6 +62,22 @@ let tests =
      RegexpReplacement =  ("GNESCC.Regexp","GNESCC.Regexp_regexp")
      TablesReplacement =  ("GNESCCGenerator.Tables","GNESCCGenerator.Tables_regexp") };
    {
+     FullGrammarPath =  "../../../Tests/GNESCC/seq_in_cls_1/seq_in_cls_1.yrd"
+     FullInputFilesPaths = 
+       []
+     FullLexerPath =  "  "
+     ActionReplacement =  ("GNESCC.Actions","GNESCC.Actionsin_cls_1")
+     RegexpReplacement =  ("GNESCC.Regexp","GNESCC.Regexpin_cls_1")
+     TablesReplacement =  ("GNESCCGenerator.Tables","GNESCCGenerator.Tablesin_cls_1") };
+   {
+     FullGrammarPath =  "../../../Tests/GNESCC/seq_in_cls_2/seq_in_cls_2.yrd"
+     FullInputFilesPaths = 
+       []
+     FullLexerPath =  "  "
+     ActionReplacement =  ("GNESCC.Actions","GNESCC.Actionsin_cls_2")
+     RegexpReplacement =  ("GNESCC.Regexp","GNESCC.Regexpin_cls_2")
+     TablesReplacement =  ("GNESCCGenerator.Tables","GNESCCGenerator.Tablesin_cls_2") };
+   {
      FullGrammarPath =  "../../../Tests/GNESCC/test_1/test_1.yrd"
      FullInputFilesPaths = 
        [

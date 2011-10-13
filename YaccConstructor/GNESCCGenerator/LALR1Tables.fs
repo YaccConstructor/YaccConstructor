@@ -278,6 +278,8 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
                 |> CreateDictionary
                 |> idx i)
         |> CreateDictionary
+
+
 //        productionIndexator
 //            (fun fa n ->
 //                let buf = ref []
@@ -632,11 +634,14 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
                             (function
                              | Some(PNonTerminal ntB) -> 
                                  let firstSet = 
-                                    let r = reachable item0
+                                    let r = 
+                                        reachable item0
+                                        |> List.map List.tail
                                     r
                                     |> List.map (fun lst -> ComputeFirstSetOfTokenList (lst,pretoken))
                                     |> Set.unionMany
-                                    |> Set.ofSeq                                    
+                                    |> Set.ofSeq
+                                 //let firstSet = ComputeFirstSetOfTokenList (reachable item0,pretoken)
                                  for prodIdx in prodTab.Productions.[ntB] do
                                      addToWorkList (prodIdx_to_item0 prodIdx,firstSet)
                              | Some(PTerminal _)|None -> ())))

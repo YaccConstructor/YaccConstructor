@@ -18,48 +18,111 @@ let s0 expr =
             let (res) =
                 let yardElemAction expr = 
                     match expr with
-                    | REClosure(lst) -> 
-                        let yardClsAction expr = 
+                    | RELeaf e -> (e :?> _ ) 
+                    | x -> getUnmatched x "RELeaf"
+
+                yardElemAction(x0)
+            (res)
+        | x -> getUnmatched x "RESeq"
+    box (inner)
+let e1 expr = 
+    let inner  = 
+        match expr with
+        | REAlt(Some(x), None) -> 
+            let yardLAltAction expr = 
+                match expr with
+                | RESeq [x0] -> 
+                    let (n) =
+                        let yardElemAction expr = 
+                            match expr with
+                            | RELeaf tNUMBER -> tNUMBER :?> 'a
+                            | x -> getUnmatched x "RELeaf"
+
+                        yardElemAction(x0)
+                    (value n |> int)
+                | x -> getUnmatched x "RESeq"
+
+            yardLAltAction x 
+        | REAlt(None, Some(x)) -> 
+            let yardRAltAction expr = 
+                match expr with
+                | RESeq [x0; x1; x2] -> 
+                    let (l) =
+                        let yardElemAction expr = 
+                            match expr with
+                            | RELeaf e -> (e :?> _ ) 
+                            | x -> getUnmatched x "RELeaf"
+
+                        yardElemAction(x0)
+                    let (op) =
+                        let yardElemAction expr = 
                             match expr with
                             | REAlt(Some(x), None) -> 
                                 let yardLAltAction expr = 
                                     match expr with
-                                    | RESeq [x0] -> 
-                                        let (m) =
+                                    | RESeq [gnescc_x0] -> 
+                                        let (gnescc_x0) =
                                             let yardElemAction expr = 
                                                 match expr with
-                                                | RELeaf tMINUS -> tMINUS :?> 'a
+                                                | RELeaf tPLUS -> tPLUS :?> 'a
                                                 | x -> getUnmatched x "RELeaf"
 
-                                            yardElemAction(x0)
-                                        (m)
+                                            yardElemAction(gnescc_x0)
+                                        ( (+) )
                                     | x -> getUnmatched x "RESeq"
 
                                 yardLAltAction x 
                             | REAlt(None, Some(x)) -> 
                                 let yardRAltAction expr = 
                                     match expr with
-                                    | RESeq [x0] -> 
-                                        let (p) =
-                                            let yardElemAction expr = 
-                                                match expr with
-                                                | RELeaf tPLUS -> tPLUS :?> 'a
-                                                | x -> getUnmatched x "RELeaf"
+                                    | REAlt(Some(x), None) -> 
+                                        let yardLAltAction expr = 
+                                            match expr with
+                                            | RESeq [gnescc_x0] -> 
+                                                let (gnescc_x0) =
+                                                    let yardElemAction expr = 
+                                                        match expr with
+                                                        | RELeaf tMULT -> tMULT :?> 'a
+                                                        | x -> getUnmatched x "RELeaf"
 
-                                            yardElemAction(x0)
-                                        (p)
-                                    | x -> getUnmatched x "RESeq"
+                                                    yardElemAction(gnescc_x0)
+                                                ( ( * ) )
+                                            | x -> getUnmatched x "RESeq"
+
+                                        yardLAltAction x 
+                                    | REAlt(None, Some(x)) -> 
+                                        let yardRAltAction expr = 
+                                            match expr with
+                                            | RESeq [gnescc_x0] -> 
+                                                let (gnescc_x0) =
+                                                    let yardElemAction expr = 
+                                                        match expr with
+                                                        | RELeaf tMINUS -> tMINUS :?> 'a
+                                                        | x -> getUnmatched x "RELeaf"
+
+                                                    yardElemAction(gnescc_x0)
+                                                ( (-) )
+                                            | x -> getUnmatched x "RESeq"
+
+                                        yardRAltAction x 
+                                    | x -> getUnmatched x "REAlt"
 
                                 yardRAltAction x 
                             | x -> getUnmatched x "REAlt"
 
-                        List.map yardClsAction lst 
-                    | x -> getUnmatched x "REClosure"
+                        yardElemAction(x1)
+                    let (r) =
+                        let yardElemAction expr = 
+                            match expr with
+                            | RELeaf e -> (e :?> _ ) 
+                            | x -> getUnmatched x "RELeaf"
 
-                yardElemAction(x0)
-            (List.map value res|> String.concat ";")
-        | x -> getUnmatched x "RESeq"
+                        yardElemAction(x2)
+                    (op l r)
+                | x -> getUnmatched x "RESeq"
+
+            yardRAltAction x 
+        | x -> getUnmatched x "REAlt"
     box (inner)
 
-let ruleToAction = dict [|(1,s0)|]
-
+let ruleToAction = dict [|(2,e1); (1,s0)|]

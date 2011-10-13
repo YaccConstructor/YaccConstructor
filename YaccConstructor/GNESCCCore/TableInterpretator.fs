@@ -120,8 +120,11 @@ type  TableInterpreter (tables:Tables) = class
         tables.ActionTable.[state].[tables.SymbolIdx.[curLexemeTag]]
         |> List.map (
             function
-            | CommonTypes.Accept    -> [stack]
-            | CommonTypes.Error     -> []//failwith "Parser error"
+            | CommonTypes.Accept    -> if curLexemeTag = Constants.gnesccEndStreamTag then [stack] else []
+            | CommonTypes.Error     -> 
+                let xx = ref 1
+                incr xx
+                []//failwith "Parser error"
             | CommonTypes.Shift s   -> 
                 let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
                 step (getLabels s @ stk) s (i+1)
@@ -134,9 +137,11 @@ type  TableInterpreter (tables:Tables) = class
                     | [] -> failwith "incorrect stack"
                         
                 let gt = (tables.GotoTable.[(state nStack)].[tables.ProdToNTerm.[ps]])
-                let stk = State gt.Value :: (Symbol (ps,Node(forest,ps,[]))) :: (nStack)
+                
                 if Option.isSome gt
-                then step (getLabels ps @ stk) (gt.Value) i
+                then
+                    let stk = State gt.Value :: (Symbol (ps,Node(forest,ps,[]))) :: (nStack) 
+                    step (getLabels ps @ stk) (gt.Value) i
                 else [stack] )
         |> List.concat           
 
@@ -144,7 +149,8 @@ type  TableInterpreter (tables:Tables) = class
         Lexer := Some lexer
         //Some tables |> setTables
         let r = 
-            (step (getLabels 0 @ [State tables.StartIdx.Head]) tables.StartIdx.Head 1)
+            let f = (step (getLabels 0 @ [State tables.StartIdx.Head]) tables.StartIdx.Head 1)
+            f
             |> List.choose (function | _::hd::_ -> Some hd | _ -> None)
         let res = 
             r     

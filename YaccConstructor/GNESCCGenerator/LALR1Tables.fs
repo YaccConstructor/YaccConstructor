@@ -858,18 +858,18 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
                 | _ -> None*)
 
             // A -> B C . rules give rise to reductions in favour of errors 
-            (*for item0 in ComputeClosure0 kernel do
+            for item0 in ComputeClosure0 kernel do
                 let prec = NoPrecedence
                 rsyms_of_item0 item0
                 |> Seq.iter
                    (function
                     | None ->
                         for terminalIdx in termTab.Indexes do 
-                            if snd(arr.[terminalIdx]) = Error then 
+                            if arr.[terminalIdx].Length = 1 && snd(arr.[terminalIdx].Head) = Error then 
                                 let prodIdx = prodIdx_of_item0 item0
                                 let action = (prec, (if IsStartItem(item0) then Accept else Reduce prodIdx))
                                 addResolvingPrecedence arr kernelIdx terminalIdx action
-                    | _  -> ())*)
+                    | _  -> ())
 
             arr//,immediateAction
 

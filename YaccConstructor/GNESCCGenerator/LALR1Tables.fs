@@ -188,7 +188,8 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
             (function 
              | i,Production(nt,fa) ->                
                 fa.Vertices
-                |> Seq.map 
+                |> List.ofSeq
+                |> List.map 
                     (fun n ->
                        fa.OutEdges n
                        |> f fa n)
@@ -241,28 +242,66 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
         | Production(nt,fa) -> iterFA fa f edgeFilter fa.Start.Value
                 
     let reachable = 
-        productionIndexator
-            (fun fa n ->
-                let buf = ref []
-                let egf = (fun (eg:QuickGraph.TaggedEdge<_,_>) -> fst eg.Tag <> Dummy)
-                fun x -> 
-                    iterFA fa 
-                        (fun eg ->
-                            match fst eg.Tag with
-                            | Dummy -> ()
-                            | _ -> 
-                                buf :=
-                                    if eg.Source<>n
-                                    then                                
-                                        match fst eg.Tag with 
-                                        | Terminal x     -> termTab.ToIndex x |> PTerminal 
-                                        | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal
-                                        | Dummy          -> failwith "Seems edge filter is incorrect."
-                                        ::!buf
-                                    else !buf ) 
-                        egf n
-                    n,!buf)
-            id
+        prodsWithIdxs
+        |> List.map 
+            (function 
+             | i,Production(nt,fa) ->                
+                fa.Vertices
+                |> List.ofSeq
+                |> List.map
+                    (fun n ->
+                        let visited = ref []
+                        let rec step v =
+                            if List.exists((=)v) !visited |> not
+                            then 
+                                visited := v :: !visited
+                                let subRes = 
+                                    fa.OutEdges(v)
+                                    |> List.ofSeq
+                                    |> List.choose
+                                        (fun eg ->
+                                            match fst eg.Tag with 
+                                            | Terminal x     -> 
+                                                let elt = termTab.ToIndex x |> PTerminal
+                                                Some (elt,step eg.Target)
+                                            | NonTerminal x  -> 
+                                                let elt = ntTab.ToIndex x |> PNonTerminal
+                                                Some (elt,step eg.Target)
+                                            | Dummy          -> None)
+                                List.map 
+                                    (fun (x,l) -> if List.isEmpty l then [[x]] else List.map (fun y -> x::y) l)
+                                    subRes
+                                |> List.concat
+                            else [[]]
+                        n, step n
+                    )
+                |> CreateDictionary
+                |> idx i)
+        |> CreateDictionary
+
+
+//        productionIndexator
+//            (fun fa n ->
+//                let buf = ref []
+//                let egf = (fun (eg:QuickGraph.TaggedEdge<_,_>) -> fst eg.Tag <> Dummy)
+//                fun x -> 
+//                    iterFA fa 
+//                        (fun eg ->
+//                            match fst eg.Tag with
+//                            | Dummy -> ()
+//                            | _ -> 
+//                                buf :=
+//                                    if eg.Source<>n
+//                                    then                                
+//                                        match fst eg.Tag with 
+//                                        | Terminal x     -> termTab.ToIndex x |> PTerminal 
+//                                        | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal
+//                                        | Dummy          -> failwith "Seems edge filter is incorrect."
+//                                        ::!buf
+//                                    else !buf ) 
+//                        egf n
+//                    n,!buf)
+//            id
         
     member prodTab.StartID(i) = startIdx.[i].Value
     member prodTab.NonTerminal(i) = b.[i]    
@@ -594,7 +633,15 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
                         |> Seq.iter 
                             (function
                              | Some(PNonTerminal ntB) -> 
-                                 let firstSet = ComputeFirstSetOfTokenList (reachable item0,pretoken)
+                                 let firstSet = 
+                                    let r = 
+                                        reachable item0
+                                        |> List.map List.tail
+                                    r
+                                    |> List.map (fun lst -> ComputeFirstSetOfTokenList (lst,pretoken))
+                                    |> Set.unionMany
+                                    |> Set.ofSeq
+                                 //let firstSet = ComputeFirstSetOfTokenList (reachable item0,pretoken)
                                  for prodIdx in prodTab.Productions.[ntB] do
                                      addToWorkList (prodIdx_to_item0 prodIdx,firstSet)
                              | Some(PTerminal _)|None -> ())))
@@ -816,18 +863,18 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
                 | _ -> None*)
 
             // A -> B C . rules give rise to reductions in favour of errors 
-            (*for item0 in ComputeClosure0 kernel do
+            for item0 in ComputeClosure0 kernel do
                 let prec = NoPrecedence
                 rsyms_of_item0 item0
                 |> Seq.iter
                    (function
                     | None ->
                         for terminalIdx in termTab.Indexes do 
-                            if snd(arr.[terminalIdx]) = Error then 
+                            if arr.[terminalIdx].Length = 1 && snd(arr.[terminalIdx].Head) = Error then 
                                 let prodIdx = prodIdx_of_item0 item0
                                 let action = (prec, (if IsStartItem(item0) then Accept else Reduce prodIdx))
                                 addResolvingPrecedence arr kernelIdx terminalIdx action
-                    | _  -> ())*)
+                    | _  -> ())
 
             arr//,immediateAction
 

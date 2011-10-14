@@ -37,7 +37,7 @@ let move () =
     |> ignore
     let filesPaths = Directory.GetFiles(testPath,"*.fs", SearchOption.AllDirectories)
     printfn "move files: \%An" filesPaths    
-    Seq.iter (fun x -> File.Move(x,Path.Combine (gtPath,Path.GetFileName(x)))) filesPaths
+    Seq.iter (fun x -> printfn "path : %s" (Path.Combine (gtPath,Path.GetFileName(x))); File.Move(x,Path.Combine (gtPath,Path.GetFileName(x)))) filesPaths
 
 let replace () =
     Directory.GetFiles(gtPath,"*.fs", SearchOption.AllDirectories)

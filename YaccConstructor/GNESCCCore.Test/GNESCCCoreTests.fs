@@ -232,7 +232,7 @@ let tests =
                 regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
                 actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
                 path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
-                rightValue = seq [5 |> box; 3 |> box; -3 |> box; 3 |> box; -1 |> box]
+                rightValue = seq [box 5]
                 lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
             })
         (23,

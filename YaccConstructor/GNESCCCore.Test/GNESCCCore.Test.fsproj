@@ -152,11 +152,6 @@
     <Compile Include="Lexer_summator_1.fs" />
     <Compile Include="test_summator_1.yrd.actions.fs" />
     <Compile Include="GNESCCCoreTests.fs" />
-    <Compile Include="test_regexp.yrd.regexp.fs" />
-    <Compile Include="test_seq_2.yrd.regexp.fs" />
-    <Compile Include="test_rec_rule_1.yrd.regexp.fs" />
-    <Compile Include="test_rec_rule_2.yrd.regexp.fs" />
-    <Compile Include="test_rec_rule_3.yrd.regexp.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

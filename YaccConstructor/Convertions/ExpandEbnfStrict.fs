@@ -23,6 +23,7 @@ module Yard.Core.Convertions.ExpandEbnfStrict
 open Yard.Core
 open Yard.Core.IL
 open Production
+open TransformAux
 
 let s2source s = (s, (0,0))
 let generatedSomesCount = ref 0
@@ -46,68 +47,88 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
     let addedBnfRules = ref []
     let sourceIf cond s = if cond then Some(s2source s) else None
     // if production is not binded then don't add semantic action in generated rules
-    let rec replaceEbnf production binded = 
+    let rec replaceEbnf production binded attrs metaArgs = 
+        let insideMetaArgs =
+            metaArgs
+            |> List.map (fun x -> PRef (x, None))
         match production with
-        | PSeq(elem_list, ac) -> PSeq(elem_list |> List.map (fun elem -> {elem with rule=replaceEbnf elem.rule (elem.binding.IsSome)}), ac) 
-        | PAlt(left, right) -> PAlt(replaceEbnf left binded, replaceEbnf right binded)
+        | PSeq(elem_list, ac) ->
+            PSeq(elem_list
+            |> List.map (fun elem -> {elem with rule = replaceEbnf elem.rule (elem.binding.IsSome) attrs metaArgs}), ac) 
+        | PAlt(left, right) -> PAlt(replaceEbnf left binded attrs metaArgs, replaceEbnf right binded attrs metaArgs)
         | PSome(p) -> 
             let generatedName = genSomeName()
-            let expandedBody = replaceEbnf p binded
+            let expandedBody = replaceEbnf p binded attrs metaArgs
+            let newRule = PMetaRef(s2source generatedName, list2opt attrs, insideMetaArgs)
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
-                 and args=[] 
-                 and body=
+                 with name = generatedName 
+                 and args = attrs 
+                 and body =
                     PAlt(
-                        PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "[elem]") ,
+                        PSeq([{default_elem with rule = expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "[elem]") ,
                         PSeq([
-                                {omit=false; rule=expandedBody; binding=sourceIf binded "head"; checker=None};
-                                {omit=false; rule=PRef(s2source generatedName, None); binding=sourceIf binded "tail"; checker=None}
+                                {omit=false;
+                                    rule = expandedBody;
+                                    binding=sourceIf binded "head";
+                                    checker=None};
+                                {omit=false;
+                                    rule = newRule;
+                                    binding=sourceIf binded "tail";
+                                    checker=None}
                              ]
                              , sourceIf binded "head::tail")
                     ) 
                  and _public=false
-                 and metaArgs=[]
+                 and metaArgs = metaArgs
                 }) :: !addedBnfRules
-            PRef(s2source generatedName, None)
+            newRule
         | PMany(p) -> 
             let generatedName = genManyName()
-            let expandedBody = replaceEbnf p binded
+            let expandedBody = replaceEbnf p binded attrs metaArgs
+            let newRule = PMetaRef(s2source generatedName, list2opt attrs, insideMetaArgs)
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
                  with name=generatedName 
-                 and args=[] 
+                 and args = attrs
                  and body=
                     PAlt(
                         PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "[]") ,
                         PSeq([
-                                {omit=false; rule=expandedBody; binding=sourceIf binded "head"; checker=None};
-                                {omit=false; rule=PRef(s2source generatedName, None); binding=sourceIf binded "tail"; checker=None}
+                                {omit=false;
+                                    rule=expandedBody;
+                                    binding=sourceIf binded "head";
+                                    checker=None};
+                                {omit=false;
+                                    rule=newRule;
+                                    binding=sourceIf binded "tail";
+                                    checker=None}
                              ]
                              , sourceIf binded "head::tail")
                     ) 
                  and _public=false
-                 and metaArgs=[]
+                 and metaArgs = metaArgs
                 }) :: !addedBnfRules
-            PRef(s2source generatedName, None)
+            newRule
         | POpt(p) -> 
             let generatedName = genOptName()
-            let expandedBody = replaceEbnf p binded
+            let expandedBody = replaceEbnf p binded attrs metaArgs
+            let newRule = PMetaRef(s2source generatedName, list2opt attrs, insideMetaArgs)
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
                  with name=generatedName 
-                 and args=[] 
+                 and args = attrs
                  and body=
                     PAlt(
-                        PSeq([{default_elem with rule=PRef(s2source "empty", None)}], sourceIf binded "None"),
+                        PSeq([{default_elem with rule=newRule}], sourceIf binded "None"),
                         PSeq([{default_elem with rule=expandedBody; binding=sourceIf binded "elem"}], sourceIf binded "Some(elem)")
                     ) 
                  and _public=false
-                 and metaArgs=[]
+                 and metaArgs = metaArgs
                 }) :: !addedBnfRules
-            PRef(s2source generatedName, None)
+            newRule
         | x -> x
-    {rule with body=replaceEbnf rule.body false}::(List.rev !addedBnfRules)
+    {rule with body=replaceEbnf rule.body false rule.args rule.metaArgs}::(List.rev !addedBnfRules)
 
 type ExpandEbnfStrict() = 
     inherit Convertion()

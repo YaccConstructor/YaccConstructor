@@ -32,7 +32,7 @@ type GNESCCGenerator() =
                 let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
                 let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
                 let regexpGenerator = RegexpGenerator(t.info.fileName + regexStr + extension)
-                let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
+                let transformedGrammar = t//{t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
                 let tgRes = tableGenerator.DbgGenerate transformedGrammar
                 let typeToTag = fst tgRes
                 regexpGenerator.Generate transformedGrammar typeToTag
@@ -48,7 +48,7 @@ type GNESCCGenerator() =
             let codeGenerator = CodeGenerator(t.info.fileName + actionsStr + extension)
             let tableGenerator = TableGenerator(t.info.fileName + tablesStr + extension)
             let regexpGenerator = RegexpGenerator(t.info.fileName + regexStr + extension)
-            let transformedGrammar = {t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
+            let transformedGrammar = t//{t with grammar = Convertions.ExpandMeta.expandMetaRules t.grammar}
             let typeToTag = tableGenerator.Generate transformedGrammar
             regexpGenerator.Generate transformedGrammar typeToTag
             codeGenerator.Generate transformedGrammar typeToTag :> obj

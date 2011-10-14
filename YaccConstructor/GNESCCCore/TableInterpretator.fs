@@ -105,7 +105,8 @@ type  TableInterpreter (tables:Tables) = class
         let reduce ps =
             let rec inner buf stack = 
                 match stack with
-                | Label _ :: tl -> buf,tl                
+                | Label i :: tl when tables.IsStart.[i].[ps] -> buf,tl
+                | Label _ :: tl -> inner buf tl
                 | State _ ::(Symbol(_,t))::tl -> inner (t::buf) tl
                 | State 0 :: _ -> buf,stack
                 | [] -> buf,[]
@@ -113,7 +114,7 @@ type  TableInterpreter (tables:Tables) = class
 
             let rec clerStack s = 
                 match s with
-                | Label _ ::tl -> clerStack tl
+                | Label i :: tl when i = ps -> clerStack tl
                 | _            ->  s
             clerStack stack |> inner [] 
 

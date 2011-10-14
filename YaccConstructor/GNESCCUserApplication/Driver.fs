@@ -38,7 +38,7 @@ let run path =
     // trees -- dirivation forest
     // cache -- trace cache
     // cc -- some additional debug info
-    let parseRes(*,cache,cc*) = 
+    let parseRes = 
         let ti = new TableInterpreter(tables)
         ti.Run l 
     let res =
@@ -69,6 +69,6 @@ let run path =
     printf "\nFull Result %A\n" res
     
 do 
-    run @"..\..\..\..\Tests\GNESCC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"
+    run @"D:\YC\recursive-ascent\Tests\GNESCC\test_seq\test_seq_1.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

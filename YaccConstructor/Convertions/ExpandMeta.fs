@@ -87,7 +87,7 @@ let getActualParam formalName args = List.tryPick (fun (x,y) -> if x = formalNam
 /// res:Rule.t list - generated rules from body
 /// returns (new body, generated rules)
 let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) (refsTbl:Dictionary<string,Source.t>) res args = 
-    printfn "b: %A" body
+//    printfn "b: %A" body
 
     /// replaces all metarule parameters in body with given args
     let rec transformBody (ruleName:string) actParams (args:(string * t<Source.t, Source.t>) list) nRules = 
@@ -193,7 +193,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
  
     /// returns (ref to new rule, list of generated rules)
     and expandMetaRef res (metaName:Source.t) _params (metaArgs':t<Source.t, Source.t> list) args =
-        printfn "r %A" metaName
+//        printfn "r %A" metaName
         let key = getKey metaName metaArgs'
         // checks if we already expanded rule with given name and meta args
         if refsTbl.ContainsKey(key) then
@@ -250,10 +250,10 @@ let rec collectMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Sourc
     | [] -> ()
     | h::t -> 
         if (isMetaRule h) then 
-            printfn "+%s" h.name
+//            printfn "+%s" h.name
             metaRulesTbl.Add(h.name,h)        
         collectMeta t (metaRulesTbl,refsTbl)
-        printfn "%s" h.name
+//        printfn "%s" h.name
 
 let rec replaceMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >),refsTbl) res = 
     match rules with 
@@ -263,11 +263,11 @@ let rec replaceMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Sourc
             if (isMetaRule h) then 
                 replaceMeta t (metaRulesTbl,refsTbl) res      
             else 
-                printfn "-%s" h.name
+//                printfn "-%s" h.name
                 let (b, rules) = expandMeta (h:Rule.t<Source.t,Source.t>).body metaRulesTbl refsTbl [] []
                 let r = { h with Rule.body = b }
                 replaceMeta t (metaRulesTbl,refsTbl) (res @ rules @ [r])
-        printfn "%s" h.name
+//        printfn "%s" h.name
         res
 
 (** main function 

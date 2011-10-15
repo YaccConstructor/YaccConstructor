@@ -44,8 +44,12 @@ let createName ((n:string), (l, c)) =
       with (*Invalid_argument*) _ -> withPrefix
     in sprintf "%s_%d" (addPrefix n) !curNum, (l, c)
 
+/// Create new Source.t item with name, consisting of yard prefix, specified middle
+///    and postfix, generated as regularly incrementing number
 let createNewName name = 
-    let newName = createName name in (incr curNum; newName)
+    let newName = createName name in
+    incr curNum;
+    newName
 
 module Names =
  begin
@@ -91,16 +95,16 @@ let isEBNFmeta name =
 //        end
 //    with Not_found -> rName
 
-(** formal parameter name in metarules for EBNF clauses *)
+/// formal parameter name in metarules for EBNF clauses
 let getItem = "item"
 
 let getItemBind = withPrefix getItem
 
+/// Does name have prefix 'item'
 let isItem (name:string) = 
-    let len = getItem.Length 
-    in
-    if  name.Length >= len 
-    then name.Substring(0, len) = getItem 
+    let len = getItem.Length in
+    if  name.Length >= len then
+        name.Substring(0, len) = getItem 
     else false
     
 (** names specific for Elkhound, *)

@@ -26,13 +26,15 @@ open Yard.Core.Namer
 
 let getText = Source.toString
 let rec getTextIL = function
-    | PRef(s,None) -> getText s
+    //| PRef(s,None) -> getText s
+    | PRef(s,_) -> getText s
     | PToken(s) -> getText s
     | PLiteral(s) -> getText s
     | POpt(p) -> "(" + getTextIL p + ")?"
     | PSome(p) -> "(" + getTextIL p + ")*"
     | PMany(p) -> "(" + getTextIL p + ")+"
     | PAlt(l,r) -> "(" + getTextIL l + ")|(" + getTextIL r + ")"
+    | PMetaRef(s,_,_) -> getText s
     | PSeq(elements, ac) ->
         "(" + (elements |> List.map (fun elem -> getTextIL elem.rule) |> String.concat " ") + "){" + 
         (match ac with Some(t) -> getText t | None -> "") + "}"

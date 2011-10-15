@@ -293,7 +293,7 @@ type ``Convertions tests`` () =
         let ilTreeConverted = 
             ilTree 
             |> ConvertionsManager.ApplyConvertion "ExpandMeta"   
-            |> ConvertionsManager.ApplyConvertion "ExpandEbnfStrict"   
+            |> ConvertionsManager.ApplyConvertion "ExpandEbnf"
             |> ConvertionsManager.ApplyConvertion "ExpandBrackets"   
         let hasNotInnerSeq = 
             ilTreeConverted.grammar 

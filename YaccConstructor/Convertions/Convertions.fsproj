@@ -43,7 +43,6 @@
     <Compile Include="Namer.fs" />
     <Compile Include="TransformAux.fs" />
     <Compile Include="ExpandAlter.fs" />
-    <Compile Include="ExpandEbnfStrict.fs" />
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />

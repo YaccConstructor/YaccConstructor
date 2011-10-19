@@ -96,7 +96,7 @@ module Grammar =  begin
 end 
 
 module Definition = begin
-    type info = { fileName: string}
+    type info = { fileName: string }
     type t<'patt,'expr>  = { 
      /// Contains information (e.g. origin) about this grammar description
      info    : info;

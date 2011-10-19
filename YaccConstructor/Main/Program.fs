@@ -101,9 +101,12 @@ let () =
                 with
                 | e -> FEError e.Message |> raise
 
+            //printfn "%A" <| ilTree
             // Apply convertions
             Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion conv !ilTree)) convertions
 
+  //          printfn "========================================================"
+    //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
                 if Seq.exists ((=) generatorName) GeneratorsManager.AvailableGenerators
@@ -155,6 +158,7 @@ List of available frontends, generators and convertions can be obtained by -af -
         |> System.Console.WriteLine
     | :? System.IO.IOException -> printf "Could not read input file\n"
     | x -> printf "%A\n" x
+
 
 
 //Tests. Please do not remove

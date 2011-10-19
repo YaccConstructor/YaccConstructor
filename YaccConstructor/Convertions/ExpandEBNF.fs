@@ -133,8 +133,11 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
 
 (** main function *)
 let convertEBNFtoMeta l = 
-    let l' = List.map (convertToMeta) l |> List.concat
-    in getMetaOpt :: getMetaSome :: getMetaMany :: l'
+    let l' = List.map (convertToMeta) l |> List.concat in
+    if l' |> List.exists (fun r -> r.name = Names.many) then
+        l'
+    else
+        getMetaOpt :: getMetaSome :: getMetaMany :: l'
 
 (* end of converting EBNF to metarules *)
 

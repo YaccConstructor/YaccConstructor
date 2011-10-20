@@ -202,7 +202,7 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
         productionIndexator
             (fun fa n -> 
                 Seq.map 
-                    (fun (eg:QuickGraph.TaggedEdge<_,_>) -> 
+                    (fun eg -> 
                         match fst eg.Tag with 
                         | Terminal x     -> termTab.ToIndex x |> PTerminal |> Some
                         | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal |> Some 
@@ -817,8 +817,9 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
                  |> ComputeClosure1
                              
             for (KeyValue(item0,lookaheads)) in items.IEnumerable do
-                let nonTermA = ntIdx_of_item0 item0
-                rsyms_of_item0 item0
+                //let nonTermA = ntIdx_of_item0 item0
+                let rsyms = rsyms_of_item0 item0
+                rsyms
                 |> Seq.iter
                    (function 
                     | Some (PTerminal termIdx) -> 

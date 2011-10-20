@@ -51,6 +51,6 @@ let run path =
     printfn "Result %A\n" result
     
 do 
-    run @"..\..\..\..\Tests\GNESCC\test_arithm_glr\test_arithm_glr_2.yrd.in"
+    run @"..\..\..\..\Tests\GNESCC\claret\braces_1\test_simple_braces_1.yrd.in"
     |> ignore
     System.Console.ReadLine() |> ignore

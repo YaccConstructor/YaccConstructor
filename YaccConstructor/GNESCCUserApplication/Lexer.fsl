@@ -36,17 +36,11 @@ type MyLexeme (tag,_value) =
  }
  
 
- let digit = ['0'-'9']
-
 rule tokens = parse
- | digit+ 
-        {MyLexeme( getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))}
- | "+" 
-        {MyLexeme( getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))}
- | "-" 
-        {MyLexeme( getTag T_MINUS, LexBuffer<_>.LexemeString(lexbuf))}
- | "*" 
-        {MyLexeme( getTag T_MULT, LexBuffer<_>.LexemeString(lexbuf))}
+ | "(" 
+        {MyLexeme( getTag T_LBR, LexBuffer<_>.LexemeString(lexbuf))}
+ | ")" 
+        {MyLexeme( getTag T_RBR, LexBuffer<_>.LexemeString(lexbuf))}
  | eof  {MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 
 {

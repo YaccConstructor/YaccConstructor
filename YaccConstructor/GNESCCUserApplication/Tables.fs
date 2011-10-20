@@ -8,21 +8,30 @@ open Yard.Generators.GNESCCGenerator
 open Yard.Generators.GNESCCGenerator.CommonTypes
 
 type symbol =
-    | T_RBR
+    | T_MINUS
     | T_LBR
     | NT_start
+    | T_MULT
+    | T_PLUS
+    | T_NUMBER
+    | NT_e
+    | NT_s
     | NT_gnesccStart
 let getTag smb =
     match smb with
     | T_RBR -> 6
-    | T_LBR -> 5
+    | T_MULT -> 8
     | NT_start -> 4
     | NT_gnesccStart -> 2
 let getName tag =
     match tag with
     | 6 -> T_RBR
-    | 5 -> T_LBR
+    | 8 -> T_MULT
     | 4 -> NT_start
+    | 7 -> T_PLUS
+    | 6 -> T_NUMBER
+    | 5 -> NT_e
+    | 4 -> NT_s
     | 2 -> NT_gnesccStart
     | _ -> failwith "getName: bad tag."
 let prodToNTerm = 
@@ -35,19 +44,28 @@ let isStart =
      [| false; false |];
      [| false; true |];
      [| false; false |];
-     [| false; false |]; |]
+     [| false; false; false |];
+     [| false; false; true |];
+     [| false; false; true |];
+     [| false; false; true |]; |]
 let gotoTable =
   [| [| Some 1; None |];
      [| None; None |];
      [| Some 3; None |];
      [| None; None |];
-     [| None; None |]; |]
+     [| None; None; None |];
+     [| Some 3; None; None |];
+     [| Some 3; None; None |];
+     [| Some 3; None; None |]; |]
 let actionTable = 
-  [| [| [Reduce 1]; [Shift 2]; [Reduce 1]; [Reduce 1] |];
+  [| [| [Error]; [Error]; [Error]; [Shift 4]; [Error]; [Error] |];
      [| [Accept]; [Accept]; [Accept]; [Accept] |];
-     [| [Reduce 1]; [Shift 2]; [Reduce 1]; [Reduce 1] |];
-     [| [Shift 4]; [Error]; [Error]; [Error] |];
-     [| [Reduce 1]; [Shift 2]; [Reduce 1]; [Reduce 1] |]; |]
+     [| [Shift 7]; [Shift 6]; [Shift 5]; [Error]; [Error]; [Reduce 1] |];
+     [| [Shift 7]; [Shift 6]; [Shift 5]; [Reduce 2]; [Error]; [Reduce 2] |];
+     [| [Error]; [Error]; [Error]; [Reduce 2]; [Error]; [Reduce 2] |];
+     [| [Error]; [Error]; [Error]; [Shift 4]; [Error]; [Error] |];
+     [| [Error]; [Error]; [Error]; [Shift 4]; [Error]; [Error] |];
+     [| [Error]; [Error]; [Error]; [Shift 4]; [Error]; [Error] |]; |]
 let tables = 
   {StartIdx=startKernelIdxs
    SymbolIdx=symbolIdx

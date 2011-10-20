@@ -28,7 +28,7 @@ open Production
 let private withPrefix s = "yard_" + s
 
 (** global variable for number of current generated rule *)
-let curNum = ref 1
+let curNum = ref 0
 
 let resetRuleEnumerator () = curNum := 1
 
@@ -47,9 +47,8 @@ let createName ((n:string), (l, c)) =
 /// Create new Source.t item with name, consisting of yard prefix, specified middle
 ///    and postfix, generated as regularly incrementing number
 let createNewName name = 
-    let newName = createName name in
     incr curNum;
-    newName
+    createName name
 
 module Names =
  begin
@@ -127,25 +126,30 @@ let someAction = sprintf " Some %s "
 
 let noneAction = " None "
 
-(** prefix for Elkhound bindings *)
+/// prefix for Elkhound bindings
 let withElkPrefix x = "_elk_" + x
 
-(** token type (need for using bindings with tokens) *)
+/// token type (need for using bindings with tokens)
 let withTokenPrefix (* token name *) = 
     sprintf "'%stoken_%s" (withPrefix "") (* token name *)
 
-(** type of semantic value *)
-let createTypeName (* ruleName *) = 
-    sprintf "'%stype_%s" (withPrefix "") (* ruleName *)
+/// type of semantic value
+let createTypeName (* ruleName *) =  sprintf "'%stype_%s" (withPrefix "") (* ruleName *)
 
-(** returns file name for tokens *)
+/// returns file name for tokens
 let createTknFileName fname = System.IO.Path.GetFileNameWithoutExtension(fname) |> sprintf "tokens_%s.tok"
 
+(*
+/// Create new name for rule
+let createRuleName name =  sprintf "'%srule_%s_%d" (withPrefix "") (fst name) (incr curNum; !curNum)
 
-(** returns token type for literal *)
+/// Create new name for argument
+let createArgName =  sprintf "'%sarg_%d" (withPrefix "") (incr curNum; !curNum)
+*)
+/// returns token type for literal
 let createLiteralToken (* number *) = sprintf "LITERAL_%d" (* number *)
 
-(** returns token name for EOF (End Of File) *)
+/// returns token name for EOF (End Of File)
 let getEofTokenName = (withPrefix "EOF").ToUpper()
     
 (* end of module Namer *)

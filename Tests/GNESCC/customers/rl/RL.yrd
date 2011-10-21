@@ -44,3 +44,4 @@ eventHeader                 : KEYWORD_EVENT;
 handler                     : handlerHeader attribute* handlerBody;
 handlerHeader               : KEYWORD_HANDLER | KEYWORD_HANDLER_SHORT;
 handlerBody                 : BRACKET_CURLY_OPEN (statement DELIMITER)* BRACKET_CURLY_CLOSE;
+fieldList                   : BRACKET_SQUARE_OPEN fields BRACKET_SQUARE_CLOSE;

@@ -36,8 +36,7 @@ let run path =
     
     //Run parser
     // forest -- dirivation forest    
-    let forest = 
-    let parseRes(*,cache,cc*) = 
+    let forest =    
         let ti = new TableInterpreter(tables)
         ti.Run l
 

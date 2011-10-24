@@ -106,27 +106,36 @@ let rec convertToMeta (r:(Rule.t<Source.t,Source.t>)) =
             | PMany _ -> Names.many 
             | _       -> invalidArg "nameOf" "Argument may be only POpt, PSome or PMany."
         in
+        let elemToMeta paramList e = 
+            let (b, rs') = bodyToMeta [] paramList e.rule 
+            in ({ e with Production.rule = b }, rs')
         function
         | POpt  r as r' -> getMeta rs _params (nameOf r') r
         | PSome r as r' -> getMeta rs _params (nameOf r') r
         | PMany r as r' -> getMeta rs _params (nameOf r') r
         | PSeq (seq, a) -> 
-          let elemToMeta paramList e = 
-            let (b, rs') = bodyToMeta [] paramList e.rule 
-            in ({ e with Production.rule = b }, rs')
-          in let rec seqToMeta _params' = function
+          let rec seqToMeta _params' = function
              | []   -> ([], [])
              | h::t -> 
                let (e', rs') = elemToMeta _params' h
                let (l', rs'') = seqToMeta (addBinding _params' h.binding) t 
                (e'::l', rs' @ rs'')
-             in let (seq', nr) = seqToMeta _params seq
+          in let (seq', nr) = seqToMeta _params seq
                 in (PSeq (seq', a), rs @ nr)
         | PAlt (l, r) -> 
           let (l', rs') = bodyToMeta rs _params l in
           let (r', rs'') = bodyToMeta rs' _params r 
           in (PAlt (l', r'), rs'')
         (* do nothing in other case *)
+        | PMetaRef(name, attrs, mRules) ->
+            let rec listToMeta _params' = function
+                | []   -> ([], [])
+                | h::t -> 
+                    let (e', rs') = bodyToMeta [] _params' h
+                    let (l', rs'') = listToMeta _params' t 
+                    (e'::l', rs' @ rs'')
+            let (mArgs', nr) = listToMeta _params mRules
+            (PMetaRef(name, attrs, mArgs'), rs @ nr)
         | other -> (other, rs)
     let (b', l') = bodyToMeta [] r.args r.body
     in l' @ [{ r with Rule.body = b' }]

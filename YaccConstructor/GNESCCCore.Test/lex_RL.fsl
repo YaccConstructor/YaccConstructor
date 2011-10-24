@@ -1,0 +1,85 @@
+{
+module Lexer
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables
+
+type MyLexeme (tag,_value) =
+    member self.MValue = _value
+    interface ILexeme with    
+       member self.tag = tag
+       member self.CompareTo x =  compare (hash self) (hash x)
+    end
+
+}
+
+let char = ['a'-'z' 'A'-'Z' '_' '0'-'9' '.']
+let whitespace = [' ' '\t' '\n' '\r']+
+let number = ['0'-'9']
+
+rule tokens = parse
+  | "("          {MyLexeme(getTag T_BRACKET_ROUND_OPEN, LexBuffer<_>.LexemeString(lexbuf))}
+  | ")"          {MyLexeme(getTag T_BRACKET_ROUND_CLOSE, LexBuffer<_>.LexemeString(lexbuf))}
+  | "["          {MyLexeme(getTag T_BRACKET_SQUARE_OPEN, LexBuffer<_>.LexemeString(lexbuf))}
+  | "]"          {MyLexeme(getTag T_BRACKET_SQUARE_CLOSE, LexBuffer<_>.LexemeString(lexbuf))}
+  | "{"          {MyLexeme(getTag T_BRACKET_CURLY_OPEN, LexBuffer<_>.LexemeString(lexbuf))}
+  | "}"          {MyLexeme(getTag T_BRACKET_CURLY_CLOSE, LexBuffer<_>.LexemeString(lexbuf))}
+  | ";"          {MyLexeme(getTag T_DELIMITER, LexBuffer<_>.LexemeString(lexbuf))}
+  | ","          {MyLexeme(getTag T_COMMA, LexBuffer<_>.LexemeString(lexbuf))}
+  | "."          {MyLexeme(getTag T_DOT, LexBuffer<_>.LexemeString(lexbuf))}
+  | "="          {MyLexeme(getTag T_EQ, LexBuffer<_>.LexemeString(lexbuf))}
+  | ">="         {MyLexeme(getTag T_GREATEREQ, LexBuffer<_>.LexemeString(lexbuf))}
+  | "<="         {MyLexeme(getTag T_LESSEREQ, LexBuffer<_>.LexemeString(lexbuf))}
+  | ">"          {MyLexeme(getTag T_GREATER, LexBuffer<_>.LexemeString(lexbuf))}
+  | "<"          {MyLexeme(getTag T_LESSER, LexBuffer<_>.LexemeString(lexbuf))}
+  | "&"          {MyLexeme(getTag T_AND, LexBuffer<_>.LexemeString(lexbuf))}
+  | "|"          {MyLexeme(getTag T_OR, LexBuffer<_>.LexemeString(lexbuf))}
+  | "<~"         {MyLexeme(getTag T_BIND, LexBuffer<_>.LexemeString(lexbuf))}
+  | "<-"         {MyLexeme(getTag T_ASSIGN, LexBuffer<_>.LexemeString(lexbuf))}
+  | "<@"         {MyLexeme(getTag T_BIND_HANDLER, LexBuffer<_>.LexemeString(lexbuf))}
+  | ":"          {MyLexeme(getTag T_SPEC, LexBuffer<_>.LexemeString(lexbuf))}
+  | "+"          {MyLexeme(getTag T_PLUS, LexBuffer<_>.LexemeString(lexbuf))}
+  | "-"          {MyLexeme(getTag T_SUB, LexBuffer<_>.LexemeString(lexbuf))}
+  | "*"          {MyLexeme(getTag T_MULT, LexBuffer<_>.LexemeString(lexbuf))}
+  | "/"          {MyLexeme(getTag T_DIV, LexBuffer<_>.LexemeString(lexbuf))}
+  | "."          {MyLexeme(getTag T_DOT, LexBuffer<_>.LexemeString(lexbuf))}
+  | "module"     {MyLexeme(getTag T_KEYWORD_MODULE, LexBuffer<_>.LexemeString(lexbuf))}
+(*  | "import"     {MyLexeme(getTag T_KEYWORD_IMPORT, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "out"        {MyLexeme(getTag T_KEYWORD_OUT, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "in"         {MyLexeme(getTag T_KEYWORD_IN, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "interface"  {MyLexeme(getTag T_KEYWORD_INTERFACE, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "foreign"    {MyLexeme(getTag T_KEYWORD_FOREIGN, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "language"   {MyLexeme(getTag T_KEYWORD_LANGUAGE, LexBuffer<_>.LexemeString(lexbuf))} *)
+(*  | "filename"   {MyLexeme(getTag T_KEYWORD_FILENAME, LexBuffer<_>.LexemeString(lexbuf))} *)
+  | "event"      {MyLexeme(getTag T_KEYWORD_EVENT, LexBuffer<_>.LexemeString(lexbuf))}
+  | "!"          {MyLexeme(getTag T_KEYWORD_EVENT_SHORT, LexBuffer<_>.LexemeString(lexbuf))}
+(*  | "on"         {MyLexeme(getTag T_KEYWORD_ON, LexBuffer<_>.LexemeString(lexbuf))} *)
+  | "true"       {MyLexeme(getTag T_KEYWORD_TRUE, LexBuffer<_>.LexemeString(lexbuf))}
+  | "false"      {MyLexeme(getTag T_KEYWORD_FALSE, LexBuffer<_>.LexemeString(lexbuf))}
+  | "handler"    {MyLexeme(getTag T_KEYWORD_HANDLER, LexBuffer<_>.LexemeString(lexbuf))}
+  | "#"          {MyLexeme(getTag T_KEYWORD_HANDLER_SHORT, LexBuffer<_>.LexemeString(lexbuf))}
+  | '\"' char+ '\"'  {MyLexeme(getTag T_STRING_CONSTANT, LexBuffer<_>.LexemeString(lexbuf))}
+  | "fun"        {MyLexeme(getTag T_KEYWORD_FUN, LexBuffer<_>.LexemeString(lexbuf))}
+  | number+      {MyLexeme(getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))}
+  | char+        {MyLexeme(getTag T_STRING_LITERAL, LexBuffer<_>.LexemeString(lexbuf))}
+  | whitespace   {tokens lexbuf}
+  | eof  {MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
+
+{
+
+type Lexer(lb) = 
+    let locBuf = ref []
+    interface ILexer with        
+    
+       member self.Get pos = 
+        let l = !locBuf |> List.length
+        if l >= pos
+        then (!locBuf).[l-pos]
+        else
+            let t = (tokens lb) :> ILexeme
+            locBuf := t :: !locBuf
+            t      
+    end
+
+}

@@ -1,0 +1,2 @@
+cls
+msbuild /verbosity:quiet

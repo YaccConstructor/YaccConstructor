@@ -202,7 +202,8 @@ type TableGenerator(outPath: string) =
                     Seq.iter (fun y -> getAllSymbols y.body) x
                     symbolIdx := dict !symbols
                     x
-                |> pmap (fun x -> x.name,buildDLFA !symbolIdx x.body)                
+                //|> pmap (fun x -> x.name,buildDLFA !symbolIdx x.body)                
+                |> Seq.map (fun x -> x.name,buildDLFA !symbolIdx x.body)                
                 |> Seq.choose 
                     (fun (x,y) -> 
                         match "NT_" + x |> getTag with
@@ -344,7 +345,7 @@ type TableGenerator(outPath: string) =
                     !symbols
                     |> Seq.map 
                         (fun (x,y) -> 
-                            if x.StartsWith "NT_" 
+                            if x.StartsWith "NT_" //&& x <> "NT_" + Constants.gnesccStartRuleName
                             then x,prodTab.NonTerminal(ntTab.ToIndex(y))
                             else x,y) 
                     |> dict

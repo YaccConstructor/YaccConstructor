@@ -1,0 +1,2 @@
++s:NUMBER
+  | s PLUS s;

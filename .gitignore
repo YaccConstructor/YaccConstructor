@@ -1,0 +1,6 @@
+
+obj/
+[Rr]elease/
+*.suo
+[Bb]in/
+GNESCCGeneratedTests/

@@ -125,7 +125,7 @@ type  TableInterpreter (tables:Tables) = class
             | CommonTypes.Error     -> 
                 let xx = ref 1
                 incr xx
-                printfn "Posiible error in symbol %A" i
+                printfn "Possible error in symbol %A" i
                 []//failwith "Parser error"
             | CommonTypes.Shift s   -> 
                 let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack

@@ -1,0 +1,5 @@
+{
+let value x = (x:>Lexer_L_attr.MyLexeme).MValue
+}
++s: <res:int> = e[1] {res};
+e[i]: n=NUMBER {(value n |> int) + i};

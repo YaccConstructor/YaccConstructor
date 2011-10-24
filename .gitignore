@@ -4,3 +4,4 @@ obj/
 *.suo
 [Bb]in/
 GNESCCGeneratedTests/
+YaccConstructor/Development/Utils/tests.fsproj.inc

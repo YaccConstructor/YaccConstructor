@@ -401,9 +401,9 @@ let tests =
 
         (39,
             {
-                tables     = Tables_simple_braces.tables
-                regexp     = GNESCC.Regexp_simple_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces.ruleToAction
+                tables     = Tables_braces.tables
+                regexp     = GNESCC.Regexp_braces.ruleToRegex
+                actionsMap = GNESCC.Actions_braces.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_1.yrd.in"
                 rightValue = seq [1 |> box]
                 lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
@@ -411,9 +411,9 @@ let tests =
 
         (40,
             {
-                tables     = Tables_simple_braces.tables
-                regexp     = GNESCC.Regexp_simple_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces.ruleToAction
+                tables     = Tables_braces.tables
+                regexp     = GNESCC.Regexp_braces.ruleToRegex
+                actionsMap = GNESCC.Actions_braces.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_2.yrd.in"
                 rightValue = seq [2 |> box]
                 lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
@@ -421,43 +421,13 @@ let tests =
 
         (41,
             {
-                tables     = Tables_simple_braces.tables
-                regexp     = GNESCC.Regexp_simple_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces.ruleToAction
+                tables     = Tables_braces.tables
+                regexp     = GNESCC.Regexp_braces.ruleToRegex
+                actionsMap = GNESCC.Actions_braces.ruleToAction
                 path       = "\claret\\braces_1\\test_simple_braces_3.yrd.in"
                 rightValue = seq [3 |> box]
                 lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
-            })
-
-        (42,
-            {
-                tables     = Tables_simple_braces_2.tables
-                regexp     = GNESCC.Regexp_simple_braces_2.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces_2.ruleToAction
-                path       = "\claret\\braces_2\\test_simple_braces_2_1.yrd.in"
-                rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
-            })
-
-        (43,
-            {
-                tables     = Tables_simple_braces_2.tables
-                regexp     = GNESCC.Regexp_simple_braces_2.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces_2.ruleToAction
-                path       = "\claret\\braces_2\\test_simple_braces_2_2.yrd.in"
-                rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
-            })
-
-        (44,
-            {
-                tables     = Tables_simple_braces_2.tables
-                regexp     = GNESCC.Regexp_simple_braces_2.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_braces_2.ruleToAction
-                path       = "\claret\\braces_2\\test_simple_braces_2_3.yrd.in"
-                rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_simple_braces_2.Lexer(buf):>ILexer  
-            })
+            })                
 
     ]
     |> dict
@@ -778,22 +748,4 @@ type ``GNESCC core tests`` () =
     member test.``claret b1 3`` () =
         let test = tests.[41]
         let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b2 1`` () =
-        let test = tests.[42]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b2 2`` () =
-        let test = tests.[43]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b2 3`` () =
-        let test = tests.[44]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+        Assert.AreEqual(test.rightValue,res)    

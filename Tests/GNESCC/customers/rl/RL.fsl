@@ -61,8 +61,8 @@ rule tokens = parse
   | "#"          {MyLexeme(getTag T_KEYWORD_HANDLER_SHORT, LexBuffer<_>.LexemeString(lexbuf))}
   | '\"' char+ '\"'  {MyLexeme(getTag T_STRING_CONSTANT, LexBuffer<_>.LexemeString(lexbuf))}
   | "fun"        {MyLexeme(getTag T_KEYWORD_FUN, LexBuffer<_>.LexemeString(lexbuf))}
-  | char+        {MyLexeme(getTag T_STRING_LITERAL, LexBuffer<_>.LexemeString(lexbuf))}
   | number+      {MyLexeme(getTag T_NUMBER, LexBuffer<_>.LexemeString(lexbuf))}
+  | char+        {MyLexeme(getTag T_STRING_LITERAL, LexBuffer<_>.LexemeString(lexbuf))}
   | whitespace   {tokens lexbuf}
   | eof  {MyLexeme( Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 

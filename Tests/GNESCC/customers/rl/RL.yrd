@@ -3,7 +3,7 @@ name                        : STRING_LITERAL;
 module                      : moduleHeader attribute* moduleBody?;
 moduleHeader                : KEYWORD_MODULE BRACKET_ROUND_OPEN fields BRACKET_ROUND_CLOSE;
 fields                      : (name (COMMA name)*)?;
-attribute                   : BRACKET_SQUARE_OPEN name (attributeEntry)* BRACKET_SQUARE_CLOSE;
+attribute                   : BRACKET_SQUARE_OPEN name (attributeEntry DELIMITER)* BRACKET_SQUARE_CLOSE;
 attributeEntry              : name SPEC expression;
 moduleBody                  : BRACKET_CURLY_OPEN (statement DELIMITER)* BRACKET_CURLY_CLOSE;
 statement                   : expression operation (COMMA operation)*;
@@ -26,8 +26,8 @@ expression_v                : module
                             | event
                             | handler
                             | name;
-expression_i                : expression_i1 ((PLUS | SUB ) expression_i1)*;
-expression_i1               : expression_i2 ((MULT | DIV) expression_i2)*;
+expression_i                : expression_i1 ((PLUS | SUB ) expression_i)?;
+expression_i1               : expression_i2 ((MULT | DIV) expression_i)?;
 expression_i2               : expression_i3 (DOT (name | apply))*;
 expression_i3               : value_i
                             | name

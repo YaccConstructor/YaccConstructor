@@ -36,16 +36,20 @@ let composeTests =
         ( fun p ->
             let inputs = 
                 listLocalFiles (Path.GetDirectoryName p) "*.in"
-                |> List.ofSeq                
+                |> List.ofSeq
             let grName = Path.GetFileName p
-            let suffix = grName.Substring(4,grName.Length-8)
+            let suffix = grName.Split('.').[0]
+            let lexer = 
+                listLocalFiles (Path.GetDirectoryName p) "*.fsl"
+                |> List.ofSeq
+                |> function | hd::tl -> hd | [] -> ""            
             {
                 FullGrammarPath     = p
-                FullLexerPath       = ""
+                FullLexerPath       = lexer
                 FullInputFilesPaths = inputs
-                ActionReplacement   = ARf,ARf + suffix
-                TablesReplacement   = TRf,TRf + suffix
-                RegexpReplacement   = RRf,RRf + suffix
+                ActionReplacement   = ARf,ARf + "_" + suffix
+                TablesReplacement   = TRf,TRf + "_" + suffix
+                RegexpReplacement   = RRf,RRf + "_" + suffix
             })
 
 let layoutTest test = 
@@ -65,9 +69,7 @@ let layoutTest test =
           |> spaceListL)
         ;
          [ "FullLexerPath = "
-          ; "\"" 
-          ; test.FullLexerPath 
-          ; "\"" 
+          ; "\"" + test.FullLexerPath + "\"" 
          ]
          |> List.map wordL         
          |> spaceListL
@@ -104,7 +106,7 @@ let layoutTests =
      |> List.map layoutTest 
      |> aboveListL
      |> squareBracketL)
-    |> Display.layout_to_string {FormatOptions.Default with PrintWidth = 100}
+    |> Display.layout_to_string {FormatOptions.Default with PrintWidth = 120}
 
 let test grammarPath inputPaths = 1
     

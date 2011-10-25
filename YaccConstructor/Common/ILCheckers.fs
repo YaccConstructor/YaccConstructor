@@ -1,5 +1,5 @@
 ﻿module Checker
 
 let checkStartRule (def:Yard.Core.IL.Definition.t<_,_>) =
-   
-    None
+    let StartRuleList = def.grammar |> List.filter (fun r -> r._public=true) 
+    StartRuleList.Length=1

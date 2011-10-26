@@ -101,7 +101,7 @@ let () =
                 with
                 | e -> FEError e.Message |> raise
 
-            //printfn "%A" <| ilTree
+//            printfn "%A" <| ilTree
             // Apply convertions
             Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion conv !ilTree)) convertions
 

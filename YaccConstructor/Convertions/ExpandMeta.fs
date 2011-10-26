@@ -63,11 +63,16 @@ let getFormalArgs name actParams formalArgs =
     else formalArgs
 
 /// create list of strings from list of productions
-let createStrList = List.map (fun x -> getTextIL x) 
+let createStrList = List.map (fun x -> getTextIL x)//x.ToString()) 
 
 /// key for hash table
-let getKey metaName metaArgs = 
-    String.concat "" ((getText metaName)::(createStrList metaArgs))
+let getKey metaName metaArgs (args : Source.t option) = 
+    (*String.concat "$#"
+        <| *)(String.concat "^#" ((getText metaName)::(createStrList metaArgs)))
+            (*::(match args with
+                | Some x -> [Source.toString x]
+                | None -> []
+                )*)
 
 /// <summary>
 /// <para> Returns actual value of formal parameter. </para>
@@ -142,10 +147,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
             /// Try to replace one entry of formal parameter with its actual value
             let replaceFormal formalToAct formal = 
                 match getActualParam (getText formal) formalToAct with
-                | Some x -> x
-//                  match x with
-//                  | PRef(s,None) -> s
-//                  | x -> failwith <| "metaparam substitution "+(Source.toString formal)+"->"+(getTextIL x)+" expected to be ref"
+                | Some y -> y
                 | None   -> PRef(formal,None)
 
             /// <summary>
@@ -160,8 +162,14 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
                     | PSome(x) -> PSome(replaceFormalInProd x)
                     | POpt(x) -> POpt(replaceFormalInProd x)
                     | PMany(x) -> PMany(replaceFormalInProd x)
-                    | PRef(s,p) -> replaceFormal formalToAct s 
-                    | PMetaRef(s,p,[]) -> replaceFormal formalToAct s 
+                    | PRef(s,p) as x -> 
+                        match getActualParam (getText s) formalToAct with
+                        | Some y -> y
+                        | None -> x
+                    | PMetaRef(s,p,a) as x -> 
+                        match getActualParam (getText s) formalToAct with
+                        | Some y -> y
+                        | None -> x
                     | x -> x
 
                 List.map replaceFormalInProd mArgs
@@ -173,8 +181,9 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
 
             /// Name of rule, what appears in result of replacing formal parameter with actual
             let mRuleName' = getText name'
-//            let p' = updateActParams (isEBNFmeta mRuleName') actParams p
             let mArgs' = replaceFormals mArgs formalToAct
+            //printfn "ma  %A" mArgs
+            //printfn "ma' %A" mArgs'
             let (b', nRules') = expandMetaRef nRules name' formParams mArgs' formalToAct args
             b', nRules'
         | POpt r -> 
@@ -235,8 +244,9 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
     /// formalToAct - list of (metaArg name, its actual value);
     /// </summary>
     and expandMetaRef res (metaName:Source.t) _params (metaArgs':t<Source.t, Source.t> list) formalToAct args =
-//        printfn "r %A" metaName
-        let key = getKey metaName metaArgs'
+        //printfn "r %A" metaName
+        //printfn "m %A" metaArgs'
+        let key = getKey metaName metaArgs' _params
         // checks if we already expanded rule with given name and meta args
         if refsTbl.ContainsKey(key) then
             (PRef (refsTbl.Item key, _params), res)
@@ -255,12 +265,14 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
 //                      printfn "%A" newRule
                       (curMetaArgs @ [PRef(newRuleName, formalArgsList |> list2opt)], newRule::rules))
                    ([], (res : Rule.t<Source.t, Source.t> list))
+            //let key = getKey metaName newMetaArgs
             let rName = createNewName metaName
             //printfn "%A" newMetaArgs
             // New rules (one for replaced rule and some for recursive expanding of rule)
             let actualArgs = (addBinding actualArgsList _params) |> createParams |> list2opt
             let eRules = 
-                refsTbl.Add(getKey metaName newMetaArgs,rName)
+                refsTbl.Add(getKey metaName newMetaArgs _params,rName)
+                refsTbl.Add(key,rName)
                 //printfn "%s %A" (fst metaName) actualArgs
                 genNewRule (getText rName) formalArgsList
                         metaRulesTbl (getText metaName) newMetaArgs args

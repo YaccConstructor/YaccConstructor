@@ -64,7 +64,42 @@ module Production = begin
         /// expr+
         |PSome    of (t<'patt,'expr>)
         /// expr?
-        |POpt     of (t<'patt,'expr>) 
+        |POpt     of (t<'patt,'expr>)
+
+        with
+        override this.ToString() =
+            let argsToString = function
+                | None -> ""
+                | Some x -> "[" + x.ToString() + "]"
+                    
+            let metaArgsToString metaArgs =
+                if ((metaArgs : 'a list).IsEmpty) then ""
+                else "<<" + (metaArgs
+                             |> List.map (fun x -> x.ToString())
+                             |> String.concat " ")
+                        + ">>"
+                    
+            match this with
+            |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
+            |PSeq (ruleSeq, attrs) ->
+                String.concat " " (ruleSeq |> List.map (fun x -> "(" + x.ToString() + ")"))
+                    + attrs.ToString()
+            |PToken src -> Source.toString src
+            |PRef (name, args) ->
+                Source.toString name + argsToString args
+            |PMany x -> "(" + x.ToString() + ")*"
+            |PMetaRef (name, args, metaArgs) ->
+                Source.toString name + metaArgsToString metaArgs + argsToString args
+            |PLiteral src -> Source.toString src
+            |PRepet _ -> failwith "Repetition was not realized yet"
+            |PPerm src -> "[|" + (src
+                                  |> List.map (fun x -> x.ToString())
+                                  |> String.concat " ")
+                                + "|]"
+            // The following are obsolete and reduction to PRepet should be discussed.
+            /// expr+
+            |PSome x -> "(" + x.ToString() + ")+"
+            |POpt x -> "(" + x.ToString() + ")?"
 end
 
 module Rule = begin

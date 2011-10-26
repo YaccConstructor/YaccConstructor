@@ -78,7 +78,7 @@ let getActualParam formalName formalToAct = List.tryPick (fun (x,y) -> if x = fo
 /// Create pair (formal argument name, actual argument name)
 let addBindingPair args = function
     | None -> args
-    | Some x -> (createNewName ("arg", (0,0)), x)::args
+    | Some x -> (*printfn "%A" x; *)(createNewName ("arg", (0,0)), x)::args
 
 /// <summary>
 /// <para> Expand references to metarules </para>
@@ -93,7 +93,7 @@ let addBindingPair args = function
 /// </summary>
 let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >)
          (refsTbl:Dictionary<string,Source.t>) res formalToAct args = 
-//    printfn "b: %A" body
+    //printfn "b: %A" body
 
     /// <summary>
     /// <para> Replaces all metarule parameters in body with given args. </para>
@@ -109,15 +109,10 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
         function
         | PRef (r, p) -> 
             let rName = getText r
-            (** pass actual parameters for item 
-            *  (which is replaced with yard_item_...) 
-            *)
-//            let aParams = updateActParams (isItem rName) actParams p
             let param = getActualParam rName formalToAct
             let (|Terminal|NonTerminal|) (name:string) = 
                 if name.[0] = name.ToLower().[0] then NonTerminal else Terminal
 
-            // test if param is replaced with actual param
             match param with          
             | Some n -> 
                 match n with
@@ -166,6 +161,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
                     | POpt(x) -> POpt(replaceFormalInProd x)
                     | PMany(x) -> PMany(replaceFormalInProd x)
                     | PRef(s,p) -> replaceFormal formalToAct s 
+                    | PMetaRef(s,p,[]) -> replaceFormal formalToAct s 
                     | x -> x
 
                 List.map replaceFormalInProd mArgs
@@ -256,7 +252,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
                       let (body, (rules : Rule.t<Source.t, Source.t> list)) = expandMeta rule metaRulesTbl refsTbl curRules formalToAct args
                       let newRuleName = createNewName ("rule",(0,0))
                       let newRule = createSimpleRule (fst newRuleName) (actualArgsList) body
-                      //printfn "%A" newRule
+//                      printfn "%A" newRule
                       (curMetaArgs @ [PRef(newRuleName, formalArgsList |> list2opt)], newRule::rules))
                    ([], (res : Rule.t<Source.t, Source.t> list))
             let rName = createNewName metaName
@@ -264,7 +260,7 @@ let rec expandMeta body (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t
             // New rules (one for replaced rule and some for recursive expanding of rule)
             let actualArgs = (addBinding actualArgsList _params) |> createParams |> list2opt
             let eRules = 
-                refsTbl.Add(key,rName)
+                refsTbl.Add(getKey metaName newMetaArgs,rName)
                 //printfn "%s %A" (fst metaName) actualArgs
                 genNewRule (getText rName) formalArgsList
                         metaRulesTbl (getText metaName) newMetaArgs args

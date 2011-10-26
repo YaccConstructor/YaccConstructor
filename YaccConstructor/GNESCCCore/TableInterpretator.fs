@@ -125,6 +125,7 @@ type  TableInterpreter (tables:Tables) = class
             | CommonTypes.Error     -> 
                 let xx = ref 1
                 incr xx
+                printfn "Possible error in symbol %A" i
                 []//failwith "Parser error"
             | CommonTypes.Shift s   -> 
                 let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
@@ -142,7 +143,7 @@ type  TableInterpreter (tables:Tables) = class
                 if Option.isSome gt
                 then
                     let stk = State gt.Value :: (Symbol (ps,Node(forest,ps,[]))) :: (nStack) 
-                    step (getLabels ps @ stk) (gt.Value) i
+                    step (getLabels gt.Value @ stk) (gt.Value) i
                 else [stack] )
         |> List.concat           
 

@@ -35,8 +35,10 @@ let move () =
 
     Directory.CreateDirectory(gtPath)
     |> ignore
-    let filesPaths = Directory.GetFiles(testPath,"*.fs", SearchOption.AllDirectories)
+    let filesPaths = Directory.GetFiles(testPath,"*.fs", SearchOption.AllDirectories) 
+    let lexFiles = Directory.GetFiles(testPath,"*.fsl", SearchOption.AllDirectories)
     printfn "move files: \%An" filesPaths    
+    Seq.iter (fun x -> printfn "path : %s" (Path.Combine (gtPath,Path.GetFileName(x))); File.Copy(x,Path.Combine (gtPath,Path.GetFileName(x)), true)) lexFiles
     Seq.iter (fun x -> printfn "path : %s" (Path.Combine (gtPath,Path.GetFileName(x))); File.Move(x,Path.Combine (gtPath,Path.GetFileName(x)))) filesPaths
 
 let replace () =
@@ -68,6 +70,9 @@ let replace () =
             let write (str:string) = outStrieam.Write(str)                        
             write(newContent)
             outStrieam.Close())
+
+    Directory.GetFiles(gtPath, "*.fsl", SearchOption.AllDirectories)
+    |> Seq.iter (fun x -> printfn "path : %s" (Path.Combine (gtPath,Path.GetFileName(x))); File.Copy(x,Path.Combine (targetPath,Path.GetFileName(x)),true)) 
 
 do Seq.iter generate tests
    move()

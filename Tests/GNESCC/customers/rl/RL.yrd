@@ -1,0 +1,47 @@
++ file                      : (statement DELIMITER)*;
+name                        : STRING_LITERAL;
+module                      : moduleHeader attribute* moduleBody?;
+moduleHeader                : KEYWORD_MODULE BRACKET_ROUND_OPEN fields BRACKET_ROUND_CLOSE;
+fields                      : (name (COMMA name)*)?;
+attribute                   : BRACKET_SQUARE_OPEN name (attributeEntry DELIMITER)* BRACKET_SQUARE_CLOSE;
+attributeEntry              : name SPEC expression;
+moduleBody                  : BRACKET_CURLY_OPEN (statement DELIMITER)* BRACKET_CURLY_CLOSE;
+statement                   : expression operation (COMMA operation)*;
+operation                   : assign | bind | bindHandler;
+assign                      : ASSIGN expression;
+bind                        : BIND expression;
+bindHandler                 : BIND_HANDLER (name | handler);
+expression                  : expression_b | expression_i | expression_v | expressionList;
+expressionList              : BRACKET_SQUARE_OPEN (expression (COMMA expression)*)? BRACKET_SQUARE_CLOSE;
+expression_b                : expression_b1 ((EQ | GREATEREQ | LESSEREQ | GREATER | LESSER) expression_b1)?;
+expression_b1               : expression_b2 (OR expression_b2)*;
+expression_b2               : expression_b3 (AND expression_b3)*;
+expression_b3               : KEYWORD_TRUE
+                            | KEYWORD_FALSE
+                            | name
+                            | apply
+                            | (BRACKET_ROUND_OPEN expression_b BRACKET_ROUND_CLOSE);
+expression_v                : module
+                            | function
+                            | event
+                            | handler
+                            | name;
+expression_i                : expression_i1 ((PLUS | SUB ) expression_i)?;
+expression_i1               : expression_i2 ((MULT | DIV) expression_i)?;
+expression_i2               : expression_i3 (DOT (name | apply))*;
+expression_i3               : value_i
+                            | name
+                            | apply
+                            | (BRACKET_ROUND_OPEN expression_i BRACKET_ROUND_CLOSE);
+apply                       : name BRACKET_ROUND_OPEN (expression (COMMA expression)*)? BRACKET_ROUND_CLOSE;
+value_i                     : NUMBER | STRING_CONSTANT;
+function                    : functionHeader attribute* functionBody;
+functionHeader              : KEYWORD_FUN BRACKET_ROUND_OPEN fields BRACKET_ROUND_CLOSE;
+functionBody                : BRACKET_CURLY_OPEN (statement DELIMITER)* BRACKET_CURLY_CLOSE;
+event                       : (eventHeader attribute*)
+                            | (KEYWORD_EVENT_SHORT BRACKET_ROUND_OPEN expression COMMA fieldList BRACKET_ROUND_CLOSE);
+eventHeader                 : KEYWORD_EVENT;
+handler                     : handlerHeader attribute* handlerBody;
+handlerHeader               : KEYWORD_HANDLER | KEYWORD_HANDLER_SHORT;
+handlerBody                 : BRACKET_CURLY_OPEN (statement DELIMITER)* BRACKET_CURLY_CLOSE;
+fieldList                   : BRACKET_SQUARE_OPEN fields BRACKET_SQUARE_CLOSE;

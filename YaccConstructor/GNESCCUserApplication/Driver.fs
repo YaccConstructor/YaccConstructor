@@ -36,8 +36,7 @@ let run path =
     
     //Run parser
     // forest -- dirivation forest    
-    let forest = 
-    let parseRes(*,cache,cc*) = 
+    let forest =    
         let ti = new TableInterpreter(tables)
         ti.Run l
 
@@ -52,6 +51,6 @@ let run path =
     printfn "Result %A\n" result
     
 do 
-    run @"..\..\..\..\Tests\GNESCC\test_alt_in_cls\test_alt_in_cls_7.yrd.in"
+    run @"..\..\..\..\Tests\GNESCC\customers\rl\min_test_11.rl.in"
     |> ignore
     System.Console.ReadLine() |> ignore

@@ -1,0 +1,7 @@
+
+obj/
+[Rr]elease/
+*.suo
+[Bb]in/
+GNESCCGeneratedTests/
+YaccConstructor/Development/Utils/tests.fsproj.inc

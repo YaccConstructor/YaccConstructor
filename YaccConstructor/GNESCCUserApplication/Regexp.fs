@@ -22,117 +22,32 @@ let buildStr kvLst =
 let s childsLst = 
     let str = buildStr childsLst
     let idxValMap = buildIndexMap childsLst
-    let re = new Regex("((((;5;))|((;6;)))*)")
+    let re = new Regex("((((;5;)(;1;)))*)")
     let elts =
         let res = re.Match(str)
         if Seq.fold (&&) true [for g in res.Groups -> g.Success]
         then res.Groups
+        else (new Regex("((((;5;)(;1;)))*)",RegexOptions.RightToLeft)).Match(str).Groups
     let e0 =
         let ofset = ref 0
         let e i =
             let str = elts.[2].Captures.[i].Value
-            let re = new Regex("((;5;))|((;6;))")
-            let elts = re.Match(str).Groups
+            let re = new Regex("((;5;)(;1;))")
+            let elts =
+                let res = re.Match(str)
+                if Seq.fold (&&) true [for g in res.Groups -> g.Success]
+                then res.Groups
+                else (new Regex("((;5;)(;1;))",RegexOptions.RightToLeft)).Match(str).Groups
             let res =
-    let elts =
-        let res = re.Match(str)
-        if Seq.fold (&&) true [for g in res.Groups -> g.Success]
-        then res.Groups
-        else (new Regex("((;6;))|((;2;)((;7;))|((;8;))|((;9;))(;2;))",RegexOptions.RightToLeft)).Match(str).Groups
-                if elts.[2].Value = ""
-                then
-                    let e2 =
-                idxValMap.[elts.[11].Captures.[0].Index] |> RELeaf
-            let e1 =
-                if elts.[6].Value = ""
-                then
-                    let e2 =
-                        if elts.[8].Value = ""
-                        then
-                            let e2 =
-                        let e0 =
-                            idxValMap.[!ofset + elts.[4].Captures.[i].Index] |> RELeaf
-                        RESeq [e0]
-                    None, Some (e2)
-                else
-                    let e1 =
-        idxValMap.[elts.[3].Captures.[0].Index] |> RELeaf
-                        let e0 =
-                            idxValMap.[!ofset + elts.[2].Captures.[i].Index] |> RELeaf
-                        RESeq [e0]
-                    Some (e1),None
-                |> REAlt            
+                let e1 =
+                    idxValMap.[!ofset + elts.[3].Captures.[0].Index] |> RELeaf
+                let e0 =
+                    idxValMap.[!ofset + elts.[2].Captures.[0].Index] |> RELeaf
+                RESeq [e0; e1]
+            ofset := !ofset + str.Length
             res
         REClosure [for i in [0..elts.[2].Captures.Count-1] -> e i]
 
-                    None, Some (e2)
-                else
-                    let e1 =
-                        let e0 =
-                            idxValMap.[elts.[6].Captures.[0].Index] |> RELeaf
     RESeq [e0]
-                    Some (e1),None
-                |> REAlt
 
-            let e0 =
-                idxValMap.[elts.[4].Captures.[0].Index] |> RELeaf
-            RESeq [e0; e1; e2]
-        None, Some (e2)
-    else
-        let e1 =
-            let e0 =
-                idxValMap.[elts.[2].Captures.[0].Index] |> RELeaf
-            RESeq [e0]
-        Some (e1),None
-    |> REAlt
-
-
-let ruleToRegex = dict [|(2,e); (1,s)|]
-
-//let buildIndexMap kvLst =
-//    let ks = List.map (fun (x:string,y) -> x.Length + 2,y) kvLst
-//    List.fold (fun (bl,blst) (l,v) -> bl+l,((bl,v)::blst)) (0,[]) ks
-//    |> snd
-//    |> dict
-//
-//let buildStr kvLst =
-//    let sep = ";;"
-//    List.map fst kvLst 
-//    |> String.concat sep
-//    |> fun s -> ";" + s + ";"
-//
-//let s childsLst = 
-//    let str = buildStr childsLst
-//    let idxValMap = buildIndexMap childsLst
-//    let re = new Regex("((((;5;))|((;6;)))*)")
-//    let elts = re.Match(str).Groups
-//    let e0 =
-//        let ofset = ref 0
-//        let e i =
-//            let str = elts.[2].Captures.[i].Value
-//            let re = new Regex("((;5;))|((;6;))")
-//            let elts = re.Match(str).Groups
-//            let res = 
-//                if elts.[2].Value = ""
-//                then
-//                    let e2 =
-//                        let e0 =
-//                            idxValMap.[!ofset + elts.[4].Captures.[0].Index] |> RELeaf
-//                        RESeq [e0]
-//                    None, Some (e2)
-//                else
-//                    let e1 =
-//                        let e0 =
-//                            idxValMap.[!ofset + elts.[2].Captures.[0].Index] |> RELeaf
-//                        RESeq [e0]
-//                    Some (e1),None
-//                |> REAlt
-//            ofset := !ofset + str.Length
-//            res
-//
-//        REClosure [for i in [0..elts.[2].Captures.Count-1] -> e i]
-//
-//    RESeq [e0]
-//
-//let ruleToRegex = dict [|(1,s)|]
-//
+let ruleToRegex = dict [|(1,s)|]

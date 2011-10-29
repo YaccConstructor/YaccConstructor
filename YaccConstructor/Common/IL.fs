@@ -52,7 +52,7 @@ module Production = begin
         |PRef     of Source.t * 'expr option
         /// expr*
         |PMany    of (t<'patt,'expr>)
-        /// Reference to metarule inside production (mr<x> in rule "a: mr<x> y z")
+        /// Reference to metarule inside production (mr<<x>> in rule "a: mr<<x>> y z")
         |PMetaRef of Source.t * 'expr option * t<'patt,'expr> list
         /// Literal. We can use constants ("if" and "then" in ' .."if" expr "then" expr...')
         |PLiteral of Source.t 

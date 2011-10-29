@@ -1,7 +1,0 @@
-a[f] : d;
-
-b[c e] : d;
-
-do<<op1 op2>>[a b] : (op1 | op2[b a])*;
-
-+s[t] : do<<a b>>[a[t] 1] ;

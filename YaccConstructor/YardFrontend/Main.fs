@@ -21,19 +21,19 @@ module Yard.Frontends.YardFrontend.Main
 open Microsoft.FSharp.Text.Lexing
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let run_common path = 
+let private run_common path = 
     let content = System.IO.File.ReadAllText(path)
     Lexer.currentFileContent := content;
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 
-let run path =
-    let buf = run_common path in 
-    let example = seq {
-                       while not buf.IsPastEndOfStream do
-                             yield Lexer.main buf  
-                      } in
-    Seq.iter (printfn "%A ") example
+//let private run path =
+//    let buf = run_common path in 
+//    let example = seq {
+//                       while not buf.IsPastEndOfStream do
+//                             yield Lexer.main buf  
+//                      } in
+//    Seq.iter (printfn "%A ") example
 
 
 let ParseFile path = 
@@ -41,4 +41,5 @@ let ParseFile path =
     GrammarParser.currentFilename := path
     GrammarParser.file Lexer.main buf
     
-      
+let ParseString string = None
+    //GrammarParser.file Lexer.main buf

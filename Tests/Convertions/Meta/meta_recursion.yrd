@@ -1,0 +1,11 @@
+yard_list<<item>>: 
+      empty { [] }
+    | <yard_h> = item <yard_t> = yard_list<<item>> { yard_h::yard_t };
+
+yard_item_1<<op>>: 
+      op
+    | op IDENT;
+
+do<<op>>:  yard_list<<yard_item_1<<op>>>>;
+
++s:  do<<NUMBER>>;

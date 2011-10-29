@@ -64,7 +64,42 @@ module Production = begin
         /// expr+
         |PSome    of (t<'patt,'expr>)
         /// expr?
-        |POpt     of (t<'patt,'expr>) 
+        |POpt     of (t<'patt,'expr>)
+
+        with
+        override this.ToString() =
+            printfn "%A" this
+            let argsToString = function
+                | None -> ""
+                | Some x -> "[" + x.ToString() + "]"
+                    
+            let metaArgsToString metaArgs =
+                if ((metaArgs : 'a list).IsEmpty) then ""
+                else "<<" + (metaArgs
+                             |> List.map (fun x -> x.ToString())
+                             |> String.concat " ")
+                        + ">>"
+                    
+            match this with
+            |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
+            |PSeq (ruleSeq, attrs) ->
+                String.concat " " (List.map (fun x -> printfn "%A" x; "(" + x.rule.ToString() + ")") ruleSeq) + attrs.ToString()
+            |PToken src -> Source.toString src
+            |PRef (name, args) ->
+                Source.toString name + argsToString args
+            |PMany x -> "(" + x.ToString() + ")*"
+            |PMetaRef (name, args, metaArgs) ->
+                Source.toString name + metaArgsToString metaArgs + argsToString args
+            |PLiteral src -> Source.toString src
+            |PRepet _ -> failwith "Repetition was not realized yet"
+            |PPerm src -> "[|" + (src
+                                  |> List.map (fun x -> x.ToString())
+                                  |> String.concat " ")
+                                + "|]"
+            // The following are obsolete and reduction to PRepet should be discussed.
+            /// expr+
+            |PSome x -> "(" + x.ToString() + ")+"
+            |POpt x -> "(" + x.ToString() + ")?"
 end
 
 module Rule = begin
@@ -101,7 +136,7 @@ module Definition = begin
      /// Contains information (e.g. origin) about this grammar description
      info    : info;
      /// Text before a grammar description ( e.g. some open-s), what will be simply copied
-     head    :'expr option; 
+     head    :'expr option;
      /// Grammar description itself
      grammar : Grammar.t<'patt,'expr>;
      /// Text after a grammar description, what will be simply copied

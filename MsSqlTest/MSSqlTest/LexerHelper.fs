@@ -46,9 +46,17 @@ type SourceText =
     static member inline ofText(text) = new SourceText(text, SourceRange.Empty)
     member inline x.Text = x.text
     member inline x.Range = x.range
-
+    
 type token = 
     | KW_SELECT | KW_FROM | KW_GO | COMMENT
+    | KW_PROCEDURE
+    | KW_VARYING
+    | KW_OUTPUT | KW_WITH | KW_FOR | KW_REPLICATION
+    | KW_AS | BEGIN | END 
+    | KW_BIGINT | KW_SMALLINT | KW_DECIMAL | KW_MONEY
+    | KW_SMALLMONEY 
+    | KW_EXEC | KW_EXECUTE 
+    | KW_CALLER | KW_SELF | KW_OWNER
     | IDENT         of SourceText (* of string // Some, [Some] *)
     | LOCALVAR      of SourceText (* of string // @Some *)
     | TEMPOBJ       of SourceText (* of string // #Some *)

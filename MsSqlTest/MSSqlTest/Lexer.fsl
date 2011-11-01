@@ -32,9 +32,35 @@ exception IdentToken
 let getKwToken (name: string) = 
   try
     match name.ToUpper() with
-    | "SELECT" -> T_KW_SELECT
-    | "FROM"   -> T_KW_FROM
-    | _        -> raise IdentToken
+    | "SELECT"    -> T_KW_SELECT
+    | "FROM"      -> T_KW_FROM
+    | "CREATE"    -> T_KW_CREATE
+    | "PROC"
+    | "PROCEDURE" -> T_KW_PROCEDURE
+    | "VARYING"   -> T_KW_VARYING
+    | "OUT" 
+    | "OUTPUT"    -> T_KW_OUTPUT
+    | "WITH"      -> T_KW_WITH
+    | "FOR"       -> T_KW_FOR
+    | "REPLICATION" -> T_KW_REPLICATION
+    | "AS"        -> T_KW_AS
+    | "BEGIN"     -> T_KW_BEGIN
+    | "END"       -> T_KW_END
+    | "BIGINT"    -> T_KW_BIGINT
+    | "INT"       -> T_KW_INT
+    | "TINYINT"   -> T_KW_TINYINT
+    | "NUMERIC"   -> T_KW_NUMERIC
+    | "BIT"       -> T_KW_BIT
+    | "SMALLINT"  -> T_KW_SMALLINT
+    | "DECIMAL"   -> T_KW_DECIMAL 
+    | "MONEY"     -> T_KW_MONEY
+    | "SMALLMONEY"-> T_KW_SMALLMONEY
+    | "EXEC" 
+    | "EXECUTE"      -> T_KW_EXECUTE
+    | "CALLER" -> T_KW_CALLER
+    | "SELF" -> T_KW_SELF
+    | "OWNER"  -> T_KW_OWNER
+    | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
 
@@ -57,17 +83,17 @@ let str_buf = new System.Text.StringBuilder()
 let appendBuf (str:string) = str_buf.Append(str) |> ignore
 let clearBuf () = str_buf.Clear() |> ignore
   
-let makeIdent notKeyWord name =
-(*    let prefix = if name.Length>=2 then name.[0..1] else ""
-    if prefix = "@@" then GLOBALVAR(SourceText.ofTuple(name,(startPos,endPos)))
-    else if prefix = "##" then GLOBALTEMPOBJ(SourceText.ofTuple(name,(startPos,endPos)))
-    else if name.[0] = '@' then LOCALVAR(SourceText.ofTuple(name,(startPos,endPos)))
-    else if name.[0] = '#' then TEMPOBJ(SourceText.ofTuple(name,(startPos,endPos)))
-    else *) 
-    if notKeyWord then T_IDENT
-    else 
-        getKwToken name 
-
+let makeIdent notKeyWord (name:string) =
+  let prefix = 
+    if String.length name >=2 
+    then name.[0..1] 
+    else ""
+  if prefix = "@@" then T_GLOBALVAR
+  else if prefix = "##" then T_GLOBALTEMPOBJ
+  else if name.[0] = '@' then T_LOCALVAR
+  else if name.[0] = '#' then T_TEMPOBJ
+  else if notKeyWord then T_IDENT
+  else getKwToken name 
 
 type MyLexeme (tag,_value) =
     member self.MValue = _value
@@ -92,8 +118,11 @@ let label = ident ':'
 
 
 rule tokens = parse
- | eol   { tokens lexbuf }
- | whitespaces { tokens lexbuf }
+ | eol          { tokens lexbuf }
+ | whitespaces  { tokens lexbuf }
+ | "."          { MyLexeme(getTag T_DOT, ".") }
+ | "="          { MyLexeme(getTag T_EQ, "=") }
+ | ";"          { MyLexeme(getTag T_SEMI, ";") }
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             MyLexeme(l |> (makeIdent false) |> getTag, l)
          }

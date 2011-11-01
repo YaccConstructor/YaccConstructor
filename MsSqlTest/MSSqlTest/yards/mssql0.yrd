@@ -1,0 +1,37 @@
+
+
+start: 
+  sel_expr = ((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { }
+| COMMENT
+| GO
+| GLOBALVAR
+| GLOBALTEMPOBJ
+| TEMPOBJ
+;
+
++create_proc:
+    xxx = ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
+	(( schema_name = IDENT {} ) DOT)? ( proc_name = IDENT {} ) (SEMI IDENT )?
+	( 
+	  (LOCALVAR (IDENT DOT)? sql_datatype  )
+	  (KW_VARYING)? (EQ IDENT)?
+	  (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
+	)+
+	(KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
+	KW_AS ( KW_BEGIN? sql_statement KW_END? )
+	(SEMI)?
+	{}
+| start {}
+;
+
+sql_statement:
+	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
+;	
+sql_datatype:
+    (KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
+	KW_INT | KW_TINYINT | KW_MONEY) {}
+;
+
+execute_as:
+	(KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | ( username = IDENT ) ) {}
+;

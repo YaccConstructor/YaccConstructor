@@ -40,6 +40,7 @@ namespace OokLanguage
             m_braceList.Add('{', '}');
             m_braceList.Add('[', ']');
             m_braceList.Add('(', ')');
+            m_braceList.Add('<', '>');
             this.View = view;
             this.SourceBuffer = sourceBuffer;
             this.CurrentChar = null;

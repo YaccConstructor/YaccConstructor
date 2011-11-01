@@ -1,8 +1,19 @@
 ﻿module Checker
 
+open System.Linq
+open Yard.Core.IL.Production
+
 let IsStartRuleExists (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar |> List.exists (fun r -> r._public) 
 
+let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
+    def.grammar.All 
+        (fun r -> 
+            match r.body with 
+            | PSeq([{rule = PToken(_);omit =_ ;binding =_;checker = _}],_)
+            | PSeq([{rule = PRef(_);omit =_ ;binding =_;checker = _}
+                   ;{rule = PRef(_);omit =_ ;binding =_;checker = _}],_) -> true 
+            | _ -> false)
 
 (*let Unused (def:Yard.Core.IL.Definition.t<_,_>) : bool =    
     let unusedLst (def:Yard.Core.IL.Definition.t<_,_>) (*: List<Rule.t>*) =

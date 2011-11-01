@@ -25,6 +25,7 @@ module Source = begin
 end
   
 module Production = begin
+    let num = ref 0
     type IRuleType = interface end
     type elem<'patt,'expr> = {
         /// Don't include rule into AST
@@ -68,7 +69,8 @@ module Production = begin
 
         with
         override this.ToString() =
-            printfn "%A" this
+//            incr num
+//            printfn "%d %A" !num this
             let argsToString = function
                 | None -> ""
                 | Some x -> "[" + x.ToString() + "]"
@@ -83,7 +85,11 @@ module Production = begin
             match this with
             |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
             |PSeq (ruleSeq, attrs) ->
-                String.concat " " (List.map (fun x -> printfn "%A" x; "(" + x.rule.ToString() + ")") ruleSeq) + attrs.ToString()
+                let strAttrs =
+                    match attrs with
+                    | None -> ""
+                    | Some x -> "{" + x.ToString() + "}"
+                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + x.rule.ToString() + ")") ruleSeq) + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->
                 Source.toString name + argsToString args

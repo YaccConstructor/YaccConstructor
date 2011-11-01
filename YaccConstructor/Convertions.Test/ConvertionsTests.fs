@@ -24,6 +24,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
+open Convertions.TransformAux
 open NUnit.Framework
 
 exception FEError of string
@@ -31,15 +32,23 @@ exception FEError of string
 let convertionTestPath = @"../../../../Tests/Convertions/"
 
 let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
-    let srcEquals (a:Source.t) (b:Source.t) = (fst a = fst b)
+    let srcEquals (a:Source.t) (b:Source.t) =
+        if (fst a = fst b) then true
+        else printfn "bad %A %A" a b; false
     let srcOptEquals a b =
         match a,b with
         | Some(sa), Some(sb) -> srcEquals sa sb
         | None, None -> true
-        | _ -> false
+        | _ -> printfn "badOpt %A %A" a b; false
 
     let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
-        match (il1,il2) with
+        let rec reduceSeq (*il*) = function
+            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None) ->
+//                printfn "seq %s" <| r.ToString()
+                reduceSeq r
+            | x -> x
+        //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
+        match (reduceSeq il1, reduceSeq il2) with
         | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
             List.length elems1 = List.length elems2 &&
                 List.zip elems1 elems2 
@@ -64,7 +73,7 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
     List.forall2  
         (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
             rule1._public = rule2._public &&
-            List.forall2 srcEquals rule1.args rule2.args &&
+            List.forall2 srcEquals (createParams rule1.args) (createParams rule2.args) &&
             ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
             rule1.name = rule2.name
@@ -312,6 +321,42 @@ type ``Convertions tests`` () =
 #endif
         Assert.True(hasNotInnerSeq)  
 
+    [<Test>]
+    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
+    /// Expected result 'sourceFileName.res'
+    member test.``Meta tests in Tests\Convertions\Meta .``()=
+        let frontend = FrontendsManager.Frontend "YardFrontend"
+        let generator = GeneratorsManager.Generator "YardPrinter"
+        printfn "%A" generator
+        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
+        |> Seq.iter 
+            (fun srcFile ->  
+                Namer.resetRuleEnumerator()
+                printfn "file %s" srcFile
+                // all convertions are in name without descr.yrd
+                let convertions = [|"ExpandMeta"|]
+                printfn "%A" convertions
+                Namer.resetRuleEnumerator()
+                let ilTree = (srcFile |> frontend.ParseGrammar)
+                printfn "after Parsing"
+                let reorder f a b = f b a
+//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
+                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
+                printfn "after Convertion"
+                Namer.resetRuleEnumerator()
+                let expected =
+                    try
+                        srcFile + ".ans" |> frontend.ParseGrammar 
+                    with
+                        | e -> printfn "%s" e.Message
+                               raise <| FEError e.Message
+                printfn "after result parsing"
+                //printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
+                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+
+            )
+        Assert.True(true)
+        
     [<Test>]
     /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
     /// Expected result 'sourceFileName.res'

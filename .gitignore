@@ -5,3 +5,4 @@ obj/
 [Bb]in/
 GNESCCGeneratedTests/
 YaccConstructor/Development/Utils/tests.fsproj.inc
+*.orig

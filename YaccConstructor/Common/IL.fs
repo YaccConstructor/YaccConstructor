@@ -25,7 +25,7 @@ module Source = begin
 end
   
 module Production = begin
-    let num = ref 0
+    //let num = ref 0
     type IRuleType = interface end
     type elem<'patt,'expr> = {
         /// Don't include rule into AST
@@ -39,7 +39,7 @@ module Production = begin
     }
     /// <summary>
     /// <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
-    /// <para>  'patt - type of attributes (arguments). </para>
+    /// <para>  'patt - type of l-attributes. </para>
     /// <para>  'expr - type of expressions in action code. </para>
     /// </summary>
     and t<'patt,'expr> = 
@@ -89,7 +89,15 @@ module Production = begin
                     match attrs with
                     | None -> ""
                     | Some x -> "{" + x.ToString() + "}"
-                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + x.rule.ToString() + ")") ruleSeq) + strAttrs
+                let elemToString (x:elem<_,_>) =
+                    if x.checker.IsSome then failwith "unrealized checker ToString()"
+                    let omit = if (x.omit) then "-" else ""
+                    let bind =
+                        match x.binding with
+                        | None -> ""
+                        | Some var -> var.ToString() + "="
+                    omit + bind + x.rule.ToString()
+                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->
                 Source.toString name + argsToString args
@@ -102,8 +110,6 @@ module Production = begin
                                   |> List.map (fun x -> x.ToString())
                                   |> String.concat " ")
                                 + "|]"
-            // The following are obsolete and reduction to PRepet should be discussed.
-            /// expr+
             |PSome x -> "(" + x.ToString() + ")+"
             |POpt x -> "(" + x.ToString() + ")?"
 end

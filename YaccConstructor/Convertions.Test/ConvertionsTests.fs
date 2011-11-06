@@ -78,7 +78,9 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
             rule1.name = rule2.name
         ) g1 g2
- 
+
+let printTree tree = 
+    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
 
 [<TestFixture>]
 type ``Convertions tests`` () =
@@ -142,156 +144,7 @@ type ``Convertions tests`` () =
         }
         Assert.AreEqual(ilTreeConverted, correctConverted)
 
-    [<Test>]
-    member test.``Expand Meta. PToken to PRef replacement test 1.`` () =
-        Namer.resetRuleEnumerator()
-        let frontend = FrontendsManager.Frontend "YardFrontend"        
-        let ilTree:t<Source.t,Source.t> = 
-            System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_1.yrd")
-            |> frontend.ParseGrammar 
-        let ilTreeConverted:t<Source.t,Source.t> = ConvertionsManager.ApplyConvertion "ExpandMeta" ilTree
-        let expectedResult:t<Source.t,Source.t> =
-            {info = {fileName = "../../../../Tests/Convertions/PToken_to_PRef_1.yrd";};
-             head = None;
-             grammar =
-              [{name = "yard_metar_1";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PToken ("NUMBER", (36, 42));
-                               binding = None;
-                               checker = None;}],None);
-                _public = false;
-                metaArgs = [];};
-               {name = "s";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PRef (("yard_metar_1", (29, 34)),None);
-                               binding = None;
-                               checker = None;}],None);
-                _public = true;
-                metaArgs = [];}];
-             foot = None;}
-
-#if DEBUG
-        let generator = GeneratorsManager.Generator "TreeDump"
-        printfn "%A\n" (generator.Generate ilTreeConverted)
-#endif
-        Assert.AreEqual(expectedResult, ilTreeConverted)
-
-    [<Test>]
-    member test.``Expand Meta. PToken to PRef replacement test 2.`` () =
-        Namer.resetRuleEnumerator()        
-        let frontend = FrontendsManager.Frontend "YardFrontend"        
-        let ilTree = 
-            System.IO.Path.Combine(convertionTestPath,"PToken_to_PRef_2.yrd")
-            |> frontend.ParseGrammar 
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion "ExpandMeta" ilTree
-        let expectedResult:t<Source.t,Source.t> =
-            {info = {fileName = "../../../../Tests/Convertions/PToken_to_PRef_2.yrd";};
-             head = None;
-             grammar =
-              [{name = "mrArg";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PToken ("NUMBER", (8, 14));
-                               binding = None;
-                               checker = None;}],None);
-                _public = false;
-                metaArgs = [];}; {name = "yard_metar_1";
-                                  args = [];
-                                  body = PSeq ([{omit = false;
-                                                 rule = PRef (("mrArg", (58, 63)),None);
-                                                 binding = None;
-                                                 checker = None;}],None);
-                                  _public = false;
-                                  metaArgs = [];};
-               {name = "s";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PRef (("yard_metar_1", (51, 56)),None);
-                               binding = None;
-                               checker = None;}],None);
-                _public = true;
-                metaArgs = [];}];
-             foot = None;}
-
-
-#if DEBUG
-        let generator = GeneratorsManager.Generator "TreeDump"
-        printfn "%A\n" (generator.Generate ilTreeConverted)
-#endif
-        Assert.AreEqual( expectedResult, ilTreeConverted)
-
-    [<Test>]
-    member test.``Expand Meta. Duplicate rules generation test.``()=
-        Namer.resetRuleEnumerator()
-        let frontend = FrontendsManager.Frontend "YardFrontend"        
-        let ilTree = 
-            System.IO.Path.Combine(convertionTestPath,"ExpandMeta_DuplicateRules.yrd")
-            |> frontend.ParseGrammar 
-        let ilTreeConverted = ConvertionsManager.ApplyConvertion ("ExpandMeta") ilTree
-        let expectedResult = 
-            {info =
-              {fileName = "../../../../Tests/Convertions/ExpandMeta_DuplicateRules.yrd";};
-             head = None;
-             grammar =
-              [{name = "yard_yardOption_1";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PToken ("NUM", (164, 167));
-                               binding = Some ("yard_item", (28, 37));
-                               checker = None;}],Some (" Some yard_item ", (46, 62)));
-                _public = false;
-                metaArgs = [];};
-               {name = "yard_yardOption_2";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PToken ("STRING", (182, 188));
-                               binding = Some ("yard_item", (28, 37));
-                               checker = None;}],Some (" Some yard_item ", (46, 62)));
-                _public = false;
-                metaArgs = [];};
-               {name = "yard_yardOption_4";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PToken ("SEMI", (194, 198));
-                               binding = Some ("yard_item", (28, 37));
-                               checker = None;}],Some (" Some yard_item ", (46, 62)));
-                _public = false;
-                metaArgs = [];};
-               {name = "yard_o_3";
-                args = [];
-                body = PSeq ([{omit = false;
-                               rule = PRef (("yard_yardOption_4", (103, 113)),None);
-                               binding = Some ("yard_item", (91, 100));
-                               checker = None;}],Some (" Some yard_item ", (123, 139)));
-                _public = false;
-                metaArgs = [];};
-               {name = "s";
-                args = [];
-                body =
-                 PSeq
-                   ([{omit = false;
-                      rule = PRef (("yard_yardOption_1", (152, 162)),None);
-                      binding = None;
-                      checker = None;};
-                     {omit = false;
-                      rule = PRef (("yard_yardOption_2", (170, 180)),None);
-                      binding = None;
-                      checker = None;}; {omit = false;
-                                         rule = PRef (("yard_o_3", (191, 192)),None);
-                                         binding = None;
-                                         checker = None;}],None);
-                _public = true;
-                metaArgs = [];}];
-             foot = None;}
-
-#if DEBUG
-        let generator = GeneratorsManager.Generator "TreeDump"
-        printfn "%A\n" (generator.Generate ilTreeConverted)
-#endif      
-        Assert.AreEqual( expectedResult, ilTreeConverted)
-
+    
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
         Namer.resetRuleEnumerator()

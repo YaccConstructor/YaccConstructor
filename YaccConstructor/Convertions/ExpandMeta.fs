@@ -31,7 +31,8 @@ type Dictionary<'a,'b> = System.Collections.Generic.Dictionary<'a,'b>
 /// find metarule with given name in hash map of collected metarules
 let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName = 
     try tbl.Item mName with
-    | :?System.Collections.Generic.KeyNotFoundException -> failwith "undeclared metarule %s" mName;
+    | :?System.Collections.Generic.KeyNotFoundException ->
+        failwith <| sprintf "undeclared metarule %s" mName;
     
 
 /// Create pair (formal argument name, actual argument name)

@@ -1,16 +1,23 @@
++start:
+	(root_rule | COMMENT )*       {}
+;
 
+root_rule:
+	create_proc {}
+| 	GO          {}
+| 	start2      {} 
+;
 
-start: 
+start2: 
   sel_expr = ((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { }
 | COMMENT
-| GO
 | GLOBALVAR
 | GLOBALTEMPOBJ
 | TEMPOBJ
 ;
 
-+create_proc:
-    xxx = ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
+create_proc:
+        ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
 	(( schema_name = IDENT {} ) DOT)? ( proc_name = IDENT {} ) (SEMI IDENT )?
 	( 
 	  (LOCALVAR (IDENT DOT)? sql_datatype  )
@@ -18,15 +25,24 @@ start:
 	  (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
 	)+
 	(KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
-	KW_AS ( KW_BEGIN? sql_statement KW_END? )
+	KW_AS ( KW_BEGIN? proc_body_stmnt* KW_END? )
 	(SEMI)?
 	{}
-| start {}
 ;
 
-sql_statement:
+proc_body_stmnt:
 	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
+|	set_stmnt 
+;
+
+set_stmnt:
+ 	SET IMPLICIT_TRANSACTIONS ( ON | OFF )
+| 	SET NO_COUNT ( ON | OFF )
+|	SET ANSI_NULLS (ON | OFF)
+|	SET QUOTED_IDENTIFIER (ON | OFF)
+|	SET LOCALVAR (DOR IDENT)? OP_EQ   sql_expr {}
 ;	
+
 sql_datatype:
     (KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
 	KW_INT | KW_TINYINT | KW_MONEY) {}
@@ -34,4 +50,17 @@ sql_datatype:
 
 execute_as:
 	(KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | ( username = IDENT ) ) {}
+;
+
+binop:
+	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
+| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD
+;
+
+sql_expr:
+	STRING_CONST
+|	LPAREN sql_expr RPAREN
+|	(IDENT DOT)? IDENT
+|	sql_expr binop sql_expr
+|	(OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr
 ;

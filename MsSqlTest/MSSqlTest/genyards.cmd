@@ -5,7 +5,7 @@ del /F %failo%.actions.fs
 del /F %failo%.regexp.fs
 del /F %failo%.tables.fs
 
-..\..\YaccConstructor\Main\bin\Debug\YaccConstructor.exe -f YardFrontend -g GNESCCGenerator -i %failo%
+..\..\YaccConstructor\Main\bin\Release\YaccConstructor.exe -f YardFrontend -g GNESCCGenerator -i %failo%
 
 IF exist %failo%.actions.fs copy %failo%.actions.fs %failo%\..\..\Actions.fs
 IF exist %failo%.tables.fs copy %failo%.tables.fs %failo%\..\..\Tables.fs

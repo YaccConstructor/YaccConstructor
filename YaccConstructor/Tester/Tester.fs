@@ -54,3 +54,8 @@ let () =
     | Gi    -> generateTests ()
     | Pt    -> PerformanceTests.Run()
     | Other -> printf "Incorrect command" 
+
+[<EntryPoint>]
+let f _ = 
+   GNESCCCoreTests.``GNESCC core tests``().arithm_glr_5()
+   0

@@ -125,7 +125,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         // Metarule reference like in "a: mr<x> y z"
         | PMetaRef(rule_name, opt_arg, metaArgs) -> Seq.singleton <| Str((Source.toString rule_name)+(printMetaArgs metaArgs)+(printArg opt_arg))
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
-        | PLiteral(source) -> Seq.singleton <| Str ("'" + Source.toString source + "'") 
+        | PLiteral(source) -> Seq.singleton <| Str ("\"" + Source.toString source + "\"") 
 //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
 //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
 ///// The following are obsolete and reduction to PRepet should be discussed.

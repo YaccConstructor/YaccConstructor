@@ -1,0 +1,179 @@
+{
+//  UserLexer.fs contains simple lexer for testing.
+//
+//  for build:  fslex Lexer.fsl --unicode -o Lexer.fs
+//
+//  Copyright 2010, 2011, 2011 Semen Grigorev <rsdpisuy@gmail.com>
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software:you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+module Lexer_alt
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Yard.Generators.GNESCCGenerator
+open Yard.Generators.GNESCCGenerator.Tables
+open Microsoft.FSharp.Reflection
+open LexerHelper
+
+exception IdentToken
+let getKwToken (name: string) = 
+  try
+    match name.ToUpper() with
+    | "SELECT"    -> T_KW_SELECT
+    | "FROM"      -> T_KW_FROM
+    | "CREATE"    -> T_KW_CREATE
+    | "PROC"
+    | "PROCEDURE" -> T_KW_PROCEDURE
+    | "VARYING"   -> T_KW_VARYING
+    | "OUT" 
+    | "OUTPUT"    -> T_KW_OUTPUT
+    | "WITH"      -> T_KW_WITH
+    | "FOR"       -> T_KW_FOR
+    | "REPLICATION" -> T_KW_REPLICATION
+    | "AS"        -> T_KW_AS
+    | "BEGIN"     -> T_KW_BEGIN
+    | "END"       -> T_KW_END
+    | "BIGINT"    -> T_KW_BIGINT
+    | "INT"       -> T_KW_INT
+    | "TINYINT"   -> T_KW_TINYINT
+    | "NUMERIC"   -> T_KW_NUMERIC
+    | "BIT"       -> T_KW_BIT
+    | "SMALLINT"  -> T_KW_SMALLINT
+    | "DECIMAL"   -> T_KW_DECIMAL 
+    | "MONEY"     -> T_KW_MONEY
+    | "SMALLMONEY"-> T_KW_SMALLMONEY
+    | "EXEC" 
+    | "EXECUTE"   -> T_KW_EXECUTE
+    | "CALLER"    -> T_KW_CALLER
+    | "SELF"      -> T_KW_SELF
+    | "OWNER"     -> T_KW_OWNER
+    | "DECLARE"   -> T_KW_DECLARE
+    | "NOCOUNT"   -> T_NOCOUNT
+    | "SET"       -> T_SET
+    | "ON"        -> T_ON
+    | "OFF"       -> T_OFF
+    | _           -> raise IdentToken
+  with
+    | IdentToken -> T_IDENT
+
+(*    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
+    let ucis = FSharpType.GetUnionCases(typeof<token>) 
+                    |> Array.map nameToUnionCtor                       
+                    |> dict
+    fun (name:string) startPos endPos ->
+    let upperName = "KW_" + name.ToUpper()
+    let (present, ctor) = ucis.TryGetValue(upperName) 
+    if present then
+        Some(ctor [| SourceText.ofTuple(name, (startPos, endPos)) |] :?>token)
+    else
+        None *)
+
+let comment_depth = ref 0
+let startPos = ref Position.Empty
+let str_buf = new System.Text.StringBuilder()
+
+let appendBuf (str:string) = str_buf.Append(str) |> ignore
+let clearBuf () = str_buf.Clear() |> ignore
+  
+let makeIdent notKeyWord (name:string) =
+  let prefix = 
+    if String.length name >=2 
+    then name.[0..1] 
+    else ""
+  if prefix = "@@" then T_GLOBALVAR
+  else if prefix = "##" then T_GLOBALTEMPOBJ
+  else if name.[0] = '@' then T_LOCALVAR
+  else if name.[0] = '#' then T_TEMPOBJ
+  else if notKeyWord then T_IDENT
+  else getKwToken name 
+
+type MyLexeme (tag,_value) =
+    member self.MValue = _value
+    interface ILexeme with    
+       member self.tag = tag
+       member self.CompareTo x =  compare (hash self) (hash x)
+    end
+
+ }
+
+let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] + 
+let lparen = '('
+let rparen = ')'
+let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
+let string_const = ''' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ ''' (* TODO: support line like 'aaa''aa' *)
+let whitespaces = [' '  '\t']+
+let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'а'-'я' 'А'-'Я' ] 
+let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'а'-'я' 'А'-'Я' ] 
+// Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
+let ident = ident_start_char ident_body_char*
+let decnumber = ['0'-'9']+ 
+let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
+let float_e = 'e' | 'E'
+let floatnumber = decnumber ('.' decnumber)? ( float_e decnumber) ? (* what with 100.   ?? *)
+let label = ident ':'
+
+
+rule tokens = parse
+ | eol          { tokens lexbuf }
+ | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
+ | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
+ | whitespaces  { tokens lexbuf }
+ | "."          { MyLexeme(getTag T_DOT, ".") }
+ | "="          { MyLexeme(getTag T_OP_EQ, "=") }
+ | ";"          { MyLexeme(getTag T_SEMI, ";") }
+ | "("		{ MyLexeme(getTag T_LPAREN, "(") }
+ | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
+ | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
+ | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
+ | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
+
+ | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
+            MyLexeme(l |> (makeIdent false) |> getTag, l)
+         }
+ 
+ | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
+and multiline_comment = parse
+  | "/*" 
+    { incr comment_depth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}
+  | "*/"
+    { decr comment_depth; 
+      if !comment_depth = 0 then 
+        MyLexeme(getTag T_COMMENT, "somecomment")
+      else 
+        appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
+    }
+  | eol {lexbuf.EndPos <- lexbuf.EndPos.NextLine; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf }
+  | eof { failwith "unclosed comment in the end of file" }
+  | [^ '\r' '\n' '*' '/']+ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf } 
+  | _ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf } 
+
+{
+
+type Lexer(lb) = 
+    let locBuf = ref []
+    interface ILexer with        
+    
+       member self.Get pos = 
+        let l = !locBuf |> List.length
+        if l >= pos
+        then (!locBuf).[l-pos]
+        else
+            let t = (tokens lb) :> ILexeme
+            locBuf := t :: !locBuf
+            t      
+    end
+
+}

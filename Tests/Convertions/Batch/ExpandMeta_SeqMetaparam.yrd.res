@@ -1,9 +1,11 @@
-yard_expression_2:  (
-      expr_part
-    | NUMBER ) bin_op (
-      expr_part
-    | NUMBER );
+yard_rule_1:  NUMBER;
 
-yard_expression_extended_1:  yard_expression_2;
+yard_rule_3: 
+      expr_part
+    | yard_rule_1;
 
-+s:  yard_expression_extended_1;
+yard_rule_expression_4:  yard_rule_3 bin_op yard_rule_3;
+
+yard_rule_expression_extended_2:  yard_rule_expression_4;
+
++s:  yard_rule_expression_extended_2;

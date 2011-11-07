@@ -488,7 +488,7 @@ and _fslex_main  _fslex_state lexbuf =
                         let n1 = lexbuf.EndPos.AbsoluteOffset in
                         brace_depth := 1;
                         let n2 = handle_lexical_error action lexbuf in
-                         ACTION (from_lexbuf lexbuf (n1,n2))
+                        ACTION (from_lexbuf lexbuf (n1,n2))
                       
 # 493 "Lexer.fs"
           )

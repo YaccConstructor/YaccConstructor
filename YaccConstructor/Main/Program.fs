@@ -139,7 +139,7 @@ let () =
     try
         if !generateSomething = true then 
             run ()
-    with 
+    with
     | InvalidFEName (feName)   -> 
         "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
         |> System.Console.WriteLine

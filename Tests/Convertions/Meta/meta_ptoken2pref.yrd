@@ -1,0 +1,4 @@
+metar<<item>>:  item;
+
++s:  metar<<NUMBER>>;
+

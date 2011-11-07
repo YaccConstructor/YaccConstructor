@@ -56,10 +56,15 @@ let getKwToken (name: string) =
     | "MONEY"     -> T_KW_MONEY
     | "SMALLMONEY"-> T_KW_SMALLMONEY
     | "EXEC" 
-    | "EXECUTE"      -> T_KW_EXECUTE
-    | "CALLER" -> T_KW_CALLER
-    | "SELF" -> T_KW_SELF
-    | "OWNER"  -> T_KW_OWNER
+    | "EXECUTE"   -> T_KW_EXECUTE
+    | "CALLER"    -> T_KW_CALLER
+    | "SELF"      -> T_KW_SELF
+    | "OWNER"     -> T_KW_OWNER
+    | "DECLARE"   -> T_KW_DECLARE
+    | "NOCOUNT"   -> T_NOCOUNT
+    | "SET"       -> T_SET
+    | "ON"        -> T_ON
+    | "OFF"       -> T_OFF
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
@@ -108,7 +113,7 @@ let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] +
 let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
-let string_const = ''' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ ''' // TODO: support line like 'aaa''aa'
+let string_const = ''' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ ''' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'à'-'ÿ' 'À'-'ß' ] 
 let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'à'-'ÿ' 'À'-'ß' ] 
@@ -117,22 +122,23 @@ let ident = ident_start_char ident_body_char*
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
 let float_e = 'e' | 'E'
-let floatnumber = decnumber ('.' decnumber)? ( float_e decnumber) ? // what with 100.   ??
+let floatnumber = decnumber ('.' decnumber)? ( float_e decnumber) ? (* what with 100.   ?? *)
 let label = ident ':'
 
 
 rule tokens = parse
  | eol          { tokens lexbuf }
  | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
+ | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
  | "."          { MyLexeme(getTag T_DOT, ".") }
- | "="          { MyLexeme(getTag T_EQ, "=") }
+ | "="          { MyLexeme(getTag T_OP_EQ, "=") }
  | ";"          { MyLexeme(getTag T_SEMI, ";") }
- | "("		{ MyLexeme(getTag T_LPAREN, "(" }
- | ")"		{ MyLexeme(getTag T_RPAREN, ")" }
- | "+"		{ MyLexeme(getTag T_RPAREN, "+" }
- | "-"		{ MyLexeme(getTag T_MINUS, "-" }
- | "~"		{ MyLexeme(getTag T_TILDA, "~" }
+ | "("		{ MyLexeme(getTag T_LPAREN, "(") }
+ | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
+ | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
+ | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
+ | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             MyLexeme(l |> (makeIdent false) |> getTag, l)

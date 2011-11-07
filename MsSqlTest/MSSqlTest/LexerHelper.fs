@@ -57,6 +57,7 @@ type token =
     | KW_SMALLMONEY 
     | KW_EXEC | KW_EXECUTE 
     | KW_CALLER | KW_SELF | KW_OWNER
+    | KW_DECLARE 
     | IDENT         of SourceText (* of string // Some, [Some] *)
     | LOCALVAR      of SourceText (* of string // @Some *)
     | TEMPOBJ       of SourceText (* of string // #Some *)

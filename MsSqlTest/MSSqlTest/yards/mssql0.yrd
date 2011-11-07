@@ -33,14 +33,15 @@ create_proc:
 proc_body_stmnt:
 	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
 |	set_stmnt 
+|	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
 ;
 
 set_stmnt:
  	SET IMPLICIT_TRANSACTIONS ( ON | OFF )
-| 	SET NO_COUNT ( ON | OFF )
+| 	SET NOCOUNT ( ON | OFF )
 |	SET ANSI_NULLS (ON | OFF)
 |	SET QUOTED_IDENTIFIER (ON | OFF)
-|	SET LOCALVAR (DOR IDENT)? OP_EQ   sql_expr {}
+|	SET LOCALVAR (DOT IDENT)? OP_EQ   sql_expr {}
 ;	
 
 sql_datatype:
@@ -54,11 +55,12 @@ execute_as:
 
 binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
-| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD
+| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
 ;
-
+(* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
 sql_expr:
-	STRING_CONST
+	STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+|	DEC_NUMBER
 |	LPAREN sql_expr RPAREN
 |	(IDENT DOT)? IDENT
 |	sql_expr binop sql_expr

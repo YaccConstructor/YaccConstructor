@@ -3,6 +3,13 @@ open Yard.Generators.GNESCCGenerator
 open Yard.Generators.GNESCCGenerator.Tables
 open Microsoft.FSharp.Text.Lexing
 
+let check grammar = 
+    Checker.IsChomskyNormalForm grammar
+
+let toFsYacc grammar =
+    let fsYaccPrinter = new Yard.Generators.FsYaccPrinter.FsYaccPrinter()
+    fsYaccPrinter.Generate grammar
+
 let run path =
     //Create lexer
     let content = System.IO.File.ReadAllText(path)
@@ -28,9 +35,15 @@ let run path =
         r
                 
     printfn "Result %A\n" result
+
+    match List.ofSeq result with
+    | (Success r)::tl ->  
+       printfn "Is in normal form: %A" (check (r :?> _))
+       toFsYacc  (r :?> _)
+    | _ -> failwith "Attribte calculation problem"
     
 do 
-    run @"D:\YC\recursive-ascent\mm_formal_lang_tasks\GrLangParser\GrLangParser\tests\t1"
+    run @"D:\projects\yc\recursive-ascent\mm_formal_lang_tasks\GrLangParser\GrLangParser\tests\t2"
     |> ignore
     System.Console.ReadLine() |> ignore
 

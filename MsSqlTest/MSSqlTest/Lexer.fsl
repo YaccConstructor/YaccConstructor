@@ -65,6 +65,7 @@ let getKwToken (name: string) =
     | "SET"       -> T_SET
     | "ON"        -> T_ON
     | "OFF"       -> T_OFF
+    | "RECOMPILE" -> T_KW_RECOMPILE
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
@@ -107,7 +108,7 @@ type MyLexeme (tag,_value) =
        member self.CompareTo x =  compare (hash self) (hash x)
     end
 
- }
+}
 
 let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] + 
 let lparen = '('
@@ -118,7 +119,8 @@ let whitespaces = [' '  '\t']+
 let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'а'-'я' 'А'-'Я' ] 
 let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'а'-'я' 'А'-'Я' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
-let ident = ident_start_char ident_body_char*
+let with_dot = '.' | ident_body_char
+let ident = ident_start_char with_dot*
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
 let float_e = 'e' | 'E'
@@ -141,7 +143,10 @@ rule tokens = parse
  | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
-            MyLexeme(l |> (makeIdent false) |> getTag, l)
+            let hasdot = l.IndexOf '.' <> -1 in
+            match makeIdent false l with
+            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l)
+            | x -> MyLexeme(getTag x,l)
          }
  
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}

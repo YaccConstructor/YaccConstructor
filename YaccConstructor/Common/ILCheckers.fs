@@ -8,8 +8,8 @@ let IsStartRuleExists (def:Yard.Core.IL.Definition.t<_,_>) =
 
 let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar.All 
-        (fun r -> 
-            match r.body with 
+        (fun r ->
+            match r.body with
             | PSeq([{rule = PToken(_);omit =_ ;binding =_;checker = _}],_)
             | PSeq([{rule = PRef(_);omit =_ ;binding =_;checker = _}
                    ;{rule = PRef(_);omit =_ ;binding =_;checker = _}],_) -> true 

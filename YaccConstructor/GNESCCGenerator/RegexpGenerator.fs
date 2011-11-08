@@ -115,10 +115,10 @@ type RegexpGenerator(outPath: string) =
                         ,re
                         ,gNum
                           
-                 let lAltB,lAltR,lAltGn = genAltItem 1 (groupNum) alt1
+                 let lAltB,lAltR,lAltGn = genAltItem 1 (groupNum + 1) alt1
                  let rAltB,rAltR,rAltGn = genAltItem 2 (lAltGn) alt2
 
-                 let regexp = lAltR + "|" + rAltR
+                 let regexp = "(" + lAltR + "|" + rAltR + ")"
                  
                  indentString indentSize 
                  + "if elts.[" + (lAltGn |> string) + "].Value = \"\"\n" 

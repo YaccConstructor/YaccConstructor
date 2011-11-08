@@ -1,4 +1,4 @@
-﻿// GNESCCCoreTests.fs contains unit tests for GNESCCCore
+﻿//  GNESCCCoreTests.fs contains unit tests for GNESCCCore
 //
 //  Copyright 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -22,730 +22,345 @@ module GNESCCCoreTests
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.GNESCCGenerator
 open NUnit.Framework
+open Yard.Generators
 
-type Test<'r,'h, 'lexer> =
-    {
-        tables     : Tables
-        actionsMap : System.Collections.Generic.IDictionary<int,'h>
-        regexp     : System.Collections.Generic.IDictionary<int,'r>
-        path       : string
-        rightValue : seq<obj>
-        lexer      : 'lexer
-    }
 
-let testPath = "..\\..\\..\\..\\Tests\\GNESCC\\"
-let performanceFolder = "Performance"
+let run path tables actions regexp lexerF =
+    let buf =
+        let content = System.IO.File.ReadAllText(path)    
+        let reader = new System.IO.StringReader(content) 
+        LexBuffer<_>.FromTextReader reader 
 
-let tests =
-    [   (1,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_1.yrd.in"
-                rightValue = seq ["-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
-            })
-        (2,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_2.yrd.in"
-                rightValue = seq ["-;-" |> box] 
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
-            })
-        (3,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_3.yrd.in"
-                rightValue = seq ["+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
-            })
-        (4,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_4.yrd.in"
-                rightValue = seq ["+;+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
-            })
-        (5,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_5.yrd.in"
-                rightValue = seq ["-;+" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
-            })
-        (6,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_6.yrd.in"
-                rightValue = seq ["+;-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer    
-            })
-        (7,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_7.yrd.in"
-                rightValue = seq ["-;+;+;-;+;-;-" |> box]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer  
-            })
-        (8,
-            {
-                tables     = Tables_alt.tables
-                regexp     = GNESCC.Regexp_alt.ruleToRegex
-                actionsMap = GNESCC.Actions_alt.ruleToAction
-                path       = "test_alt\\test_alt_1.yrd.in"
-                rightValue = seq ["Detected: +" |> box]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer
-            })
-        (9,
-            {
-                tables     = Tables_alt.tables
-                regexp     = GNESCC.Regexp_alt.ruleToRegex
-                actionsMap = GNESCC.Actions_alt.ruleToAction
-                path       = "test_alt\\test_alt_2.yrd.in"
-                rightValue = seq ["Detected: *" |> box]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer  
-            })
-        (10,
-            {
-                tables     = Tables_seq.tables
-                regexp     = GNESCC.Regexp_seq.ruleToRegex                    
-                actionsMap = GNESCC.Actions_seq.ruleToAction
-                path       = "test_seq\\test_seq_1.yrd.in"
-                rightValue = seq [3.0 |> box]
-                lexer      = fun buf -> Lexer_seq.Lexer(buf):>ILexer 
-            })
-        (11,
-            {
-                tables     = Tables_cls_with_tail.tables
-                regexp     = GNESCC.Regexp_cls_with_tail.ruleToRegex
-                actionsMap = GNESCC.Actions_cls_with_tail.ruleToAction
-                path       = "test_cls_with_tail\\test_cls_with_tail_1.yrd.in"
-                rightValue = seq ["tail minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
-            })
-        (12,
-            {
-                tables     = Tables_cls_with_tail.tables
-                regexp     = GNESCC.Regexp_cls_with_tail.ruleToRegex
-                actionsMap = GNESCC.Actions_cls_with_tail.ruleToAction
-                path       = "test_cls_with_tail\\test_cls_with_tail_2.yrd.in"
-                rightValue = seq ["list minus;tail minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
-            })
-        (13,
-            {
-                tables     = Tables_cls_with_head.tables
-                regexp     = GNESCC.Regexp_cls_with_head.ruleToRegex
-                actionsMap = GNESCC.Actions_cls_with_head.ruleToAction
-                path       = "test_cls_with_head\\test_cls_with_head_1.yrd.in"
-                rightValue = seq ["Head minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
-            })
-        (14,
-            {
-                tables     = Tables_cls_with_head.tables
-                regexp     = GNESCC.Regexp_cls_with_head.ruleToRegex
-                actionsMap = GNESCC.Actions_cls_with_head.ruleToAction
-                path       = "test_cls_with_head\\test_cls_with_head_2.yrd.in"
-                rightValue = seq ["Head minus;list minus" |> box]
-                lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
-            })
-        (15,
-            {
-                tables     = Tables_cls.tables
-                regexp     = GNESCC.Regexp_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_cls.ruleToAction
-                path       = "test_cls\\test_cls_1.yrd.in"
-                rightValue = seq ["" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
-            })
-        (16,
-            {
-                tables     = Tables_cls.tables
-                regexp     = GNESCC.Regexp_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_cls.ruleToAction
-                path       = "test_cls\\test_cls_2.yrd.in"
-                rightValue = seq ["*" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
-            })
-        (17,
-            {
-                tables     = Tables_cls.tables
-                regexp     = GNESCC.Regexp_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_cls.ruleToAction
-                path       = "test_cls\\test_cls_3.yrd.in"
-                rightValue = seq ["*;*" |> box]
-                lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
-            })
-        (18,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_1.yrd.in"
-                rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
-            })
-        (19,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_2.yrd.in"
-                rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
-            })
-        (20,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_3.yrd.in"
-                rightValue = seq [6 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
-            })
-        (21,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_4.yrd.in"
-                rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
-            })
-        (22,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_5.yrd.in"
-                rightValue = seq [box 5]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
-            })
-        (23,
-            {
-                tables     = Tables_l_attr.tables
-                regexp     = GNESCC.Regexp_l_attr.ruleToRegex
-                actionsMap = GNESCC.Actions_l_attr.ruleToAction
-                path       = "test_l_attr\\test_l_attr_1.yrd.in"
-                rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_L_attr.Lexer(buf):>ILexer
-            })
-        (24,
-            {
-                tables     = Tables_simple_checker.tables
-                regexp     = GNESCC.Regexp_simple_checker.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_checker.ruleToAction
-                path       = "test_simple_checker\\test_simple_checker_1.yrd.in"
-                rightValue = seq [7 |> box]
-                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
-            })
-        (25,
-            {
-                tables     = Tables_simple_checker.tables
-                regexp     = GNESCC.Regexp_simple_checker.ruleToRegex
-                actionsMap = GNESCC.Actions_simple_checker.ruleToAction
-                path       = "test_simple_checker\\test_simple_checker_2.yrd.in"
-                rightValue = seq [12 |> box; 12 |> box]
-                lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
-            })
-        (26,
-            {
-                tables     = Tables_checker_on_glr.tables
-                regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
-                path       = "test_checker_on_glr\\test_checker_on_glr_1.yrd.in"
-                rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
-            })
-        (27,
-            {
-                tables     = Tables_checker_on_glr.tables
-                regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
-                path       = "test_checker_on_glr\\test_checker_on_glr_2.yrd.in"
-                rightValue = seq [10 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
-            })
-        (28,
-            {
-                tables     = Tables_checker_on_glr.tables
-                regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
-                path       = "test_checker_on_glr\\test_checker_on_glr_3.yrd.in"
-                rightValue = seq [11 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
-            })
-        (29,
-            {
-                tables     = Tables_checker_on_glr.tables
-                regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
-                path       = "test_checker_on_glr\\test_checker_on_glr_4.yrd.in"
-                rightValue = seq [40 |> box]
-                lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
-            })
-
-        (30,
-            {
-                tables     = Tables_summator_1.tables
-                regexp     = GNESCC.Regexp_summator_1.ruleToRegex
-                actionsMap = GNESCC.Actions_summator_1.ruleToAction
-                path       = "test_summator_1\\test_summator_1_1.yrd.in"
-                rightValue = seq [1.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
-            })
-
-        (31,
-            {
-                tables     = Tables_summator_1.tables
-                regexp     = GNESCC.Regexp_summator_1.ruleToRegex
-                actionsMap = GNESCC.Actions_summator_1.ruleToAction
-                path       = "test_summator_1\\test_summator_1_2.yrd.in"
-                rightValue = seq [3.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
-            })
-
-        (32,
-            {
-                tables     = Tables_summator_1.tables
-                regexp     = GNESCC.Regexp_summator_1.ruleToRegex
-                actionsMap = GNESCC.Actions_summator_1.ruleToAction
-                path       = "test_summator_1\\test_summator_1_3.yrd.in"
-                rightValue = seq [6.0 |> box]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer
-            })
-
-        (33,
-            {
-                tables     = Tables_opt.tables
-                regexp     = GNESCC.Regexp_opt.ruleToRegex
-                actionsMap = GNESCC.Actions_opt.ruleToAction
-                path       = "test_opt\\test_opt_1.yrd.in"
-                rightValue = seq ["1 +" |> box]
-                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer  
-            })
-
-        (333,
-            {
-                tables     = Tables_opt.tables
-                regexp     = GNESCC.Regexp_opt.ruleToRegex
-                actionsMap = GNESCC.Actions_opt.ruleToAction
-                path       = "test_opt\\test_opt_2.yrd.in"
-                rightValue = seq ["1" |> box]
-                lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer  
-            })
-
-        (34,
-            {
-                tables     = Tables_alt.tables
-                regexp     = GNESCC.Regexp_alt.ruleToRegex
-                actionsMap = GNESCC.Actions_alt.ruleToAction
-                path       = "test_alt\\test_alt_3.yrd.in"
-                rightValue = seq ["1 NUMBER 1"]
-                lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer  
-            })
-
-        (35,
-            {
-                tables     = Tables_alt_in_cls.tables
-                regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
-                actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
-                path       = "test_alt_in_cls\\test_alt_in_cls_8.yrd.in"
-                rightValue = seq ["5 NUMBER 2"]
-                lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer  
-            })
-
-        (36,
-            {
-                tables     = Tables_summator_1.tables
-                regexp     = GNESCC.Regexp_summator_1.ruleToRegex
-                actionsMap = GNESCC.Actions_summator_1.ruleToAction
-                path       = "test_summator_1\\test_summator_1_4.yrd.in"
-                rightValue = seq ["5 PLUS +"]
-                lexer      = fun buf -> Lexer_summator_1.Lexer(buf):>ILexer  
-            })
-
-        (37,
-            {
-                tables     = Tables_arithm_glr.tables
-                regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
-                actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-                path       = "test_arithm_glr\\test_arithm_glr_6.yrd.in"
-                rightValue = seq ["5 MINUS -"]
-                lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer  
-            })
-
-        (38,
-            {
-                tables     = Tables_reduce_reduce.tables
-                regexp     = GNESCC.Regexp_reduce_reduce.ruleToRegex
-                actionsMap = GNESCC.Actions_reduce_reduce.ruleToAction
-                path       = "test_reduce_reduce\\test_reduce_reduce_1.yrd.in"
-                rightValue = seq ["A" |> box; "B" |> box]
-                lexer      = fun buf -> Lexer_reduce_reduce.Lexer(buf):>ILexer  
-            })
-
-        (39,
-            {
-                tables     = Tables_braces.tables
-                regexp     = GNESCC.Regexp_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_braces.ruleToAction
-                path       = "\claret\\braces_1\\test_simple_braces_1.yrd.in"
-                rightValue = seq [1 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
-            })
-
-        (40,
-            {
-                tables     = Tables_braces.tables
-                regexp     = GNESCC.Regexp_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_braces.ruleToAction
-                path       = "\claret\\braces_1\\test_simple_braces_2.yrd.in"
-                rightValue = seq [2 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
-            })
-
-        (41,
-            {
-                tables     = Tables_braces.tables
-                regexp     = GNESCC.Regexp_braces.ruleToRegex
-                actionsMap = GNESCC.Actions_braces.ruleToAction
-                path       = "\claret\\braces_1\\test_simple_braces_3.yrd.in"
-                rightValue = seq [3 |> box]
-                lexer      = fun buf -> Lexer_simple_braces.Lexer(buf):>ILexer  
-            })                
-
-    ]
-    |> dict
-
-type TestStatus =
-    | TSuccess of seq<obj>
-    | TError of string
-
-let run_common path = 
-    let content = System.IO.File.ReadAllText(path)    
-    let reader = new System.IO.StringReader(content) in
-    LexBuffer<_>.FromTextReader reader
-
-let runMain path tables actions regexp lexerF =
-    let buf = run_common path 
     let l = lexerF buf
     let parseRes = 
         let ti = new TableInterpreter(tables)
         ti.Run l
-    
-    let res  = 
-        //match parseRes with
-         
-        Seq.map (fun tree -> ASTInterpretator.interp actions regexp tree) parseRes    
-        |> Seq.filter (function | Success _ -> true | _ -> false)
-        |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
-        |> TSuccess
-//        | PError (pos) -> 
-//            TError((l:>ILexer).Get(pos) 
-//            |> fun x -> (String.concat " " [pos.ToString(); string x.tag]))
-
-    res
-    
-
-let run path tables actions regexp lexerF  =
-    match runMain path tables actions regexp lexerF with
-    | TSuccess(r) -> r
-    | _                 -> Seq.empty
-
-let eRun path tables actions lexerF = Seq.empty
-//    match runMain path tables actions lexerF with
-//    | (TError(r),_,_) -> 
-//    //#if debug
-//        printf "\nError: %A \n" r
-//    //#endif
-//        Seq.singleton r
-//    | _               -> Seq.empty
-
-let pRun path tables actions lexerF = 0
-//    match runMain path tables actions lexerF with
-//    | (_,_,cc) -> cc
-
-type GNESCCPerformanceTests () =
-    static member Test1 = 
-        let test = tests.[1] 
-        fun x -> pRun x test.tables test.actionsMap
-        , testPath + "/test_alt_in_cls/" + performanceFolder
-
-    static member Test2 = 
-        let test = tests.[30] 
-        fun x -> pRun x test.tables test.actionsMap
-        , testPath + "/test_summator_1/" + performanceFolder
-
-     
-[<TestFixture>]
-type ``GNESCC parse error position tests`` () =
-
-    [<Test>] 
-    member test.``Alt error`` () =
-        let test = tests.[34]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap 
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Alt in cls error`` () =
-        let test = tests.[35]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Summator 1 error`` () =
-        let test = tests.[36]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Arithm glr error`` () =
-        let test = tests.[37]
-        let res = eRun (testPath + test.path) test.tables test.actionsMap
-        Assert.AreEqual(test.rightValue,res)
+              
+    Seq.map (fun tree -> ASTInterpretator.interp actions regexp tree) parseRes    
+    |> Seq.filter (function | Success _ -> true | _ -> false)
+    |> Seq.map (function | Success x -> x | _ -> failwith "Incorrect filter")
+    |> List.ofSeq
 
 
 [<TestFixture>]
 type ``GNESCC core tests`` () =
-    [<Test>] 
-    member test.``Alt in closure test 1`` () =
-        let test = tests.[1]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer     
-        Assert.AreEqual(test.rightValue,res) 
+    [<Test>]
+    member test.checker_on_glr_1() =
+        let tables     = GNESCCGenerator.Tables_checker_on_glr.tables
+        let regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
+        let rightValue = [3 |> box]
+        let lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/checker_on_glr/checker_on_glr_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 2`` () =
-        let test = tests.[2]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.checker_on_glr_2() =
+        let tables     = GNESCCGenerator.Tables_checker_on_glr.tables
+        let regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
+        let rightValue = [10 |> box]
+        let lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/checker_on_glr/checker_on_glr_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 3`` () =
-        let test = tests.[3]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.checker_on_glr_3() =
+        let tables     = GNESCCGenerator.Tables_checker_on_glr.tables
+        let regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
+        let rightValue = [11 |> box]
+        let lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/checker_on_glr/checker_on_glr_3.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 4`` () =
-        let test = tests.[4]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.checker_on_glr_4() =
+        let tables     = GNESCCGenerator.Tables_checker_on_glr.tables
+        let regexp     = GNESCC.Regexp_checker_on_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_checker_on_glr.ruleToAction
+        let rightValue = [40 |> box]
+        let lexer      = fun buf -> Lexer_checker_on_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/checker_on_glr/checker_on_glr_4.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 5`` () =
-        let test = tests.[5]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.simple_checker_1() =
+        let tables     = GNESCCGenerator.Tables_simple_checker.tables
+        let regexp     = GNESCC.Regexp_simple_checker.ruleToRegex
+        let actionsMap = GNESCC.Actions_simple_checker.ruleToAction
+        let rightValue = [7 |> box]
+        let lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/simple_checker/simple_checker_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 6`` () =
-        let test = tests.[6]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.simple_checker_2() =
+        let tables     = GNESCCGenerator.Tables_simple_checker.tables
+        let regexp     = GNESCC.Regexp_simple_checker.ruleToRegex
+        let actionsMap = GNESCC.Actions_simple_checker.ruleToAction
+        let rightValue = [12 |> box; 12 |> box]
+        let lexer      = fun buf -> Lexer_simple_checker.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/checkers/simple_checker/simple_checker_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt in closure test 7`` () =
-        let test = tests.[7]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.l_attr_1() =
+        let tables     = GNESCCGenerator.Tables_l_attr.tables
+        let regexp     = GNESCC.Regexp_l_attr.ruleToRegex
+        let actionsMap = GNESCC.Actions_l_attr.ruleToAction
+        let rightValue = [3 |> box]
+        let lexer      = fun buf -> Lexer_l_attr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/action_code/l_attrs/l_attr/l_attr_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt test 1`` () =
-        let test = tests.[8]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.arithm_glr_1() =
+        let tables     = GNESCCGenerator.Tables_arithm_glr.tables
+        let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
+        let rightValue = [1 |> box]
+        let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Alt test 2`` () =
-        let test = tests.[9]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.arithm_glr_2() =
+        let tables     = GNESCCGenerator.Tables_arithm_glr.tables
+        let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
+        let rightValue = [3 |> box]
+        let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Seq test 1`` () =
-        let test = tests.[10]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.arithm_glr_3() =
+        let tables     = GNESCCGenerator.Tables_arithm_glr.tables
+        let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
+        let rightValue = seq [6 |> box]
+        let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_3.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure with tail test 1`` () =
-        let test = tests.[11]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.arithm_glr_4() =
+        let tables     = GNESCCGenerator.Tables_arithm_glr.tables
+        let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
+        let rightValue = [2 |> box]
+        let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_4.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure with tail test 2`` () =
-        let test = tests.[12]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.arithm_glr_5() =
+        let tables     = GNESCCGenerator.Tables_arithm_glr.tables
+        let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
+        let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
+        let rightValue = [5|>box]
+        let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_5.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure with head test 1`` () =
-        let test = tests.[13]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_1() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = seq ["-" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure with head test 2`` () =
-        let test = tests.[14]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_2() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["-;-" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure test 1`` () =
-        let test = tests.[15]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_3() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["+" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_3.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure test 2`` () =
-        let test = tests.[16]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_4() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["+;+" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_4.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Closure test 3`` () =
-        let test = tests.[17]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_5() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["-;+" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_5.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Arithm glr test 2`` () =
-        let test = tests.[19]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_6() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["+;-" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_6.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Arithm glr test 3`` () =
-        let test = tests.[20]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_in_cls_7() =
+        let tables     = GNESCCGenerator.Tables_alt_in_cls.tables
+        let regexp     = GNESCC.Regexp_alt_in_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt_in_cls.ruleToAction
+        let rightValue = ["-;+;+;-;+;-;-" |> box]
+        let lexer      = fun buf -> Lexer_alt_in_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/alt_in_cls/alt_in_cls_7.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Arithm glr test 4`` () =
-        let test = tests.[21]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_with_head_1() =
+        let tables     = GNESCCGenerator.Tables_cls_with_head.tables
+        let regexp     = GNESCC.Regexp_cls_with_head.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls_with_head.ruleToAction
+        let rightValue = ["Head minus" |> box]
+        let lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/cls_with_head/cls_with_head_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Arithm glr test 5`` () =
-        let test = tests.[22]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_with_head_2() =
+        let tables     = GNESCCGenerator.Tables_cls_with_head.tables
+        let regexp     = GNESCC.Regexp_cls_with_head.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls_with_head.ruleToAction
+        let rightValue = ["Head minus;list minus" |> box]
+        let lexer      = fun buf -> Lexer_cls_with_head.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/cls_with_head/cls_with_head_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Arithm glr test 1`` () =
-        let test = tests.[18]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_with_tail_1() =
+        let tables     = GNESCCGenerator.Tables_cls_with_tail.tables
+        let regexp     = GNESCC.Regexp_cls_with_tail.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls_with_tail.ruleToAction
+        let rightValue = ["tail minus" |> box]
+        let lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/cls_with_tail/cls_with_tail_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``L attribute test 1`` () =
-        let test = tests.[23]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_with_tail_2() =
+        let tables     = GNESCCGenerator.Tables_cls_with_tail.tables
+        let regexp     = GNESCC.Regexp_cls_with_tail.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls_with_tail.ruleToAction
+        let rightValue = ["list minus;tail minus" |> box]
+        let lexer      = fun buf -> Lexer_cls_with_tail.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/cls_with_tail/cls_with_tail_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Simple checker test 1`` () =
-        let test = tests.[24]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.seq_nonterms_1() =
+        let tables     = GNESCCGenerator.Tables_seq_nonterms.tables
+        let regexp     = GNESCC.Regexp_seq_nonterms.ruleToRegex
+        let actionsMap = GNESCC.Actions_seq_nonterms.ruleToAction
+        let rightValue = [3.0 |> box]
+        let lexer      = fun buf -> Lexer_seq_nonterms.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/complex/seq_nonterms/seq_nonterms_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Checker in glr arithmetic test 1`` () =
-        let test = tests.[26]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_1() =
+        let tables     = GNESCCGenerator.Tables_alt.tables
+        let regexp     = GNESCC.Regexp_alt.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt.ruleToAction
+        let rightValue = ["Detected: +" |> box]
+        let lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/alt/alt_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Checker in glr arithmetic test 2`` () =
-        let test = tests.[27]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.alt_2() =
+        let tables     = GNESCCGenerator.Tables_alt.tables
+        let regexp     = GNESCC.Regexp_alt.ruleToRegex
+        let actionsMap = GNESCC.Actions_alt.ruleToAction
+        let rightValue = ["Detected: *" |> box]
+        let lexer      = fun buf -> Lexer_alt.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/alt/alt_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Checker in glr arithmetic test 3`` () =
-        let test = tests.[28]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_1() =
+        let tables     = GNESCCGenerator.Tables_cls.tables
+        let regexp     = GNESCC.Regexp_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls.ruleToAction
+        let rightValue = ["" |> box]
+        let lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/cls/cls_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Checker in glr arithmetic test 4`` () =
-        let test = tests.[29]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_2() =
+        let tables     = GNESCCGenerator.Tables_cls.tables
+        let regexp     = GNESCC.Regexp_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls.ruleToAction
+        let rightValue = ["*" |> box]
+        let lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/cls/cls_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Simple checker test 2`` () =
-        let test = tests.[25]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.cls_3() =
+        let tables     = GNESCCGenerator.Tables_cls.tables
+        let regexp     = GNESCC.Regexp_cls.ruleToRegex
+        let actionsMap = GNESCC.Actions_cls.ruleToAction
+        let rightValue = ["*;*" |> box]
+        let lexer      = fun buf -> Lexer_cls.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/cls/cls_3.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Smmator_1 1`` () =
-        let test = tests.[30]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.opt_1() =
+        let tables     = GNESCCGenerator.Tables_opt.tables
+        let regexp     = GNESCC.Regexp_opt.ruleToRegex
+        let actionsMap = GNESCC.Actions_opt.ruleToAction
+        let rightValue = ["1 +" |> box]
+        let lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/opt/opt_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Summator_1 2`` () =
-        let test = tests.[31]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.opt_2() =
+        let tables     = GNESCCGenerator.Tables_opt.tables
+        let regexp     = GNESCC.Regexp_opt.ruleToRegex
+        let actionsMap = GNESCC.Actions_opt.ruleToAction
+        let rightValue = ["1" |> box]
+        let lexer      = fun buf -> Lexer_opt.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/opt/opt_2.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Summator_1 3`` () =
-        let test = tests.[32]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
+    [<Test>]
+    member test.seq_1() =
+        let tables     = GNESCCGenerator.Tables_seq.tables
+        let regexp     = GNESCC.Regexp_seq.ruleToRegex
+        let actionsMap = GNESCC.Actions_seq.ruleToAction
+        let rightValue = [3.0 |> box]
+        let lexer      = fun buf -> Lexer_seq.Lexer(buf):>ILexer
+        let res = run @"../../../../Tests/GNESCC/regexp/simple/seq/seq_1.yrd.in" tables actionsMap regexp lexer
+        Assert.AreEqual(rightValue,res)
 
-    [<Test>] 
-    member test.``Option 1`` () =
-        let test = tests.[33]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``Option 2`` () =
-        let test = tests.[333]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-    
-    [<Test>] 
-    member test.``Reduce reduce conflict 1`` () =
-        let test = tests.[38]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b1 1`` () =
-        let test = tests.[39]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b1 2`` () =
-        let test = tests.[40]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)
-
-    [<Test>] 
-    member test.``claret b1 3`` () =
-        let test = tests.[41]
-        let res = run (testPath + test.path) test.tables test.actionsMap test.regexp test.lexer
-        Assert.AreEqual(test.rightValue,res)    

@@ -64,4 +64,3 @@ let ParseFile fileName =
         let pos = lexbuf.EndPos
         let extendedMessage = sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage
-        

@@ -148,7 +148,8 @@ rule tokens = parse
             | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l)
             | x -> MyLexeme(getTag x,l)
          }
- 
+ | "--" [^'\r' '\n']*  { MyLexeme(getTag T_COMMENT, LexBuffer<_>.LexemeString(lexbuf).Substring(2)) }  
+ | "/*" { comment_depth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 and multiline_comment = parse
   | "/*" 

@@ -34,6 +34,7 @@ proc_body_stmnt:
 	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
 |	set_stmnt 
 |	execute_stmnt
+|       COMMENT
 |	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
 ;
 execute_stmnt:

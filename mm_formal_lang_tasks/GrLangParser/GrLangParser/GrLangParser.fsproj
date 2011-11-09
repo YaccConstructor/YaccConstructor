@@ -52,6 +52,9 @@
     </Reference>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FsYaccPrinter">
+      <HintPath>lib\FsYaccPrinter.dll</HintPath>
+    </Reference>
     <Reference Include="GNESCCCommon">
       <HintPath>lib\GNESCCCommon.dll</HintPath>
     </Reference>

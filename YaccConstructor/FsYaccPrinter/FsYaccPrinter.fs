@@ -19,10 +19,14 @@ namespace Yard.Generators.FsYaccPrinter
 
 open Yard.Core
 
-
 type FsYaccPrinter() = 
     inherit Generator()
         override this.Name = "FsYaccPrinter"
-        override this.Generate t = Generator.generate t "" :> obj
-        override this.Generate(t, tokenType) = Generator.generate t tokenType :> obj
+        override this.Generate t =
+            this.Generate (t, "")
+        override this.Generate(t, tokenType) = 
+            let outFile = t.info.fileName + ".fsy"
+            let res = Generator.generate t tokenType
+            System.IO.File.WriteAllText(outFile,res)
+            res :> obj
         override this.AcceptableProductionTypes = ["PAlt"; "PSeq"; "PRef"; "PToken"]

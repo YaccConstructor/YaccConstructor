@@ -19,8 +19,10 @@ namespace Yard.Core
 
 open Yard.Core.IL
 
+//[<AbstractClass>]
 type IFrontend = interface
     abstract Name : string
+    //abstract CheckGrammar : Definition.t<Source.t,Source.t> -> bool
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>
     abstract ProductionTypes : string list
 end

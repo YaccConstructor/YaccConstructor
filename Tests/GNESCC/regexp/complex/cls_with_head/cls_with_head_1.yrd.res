@@ -1,0 +1,1 @@
+["Head minus" |> box]

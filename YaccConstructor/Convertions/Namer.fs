@@ -30,7 +30,7 @@ let private withPrefix s = "yard_" + s
 (** global variable for number of current generated rule *)
 let curNum = ref 0
 
-let resetRuleEnumerator () = curNum := 1
+let resetRuleEnumerator () = curNum := 0
 
 let private genYardName n (l, c) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c)
 

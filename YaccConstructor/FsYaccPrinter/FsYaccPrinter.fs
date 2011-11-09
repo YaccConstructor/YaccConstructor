@@ -19,11 +19,10 @@ namespace Yard.Generators.FsYaccPrinter
 
 open Yard.Core
 
-
 type FsYaccPrinter() = 
     inherit Generator()
-        override this.Name = "FsYaccPrinter"        
-        override this.Generate t = 
+        override this.Name = "FsYaccPrinter"
+        override this.Generate t =
             this.Generate (t, "")
         override this.Generate(t, tokenType) = 
             let outFile = t.info.fileName + ".fsy"

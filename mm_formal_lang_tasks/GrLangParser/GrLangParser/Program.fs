@@ -9,28 +9,27 @@ let run path =
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
     let l = Lexer.Lexer(buf)
-
-    //Create tables
-    let tables = tables
-    
-    //Run parser
-    // forest -- dirivation forest    
+        
     let forest =    
         let ti = new TableInterpreter(tables)
         ti.Run l
 
-    let result =
-        //run forest interpretation (action code calculation)
+    let result =    
         let r = 
             Seq.map 
                 (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToRegex)
                 forest
-        r
-                
+        r |> List.ofSeq
+    
+    let toFsYacc =
+        let fsYaccPrinter = Yard.Generators.FsYaccPrinter.FsYaccPrinter()
+        result 
+        |> List.map (function | Success r -> (let x = fsYaccPrinter.Generate(r:?> Yard.Core.IL.Definition.t<Yard.Core.IL.Source.t,Yard.Core.IL.Source.t>) in printfn "%A" x)  | _ ->())
+
     printfn "Result %A\n" result
+   // toFsYacc()
     
 do 
-    run @"D:\YC\recursive-ascent\mm_formal_lang_tasks\GrLangParser\GrLangParser\tests\t1"
+    run @"..\..\tests\t1"
     |> ignore
     System.Console.ReadLine() |> ignore
-

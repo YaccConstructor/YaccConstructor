@@ -19,15 +19,15 @@ let elem t =
     {    
         omit    = false
         rule    = t        
-        binding = None        
-        checker = None
+        binding = (None:Option<Source.t>)        
+        checker = (None:Option<Source.t>)
     }
 
 let rule (nterm,rSeq) isStart=
     {       
         name    = nterm
         args    = []
-        body    = PSeq (List.map elem rSeq,None)
+        body    = PSeq (List.map elem rSeq,(None))
         _public = isStart
         metaArgs= []
     }
@@ -36,7 +36,7 @@ let grammar rLst =
     { 
      Definition.empty with
        Definition.info = { fileName = "" }
-       Definition.head = None
+       Definition.head = (None:Option<Source.t>)
        Definition.grammar = List.mapi (fun i x -> rule x (i=0)) rLst
        Definition.foot = None
     }    
@@ -88,7 +88,7 @@ let rule1 expr =
                     | x -> getUnmatched x "RELeaf"
 
                 yardElemAction(gnescc_x1)
-            let (lst) =
+            let (lst:Production.t<Source.t,Source.t> list) =
                 let yardElemAction expr = 
                     match expr with
                     | REClosure(lst) -> 
@@ -105,7 +105,7 @@ let rule1 expr =
                                                 | x -> getUnmatched x "RELeaf"
 
                                             yardElemAction(x0)
-                                        (PRef((value nt,(0,0)),None))
+                                        (PRef((value nt,(0,0)),(None:Option<Source.t>)))
                                     | x -> getUnmatched x "RESeq"
 
                                 yardLAltAction x 

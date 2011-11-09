@@ -1,4 +1,4 @@
-﻿module Checker
+﻿module Yard.Core.Checkers
 
 open System.Linq
 open Yard.Core.IL.Production

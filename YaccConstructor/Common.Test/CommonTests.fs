@@ -4,6 +4,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
+open Yard.Core.Checkers
 open NUnit.Framework
 open System.Linq
 
@@ -52,3 +53,12 @@ type ``Components loader tests`` () =
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
         Assert.AreEqual(allConversions,expetedResult)
+
+[<TestFixture>]
+type ``Checker test`` () =
+    [<Test>]
+    member test.``Start rule checker test.`` () =
+        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\no_start_rule.yrd") 
+        |> IsStartRuleExists
+        |> Assert.IsFalse

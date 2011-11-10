@@ -1,5 +1,4 @@
-﻿#light
-namespace Module1
+﻿namespace VSYardModule
 open System.Collections.Generic
 open System
 open System.ComponentModel.Composition;
@@ -10,8 +9,7 @@ open Microsoft.VisualStudio.Text.Tagging;
 open Microsoft.VisualStudio.Utilities;
 open System.Linq;
 
-type internal BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
-    class
+type internal BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) = class
        (* let View : ITextView = view
         let SourceBuffer : ITextBuffer = sourceBuffer
         let CurrentChar : Nullable<SnapshotPoint> = null

@@ -1,5 +1,4 @@
-﻿// Дополнительные сведения о F# см. на http://fsharp.net
-namespace Module1
+﻿namespace VSYardModule
 open System
 open System.Collections.Generic
 open System.ComponentModel.Composition

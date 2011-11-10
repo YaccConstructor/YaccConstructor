@@ -11,7 +11,7 @@ open Microsoft.VisualStudio.Utilities
 open System.Linq
 
 type internal BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) = class
-     interface ITagger<TextMarkerTag> with
+     interface ITagger<ITag> with
       member self.GetTags spans = null
       member self.add_TagsChanged x = ()
       member self.remove_TagsChanged x = ()

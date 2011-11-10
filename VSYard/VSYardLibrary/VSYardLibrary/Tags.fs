@@ -1,4 +1,4 @@
-﻿namespace VSYardModule
+﻿namespace VSYardNS
 
 open System
 open System.Collections.Generic

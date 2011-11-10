@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="BraceMatchingTagger.fs" />
     <Compile Include="BraceMatchingTaggerProvider.fs" />
-    <None Include="Script.fsx" />
     <Compile Include="Parser.fs" />
     <Compile Include="Tags.fs" />
     <Compile Include="YardClassifier.fs" />

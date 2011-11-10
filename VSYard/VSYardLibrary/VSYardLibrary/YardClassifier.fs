@@ -10,14 +10,13 @@ open Microsoft.VisualStudio.Text.Tagging
 open Microsoft.VisualStudio.Utilities
 open System.Linq
 
-type internal MyClassifier (buffer, ookTagAggregator, ClassificationTypeRegistry) = class
-    interface ITagger<ClassificationTag>
-    end
-
 //тип должен быть описан перед его использованием
 type internal MyClassifier (buffer, ookTagAggregator, ClassificationTypeRegistry) = class
-    interface ITagger<ClassificationTag>
-    end
+    interface ITagger<ClassificationTag> with
+        member self.GetTags (spans:NormalizedSnapshotSpanCollection) : seq<ITagSpan<ClassificationTag>> = Seq.empty
+        member self.add_TagsChanged x = ()
+        member self.remove_TagsChanged x = ()
+ end
 
 [<Export(typeof<ITaggerProvider>)>]
 [<ContentType("yard")>]
@@ -52,10 +51,10 @@ type internal YardClassifier () = class
         [<Import>]        
         member self.AggregatorFactory 
             with get () = aggregatorFactory
-            and set af = aggregatorFactory <- af
+            and set af = aggregatorFactory <- af        
 
         interface ITaggerProvider with
-            member this.CreateTagger<'T when 'T :> ITag>(buffer : ITextBuffer) : ITagger<'T> =
+            member this.CreateTagger(buffer : ITextBuffer) =
                 let ookTagAggregator : ITagAggregator<TokenTag> = aggregatorFactory.CreateTagAggregator<TokenTag>(buffer)
-                MyClassifier(buffer, ookTagAggregator, classificationTypeRegistry) :> ITagger<'T> 
+                box (MyClassifier(buffer, ookTagAggregator, classificationTypeRegistry)) :?> ITagger<_> 
     end

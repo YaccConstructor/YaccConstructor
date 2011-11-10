@@ -9,8 +9,8 @@ open Microsoft.VisualStudio.Text.Tagging
 open Microsoft.VisualStudio.Utilities
 open System.Linq
 
-type internal BraceMatchingTaggerProvider<'T> = class
+type internal BraceMatchingTaggerProvider = class
     interface IViewTaggerProvider with
-        member self.CreateTagger<'T> (textView : ITextView, buffer : ITextBuffer) = 
-            new BraceMatchingTagger(textView, buffer) 
+        member self.CreateTagger (textView : ITextView, buffer : ITextBuffer) = 
+            box (new BraceMatchingTagger(textView, buffer)) :?> ITagger<_>
 end

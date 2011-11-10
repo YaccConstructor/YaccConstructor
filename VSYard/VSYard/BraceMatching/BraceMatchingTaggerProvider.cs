@@ -17,7 +17,7 @@
     {
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-            return new BraceMatchingTagger(textView, buffer) as ITagger<T>;
+            return new  VSYardNS.BraceMatchingTagger(textView, buffer) as ITagger<T>;
         }
     }
 }

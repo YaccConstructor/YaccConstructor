@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Utilities;
     using System.Linq;
 
-    internal class BraceMatchingTagger : ITagger<TextMarkerTag>
+    /*internal class BraceMatchingTagger : ITagger<TextMarkerTag>
     {
 
         ITextView View { get; set; }
@@ -220,5 +220,5 @@
             }
             return false;
         }
-    }
+    }*/
 }

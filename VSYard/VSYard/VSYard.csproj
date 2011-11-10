@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MyCompany.VSYard</RootNamespace>
     <AssemblyName>VSYard</AssemblyName>
-    <SignAssembly>True</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
@@ -116,7 +116,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="blahblah.yrd" />
     <Compile Include="BraceMatching\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatching\BraceMatchingTaggerProvider.cs" />
     <Compile Include="Classifiers\Parser.cs" />
@@ -144,7 +143,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -155,7 +153,12 @@
   <ItemGroup>
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\VSYardLibrary\VSYardLibrary\VSYardLibrary.fsproj">
+      <Project>{465D7B80-550A-40BF-B108-86418AD5E565}</Project>
+      <Name>VSYardLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
   </PropertyGroup>

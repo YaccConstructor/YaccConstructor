@@ -1,13 +1,13 @@
-﻿module Parser
+﻿namespace VSYardNS
 
-open System;
-open System.Collections.Generic;
-open System.Linq;
-open System.Text;
-open Microsoft.VisualStudio.Text.Tagging;
-open Microsoft.VisualStudio.Text;
-open Microsoft.VisualStudio.Utilities;
-open System.ComponentModel.Composition;
+open System
+open System.Collections.Generic
+open System.Linq
+open System.Text
+open Microsoft.VisualStudio.Text.Tagging
+open Microsoft.VisualStudio.Text
+open Microsoft.VisualStudio.Utilities
+open System.ComponentModel.Composition
 
 [<Export(typeof<ITaggerProvider>)>]
 [<TagType(typeof<IOutliningRegionTag>)>]

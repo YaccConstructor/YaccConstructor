@@ -10,6 +10,10 @@ open Microsoft.VisualStudio.Utilities;
 open System.Linq;
 
 type internal BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) = class
+     interface ITagger<TextMarkerTag> with
+      member self.GetTags spans = null
+      member self.add_TagsChanged x = ()
+      member self.remove_TagsChanged x = ()
        (* let View : ITextView = view
         let SourceBuffer : ITextBuffer = sourceBuffer
         let CurrentChar : Nullable<SnapshotPoint> = null

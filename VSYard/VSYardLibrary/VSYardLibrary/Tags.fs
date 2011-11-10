@@ -1,4 +1,4 @@
-﻿module Tags
+﻿namespace VSYardModule
 
 open System;
 open System.Collections.Generic;

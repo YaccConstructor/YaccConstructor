@@ -10,7 +10,13 @@ open Microsoft.VisualStudio.Text.Tagging
 open Microsoft.VisualStudio.Utilities
 open System.Linq
 
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) = 
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
+    let caretPositionChanged  = 
+       fun x ->
+          let y = x 
+          () 
+    do
+      view.Caret.PositionChanged.Add(caretPositionChanged)
     let getTags (spans : NormalizedSnapshotSpanCollection) =
         //Здесь логика по подсветке скобок
         let res = Seq.empty

@@ -1,4 +1,5 @@
-﻿namespace VSYardModule
+﻿namespace VSYardNS
+
 open System
 open System.Collections.Generic
 open System.ComponentModel.Composition
@@ -7,7 +8,11 @@ open Microsoft.VisualStudio.Text.Classification
 open Microsoft.VisualStudio.Text.Editor
 open Microsoft.VisualStudio.Text.Tagging
 open Microsoft.VisualStudio.Utilities
-open System.Linq;
+open System.Linq
+
+type internal MyClassifier (buffer, ookTagAggregator, ClassificationTypeRegistry) = class
+    interface ITagger<ClassificationTag>
+    end
 
 [<Export(typeof<ITaggerProvider>)>]
 [<ContentType("yard")>]
@@ -24,7 +29,7 @@ type internal YardClassifier () = class
         [<Export>]
         [<FileExtension(".yrd")>]
         [<ContentType("yard")>]
-        let mutable ookFileType : FileExtensionToContentTypeDefinition = null
+        let mutable ookFileType : FileExtensionToContentTypeDefinition = null (*   ??   *)
         member self.OokFileType 
             with get () = ookContentType
             and set oft = ookContentType <- oft
@@ -42,10 +47,7 @@ type internal YardClassifier () = class
             and set af = aggregatorFactory <- af
 
         interface ITaggerProvider with
-            member this. CreateTagger<'T when 'T :> ITag>(buffer : ITextBuffer) : ITagger<'T> =
+            member this. CreateTagger<'T (*   ??   *) when 'T :> ITag>(buffer : ITextBuffer) : ITagger<'T> =
                 let ookTagAggregator : ITagAggregator<TokenTag> = aggregatorFactory.CreateTagAggregator<TokenTag>(buffer)
-                MyClassifier(buffer, ookTagAggregator, ClassificationTypeRegistry) :> ITagger<'T>; 
-    end
-type internal MyClassifier () = class
-    interface ITagger<ClassificationTag>
+                MyClassifier(buffer, ookTagAggregator, classificationTypeRegistry) :> ITagger<'T> (*   ??   *)
     end

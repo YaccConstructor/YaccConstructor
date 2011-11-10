@@ -1,13 +1,14 @@
-﻿namespace VSYardModule
+﻿namespace VSYardNS
+
 open System.Collections.Generic
 open System
-open System.ComponentModel.Composition;
-open Microsoft.VisualStudio.Text;
-open Microsoft.VisualStudio.Text.Classification;
-open Microsoft.VisualStudio.Text.Editor;
-open Microsoft.VisualStudio.Text.Tagging;
-open Microsoft.VisualStudio.Utilities;
-open System.Linq;
+open System.ComponentModel.Composition
+open Microsoft.VisualStudio.Text
+open Microsoft.VisualStudio.Text.Classification
+open Microsoft.VisualStudio.Text.Editor
+open Microsoft.VisualStudio.Text.Tagging
+open Microsoft.VisualStudio.Utilities
+open System.Linq
 
 type internal BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) = class
        (* let View : ITextView = view

@@ -1,0 +1,2 @@
+a:(NUMBER|s);
++s: a;

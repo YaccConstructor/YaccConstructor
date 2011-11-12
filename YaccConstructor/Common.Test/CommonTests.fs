@@ -57,8 +57,29 @@ type ``Components loader tests`` () =
 [<TestFixture>]
 type ``Checker test`` () =
     [<Test>]
-    member test.``Start rule checker test.`` () =
+    member test.``Start rule exists 1`` () =
         let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
         frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\no_start_rule.yrd") 
         |> IsStartRuleExists
+        |> Assert.IsFalse
+
+    [<Test>]
+    member test.``Start rule exists 2`` () =
+        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\one_start_rule.yrd") 
+        |> IsStartRuleExists
+        |> Assert.IsTrue
+
+    [<Test>]
+    member test.``Single start rule 1`` () =
+        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\one_start_rule.yrd") 
+        |> IsSingleStartRule
+        |> Assert.IsTrue
+
+    [<Test>]
+    member test.``Single start rule 2`` () =
+        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\two_start_rules.yrd") 
+        |> IsSingleStartRule
         |> Assert.IsFalse

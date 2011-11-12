@@ -1,0 +1,5 @@
+yard_rule_2[arg]:  b[5];
+
+yard_rule_a_3[yard_arg_1]:  yard_rule_2[yard_arg_1 6];
+
++s[arg]:  yard_rule_a_3[arg];

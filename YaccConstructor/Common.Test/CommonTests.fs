@@ -7,6 +7,7 @@ open Yard.Core.IL.Definition
 open Yard.Core.Checkers
 open NUnit.Framework
 open System.Linq
+open System.IO
 
 [<TestFixture>]
 type ``Components loader tests`` () =
@@ -56,30 +57,47 @@ type ``Components loader tests`` () =
 
 [<TestFixture>]
 type ``Checker test`` () =
+    let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+    let basePath = @"..\..\..\..\Tests\Checkers\"
+
     [<Test>]
-    member test.``Start rule exists 1`` () =
-        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
-        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\no_start_rule.yrd") 
+    member test.``Start rule exists. No start rule.`` () =
+        Path.Combine(basePath, "no_start_rule.yrd")
+        |> frontend.ParseGrammar
         |> IsStartRuleExists
         |> Assert.IsFalse
 
     [<Test>]
-    member test.``Start rule exists 2`` () =
-        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
-        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\one_start_rule.yrd") 
+    member test.``Start rule exists. One start rule.`` () =
+        Path.Combine(basePath, "one_start_rule.yrd")
+        |> frontend.ParseGrammar
         |> IsStartRuleExists
         |> Assert.IsTrue
 
     [<Test>]
-    member test.``Single start rule 1`` () =
-        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
-        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\one_start_rule.yrd") 
+    member test.``Start rule exists. Two start rules.`` () =
+        Path.Combine(basePath, "two_start_rules.yrd")
+        |> frontend.ParseGrammar
+        |> IsStartRuleExists
+        |> Assert.IsTrue
+
+    [<Test>]
+    member test.``Single start rule. No start rule.`` () =
+        Path.Combine(basePath, "no_start_rule.yrd")
+        |> frontend.ParseGrammar
+        |> IsSingleStartRule
+        |> Assert.IsFalse
+
+    [<Test>]
+    member test.``Single start rule. One start rule.`` () =
+        Path.Combine(basePath, "one_start_rule.yrd")
+        |> frontend.ParseGrammar
         |> IsSingleStartRule
         |> Assert.IsTrue
 
     [<Test>]
-    member test.``Single start rule 2`` () =
-        let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
-        frontend.ParseGrammar(@"..\..\..\..\Tests\Checkers\two_start_rules.yrd") 
+    member test.``Single start rule. Two start rules.`` () =
+        Path.Combine(basePath, "two_start_rules.yrd")
+        |> frontend.ParseGrammar
         |> IsSingleStartRule
         |> Assert.IsFalse

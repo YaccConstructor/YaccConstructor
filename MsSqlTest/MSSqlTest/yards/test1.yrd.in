@@ -1,5 +1,5 @@
 create procedure ProcName 
 as 
 begin 
-IF (@ret > 0) then @asfd
+return (1)
 end

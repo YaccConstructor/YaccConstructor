@@ -66,6 +66,7 @@ let getKwToken (name: string) =
     | "ON"        -> T_ON
     | "OFF"       -> T_OFF
     | "RECOMPILE" -> T_KW_RECOMPILE
+    | "RETURN"    -> T_KW_RETURN
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT

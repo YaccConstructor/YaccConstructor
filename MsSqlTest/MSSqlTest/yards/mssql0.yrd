@@ -36,6 +36,8 @@ proc_body_stmnt:
 |	execute_stmnt
 |       COMMENT
 |	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
+|	KW_RETURN sql_expr     (* NB. expression should be integer
+				* http://msdn.microsoft.com/en-us/library/ms174998.aspx *)
 ;
 execute_stmnt:
  	(KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( IDENT | FIDENT )
@@ -53,7 +55,7 @@ set_stmnt:
 | 	SET NOCOUNT ( ON | OFF )
 |	SET ANSI_NULLS (ON | OFF)
 |	SET QUOTED_IDENTIFIER (ON | OFF)
-|	SET LOCALVAR (DOT IDENT)? OP_EQ   sql_expr {}
+|	SET LOCALVAR (DOT IDENT)? OP_EQ sql_expr
 ;	
 
 sql_datatype:

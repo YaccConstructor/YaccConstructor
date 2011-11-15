@@ -31,19 +31,60 @@ create_proc:
 ;
 
 proc_body_stmnt:
-	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
+	select_stmnt
 |	set_stmnt 
 |	execute_stmnt
+|	sql_expr
 |       COMMENT
 |	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
 ;
+(* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
+select_stmnt:
+(*	list<<(KW_WITH common_table_expression)* COMMA>> *)
+	KW_SELECT IDENT KW_FROM IDENT
+|	query_expression
+	(KW_INTO FIDENT (* http://msdn.microsoft.com/en-us/library/ms188029.aspx *) )?
+;
+query_expression:
+	( query_specification | (LPAREN query_expression RPAREN) )
+	(
+		(KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT) query_specification	
+	|	LPAREN query_expression RPAREN
+	)
+;
+query_specification:
+	(* http://msdn.microsoft.com/en-us/library/ms176104.aspx *)
+	KW_SELECT (KW_ALL | KW_DISTINCT)?
+	(KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? (KW_WITH KW_TIES)? )?
+	(* <select_list> *)	
+	list<<	(       
+			STAR
+		|	(IDENT | FIDENT) DOT STAR
+		|	(
+				( (IDENT | FIDENT) DOT)? (IDENT | (DOLLAR KW_IDENTITY) | (DOLLAR KW_ROWGUID) )
+			|	IDENT (
+					(DOT | DOUBLE_COLON)
+					(IDENT | FIDENT LPAREN list<<sql_expr COMMA>> RPAREN)
+				)?
+			|	sql_expr ( KW_AS? IDENT)?
+			)
+		|	IDENT OP_EQ sql_expr
+		)
+		COMMA>>
+;
+(*
+(* http://msdn.microsoft.com/en-us/library/ms175972.aspx *)
+common_table_expression:
+	ident                                            (* TODO: impelement it ! *)
+;
+*)
 execute_stmnt:
  	(KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( IDENT | FIDENT )
 	(
 		(LOCALVAR OP_EQ)? 
 		(       ( (GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
 		|	KW_DEFAULT?
-		|       sql_value)
+		|       sql_value	)
 	)*
 	(KW_WITH KW_RECOMPILE)?
 	SEMI?
@@ -68,14 +109,27 @@ execute_as:
 binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
 | OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
+|	OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
 ;
 (* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
 sql_expr:
 	sql_value
 |	LPAREN sql_expr RPAREN
-|	(IDENT DOT)? IDENT
+|	LOCALVAR 
 |	sql_expr binop sql_expr
-|	(OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr
+|	KW_IF sql_expr KW_THEN ((KW_BEGIN sql_expr* KW_END) | sql_expr) 
+(*|	KW_SELECT sql_expr KW_FROM IDENT
+|	(OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr *)
+(*|	GLOBALVAR
+|	IDENT LPAREN list<<sql_expr COMMA>> RPAREN
+|	(IDENT DOT)* IDENT                        *)
+
+;
+list<<item sep>> : 
+	item (sep item)* 
+;
+comma_list<<item>>:
+ 	list<<item COMMA>>
 ;
 sql_value:
 	STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)

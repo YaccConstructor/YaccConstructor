@@ -1,5 +1,5 @@
 cls
-set failo=yards\mssql0.yrd
+set failo=yards\a1.yrd
 
 del /F %failo%.actions.fs
 del /F %failo%.regexp.fs

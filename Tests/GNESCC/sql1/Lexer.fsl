@@ -32,41 +32,12 @@ exception IdentToken
 let getKwToken (name: string) = 
   try
     match name.ToUpper() with
-    | "SELECT"    -> T_KW_SELECT
-    | "FROM"      -> T_KW_FROM
-    | "CREATE"    -> T_KW_CREATE
-    | "PROC"
-    | "PROCEDURE" -> T_KW_PROCEDURE
-    | "VARYING"   -> T_KW_VARYING
-    | "OUT" 
-    | "OUTPUT"    -> T_KW_OUTPUT
-    | "WITH"      -> T_KW_WITH
-    | "FOR"       -> T_KW_FOR
-    | "REPLICATION" -> T_KW_REPLICATION
-    | "AS"        -> T_KW_AS
     | "BEGIN"     -> T_KW_BEGIN
     | "END"       -> T_KW_END
-    | "BIGINT"    -> T_KW_BIGINT
-    | "INT"       -> T_KW_INT
-    | "TINYINT"   -> T_KW_TINYINT
-    | "NUMERIC"   -> T_KW_NUMERIC
-    | "BIT"       -> T_KW_BIT
-    | "SMALLINT"  -> T_KW_SMALLINT
-    | "DECIMAL"   -> T_KW_DECIMAL 
-    | "MONEY"     -> T_KW_MONEY
-    | "SMALLMONEY"-> T_KW_SMALLMONEY
     | "EXEC" 
-    | "EXECUTE"   -> T_KW_EXECUTE
-    | "CALLER"    -> T_KW_CALLER
-    | "SELF"      -> T_KW_SELF
-    | "OWNER"     -> T_KW_OWNER
-    | "DECLARE"   -> T_KW_DECLARE
-    | "NOCOUNT"   -> T_NOCOUNT
-    | "SET"       -> T_SET
-    | "ON"        -> T_ON
-    | "OFF"       -> T_OFF
-    | "RECOMPILE" -> T_KW_RECOMPILE
-    | "RETURN"    -> T_KW_RETURN
+    | "IF"        -> T_KW_IF
+(*    | "ELSE"      -> T_KW_ELSE *)
+    | "THEN"      -> T_KW_THEN 
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
@@ -95,10 +66,7 @@ let makeIdent notKeyWord (name:string) =
     if String.length name >=2 
     then name.[0..1] 
     else ""
-  if prefix = "@@" then T_GLOBALVAR
-  else if prefix = "##" then T_GLOBALTEMPOBJ
-  else if name.[0] = '@' then T_LOCALVAR
-  else if name.[0] = '#' then T_TEMPOBJ
+  if name.[0] = '@' then T_LOCALVAR
   else if notKeyWord then T_IDENT
   else getKwToken name 
 
@@ -134,39 +102,23 @@ rule tokens = parse
  | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
  | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
- | "."          { MyLexeme(getTag T_DOT, ".") }
  | "="          { MyLexeme(getTag T_OP_EQ, "=") }
- | ";"          { MyLexeme(getTag T_SEMI, ";") }
  | "("		{ MyLexeme(getTag T_LPAREN, "(") }
  | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
  | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
  | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
  | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
+ | ">"		{ MyLexeme(getTag T_OP_MT, ">") }
+ | "<"		{ MyLexeme(getTag T_OP_LT, "<") }
+ | ">="		{ MyLexeme(getTag T_OP_MT_EQ, ">=") }
+ | "<="		{ MyLexeme(getTag T_OP_LT_EQ, "<=") }
 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             let hasdot = l.IndexOf '.' <> -1 in
             match makeIdent false l with
-            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l)
             | x -> MyLexeme(getTag x,l)
          }
- | "--" [^'\r' '\n']*  { MyLexeme(getTag T_COMMENT, LexBuffer<_>.LexemeString(lexbuf).Substring(2)) }  
- | "/*" { comment_depth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
-and multiline_comment = parse
-  | "/*" 
-    { incr comment_depth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}
-  | "*/"
-    { decr comment_depth; 
-      if !comment_depth = 0 then 
-        MyLexeme(getTag T_COMMENT, "somecomment")
-      else 
-        appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
-    }
-  | eol {lexbuf.EndPos <- lexbuf.EndPos.NextLine; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf }
-  | eof { failwith "unclosed comment in the end of file" }
-  | [^ '\r' '\n' '*' '/']+ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf } 
-  | _ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf } 
-
 {
 
 type Lexer(lb) = 

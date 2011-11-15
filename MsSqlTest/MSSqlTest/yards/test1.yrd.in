@@ -1,0 +1,5 @@
+create procedure ProcName 
+as 
+begin 
+select * from a
+end

@@ -1,0 +1,21 @@
+binop:
+	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
+| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
+|	OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
+;
++sql_expr:
+	IDENT
+|	sql_value
+|	LPAREN sql_expr RPAREN
+|	LOCALVAR 
+|	sql_expr binop sql_expr
+|	KW_IF sql_expr KW_THEN ((KW_BEGIN sql_expr* KW_END) | sql_expr) 
+
+;
+list<<item sep>> : 
+	item (sep item)* 
+;
+sql_value:
+	STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+|	DEC_NUMBER
+;

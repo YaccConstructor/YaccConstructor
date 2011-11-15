@@ -1,0 +1,94 @@
++start:
+	(root_rule | COMMENT )*       {}
+;
+
+root_rule:
+	create_proc {}
+| 	GO          {}
+| 	start2      {} 
+;
+
+start2: 
+  sel_expr = ((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { }
+| COMMENT
+| GLOBALVAR
+| GLOBALTEMPOBJ
+| TEMPOBJ
+;
+
+create_proc:
+        ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
+	(( schema_name = IDENT {} ) DOT)? ( proc_name = IDENT {} ) (SEMI IDENT )?
+	( 
+	  (LOCALVAR (IDENT DOT)? sql_datatype  )
+	  (KW_VARYING)? (EQ IDENT)?
+	  (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
+	)*
+	(KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
+	KW_AS ( KW_BEGIN? proc_body_stmnt* KW_END? )
+	(SEMI)?
+	{}
+;
+
+proc_body_stmnt:
+	((KW_SELECT what = IDENT {})  (KW_FROM where=IDENT {}) ) { } 
+|	set_stmnt 
+|	execute_stmnt
+|	sql_expr
+|       COMMENT
+|	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
+;
+execute_stmnt:
+ 	(KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( IDENT | FIDENT )
+	(
+		(LOCALVAR OP_EQ)? 
+		(       ( (GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
+		|	KW_DEFAULT?
+		|       sql_value	)
+	)*
+	(KW_WITH KW_RECOMPILE)?
+	SEMI?
+;
+set_stmnt:
+ 	SET IMPLICIT_TRANSACTIONS ( ON | OFF )
+| 	SET NOCOUNT ( ON | OFF )
+|	SET ANSI_NULLS (ON | OFF)
+|	SET QUOTED_IDENTIFIER (ON | OFF)
+|	SET LOCALVAR (DOT IDENT)? OP_EQ   sql_expr {}
+;	
+
+sql_datatype:
+    (KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
+	KW_INT | KW_TINYINT | KW_MONEY) {}
+;
+
+execute_as:
+	(KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | ( username = IDENT ) ) {}
+;
+
+binop:
+	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
+| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
+|	OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
+;
+(* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
+sql_expr:
+	sql_value
+|	LPAREN sql_expr RPAREN
+|	LOCALVAR 
+|	sql_expr binop sql_expr
+|	KW_IF sql_expr KW_THEN ((KW_BEGIN sql_expr* KW_END) | sql_expr) 
+(*|	KW_SELECT sql_expr KW_FROM IDENT
+|	(OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr *)
+(*|	GLOBALVAR
+|	IDENT LPAREN list<<sql_expr COMMA>> RPAREN
+|	(IDENT DOT)* IDENT                        *)
+
+;
+list<<item sep>> : 
+	item (sep item)* 
+;
+sql_value:
+	STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+|	DEC_NUMBER
+;

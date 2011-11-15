@@ -15,7 +15,7 @@ namespace MyCompany.VSYard.Classifiers
     [Export(typeof(ITaggerProvider))]
     [ContentType("yard")]
     [TagType(typeof(ClassificationTag))]
-    internal sealed class YardClassifier : ITaggerProvider
+    internal sealed class YardClassifierProvider : ITaggerProvider
     {
         [Export]
         [Name("yard")]
@@ -36,29 +36,29 @@ namespace MyCompany.VSYard.Classifiers
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
 
-            ITagAggregator<TokenTag> ookTagAggregator =
-                                            aggregatorFactory.CreateTagAggregator<TokenTag>(buffer);
+            ITagAggregator<VSYardNS.TokenTag> ookTagAggregator =
+                                            aggregatorFactory.CreateTagAggregator<VSYardNS.TokenTag>(buffer);
 
-            return new MyClassifier(buffer, ookTagAggregator, ClassificationTypeRegistry) as ITagger<T>;
+            return new VSYardNS.YardClassifier(buffer, ookTagAggregator, ClassificationTypeRegistry) as ITagger<T>;
         }
 
     }
-    internal sealed class MyClassifier : ITagger<ClassificationTag>
+    /*internal sealed class YardClassifier : ITagger<ClassificationTag>
     {
         ITextBuffer _buffer;
-        ITagAggregator<TokenTag> _aggregator;
-        IDictionary<TokenTypes, IClassificationType> _ookTypes;
+        ITagAggregator<VSYardNS.TokenTag> _aggregator;
+        IDictionary<VSYardNS.TokenTypes, IClassificationType> _ookTypes;
 
-        internal MyClassifier(ITextBuffer buffer,
-                               ITagAggregator<TokenTag> ookTagAggregator,
+        internal YardClassifier(ITextBuffer buffer,
+                               ITagAggregator<VSYardNS.TokenTag> ookTagAggregator,
                                IClassificationTypeRegistryService typeService)
         {
             _buffer = buffer;
             _aggregator = ookTagAggregator;
-            _ookTypes = new Dictionary<TokenTypes, IClassificationType>();
-            _ookTypes[TokenTypes.OokExclaimation] = typeService.GetClassificationType("ook!");
-            _ookTypes[TokenTypes.OokPeriod] = typeService.GetClassificationType("ook.");
-            _ookTypes[TokenTypes.OokQuestion] = typeService.GetClassificationType("ook?");
+            _ookTypes = new Dictionary<VSYardNS.TokenTypes, IClassificationType>();
+            _ookTypes[VSYardNS.TokenTypes.TLitersl] = typeService.GetClassificationType("ook!");
+            _ookTypes[VSYardNS.TokenTypes.TNonterm] = typeService.GetClassificationType("ook.");
+            _ookTypes[VSYardNS.TokenTypes.TTerm] = typeService.GetClassificationType("ook?");
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged
@@ -75,9 +75,9 @@ namespace MyCompany.VSYard.Classifiers
                 var tagSpans = tagSpan.Span.GetSpans(spans[0].Snapshot);
                 yield return
                     new TagSpan<ClassificationTag>(tagSpans[0],
-                                                   new ClassificationTag(_ookTypes[tagSpan.Tag.type]));
+                                                   new ClassificationTag(_ookTypes[tagSpan.Tag.Type]));
             }
         }
-    }
+    }*/
 
 }

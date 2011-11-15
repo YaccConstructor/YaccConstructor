@@ -1,5 +1,5 @@
 create procedure ProcName 
 as 
 begin 
-return (1)
+select * from a
 end

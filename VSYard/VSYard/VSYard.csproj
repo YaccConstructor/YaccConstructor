@@ -49,6 +49,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -116,8 +117,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BraceMatching\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatching\BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Classifiers\ClassificationFormat.cs" />
+    <Compile Include="Classifiers\ClassificationType.cs" />
     <Compile Include="Classifiers\Parser.cs" />
     <Compile Include="Classifiers\Tags.cs" />
     <Compile Include="Classifiers\YardClassifier.cs" />
@@ -154,6 +156,14 @@
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\YaccConstructor\Common\Common.fsproj">
+      <Project>{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\YaccConstructor\YardFrontend\YardFrontend.fsproj">
+      <Project>{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}</Project>
+      <Name>YardFrontend</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VSYardLibrary\VSYardLibrary\VSYardLibrary.fsproj">
       <Project>{465D7B80-550A-40BF-B108-86418AD5E565}</Project>
       <Name>VSYardLibrary</Name>

@@ -56,5 +56,11 @@ let ParseFile path =
 
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
     
-let ParseString string = None
-    //GrammarParser.file Lexer.main buf
+let LexString string =
+    Lexer.currentFileContent := string;
+    let reader = new System.IO.StringReader(string)
+    let buf = LexBuffer<_>.FromTextReader reader
+    seq {
+            while not buf.IsPastEndOfStream do
+               yield Lexer.main buf  
+        }

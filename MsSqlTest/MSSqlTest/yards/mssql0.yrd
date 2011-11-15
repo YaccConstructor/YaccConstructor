@@ -37,6 +37,7 @@ proc_body_stmnt:
 |	sql_expr
 |       COMMENT
 |	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
+|	KW_RETURN sql_expr
 ;
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:

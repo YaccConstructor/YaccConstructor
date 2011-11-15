@@ -142,7 +142,8 @@ rule tokens = parse
  | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
  | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
  | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
-
+ | "*"      { MyLexeme(getTag T_STAR, "*") }
+ | "$"      { MyLexeme(getTag T_DOLLAR, "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             let hasdot = l.IndexOf '.' <> -1 in
             match makeIdent false l with

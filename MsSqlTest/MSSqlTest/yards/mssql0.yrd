@@ -42,8 +42,7 @@ proc_body_stmnt:
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
 (*	list<<(KW_WITH common_table_expression)* COMMA>> *)
-	KW_SELECT IDENT KW_FROM IDENT
-|	query_expression
+	query_expression
 	(KW_INTO FIDENT (* http://msdn.microsoft.com/en-us/library/ms188029.aspx *) )?
 ;
 query_expression:
@@ -51,12 +50,12 @@ query_expression:
 	(
 		(KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT) query_specification	
 	|	LPAREN query_expression RPAREN
-	)
+	)?
 ;
 query_specification:
 	(* http://msdn.microsoft.com/en-us/library/ms176104.aspx *)
-	KW_SELECT (KW_ALL | KW_DISTINCT)?
-	(KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? (KW_WITH KW_TIES)? )?
+	KW_SELECT (* (KW_ALL | KW_DISTINCT)?
+	(KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? (KW_WITH KW_TIES)? )? *)
 	(* <select_list> *)	
 	list<<	(       
 			STAR
@@ -72,6 +71,8 @@ query_specification:
 		|	IDENT OP_EQ sql_expr
 		)
 		COMMA>>
+	from_stmnt?
+	
 ;
 (*
 (* http://msdn.microsoft.com/en-us/library/ms175972.aspx *)
@@ -79,6 +80,23 @@ common_table_expression:
 	ident                                            (* TODO: impelement it ! *)
 ;
 *)
+(* http://msdn.microsoft.com/en-us/library/ms177634.aspx *) 
+from_stmnt:
+	KW_FROM comma_list<<(
+		(FIDENT | IDENT)
+			(* (KW_AS? FIDENT)? tablesample_clause? 
+		(KW_WITH LPAREN table_hint+ RPAREN)?        *)
+
+	)>>
+;                           (*
+tablesample_clause:
+	KW_TABLESAMPLE KW_SYSTEM? LPAREN DEC_NUMBER (KW_RERCENT | KW_ROWS)? RPAREN
+		(KW_REPEATABLE LPAREN DEC_NUMBER RPAREN)?
+;
+(* http://msdn.microsoft.com/en-us/library/ms187373.aspx *)
+table_hint:
+ 	KW_NOEXPAND? NOLOCK
+;                         *)
 execute_stmnt:
  	(KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( IDENT | FIDENT )
 	(

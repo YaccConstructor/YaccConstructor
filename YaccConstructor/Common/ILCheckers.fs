@@ -3,14 +3,14 @@
 open System.Linq
 open Yard.Core.IL.Production
 
-let private StartRulesCount (def:Yard.Core.IL.Definition.t<_,_>) =
+let private startRulesCount (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar.Count(fun r -> r._public)
 
 let IsStartRuleExists (def:Yard.Core.IL.Definition.t<_,_>) =
-    StartRulesCount def > 0
+    startRulesCount def > 0
 
 let IsSingleStartRule (def:Yard.Core.IL.Definition.t<_,_>) =
-    StartRulesCount def = 1
+    startRulesCount def = 1
 
 let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar.All 

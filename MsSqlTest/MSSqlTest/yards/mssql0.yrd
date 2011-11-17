@@ -1,5 +1,5 @@
 +start:
-	(root_rule | COMMENT )*       {}
+	(root_rule)*       {}
 ;
 
 root_rule:
@@ -10,7 +10,6 @@ root_rule:
 
 start2: 
   sel_expr = ((KW_SELECT ident {})  (KW_FROM ident {}) ) { }
-| COMMENT
 | GLOBALVAR
 | GLOBALTEMPOBJ
 | TEMPOBJ
@@ -35,7 +34,6 @@ proc_body_stmnt:
 |	set_stmnt 
 |	execute_stmnt
 |	sql_expr
-|       COMMENT
 |	KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
 |	KW_RETURN sql_expr
 ;

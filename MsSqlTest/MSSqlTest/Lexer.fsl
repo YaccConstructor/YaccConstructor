@@ -149,6 +149,8 @@ rule tokens = parse
  | ";"          { MyLexeme(getTag T_SEMI, ";") }
  | "("		{ MyLexeme(getTag T_LPAREN, "(") }
  | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
+ | "["		{ MyLexeme(getTag T_LBRACKET, "(") }
+ | "]"		{ MyLexeme(getTag T_RBRACKET, "]") }
  | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
  | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
  | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
@@ -161,7 +163,7 @@ rule tokens = parse
 (*            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l) *)
             | x -> MyLexeme(getTag x,l)
          }
- | "--" [^'\r' '\n']*  { MyLexeme(getTag T_COMMENT, LexBuffer<_>.LexemeString(lexbuf).Substring(2)) }  
+ | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { comment_depth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
 and multiline_comment = parse
@@ -170,7 +172,7 @@ and multiline_comment = parse
   | "*/"
     { decr comment_depth; 
       if !comment_depth = 0 then 
-        MyLexeme(getTag T_COMMENT, "somecomment")
+        tokens lexbuf
       else 
         appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
     }

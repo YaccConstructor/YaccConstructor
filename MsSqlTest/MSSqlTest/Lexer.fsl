@@ -55,6 +55,14 @@ let getKwToken (name: string) =
     | "DECIMAL"   -> T_KW_DECIMAL 
     | "MONEY"     -> T_KW_MONEY
     | "SMALLMONEY"-> T_KW_SMALLMONEY
+    | "FLOAT"     -> T_KW_FLOAT
+    | "REAL"      -> T_KW_REAL
+    | "CHAR"      -> T_KW_CHAR
+    | "VARCHAR"   -> T_KW_VARCHAR
+    | "NCHAR"     -> T_KW_NCHAR
+    | "NVARCHAR"  -> T_KW_NVARCHAR
+    | "MAX"       -> T_KW_MAX
+    | "NULL"      -> T_KW_NULL
     | "EXEC" 
     | "EXECUTE"   -> T_KW_EXECUTE
     | "CALLER"    -> T_KW_CALLER
@@ -121,7 +129,7 @@ let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'а'-'я' 'А'-'Я' ]
 let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'а'-'я' 'А'-'Я' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 let with_dot = '.' | ident_body_char
-let ident = ident_start_char with_dot*
+let ident = ident_start_char ident_body_char*
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
 let float_e = 'e' | 'E'
@@ -132,9 +140,11 @@ let label = ident ':'
 rule tokens = parse
  | eol          { tokens lexbuf }
  | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
- | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
+ | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
+                  MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
  | "."          { MyLexeme(getTag T_DOT, ".") }
+ | ","          { MyLexeme(getTag T_COMMA, ",") }
  | "="          { MyLexeme(getTag T_OP_EQ, "=") }
  | ";"          { MyLexeme(getTag T_SEMI, ";") }
  | "("		{ MyLexeme(getTag T_LPAREN, "(") }
@@ -146,8 +156,9 @@ rule tokens = parse
  | "$"      { MyLexeme(getTag T_DOLLAR, "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             let hasdot = l.IndexOf '.' <> -1 in
+(*            Printf.printf "ident %s\n" (LexBuffer<_>.LexemeString(lexbuf)) *)
             match makeIdent false l with
-            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l)
+(*            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l) *)
             | x -> MyLexeme(getTag x,l)
          }
  | "--" [^'\r' '\n']*  { MyLexeme(getTag T_COMMENT, LexBuffer<_>.LexemeString(lexbuf).Substring(2)) }  

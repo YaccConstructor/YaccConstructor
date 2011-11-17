@@ -20,8 +20,8 @@ create_proc:
         ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
 	(( schema_name = ident) DOT)? ( proc_name = ident {} ) (SEMI DEC_NUMBER)?
 	comma_list<<( 
-	  (LOCALVAR (full_ident DOT)? sql_datatype  )
-	  (KW_VARYING)? (EQ IDENT)?
+	  (LOCALVAR (full_ident DOT)? sql_datatype)
+	  (KW_VARYING)? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
 	  (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
 	)>>?
 	(KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
@@ -118,8 +118,15 @@ set_stmnt:
 ;	
 
 sql_datatype:
-    (KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
-	KW_INT | KW_TINYINT | KW_MONEY) {}
+	KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
+	KW_INT | KW_TINYINT | KW_MONEY
+|	KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+|	KW_REAL
+|	KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
+|	KW_VARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+|	KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+|	KW_NVARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+
 ;
 
 execute_as:
@@ -137,6 +144,7 @@ sql_expr:
 |	LPAREN sql_expr RPAREN
 |	LOCALVAR 
 |	sql_expr binop sql_expr
+
 |	KW_IF sql_expr KW_THEN ((KW_BEGIN sql_expr* KW_END) | sql_expr) 
 
 (*|	KW_SELECT sql_expr KW_FROM IDENT

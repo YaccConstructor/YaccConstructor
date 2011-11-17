@@ -123,7 +123,7 @@ let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] +
 let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
-let string_const = ''' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ ''' (* TODO: support line like 'aaa''aa' *)
+let string_const = '\'' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ '\'' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'à'-'ÿ' 'À'-'ß' ] 
 let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'à'-'ÿ' 'À'-'ß' ] 
@@ -139,7 +139,8 @@ let label = ident ':'
 
 rule tokens = parse
  | eol          { tokens lexbuf }
- | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
+ | string_const { Printf.printf "string_const: %s\n" (LexBuffer<_>.LexemeString(lexbuf) ) 
+                  MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
                   MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
@@ -147,13 +148,13 @@ rule tokens = parse
  | ","          { MyLexeme(getTag T_COMMA, ",") }
  | "="          { MyLexeme(getTag T_OP_EQ, "=") }
  | ";"          { MyLexeme(getTag T_SEMI, ";") }
- | "("		{ MyLexeme(getTag T_LPAREN, "(") }
- | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
- | "["		{ MyLexeme(getTag T_LBRACKET, "(") }
- | "]"		{ MyLexeme(getTag T_RBRACKET, "]") }
- | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
- | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
- | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
+ | "("      { MyLexeme(getTag T_LPAREN, "(") }
+ | ")"      { MyLexeme(getTag T_RPAREN, ")") }
+ | "["      { MyLexeme(getTag T_LBRACKET, "(") }
+ | "]"      { MyLexeme(getTag T_RBRACKET, "]") }
+ | "+"      { MyLexeme(getTag T_OP_PLUS, "+") }
+ | "-"      { MyLexeme(getTag T_OP_MINUS, "-") }
+ | "~"      { MyLexeme(getTag T_OP_TILDA, "~") }
  | "*"      { MyLexeme(getTag T_STAR, "*") }
  | "$"      { MyLexeme(getTag T_DOLLAR, "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
@@ -166,6 +167,7 @@ rule tokens = parse
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { comment_depth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
+ | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
 and multiline_comment = parse
   | "/*" 
     { incr comment_depth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}

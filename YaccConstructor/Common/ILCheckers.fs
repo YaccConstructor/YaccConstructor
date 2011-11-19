@@ -24,10 +24,10 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
 
 let GetUndeclaredNonterminalsList (def:Yard.Core.IL.Definition.t<_,_>) =
     let declaredRules = def.grammar |> List.map (fun r -> r.name) 
-    let undeclaredRules = new HashSet<string>()
+    let undeclaredRules = new HashSet<_>()
 
-    let rec getUndeclaredRules (additionRules, body:Yard.Core.IL.Production.t<_,_>) =
-        let getUndeclaredRulesCurried (body:Yard.Core.IL.Production.t<_,_>) = getUndeclaredRules (additionRules, body)
+    let rec getUndeclaredRules (additionRules, body) =
+        let getUndeclaredRulesCurried body = getUndeclaredRules (additionRules, body)
         match body with
             |PRef (name,_) ->   
                 let name = (fst name).ToString()
@@ -49,7 +49,7 @@ let GetUndeclaredNonterminalsList (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar 
     |> List.iter 
         (fun r -> 
-            let additionRules = new HashSet<string>()
+            let additionRules = new HashSet<_>()
             r.metaArgs |> List.iter (fun i -> additionRules.Add((fst i).ToString()) |> ignore)
             getUndeclaredRules (additionRules, r.body))
 

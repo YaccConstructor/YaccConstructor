@@ -25,15 +25,18 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
 let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
     let declaredRules = def.grammar |> List.map (fun r -> r.name) 
     let undeclaredRules = new HashSet<string>()
+    let addUndeclaredRule name additionRules = 
+        let name = (fst name).ToString()
+        if (List.tryFind ( (=) name) (declaredRules) ).IsNone
+        && (Seq.tryFind ( (=) name) (additionRules) ).IsNone then
+            undeclaredRules.Add( name ) |> ignore
 
-    let rec getUndeclaredRules (additionRules, body:Yard.Core.IL.Production.t<_,_>) =
-        let getUndeclaredRulesCurried (body:Yard.Core.IL.Production.t<_,_>) = getUndeclaredRules (additionRules, body)
+    let rec getUndeclaredRules (additionRules, body) =
+        let getUndeclaredRulesCurried body = getUndeclaredRules (additionRules, body)
         match body with
-            |PRef (name,_) ->   let name = (fst name).ToString()
-                                if (List.tryFind ( (=) name) (declaredRules) ).IsNone
-                                && (Seq.tryFind ( (=) name) (additionRules) ).IsNone then
-                                    undeclaredRules.Add( name ) |> ignore
-            //|PMetaRef (name,_,_)
+            |PRef (name,_) -> addUndeclaredRule name additionRules
+            |PMetaRef (name,_,exprList) ->  addUndeclaredRule name additionRules
+                                            exprList |> List.iter (fun r -> getUndeclaredRulesCurried r )
             |PSeq (exprList,_) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r.rule )
             |PPerm (exprList) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r )
             |PRepet (expr,_,_)
@@ -50,7 +53,7 @@ let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
                                 getUndeclaredRules (additionRules, r.body)
                                 )
 
-    undeclaredRules
+    List.ofSeq undeclaredRules
 
 (*
 let IsUndeclaredNonterminalsExists (def:Yard.Core.IL.Definition.t<_,_>) =

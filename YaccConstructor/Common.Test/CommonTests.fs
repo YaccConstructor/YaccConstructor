@@ -101,3 +101,23 @@ type ``Checker test`` () =
         |> frontend.ParseGrammar
         |> IsSingleStartRule
         |> Assert.IsFalse
+
+    [<Test>]
+    member test.``Undeclared nonterminals. Right grammar.`` () =
+        let result =
+            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
+            |> frontend.ParseGrammar
+            |> GetUndeclaredNonterminalsList
+            |> List.sort
+        let expetedResult = []
+        Assert.AreEqual(result,expetedResult)
+
+    [<Test>]
+    member test.``Undeclared nonterminals. Wrong grammar.`` () =
+        let result =
+            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Uncorrect.yrd")
+            |> frontend.ParseGrammar
+            |> GetUndeclaredNonterminalsList
+            |> List.sort
+        let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
+        Assert.AreEqual(result,expetedResult)

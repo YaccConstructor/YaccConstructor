@@ -4,7 +4,7 @@ open Yard.Generators.GNESCCGenerator.Tables
 open Microsoft.FSharp.Text.Lexing
 
 let check grammar = 
-    Checker.IsChomskyNormalForm grammar
+    Yard.Core.Checkers.IsChomskyNormalForm grammar
 
 let toFsYacc grammar =
     let fsYaccPrinter = new Yard.Generators.FsYaccPrinter.FsYaccPrinter()
@@ -38,8 +38,8 @@ let run path =
 
     match List.ofSeq result with
     | (Success r)::tl ->  
-       printfn "Is in normal form: %A" (check (r :?> _))
-       toFsYacc  (r :?> _)
+       printfn "Is in normal form: %A" (check (r :?> Yard.Core.IL.Definition.t<Yard.Core.IL.Source.t,Yard.Core.IL.Source.t>))
+       toFsYacc  //(r :?> _)
     | _ -> failwith "Attribte calculation problem"
     
 do 

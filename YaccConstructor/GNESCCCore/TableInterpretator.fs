@@ -79,7 +79,7 @@ type  TableInterpreter (tables:Tables) = class
                 printfn 
                     "         State:\n             item = %A\n             forest = <<\n" 
                     s.item                
-                List.iter PrintTree (List.map (fun x -> !x)(s.forest))
+                //List.iter PrintTree (List.map (fun x -> !x)(s.forest))
                 printfn "             >>\n")
             ps.statesSet
         printfn "     ]\n" 
@@ -158,7 +158,8 @@ type  TableInterpreter (tables:Tables) = class
             r     
             |> List.map (
                 function
-                | Symbol (s,t) -> t)
+                | Symbol (s,t) -> t
+                | x -> failwith <| "Parser error. Incorrest stack : " + x.ToString())
                        
                 
 //            |> Set.fold
@@ -182,7 +183,7 @@ type  TableInterpreter (tables:Tables) = class
 //#if DEBUG
 //        Set.iter PrintTree res
 //#endif
-        Set.iter PrintTree (Set.ofList res)
+        //
         cache.Clear()
         traceBuilderCache.Clear()
         let trC =

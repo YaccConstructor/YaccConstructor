@@ -1,1 +1,1 @@
-IF (@ret > 0) then @asfd
+IF (1 > 0) 

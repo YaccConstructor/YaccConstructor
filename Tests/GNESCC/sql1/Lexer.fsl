@@ -32,12 +32,9 @@ exception IdentToken
 let getKwToken (name: string) = 
   try
     match name.ToUpper() with
-    | "BEGIN"     -> T_KW_BEGIN
-    | "END"       -> T_KW_END
     | "EXEC" 
     | "IF"        -> T_KW_IF
-(*    | "ELSE"      -> T_KW_ELSE *)
-    | "THEN"      -> T_KW_THEN 
+    | "THEN"      -> T_KW_THEN  
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
@@ -99,20 +96,12 @@ let label = ident ':'
 
 rule tokens = parse
  | eol          { tokens lexbuf }
- | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
  | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
- | "="          { MyLexeme(getTag T_OP_EQ, "=") }
- | "("		{ MyLexeme(getTag T_LPAREN, "(") }
- | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
- | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
- | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
- | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
- | ">"		{ MyLexeme(getTag T_OP_MT, ">") }
- | "<"		{ MyLexeme(getTag T_OP_LT, "<") }
- | ">="		{ MyLexeme(getTag T_OP_MT_EQ, ">=") }
- | "<="		{ MyLexeme(getTag T_OP_LT_EQ, "<=") }
-
+ | "("      { MyLexeme(getTag T_LPAREN, "(") }
+ | ")"      { MyLexeme(getTag T_RPAREN, ")") }
+ | ">"      { MyLexeme(getTag T_OP_MT, ">") }
+ 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             let hasdot = l.IndexOf '.' <> -1 in
             match makeIdent false l with

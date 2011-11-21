@@ -72,11 +72,6 @@
     <Compile Include="YardFrontend.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AntlrToYard\AntlrFrontend.fsproj">
-      <Name>AntlrFrontend</Name>
-      <Project>{b75aec02-64bd-4b31-8115-6708c64ee5dc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

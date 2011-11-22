@@ -1,0 +1,31 @@
+System.ArgumentException: The lists had different lengths.
+Parameter name: xs2
+   at Microsoft.FSharp.Primitives.Basics.List.zipToFreshConsTail[a,b](FSharpList`1 cons, FSharpList`1 xs1, FSharpList`1 xs2)
+   at Microsoft.FSharp.Primitives.Basics.List.zip[T1,T2](FSharpList`1 xs1, FSharpList`1 xs2)
+   at Microsoft.FSharp.Collections.ListModule.Zip[T1,T2](FSharpList`1 list1, FSharpList`1 list2)
+   at Yard.Core.Convertions.ExpandMeta.expandMetaRef@113.Invoke(String name, FSharpOption`1 attrs, FSharpList`1 metaArgs) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 146
+   at Yard.Core.Convertions.ExpandMeta.expandBody@90.Invoke(t`2 body, FSharpList`1 globalAttrs, Dictionary`2 metaRules, Dictionary`2 expanded, FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 181
+   at Yard.Core.Convertions.ExpandMeta.expandBody@171-5.Invoke(elem`2 elem') in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 172
+   at Microsoft.FSharp.Collections.ListModule.loop@144-20[T,TState](FSharpFunc`3 f, TState s, FSharpList`1 xs)
+   at Microsoft.FSharp.Collections.ListModule.Fold[T,TState](FSharpFunc`2 folder, TState state, FSharpList`1 list)
+   at Yard.Core.Convertions.ExpandMeta.expandBody@90.Invoke(t`2 body, FSharpList`1 globalAttrs, Dictionary`2 metaRules, Dictionary`2 expanded, FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 169
+   at Yard.Core.Convertions.ExpandMeta.expandMetaRef@116-2.Invoke(t`2 body) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 117
+   at Microsoft.FSharp.Collections.ListModule.loop@144-20[T,TState](FSharpFunc`3 f, TState s, FSharpList`1 xs)
+   at Microsoft.FSharp.Collections.ListModule.Fold[T,TState](FSharpFunc`2 folder, TState state, FSharpList`1 list)
+   at Yard.Core.Convertions.ExpandMeta.expandMetaRef@113.Invoke(String name, FSharpOption`1 attrs, FSharpList`1 metaArgs) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 113
+   at Yard.Core.Convertions.ExpandMeta.expandBody@90.Invoke(t`2 body, FSharpList`1 globalAttrs, Dictionary`2 metaRules, Dictionary`2 expanded, FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 181
+   at Yard.Core.Convertions.ExpandMeta.expandBody@171-5.Invoke(elem`2 elem') in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 172
+   at Microsoft.FSharp.Collections.ListModule.loop@144-20[T,TState](FSharpFunc`3 f, TState s, FSharpList`1 xs)
+   at Microsoft.FSharp.Collections.ListModule.Fold[T,TState](FSharpFunc`2 folder, TState state, FSharpList`1 list)
+   at Yard.Core.Convertions.ExpandMeta.expandBody@90.Invoke(t`2 body, FSharpList`1 globalAttrs, Dictionary`2 metaRules, Dictionary`2 expanded, FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 169
+   at Yard.Core.Convertions.ExpandMeta.expandMeta(t`2 body, FSharpList`1 globalAttrs, Dictionary`2 metaRules, Dictionary`2 expanded, FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 86
+   at Yard.Core.Convertions.ExpandMeta.replaceMeta@238-3.Invoke(FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 244
+   at Yard.Core.Convertions.ExpandMeta.replaceMeta@238-3.Invoke(FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 242
+   at Yard.Core.Convertions.ExpandMeta.replaceMeta@238-3.Invoke(FSharpList`1 res) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 242
+   at Yard.Core.Convertions.ExpandMeta.expandMetaRules(FSharpList`1 rules) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 254
+   at Yard.Core.Convertions.ExpandMeta.ExpandMeta.ConvertList(FSharpList`1 ruleList) in C:\Projects\recursive-ascent\YaccConstructor\Convertions\ExpandMeta.fs:line 260
+   at Yard.Core.ConvertionsManager.ApplyConvertion(String convNameWithParams, t`2 ilTree) in C:\Projects\recursive-ascent\YaccConstructor\Common\ConvertionsManager.fs:line 36
+   at YaccConstructor.Program.run@106-1.Invoke(String conv) in C:\Projects\recursive-ascent\YaccConstructor\Main\Program.fs:line 106
+   at Microsoft.FSharp.Collections.SeqModule.Iterate[T](FSharpFunc`2 action, IEnumerable`1 source)
+   at YaccConstructor.Program.run@84.Invoke(Unit unitVar0) in C:\Projects\recursive-ascent\YaccConstructor\Main\Program.fs:line 106
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in C:\Projects\recursive-ascent\YaccConstructor\Main\Program.fs:line 141

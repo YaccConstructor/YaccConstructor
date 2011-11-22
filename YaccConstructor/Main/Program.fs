@@ -19,6 +19,7 @@ module YaccConstructor.Program
 
 open Yard.Core
 open Yard.Core.IL
+open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
 
@@ -27,6 +28,7 @@ exception InvalidGenName of string
 exception EmptyArg of string
 exception FEError of string
 exception GenError of string
+exception NotOneRule
 
 let () =
     let a:Source.t = "aa",(0,1)
@@ -118,7 +120,10 @@ let () =
                 else _raise ()
                                
             // Generate something
-            let result =            
+            let result =  
+                if not (IsSingleStartRule !ilTree) then
+                    raise NotOneRule
+                      
                 try
                     match !generatorParams with
                     | None -> gen.Generate (!ilTree)
@@ -155,6 +160,9 @@ List of available frontends, generators and convertions can be obtained by -af -
         |> System.Console.WriteLine
     | GenError (error)         ->
         "Generator error: " + error + "\n"
+        |> System.Console.WriteLine
+    | NotOneRule         ->
+        "Input grammar should contains only one start rule.\n"
         |> System.Console.WriteLine
     | :? System.IO.IOException -> printf "Could not read input file\n"
     | x -> printf "%A\n" x

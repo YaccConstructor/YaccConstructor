@@ -64,7 +64,9 @@ type TableGenerator(outPath: string) =
                         let tag = (symbolsEnumerator.Next())
                         symbols := (prefix + smbName , tag) :: !symbols
 
-                | x                 -> failwith ("You should support elem " + x.ToString())
+                | PMetaRef(_,_,_)   -> failwith ("Grammar should not contains metarules. Try to use ExpandMeta conversion.")
+
+                | x                 -> failwith ("Element " + x.ToString() + " is not supported. Try to use corresponding conversion to transform grammar.")
 
         let enumerator = new Enumerator()
          
@@ -112,7 +114,9 @@ type TableGenerator(outPath: string) =
                     builder.Trivial (FA.AtmSymbol tag) [[]]
                     |> builder.Wrap (FA.Epsilon, [[TSmbS smbNum]]) (FA.Epsilon, [[TSmbE smbNum]])
 
-                | x                 -> failwith ("You should support elem " + x.ToString())
+                | PMetaRef(_,_,_)   -> failwith ("Grammar should not contains metarules. Try to use ExpandMeta conversion.")
+
+                | x                 -> failwith ("Element " + x.ToString() + " is not supported. Try to use corresponding conversion to transform grammar.")
             
             let dv = ref -1
             let fa = build production

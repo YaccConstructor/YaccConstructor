@@ -55,6 +55,14 @@ let getKwToken (name: string) =
     | "DECIMAL"   -> T_KW_DECIMAL 
     | "MONEY"     -> T_KW_MONEY
     | "SMALLMONEY"-> T_KW_SMALLMONEY
+    | "FLOAT"     -> T_KW_FLOAT
+    | "REAL"      -> T_KW_REAL
+    | "CHAR"      -> T_KW_CHAR
+    | "VARCHAR"   -> T_KW_VARCHAR
+    | "NCHAR"     -> T_KW_NCHAR
+    | "NVARCHAR"  -> T_KW_NVARCHAR
+    | "MAX"       -> T_KW_MAX
+    | "NULL"      -> T_KW_NULL
     | "EXEC" 
     | "EXECUTE"   -> T_KW_EXECUTE
     | "CALLER"    -> T_KW_CALLER
@@ -66,6 +74,7 @@ let getKwToken (name: string) =
     | "ON"        -> T_ON
     | "OFF"       -> T_OFF
     | "RECOMPILE" -> T_KW_RECOMPILE
+    | "RETURN"    -> T_KW_RETURN
     | _           -> raise IdentToken
   with
     | IdentToken -> T_IDENT
@@ -114,13 +123,13 @@ let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] +
 let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
-let string_const = ''' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ ''' (* TODO: support line like 'aaa''aa' *)
+let string_const = '\'' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' ]+ '\'' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let ident_start_char  = ['A'-'Z' 'a'-'z' '_' '@' '#' 'а'-'я' 'А'-'Я' ] 
 let ident_body_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'а'-'я' 'А'-'Я' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 let with_dot = '.' | ident_body_char
-let ident = ident_start_char with_dot*
+let ident = ident_start_char ident_body_char*
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
 let float_e = 'e' | 'E'
@@ -130,34 +139,42 @@ let label = ident ':'
 
 rule tokens = parse
  | eol          { tokens lexbuf }
- | string_const { MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
- | decnumber    { MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
+ | string_const { Printf.printf "string_const: %s\n" (LexBuffer<_>.LexemeString(lexbuf) ) 
+                  MyLexeme(getTag T_STRING_CONST, LexBuffer<_>.LexemeString(lexbuf) ) }
+ | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
+                  MyLexeme(getTag T_DEC_NUMBER,   LexBuffer<_>.LexemeString(lexbuf) ) }
  | whitespaces  { tokens lexbuf }
  | "."          { MyLexeme(getTag T_DOT, ".") }
+ | ","          { MyLexeme(getTag T_COMMA, ",") }
  | "="          { MyLexeme(getTag T_OP_EQ, "=") }
  | ";"          { MyLexeme(getTag T_SEMI, ";") }
- | "("		{ MyLexeme(getTag T_LPAREN, "(") }
- | ")"		{ MyLexeme(getTag T_RPAREN, ")") }
- | "+"		{ MyLexeme(getTag T_OP_PLUS, "+") }
- | "-"		{ MyLexeme(getTag T_OP_MINUS, "-") }
- | "~"		{ MyLexeme(getTag T_OP_TILDA, "~") }
-
+ | "("      { MyLexeme(getTag T_LPAREN, "(") }
+ | ")"      { MyLexeme(getTag T_RPAREN, ")") }
+ | "["      { MyLexeme(getTag T_LBRACKET, "(") }
+ | "]"      { MyLexeme(getTag T_RBRACKET, "]") }
+ | "+"      { MyLexeme(getTag T_OP_PLUS, "+") }
+ | "-"      { MyLexeme(getTag T_OP_MINUS, "-") }
+ | "~"      { MyLexeme(getTag T_OP_TILDA, "~") }
+ | "*"      { MyLexeme(getTag T_STAR, "*") }
+ | "$"      { MyLexeme(getTag T_DOLLAR, "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf) in
             let hasdot = l.IndexOf '.' <> -1 in
+(*            Printf.printf "ident %s\n" (LexBuffer<_>.LexemeString(lexbuf)) *)
             match makeIdent false l with
-            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l)
+(*            | T_IDENT when hasdot -> MyLexeme(getTag T_FIDENT, l) *)
             | x -> MyLexeme(getTag x,l)
          }
- | "--" [^'\r' '\n']*  { MyLexeme(getTag T_COMMENT, LexBuffer<_>.LexemeString(lexbuf).Substring(2)) }  
+ | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { comment_depth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {MyLexeme(Constants.gnesccEndStreamTag, LexBuffer<_>.LexemeString(lexbuf))}
+ | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
 and multiline_comment = parse
   | "/*" 
     { incr comment_depth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}
   | "*/"
     { decr comment_depth; 
       if !comment_depth = 0 then 
-        MyLexeme(getTag T_COMMENT, "somecomment")
+        tokens lexbuf
       else 
         appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
     }

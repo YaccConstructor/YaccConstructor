@@ -35,10 +35,10 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="BraceMatchingTagger.fs" />
-    <Compile Include="BraceMatchingTaggerProvider.fs" />
     <Compile Include="Parser.fs" />
-    <Compile Include="Tags.fs" />
+    <Compile Include="TokenClassification.fs" />
     <Compile Include="YardClassifier.fs" />
+    <None Include="BraceMatchingTagger.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -52,6 +52,18 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\YaccConstructor\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\YaccConstructor\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

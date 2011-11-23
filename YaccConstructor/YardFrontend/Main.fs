@@ -39,22 +39,25 @@ let private run_common path =
 let ParseFile path = 
     let buf = run_common path
     GrammarParser.currentFilename := path
+    let posTo2D pos =
+        let source = System.IO.File.ReadAllText path
+        source.ToCharArray(0, min (pos+1) (source.Length))
+        |> Array.fold
+            (fun (col,row) -> function
+                | '\n' -> (col+1, 0)
+                | '\r' -> (col, row)
+                | _ -> (col, row+1)
+            )
+            (1,0)
     try
         GrammarParser.file Lexer.main buf
     with
     | Lexer.Lexical_error (msg, pos) ->
-        let pos2D =
-            let source = System.IO.File.ReadAllText path
-            source.ToCharArray(0, min (pos+1) (source.Length))
-            |> Array.fold
-                (fun (col,row) -> function
-                    | '\n' -> (col+1, 0)
-                    | '\r' -> (col, row)
-                    | _ -> (col, row+1)
-                )
-                (1,0)
-
+        let pos2D = posTo2D pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
+    (*| GrammarParser.Parse_error msg ->
+        let pos2D = posTo2D pos
+        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg*)
     
 let LexString string =
     Lexer.currentFileContent := string;

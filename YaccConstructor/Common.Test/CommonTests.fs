@@ -13,18 +13,21 @@ open System.IO
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =
+        let GeneratorsManager = GeneratorsManager.GeneratorsManager()
         let allGenerators = 
-            List.ofSeq GeneratorsManager.AvailableGenerators
+            List.ofSeq GeneratorsManager.Available
             |> List.sort
         let expetedResult = 
-            //["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"TreeDump";"YardPrinter"]
-            ["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"YardPrinter"]
+            ["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"TreeDump";"YardPrinter"]
+            //["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"YardPrinter"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
         Assert.AreEqual(allGenerators,expetedResult)
     
+
+
     [<Test>]
     member test.``All frontends`` () =
         let allFrontends = 
@@ -47,13 +50,31 @@ type ``Components loader tests`` () =
             |> List.sort
         let expetedResult =
             ["AddDefaultAC";"BuildAstSimple";"MergeAlter";"ExpandEbnf";"BuildAST";"LeaveLast"
-             ;"ReplaceLiterals";"AddEOF";"ExpandBrackets";"ExpandMeta";"ExpandEbnfStrict"
+             ;"ReplaceLiterals";"AddEOF";"ExpandBrackets";"ExpandMeta"//;"ExpandEbnfStrict"
              ;"ExpandAlter"]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
         Assert.AreEqual(allConversions,expetedResult)
+
+    
+    [<Test>]
+    member test.``Get generators name`` () =
+        let GeneratorsManager = GeneratorsManager.GeneratorsManager()
+        let VerificatedGenerators  = [("FParsecGenerator",true);("FsYaccPrinter",true);("GNESCCGenerator",true);("TreeDump",true);("YardPrinter",true)]
+
+        let genfun (x,y)  = 
+            match (x |> GeneratorsManager.Component  ) with
+                | Some GeneratorsManager -> true
+                | None -> false
+        
+        let allGetingGenerators = List.map genfun VerificatedGenerators
+
+        List.iter (fun vg ->  (vg |> snd |> printfn "%A : "); (vg |> fst |> printfn "%A;"))  VerificatedGenerators
+        printfn "**********************"
+        List.iter (printfn "%A;") allGetingGenerators 
+        Assert.AreEqual(VerificatedGenerators |> List.map (fun vg ->   vg |> snd),allGetingGenerators)
 
 [<TestFixture>]
 type ``Checker test`` () =

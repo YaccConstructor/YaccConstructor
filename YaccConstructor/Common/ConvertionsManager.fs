@@ -19,7 +19,7 @@ module Yard.Core.ConvertionsManager
 
 open Yard.Core
 open Yard.Core.IL
-
+(**)
 let private convertionsCollection: ResizeArray<Convertion> = 
     new ResizeArray<Convertion>(ComponentsLoader.LoadComponents(typeof<Convertion>) |> Seq.map (fun x -> x :?> Convertion))
 
@@ -39,3 +39,18 @@ let ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,So
         and  foot = ilTree.foot
     }
 
+(*
+
+type ConvertionsManager () as this =
+    inherit Yard.Core.Manager.Manager<Convertion>()
+    let ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
+    {   new Definition.t<Source.t,Source.t>
+        with info = ilTree.info
+        and  head = ilTree.head
+        and  grammar = 
+            match Array.toList (convNameWithParams.Split(' ')) with
+            | name::[] -> (this.Available ) ConvertList ilTree.grammar
+            | name::parameters -> (Convertion name).ConvertList (ilTree.grammar, String.concat " " parameters)
+            | _ -> failwith "You need to specify convertion name"
+        and  foot = ilTree.foot
+    }*)

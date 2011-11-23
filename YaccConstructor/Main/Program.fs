@@ -39,6 +39,7 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let convertions = new ResizeArray<string>()
+    let GeneratorsManager = GeneratorsManager.GeneratorsManager()
 
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
@@ -47,10 +48,10 @@ let () =
             Seq.tryFind (fun _ -> true) FrontendsManager.AvailableFrontends
             
     generatorName :=
-        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.AvailableGenerators then
+        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.Available then
             Some("GNESCCGenerator")
         else
-            Seq.tryFind (fun _ -> true) GeneratorsManager.AvailableGenerators
+            Seq.tryFind (fun _ -> true) GeneratorsManager.Available
 
     let generateSomething = ref true
 
@@ -72,7 +73,7 @@ let () =
                 | name::parameters -> generatorName := Some(name); generatorParams := Some(String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
          "-i", ArgType.String (fun s ->
@@ -111,15 +112,18 @@ let () =
     //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
-                if Seq.exists ((=) generatorName) GeneratorsManager.AvailableGenerators
+                if Seq.exists ((=) generatorName) GeneratorsManager.Available
                 then              
                     try
-                        GeneratorsManager.Generator generatorName
+                        match GeneratorsManager.Component  generatorName with
+                        | Some gen -> gen
+                        | None -> failwith "TreeDump is not found."
                     with
                     | _ -> _raise ()
                 else _raise ()
                                
             // Generate something
+            
             let result =  
                 if not (IsSingleStartRule !ilTree) then
                     raise NotOneRule

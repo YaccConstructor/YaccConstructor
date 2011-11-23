@@ -110,6 +110,9 @@ type ``Checker test`` () =
             |> GetUndeclaredNonterminalsList
             |> List.sort
         let expetedResult = []
+        Seq.iter (printfn "%A;") result
+        printfn "**********************"
+        Seq.iter (printfn "%A;") expetedResult  
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]
@@ -120,4 +123,7 @@ type ``Checker test`` () =
             |> GetUndeclaredNonterminalsList
             |> List.sort
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
+        Seq.iter (printfn "%A;") result
+        printfn "**********************"
+        Seq.iter (printfn "%A;") expetedResult 
         Assert.AreEqual(result,expetedResult)

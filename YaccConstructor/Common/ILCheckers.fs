@@ -7,10 +7,10 @@ open System.Linq
 let private startRulesCount (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar.Count(fun r -> r._public)
 
-let IsStartRuleExists (def:Yard.Core.IL.Definition.t<_,_>) =
+let IsStartRuleExists def =
     startRulesCount def > 0
 
-let IsSingleStartRule (def:Yard.Core.IL.Definition.t<_,_>) =
+let IsSingleStartRule def =
     startRulesCount def = 1
 
 let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
@@ -25,33 +25,38 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
 let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
     let declaredRules = def.grammar |> List.map (fun r -> r.name) 
     let undeclaredRules = new HashSet<_>()
-    let addUndeclaredRule name additionRules = 
-        let name = (fst name).ToString()
-        if (List.tryFind ( (=) name) (declaredRules) ).IsNone
-        && (Seq.tryFind ( (=) name) (additionRules) ).IsNone then
-            undeclaredRules.Add( name ) |> ignore
+    let addUndeclaredRule (name_,_) additionRules = 
+        let name = name_.ToString()
+        if not (List.exists ((=) name) declaredRules
+                || Seq.exists ((=) name) additionRules)
+        then
+            undeclaredRules.Add name |> ignore
 
-    let rec getUndeclaredRules (additionRules, body) =
-        let getUndeclaredRulesCurried body = getUndeclaredRules (additionRules, body)
+    let rec getUndeclaredRules additionRules body =
+        let getUndeclaredRulesCurried body = getUndeclaredRules additionRules body
         match body with
-            |PRef (name,_) -> addUndeclaredRule name additionRules
-            |PMetaRef (name,_,exprList) ->  addUndeclaredRule name additionRules
-                                            exprList |> List.iter (fun r -> getUndeclaredRulesCurried r )
-            |PSeq (exprList,_) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r.rule )
-            |PPerm (exprList) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r )
-            |PRepet (expr,_,_)
-            |PMany(expr)
-            |PSome (expr)
-            |POpt (expr) -> getUndeclaredRulesCurried expr
-            |PAlt (lExpr,rExpr) -> getUndeclaredRulesCurried lExpr
-                                   getUndeclaredRulesCurried rExpr
-            | _ -> ()
+        | PRef (name,_) -> addUndeclaredRule name additionRules
+        | PMetaRef (name,_,exprList) ->  
+            addUndeclaredRule name additionRules
+            exprList |> List.iter getUndeclaredRulesCurried 
+        | PSeq (exprList,_) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r.rule)
+        | PPerm exprList    -> exprList |> List.iter getUndeclaredRulesCurried 
+        | PRepet (expr,_,_)
+        | PMany expr
+        | PSome expr
+        | POpt expr -> getUndeclaredRulesCurried expr
+        | PAlt (lExpr,rExpr) -> 
+            getUndeclaredRulesCurried lExpr
+            getUndeclaredRulesCurried rExpr
+        | PLiteral _ 
+        | PToken _  -> ()
 
-    def.grammar |> List.iter (fun r -> 
-                                let additionRules = new HashSet<string>()
-                                r.metaArgs |> List.iter (fun i -> additionRules.Add( (fst i).ToString() ) |> ignore )
-                                getUndeclaredRules (additionRules, r.body)
-                                )
+    def.grammar 
+    |> List.iter 
+        (fun r -> 
+            let additionRules = new HashSet<_>()
+            r.metaArgs |> List.iter (fun (i,_) -> additionRules.Add(i.ToString()) |> ignore)
+            getUndeclaredRules additionRules r.body)
 
     List.ofSeq undeclaredRules
 

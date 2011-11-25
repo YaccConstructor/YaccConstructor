@@ -72,8 +72,8 @@ type ``YardFrontend lexer tests`` () =
     member test.``Lexer cls test`` () =
         lexerTest 
             "+s: (MINUS|PLUS)*;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN; UIDENT ("MINUS", (5, 10)); BAR;
-                UIDENT ("PLUS", (11, 15)); RPAREN; STAR; SEMICOLON; EOF]
+            [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10)); BAR;
+                UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON; EOF]
 
     [<Test>]            
     member test.``Include test`` () =

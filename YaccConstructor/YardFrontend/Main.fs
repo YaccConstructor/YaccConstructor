@@ -15,7 +15,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#light
 module Yard.Frontends.YardFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
@@ -27,17 +26,8 @@ let private run_common path =
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 
-//let private run path =
-//    let buf = run_common path in 
-//    let example = seq {
-//                       while not buf.IsPastEndOfStream do
-//                             yield Lexer.main buf  
-//                      } in
-//    Seq.iter (printfn "%A ") example
-
-
 let ParseFile path = 
-    let buf = run_common path
+    let buf = run_common path    
     GrammarParser.currentFilename := path
     let posTo2D pos =
         let source = System.IO.File.ReadAllText path

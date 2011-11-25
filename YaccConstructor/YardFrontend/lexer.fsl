@@ -170,8 +170,8 @@ and  main = parse
         lexbuf.StartPos <- string_start;
         STRING (from_lexbuf lexbuf (string_start.pos_cnum + 1, lexbuf.EndPos.AbsoluteOffset - 1))
       }
-    | "(" {LPAREN}
-    | ")" {RPAREN}
+    | "(" {LPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
+    | ")" {RPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
     | _
        { raise(Lexical_error
                 ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),

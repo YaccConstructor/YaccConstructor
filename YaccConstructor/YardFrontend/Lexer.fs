@@ -522,12 +522,12 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 20 -> ( 
 # 173 "Lexer.fsl"
-                          LPAREN
+                          LPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))
 # 526 "Lexer.fs"
           )
   | 21 -> ( 
 # 174 "Lexer.fsl"
-                          RPAREN
+                          RPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))
 # 531 "Lexer.fs"
           )
   | 22 -> ( 

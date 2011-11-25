@@ -31,7 +31,6 @@ type YardFrontend() =
 
 // For testing switch to Console App and then switch back to Class Library
 module Run = 
-    FrontendsManager.Register(new YardFrontend()) // Not register itself automatically
-    //let filename = @"..\..\..\..\Tests\Basic\test_include\test_include_main.yrd" 
+     //let filename = @"..\..\..\..\Tests\Basic\test_include\test_include_main.yrd" 
     let filename = @"..\..\..\..\Tests\RACC\test_arithm_glr\test_arithm_glr.yrd" 
     printf "%A\n" <| Yard.Frontends.YardFrontend.Main.ParseFile filename

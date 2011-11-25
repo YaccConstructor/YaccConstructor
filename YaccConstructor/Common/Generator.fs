@@ -20,9 +20,11 @@ namespace Yard.Core
 open Yard.Core.IL
 
 [<AbstractClass>]
-type Generator() =
+type Generator() as this =
     abstract Name : string
     abstract Generate : Definition.t<Source.t,Source.t> -> obj
     abstract Generate : Definition.t<Source.t,Source.t> * string -> obj
     default this.Generate(grammar, string) = this.Generate(grammar)
     abstract AcceptableProductionTypes : string list
+    interface Yard.Core.Manager.IComponent with
+        member self.Name : string =  this.Name

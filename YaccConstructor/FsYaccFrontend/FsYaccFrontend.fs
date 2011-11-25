@@ -40,8 +40,7 @@ module Run =
 
     open Microsoft.FSharp.Text.Lexing
 
-    FrontendsManager.Register(new FsYaccFrontend()) // Not register itself automatically
-    
+   
 //    let filename = @"..\..\..\AntlrToYard\Parser.fsy" 
     let filename = @"..\..\..\..\Tests\FsYacc\5.fsy" 
 //    let content = System.IO.File.ReadAllText(filename)

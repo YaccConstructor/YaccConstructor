@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommonTests.fs" />
+    <Compile Include="Manager.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AntlrToYard\AntlrFrontend.fsproj">

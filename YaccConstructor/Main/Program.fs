@@ -28,7 +28,7 @@ exception InvalidGenName of string
 exception EmptyArg of string
 exception FEError of string
 exception GenError of string
-exception NotOneRule
+exception CheckerError of string
 
 let () =
     let a:Source.t = "aa",(0,1)
@@ -39,6 +39,7 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let convertions = new ResizeArray<string>()
+    let GeneratorsManager = GeneratorsManager.GeneratorsManager()
 
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
@@ -47,10 +48,10 @@ let () =
             Seq.tryFind (fun _ -> true) FrontendsManager.AvailableFrontends
             
     generatorName :=
-        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.AvailableGenerators then
+        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.Available then
             Some("GNESCCGenerator")
         else
-            Seq.tryFind (fun _ -> true) GeneratorsManager.AvailableGenerators
+            Seq.tryFind (fun _ -> true) GeneratorsManager.Available
 
     let generateSomething = ref true
 
@@ -72,7 +73,7 @@ let () =
                 | name::parameters -> generatorName := Some(name); generatorParams := Some(String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.AvailableGenerators !generatorName), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
          "-i", ArgType.String (fun s ->
@@ -111,18 +112,26 @@ let () =
     //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
-                if Seq.exists ((=) generatorName) GeneratorsManager.AvailableGenerators
+                if Seq.exists ((=) generatorName) GeneratorsManager.Available
                 then              
                     try
-                        GeneratorsManager.Generator generatorName
+                        match GeneratorsManager.Component  generatorName with
+                        | Some gen -> gen
+                        | None -> failwith "TreeDump is not found."
                     with
                     | _ -> _raise ()
                 else _raise ()
                                
             // Generate something
+            
             let result =  
                 if not (IsSingleStartRule !ilTree) then
-                    raise NotOneRule
+                    raise <| CheckerError "Input grammar should contains only one start rule."
+                let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
+                if undeclaredNonterminals.Length > 0 then
+                    "Input grammar contains some undeclared nonterminals: \n" + String.concat "\n" undeclaredNonterminals
+                    |> CheckerError
+                    |> raise
                       
                 try
                     match !generatorParams with
@@ -155,14 +164,14 @@ let () =
          printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
 YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd \n
 List of available frontends, generators and convertions can be obtained by -af -ag -ac keys" argName
-    | FEError (error)          ->
+    | FEError error          ->
         "Frontend error: " + error + "\n"
         |> System.Console.WriteLine
-    | GenError (error)         ->
+    | GenError error         ->
         "Generator error: " + error + "\n"
         |> System.Console.WriteLine
-    | NotOneRule         ->
-        "Input grammar should contains only one start rule.\n"
+    | CheckerError error         ->
+        error + "\n"
         |> System.Console.WriteLine
     | :? System.IO.IOException -> printf "Could not read input file\n"
     | x -> printf "%A\n" x

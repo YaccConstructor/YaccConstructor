@@ -1,0 +1,10 @@
+e<<f>> : d f;
++s : b;
+b : NUMBER | e<<x>> a<<z z z>>;
+d : s;
+z : e<<(x|y)>> w<<s>>;
+w<<g>> : a<<g s d>>;
+x : y;
+y : PLUS;
+unused : s;
+a<<b c d>> : c;

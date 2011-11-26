@@ -30,7 +30,7 @@ open NUnit.Framework
 exception FEError of string
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
-
+let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
 let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
         if (fst a = fst b) then true
@@ -79,8 +79,8 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             rule1.name = rule2.name
         ) g1 g2
 
-let printTree tree = 
-    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
+//let printTree tree = 
+//    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
 
 [<TestFixture>]
 type ``Convertions tests`` () =
@@ -169,7 +169,10 @@ type ``Convertions tests`` () =
                 )
             
 #if DEBUG
-        let generator = GeneratorsManager.Generator "TreeDump"
+        let generator = 
+           match GeneratorsManager.Component  "TreeDump" with
+           | Some gen -> gen
+           | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif
         Assert.True(hasNotInnerSeq)  
@@ -179,7 +182,10 @@ type ``Convertions tests`` () =
     /// Expected result 'sourceFileName.res'
     member test.``Meta tests in Tests\Convertions\Meta .``()=
         let frontend = FrontendsManager.Frontend "YardFrontend"
-        let generator = GeneratorsManager.Generator "YardPrinter"
+        let generator = 
+           match GeneratorsManager.Component  "YardPrinter" with
+           | Some gen -> gen
+           | None -> failwith "TreeDump is not found." 
         printfn "%A" generator
         System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
         |> Seq.iter 
@@ -215,7 +221,10 @@ type ``Convertions tests`` () =
     /// Expected result 'sourceFileName.res'
     member test.``Batch tests in Tests\Convertions\Batch .``()=
         let frontend = FrontendsManager.Frontend "YardFrontend"
-        let generator = GeneratorsManager.Generator "YardPrinter"
+        let generator = 
+           match GeneratorsManager.Component  "YardPrinter" with
+           | Some gen -> gen
+           | None -> failwith "TreeDump is not found."
         printfn "%A" generator
         System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
         |> Seq.iter 

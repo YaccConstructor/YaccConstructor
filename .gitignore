@@ -6,3 +6,4 @@ obj/
 GNESCCGeneratedTests/
 YaccConstructor/Development/Utils/tests.fsproj.inc
 *.orig
+*.user

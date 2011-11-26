@@ -20,7 +20,14 @@
 open Microsoft.FSharp.Text
 open Yard.Core.IL
 open Yard.Core.IL.Production
-  
+ 
+type Range = struct
+	val Start: Lexing.Position
+	val End: Lexing.Position
+
+	new (start,end_) = {Start = start; End = end_}
+end
+
 exception Parse_error
   
 let currentFilename = ref ""
@@ -53,8 +60,8 @@ let parseRules (filename:string) =
 %token MINUS
 %token QUESTION
 %token EXCLAMATION
-%token LPAREN
-%token RPAREN
+%token <Range> LPAREN
+%token <Range> RPAREN
 %token DGREAT
 %token DLESS
 %token COMMUT

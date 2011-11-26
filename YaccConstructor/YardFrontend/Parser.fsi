@@ -14,8 +14,8 @@ type token =
   | COMMUT
   | DLESS
   | DGREAT
-  | RPAREN
-  | LPAREN
+  | RPAREN of (Range)
+  | LPAREN of (Range)
   | EXCLAMATION
   | QUESTION
   | MINUS

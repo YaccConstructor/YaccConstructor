@@ -44,13 +44,21 @@ type FA<'vertex, 'label> () =
 
 type EdgeType = In|Out
 
+/// Traverse all edges, feasible from virtex from sequence s, filtered by edgesFilter.
+/// Accumulates path of traversal in form (virtex, result for edges from it with edges' tags).
+/// If we have visited the virtex, we won't go by it twice.
+/// Returns Pair of:
+///   List of lists: for each virtex in s list of (virtex, tags on edges, visited from it);
+///   list of visited vertices
 let atmWolker (atm:FA<_,_>) edgesFilter s =
-    let visited = ref []   
+    let visited = ref []
+    /// See description above. Recursive realization.
     let rec inner s =
         if List.exists ((=)s) !visited |> not
         then
             visited := s::!visited            
-            atm.OutEdges(s) |> Seq.filter edgesFilter 
+            atm.OutEdges(s)
+            |> Seq.filter edgesFilter 
             |> fun x -> if x.Count() = 0 
                         then Seq.singleton (Seq.singleton (s,[]))
                         else Seq.map (fun (e:TaggedEdge<_,_>) -> inner e.Target) x
@@ -58,8 +66,9 @@ let atmWolker (atm:FA<_,_>) edgesFilter s =
             |> Seq.concat
         else Seq.singleton (s,[])
     let res = Seq.map inner s
-    res |> List.ofSeq |> List.map List.ofSeq , visited
+    res |> List.ofSeq |> List.map List.ofSeq , !visited
 
+/// Reverse all edges in graph.
 let revert (g:FA<_,_>) = 
     let revEdges = 
         g.Edges
@@ -69,31 +78,38 @@ let revert (g:FA<_,_>) =
     g.Clear()
     g.AddVerticesAndEdgeRange revEdges
 
-
-let eCls (g:FA<_,_>)  epsilon =
+/// Find epsilon-closures for rules
+let eCls (g:FA<_,_>) epsilon =
     let newStateEnumerator = new Enumerator()
     let newStateMap = new System.Collections.Generic.Dictionary<_,_>()
     let symbols = g.Edges |> Seq.map (fun e -> fst e.Tag) |> Set.ofSeq |> Set.filter ((<>)epsilon)
+    /// For set of virteces and specified virtex smb
+    ///     for each edge from vertices from set
+    ///     checks if its destination is smb and returns tuple of 3 lists:
+    ///   (start virtex, label on edge, end virtex)
     let tran sttSet smb = 
-        sttSet 
+        sttSet
         |> Seq.map (fun s -> g.OutEdges(s))
-        |> Seq.concat 
-        |> Seq.filter (fun (e:TaggedEdge<_,_>) -> fst e.Tag = smb)        
+        |> Seq.concat
+        |> Seq.filter (fun (e:TaggedEdge<_,_>) -> fst e.Tag = smb)
         |> Seq.map (fun e -> e.Source, snd e.Tag ,e.Target)
         |> Seq.toList
         |> List.unzip3
 
+    /// Edge remains if it's tag is epsilon
     let filter = fun (e:TaggedEdge<_,_>) -> fst e.Tag = epsilon
-    let trs,s = atmWolker g filter [g.Start.Value]    
+    // Traverse a graph starting from global start rule.
+    let trs, s = atmWolker g filter [g.Start.Value]
     let newFA = new FA<_,_>()
     let traceCollection = ref Seq.empty
     let visited = new System.Collections.Generic.Dictionary<_,_>()
     let traceInfo = new System.Collections.Generic.Dictionary<_,_>()
+    /// Transform path of traversal into single sequence
     let formatTraceInfo trs =
         Seq.concat trs
-        |> Seq. map (fun (x,y) -> x, List.concat y)
+        |> Seq.map (fun (x,y) -> x, List.concat y)
 
-    let s' = List.sort !s
+    let s' = List.sort s
     visited.Add(s',false)
     traceInfo.Add(s', formatTraceInfo trs)    
     newStateMap.Add(s',newStateEnumerator.Next())
@@ -105,12 +121,12 @@ let eCls (g:FA<_,_>)  epsilon =
             (fun smb -> 
                 let src,trTrs,tran = tran T smb
                 let trs,U = atmWolker g filter tran
-                if List.isEmpty !U |> not
+                if List.isEmpty U |> not
                 then
-                    let U' = List.sort !U
+                    let U' = List.sort U
                     let cFun = fun k -> k = U'
                     let cond = Seq.exists cFun visited.Keys
-                    if cond  |> not
+                    if not cond
                     then 
                         visited.Add(U',false)
                         traceInfo.Add(U', formatTraceInfo trs)

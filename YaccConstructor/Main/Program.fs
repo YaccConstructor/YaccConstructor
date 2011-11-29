@@ -40,12 +40,14 @@ let () =
     let testFile = ref None
     let convertions = new ResizeArray<string>()
     let GeneratorsManager = GeneratorsManager.GeneratorsManager()
+    let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+    let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
     feName := // Fill by default value
-        if Seq.exists ((=) "YardFrontend") FrontendsManager.AvailableFrontends then
+        if Seq.exists ((=) "YardFrontend") FrontendsManager.Available then
             Some("YardFrontend")
         else
-            Seq.tryFind (fun _ -> true) FrontendsManager.AvailableFrontends
+            Seq.tryFind (fun _ -> true) FrontendsManager.Available
             
     generatorName :=
         if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.Available then
@@ -65,7 +67,7 @@ let () =
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.AvailableFrontends !feName), "Available frontends"
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.Available !feName), "Available frontends"
          "-g", ArgType.String 
             (fun s -> 
                 match Array.toList (s.Split(' ')) with
@@ -75,7 +77,7 @@ let () =
             ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.AvailableConvertions None), "Available convertions"
+         "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -89,10 +91,12 @@ let () =
             let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
-                if Seq.exists ((=) feName) FrontendsManager.AvailableFrontends
+                if Seq.exists ((=) feName) FrontendsManager.Available
                 then
                     try
-                        FrontendsManager.Frontend feName
+                        match FrontendsManager.Component feName with
+                           | Some fron -> fron
+                           | None -> failwith "Frontend is not found."
                     with
                     | _ -> _raise ()
                 else _raise ()

@@ -20,14 +20,14 @@ namespace Yard.Frontends.YardFrontend
 open Yard.Core
 
 type YardFrontend() = 
-    interface IFrontend with
-        member this.Name = "YardFrontend"
-        member this.ParseGrammar t = 
+    inherit Frontend()
+        override this.Name = "YardFrontend"
+        override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> Main.ParseFile s
             | _ -> IL.Definition.empty
-        member this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
-    end
+        override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+    
 
 // For testing switch to Console App and then switch back to Class Library
 module Run = 

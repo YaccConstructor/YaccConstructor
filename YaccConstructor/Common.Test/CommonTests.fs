@@ -30,8 +30,9 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All frontends`` () =
+        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
         let allFrontends = 
-            List.ofSeq FrontendsManager.AvailableFrontends
+            List.ofSeq FrontendsManager.Available
             |> List.sort
         let expetedResult =
             ["AntlrFrontend";"FsYaccFrontend";"YardFrontend"]
@@ -45,8 +46,9 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
+        let ConvertionsManager = ConvertionsManager.ConvertionsManager()
         let allConversions = 
-            List.ofSeq ConvertionsManager.AvailableConvertions
+            List.ofSeq ConvertionsManager.Available
             |> List.sort
         let expetedResult =
             ["AddDefaultAC";"BuildAstSimple";"MergeAlter";"ExpandEbnf";"BuildAST";"LeaveLast"
@@ -78,7 +80,7 @@ type ``Components loader tests`` () =
 
 [<TestFixture>]
 type ``Checker test`` () =
-    let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> IFrontend
+    let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
     let basePath = @"..\..\..\..\Tests\Checkers\"
 
     [<Test>]

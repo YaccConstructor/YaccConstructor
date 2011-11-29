@@ -19,38 +19,27 @@ module Yard.Core.ConvertionsManager
 
 open Yard.Core
 open Yard.Core.IL
-(**)
-let private convertionsCollection: ResizeArray<Convertion> = 
-    new ResizeArray<Convertion>(ComponentsLoader.LoadComponents(typeof<Convertion>) |> Seq.map (fun x -> x :?> Convertion))
 
-let AvailableConvertions = Seq.map (fun (x:Convertion) -> x.Name) convertionsCollection
-
-let Convertion name = convertionsCollection.Find (fun convertion -> convertion.Name = name)
-
-let ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
-    {   new Definition.t<Source.t,Source.t>
-        with info = ilTree.info
-        and  head = ilTree.head
-        and  grammar = 
-            match Array.toList (convNameWithParams.Split(' ')) with
-            | name::[] -> (Convertion name).ConvertList ilTree.grammar
-            | name::parameters -> (Convertion name).ConvertList (ilTree.grammar, String.concat " " parameters)
-            | _ -> failwith "You need to specify convertion name"
-        and  foot = ilTree.foot
-    }
-
-(*
-
+//Не понял еще сути этой функции, так что просто сделал что-бы работало
 type ConvertionsManager () as this =
     inherit Yard.Core.Manager.Manager<Convertion>()
-    let ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
-    {   new Definition.t<Source.t,Source.t>
+    let apply_convertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
+      {new Definition.t<Source.t,Source.t>
         with info = ilTree.info
         and  head = ilTree.head
         and  grammar = 
             match Array.toList (convNameWithParams.Split(' ')) with
-            | name::[] -> (this.Available ) ConvertList ilTree.grammar
-            | name::parameters -> (Convertion name).ConvertList (ilTree.grammar, String.concat " " parameters)
+            | name::[] -> 
+                match (this.Component name) with 
+                | Some conv -> conv.ConvertList ilTree.grammar
+                | None -> failwith "Convertion is not found" 
+            
+            | name::parameters -> 
+                match (this.Component name) with 
+                | Some conv -> conv.ConvertList (ilTree.grammar, String.concat " " parameters)
+                | None -> failwith "Convertion is not found"
             | _ -> failwith "You need to specify convertion name"
         and  foot = ilTree.foot
-    }*)
+      }
+    member  self.ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = apply_convertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)
+     

@@ -29,7 +29,7 @@ type Range = struct
 end
 
 exception Parse_error
-  
+let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
@@ -43,7 +43,7 @@ let parseRules (filename:string) =
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
     match FrontendsManager.GetByExtension ext with
     | Some(frontend) -> 
-        let def = frontend.ParseGrammar sameDirFilename in
+        let def = frontend.Value.ParseGrammar sameDirFilename in
         def.grammar
     | None -> 
         failwith (sprintf "Not supported extension %s in file %s" ext filename )

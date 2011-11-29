@@ -17,21 +17,12 @@
 
 module Yard.Core.FrontendsManager
 
-let private frontendsCollection: ResizeArray<IFrontend> = 
-    new ResizeArray<IFrontend>(ComponentsLoader.LoadComponents(typeof<IFrontend>) |> Seq.map (fun x -> x :?> IFrontend))
+type FrontendsManager() as this =
+    inherit  Yard.Core.Manager.Manager<Frontend>()
 
-let AvailableFrontends = Seq.map (fun (x:IFrontend) -> x.Name) frontendsCollection
+    let get_by_extension = function
+        | "yrd" -> Some(this.Component "YardFrontend")
+        | "g"   -> Some(this.Component "AntlrFrontend")
+        | _     -> None
 
-let Frontend name = frontendsCollection.Find (fun frontend -> frontend.Name = name)
-
-
-let GetByExtension = function
-    | "yrd" -> Some(Frontend "YardFrontend")
-    | "g"   -> Some(Frontend "AntlrFrontend")
-    | _     -> None
-    
-   
-    (*
-type FrontendsManager () =
-    inherit Yard.Core.Manager.Manager<IFrontend>()
-    *)
+    member public self.GetByExtension = get_by_extension

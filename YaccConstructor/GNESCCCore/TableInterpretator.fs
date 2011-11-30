@@ -109,8 +109,7 @@ type  TableInterpreter (tables:Tables) = class
         |> List.concat           
 
     let run lexer  = 
-        Lexer := Some lexer
-        //Some tables |> setTables
+        Lexer := Some lexer        
         let r = 
             let f = (step (getLabels 0 @ [State tables.StartIdx.Head]) tables.StartIdx.Head 1)
             f
@@ -119,7 +118,8 @@ type  TableInterpreter (tables:Tables) = class
             r     
             |> List.map (
                 function
-                | Symbol (s,t) -> t)
+                | Symbol (s,t) -> t
+                | x -> failwith <| "Incorrect stack: \n" + (List.map string r |> String.concat "\n"))
                        
                 
         Set.iter PrintTree (Set.ofList res)

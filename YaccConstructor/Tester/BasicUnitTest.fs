@@ -2,14 +2,14 @@
 
 open NUnit.Framework
 
-[<TestFixture>]
+(*[<TestFixture>]
 type ``RACC core tests`` () =    
     inherit RACCCoreTests.``RACC core tests``()
 
 [<TestFixture>]
 type ``RACC parse error position tests`` () =    
     inherit RACCCoreTests.``RACC parse error position tests``()
-
+    *)
 (*[<TestFixture>]
 type ``Yard frontend tests`` () =    
     inherit YardFrontendTester .``YARD frontend Tests``()*)

@@ -55,7 +55,6 @@ type  TableInterpreter (tables:Tables) = class
                 if not flg then cache.Add(key,calculated)
                 calculated
 
-                List.iter PrintTree (List.map (fun x -> !x)(s.forest))
     let rAST =  RegExpAST()
 
     let getLabels s =

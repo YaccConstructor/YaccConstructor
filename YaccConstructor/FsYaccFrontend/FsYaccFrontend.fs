@@ -22,14 +22,14 @@ open Yard.Core
 /// Parser of FsYacc grammars. Usually it is files with .fsy extension.
 /// Also might work with OCamlYacc grammars(.mly) 
 type FsYaccFrontend() = 
-    interface IFrontend with
-        member this.Name = "FsYaccFrontend"
-        member this.ParseGrammar t = 
+    inherit Frontend()
+        override this.Name = "FsYaccFrontend"
+        override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> Main.ParseFile s
             | _ -> IL.Definition.empty
-        member this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
-    end
+        override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+    
 
 // For testing switch to Console App and then switch back to Class Library
 // Delete action code from yard_option_8 and yard_option_11

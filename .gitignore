@@ -7,3 +7,5 @@ GNESCCGeneratedTests/
 YaccConstructor/Development/Utils/tests.fsproj.inc
 *.orig
 *.user
+ook_based_test/report/picts/*
+*.ompv

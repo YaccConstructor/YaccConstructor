@@ -126,11 +126,6 @@
       <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RACCGenerator\RACCGenerator.fsproj">
-      <Name>RACCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
              Other similar extension points exist, see Microsoft.Common.targets.

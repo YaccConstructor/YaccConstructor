@@ -16,14 +16,5 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Yard.Core.GeneratorsManager
-
-(*let private generatorsCollection: ResizeArray<Generator> = 
-    new ResizeArray<Generator>(ComponentsLoader.LoadComponents(typeof<Generator>) |> Seq.map (fun x -> x :?> Generator))
-
-let AvailableGenerators = Seq.map (fun (x:Generator) -> x.Name) generatorsCollection
-let Generator name = generatorsCollection.Find (function gen -> gen.Name = name)
-//let Register (gen) = generatorsCollection.Add (gen)
-*)
-type GeneratorsManager () =
-    inherit Yard.Core.Manager.Manager<Generator>()    
+type GeneratorsManager () = inherit Yard.Core.Manager.Manager<Generator>()    
     

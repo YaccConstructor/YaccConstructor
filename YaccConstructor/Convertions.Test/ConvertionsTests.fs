@@ -28,6 +28,7 @@ open Convertions.TransformAux
 open NUnit.Framework
 
 exception FEError of string
+let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
@@ -147,11 +148,15 @@ type ``Convertions tests`` () =
     
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
+        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
         Namer.resetRuleEnumerator()
-        let frontend = FrontendsManager.Frontend "YardFrontend"        
+        let frontend =
+            match FrontendsManager.Component "YardFrontend" with
+               | Some fron -> fron
+               | None -> failwith "YardFrontend is not found."         
         let ilTree = 
             System.IO.Path.Combine(convertionTestPath,"expandbrackets_1.yrd")
-            |> frontend.ParseGrammar 
+            |> frontend.ParseGrammar
         let ilTreeConverted = 
             ilTree 
             |> ConvertionsManager.ApplyConvertion "ExpandMeta"   
@@ -181,7 +186,11 @@ type ``Convertions tests`` () =
     /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
     /// Expected result 'sourceFileName.res'
     member test.``Meta tests in Tests\Convertions\Meta .``()=
-        let frontend = FrontendsManager.Frontend "YardFrontend"
+        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
+        let frontend =
+            match FrontendsManager.Component "YardFrontend" with
+                   | Some fron -> fron
+                   | None -> failwith "YardFrontend is not found." 
         let generator = 
            match GeneratorsManager.Component  "YardPrinter" with
            | Some gen -> gen
@@ -220,7 +229,11 @@ type ``Convertions tests`` () =
     /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
     /// Expected result 'sourceFileName.res'
     member test.``Batch tests in Tests\Convertions\Batch .``()=
-        let frontend = FrontendsManager.Frontend "YardFrontend"
+        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
+        let frontend =
+            match FrontendsManager.Component "YardFrontend" with
+               | Some fron -> fron
+               | None -> failwith "YardFrontend is not found."
         let generator = 
            match GeneratorsManager.Component  "YardPrinter" with
            | Some gen -> gen

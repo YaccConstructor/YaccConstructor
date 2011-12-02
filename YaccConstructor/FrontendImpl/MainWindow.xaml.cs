@@ -21,24 +21,26 @@ namespace Yard.Development.Tools.FrontendImpl
     public partial class MainWindow : Window
     {
         Yard.Core.GeneratorsManager.GeneratorsManager GeneratorsManager = new Yard.Core.GeneratorsManager.GeneratorsManager();
+        Yard.Core.FrontendsManager.FrontendsManager FrontendsManager = new Yard.Core.FrontendsManager.FrontendsManager();
         public MainWindow()
         {
             InitializeComponent();
             yc_FrontendsContainer.ComponentName = "Frontend";
-            yc_FrontendsContainer.ComponentsList = Yard.Core.FrontendsManager.AvailableFrontends;
+            yc_FrontendsContainer.ComponentsList = FrontendsManager.Available;
             yc_GeneratorsContainer.ComponentName = "Generator";
             yc_GeneratorsContainer.ComponentsList = GeneratorsManager.Available;
         }
 
         private void btn_Run_Click(object sender, RoutedEventArgs e)
         {
-            tb_GrammarText.Text = (new System.IO.StreamReader(yc_OpenGrammar.GrammarFilePath)).ReadToEnd();
-            tbc_Graphs.Items.Clear();
-            var fe = Yard.Core.FrontendsManager.Frontend(yc_FrontendsContainer.SelectedConponent);
-            var il = fe.ParseGrammar(yc_OpenGrammar.GrammarFilePath);
-
+            
             try
             {
+                tb_GrammarText.Text = (new System.IO.StreamReader(yc_OpenGrammar.GrammarFilePath)).ReadToEnd();
+                tbc_Graphs.Items.Clear();
+                var fe = FrontendsManager.Component (yc_FrontendsContainer.SelectedConponent);
+                var il = fe.Value.ParseGrammar(yc_OpenGrammar.GrammarFilePath);
+            
                 var be = GeneratorsManager.Component(yc_GeneratorsContainer.SelectedConponent);
                 var res = Development.Tools.TablesPrinter.formatRaccGenresult((GNESCCGenerator)be.Value, il);
                 foreach (var g in res)
@@ -48,7 +50,7 @@ namespace Yard.Development.Tools.FrontendImpl
             catch
             {
 
-                Console.WriteLine("This generator not found.");
+                Console.WriteLine("This generator or frontend not found.");
             }
         }
     }

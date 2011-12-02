@@ -43,11 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tables.fs" />
-    <Compile Include="StateInfo.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="RegExpAST.fs" />
-    <Compile Include="ParserState.fs" />
-    <Compile Include="ParserResult.fs" />
     <Compile Include="ASTInerpretator.fs" />
     <Compile Include="TableInterpretator.fs" />
     <Compile Include="Driver.fs" />

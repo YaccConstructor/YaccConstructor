@@ -8,7 +8,7 @@ open Yard.Core.IL.Definition
 open Yard.Core.IL.Production
 
 let run ironyGrammar =
-    let frontend = new IronyFrontend() :> IFrontend
+    let frontend = new IronyFrontend() :> Frontend
     let ilTree = frontend.ParseGrammar ironyGrammar
     ilTree
 

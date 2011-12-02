@@ -23,12 +23,6 @@ namespace Yard.Generators.GNESCCGenerator
 
 open Yard.Generators.GNESCCGenerator.AST
 
-type Item<'state, 'symbol> =
-    {
-        state  : 'state
-        symbol : 'symbol        
-    }
-
 type ParseStatus<'a,'b,'c when 'a: comparison and 'c: equality and 'c: comparison> = 
     | PSuccess of Set<AST<'a,'b,'c>>
     | PError   of int
@@ -48,17 +42,6 @@ type  TableInterpreter (tables:Tables) = class
 
     let CallCount = ref 0
 
-//    let tables,setTables =
-//        let Tables: Option<Tables> ref = ref None  
-//        let getTables () =  (!Tables).Value
-//        getTables , fun t -> Tables:=t
-
-    let traceCache = new System.Collections.Generic.Dictionary<Set<FATrace list>,int>()
-
-    let traceBuilderCache = new System.Collections.Generic.Dictionary<_, int>()
-
-    let traceEnumerator = new Enumerator()
-
     let cache = new System.Collections.Generic.Dictionary<_,_>()    
 
     let memoize f =         
@@ -72,33 +55,12 @@ type  TableInterpreter (tables:Tables) = class
                 if not flg then cache.Add(key,calculated)
                 calculated
 
-    let print ps =
-        printfn "ParseState:\n     i = %A\n     symbol = %A\n     statesSet = [\n" ps.i ps.inpSymbol        
-        Set.iter 
-            (fun s -> 
-                printfn 
-                    "         State:\n             item = %A\n             forest = <<\n" 
-                    s.item                
-                //List.iter PrintTree (List.map (fun x -> !x)(s.forest))
-                printfn "             >>\n")
-            ps.statesSet
-        printfn "     ]\n" 
-
+                List.iter PrintTree (List.map (fun x -> !x)(s.forest))
     let rAST =  RegExpAST()
 
     let getLabels s =
         List.init (Seq.fold (fun b x -> if x then b+1 else b) 0 (tables.IsStart.[s])) (fun _ -> Label s)
-
-    let buildCorrectTrace trace =
-        let id = hash trace        
-        if traceBuilderCache.ContainsKey(id)
-        then traceBuilderCache.[id]
-        else                                                
-            let key = traceEnumerator.Next()
-            traceBuilderCache.Add(id, key)
-            traceCache.Add(rAST.BuilCorrectTrace trace,key)
-            key
-
+   
     let rec step stack state i =
         let curLexeme = (!Lexer).Value.Get i
         let curLexemeTag = curLexeme.tag
@@ -126,7 +88,7 @@ type  TableInterpreter (tables:Tables) = class
                 let xx = ref 1
                 incr xx
                 printfn "Possible error in symbol %A" i
-                []//failwith "Parser error"
+                []
             | CommonTypes.Shift s   -> 
                 let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
                 step (getLabels s @ stk) s (i+1)
@@ -148,8 +110,7 @@ type  TableInterpreter (tables:Tables) = class
         |> List.concat           
 
     let run lexer  = 
-        Lexer := Some lexer
-        //Some tables |> setTables
+        Lexer := Some lexer        
         let r = 
             let f = (step (getLabels 0 @ [State tables.StartIdx.Head]) tables.StartIdx.Head 1)
             f
@@ -159,42 +120,11 @@ type  TableInterpreter (tables:Tables) = class
             |> List.map (
                 function
                 | Symbol (s,t) -> t
-                | x -> failwith <| "Parser error. Incorrest stack : " + x.ToString())
+                | x -> failwith <| "Incorrect stack: \n" + (List.map string r |> String.concat "\n"))
                        
                 
-//            |> Set.fold
-//                (fun buf r ->
-//                    let forest = List.map (fun x -> !x) (r.rItem.forest)
-//                    if List.length  forest = 1 && r.rItem.item = tables.StartIdx.Head
-//                    then
-//                        let getUserTree tree =
-//                            match tree with
-//                            | Node (childs,_,_) -> Some (List.head childs)
-//                            | _                   -> None
-//
-//                        List.head forest
-//                        |> fun x ->
-//                            let y = getUserTree x
-//                            if y.IsSome
-//                            then Set.add !y.Value buf
-//                            else buf
-//                    else buf)
-//                Set.empty
-//#if DEBUG
-//        Set.iter PrintTree res
-//#endif
         //
-        cache.Clear()
-        traceBuilderCache.Clear()
-        let trC =
-            seq {for s in traceCache -> s.Value,s.Key}
-            |> dict
-        traceCache.Clear()
-//        let res = 
-//            if res.Count > 0
-//            then PSuccess res
-//            else PError (!maxCorrPos + 1)
-//             ,trC,!CallCount
+        cache.Clear()        
         CallCount := 0
         maxCorrPos := 0
         res

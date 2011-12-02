@@ -100,16 +100,6 @@
       <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RACCCommon\RACCCommon.fsproj">
-      <Name>RACCCommon</Name>
-      <Project>{3a217e72-934e-436c-b104-d9a9db22569b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RACCCore.Test\RACCCore.Test.fsproj">
-      <Name>RACCCore.Test</Name>
-      <Project>{a03e9238-9c7c-43a3-afef-cd87313f7b2e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>

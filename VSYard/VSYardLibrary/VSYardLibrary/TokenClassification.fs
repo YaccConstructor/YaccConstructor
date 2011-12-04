@@ -41,7 +41,7 @@ type TokenTagger (buffer:ITextBuffer) =
                         let tokenSpan _l = 
                             l := _l
                             new SnapshotSpan(curSpan.Snapshot, new Span(!curLoc, _l))
-                        let res =                                                        
+                        let res =                       
                             let r = 
                                 let length x = Yard.Core.IL.Source.toString x |> String.length
                                 match t with
@@ -56,8 +56,8 @@ type TokenTagger (buffer:ITextBuffer) =
                                 | MINUS
                                 | QUESTION
                                 | EQUAL
-                                | LPAREN
-                                | RPAREN
+                                | LPAREN(_)
+                                | RPAREN(_)
                                 | BAR                               
                                 | STAR  -> TagSpan<TokenTag>(tokenSpan 1, new TokenTag(TOther))
                                 | DLESS  

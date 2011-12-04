@@ -122,7 +122,7 @@ type  TableInterpreter (tables:Tables) = class
                 | x -> failwith <| "Incorrect stack: \n" + (List.map string r |> String.concat "\n"))
                        
                 
-        Set.iter PrintTree (Set.ofList res)
+        //
         cache.Clear()        
         CallCount := 0
         maxCorrPos := 0

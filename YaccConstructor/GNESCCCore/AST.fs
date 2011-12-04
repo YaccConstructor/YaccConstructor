@@ -31,17 +31,17 @@ type AST<'lexeme, 'nodeVal, 'trace
                    *'trace                   
         | Leaf  of int * 'lexeme
              
-let rec private dumpTree i item =
+let rec private dumpTree getName i item =
     let iter i = String.replicate i "    "
     match item with
     | Node (lst, tag, trace) -> 
         let trace = trace.ToString()
-        [iter i;"<NODE name=\""; string tag; "\" trace=\""; trace ; "\">\n"]
-        @(List.map (fun x -> dumpTree (i+1) x) lst)
+        [iter i;"<NODE name=\""; (getName tag).ToString(); "\" trace=\""; trace ; "\">\n"]
+        @(List.map (fun x -> dumpTree getName (i+1) x) lst)
         @[iter i;"</NODE>\n"]
         |> String.concat "" 
 
     | Leaf (tag, value)     ->
         String.concat "" [iter i;"<LEAF name=\""; string tag; "\"/>\n"]        
 
-let PrintTree tree = System.Console.WriteLine (dumpTree 0 tree)
+let PrintTree getName tree = System.Console.WriteLine (dumpTree getName 0 tree)

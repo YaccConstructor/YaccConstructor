@@ -40,6 +40,13 @@ let run path =
         let ti = new TableInterpreter(tables)
         ti.Run l
 
+    let f x =
+        match x with
+        | NT_gnesccStart -> "start"
+        | NT_s -> "s"
+        | _ -> "asdas"
+    Seq.iter (Yard.Generators.GNESCCGenerator.AST.PrintTree (fun x -> symbolIdx.[x] |> getName |> f)) forest
+
     let result =
         //run forest interpretation (action code calculation)
         let r = 
@@ -51,6 +58,6 @@ let run path =
     printfn "Result %A\n" result
     
 do 
-    run @"..\..\..\..\Tests\GNESCC\customers\rl\min_test_11.rl.in"
+    run @"..\..\..\..\Tests\GNESCC\regexp\simple\alt\alt_1.yrd.in "
     |> ignore
     System.Console.ReadLine() |> ignore

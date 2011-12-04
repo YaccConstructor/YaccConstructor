@@ -41,7 +41,7 @@ type TokenTagger (buffer:ITextBuffer) =
                         let tokenSpan _l = 
                             l := _l
                             new SnapshotSpan(curSpan.Snapshot, new Span(!curLoc, _l))
-                        let res =                       
+                        let res =                                                        
                             let r = 
                                 let length x = Yard.Core.IL.Source.toString x |> String.length
                                 match t with
@@ -56,8 +56,8 @@ type TokenTagger (buffer:ITextBuffer) =
                                 | MINUS
                                 | QUESTION
                                 | EQUAL
-                                | LPAREN(_)
-                                | RPAREN(_)
+                                | LPAREN _
+                                | RPAREN _
                                 | BAR                               
                                 | STAR  -> TagSpan<TokenTag>(tokenSpan 1, new TokenTag(TOther))
                                 | DLESS  
@@ -90,20 +90,4 @@ type TokenTagger (buffer:ITextBuffer) =
     interface  ITagger<TokenTag> with
         member self.GetTags spans = getTags spans :?> _
         member self.add_TagsChanged x = () 
-        member self.remove_TagsChanged x = () 
-    
-    (*public event EventHandler<SnapshotSpanEventArgs> TagsChanged
-    {
-        add { }
-        remove { }
-    }*)
-
-    (*public IEnumerable<ITagSpan<TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-    {
-
-        
-
-    }
-}*)
-
-
+        member self.remove_TagsChanged x = ()

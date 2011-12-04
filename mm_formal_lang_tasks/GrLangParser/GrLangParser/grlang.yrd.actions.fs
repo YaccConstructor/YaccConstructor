@@ -35,7 +35,7 @@ let rule (nterm,rSeq) isStart=
 let grammar rLst =
     { 
      Definition.empty with
-       Definition.info = { fileName = "" }
+       Definition.info = { fileName = "asdd.yrd" }
        Definition.head = (None:Option<Source.t>)
        Definition.grammar = List.mapi (fun i x -> rule x (i=0)) rLst
        Definition.foot = None

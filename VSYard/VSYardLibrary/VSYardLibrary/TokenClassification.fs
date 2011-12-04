@@ -56,8 +56,8 @@ type TokenTagger (buffer:ITextBuffer) =
                                 | MINUS
                                 | QUESTION
                                 | EQUAL
-                                | LPAREN
-                                | RPAREN
+                                | LPAREN _
+                                | RPAREN _
                                 | BAR                               
                                 | STAR  -> TagSpan<TokenTag>(tokenSpan 1, new TokenTag(TOther))
                                 | DLESS  
@@ -90,20 +90,4 @@ type TokenTagger (buffer:ITextBuffer) =
     interface  ITagger<TokenTag> with
         member self.GetTags spans = getTags spans :?> _
         member self.add_TagsChanged x = () 
-        member self.remove_TagsChanged x = () 
-    
-    (*public event EventHandler<SnapshotSpanEventArgs> TagsChanged
-    {
-        add { }
-        remove { }
-    }*)
-
-    (*public IEnumerable<ITagSpan<TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-    {
-
-        
-
-    }
-}*)
-
-
+        member self.remove_TagsChanged x = ()

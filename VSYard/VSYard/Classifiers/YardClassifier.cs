@@ -35,49 +35,10 @@ namespace MyCompany.VSYard.Classifiers
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-
             ITagAggregator<VSYardNS.TokenTag> ookTagAggregator =
                                             aggregatorFactory.CreateTagAggregator<VSYardNS.TokenTag>(buffer);
 
             return new VSYardNS.YardClassifier(buffer, ookTagAggregator, ClassificationTypeRegistry) as ITagger<T>;
         }
-
     }
-    /*internal sealed class YardClassifier : ITagger<ClassificationTag>
-    {
-        ITextBuffer _buffer;
-        ITagAggregator<VSYardNS.TokenTag> _aggregator;
-        IDictionary<VSYardNS.TokenTypes, IClassificationType> _ookTypes;
-
-        internal YardClassifier(ITextBuffer buffer,
-                               ITagAggregator<VSYardNS.TokenTag> ookTagAggregator,
-                               IClassificationTypeRegistryService typeService)
-        {
-            _buffer = buffer;
-            _aggregator = ookTagAggregator;
-            _ookTypes = new Dictionary<VSYardNS.TokenTypes, IClassificationType>();
-            _ookTypes[VSYardNS.TokenTypes.TLitersl] = typeService.GetClassificationType("ook!");
-            _ookTypes[VSYardNS.TokenTypes.TNonterm] = typeService.GetClassificationType("ook.");
-            _ookTypes[VSYardNS.TokenTypes.TTerm] = typeService.GetClassificationType("ook?");
-        }
-
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged
-        {
-            add { }
-            remove { }
-        }
-
-        public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-        {
-
-            foreach (var tagSpan in this._aggregator.GetTags(spans))
-            {
-                var tagSpans = tagSpan.Span.GetSpans(spans[0].Snapshot);
-                yield return
-                    new TagSpan<ClassificationTag>(tagSpans[0],
-                                                   new ClassificationTag(_ookTypes[tagSpan.Tag.Type]));
-            }
-        }
-    }*/
-
 }

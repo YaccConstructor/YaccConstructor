@@ -25,7 +25,7 @@ let RRf = "GNESCC.Regexp"
 
 let generate test = 
     printfn "geterate test: %A\n" test.FullGrammarPath
-    (fe:>IFrontend).ParseGrammar test.FullGrammarPath |> (be:>Generator).Generate |> ignore
+    (fe:>Frontend).ParseGrammar test.FullGrammarPath |> (be:>Generator).Generate |> ignore
 
 let move () =
     try     

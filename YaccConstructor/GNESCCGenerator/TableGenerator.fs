@@ -228,7 +228,7 @@ type TableGenerator (outPath: string) =
                     let traceNum = traceEnumerator.Next()
                     traceCollection.Add(traceNum,trace)
                     match smb with 
-                    | FA.AtmSymbol smb -> if Seq.exists ((=)smb) terminals then Terminal smb else NonTerminal smb
+                    | FA.AtmSymbol smb -> if List.exists ((=)smb) terminals then Terminal smb else NonTerminal smb
                     | FA.Dummy         -> Dummy
                     | FA.Epsilon       -> failwith "Incorrect dfla. Seems it contains epsilon transitions."
                     , traceNum
@@ -273,29 +273,24 @@ type TableGenerator (outPath: string) =
                 ->  let isStart =
                         states
                         |> Array.mapi 
-                            (fun i s ->                                 
-                                List. map 
-                                    (fun (pi,Production(_,p)) ->
-                                         pi
-                                         , Set.exists 
-                                            (fun i -> 
-                                                  let dot = dotIdx_of_item0 i
-                                                  let pri = prodIdx_of_item0 i                                                  
-                                                  pri = pi 
-                                                  &&
-                                                  dot = 0) kernlToItemIdx.[i])
-                                     (prodTab.AllProds())
-                                |> List.sortBy(fst)
-                                |> List.map snd
-                                |> Array.ofList)                        
+                            (fun i _ ->                                 
+                                [for (pi,Production(_,_)) in prodTab.AllProds() ->
+                                    let isStart =
+                                        kernlToItemIdx.[i]
+                                        |> Set.exists 
+                                            (fun j ->
+                                                let dot = dotIdx_of_item0 j
+                                                let pri = prodIdx_of_item0 j                                                  
+                                                pri = pi && dot = 0)
+                                    pi, isStart]
+                                |> List.sortBy fst
+                                |> List.map snd)                        
 
                     let prodToNTerm = 
                         prodTab.AllProds()
-                        |> List.map
-                            (fun (i,Production(t,r)) -> i, ntTab.ToIndex t)
+                        |> List.map (fun (i,Production(nt,_)) -> i, ntTab.ToIndex nt)
                         |> List.sortBy fst
                         |> List.map snd
-                        |> Array.ofList
                             
                     Yard.Core.Layouts.LayoutArray (string >> wordL) prodToNTerm
                     |> fun l -> (wordL "let prodToNTerm = ") @@-- l

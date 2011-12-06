@@ -19,10 +19,11 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
       view.Caret.PositionChanged.Add(caretPositionChanged)
     let getTags (spans : NormalizedSnapshotSpanCollection) =
         //Здесь логика по подсветке скобок
-        let res = Seq.empty
-        res
+        let spans_Text = spans.ToString
+        let preres = Yard.Frontends.YardFrontend.Main.LexString "ahgfvhasg"
+        Seq.empty
         
-    interface ITagger<ITag> with
+    interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans
         member self.add_TagsChanged x = ()
         member self.remove_TagsChanged x = ()

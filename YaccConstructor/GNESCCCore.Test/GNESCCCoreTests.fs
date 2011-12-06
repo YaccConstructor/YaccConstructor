@@ -159,7 +159,7 @@ type ``GNESCC core tests`` () =
         let tables     = GNESCCGenerator.Tables_arithm_glr.tables
         let regexp     = GNESCC.Regexp_arithm_glr.ruleToRegex
         let actionsMap = GNESCC.Actions_arithm_glr.ruleToAction
-        let rightValue = [5|>box]
+        let rightValue = [5|>box; -1|>box; 2|>box]
         let lexer      = fun buf -> Lexer_arithm_glr.Lexer(buf):>ILexer
         let res = run @"../../../../Tests/GNESCC/glr/arithm_glr/arithm_glr_5.yrd.in" tables actionsMap regexp lexer
         Assert.AreEqual(rightValue,res)

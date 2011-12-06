@@ -35,14 +35,11 @@ module ASTInterpretator =
         | Node (childs, name, trace) ->
             List.map (fun x -> lInterp ruleToActon ruleToRegexp x) childs
             |> fun x -> List.map2 (fun ch x -> match ch with Node(_,name,_) | Leaf(name,_) -> string name, x) childs x
-            |> ruleToRegexp.[name] //(traceCache.[trace] |> Set.minElement |> reast.BuildREAST)
+            |> ruleToRegexp.[name]
             |> ruleToActon.[name]
-//             fun x -> 
-//                   match x with 
-//                   | (t,_,_) -> ruleToActon.[name] t                  
         | Leaf (name, value)        -> box value            
 
-    let interp ruleToActon ruleToRegexp (tree(*:AST<ILexeme,_,List<_>>*)) = 
+    let interp ruleToActon ruleToRegexp (tree) = 
         try
             Success(lInterp ruleToActon ruleToRegexp tree)
         with 

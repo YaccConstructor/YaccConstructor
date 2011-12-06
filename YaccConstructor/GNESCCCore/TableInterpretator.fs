@@ -22,6 +22,7 @@ namespace Yard.Generators.GNESCCGenerator
 
 
 open Yard.Generators.GNESCCGenerator.AST
+open System.Linq
 
 type ParseStatus<'a,'b,'c when 'a: comparison and 'c: equality and 'c: comparison> = 
     | PSuccess of Set<AST<'a,'b,'c>>
@@ -58,7 +59,7 @@ type  TableInterpreter (tables:Tables) = class
     let rAST =  RegExpAST()
 
     let getLabels s =
-        List.init (Seq.fold (fun b x -> if x then b+1 else b) 0 (tables.IsStart.[s])) (fun _ -> Label s)
+        List.init (tables.IsStart.[s].Count(fun x -> x)) (fun _ -> Label s)
    
     let rec step stack state i =
         let curLexeme = (!Lexer).Value.Get i
@@ -84,12 +85,10 @@ type  TableInterpreter (tables:Tables) = class
             function
             | CommonTypes.Accept    -> if curLexemeTag = Constants.gnesccEndStreamTag then [stack] else []
             | CommonTypes.Error     -> 
-                let xx = ref 1
-                incr xx
                 printfn "Possible error in symbol %A" i
                 []
             | CommonTypes.Shift s   -> 
-                let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))):: stack
+                let stk = State s :: Symbol (curLexemeTag,(Leaf(curLexemeTag,curLexeme))) :: stack
                 step (getLabels s @ stk) s (i+1)
             | CommonTypes.Reduce ps -> 
                 let forest,nStack = reduce ps
@@ -99,7 +98,7 @@ type  TableInterpreter (tables:Tables) = class
                     | hd :: tl -> state tl
                     | [] -> failwith "incorrect stack"
                         
-                let gt = (tables.GotoTable.[(state nStack)].[tables.ProdToNTerm.[ps]])
+                let gt = tables.GotoTable.[state nStack].[tables.ProdToNTerm.[ps]]
                 
                 if Option.isSome gt
                 then
@@ -109,7 +108,7 @@ type  TableInterpreter (tables:Tables) = class
         |> List.concat           
 
     let run lexer  = 
-        Lexer := Some lexer        
+        Lexer := Some lexer
         let r = 
             let f = (step (getLabels 0 @ [State tables.StartIdx.Head]) tables.StartIdx.Head 1)
             f
@@ -120,9 +119,7 @@ type  TableInterpreter (tables:Tables) = class
                 function
                 | Symbol (s,t) -> t
                 | x -> failwith <| "Incorrect stack: \n" + (List.map string r |> String.concat "\n"))
-                       
-                
-        //
+
         cache.Clear()        
         CallCount := 0
         maxCorrPos := 0

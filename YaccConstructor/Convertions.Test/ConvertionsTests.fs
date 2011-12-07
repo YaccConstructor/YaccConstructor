@@ -191,11 +191,11 @@ type ``Convertions tests`` () =
             match FrontendsManager.Component "YardFrontend" with
                    | Some fron -> fron
                    | None -> failwith "YardFrontend is not found." 
-        let generator = 
-           match GeneratorsManager.Component  "YardPrinter" with
+        (*let generator = 
+           match GeneratorsManager.Component "YardPrinter" with
            | Some gen -> gen
-           | None -> failwith "TreeDump is not found." 
-        printfn "%A" generator
+           | None -> failwith "YardPrinter is not found." 
+        printfn "%A" generator*)
         System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
         |> Seq.iter 
             (fun srcFile ->  
@@ -234,11 +234,11 @@ type ``Convertions tests`` () =
             match FrontendsManager.Component "YardFrontend" with
                | Some fron -> fron
                | None -> failwith "YardFrontend is not found."
-        let generator = 
-           match GeneratorsManager.Component  "YardPrinter" with
+        (*let generator = 
+           match GeneratorsManager.Component "YardPrinter" with
            | Some gen -> gen
-           | None -> failwith "TreeDump is not found."
-        printfn "%A" generator
+           | None -> failwith "YardPrinter is not found."
+        printfn "%A" generator*)
         System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
         |> Seq.iter 
             (fun srcFile ->  

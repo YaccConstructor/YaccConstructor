@@ -164,11 +164,11 @@ let idx x y = x,y
 /// Allocate indexes for each production
 type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals:int list, prods: Production<_> list) =
     let prodsWithIdxs = List.mapi (fun i n -> (i,n)) prods
+
     let startIdx =
         prodsWithIdxs
-        |> List.map 
-            (fun (i,Production(_,syms)) -> i,syms.Start)
-        |> CreateDictionary          
+        |> List.map (fun (i,Production(_,syms)) -> i,syms.Start)
+        |> CreateDictionary
 
     let b = Array.ofList (List.map (fun (_,Production(nt,_)) -> ntTab.ToIndex nt) prodsWithIdxs)
 
@@ -178,7 +178,7 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
             (fun nt -> 
                 (ntTab.ToIndex nt
                 ,List.choose 
-                    (fun (i,Production(nt2,syms)) -> if nt2=nt then Some i else None) 
+                    (fun (i,Production(nt2,_)) -> if nt2=nt then Some i else None) 
                     prodsWithIdxs))
         |> CreateDictionary
     
@@ -233,83 +233,46 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
                 let oe = fa.OutEdges s 
                 Seq.iter f oe
                 Seq.filter edgeFilter oe
-                |> Seq.map (fun (e:QuickGraph.TaggedEdge<_,_>) -> e.Target)  
+                |> Seq.map (fun e -> e.Target)  
                 |> Seq.iter inner                                 
         inner s
 
-    let iter prod f edgeFilter =
-        match prod with
-        | Production(nt,fa) -> iterFA fa f edgeFilter fa.Start.Value
+    let iter (Production(nt,fa)) f edgeFilter = 
+        iterFA fa f edgeFilter fa.Start.Value
                 
-    let reachable = 
-        prodsWithIdxs
-        |> List.map 
-            (function 
-             | i,Production(nt,fa) ->                
-                fa.Vertices
-                |> List.ofSeq
-                |> List.map
-                    (fun n ->
-                        let visited = ref []
-                        let rec step v =
-                            if List.exists((=)v) !visited |> not
-                            then 
-                                visited := v :: !visited
-                                let subRes = 
-                                    fa.OutEdges(v)
-                                    |> List.ofSeq
-                                    |> List.choose
-                                        (fun eg ->
-                                            match fst eg.Tag with 
-                                            | Terminal x     -> 
-                                                let elt = termTab.ToIndex x |> PTerminal
-                                                Some (elt,step eg.Target)
-                                            | NonTerminal x  -> 
-                                                let elt = ntTab.ToIndex x |> PNonTerminal
-                                                Some (elt,step eg.Target)
-                                            | Dummy          -> None)
-                                List.map 
-                                    (fun (x,l) -> if List.isEmpty l then [[x]] else List.map (fun y -> x::y) l)
-                                    subRes
-                                |> List.concat
-                            else [[]]
-                        n, step n
-                    )
-                |> CreateDictionary
-                |> idx i)
+    let reachable =
+        [for i,Production(_,fa) in prodsWithIdxs ->
+            let visited = new Dictionary<_,_>(fa.VertexCount)
+            let resetVisited () = 
+                for v in fa.Vertices do visited.[v] <- false
+            let rec step v =
+                if not visited.[v] 
+                then
+                    visited.[v] <- true
+                    let subRes = new ResizeArray<_> ()
+                    for eg in fa.OutEdges v do                                    
+                        match fst eg.Tag with
+                        | Terminal x     -> 
+                            let elt = termTab.ToIndex x |> PTerminal
+                            subRes.Add (elt,step eg.Target)
+                        | NonTerminal x  -> 
+                            let elt = ntTab.ToIndex x |> PNonTerminal
+                            subRes.Add (elt,step eg.Target)
+                        | Dummy          -> ()
+                    [for (x,l) in subRes -> if List.isEmpty l then [[x]] else List.map (fun y -> x::y) l]                                    
+                    |> List.concat
+                else [[]]
+            [for v in fa.Vertices -> resetVisited (); v, step v]
+            |> CreateDictionary
+            |> idx i]
         |> CreateDictionary
 
-
-//        productionIndexator
-//            (fun fa n ->
-//                let buf = ref []
-//                let egf = (fun (eg:QuickGraph.TaggedEdge<_,_>) -> fst eg.Tag <> Dummy)
-//                fun x -> 
-//                    iterFA fa 
-//                        (fun eg ->
-//                            match fst eg.Tag with
-//                            | Dummy -> ()
-//                            | _ -> 
-//                                buf :=
-//                                    if eg.Source<>n
-//                                    then                                
-//                                        match fst eg.Tag with 
-//                                        | Terminal x     -> termTab.ToIndex x |> PTerminal 
-//                                        | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal
-//                                        | Dummy          -> failwith "Seems edge filter is incorrect."
-//                                        ::!buf
-//                                    else !buf ) 
-//                        egf n
-//                    n,!buf)
-//            id
-        
     member prodTab.StartID(i) = startIdx.[i].Value
     member prodTab.NonTerminal(i) = b.[i]    
     member prodTab.Symbols i n = symbols.[i].[n]
     member prodTab.Iter i f edgeFilter = iter (List.find (fun x -> fst x = i ) prodsWithIdxs |> snd) f edgeFilter
     member prodTab.Reachable i n = reachable.[i].[n]
-    member prodTab.Next i from smb = 
-        next.[i].[from,smb]
+    member prodTab.Next i from smb = next.[i].[from,smb]
     member prodTab.Productions = productions
     member prodTab.AllProds () = prodsWithIdxs
 

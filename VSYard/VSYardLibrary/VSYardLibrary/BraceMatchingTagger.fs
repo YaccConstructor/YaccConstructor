@@ -9,64 +9,60 @@ open Microsoft.VisualStudio.Text.Editor
 open Microsoft.VisualStudio.Text.Tagging
 open Microsoft.VisualStudio.Utilities
 open System.Linq
+open Yard.Frontends.YardFrontend.Main
+open Yard.Frontends.YardFrontend.GrammarParser
 
-
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self =
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>() //is this right?
-//    let mutable CurrenToken : Yard.Frontends.YardFrontend.GrammarParser.token = Yard.Frontends.YardFrontend.GrammarParser.LPAREN (new Yard.Frontends.YardFrontend.GrammarParser.Range(1,2))
-//    let mutable m_braceList : Dictionary<Yard.Frontends.YardFrontend.GrammarParser.token,Yard.Frontends.YardFrontend.GrammarParser.token> = null
+    //let mutable m_braceList : Dictionary<Yard.Frontends.YardFrontend.GrammarParser.token,Yard.Frontends.YardFrontend.GrammarParser.token> = null
+    
     let mutable lexeredText = null
 
-// *    let TagsChanged : Event<SnapshotSpanEventArgs> = new Event<SnapshotSpanEventArgs>() //how should this be done?
-//    let UpdateAtCaretPosition caretPosition : CaretPosition = 
-//        CurrentChar <- caretPosition.Point.GetPoint(SourceBuffer, caretPosition.Affinity)
-//        if not CurrentChar.HasValue then ()
-//            else
-//                let tempEvent = TagsChanged
-//                if not (tempEvent.Equals(null)) then tempEvent.Trigger(new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0,SourceBuffer.CurrentSnapshot.Length)))
-//    let CaretPositionChanged (sender : obj, e : CaretPositionChangedEventArgs) = 
-//        UpdateAtCaretPosition(e.NewPosition)
-//          ()
-//                
-//    let ViewLayoutChanged (sender : obj, e : TextViewLayoutChangedEventArgs) = 
-//        if e.NewSnapshot = e.OldSnapshot then UpdateAtCaretPosition(View.Caret.Position)
-//        ()
-    do
-        //m_braceList.Add(Yard.Frontends.YardFrontend.GrammarParser.LPAREN,Yard.Frontends.YardFrontend.GrammarParser.RPAREN)
+    let getTags (spans : NormalizedSnapshotSpanCollection) =
+        Seq.empty
+
+    let TagsChanged = new Event<_>()
+        
+
+    let UpdateAtCaretPosition (position : CaretPosition) =
+        CurrentChar <- position.Point.GetPoint(SourceBuffer, position.Affinity)
+        //if not CurrentChar.HasValue then RETUTN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+        TagsChanged.Trigger (self, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)))
+        ()    
+    
+    let CaretPositionChanged (sender: obj, e : CaretPositionChangedEventArgs) = 
+        UpdateAtCaretPosition(e.NewPosition)      
+
+    let ViewLayoutChanged (sender : obj, e : TextViewLayoutChangedEventArgs) =
+        if not (e.OldSnapshot = e.NewSnapshot) then
+            UpdateAtCaretPosition(View.Caret.Position)
+    let mutable lexeredText = LexString (SourceBuffer.CurrentSnapshot.GetText())
+
+    do //this.View.Caret.PositionChanged += CaretPositionChanged;    //this.View.LayoutChanged += ViewLayoutChanged;
         View <- view
         SourceBuffer <- sourceBuffer
-// *       View.Caret.PositionChanged.Add(CaretPositionChanged)
-//        View.LayoutChanged.Add(ViewLayoutChanged)
-//        if not (View.ToString() = "") then lexeredText <- Yard.Frontends.YardFrontend.Main.LexString (View.ToString())
+        //Event.add CaretPositionChanged View.Caret.PositionChanged ///How??
 
-    let getTags (spans : NormalizedSnapshotSpanCollection) =
-        if spans.Count = 0 then ()
 
-//        if not ((not CurrentChar.HasValue) || CurrentChar.Value.Position >= CurrentChar.Value.Snapshot.Length)&& (not (spans.Count = 0) ) then 
-//            let mutable currentChar : SnapshotPoint = CurrentChar.Value
-//        
-//            if not (spans.ElementAt(0).Snapshot = currentChar.Snapshot) then                   //is replacing spans[0] to what is here correct?
-//                currentChar <- currentChar.TranslateTo(spans.ElementAt(0).Snapshot, PointTrackingMode.Positive)
-//
-//            let mutable currentText : char = currentChar.GetChar()
-//            let mutable lastChar : SnapshotPoint = 
-//                if currentChar.Position = 0 then currentChar
-//                    else currentChar - 1
-//            let mutable lastText = lastChar.GetChar()
-//            let mutable pairSpan = new SnapshotSpan()
-//
-//    //        if currentText = Yard.Frontends.YardFrontend.GrammarParser.LPAREN then
-//    //            let closeChar = ')'
-//
-//            let x = Yard.Frontends.YardFrontend.Main.LexString (View.ToString())
-//            ()
-
-        Seq.empty
-    
+    let FindMatchingCloseChar (start : SnapshotPoint, openChar : char, closeChar : char, maxLines : int, pairSpan : SnapshotSpan) = //return the value
+        lexeredText <- LexString (SourceBuffer.CurrentSnapshot.GetText())
+        let currentPosition = start.Position //shows the number of chars befor the cursor position
+        let hasTheCurrentPosition t =
+                match t with
+                | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
+                | _ -> false
+        let gotIt = Seq.exists hasTheCurrentPosition lexeredText
+        let y = 
+            lexeredText
+            |> Seq.findIndex
+                (fun t ->
+                    match t with
+                    | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
+                    | _ -> false)
         
     interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans
-        member self.add_TagsChanged x = ()
-        member self.remove_TagsChanged x = ()
+        member self.add_TagsChanged x   = () // Event.add x TagsChanged.Publish
+        member self.remove_TagsChanged x =  ()

@@ -62,6 +62,14 @@ type  TableInterpreter (tables:Tables) = class
         List.init (tables.IsStart.[s].Count(fun x -> x)) (fun _ -> Label s)
    
     let rec step stack state i =
+#if _DEBUG
+        let write = function
+            | Symbol (tag, node) -> "Sym (" + tag.ToString() + ","
+                                        + (sprintf "%A" node) + ")"
+            | State s -> "S " + s.ToString()
+            | Label l -> "L " + l.ToString()
+        printfn "%d:\n%A" (i-1) (List.map write (List.rev stack))
+#endif
         let curLexeme = (!Lexer).Value.Get i
         let curLexemeTag = curLexeme.tag
         let reduce ps =
@@ -105,7 +113,7 @@ type  TableInterpreter (tables:Tables) = class
                     let stk = State gt.Value :: (Symbol (ps,Node(forest,ps,[]))) :: (nStack) 
                     step (getLabels gt.Value @ stk) (gt.Value) i
                 else [stack] )
-        |> List.concat           
+        |> List.concat
 
     let run lexer  = 
         Lexer := Some lexer
@@ -123,6 +131,7 @@ type  TableInterpreter (tables:Tables) = class
         cache.Clear()        
         CallCount := 0
         maxCorrPos := 0
+        List.iter (AST.PrintTree id) res
         res
     member self.Run lexer = run lexer
 end

@@ -36,13 +36,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <ItemGroup>
-    <Compile Include="LexerHelper.fs" />
-    <FsLex Include="Lexer.fsl" />
-    <Compile Include="Tables.fs" />
-    <Compile Include="Lexer.fs" />
-    <Compile Include="Driver.fs" />
-  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
@@ -50,16 +44,25 @@
     <Reference Include="FSharp.PowerPack.Metadata, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="FSharp.PowerPack.Parallel.Seq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="GNESCCCommon">
-      <HintPath>..\..\..\..\..\YaccConstructor\GNESCCCore\bin\Debug\GNESCCCommon.dll</HintPath>
+      <HintPath>..\..\..\YaccConstructor\GNESCCCore\bin\Debug\GNESCCCommon.dll</HintPath>
     </Reference>
     <Reference Include="GNESCCCore">
-      <HintPath>..\..\..\..\..\YaccConstructor\GNESCCCore\bin\Debug\GNESCCCore.dll</HintPath>
+      <HintPath>..\..\..\YaccConstructor\GNESCCCore\bin\Debug\GNESCCCore.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LexerHelper.fs" />
+    <Compile Include="Tables.fs" />
+    <FsLex Include="Lexer.fsl">
+      <OtherFlags>--unicode</OtherFlags>
+    </FsLex>
+    <Compile Include="Lexer.fs" />
+    <Compile Include="Driver.fs" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

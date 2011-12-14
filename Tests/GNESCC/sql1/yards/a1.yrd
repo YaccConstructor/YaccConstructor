@@ -2,10 +2,10 @@
 ;
    *)
 +sql_expr:
-    IDENT
-|   LPAREN sql_expr RPAREN
-|   LOCALVAR 
+    LPAREN sql_expr RPAREN
 |   sql_expr OP_MT sql_expr
 |   KW_IF sql_expr
 |   DEC_NUMBER
 ;
+
+s: LOCALVAR | IDENT;

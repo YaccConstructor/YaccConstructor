@@ -53,5 +53,5 @@ type GNESCCGenerator() =
             regexpGenerator.Generate transformedGrammar typeToTag
             codeGenerator.Generate transformedGrammar typeToTag :> obj
         override this.AcceptableProductionTypes = 
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) 
+            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)

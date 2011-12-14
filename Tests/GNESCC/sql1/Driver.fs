@@ -32,7 +32,16 @@ let run path =
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
     let l = Lexer_alt.Lexer(buf)
-    
+    //for i in Yard.Generators.GNESCCGenerator.
+    try 
+        for i in 1..100 do
+            printfn "%d: %A"
+                    ((l :> ILexer).Get i).tag
+                    (getName ((l :> ILexer).Get i).tag)
+    with
+        | _ -> ()
+
+    printfn "\n"
     //Create tables
     let tables = tables
     
@@ -68,4 +77,4 @@ let run path =
 do 
     run @"..\..\yards\test1.yrd.in"
     |> ignore
-    System.Console.ReadLine() |> ignore
+//    System.Console.ReadLine() |> ignore

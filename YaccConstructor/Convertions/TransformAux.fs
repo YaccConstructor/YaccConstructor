@@ -77,4 +77,8 @@ let list2opt = function
     | [h]    -> Some h (** list contains only one element!!! *)
     | _other -> invalidArg "list2opt" "Inpul list cannot contains more than one element." 
 
+let opt2list = function
+    | None -> []
+    | Some x -> [x]
+
 (* end of TransformAux *)

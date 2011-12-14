@@ -21,9 +21,9 @@ namespace Yard.Generators.GNESCCGenerator
 
 type Enumerator() = class
     let i = ref -1
-    let next() = incr i; !i          
+    let next() = incr i; !i
     member self.Next() = next()
     member self.Reset() = i := -1
-    member self.Reset start = i := start   
+    member self.Reset start = i := start
 end
 

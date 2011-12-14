@@ -20,8 +20,8 @@
 namespace Yard.Generators.GNESCCGenerator
 
 type ILexeme = interface
-        inherit System.IComparable
-        abstract tag : int
+    inherit System.IComparable
+    abstract tag : int
 end
  
 type ILexer = interface

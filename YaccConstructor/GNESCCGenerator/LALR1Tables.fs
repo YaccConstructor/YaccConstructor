@@ -205,7 +205,7 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
                     (fun eg -> 
                         match fst eg.Tag with 
                         | Terminal x     -> termTab.ToIndex x |> PTerminal |> Some
-                        | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal |> Some 
+                        | NonTerminal x  -> ntTab.ToIndex x |> PNonTerminal |> Some
                         | Dummy          -> None)
                  >> List.ofSeq
                  >> (idx n))
@@ -272,7 +272,9 @@ type ProductionTable(ntTab:NonTerminalTable, termTab:TerminalTable, nonTerminals
     member prodTab.Symbols i n = symbols.[i].[n]
     member prodTab.Iter i f edgeFilter = iter (List.find (fun x -> fst x = i ) prodsWithIdxs |> snd) f edgeFilter
     member prodTab.Reachable i n = reachable.[i].[n]
-    member prodTab.Next i from smb = next.[i].[from,smb]
+    /// Get transition in production rule 'i', from vertex 'from' using edge, labeled with 'smb'
+    member prodTab.Next i from smb = 
+        next.[i].[from,smb]
     member prodTab.Productions = productions
     member prodTab.AllProds () = prodsWithIdxs
 
@@ -438,7 +440,7 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
     // (int,int) representation of LR(0) items 
     let prodIdx_to_item0 idx = mkItem0(idx,prodTab.StartID idx)     
     let ntIdx_of_item0 item0 = prodTab.NonTerminal (prodIdx_of_item0 item0)
-   
+
     let rsyms_of_item0 item0 = 
         let prodIdx = prodIdx_of_item0 item0
         let dotIdx = dotIdx_of_item0 item0
@@ -666,8 +668,7 @@ let CompilerLalrParserSpec (spec : ProcessedParserSpec<_>) =
 
 
         //printfn "#kernelIdxs = %d, count = %d" kernelTab.Indexes.Length !count
-        spontaneous,
-        propagate
+        spontaneous, propagate
    
     //printfn "#spontaneous = %d, #propagate = %d" spontaneous.Count propagate.Count; stdout.Flush();
    

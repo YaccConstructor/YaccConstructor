@@ -29,16 +29,16 @@ let run path =
     let content = System.IO.File.ReadAllText(path)
     let reader = new System.IO.StringReader(content)    
     let buf = LexBuffer<_>.FromTextReader reader
-    let l = Lexer_seq.Lexer(buf)
+    let lexer = Lexer_seq.Lexer(buf)
 
     //Create tables
     let tables = tables
-    
+
     //Run parser
-    // forest -- dirivation forest    
-    let forest =    
+    // forest -- derivation forest    
+    let forest =
         let ti = new TableInterpreter(tables)
-        ti.Run l
+        ti.Run lexer
 
     let f x =
         match x with
@@ -49,14 +49,14 @@ let run path =
 
     let result =
         //run forest interpretation (action code calculation)
-        let r = 
+        let res = 
             Seq.map 
                 (ASTInterpretator.interp GNESCC.Actions.ruleToAction GNESCC.Regexp.ruleToRegex)
                 forest
-        r
-                
+        res
+
     printfn "Result %A\n" result
-    
+
 do 
     run @"..\..\..\..\Tests\GNESCC\regexp\simple\alt\alt_1.yrd.in "
     |> ignore

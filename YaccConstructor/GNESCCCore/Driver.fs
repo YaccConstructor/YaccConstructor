@@ -23,7 +23,7 @@ type CoreDriver() =
     class
         let parse (lexer: ILexer) tables =
             let tableInterpreter = new TableInterpreter(tables)
-            tableInterpreter.Run lexer            
+            tableInterpreter.Run lexer
 
         let interprete inpForest = ()
 

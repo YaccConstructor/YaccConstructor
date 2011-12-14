@@ -25,13 +25,13 @@ open QuickGraph
 type AtmBuilder(enumerator:Enumerator) =
     class
         let concat (lAtm:FA.FA<_,_>) (rAtm:FA.FA<_,_>) lbl = 
-                lAtm.AddVerticesAndEdgeRange rAtm.Edges
-                |> ignore
-                new TaggedEdge<_,_>(lAtm.Finale.Head, rAtm.Start.Value, lbl)
-                |> lAtm.AddVerticesAndEdge
-                |> ignore
-                lAtm.Finale <- rAtm.Finale
-                lAtm
+            lAtm.AddVerticesAndEdgeRange rAtm.Edges
+            |> ignore
+            new TaggedEdge<_,_>(lAtm.Finale.Head, rAtm.Start.Value, lbl)
+            |> lAtm.AddVerticesAndEdge
+            |> ignore
+            lAtm.Finale <- rAtm.Finale
+            lAtm
                 
         let alt (atm1:FA.FA<_,_>) (atm2:FA.FA<_,_>) alt1Slbl alt1Elbl alt2Slbl alt2Elbl =
             let startStateID = enumerator.Next()
@@ -39,10 +39,10 @@ type AtmBuilder(enumerator:Enumerator) =
             atm1.AddVerticesAndEdgeRange atm2.Edges
             |> ignore
             atm1.AddVerticesAndEdgeRange(
-                [new TaggedEdge<_,_>(startStateID,atm1.Start.Value,alt1Slbl)
-                ;new TaggedEdge<_,_>(startStateID,atm2.Start.Value,alt2Slbl)
-                ;new TaggedEdge<_,_>(atm1.Finale.Head,finaleStateID,alt1Elbl)
-                ;new TaggedEdge<_,_>(atm2.Finale.Head,finaleStateID,alt2Slbl)])
+                [new TaggedEdge<_,_>(startStateID, atm1.Start.Value, alt1Slbl)
+                ;new TaggedEdge<_,_>(startStateID, atm2.Start.Value, alt2Slbl)
+                ;new TaggedEdge<_,_>(atm1.Finale.Head, finaleStateID, alt1Elbl)
+                ;new TaggedEdge<_,_>(atm2.Finale.Head, finaleStateID, alt2Slbl)])
             |> ignore
             atm1.Start <- Some startStateID            
             atm1.Finale <- [finaleStateID]
@@ -52,10 +52,10 @@ type AtmBuilder(enumerator:Enumerator) =
             let startStateID = enumerator.Next()
             let finaleStateID = enumerator.Next()
             atm.AddVerticesAndEdgeRange(
-                [new TaggedEdge<_,_>(atm.Start.Value,atm.Finale.Head,(omega))
-                ;new TaggedEdge<_,_>(atm.Finale.Head,atm.Start.Value,(omega))
-                ;new TaggedEdge<_,_>(startStateID,atm.Start.Value,clsSlbl)
-                ;new TaggedEdge<_,_>(atm.Finale.Head,finaleStateID,clsElbl)])
+                [new TaggedEdge<_,_>(atm.Start.Value, atm.Finale.Head, omega)
+                ;new TaggedEdge<_,_>(atm.Finale.Head, atm.Start.Value, omega)
+                ;new TaggedEdge<_,_>(startStateID, atm.Start.Value, clsSlbl)
+                ;new TaggedEdge<_,_>(atm.Finale.Head, finaleStateID, clsElbl)])
             |> ignore
             atm.Start <- Some startStateID
             atm.Finale <- [finaleStateID]

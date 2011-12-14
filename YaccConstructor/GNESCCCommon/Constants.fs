@@ -28,4 +28,3 @@ module Constants =
 
     exception CheckerFalse
 
-    

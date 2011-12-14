@@ -16,8 +16,6 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>() //is this right?
-    //let mutable m_braceList : Dictionary<Yard.Frontends.YardFrontend.GrammarParser.token,Yard.Frontends.YardFrontend.GrammarParser.token> = null
-    
     let mutable lexeredText = null
 
     let getTags (spans : NormalizedSnapshotSpanCollection) =
@@ -28,22 +26,20 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
 
     let UpdateAtCaretPosition (position : CaretPosition) =
         CurrentChar <- position.Point.GetPoint(SourceBuffer, position.Affinity)
-        //if not CurrentChar.HasValue then RETUTN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-        TagsChanged.Trigger (self, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)))
+        TagsChanged.Trigger (new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)))
         ()    
-    
-    let CaretPositionChanged (sender: obj, e : CaretPositionChangedEventArgs) = 
-        UpdateAtCaretPosition(e.NewPosition)      
-
-    let ViewLayoutChanged (sender : obj, e : TextViewLayoutChangedEventArgs) =
+    let CaretPositionChanged (sender : obj) (e : CaretPositionChangedEventArgs) = 
+        UpdateAtCaretPosition(e.NewPosition)
+    let ViewLayoutChanged (sender: obj) (e : TextViewLayoutChangedEventArgs) =
         if not (e.OldSnapshot = e.NewSnapshot) then
             UpdateAtCaretPosition(View.Caret.Position)
     let mutable lexeredText = LexString (SourceBuffer.CurrentSnapshot.GetText())
 
-    do //this.View.Caret.PositionChanged += CaretPositionChanged;    //this.View.LayoutChanged += ViewLayoutChanged;
+    do 
         View <- view
         SourceBuffer <- sourceBuffer
-        //Event.add CaretPositionChanged View.Caret.PositionChanged ///How??
+        View.Caret.PositionChanged.AddHandler (new EventHandler<CaretPositionChangedEventArgs>(CaretPositionChanged))
+        View.LayoutChanged.AddHandler (new EventHandler<TextViewLayoutChangedEventArgs>(ViewLayoutChanged))
 
 
     let FindMatchingCloseChar (start : SnapshotPoint, openChar : char, closeChar : char, maxLines : int, pairSpan : SnapshotSpan) = //return the value
@@ -61,8 +57,11 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
                     match t with
                     | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
                     | _ -> false)
-        
+        ()
+
     interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans
-        member self.add_TagsChanged x   = () // Event.add x TagsChanged.Publish
+        member self.add_TagsChanged z  = //no idea of any way of transforming EventHandler<SnapshotSpanEvebtArgs> to acceptible type for Event.add or TagsChanged.Add
+            TagsChanged.Publish.AddHandler z
+            () // Event.add x TagsChanged.Publish
         member self.remove_TagsChanged x =  ()

@@ -1,8 +1,8 @@
 +sql_expr:
-    LPAREN sql_expr RPAREN
+    IDENT
+|   LPAREN sql_expr RPAREN
+|   LOCALVAR 
 |   sql_expr OP_MT sql_expr
 |   KW_IF sql_expr KW_THEN sql_expr
 |   DEC_NUMBER
 ;
-
-s: LOCALVAR | IDENT;

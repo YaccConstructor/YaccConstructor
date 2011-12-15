@@ -62,14 +62,14 @@ type  TableInterpreter (tables:Tables) = class
         List.init (tables.IsStart.[s].Count(fun x -> x)) (fun _ -> Label s)
    
     let rec step stack state i =
-#if _DEBUG
+//#if _DEBUG
         let write = function
             | Symbol (tag, node) -> "Sym (" + tag.ToString() + ","
                                         + (sprintf "%A" node) + ")"
             | State s -> "S " + s.ToString()
             | Label l -> "L " + l.ToString()
         printfn "%d:\n%A" (i-1) (List.map write (List.rev stack))
-#endif
+//#endif
         let curLexeme = (!Lexer).Value.Get i
         let curLexemeTag = curLexeme.tag
         let reduce ps =

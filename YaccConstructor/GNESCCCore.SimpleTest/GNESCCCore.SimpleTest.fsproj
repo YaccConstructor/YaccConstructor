@@ -47,6 +47,9 @@
     <Compile Include="first_grammar.yrd.actions.fs" />
     <Compile Include="first_grammar.yrd.regexp.fs" />
     <Compile Include="first_grammar.yrd.tables.fs" />
+    <Compile Include="add.yrd.actions.fs" />
+    <Compile Include="add.yrd.regexp.fs" />
+    <Compile Include="add.yrd.tables.fs" />
     <Compile Include="GNESCCCoreSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

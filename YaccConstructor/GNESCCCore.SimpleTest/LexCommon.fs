@@ -18,10 +18,10 @@ type Lexer<'lexType>(path, getTag) =
             |> Array.map (fun uci -> (uci.Name,  FSharpValue.PreComputeUnionConstructor(uci)) ) 
             |> dict
 
-        //printfn "%A" targetUCIs
+        printfn "%A" targetUCIs
 
         fun (name:string) ->
-            //printfn "%s" name
+            printfn "%s" name
             let caseCtor = targetUCIs.["T_" + name]
             (caseCtor [||]):?> 'lexType
             |> (fun x -> MyLexeme(getTag x, name) :> ILexeme)

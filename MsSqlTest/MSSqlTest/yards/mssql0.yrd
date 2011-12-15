@@ -36,6 +36,7 @@ proc_body_stmnt:
 |   sql_expr
 |   KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
 |   KW_RETURN sql_expr
+|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) 
 ;
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
@@ -146,12 +147,14 @@ binop:
 |   OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
 ;
 (* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
+sql_expr_lrecu:
+    sql_expr binop sql_expr
+;
 sql_expr:
-    sql_value
+    sql_expr_lrecu
+|   sql_value
 |   LPAREN sql_expr RPAREN
 |   LOCALVAR 
-|   sql_expr binop sql_expr
-|   KW_IF sql_expr KW_THEN ((KW_BEGIN sql_expr* KW_END) | sql_expr) 
 |   full_ident LPAREN comma_list<<sql_expr>>? RPAREN
 |   KW_SELECT sql_expr KW_FROM IDENT
 |   (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 

@@ -44,11 +44,16 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
 
     let FindMatchingCloseChar (start : SnapshotPoint, openChar : char, closeChar : char, maxLines : int, pairSpan : SnapshotSpan) = //return the value
         lexeredText <- LexString (SourceBuffer.CurrentSnapshot.GetText())
-        let currentPosition = start.Position //shows the number of chars befor the cursor position
+        let currentPosition = start.Position //shows the number of chars before the cursor position
         let hasTheCurrentPosition t =
                 match t with
                 | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
                 | _ -> false
+        let isParenthesisToken t =
+            match t with
+            | LPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
+            | RPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
+            | _ -> false
         let gotIt = Seq.exists hasTheCurrentPosition lexeredText
         let y = 
             lexeredText
@@ -57,11 +62,27 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
                     match t with
                     | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
                     | _ -> false)
+        let count = ref 0
+        let parentheses = Seq.filter isParenthesisToken lexeredText //got all parentheses after the first
+        let index = ref 0
+        let checkTheItem (x : token) =
+            match x with
+                | LPAREN (r) -> (count := !count + 1)
+                | RPAREN (r) -> if not (!count = 0) then (count := !count - 1)
+                | _ -> ()
+        for i = 0 to Seq.length parentheses - 1 do
+            let t = Seq.head parentheses
+            checkTheItem t
+            if !count = 0 then
+                match t with
+                    | RPAREN (r) -> index := r.Start.AbsoluteOffset
+                    | _ -> () //potential risk, if got there then sth went wrong
+        done
         ()
 
     interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans
         member self.add_TagsChanged z  = //no idea of any way of transforming EventHandler<SnapshotSpanEvebtArgs> to acceptible type for Event.add or TagsChanged.Add
-            TagsChanged.Publish.AddHandler z
+           // TagsChanged.Publish.AddHandler z
             () // Event.add x TagsChanged.Publish
         member self.remove_TagsChanged x =  ()

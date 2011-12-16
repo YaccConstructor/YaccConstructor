@@ -12,7 +12,7 @@ open System.Linq
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
 
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self =
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>()
@@ -26,7 +26,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
     let UpdateAtCaretPosition (position : CaretPosition) =
         CurrentChar <- position.Point.GetPoint(SourceBuffer, position.Affinity)
         TagsChanged.Trigger (new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)))
-        ()    
+                  
     let CaretPositionChanged (sender : obj) (e : CaretPositionChangedEventArgs) = 
         UpdateAtCaretPosition(e.NewPosition)
     let ViewLayoutChanged (sender: obj) (e : TextViewLayoutChangedEventArgs) =
@@ -46,38 +46,35 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
         let currentPosition = start.Position //shows the number of chars before the cursor position
         let hasTheCurrentPosition t =
             match t with
-            | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
+            | LPAREN x -> x.Start.AbsoluteOffset = currentPosition
             | _ -> false
         let isParenthesisToken t =
             match t with
-            | LPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
-            | RPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
+            | LPAREN x 
+            | RPAREN x -> x.Start.AbsoluteOffset > currentPosition
             | _ -> false
         let gotIt = Seq.exists hasTheCurrentPosition lexeredText
         let y = 
             lexeredText
             |> Seq.findIndex
-                (fun t ->
-                    match t with
-                    | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
+                   (function
+                    | LPAREN x -> x.Start.AbsoluteOffset = currentPosition
                     | _ -> false)
         let count = ref 0
         let parentheses = Seq.filter isParenthesisToken lexeredText //got all parentheses after the first
         let index = ref 0
         let checkTheItem (x : token) =
             match x with
-                | LPAREN (r) -> (count := !count + 1)
-                | RPAREN (r) -> if not (!count = 0) then (count := !count - 1)
-                | _ -> ()
+            | LPAREN r -> count := !count + 1
+            | RPAREN r -> if not (!count = 0) then count := !count - 1
+            | _ -> ()
         for i = 0 to Seq.length parentheses - 1 do
             let t = Seq.head parentheses
             checkTheItem t
             if !count = 0 then
                 match t with
-                    | RPAREN (r) -> index := r.Start.AbsoluteOffset
-                    | _ -> () //potential risk, if got there then sth went wrong
-        done
-        ()
+                | RPAREN r -> index := r.Start.AbsoluteOffset
+                | _ -> () //potential risk, if got there then sth went wrong
 
     interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans

@@ -117,3 +117,17 @@ type ``GNESCC core tests with simple lexer`` () =
         
         run path tables actions regexp getTag getName
         |> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+
+    [<Test>]
+    member test.``Left recursion with regular expressions test``() =
+        let regexp     = GNESCC.Regexp_regexp_rec.ruleToRegex
+        let actions    = GNESCC.Actions_regexp_rec.ruleToAction
+        let tables     = GNESCCGenerator.Tables_regexp_rec.tables
+        let getTag     = GNESCCGenerator.Tables_regexp_rec.getTag
+        let getName    = GNESCCGenerator.Tables_regexp_rec.getName
+        let path = dir + "regexp_rec/input.txt"
+        let rightValue = []
+        
+        run path tables actions regexp getTag getName
+        //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+        |> printfn "Result: %A"

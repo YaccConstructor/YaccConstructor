@@ -17,9 +17,6 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>()
 
-    let getTags (spans : NormalizedSnapshotSpanCollection) =
-        Seq.empty
-
     let TagsChanged = new Event<_>()
 
     let UpdateAtCaretPosition (position : CaretPosition) =
@@ -30,7 +27,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
     let CaretPositionChanged (sender : obj) (e : CaretPositionChangedEventArgs) = 
         UpdateAtCaretPosition(e.NewPosition)
     let ViewLayoutChanged (sender: obj) (e : TextViewLayoutChangedEventArgs) =
-        if not (e.OldSnapshot = e.NewSnapshot) then
+        if not (e.OldSnapshot = e.NewSnapshot) && ( e.NewSnapshot.Length = e.OldSnapshot.Length || e.VerticalTranslation || e.HorizontalTranslation) then
             UpdateAtCaretPosition(View.Caret.Position)
 
     do 
@@ -103,8 +100,12 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
                                         currentChar := (!currentChar).TranslateTo(spans.ElementAt<SnapshotSpan>(0).Snapshot, PointTrackingMode.Positive)
                            
                             let currentPosition = currentChar.Value.Position
-                            let lexeredText = List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
-                            let parentheses = List.filter isParenthesis lexeredText
+                            let lexeredText = ref List.Empty
+                            try
+                                lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                            with
+                            |_ -> ()
+                            let parentheses = List.filter isParenthesis !lexeredText
                             let shouldBeProcessed = parentheses |> List.exists (fun x ->
                                                 match x with
                                                 |LPAREN r when r.Start.AbsoluteOffset = currentPosition -> true

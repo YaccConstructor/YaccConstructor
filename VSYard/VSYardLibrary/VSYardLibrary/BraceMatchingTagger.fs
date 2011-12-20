@@ -61,35 +61,6 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
         let result = ref (new SnapshotSpan())
         if !got then result := new SnapshotSpan (new SnapshotPoint (SourceBuffer.CurrentSnapshot, !closeParenthesisPosition), 1)
         !result
-//        let currentPosition = start.Position //shows the number of chars before the cursor position
-//        let isParenthesisToken t =
-//            match t with
-//            | LPAREN x 
-//            | RPAREN x -> x.Start.AbsoluteOffset > currentPosition
-//            | _ -> false
-//        let count = ref 0
-////        let tmp = List.ofSeq ((LexString (SourceBuffer.CurrentSnapshot.GetText())) |> Seq.filter (fun x ->
-////                                                                                                match x with
-////                                                                                                | COMMUT -> true
-////                                                                                                | _ -> false))
-//        let parentheses = List.ofSeq (LexString (SourceBuffer.CurrentSnapshot.GetText()) |> Seq.filter isParenthesisToken) //got all parentheses after the first
-//        let w = ref -1
-//        let got = ref false
-//        let s x =
-//            match x with
-//            | LPAREN _ -> count:= !count + 1
-//            | RPAREN _ when not (!count = 0) -> count := !count - 1
-//            | RPAREN r when (!count = 0) && (!got = false) -> w := r.Start.AbsoluteOffset 
-//            | _ -> ()
-//            if not (!w = -1) then got := true
-//
-//        List.iter s parentheses
-//        let resultPoint = ref (new SnapshotPoint () )
-//        if !got
-//            then resultPoint := SnapshotPoint (start.Snapshot, !w)
-//            else resultPoint := SnapshotPoint ()
-//        let pairSpan = new SnapshotSpan(!resultPoint, 1)
-//        pairSpan
 
     let FindMatchForClose (parentheses, closeParenthesisPosition) = 
         let isFurtherThanCurrent x =
@@ -112,28 +83,6 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
         let result = ref (new SnapshotSpan())
         if !got then result := new SnapshotSpan (new SnapshotPoint (SourceBuffer.CurrentSnapshot, !openParenthesisPosition), 1)
         !result
-//        let currentPosition = finish.Position //shows the number of chars before the cursor position
-//        let isParenthesisToken t =
-//            match t with
-//            | LPAREN x 
-//            | RPAREN x -> x.Start.AbsoluteOffset < currentPosition
-//            | _ -> false
-//        let count = ref 0
-//        let parentheses = List.rev (List.ofSeq (LexString (SourceBuffer.CurrentSnapshot.GetText()) |> Seq.filter isParenthesisToken)) //got all parentheses before the last (from the closest)
-//        let w = ref -1
-//        let got = ref false
-//        let s x =
-//            match x with
-//            | RPAREN _ -> count:= !count + 1
-//            | LPAREN _ when not (!count = 0) -> count := !count - 1
-//            | LPAREN r when (!count = 0) && (!got = false) -> w := r.Start.AbsoluteOffset 
-//            | _ -> ()
-//            if not (!w = -1) then got := true
-//
-//        List.iter s parentheses
-//        let resultPoint = new SnapshotPoint (finish.Snapshot, !w)
-//        let pairSpan = new SnapshotSpan(resultPoint, 1)
-//        pairSpan
     
     let getTags (spans : NormalizedSnapshotSpanCollection) =
         let isLParen x = 

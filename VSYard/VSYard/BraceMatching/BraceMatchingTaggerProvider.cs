@@ -9,6 +9,22 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using System.Linq;
+    using System.Windows.Media;
+
+    [Export(typeof(EditorFormatDefinition))]
+    [Name("green")]
+    [UserVisible(true)]
+    internal class HighlightFormatDefinition1 : MarkerFormatDefinition
+    {
+        public HighlightFormatDefinition1()
+        {
+            this.BackgroundColor = Colors.Aquamarine;
+            this.ForegroundColor = Colors.Teal;
+            this.DisplayName = "green element!";
+            this.ZOrder = 5;
+        }
+    }
+
 
     [Export(typeof(IViewTaggerProvider))]
     [ContentType("text")]

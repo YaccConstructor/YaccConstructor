@@ -50,6 +50,9 @@
     <Compile Include="add.yrd.actions.fs" />
     <Compile Include="add.yrd.regexp.fs" />
     <Compile Include="add.yrd.tables.fs" />
+    <Compile Include="regexp_rec.yrd.actions.fs" />
+    <Compile Include="regexp_rec.yrd.regexp.fs" />
+    <Compile Include="regexp_rec.yrd.tables.fs" />
     <Compile Include="GNESCCCoreSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

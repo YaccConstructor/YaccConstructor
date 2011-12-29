@@ -60,7 +60,7 @@ type  TableInterpreter (tables:Tables) = class
 
     let getLabels s =
         List.init (tables.IsStart.[s].Count(fun x -> x)) (fun _ -> Label s)
-   
+
     let rec step stack state i =
 //#if _DEBUG
         let write = function

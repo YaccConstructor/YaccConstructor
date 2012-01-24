@@ -43,7 +43,6 @@
     <Compile Include="Namer.fs" />
     <Compile Include="TransformAux.fs" />
     <Compile Include="ExpandAlter.fs" />
-    <Compile Include="ExpandMeta.fs" />
     <Compile Include="ExpandBrackets.fs" />
     <Compile Include="AddEOF.fs" />
     <Compile Include="ReplaceLiterals.fs" />
@@ -53,6 +52,8 @@
     <Compile Include="MergeAlter.fs" />
     <Compile Include="BuildAstSimple.fs" />
     <Compile Include="AddDefaultAC.fs" />
+    <Compile Include="ExpandMeta.fs" />
+    <Compile Include="EliminateLeftRecursion.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

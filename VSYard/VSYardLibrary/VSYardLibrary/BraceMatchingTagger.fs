@@ -12,28 +12,23 @@ open System.Linq
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
 
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self =
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
-    let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>() //is this right?
-    let mutable lexeredText = null
-
-    let getTags (spans : NormalizedSnapshotSpanCollection) =
-        Seq.empty
+    let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>()
 
     let TagsChanged = new Event<_>()
-        
 
     let UpdateAtCaretPosition (position : CaretPosition) =
         CurrentChar <- position.Point.GetPoint(SourceBuffer, position.Affinity)
-        TagsChanged.Trigger (new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)))
-        ()    
+        let tempEvent = TagsChanged
+        tempEvent.Trigger (new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot,0,SourceBuffer.CurrentSnapshot.Length)))
+                  
     let CaretPositionChanged (sender : obj) (e : CaretPositionChangedEventArgs) = 
         UpdateAtCaretPosition(e.NewPosition)
     let ViewLayoutChanged (sender: obj) (e : TextViewLayoutChangedEventArgs) =
-        if not (e.OldSnapshot = e.NewSnapshot) then
+        if not (e.OldSnapshot = e.NewSnapshot) && ( e.NewSnapshot.Length = e.OldSnapshot.Length || e.VerticalTranslation || e.HorizontalTranslation) then
             UpdateAtCaretPosition(View.Caret.Position)
-    let mutable lexeredText = LexString (SourceBuffer.CurrentSnapshot.GetText())
 
     do 
         View <- view
@@ -42,47 +37,106 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) as self 
         View.LayoutChanged.AddHandler (new EventHandler<TextViewLayoutChangedEventArgs>(ViewLayoutChanged))
 
 
-    let FindMatchingCloseChar (start : SnapshotPoint, openChar : char, closeChar : char, maxLines : int, pairSpan : SnapshotSpan) = //return the value
-        lexeredText <- LexString (SourceBuffer.CurrentSnapshot.GetText())
-        let currentPosition = start.Position //shows the number of chars before the cursor position
-        let hasTheCurrentPosition t =
-                match t with
-                | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
-                | _ -> false
-        let isParenthesisToken t =
-            match t with
-            | LPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
-            | RPAREN (x) -> (x.Start.AbsoluteOffset > currentPosition)
-            | _ -> false
-        let gotIt = Seq.exists hasTheCurrentPosition lexeredText
-        let y = 
-            lexeredText
-            |> Seq.findIndex
-                (fun t ->
-                    match t with
-                    | LPAREN (x) -> (x.Start.AbsoluteOffset = currentPosition)
-                    | _ -> false)
-        let count = ref 0
-        let parentheses = Seq.filter isParenthesisToken lexeredText //got all parentheses after the first
-        let index = ref 0
-        let checkTheItem (x : token) =
+    let FindMatchForOpen (parentheses, openParenthesisPosition) = 
+        let isFurtherThanCurrent x =
             match x with
-                | LPAREN (r) -> (count := !count + 1)
-                | RPAREN (r) -> if not (!count = 0) then (count := !count - 1)
-                | _ -> ()
-        for i = 0 to Seq.length parentheses - 1 do
-            let t = Seq.head parentheses
-            checkTheItem t
-            if !count = 0 then
-                match t with
-                    | RPAREN (r) -> index := r.Start.AbsoluteOffset
-                    | _ -> () //potential risk, if got there then sth went wrong
-        done
-        ()
+            |LPAREN r when r.Start.AbsoluteOffset > openParenthesisPosition -> true
+            |RPAREN r when r.Start.AbsoluteOffset > openParenthesisPosition -> true
+            | _ -> false
+        let furtherParentheses = List.filter isFurtherThanCurrent parentheses
+        let closeParenthesisPosition = ref -1
+        let got = ref false
+        let count = ref 0
+        let counter x =
+            match x with
+            |LPAREN _ -> count := !count + 1
+            |RPAREN _ when not (!count = 0 ) -> count:= !count - 1
+            |RPAREN r when (!count = 0) && not !got -> closeParenthesisPosition := r.Start.AbsoluteOffset
+            | _ -> ()
+            if not (!closeParenthesisPosition = -1) then got := true
+        List.iter counter furtherParentheses
+        let result = ref (new SnapshotSpan())
+        if !got then result := new SnapshotSpan (new SnapshotPoint (SourceBuffer.CurrentSnapshot, !closeParenthesisPosition), 1)
+        !result
+
+    let FindMatchForClose (parentheses, closeParenthesisPosition) = 
+        let isFurtherThanCurrent x =
+            match x with
+            |LPAREN r when r.Start.AbsoluteOffset < closeParenthesisPosition -> true
+            |RPAREN r when r.Start.AbsoluteOffset < closeParenthesisPosition -> true
+            | _ -> false
+        let furtherParentheses = List.rev <| List.filter isFurtherThanCurrent parentheses
+        let openParenthesisPosition = ref -1
+        let got = ref false
+        let count = ref 0
+        let counter x =
+            match x with
+            |RPAREN _ -> count := !count + 1
+            |LPAREN _ when not (!count = 0) -> count := !count - 1
+            |LPAREN r when (!count = 0) && not !got -> openParenthesisPosition := r.Start.AbsoluteOffset
+            | _ -> ()
+            if not (!openParenthesisPosition = -1) then got := true
+        List.iter counter furtherParentheses
+        let result = ref (new SnapshotSpan())
+        if !got then result := new SnapshotSpan (new SnapshotPoint (SourceBuffer.CurrentSnapshot, !openParenthesisPosition), 1)
+        !result
+    
+    let getTags (spans : NormalizedSnapshotSpanCollection) =
+        let isLParen x = 
+            match x with
+            |LPAREN _ -> true
+            | _ -> false
+        let isRParen x = 
+            match x with
+            |RPAREN _ -> true
+            | _ -> false
+        let isParenthesis x = isRParen x || isLParen  x
+        let ok = not (spans.Count = 0) && CurrentChar.HasValue && (CurrentChar.Value.Position< CurrentChar.Value.Snapshot.Length) 
+        let result = if ok
+                        then
+                            let currentChar = ref CurrentChar.Value
+
+                            if not (spans.ElementAt<SnapshotSpan>(0).Snapshot = (!currentChar).Snapshot) then
+                                        currentChar := (!currentChar).TranslateTo(spans.ElementAt<SnapshotSpan>(0).Snapshot, PointTrackingMode.Positive)
+                           
+                            let currentPosition = currentChar.Value.Position
+                            let lexeredText = ref List.Empty
+                            try
+                                lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                            with
+                            |_ -> ()
+                            let parentheses = List.filter isParenthesis !lexeredText
+                            let shouldBeProcessed = parentheses |> List.exists (fun x ->
+                                                match x with
+                                                |LPAREN r when r.Start.AbsoluteOffset = currentPosition -> true
+                                                |RPAREN r when r.Start.AbsoluteOffset = currentPosition -> true
+                                                | _                                                     -> false )
+                            if shouldBeProcessed
+                                then
+                                    let currentToken = ref ( parentheses.ElementAt(0) )
+                                    let f x =
+                                        match x with
+                                            |LPAREN r when r.Start.AbsoluteOffset = currentPosition -> currentToken := x
+                                            |RPAREN r when r.Start.AbsoluteOffset = currentPosition -> currentToken := x 
+                                            | _ -> () |> ignore 
+                                    List.iter f parentheses
+                                    let pairSpan = 
+                                        if isLParen !currentToken
+                                            then FindMatchForOpen (parentheses, currentPosition)
+                                            else if isRParen !currentToken
+                                                then FindMatchForClose(parentheses, currentPosition)
+                                                else (new SnapshotSpan())
+                                    let s = (new TagSpan<TextMarkerTag>(new SnapshotSpan(!currentChar,1),new TextMarkerTag("green"))) :> ITagSpan<TextMarkerTag>
+                                    let e = (new TagSpan<TextMarkerTag>(pairSpan,new TextMarkerTag("green"))) :> ITagSpan<TextMarkerTag>
+                                    let preresult = seq { yield s; yield e}
+                                    preresult
+                            else Seq.empty
+                        else Seq.empty
+        result
 
     interface ITagger<TextMarkerTag> with
         member self.GetTags spans = getTags spans
-        member self.add_TagsChanged z  = //no idea of any way of transforming EventHandler<SnapshotSpanEvebtArgs> to acceptible type for Event.add or TagsChanged.Add
-           // TagsChanged.Publish.AddHandler z
-            () // Event.add x TagsChanged.Publish
-        member self.remove_TagsChanged x =  ()
+        member self.add_TagsChanged x =
+           Event.add (fun arg -> x.Invoke(self,arg)) TagsChanged.Publish
+        member self.remove_TagsChanged x =
+            TagsChanged.Publish.RemoveHandler ( new Handler<SnapshotSpanEventArgs> (fun s a -> x.Invoke(s,a) ) )

@@ -34,5 +34,5 @@ let leaveLast (ruleList: Rule.t<Source.t, Source.t> list) =
 type LeaveLast() = 
     inherit Convertion()
         override this.Name = "LeaveLast"
-        override this.ConvertList ruleList = leaveLast ruleList
+        override this.ConvertList (ruleList,_) = leaveLast ruleList
         override this.EliminatedProductionTypes = [""]

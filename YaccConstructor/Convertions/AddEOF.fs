@@ -98,5 +98,5 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
 type AddEOF() = 
     inherit Convertion()
         override this.Name = "AddEOF"
-        override this.ConvertList ruleList = addEOF ruleList
+        override this.ConvertList (ruleList,_) = addEOF ruleList
         override this.EliminatedProductionTypes = [""]

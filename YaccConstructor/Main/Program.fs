@@ -84,7 +84,7 @@ let () =
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
-    
+
     let run () =
         match !testFile, !feName , !generatorName with
         | Some(fName), Some(feName), Some(generatorName) ->
@@ -133,17 +133,18 @@ let () =
                     raise <| CheckerError "Input grammar should contains only one start rule."
                 let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
                 if undeclaredNonterminals.Length > 0 then
-                    "Input grammar contains some undeclared nonterminals: \n" + String.concat "\n" undeclaredNonterminals
-                    |> CheckerError
-                    |> raise
-                      
+                    eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"  
+                    <| String.concat "\n" undeclaredNonterminals
+
+//                    |> CheckerError
+  //                  |> raise
                 try
                     match !generatorParams with
                     | None -> gen.Generate (!ilTree)
                     | Some(genParams) -> gen.Generate(!ilTree, genParams)
                 with
                 | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
-                    -> GenError "Strat rule cannot be found in input grammar. Please, specify start rule."
+                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
                        |> raise
                 | e -> GenError e.Message |> raise
 
@@ -177,7 +178,7 @@ List of available frontends, generators and convertions can be obtained by -af -
     | CheckerError error         ->
         error + "\n"
         |> System.Console.WriteLine
-    | :? System.IO.IOException -> printf "Could not read input file\n"
+    | :? System.IO.IOException as e -> printf "%s" <| (e.Message + ". Could not read input file.\n")
     | x -> printf "%A\n" x
 
 

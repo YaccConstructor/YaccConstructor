@@ -43,7 +43,7 @@ let eliminateLeftRecursion (ruleList : Rule.t<_,_> list) =
 type EliminateLeftRecursion() = 
     inherit Convertion()
         override this.Name = "EliminateLeftRecursion"
-        override this.ConvertList ruleList =
+        override this.ConvertList (ruleList,_) =
             let prevConvertions = ["ExpandEbnf"; "ExpandMeta"; "ExpandAlter"]
             eliminateLeftRecursion ruleList
         override this.EliminatedProductionTypes = [""]

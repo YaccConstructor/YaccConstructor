@@ -101,7 +101,6 @@ let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
 type BuildAST() = 
     inherit Convertion()
         override this.Name = "BuildAST"
-        override this.ConvertList ruleList = buildAST ruleList "" 
-        override this.ConvertList(ruleList, tokenType) = buildAST ruleList tokenType
+        override this.ConvertList(ruleList, tokenType) = buildAST ruleList tokenType.[0]
         override this.EliminatedProductionTypes = [""]
 

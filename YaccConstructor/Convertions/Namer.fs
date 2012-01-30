@@ -108,8 +108,8 @@ let isItem (name:string) =
     
 (** names specific for Elkhound, *)
 
-(** there is special nonterminal for empty alternative: empty *)
-let getEmptyAltName = "empty"
+//(** there is special nonterminal for empty alternative: empty *)
+//let getEmptyAltName = "empty"
 
 (** name of parameter in function "keep" *)
 let getKeepParamName = withPrefix "val"

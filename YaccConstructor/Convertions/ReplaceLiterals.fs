@@ -100,6 +100,6 @@ let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) (token_format:st
 type ReplaceLiterals() = 
     inherit Convertion()
         override this.Name = "ReplaceLiterals"
-        override this.ConvertList ruleList = replaceLiterals ruleList "%s"
-        override this.ConvertList(ruleList, token_format) =  replaceLiterals ruleList token_format
+        override this.ConvertList ruleList = this.ConvertList(ruleList, [|"%s"|])
+        override this.ConvertList(ruleList, token_format) =  replaceLiterals ruleList token_format.[0]
         override this.EliminatedProductionTypes = [""]

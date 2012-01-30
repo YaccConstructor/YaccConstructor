@@ -27,18 +27,14 @@ type ConvertionsManager () as this =
       {new Definition.t<Source.t,Source.t>
         with info = ilTree.info
         and  head = ilTree.head
-        and  grammar = 
-            match Array.toList (convNameWithParams.Split(' ')) with
-            | name::[] -> 
-                match (this.Component name) with 
-                | Some conv -> conv.ConvertList ilTree.grammar
-                | None -> failwith "Convertion is not found" 
-            
-            | name::parameters -> 
-                match (this.Component name) with 
-                | Some conv -> conv.ConvertList (ilTree.grammar, String.concat " " parameters)
-                | None -> failwith "Convertion is not found"
-            | _ -> failwith "You need to specify convertion name"
+        and  grammar =
+                  let parameters = convNameWithParams.Split(' ')
+                  //printfn "Convertion: %s" convNameWithParams
+                  if parameters.Length = 0 then failwith "Missing convertion name"
+                  else
+                      match this.Component parameters.[0] with 
+                      | Some conv -> conv.ConvertList (ilTree.grammar, Array.sub parameters 1 (parameters.Length - 1))
+                      | None -> failwith <| "Convertion not found: " + parameters.[0]
         and  foot = ilTree.foot
       }
     member  self.ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = apply_convertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)

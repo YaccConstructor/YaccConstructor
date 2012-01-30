@@ -34,27 +34,47 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
             )
             productions
     let allTokens = _findTokens (grammar |> List.map (fun rule -> rule.body)) 
-    List.fold (fun unique token -> if List.exists ((=) token) unique then unique else token::unique) [] allTokens
+    List.fold (fun unique token -> if List.exists ((=) token) unique then unique else token::unique)
+        [] allTokens
 
-let findStartRules (grammar:Rule.t<Source.t, Source.t> list) = grammar |> List.choose (fun rule -> if rule._public then Some(rule.name) else None)
+let findStartRules (grammar:Rule.t<Source.t, Source.t> list) =
+    grammar |> List.choose (fun rule -> if rule._public then Some(rule.name) else None)
    
 let indentedListL = List.reduce (---) 
 
-let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) = 
+let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) = 
     let lineNumber = ref 0
-    let rec layoutProduction = function
-        | PAlt(left, right) -> aboveL (layoutProduction left) (layoutProduction right)
+    let actionCodeFunPrefix = 
+        if yardRule.args.IsEmpty then ""
+        else sprintf "fun %s -> " (String.concat " " (List.map fst yardRule.args))
+    let rec layoutProduction isOnTop = function
+        | PAlt(left, right) -> aboveL (layoutProduction isOnTop left) (layoutProduction isOnTop right)
         | PSeq(elements, actionCode) -> 
-            let bindings = List.filter (fun (_,elem) -> elem.binding.IsSome) <| List.mapi (fun i x -> (i+1,x)) elements
-            let actionCodePrefix = bindings |> List.fold (fun state (i, elem) -> sprintf "%slet %s=$%d in " state (fst elem.binding.Value) i) ""
+            let bindings =
+                List.filter
+                    (fun (_,elem) -> elem.binding.IsSome) <| List.mapi (fun i x -> (i+1,x))
+                    elements
+            let actionCodePrefix =
+                bindings
+                |> List.fold
+                    (fun state (i, elem) ->
+                        let args =
+                            match elem.rule with
+                            | PRef (_,Some args) -> fst args
+                            | _ -> ""
+                        sprintf "%slet %s=$%d %s in " state (fst elem.binding.Value) i args)
+                    ""
             lineNumber := !lineNumber + 1
             indentedListL (
-                if !lineNumber = 1 then wordL ":" else wordL "|"
-                ::(elements |> List.map (fun elem -> layoutProduction elem.rule)) 
-                @ (if actionCode = None then [wordL "{ }"] else [wordL ("{" + actionCodePrefix + fst actionCode.Value + "}")]))
-        | PRef(("empty",_),_) -> leftL ""
+                if !lineNumber = 1 then wordL "" else wordL "|"
+                ::(elements |> List.map (fun elem -> layoutProduction false elem.rule)) 
+                @ (if actionCode = None then [wordL "{ }"]
+                   else [wordL ("{ " + actionCodeFunPrefix + actionCodePrefix + fst actionCode.Value + "}")]))
+        //| PRef(("empty",_),_) -> leftL ""
         | PToken(src)
-        | PRef(src, _) -> wordL (fst src)
+        | PRef(src, _) ->
+            if not isOnTop then wordL (fst src)
+            else wordL <| (fst src) + "{ " + actionCodeFunPrefix + "$1 }"
         | PMany _ -> wordL "$UNEXPECTED MANY$"
         | PMetaRef _ -> wordL "$UNEXPECTED META_REF$"
         | PLiteral _ -> wordL "$UNEXPECTED LITERAL$"
@@ -63,7 +83,7 @@ let fsYaccRule (yardRule:Rule.t<Source.t, Source.t>) =
         | PSome _ -> wordL "$UNEXPECTED SOME$"
         | POpt _ -> wordL "$UNEXPECTED OPT$"
 //        | _ -> wordL "$UNEXPECTED$"
-    let layout = (^^) (wordL (yardRule.name)) (layoutProduction yardRule.body)
+    let layout = (^^) (wordL (yardRule.name + " :")) (layoutProduction true yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
 let generate (ilDef:Definition.t<Source.t, Source.t>) tokenType = 

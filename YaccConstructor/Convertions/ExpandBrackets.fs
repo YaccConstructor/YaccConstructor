@@ -52,7 +52,7 @@ let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
                                 toExpand.Enqueue({name=newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
                                 { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
                             | _ -> elem
-                        newElem::res, if elem.binding.IsSome then elem.binding.Value::attrs else attrs
+                        newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
                     )
                     ([], attrs)
                  |> fst |> List.rev

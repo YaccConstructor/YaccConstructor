@@ -46,7 +46,7 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
     let lineNumber = ref 0
     let actionCodeFunPrefix = 
         if yardRule.args.IsEmpty then ""
-        else sprintf "fun %s -> " (String.concat " " (List.map fst yardRule.args))
+        else  (String.concat "" (List.map (fst >> sprintf "fun %s -> ") yardRule.args))
     let rec layoutProduction isOnTop = function
         | PAlt(left, right) -> aboveL (layoutProduction isOnTop left) (layoutProduction isOnTop right)
         | PSeq(elements, actionCode) -> 

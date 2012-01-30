@@ -64,10 +64,9 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             PSeq(elem_list
                  |> List.fold
                     (fun (res,curAttrs) elem ->
-                        ({elem with rule = replaceEbnf elem.rule curAttrs metaArgs}::res
-                         , if elem.binding.IsNone then curAttrs
-                           else (elem.binding.Value, elem.binding.Value(*createNewName <| createSource "arg"*))
-                                    ::curAttrs)
+                        {elem with rule = replaceEbnf elem.rule curAttrs metaArgs}::res
+                        , if elem.binding.IsNone then curAttrs
+                           else curAttrs@[elem.binding.Value, elem.binding.Value(*createNewName <| createSource "arg"*)]
                     )
                     ([],attrs)
                  |> fst

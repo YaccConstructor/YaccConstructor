@@ -90,7 +90,7 @@ let generate2 (ilDef:Definition.t<Source.t, Source.t>) tokenType =
     let headerSection = if ilDef.head.IsSome then sprintf "%%{\n%s\n%%}\n" (fst ilDef.head.Value) else ""
     let tokens = findTokens ilDef.grammar
     // TODO: use String.concat instead of fold+sprintf
-    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token%s %s\n" text (tokenType token) token) "" tokens)
+    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token <%s> %s\n" text (tokenType token) token) "" tokens)
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)

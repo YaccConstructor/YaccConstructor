@@ -86,14 +86,17 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
     let layout = (^^) (wordL (yardRule.name + " :")) (layoutProduction true yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
-let generate (ilDef:Definition.t<Source.t, Source.t>) tokenType = 
+let generate2 (ilDef:Definition.t<Source.t, Source.t>) tokenType =
     let headerSection = if ilDef.head.IsSome then sprintf "%%{\n%s\n%%}\n" (fst ilDef.head.Value) else ""
     let tokens = findTokens ilDef.grammar
-    let tokenTypeStr = if tokenType="" then "" else sprintf " <%s>" tokenType
-    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token%s %s\n" text tokenTypeStr token) "" tokens)
+    // TODO: use String.concat instead of fold+sprintf
+    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token%s %s\n" text (tokenType token) token) "" tokens)
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)
     let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar))
     let footerSection = if ilDef.foot.IsSome then sprintf "%%%%\n%s\n" (fst ilDef.foot.Value) else ""
     headerSection + tokensSection + startRulesSection + typesSection + rulesSection + footerSection
+
+let generate ilDef tokenType =
+  generate2 ilDef (fun _ -> tokenType)

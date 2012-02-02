@@ -52,5 +52,5 @@ let mergeAlter (ruleList: Rule.t<Source.t, Source.t> list) =
 type MergeAlter() = 
     inherit Convertion()
         override this.Name = "MergeAlter"
-        override this.ConvertList ruleList = mergeAlter ruleList
+        override this.ConvertList (ruleList,_) = mergeAlter ruleList
         override this.EliminatedProductionTypes = [""]

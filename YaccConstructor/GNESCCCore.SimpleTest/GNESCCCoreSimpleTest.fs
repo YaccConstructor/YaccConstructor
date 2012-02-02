@@ -131,3 +131,45 @@ type ``GNESCC core tests with simple lexer`` () =
         run path tables actions regexp getTag getName
         //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
         |> printfn "Result: %A"
+
+    [<Test>]
+    member test.``Left recursion with implicit left ebnf test``() =
+        let regexp     = GNESCC.Regexp_ebnf_implicit.ruleToRegex
+        let actions    = GNESCC.Actions_ebnf_implicit.ruleToAction
+        let tables     = GNESCCGenerator.Tables_ebnf_implicit.tables
+        let getTag     = GNESCCGenerator.Tables_ebnf_implicit.getTag
+        let getName    = GNESCCGenerator.Tables_ebnf_implicit.getName
+        let path = dir + "ebnf_implicit/input.txt"
+        let rightValue = []
+        
+        run path tables actions regexp getTag getName
+        //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+        |> printfn "Result: %A"
+
+    [<Test>]
+    member test.``Hidden left recursion in EBNF test``() =
+        let regexp     = GNESCC.Regexp_binop.ruleToRegex
+        let actions    = GNESCC.Actions_binop.ruleToAction
+        let tables     = GNESCCGenerator.Tables_binop.tables
+        let getTag     = GNESCCGenerator.Tables_binop.getTag
+        let getName    = GNESCCGenerator.Tables_binop.getName
+        let path = dir + "binop/input.txt"
+        let rightValue = []
+        
+        run path tables actions regexp getTag getName
+        //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+        |> printfn "Result: %A"
+
+    [<Test>]
+    member test.``Hidden left recursion test``() =
+        let regexp     = GNESCC.Regexp_left_implicit.ruleToRegex
+        let actions    = GNESCC.Actions_left_implicit.ruleToAction
+        let tables     = GNESCCGenerator.Tables_left_implicit.tables
+        let getTag     = GNESCCGenerator.Tables_left_implicit.getTag
+        let getName    = GNESCCGenerator.Tables_left_implicit.getName
+        let path = dir + "left_implicit/input.txt"
+        let rightValue = []
+        
+        run path tables actions regexp getTag getName
+        //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+        |> printfn "Result: %A"

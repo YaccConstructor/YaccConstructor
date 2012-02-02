@@ -68,7 +68,7 @@ type ``Components loader tests`` () =
 
         let genfun (x,y)  = 
             match (x |> GeneratorsManager.Component  ) with
-                | Some GeneratorsManager -> true
+                | Some _ -> true
                 | None -> false
         
         let allGetingGenerators = List.map genfun VerificatedGenerators

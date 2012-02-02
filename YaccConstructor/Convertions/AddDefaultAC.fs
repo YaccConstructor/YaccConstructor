@@ -24,6 +24,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
+open Yard.Core.Convertions.TransformAux
 
 /// Adds action code to production considering it is used somewhere
 let rec addAcToProduction neededRules ruleBody = 
@@ -55,8 +56,8 @@ let rec addAcToProduction neededRules ruleBody =
     | PSome p -> PSome(addAcToProduction neededRules p)
     | PMany p -> PMany(addAcToProduction neededRules p)
     | POpt p -> POpt(addAcToProduction neededRules p)
-    | _ -> failwith "EORRR"
-
+    //| PMetaRef(_,_,_) -> failwith "ERROR: PMetaRef unexpected in AddDefaultAC"
+    | x -> failwith <| sprintf "ERROR: %A unexpected in AddDefaultAC" x
 
 let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  = 
     let updatedRules = new HashSet<string>()
@@ -69,22 +70,37 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
-        if not(updatedRules.Contains(bfsFor)) then    
-            if bfsFor="column_definition" then
-                printfn "yo" 
-            updatedRules.Add(bfsFor) |> ignore        
-            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None); Rule.t._public=false; Rule.t.metaArgs=[]}
+        if not <| updatedRules.Contains bfsFor then    
+            updatedRules.Add bfsFor |> ignore        
+            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None);
+                                Rule.t._public=false; Rule.t.metaArgs=[]}
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then
+                // Some generators need to have a sequence on the top of body tree
+                (*
+                let rec bodyToSeq = function
+                    | PSeq (_,_) as p -> p
+                    | PAlt (l,r) -> PAlt(bodyToSeq l, bodyToSeq r)
+                    | x -> PSeq([{rule = x; binding = createSource "yard_bind" |> Some;
+                                    omit = false; checker = None}]
+                                , Some(createSource "yard_bind"))
+                                *)
                 let neededRules = ref []
-                let updatedBody = addAcToProduction neededRules ((!ruleFor).body)
+                let updatedBody =
+                    addAcToProduction neededRules ((!ruleFor).body)
+                    //|> bodyToSeq
                 !neededRules |> List.iter (fun r -> if not (updatedRules.Contains(r)) then rulesQueueBfs.Enqueue(r))
                 rulesMap.[bfsFor] <- { !ruleFor with body=updatedBody}
-    ruleList |> List.map (fun rule -> let ruleRef = ref rule in rulesMap.TryGetValue(rule.name ,ruleRef) |> ignore; !ruleRef)
+    ruleList
+    |> List.map (fun rule ->
+                    let ruleRef = ref rule in
+                    rulesMap.TryGetValue(rule.name ,ruleRef)
+                    |> ignore;
+                    !ruleRef)
 
 type AddDefaultAC() = 
     inherit Convertion()
         override this.Name = "AddDefaultAC"
-        override this.ConvertList ruleList = addDefaultAC ruleList 
+        override this.ConvertList (ruleList,_) = addDefaultAC ruleList 
         override this.EliminatedProductionTypes = [""]
 

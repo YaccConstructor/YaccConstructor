@@ -24,6 +24,7 @@ module Yard.Core.Convertions.ExpandBrackets
 
 open Yard.Core
 open Yard.Core.IL
+open TransformAux
 open Yard.Core.IL.Production
 
 let private newName () = (Namer.Names.brackets,(0,0)) |> Namer.createNewName |> fst
@@ -33,32 +34,34 @@ let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
     let expanded = ref []
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()
-        let rec expandBody = function
+        let rec expandBody attrs = function
             | PSeq(elements, actionCode) -> 
                 (elements
-                 |>List.choose 
-                    (fun elem ->
-                        match elem.rule with 
-                        | PSeq(subelements, None) when List.length subelements = 1 && (match (List.head subelements).rule with PRef(("empty",_),_) -> true | _ -> false) -> 
-                            None
-                        | PSeq(subelements, None) when List.length subelements = 1 -> 
-                             Some { elem with rule = (List.head subelements).rule }
-                        | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
-                            let newName = newName()
-                            toExpand.Enqueue({name = newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                            Some { elem with rule = PRef((newName,(0,0)), None) }
-                        | PAlt(_,_) -> 
-                            let newName = newName()
-                            toExpand.Enqueue({name=newName; args=[]; body=elem.rule; _public=false; metaArgs=[]})
-                            Some { elem with rule = PRef((newName,(0,0)), None) }
-                        | _ -> Some elem
-                    )                
-                ,actionCode)
+                 |>List.fold
+                    (fun (res, attrs) elem ->
+                        let newElem =
+                            match elem.rule with 
+                            | PSeq(subelements, None) when List.length subelements = 1 -> 
+                                { elem with rule = (List.head subelements).rule }
+                            | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
+                                let newName = newName()
+                                toExpand.Enqueue({name = newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
+                            | PAlt(_,_) -> 
+                                let newName = newName()
+                                toExpand.Enqueue({name=newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
+                            | _ -> elem
+                        newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
+                    )
+                    ([], attrs)
+                 |> fst |> List.rev
+                 ,actionCode)
                 |> PSeq
-            | PAlt(left, right) -> PAlt(expandBody left, expandBody right)
+            | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x
         
-        let expandedRule = expandBody toExpandRule.body
+        let expandedRule = expandBody toExpandRule.args toExpandRule.body
         expanded := { toExpandRule with body=expandedRule } :: !expanded
         ()
     List.rev !expanded
@@ -66,5 +69,5 @@ let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
 type ExpandBrackets() = 
     inherit Convertion()
         override this.Name = "ExpandBrackets"
-        override this.ConvertList ruleList = expandBrackets ruleList
+        override this.ConvertList (ruleList,_) = expandBrackets ruleList
         override this.EliminatedProductionTypes = [""]

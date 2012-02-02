@@ -46,5 +46,5 @@ let extract_one_rule (rule:Rule.t<'a,'b>) =
 type ExpandAlter() = 
     inherit Convertion()
         override this.Name = "ExpandAlter"
-        override this.ConvertList ruleList = List.collect extract_one_rule ruleList
+        override this.ConvertList (ruleList,_) = List.collect extract_one_rule ruleList
         override this.EliminatedProductionTypes = ["PAlt"]

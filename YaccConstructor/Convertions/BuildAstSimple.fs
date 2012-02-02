@@ -96,6 +96,6 @@ let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  =
 type BuildAstSimple() = 
     inherit Convertion()
         override this.Name = "BuildAstSimple"
-        override this.ConvertList ruleList = buildAstSimple ruleList 
+        override this.ConvertList (ruleList,_) = buildAstSimple ruleList 
         override this.EliminatedProductionTypes = [""]
 

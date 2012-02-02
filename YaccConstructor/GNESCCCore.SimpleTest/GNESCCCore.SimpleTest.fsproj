@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{631d47b4-d814-4ab3-85f2-1b68167842c0}</ProjectGuid>
@@ -13,7 +13,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <Name>GNESCCCore.SimpleTest</Name>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,17 +21,17 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\GNESCCCore.SimpleTest.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\GNESCCCore.SimpleTest.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
@@ -53,6 +53,15 @@
     <Compile Include="regexp_rec.yrd.actions.fs" />
     <Compile Include="regexp_rec.yrd.regexp.fs" />
     <Compile Include="regexp_rec.yrd.tables.fs" />
+    <Compile Include="ebnf_implicit.yrd.actions.fs" />
+    <Compile Include="ebnf_implicit.yrd.regexp.fs" />
+    <Compile Include="ebnf_implicit.yrd.tables.fs" />
+    <Compile Include="binop.yrd.actions.fs" />
+    <Compile Include="binop.yrd.regexp.fs" />
+    <Compile Include="binop.yrd.tables.fs" />
+    <Compile Include="left_implicit.yrd.actions.fs" />
+    <Compile Include="left_implicit.yrd.regexp.fs" />
+    <Compile Include="left_implicit.yrd.tables.fs" />
     <Compile Include="GNESCCCoreSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

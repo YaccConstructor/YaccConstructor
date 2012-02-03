@@ -42,10 +42,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InitialConvert.fs" />
     <Compile Include="Epsilon.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
-    <Compile Include="Item.fs" />
+    <Compile Include="States.fs" />
     <Compile Include="GenerateActions.fs" />
     <Compile Include="GenerateTranslator.fs" />
     <Compile Include="Generator.fs" />

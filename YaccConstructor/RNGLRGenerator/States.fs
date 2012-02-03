@@ -1,4 +1,4 @@
-﻿//  Item.fs contains description of items
+﻿//  States.fs builds graph, related with states of parser
 //
 //  Copyright 2011-2012 Avdyukhin Dmitry
 //
@@ -72,20 +72,38 @@ let items (grammar : FinalGrammar) (kernelIndexator : KernelIndexator) =
         fun () -> incr num; !num
     let result = new Dictionary<Kernel[], Virtex<int,int>>()
     let kernelInterpreter = new KernelInterpreter()
-    let closure kernels =
+    let curSymbol kernel = kernelInterpreter.symbol grammar kernel
+    let closure (kernels : Kernel[]) =
         let was : bool[] = Array.zeroCreate grammar.indexator.fullCount
-        let mutable result : Set<int> = Set.empty
-        //let closDfs kernel = 
-            
-        kernels
-    let dfs initKernels =
+        let mutable result = Set.ofArray kernels
+        let queue = new Queue<_>()
+        let enqueue symbol = 
+            if not was.[symbol] then
+                was.[symbol] <- true
+                queue.Enqueue symbol
+        for k in kernels do
+            enqueue <| curSymbol k
+        while queue.Count <> 0 do
+            let nonterm = queue.Dequeue()
+            for rule in grammar.rules.rulesWithLeftSide nonterm do
+                result <- result.Add <| kernelInterpreter.toKernel (rule,0)
+                enqueue <| grammar.rules.symbol rule 0
+        Array.ofSeq result |> Array.sort
+    let rec dfs initKernels =
         let kernels = initKernels |> closure
         if result.ContainsKey kernels then
             result.Item kernels
         else
             let virtex = new Virtex<int,int>(nextIndex())
-            // adding edges
             result.Add(kernels, virtex)
+            // adding edges
+            for i in 0.. grammar.indexator.fullCount - 1 do
+                if i <> grammar.indexator.eofIndex then
+                    let destKernels =
+                        [|for k in kernels do
+                            if curSymbol k = i then yield kernelInterpreter.incPos k|]
+                    if destKernels.Length > 0 then
+                        virtex.addEdge(new Edge<_,_>(dfs destKernels, i))
             virtex
     let initKernel = kernelInterpreter.toKernel(grammar.startRule, 0)
     [| initKernel |] |> dfs
@@ -113,5 +131,4 @@ let buildLookaheads (grammar : FinalGrammar) =
                 
     dfs grammar.rules.startSymbol grammar.indexator.eofIndex
     ()
-
 *)

@@ -54,6 +54,7 @@
     <Compile Include="AddDefaultAC.fs" />
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="EliminateLeftRecursion.fs" />
+    <Compile Include="ExpandInnerAlt.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

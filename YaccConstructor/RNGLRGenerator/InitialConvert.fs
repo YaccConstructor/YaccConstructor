@@ -1,4 +1,5 @@
-﻿//  RNGLRGenerator.fs contains implementation of interface Generator
+﻿//  InitialConvert.fs contains methods, which must be applied to grammar
+//    to transform this to appliable for RNGLR form.
 //
 //  Copyright 2011-2012 Avdyukhin Dmitry
 //
@@ -17,19 +18,17 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Yard.Generators.RNGLR
+module Yard.Generators.RNGLR.InitialConvert
 
-open Yard.Core
-open Yard.Generators.RNGLR.InitialConvert
+open Yard.Core.IL
+open Yard.Core.IL.Production
 
-type RNGLR() = 
-    inherit Generator()
-        override this.Name = "RNGLRGenerator"
-        override this.Generate t =
-            this.Generate (t, "")
-        override this.Generate(definition, tokenType) =
-            let newDefinition = initialConvert definition
-            box ()
-        override this.AcceptableProductionTypes =
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)
+let initialConvert (def : Definition.t<_,_>) =
+    let splitAlters ruleList =
+        let rec splitRule (curRule : Rule.t<_,_>) res = function
+            | PAlt (l, r) ->
+                let leftRes = splitRule curRule res l
+                splitRule curRule leftRes r
+            |  x -> {curRule with body = x}::res
+        List.fold (fun res rule -> splitRule rule res rule.body) [] ruleList
+    {def with grammar = splitAlters def.grammar}

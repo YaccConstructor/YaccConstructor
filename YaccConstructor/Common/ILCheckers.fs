@@ -60,9 +60,9 @@ let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
 
     List.ofSeq undeclaredRules
 
-
-let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
-    let declaredRules = def.grammar |> List.map (fun r -> r.name)
+// returns a list of rule's names which are reachead from start rule in the grammar
+let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
+    let declaredRules = rules |> List.map (fun r -> r.name)
     let reachedRules = new HashSet<_>()
     
     let getAdditionRules (rule:Yard.Core.IL.Rule.t<_,_>) =
@@ -95,12 +95,18 @@ let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
            || Seq.exists ((=) name) reachedRules)
         then
             reachedRules.Add name |> ignore
-            let rule = def.grammar |> List.find (fun r -> r.name = name)
+            let rule = rules |> List.find (fun r -> r.name = name)
             let newAdditionRules = getAdditionRules rule
             getReachableRules newAdditionRules rule.body
 
-    let start_rule = def.grammar|> List.find (fun r -> r._public)
+    let start_rule = rules |> List.find (fun r -> r._public)
     reachedRules.Add start_rule.name |> ignore
     getReachableRules (getAdditionRules start_rule) start_rule.body
+    reachedRules |> Seq.toList
 
-    def.grammar |> List.exists (fun r -> reachedRules |> Seq.exists (fun n -> n = r.name) |> not)
+let reachableRulesInfo (def: Yard.Core.IL.Definition.t<_,_>) =
+  reachableRulesInfo_of_list def.grammar
+
+let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
+  let reachedRules = reachableRulesInfo def
+  def.grammar |> List.exists (fun r -> reachedRules |> Seq.exists (fun n -> n = r.name) |> not)

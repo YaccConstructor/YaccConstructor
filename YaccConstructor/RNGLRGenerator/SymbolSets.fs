@@ -23,9 +23,9 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.Epsilon
 
 let firstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
-    let result : Set<int>[] = Array.zeroCreate indexator.fullCount
+    let result : Set<int>[] = Array.create indexator.fullCount Set.empty
     for term in indexator.nonTermCount..indexator.fullCount-1 do
-        let was : bool[] = Array.zeroCreate indexator.nonTermCount
+        let was : bool[] = Array.zeroCreate indexator.fullCount
         let rec dfs u = 
             result.[u] <- result.[u].Add term
             was.[u] <- true
@@ -43,9 +43,9 @@ let firstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : 
     result
 
 let followSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) (firstSet : Set<int>[]) =
-    let result : Set<int>[][] = Array.zeroCreate indexator.fullCount
-    for i in 0..rules.rulesCount do
-        result.[i] <- Array.zeroCreate (rules.length i)
+    let result : Set<int>[][] = Array.zeroCreate rules.rulesCount
+    for i = 0 to rules.rulesCount-1 do
+        result.[i] <- Array.create (rules.length i) Set.empty
         let mutable curSet : Set<int> = Set.empty
         for j = rules.length i - 1 downto 0 do
             result.[i].[j] <- curSet

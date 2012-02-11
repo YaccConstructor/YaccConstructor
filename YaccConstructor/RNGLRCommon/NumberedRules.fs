@@ -23,7 +23,7 @@ open Yard.Core.IL.Production;
 open Yard.Core.IL;
 open Yard.Generators.RNGLR;
 
-type NumberedRules (ruleList : Rule.t<_,_> list, indexator : Indexator) =
+type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Indexator) =
     let rules = ruleList |> Array.ofList
     let start =
         rules
@@ -31,19 +31,20 @@ type NumberedRules (ruleList : Rule.t<_,_> list, indexator : Indexator) =
     let left = rules |> Array.map (fun x -> x.name |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function
-            | PRef (nTerm,_) -> (indexator.nonTermToIndex <| fst nTerm)::acc
-            | PToken token -> (indexator.termToIndex <| fst token)::acc
-            | PLiteral lit -> (indexator.literalToIndex <| fst lit)::acc
+            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| fst nTerm)::acc
+            | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| fst token)::acc
+            | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| fst lit)::acc
             | PSeq (s,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc
             | _ -> failwith "Unexpected construction in grammar"
         rules
         |> Array.map
             (fun x ->
                 transformBody [] x.body 
-                |> List.rev
-                |> Array.ofList)
+                //|> List.rev
+                |> Array.ofList )
+        //|> (fun x -> printfn "======="; x)
     let rulesWithLeft =
-        let result : int list array = Array.zeroCreate indexator.fullCount
+        let result : int list array = Array.create indexator.fullCount []
         for i in 0..rules.Length-1 do
             result.[left.[i]] <- i::result.[left.[i]]
         result

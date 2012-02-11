@@ -21,15 +21,21 @@ namespace Yard.Generators.RNGLR
 
 open Yard.Core
 open Yard.Generators.RNGLR.InitialConvert
+open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.YardPrinter
+open Yard.Generators.RNGLR.States
 
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Generate t =
-            this.Generate (t, "")
-        override this.Generate(definition, tokenType) =
+        override this.Generate definition =
+            let start = System.DateTime.Now
             let newDefinition = initialConvert definition
-            box ()
+            let grammar = new FinalGrammar(newDefinition.grammar);
+            let kernelIndexator = new KernelIndexator(grammar)
+            items grammar kernelIndexator
+            printfn "%A" <| System.DateTime.Now - start
+            (new YardPrinter()).Generate newDefinition
         override this.AcceptableProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)

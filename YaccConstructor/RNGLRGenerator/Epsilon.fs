@@ -57,7 +57,9 @@ let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
                         let value = rules.symbol i j
                         if not result.[value] then false
                         else checkEpsilon <| j-1
-                result.[i] <- checkEpsilon (rules.length i - 1)
+                if checkEpsilon (rules.length i - 1) then
+                    modified <- true
+                    result.[rules.leftSide i] <- true
 
     result
 
@@ -124,7 +126,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =
     let result : int[] = Array.zeroCreate rules.rulesCount
-    for i in 0..rules.rulesCount do
+    for i = 0 to rules.rulesCount-1 do
         let rec inner pos =
             if pos < 0 then 0
             elif not canInferEpsilon.[rules.symbol i pos] then pos+1

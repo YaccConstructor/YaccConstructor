@@ -22,14 +22,13 @@ namespace Yard.Generators.RNGLR
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-type Indexator (ruleList : Rule.t<_,_> list) =
+type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let unique s = s |> Set.ofSeq |> Array.ofSeq
-    let connect = 
-        fun x ->
-            let dict = x |> Array.mapi (fun i n -> n, i) |> dict
-            (fun nTerm -> dict.Item nTerm)
-            , (fun i -> x.[i])
-            , x.Length
+    let connect x = 
+        let dict = x |> Array.mapi (fun i n -> n, i) |> dict
+        (fun nTerm -> dict.Item nTerm)
+        , (fun i -> x.[i])
+        , x.Length
 
     let rules = ruleList |> Array.ofList
 
@@ -41,7 +40,7 @@ type Indexator (ruleList : Rule.t<_,_> list) =
                 |> List.fold collectTermsAndLits (accTerms, accLiterals)
             | PLiteral lit -> (accTerms, (fst lit)::accLiterals)
             | PToken token -> ((fst token)::accTerms, accLiterals)
-            | _ -> failwith "Unexpected construction in grammar"
+            | x -> failwithf "Unexpected construction %A in grammar" x
                     
         rules
         |> Array.map (fun rule -> rule.body)
@@ -51,7 +50,7 @@ type Indexator (ruleList : Rule.t<_,_> list) =
     let nonTermsConnect = 
         rules
         |> Array.map (fun x -> x.name)
-        |> Array.append ([|"empty"|])
+        |> Array.append ([|"error"|])
         |> unique
         |> connect
     let termsConnect = connect terms

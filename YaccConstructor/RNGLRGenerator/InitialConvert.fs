@@ -22,8 +22,26 @@ module Yard.Generators.RNGLR.InitialConvert
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
+open Yard.Core.Convertions.TransformAux
 
 let initialConvert (def : Definition.t<_,_>) =
+    let addStartRule (ruleList : Rule.t<_,_> list) =
+        let wasStart = ref false
+        ruleList
+        |> List.fold
+            (fun res rule ->
+                if not rule._public then rule::res
+                else
+                    if !wasStart then failwith "More than one start rule"
+                    wasStart := true
+                    let startRule : Rule.t<_,_> =
+                        {_public = true; name = "yard_start_rule"; args = rule.args;
+                         metaArgs = []; body = PRef(createSource rule.name, rule.args |> createParams |> list2opt)}
+                    startRule::{rule with _public = false}::res
+            )
+            []
+        |> (fun x -> if not !wasStart then failwith "No startRule was found"
+                     x)
     let splitAlters ruleList =
         let rec splitRule (curRule : Rule.t<_,_>) res = function
             | PAlt (l, r) ->
@@ -31,4 +49,4 @@ let initialConvert (def : Definition.t<_,_>) =
                 splitRule curRule leftRes r
             |  x -> {curRule with body = x}::res
         List.fold (fun res rule -> splitRule rule res rule.body) [] ruleList
-    {def with grammar = splitAlters def.grammar}
+    {def with grammar = def.grammar |> addStartRule |> splitAlters}

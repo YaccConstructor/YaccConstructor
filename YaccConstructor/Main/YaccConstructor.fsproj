@@ -45,7 +45,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g "FsYaccPrinter SourceText" -i "C:\Projects\SqlMigration2\SqlMigration\SqlParser\Parser\Parser.yrd"</StartArguments>
+    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\list.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>
@@ -112,6 +112,11 @@
     <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
       <Name>GNESCCGenerator</Name>
       <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <Name>RNGLRGenerator</Name>
+      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">

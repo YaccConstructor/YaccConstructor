@@ -25,7 +25,7 @@ open Yard.Generators.RNGLR.Epsilon
 open Yard.Generators.RNGLR.SymbolSets
 
 
-type FinalGrammar (ruleList : Rule.t<_,_> list) =
+type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     let _indexator = new Indexator(ruleList)
     let _numberedRules = new NumberedRules(ruleList, _indexator)
     let _canInferEpsilon = canInferEpsilon _numberedRules _indexator

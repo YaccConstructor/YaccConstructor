@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.RNGLR.Item
+module Yard.Generators.RNGLR.States
 
 open System.Collections.Generic
 open Yard.Generators.RNGLR.FinalGrammar
@@ -67,10 +67,14 @@ type KernelIndexator (grammar : FinalGrammar) =
     member this.kernelToIndex kernel = kernelToIdx.Item kernel
 
 let items (grammar : FinalGrammar) (kernelIndexator : KernelIndexator) =
-    let nextIndex =
+    let nextIndex, virtexCount =
         let num = ref -1
-        fun () -> incr num; !num
-    let result = new Dictionary<Kernel[], Virtex<int,int>>()
+        (fun () -> incr num; !num)
+        , (fun () -> !num + 1)
+    let kernelsToVirtex = new Dictionary<string, Virtex<int,int>>()
+    let virtices = new Dictionary<int, Virtex<int,int> >()
+    let stateToKernels = new Dictionary<int, Kernel[]>()
+    let stateToLookahead = new Dictionary<int, Set<int>[] >()
     let kernelInterpreter = new KernelInterpreter()
     let curSymbol kernel = kernelInterpreter.symbol grammar kernel
     let closure (kernels : Kernel[]) =
@@ -87,17 +91,23 @@ let items (grammar : FinalGrammar) (kernelIndexator : KernelIndexator) =
             let nonterm = queue.Dequeue()
             for rule in grammar.rules.rulesWithLeftSide nonterm do
                 result <- result.Add <| kernelInterpreter.toKernel (rule,0)
-                enqueue <| grammar.rules.symbol rule 0
+                if grammar.rules.length rule > 0 then
+                    enqueue <| grammar.rules.symbol rule 0
         Array.ofSeq result |> Array.sort
     let rec dfs initKernels =
         let kernels = initKernels |> closure
-        if result.ContainsKey kernels then
-            result.Item kernels
+        let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
+        if kernelsToVirtex.ContainsKey key then
+            kernelsToVirtex.Item key
         else
+            //printfn "%A" <| key
             let virtex = new Virtex<int,int>(nextIndex())
-            result.Add(kernels, virtex)
+            virtices.Add(virtex.label, virtex)
+            kernelsToVirtex.Add(key, virtex)
+            //System.Diagnostics.Debug.Assert(result.ContainsKey key)
+            stateToKernels.Add(virtex.label, kernels)
             // adding edges
-            for i in 0.. grammar.indexator.fullCount - 1 do
+            for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
                     let destKernels =
                         [|for k in kernels do
@@ -106,7 +116,29 @@ let items (grammar : FinalGrammar) (kernelIndexator : KernelIndexator) =
                         virtex.addEdge(new Edge<_,_>(dfs destKernels, i))
             virtex
     let initKernel = kernelInterpreter.toKernel(grammar.startRule, 0)
-    [| initKernel |] |> dfs
+    [| initKernel |] |> dfs |> ignore
+
+    printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| virtexCount()
+    let print () =
+        printfn "\nrules:"
+        for i = 0 to grammar.rules.rulesCount-1 do
+            printf "%d = " <| grammar.rules.leftSide i
+            for j = 0 to grammar.rules.length i - 1 do
+                printf "%d " <| grammar.rules.symbol i j
+            printfn ""
+        printfn "\nstates:"
+        for i = 0 to virtexCount()-1 do
+            printfn "==============================\n%d:" i
+            let kernels = stateToKernels.Item i
+            for k in kernels do
+                printfn "(%d,%d)" (kernelInterpreter.getProd k) (kernelInterpreter.getPos k)
+            printfn "------------------------------"
+            let virtex = virtices.Item i
+            for edge in virtex.outEdges do
+                printf "(%d,%d) " edge.label edge.dest.label
+            printfn ""
+    print ()
+    ()
 (*
 let buildLookaheads (grammar : FinalGrammar) =
     let res : Set<int>[] = Array.zeroCreate grammar.indexator.fullCount

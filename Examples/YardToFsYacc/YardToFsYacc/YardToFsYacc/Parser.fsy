@@ -1,0 +1,45 @@
+%{
+
+open AST
+
+%}
+%token <string> EOF
+%token <string> IDENT
+%token <string> NUMBER
+%token <string> EQ
+%token <string> KW_LET
+%token <string> ARROW
+%token <string> KW_FUN
+%token <string> PLUS
+%token <string> SEMI
+
+%start s
+
+%type <'a> s
+
+%%
+
+yard_exp_brackets_2 :  SEMI expr { fun hd -> let itm=$2  in itm}
+
+subexpr :  num { let n=$1  in n}
+          | var { let v=$1  in v}
+          | subexpr PLUS subexpr { let l=$1  in let r=$3  in Sum(l,r)}
+          | KW_FUN ident ARROW subexpr
+            { let id=$2  in let body=$4  in Fun(id,body)}
+
+expr :  KW_LET ident EQ subexpr { let id=$2  in let expr=$4  in Expr(id,expr)}
+
+num :  NUMBER { let n=$1  in Number(int n)}
+
+var :  IDENT { let v=$1  in Var v}
+
+ident :  IDENT { let id=$1  in Ident id}
+
+s :  yard_rule_not_empty_list_1 EOF { let lst=$1  in Prog lst}
+
+yard_many_1 :  { fun hd -> []}
+              | yard_exp_brackets_2 yard_many_1
+                { fun hd -> let yard_head=$1 hd in let yard_tail=$2 hd in yard_head::yard_tail}
+
+yard_rule_not_empty_list_1 :  expr yard_many_1
+                               { let hd=$1  in let tl=$2 hd in hd::tl}

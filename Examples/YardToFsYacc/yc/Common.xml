@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>Common</name></assembly>
+<members>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.Checkers">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.ComponentsLoader">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.ConvertionsManager">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.FrontendsManager">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.GeneratorsManager">
+
+</member>
+<member name="F:Yard.Core.IL.Definition.t`2.foot">
+<summary>
+ Text after a grammar description, what will be simply copied
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Definition.t`2.grammar">
+<summary>
+ Grammar description itself
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Definition.t`2.head">
+<summary>
+ Text before a grammar description ( e.g. some open-s), what will be simply copied
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Definition.t`2.info">
+<summary>
+ Contains information (e.g. origin) about this grammar description
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:Yard.Core.IL.Definition.empty``2">
+<summary>
+ Empty grammar
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Definition">
+
+</member>
+<member name="T:Yard.Core.IL.Grammar.t`2">
+<summary>
+ Grammar is a list of rules
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Grammar">
+
+</member>
+<member name="F:Yard.Core.IL.Rule.t`2.metaArgs">
+<summary>
+ List of meta-arguments - names of rules, parametrizing this rule.
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Rule.t`2._public">
+<summary>
+ Is this rule a start non-terminal (in this case &apos;+&apos; is used before rule)
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Rule.t`2.body">
+<summary>
+ Rule body (production).
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Rule.t`2.args">
+<summary>
+ Heritable arguments of rule
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Rule.t`2.name">
+<summary>
+ Rule name. Used to start from this or to be referenced to from other rules.
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Rule.t`2">
+ <summary>
+ <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
+ <para>  'patt - type of attributes (arguments). </para>
+ <para>  'expr - type of expressions in action code. </para>
+ <para>Rule have the following format: </para>
+ <para>  [+]name&lt;&lt; metaArgs &gt;&gt;[args] : body; </para>
+ </summary>
+</member>
+<member name="T:Yard.Core.IL.Rule">
+
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.POpt">
+<summary>
+ expr?
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PSome">
+<summary>
+ expr+
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PPerm">
+<summary>
+ Permutation (A || B || C)
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PRepet">
+<summary>
+ Extended regexp repetition, &quot;man egrep&quot; for details
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PLiteral">
+<summary>
+ Literal. We can use constants (&quot;if&quot; and &quot;then&quot; in &apos; ..&quot;if&quot; expr &quot;then&quot; expr...&apos;)
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PMetaRef">
+<summary>
+ Reference to metarule inside production (mr&lt;&lt;x&gt;&gt; in rule &quot;a: mr&lt;&lt;x&gt;&gt; y z&quot;)
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PMany">
+<summary>
+ expr*
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PRef">
+<summary>
+ Reference to other rule inside production. With an optional args list.
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PToken">
+<summary>
+ Token itself. Final element of parsing.
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PSeq">
+<summary>
+ Sequence * attribute. (Attribute is always applied to sequence) 
+</summary>
+</member>
+<member name="T:Yard.Core.IL.Production.t`2.PAlt">
+<summary>
+ Alternative (e1 | e2)
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.IL.Production.t`2">
+ <summary>
+ <para>t&lt;'patt,'expr&gt; - Type of production node in derivation tree. </para>
+ <para>  'patt - type of l-attributes. </para>
+ <para>  'expr - type of expressions in action code. </para>
+ </summary>
+</member>
+<member name="F:Yard.Core.IL.Production.elem`2.checker">
+<summary>
+ Almost resolver (condition in production).
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Production.elem`2.binding">
+<summary>
+ Binding :) like f:F or f:=F.... Seal 
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Production.elem`2.rule">
+<summary>
+ Production rule itself.
+</summary>
+</member>
+<member name="F:Yard.Core.IL.Production.elem`2.omit">
+<summary>
+ Don&apos;t include rule into AST
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.IL.Production">
+
+</member>
+<member name="T:Yard.Core.IL.Source.t">
+<summary>
+ Type of elementary part of source grammar
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.IL.Source">
+
+</member>
+<member name="T:Yard.Core.IL">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.Layouts">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Yard.Core.Manager">
+
+</member>
+</members>
+</doc>

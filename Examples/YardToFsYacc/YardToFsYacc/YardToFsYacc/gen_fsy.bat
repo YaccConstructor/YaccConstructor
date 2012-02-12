@@ -1,0 +1,1 @@
+..\..\YC\YaccConstructor.exe -g "FsYaccPrinter string" -c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%%s" -c ExpandBrackets -c AddEOF -c LeaveLast -c AddDefaultAC -i Grammar.yrd > Parser.fsy

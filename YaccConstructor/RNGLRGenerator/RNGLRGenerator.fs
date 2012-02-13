@@ -32,8 +32,8 @@ type RNGLR() =
             let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
-            let kernelIndexator = new KernelIndexator(grammar)
-            items grammar kernelIndexator
+            let statesInterpreter = buildStates grammar
+            let tables = new Tables(grammar, statesInterpreter)
             printfn "%A" <| System.DateTime.Now - start
             (new YardPrinter()).Generate newDefinition
         override this.AcceptableProductionTypes =

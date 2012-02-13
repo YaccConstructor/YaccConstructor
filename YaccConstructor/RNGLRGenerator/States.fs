@@ -24,27 +24,36 @@ open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR
 
 type Kernel = int
-type Item = Kernel * Set<int>
-type TempState = Kernel list
-type State = Kernel[] * Set<int>[]
+//type Item = Kernel * Set<int>
 
-type KernelInterpreter () =
-    member this.toKernel (prod,pos) = (prod <<< 16) ||| pos
-    member this.incPos kernel = kernel + 1
-    member this.getProd kernel = kernel >>> 16
-    member this.getPos kernel = kernel <<< 16 >>> 16
-    member this.kernelsOfState = fst
-    member this.lookAheadsOfState = snd
-    member this.symbol (grammar : FinalGrammar) kernel =
-        let rule = this.getProd kernel
-        let pos = this.getPos kernel
+type KernelInterpreter =
+    static member inline toKernel (prod,pos) = (prod <<< 16) ||| pos
+    static member inline incPos kernel = kernel + 1
+    static member inline getProd kernel = kernel >>> 16
+    static member inline getPos kernel = kernel <<< 16 >>> 16
+    static member inline unzip kernel = (KernelInterpreter.getProd kernel, KernelInterpreter.getPos kernel)
+    static member inline kernelsOfState = fst
+    static member inline lookAheadsOfState = snd
+
+    static member inline symbol (grammar : FinalGrammar) kernel =
+        let rule = KernelInterpreter.getProd kernel
+        let pos = KernelInterpreter.getPos kernel
         if grammar.rules.length rule = pos then grammar.indexator.eofIndex
         else grammar.rules.symbol rule pos
 
+    static member inline symbolAndLookAheads (grammar : FinalGrammar) (kernel, endLookeheads) =
+        let rule = KernelInterpreter.getProd kernel
+        let pos = KernelInterpreter.getPos kernel
+        if grammar.rules.length rule = pos then (grammar.indexator.eofIndex, Set.empty)
+        else
+            let lookAheads =
+                if grammar.epsilonTailStart.[rule] > pos + 1 then grammar.followSet.[rule].[pos]
+                else Set.union grammar.followSet.[rule].[pos] endLookeheads
+            (grammar.rules.symbol rule pos, lookAheads)
+(*
 type KernelIndexator (grammar : FinalGrammar) =
     let kernels = 
-        let kernelInterpreter = new KernelInterpreter()
-        let initKernel = kernelInterpreter.toKernel(grammar.startRule, 0)
+        let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
         let was : bool[] = Array.zeroCreate grammar.indexator.fullCount
         let rec dfs nonTerminal =
             was.[nonTerminal] <- true
@@ -58,109 +67,150 @@ type KernelIndexator (grammar : FinalGrammar) =
             if was.[i] then
                 for rule in grammar.rules.rulesWithLeftSide i do
                     for pos = 0 to grammar.rules.length rule - 1 do
-                        yield kernelInterpreter.toKernel (rule, pos)
+                        yield KernelInterpreter.toKernel (rule, pos)
         |]
 
     let kernelToIdx = kernels |> Array.mapi (fun i x -> (x,i)) |> dict
 
     member this.indexToKernel index = kernels.[index]
     member this.kernelToIndex kernel = kernelToIdx.Item kernel
-
-let items (grammar : FinalGrammar) (kernelIndexator : KernelIndexator) =
+*)
+type StatesInterpreter (stateToVirtex : Virtex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
+    member this.count = stateToVirtex.Length
+    member this.virtex i = stateToVirtex.[i]
+    member this.kernels i = stateToKernels.[i]
+    member this.lookaheads i = stateToLookahead.[i]
+    
+let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
     let nextIndex, virtexCount =
         let num = ref -1
         (fun () -> incr num; !num)
         , (fun () -> !num + 1)
     let kernelsToVirtex = new Dictionary<string, Virtex<int,int>>()
-    let virtices = new Dictionary<int, Virtex<int,int> >()
-    let stateToKernels = new Dictionary<int, Kernel[]>()
-    let stateToLookahead = new Dictionary<int, Set<int>[] >()
-    let kernelInterpreter = new KernelInterpreter()
-    let curSymbol kernel = kernelInterpreter.symbol grammar kernel
-    let closure (kernels : Kernel[]) =
-        let was : bool[] = Array.zeroCreate grammar.indexator.fullCount
-        let mutable result = Set.ofArray kernels
+    let virtices = new ResizeArray<Virtex<int,int> >()
+    let stateToKernels = new ResizeArray<Kernel[]>()
+    let stateToLookahead = new ResizeArray<Set<int>[] >()
+    let curSymbol kernel = KernelInterpreter.symbol grammar kernel
+    let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreter.symbolAndLookAheads grammar
+    let wasEdge = new ResizeArray<Set<int> >()
+    let wasNTermSymbol : bool[,] = Array2D.zeroCreate grammar.indexator.fullCount grammar.indexator.fullCount
+    let addedNTermsSymbols = new ResizeArray<_>(grammar.indexator.fullCount * grammar.indexator.fullCount)
+
+    let closure (kernelsAndLookAheads : (Kernel * Set<int>)[]) =
+        //eprintf "%d " <| addedNTermsSymbols.Capacity
+        let mutable result = kernelsAndLookAheads |> Array.map fst |> Set.ofArray
+        let kernelToLookAhead = new Dictionary<_,_> ()// Array.zip kernels lookAheads |> dict
         let queue = new Queue<_>()
-        let enqueue symbol = 
-            if not was.[symbol] then
-                was.[symbol] <- true
-                queue.Enqueue symbol
-        for k in kernels do
-            enqueue <| curSymbol k
-        while queue.Count <> 0 do
-            let nonterm = queue.Dequeue()
+        let enqueue (nonTerm, symbolSet) = 
+            let checkWas symbol =
+                if not wasNTermSymbol.[nonTerm, symbol] then
+                    wasNTermSymbol.[nonTerm, symbol] <- true
+                    addedNTermsSymbols.Add(nonTerm, symbol)
+                    true
+                else false
+            let newSymbolSet = Set.filter checkWas symbolSet
+            queue.Enqueue (nonTerm, newSymbolSet)
+        for i = 0 to kernelsAndLookAheads.Length - 1 do
+            kernelToLookAhead.Add (kernelsAndLookAheads.[i])
+            enqueue <| symbolAndLookAheads kernelsAndLookAheads.[i]
+        while queue.Count > 0 do
+            let nonterm, symbolSet = queue.Dequeue()
             for rule in grammar.rules.rulesWithLeftSide nonterm do
-                result <- result.Add <| kernelInterpreter.toKernel (rule,0)
-                if grammar.rules.length rule > 0 then
-                    enqueue <| grammar.rules.symbol rule 0
-        Array.ofSeq result |> Array.sort
-    let rec dfs initKernels =
-        let kernels = initKernels |> closure
+                let kernel = KernelInterpreter.toKernel (rule,0)
+                let newSymbolSet = 
+                    if not <| result.Contains kernel then
+                        result <- result.Add kernel
+                        kernelToLookAhead.Add(kernel, symbolSet)
+                        symbolSet
+                    else
+                        let newSymbolSet = Set.difference symbolSet (kernelToLookAhead.Item kernel)
+                        kernelToLookAhead.Item kernel <- Set.union (kernelToLookAhead.Item kernel) newSymbolSet
+                        newSymbolSet
+                if grammar.rules.length rule > 0 && not newSymbolSet.IsEmpty then
+                    enqueue <| symbolAndLookAheads (KernelInterpreter.toKernel(rule,0), newSymbolSet)
+        for pair in addedNTermsSymbols do
+            wasNTermSymbol.[fst pair, snd pair] <- false
+        addedNTermsSymbols.Clear()
+        Array.ofSeq result
+        |> (fun ks -> ks , [|for i = 0 to ks.Length - 1 do yield kernelToLookAhead.Item ks.[i]|])
+    let incount = ref 0
+    let rec dfs initKernelsAndLookAheads =
+        incr incount
+        if !incount % 100 = 0 then eprintfn "%d" !incount
+        let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
-        if kernelsToVirtex.ContainsKey key then
-            kernelsToVirtex.Item key
-        else
-            //printfn "%A" <| key
-            let virtex = new Virtex<int,int>(nextIndex())
-            virtices.Add(virtex.label, virtex)
-            kernelsToVirtex.Add(key, virtex)
-            //System.Diagnostics.Debug.Assert(result.ContainsKey key)
-            stateToKernels.Add(virtex.label, kernels)
-            // adding edges
+        let virtex, newLookAheads, needDfs =
+            if kernelsToVirtex.ContainsKey key then
+                let virtex = kernelsToVirtex.Item key
+                let alreadySets = stateToLookahead.Item virtex.label
+                let needDfs = ref false
+//                printfn "============"
+//                printfn "%A" alreadySets
+                let diff =
+                    [|for i = 0 to kernels.Length - 1 do
+                        let diffSet = Set.difference lookaheads.[i] alreadySets.[i]
+                        alreadySets.[i] <- Set.union alreadySets.[i] diffSet
+                        if not diffSet.IsEmpty then needDfs := true
+//                        for s in diffSet do
+//                            System.Diagnostics.Debug.Assert <| (stateToLookahead.Item virtex.label).[i].Contains s
+                        yield diffSet|]
+                virtex, diff, !needDfs
+            else
+                //printfn "%A" <| key
+                let virtex = new Virtex<int,int>(nextIndex())
+                wasEdge.Add Set.empty
+                virtices.Add virtex
+                kernelsToVirtex.Add(key, virtex)
+                //System.Diagnostics.Debug.Assert(result.ContainsKey key)
+                stateToKernels.Add(kernels)
+                stateToLookahead.Add(lookaheads)
+                virtex, lookaheads, true
+                // adding edges
+        if needDfs then
+//            printfn "%d" virtex.label
+//            printfn "%A" kernels
+//            printfn "%A" newLookAheads
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
-                    let destKernels =
-                        [|for k in kernels do
-                            if curSymbol k = i then yield kernelInterpreter.incPos k|]
-                    if destKernels.Length > 0 then
-                        virtex.addEdge(new Edge<_,_>(dfs destKernels, i))
-            virtex
-    let initKernel = kernelInterpreter.toKernel(grammar.startRule, 0)
-    [| initKernel |] |> dfs |> ignore
+                    let newSymbols = ref false
+                    let destStates =
+                        [|for j = 0 to kernels.Length-1 do
+                            if curSymbol kernels.[j] = i then
+                                if not newLookAheads.[j].IsEmpty then newSymbols := true
+                                yield (KernelInterpreter.incPos kernels.[j], newLookAheads.[j])
+                        |]
+                    if destStates.Length > 0 && !newSymbols then
+                        let newVirtex : Virtex<_,_> = dfs destStates
+                        if not <| wasEdge.[virtex.label].Contains newVirtex.label then
+                            wasEdge.[virtex.label] <- wasEdge.[virtex.label].Add newVirtex.label
+                            virtex.addEdge(new Edge<_,_>(newVirtex, i))
+        virtex
+    let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
+    let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
+    [| initKernel, initLookAhead|] |> dfs |> ignore
 
-    printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| virtexCount()
+    //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| virtexCount()
     let print () =
         printfn "\nrules:"
         for i = 0 to grammar.rules.rulesCount-1 do
-            printf "%d = " <| grammar.rules.leftSide i
+            printf "%4d: %d = " i <| grammar.rules.leftSide i
             for j = 0 to grammar.rules.length i - 1 do
                 printf "%d " <| grammar.rules.symbol i j
             printfn ""
         printfn "\nstates:"
         for i = 0 to virtexCount()-1 do
             printfn "==============================\n%d:" i
-            let kernels = stateToKernels.Item i
-            for k in kernels do
-                printfn "(%d,%d)" (kernelInterpreter.getProd k) (kernelInterpreter.getPos k)
+            let kernels = stateToKernels.[i]
+            let lookaheads = stateToLookahead.[i]
+            for k = 0 to kernels.Length-1 do
+                printfn "(%d,%d) [%s]" (KernelInterpreter.getProd kernels.[k]) (KernelInterpreter.getPos kernels.[k])
+                    <| (lookaheads.[k] |> List.ofSeq
+                        |> List.map (fun x -> x.ToString())
+                        |> String.concat "," )
             printfn "------------------------------"
-            let virtex = virtices.Item i
+            let virtex = virtices.[i]
             for edge in virtex.outEdges do
                 printf "(%d,%d) " edge.label edge.dest.label
             printfn ""
     print ()
-    ()
-(*
-let buildLookaheads (grammar : FinalGrammar) =
-    let res : Set<int>[] = Array.zeroCreate grammar.indexator.fullCount
-    // for each rule we look if we have already visited it
-    let was : bool[] = Array.zeroCreate grammar.rules.rulesCount
-    // look on all rules with left side equals to this nonTerminal
-    let rec dfs nonTerminal symbol =
-        res.[nonTerminal] <- Set.add symbol res.[nonTerminal]
-        for rule in grammar.rules.rulesWithLeftSide nonTerminal do
-            let production = grammar.rules.rightSide rule
-            // if we look on rule for the first time, we must collect for each symbol it's follow sets
-            if (not was.[rule]) then
-                was.[rule] <- true
-                for i in 0..grammar.rules.length rule-1 do
-                    for s in grammar.followSet.[rule].[i] do
-                        if not <| Set.contains s res.[production.[i]] then
-                            dfs production.[i] s
-            // look on epsilon-tail of rule
-            for i in grammar.epsilonTailStart.[rule] - 1 .. grammar.rules.length rule - 1 do
-                if not <| Set.contains symbol res.[production.[i]] then
-                    dfs production.[i] symbol
-                
-    dfs grammar.rules.startSymbol grammar.indexator.eofIndex
-    ()
-*)
+    new StatesInterpreter(virtices.ToArray(), stateToKernels.ToArray(), stateToLookahead.ToArray())

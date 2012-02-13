@@ -49,6 +49,7 @@
     <Compile Include="States.fs" />
     <Compile Include="GenerateActions.fs" />
     <Compile Include="GenerateTranslator.fs" />
+    <Compile Include="Tables.fs" />
     <Compile Include="Generator.fs" />
     <Compile Include="RNGLRGenerator.fs" />
   </ItemGroup>

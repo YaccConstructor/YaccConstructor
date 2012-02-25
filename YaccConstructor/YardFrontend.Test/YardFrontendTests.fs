@@ -30,7 +30,6 @@ open NUnit.Framework
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFileContent := str
@@ -44,10 +43,18 @@ let lexerTest str lexemsListCorrect =
 
     Assert.AreEqual(lexemsList, lexemsListCorrect)
 
-let parserTest str ilDefCorrect =
+let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
+    let currentIL = {Main.ParseFile path with info = {fileName =""}}
+
+    printfn "ilDef = %A" currentIL
+    printfn "ilDefCorrect = %A" expectedIL
+
+    Assert.AreEqual(currentIL, expectedIL)
+
+let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFileContent := str
-    let ilDef = GrammarParser.file Lexer.main buf
+    let ilDef = {GrammarParser.file Lexer.main buf with info = {fileName =""}}
 
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
@@ -81,6 +88,148 @@ include ""test_included.yrd""
 +s:PLUS;"
             [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33))
             ; COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON; EOF]
+
+[<TestFixture>]
+type ``Yard frontend preprocessor tests`` () =
+    let basePath = "../../../../Tests/YardFrontend/Preprocessor"
+    let cp file = System.IO.Path.Combine(basePath,file)
+    [<Test>]
+    member test.noUserDefs () =
+        let expected = 
+            {
+                info = {fileName =""}
+                head = None
+                grammar = [{name = "e"
+                            args = []
+                            body = PSeq ([{omit = false
+                                           rule = PToken ("R", (28, 29))
+                                           binding = None
+                                           checker = None}],None)
+                            _public = true
+                            metaArgs = []}]
+                foot = None}
+        preprocessorTest (cp "test_0.yrd") expected
+
+    [<Test>]
+    member test.if_endif () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("N", (16, 17))
+                                        binding = None
+                                        checker = None}; {omit = false
+                                                          rule = PToken ("R", (28, 29))
+                                                          binding = None
+                                                          checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest ((cp "test_0.yrd")+"%ora") expected
+
+    [<Test>]
+    member test.``if_else_end. No user defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("R", (29, 30))
+                                        binding = None
+                                        checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest (cp "test_1.yrd") expected
+
+    [<Test>]
+    member test.``if_else_end. User defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("N", (17, 18))
+                                        binding = None
+                                        checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest ((cp "test_1.yrd")+"%ora") expected
+
+    [<Test>]
+    member test.``Inner if. No user defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("Q", (57, 58))
+                                        binding = None
+                                        checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest (cp "test_2.yrd") expected
+
+    [<Test>]
+    member test.``Inner if. Inner user defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("Q", (57, 58))
+                                        binding = None
+                                        checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest ((cp "test_2.yrd")+"%x") expected
+
+    [<Test>]
+    member test.``Inner if. Full user defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("N", (16, 17))
+                                        binding = None
+                                        checker = None}; {omit = false
+                                                          rule = PToken ("G", (27, 28))
+                                                          binding = None
+                                                          checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest ((cp "test_2.yrd")+"%ora;x") expected
+
+    [<Test>]
+    member test.``Inner if. Top user defs.`` () =
+        let expected = 
+            {info = {fileName = ""}
+             head = None
+             grammar = [{name = "e"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("N", (16, 17))
+                                        binding = None
+                                        checker = None}; {omit = false
+                                                          rule = PToken ("H", (38, 39))
+                                                          binding = None
+                                                          checker = None}],None)
+                         _public = true
+                         metaArgs = []}]
+             foot = None}
+        preprocessorTest ((cp "test_2.yrd")+"%ora") expected
 
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    

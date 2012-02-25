@@ -18,16 +18,77 @@
 module Yard.Frontends.YardFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
+open System.Linq
+
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let private run_common path = 
+let private bufFromFile path = 
     let content = System.IO.File.ReadAllText(path)
     Lexer.currentFileContent := content;
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 
-let ParseFile path = 
-    let buf = run_common path    
+let private bufFromString string =
+    Lexer.currentFileContent := string;
+    let reader = new System.IO.StringReader(string)
+    LexBuffer<_>.FromTextReader reader
+
+let (|IF|ELSE|ENDIF|) (str:string) =
+    let tStr = str.Trim()
+    if tStr.StartsWith("#if")
+    then IF (tStr.Split(' ').[1])
+    elif tStr.StartsWith("#else")
+    then ELSE
+    else ENDIF
+
+let private filterByDefs (buf:LexBuffer<_>) userDefined =     
+    let tokens =
+        seq {
+            while not buf.IsPastEndOfStream do
+               yield Lexer.main buf  
+            }
+
+    let currentDefined = ref []
+    let filter x =
+        let flg = 
+            if List.isEmpty !currentDefined 
+            then true
+            else (!currentDefined).All(fun x -> x)
+        flg
+
+    let filtered =
+        seq{
+            for token in tokens do
+                match token with
+                | GrammarParser.SHARPLINE str ->
+                    match str with
+                    | IF d -> currentDefined := (Array.contains d userDefined)::!currentDefined
+                    | ELSE -> 
+                        match !currentDefined with
+                        | hd :: tl -> currentDefined :=  not hd :: tl
+                        | _ -> failwith "Unexpected #ELSE"
+                    | ENDIF -> 
+                        match !currentDefined with
+                        | hd :: tl -> currentDefined := tl
+                        | _ -> failwith "Unexpected #ENDIF"
+
+                | t -> if filter t then yield t
+            }
+    let tokensEnumerator = filtered.GetEnumerator()
+    let getNextToken (lexbuf:Lexing.LexBuffer<_>) =
+        tokensEnumerator.MoveNext() |> ignore
+        let res = tokensEnumerator.Current
+        res
+    getNextToken
+
+let ParseFile (args:string) =
+    let path,userDefs =
+        let args = args.Trim().Split('%')
+        if args.Length = 2
+        then args.[0],args.[1].Split(';')
+        else args.[0],[||]
+
+    let buf = bufFromFile path    
     GrammarParser.currentFilename := path
     let posTo2D pos =
         let source = System.IO.File.ReadAllText path
@@ -40,7 +101,7 @@ let ParseFile path =
             )
             (1,0)
     try
-        GrammarParser.file Lexer.main buf
+        GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos

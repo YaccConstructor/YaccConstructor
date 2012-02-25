@@ -104,13 +104,18 @@ let identbody =
 let backslash_escapes =
   ['\\' '"' '\'' 'n' 't' 'b' 'r']
 
+let sharp = '#'
+let sharplineBody =  ['A'-'Z' 'a'-'z' ' ']+
+let sharpLine = sharp sharplineBody 
+
 
 let blank =  [' ' '\013' '\009' '\012'] *
 
 rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
 and skipSpaces  = parse blank {lexbuf}
-and  main = parse
+and  main = parse	
        blank  { main lexbuf }
+	 | sharpLine {SHARPLINE (LexBuffer<_>.LexemeString lexbuf) }
      | '\010' { //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }; 
                 main lexbuf
               }

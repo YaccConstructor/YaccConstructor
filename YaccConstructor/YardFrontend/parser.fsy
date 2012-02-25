@@ -69,6 +69,7 @@ let parseRules (filename:string) =
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
+%token <string>SHARPLINE
 
 
 %start file

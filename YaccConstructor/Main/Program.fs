@@ -43,6 +43,8 @@ let () =
     let ConvertionsManager = ConvertionsManager.ConvertionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
+    let userDefsStr = ref ""
+
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.Available then
             Some("YardFrontend")
@@ -78,6 +80,7 @@ let () =
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
+         "-def", ArgType.String (fun s -> userDefsStr := s), "User defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -104,7 +107,10 @@ let () =
             // Parse grammar    
             let ilTree =                
                 try
-                    ref (fe.ParseGrammar grammarFilePath)
+                    if System.String.IsNullOrEmpty !userDefsStr
+                    then fe.ParseGrammar grammarFilePath
+                    else grammarFilePath + "%" + !userDefsStr |> fe.ParseGrammar
+                    |> ref
                 with
                 | e -> FEError e.Message |> raise
 

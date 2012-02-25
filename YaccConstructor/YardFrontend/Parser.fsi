@@ -3,6 +3,7 @@
 module Yard.Frontends.YardFrontend.GrammarParser
 open Yard.Core
 type token = 
+  | SHARPLINE of (string)
   | PATTERN of (IL.Source.t)
   | PARAM of (IL.Source.t)
   | PREDICATE of (IL.Source.t)
@@ -27,6 +28,7 @@ type token =
   | COLON
   | EOF
 type tokenId = 
+    | TOKEN_SHARPLINE
     | TOKEN_PATTERN
     | TOKEN_PARAM
     | TOKEN_PREDICATE

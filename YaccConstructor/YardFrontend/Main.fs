@@ -63,11 +63,11 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                 | GrammarParser.SHARPLINE str ->
                     match str with
                     | IF d -> currentDefined := (Array.contains d userDefined)::!currentDefined
-                    | ELSE -> 
+                    | ELSE ->
                         match !currentDefined with
                         | hd :: tl -> currentDefined :=  not hd :: tl
                         | _ -> failwith "Unexpected #ELSE"
-                    | ENDIF -> 
+                    | ENDIF ->
                         match !currentDefined with
                         | hd :: tl -> currentDefined := tl
                         | _ -> failwith "Unexpected #ENDIF"

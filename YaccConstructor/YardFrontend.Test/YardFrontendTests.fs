@@ -40,19 +40,18 @@ let lexerTest str lexemsListCorrect =
     } 
     let lexemsList = Seq.toList lexemsSeq
 
-//    #if DEBUG
     printfn "%A" lexemsList
-//    #endif
+
     Assert.AreEqual(lexemsList, lexemsListCorrect)
 
 let parserTest str ilDefCorrect =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFileContent := str
     let ilDef = GrammarParser.file Lexer.main buf
-//    #if DEBUG
+
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
-//    #endif
+
     Assert.AreEqual(ilDef, ilDefCorrect)
 
 let completeTest str lexemsListCorrect ilDefCorrect = 
@@ -65,23 +64,23 @@ type ``YardFrontend lexer tests`` () =
     member test.``Lexer seq test`` () =
         lexerTest 
             "+s: NUMBER PLUS NUMBER;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; UIDENT ("NUMBER", (4, 10)); 
-                UIDENT ("PLUS", (11, 15)); UIDENT ("NUMBER", (16, 22)); SEMICOLON; EOF]
+            [PLUS; LIDENT ("s", (1, 2)); COLON; UIDENT ("NUMBER", (4, 10))
+            ; UIDENT ("PLUS", (11, 15)); UIDENT ("NUMBER", (16, 22)); SEMICOLON; EOF]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
             "+s: (MINUS|PLUS)*;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10)); BAR;
-                UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON; EOF]
+            [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10)); BAR
+            ; UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON; EOF]
 
     [<Test>]            
     member test.``Include test`` () =
         lexerTest @"
 include ""test_included.yrd""
 +s:PLUS;"
-            [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33));
-                COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON; EOF]
+            [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33))
+            ; COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON; EOF]
 
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    
@@ -89,10 +88,9 @@ type ``YardFrontend Parser tests`` () =
     member test.``Seq test`` () =
         parserTest
             "+s: NUMBER PLUS NUMBER;" 
-            { new Definition.t<Source.t, Source.t> with
-                info = {fileName = ""} 
-                and head = None  
-                and grammar = 
+            { info = {fileName = ""} 
+              head = None  
+              grammar = 
                     [{ 
                         name = "s"
                         args = []
@@ -114,12 +112,11 @@ type ``YardFrontend Parser tests`` () =
                                     binding = None
                                     checker = None
                                 }],
-                                None
-                            );
+                                None)
                         _public = true
                         metaArgs = []
                     }] 
-                and foot = None
+              foot = None
             } 
                 
 [<TestFixture>]
@@ -141,23 +138,22 @@ let value x = (x:>Lexeme<string>).value
                 SEMICOLON; LIDENT ("e", (78, 79)); PARAM ("i", (80, 81)); COLON;
                 LIDENT ("n", (84, 85)); EQUAL; UIDENT ("NUMBER", (86, 92));
                 ACTION ("(value n |> int) + i", (94, 114)); SEMICOLON; EOF]
-            { new Definition.t<Source.t, Source.t> with 
-                info = { fileName = ""; }
-                and head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
-                and grammar = 
+            {
+             info = { fileName = ""; }
+             head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
+             grammar = 
                     [{ 
                         name = "s"
                         args = []
                         body = 
                             PSeq (
                                 [{
-                                    omit = false;
+                                    omit = false
                                     rule = PRef (("e", (65, 66)),Some ("1", (67, 68)))
                                     binding = Some ("res:int", (54, 61))
-                                    checker = None;
+                                    checker = None
                                 }],
-                                Some ("res", (71, 74))
-                            );
+                                Some ("res", (71, 74)))
                         _public = true
                         metaArgs = []
                       }; { 
@@ -166,15 +162,14 @@ let value x = (x:>Lexeme<string>).value
                         body = 
                             PSeq (
                                 [{
-                                    omit = false;
+                                    omit = false
                                     rule = PToken ("NUMBER", (86, 92))
                                     binding = Some ("n", (84, 85))
                                     checker = None
                                 }],
-                                Some ("(value n |> int) + i", (94, 114))
-                            );
+                                Some ("(value n |> int) + i", (94, 114)))
                         _public = false
                         metaArgs = []
                     }]
-                and foot = None
+             foot = None
             }

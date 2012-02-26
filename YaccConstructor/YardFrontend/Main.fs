@@ -39,7 +39,9 @@ let (|IF|ELSE|ENDIF|) (str:string) =
     then IF (tStr.Split(' ').[1])
     elif tStr.StartsWith("#else")
     then ELSE
-    else ENDIF
+    elif tStr.StartsWith("#endif")
+    then ENDIF
+    else "Unexpected macrocommand " + str |> failwith
 
 let private filterByDefs (buf:LexBuffer<_>) userDefined =     
     let tokens =

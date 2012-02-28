@@ -98,17 +98,9 @@ let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
 
 let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let allEpsilon = epsilonRules rules indexator canInferEpsilon
-    let result : MultiAST[] = Array.zeroCreate indexator.nonTermCount
+    let result : MultiAST [] = Array.create indexator.nonTermCount (ref [])
     let was : int[] = Array.zeroCreate indexator.nonTermCount
     for i in 0..indexator.nonTermCount-1 do
-(*        let rec collectAsts (production : int[]) acc num =
-            if num = production.Length then acc
-            else
-                let newAcc =
-                    [for child in result.[production.[num]] do
-                        for prev in acc do
-                            yield child::prev]
-                collectAsts production newAcc (num + 1)*)
         if (was.[i] = 0 && canInferEpsilon.[i]) then
             let rec dfs u =
                 was.[u] <- 1
@@ -119,7 +111,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                         let asts =
                             rules.rightSide i
                             |> Array.map (fun num -> result.[num])
-                        result.[u] <- {ruleNumber = i; children = asts}::result.[u]
+                        result.[u] := {ruleNumber = i; children = asts}::!result.[u]
                 was.[u] <- 2
             dfs i
     result

@@ -74,10 +74,14 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     member this.termToIndex = add termsShift <| fst termsConnect
     member this.indexToTerm = sub termsShift <| snd termsConnect
     member this.termCount = trd termsConnect
+    member this.termsStart = termsShift
+    member this.termsEnd = termsShift + this.termCount - 1
 
     member this.literalToIndex = add literalsShift <| fst literalsConnect
     member this.indexToLiteral = sub literalsShift <| snd literalsConnect
     member this.literalsCount = trd literalsConnect
+    member this.literalsStart = literalsShift
+    member this.literalsEnd = literalsShift + this.literalsCount - 1
 
     member this.fullCount = (trd literalsConnect) + (trd termsConnect) + (trd nonTermsConnect)
     member this.eofIndex = this.termToIndex "EOF"

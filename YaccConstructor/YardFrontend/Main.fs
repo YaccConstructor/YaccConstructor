@@ -33,12 +33,14 @@ let private bufFromString string =
     let reader = new System.IO.StringReader(string)
     LexBuffer<_>.FromTextReader reader
 
-let (|IF|ELSE|ENDIF|) (str:string) =
+let (|IF|ELSE|ELIF|ENDIF|) (str:string) =
     let tStr = str.Trim()
     if tStr.StartsWith("#if")
     then IF (tStr.Split(' ').[1])
     elif tStr.StartsWith("#else")
     then ELSE
+    elif tStr.StartsWith("#elif")
+    then ELIF (tStr.Split(' ').[1])
     elif tStr.StartsWith("#endif")
     then ENDIF
     else "Unexpected macrocommand " + str |> failwith
@@ -55,7 +57,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
         let flg = 
             if List.isEmpty !currentDefined 
             then true
-            else (!currentDefined).All(fun x -> x)
+            else (!currentDefined).All(fun (x,y) -> x)
         flg
 
     let filtered =
@@ -64,10 +66,18 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                 match token with
                 | GrammarParser.SHARPLINE str ->
                     match str with
-                    | IF d -> currentDefined := (Array.contains d userDefined)::!currentDefined
+                    | IF d -> 
+                        let x = Array.contains d userDefined
+                        currentDefined := (x, x)::!currentDefined
+                    | ELIF d ->
+                        match !currentDefined with
+                        | (_, prev) :: tl -> 
+                            let x = Array.contains d userDefined
+                            currentDefined :=  (x, prev || x) :: tl
+                        | _ -> failwith "Unexpected #ELIF"
                     | ELSE ->
                         match !currentDefined with
-                        | hd :: tl -> currentDefined :=  not hd :: tl
+                        | (hd1, hd2) :: tl -> currentDefined :=  (not hd2, hd2) :: tl
                         | _ -> failwith "Unexpected #ELSE"
                     | ENDIF ->
                         match !currentDefined with

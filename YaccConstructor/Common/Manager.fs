@@ -2,7 +2,6 @@
 
 type IComponent = interface
     abstract Name : string
-    
 end
 
 type Manager<'T when 'T :> IComponent> () = 

@@ -63,14 +63,14 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
         | PAlt _ -> true
         | _ -> false
     match production with
-    | PSeq(elements, _) -> 
+    | PSeq(elements, _) ->
         if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
             PSeq(elements, Some("Node(\"empty\", [])", (0,0)))
         else
             PSeq(
-                elements 
-                |> List.mapi 
-                    (fun i elem -> 
+                elements
+                |> List.mapi
+                    (fun i elem ->
                 //Don't add bindings to omit or tokens or literals
                 //TODO add omit check
                         match elem.rule with
@@ -79,7 +79,7 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                         | PAlt(left,right) -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName (i+1)) left,_buildAST (sprintf "%s_Alt%dR" ruleName (i+1)) right) }
                         | PMany p -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PMany(_buildAST (sprintf "%s_Many%d" ruleName (i+1)) p) }
                         | PSome p -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=PSome(_buildAST (sprintf "%s_Some%d" ruleName (i+1)) p) }
-                        | POpt p   -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
+                        | POpt p  -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=POpt (_buildAST (sprintf "%s_Opt%d"  ruleName (i+1)) p) }
                         | x -> { elem with binding=Some((sprintf "S%d" (i+1)), (0,0)); rule=_buildAST (sprintf "%s_INNER%d" ruleName (i+1)) elem.rule }
                     )
                 ,(                    
@@ -94,7 +94,9 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                     |> sprintf "Node(\"%s\", [%s])" ruleName
                     , (0,0)
                 )|> Some)
-    | x -> _buildAST ruleName (seqify x)
+    | PAlt(left,right) -> 
+        PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName 1) left,_buildAST (sprintf "%s_Alt%dR" ruleName 1) right)
+    | x -> seqify x |> _buildAST ruleName
 
 let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
     if System.String.IsNullOrEmpty tokenType then

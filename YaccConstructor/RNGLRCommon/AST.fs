@@ -19,11 +19,11 @@
 
 namespace Yard.Generators.RNGLR
 
+type NodeType = Term | NonTerm | EpsTree
+
 type AST = {
-    /// Number of rule, applied to obtain nonTerminal in the root of tree.
-    /// Or -1, if it's epsilon-tree.
-    /// Or 1 << 31 ^ term_num, if it's terminal.
-    ruleNumber : int;
+    number : int;
+    nodeType : NodeType;
     /// Children of root
     children : MultiAST [];
 }
@@ -32,13 +32,11 @@ and MultiAST = AST list ref
 
 type ASTTyper =
     static member private flag = 1 <<< 31
-    static member private emptyArray = [| |]
-    static member isTerminal (a : AST) = ((a.ruleNumber &&& ASTTyper.flag) <> 0) && (a.ruleNumber <> -1)
-    static member isNonTerminal (a : AST) = (a.ruleNumber &&& ASTTyper.flag) = 0
-    static member isEpsilon (a : AST) = a.ruleNumber = -1
+    static member private emptyChildren = [| |]
+    static member isTerminal (a : AST) = a.nodeType = Term
+    static member isNonTerminal (a : AST) = a.nodeType = NonTerm
+    static member isEpsilon (a : AST) = a.nodeType = EpsTree
 
-    static member getRuleNumber (a : AST) = a.ruleNumber
-    static member getTermIndex (a : AST) = a.ruleNumber ^^^ ASTTyper.flag
-
-    static member createEpsilonTree nTerm = ref [{ruleNumber = nTerm; children = [| ref [{ruleNumber = -1; children = ASTTyper.emptyArray}] |]}]
-    static member createTerminalTree term = ref [{ruleNumber = term; children = ASTTyper.emptyArray}]
+    static member createEpsilonTree nTerm = ref [{number = nTerm; nodeType = EpsTree; children = ASTTyper.emptyChildren}]
+    static member createTerminalTree term = ref [{number = term; nodeType = Term; children = ASTTyper.emptyChildren}]
+    static member createNonTerminalTree nTerm children = {number = nTerm; nodeType = NonTerm; children = children}

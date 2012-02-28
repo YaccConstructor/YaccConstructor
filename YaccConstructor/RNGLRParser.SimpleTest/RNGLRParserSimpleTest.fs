@@ -11,16 +11,72 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens
 
-let dir = @"../../../../Tests/RNGLR/simple/"
+let dir = @"../../../../Tests/RNGLR/"
+
+let rec printAst ind (ast : MultiAST) =
+    let printInd num (x : 'a) =
+        printf "%s" (String.replicate (num * 4) " ")
+        printfn x
+    let nodeTypeToStr = function
+        | EpsTree -> "e"
+        | NonTerm -> "n"
+        | Term -> "t"
+    match !ast with
+    | [] -> ()
+    | l ->  if l.Length > 1 then printInd ind "^^^^"
+            l |> List.iteri 
+                (fun i x -> if i > 0 then
+                                printInd ind "----"
+                            printInd ind "%s %d" (nodeTypeToStr x.nodeType) x.number
+                            x.children
+                            |> Array.iter (printAst <| ind+1))
+            if l.Length > 1 then printInd ind "vvvv"
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
 
     [<Test>]
-    member test.``Simple grammar test``() =
-        let parser = RNGLR.Parse.buildAst
+    member test.``First grammar test``() =
+        let parser = RNGLR.ParseFirst.buildAst
         let path = dir + "first/input.txt"
-        //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
-        run path parser
-        //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+        match run path parser with
+        | Parser.Error (num, message) -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst -> mAst |> printAst 0
+
+    [<Test>]
+    member test.``List test``() =
+        let parser = RNGLR.ParseList.buildAst
+        let path = dir + "list/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message) -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst -> mAst |> printAst 0
+
+    [<Test>]
+    member test.``Simple Right Null test``() =
+        let parser = RNGLR.ParseSimpleRightNull.buildAst
+        let path = dir + "simpleRightNull/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message) -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst -> mAst |> printAst 0
+
+    [<Test>]
+    member test.``Complex Right Null test``() =
+        let parser = RNGLR.ParseComplexRightNull.buildAst
+        let path = dir + "complexRightNull/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message) -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst -> mAst |> printAst 0
+
+    [<Test>]
+    member test.``Expression test``() =
+        let parser = RNGLR.ParseExpr.buildAst
+        let path = dir + "expr/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message) -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst -> mAst |> printAst 0
+

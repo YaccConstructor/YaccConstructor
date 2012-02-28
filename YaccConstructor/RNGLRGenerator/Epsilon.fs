@@ -111,7 +111,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                         let asts =
                             rules.rightSide i
                             |> Array.map (fun num -> result.[num])
-                        result.[u] := {ruleNumber = i; children = asts}::!result.[u]
+                        result.[u] := (ASTTyper.createNonTerminalTree i asts)::!result.[u]
                 was.[u] <- 2
             dfs i
     result

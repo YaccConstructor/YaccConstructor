@@ -35,8 +35,8 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
         if grammar.canInferEpsilon.[grammar.startRule] then acc <- (*startState*)0::acc
         let endRule = KernelInterpreter.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
         for i = 0 to states.count-1 do
-            let virtex = states.virtex i
-            for e in virtex.outEdges do
+            let vertex = states.virtex i
+            for e in vertex.outEdges do
                 let symbol = e.label
                 gotos.[i, symbol] <- Some(e.dest.label)
             let kernels, lookaheads = states.kernels i, states.lookaheads i
@@ -44,10 +44,13 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
                 let k, la = kernels.[j], lookaheads.[j]
                 let prod, pos = KernelInterpreter.unzip k
                 if k = endRule then acc <- i::acc
-                if grammar.epsilonTailStart.[prod] <= pos then
+                elif grammar.epsilonTailStart.[prod] <= pos then
                     for symbol in la do 
                         reduces.[i, symbol] <- (prod,pos)::reduces.[i, symbol]
-
+            printfn "\n%d: " i
+            for j = 0 to symbolCount - 1 do
+                printf "%A " reduces.[i,j]
+            printfn ""
         reduces, gotos, acc
 
     member this.reduces = _reduces

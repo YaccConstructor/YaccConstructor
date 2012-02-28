@@ -24,6 +24,7 @@ open Yard.Generators.RNGLR.InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
 open Yard.Generators.RNGLR.States
+open Yard.Generators.RNGLR.Printer
 
 type RNGLR() = 
     inherit Generator()
@@ -34,6 +35,7 @@ type RNGLR() =
             let grammar = new FinalGrammar(newDefinition.grammar);
             let statesInterpreter = buildStates grammar
             let tables = new Tables(grammar, statesInterpreter)
+            printTables grammar tables definition.info.fileName
             printfn "%A" <| System.DateTime.Now - start
             (new YardPrinter()).Generate newDefinition
         override this.AcceptableProductionTypes =

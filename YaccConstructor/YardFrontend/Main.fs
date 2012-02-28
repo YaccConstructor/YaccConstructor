@@ -46,8 +46,8 @@ let (|IF|ELSE|ENDIF|) (str:string) =
 let private filterByDefs (buf:LexBuffer<_>) userDefined =     
     let tokens =
         seq {
-            while not buf.IsPastEndOfStream do
-               yield Lexer.main buf  
+                while not buf.IsPastEndOfStream do
+                   yield Lexer.main buf  
             }
 
     let currentDefined = ref []
@@ -73,7 +73,6 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                         match !currentDefined with
                         | hd :: tl -> currentDefined := tl
                         | _ -> failwith "Unexpected #ENDIF"
-
                 | t -> if filter t then yield t
             }
     let tokensEnumerator = filtered.GetEnumerator()
@@ -90,7 +89,7 @@ let ParseFile (args:string) =
         then args.[0],args.[1].Split(';')
         else args.[0],[||]
 
-    let buf = bufFromFile path    
+    let buf = bufFromFile path
     GrammarParser.currentFilename := path
     let posTo2D pos =
         let source = System.IO.File.ReadAllText path

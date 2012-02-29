@@ -90,7 +90,7 @@ let ParseFile (args:string) =
         else args.[0],[||]
 
     let buf = bufFromFile path
-    GrammarParser.currentFilename := path
+    GrammarParser.currentFilename := args
     let posTo2D pos =
         let source = System.IO.File.ReadAllText path
         source.ToCharArray(0, min (pos+1) (source.Length))

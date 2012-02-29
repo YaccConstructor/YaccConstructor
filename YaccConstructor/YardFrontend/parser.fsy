@@ -33,17 +33,23 @@ let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 let currentFilename = ref ""
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
-(*let parse_error (s:string):unit = ()*)
+
 let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 let parseRules (filename:string) =
     let ext = filename.Substring(filename.LastIndexOf(".") + 1) in
     let frontend = FrontendsManager.GetByExtension ext in
+    let userDefs =
+        let args = (!currentFilename).Trim().Split('%') in
+        if args.Length = 2
+        then args.[1]
+        else ""
+	in
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
     match FrontendsManager.GetByExtension ext with
     | Some(frontend) -> 
-        let def = frontend.Value.ParseGrammar sameDirFilename in
+        let def = frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs) in
         def.grammar
     | None -> 
         failwith (sprintf "Not supported extension %s in file %s" ext filename )

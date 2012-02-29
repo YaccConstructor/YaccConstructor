@@ -31,18 +31,32 @@ let printTables (grammar : FinalGrammar) (tables : Tables) (srcFileName : string
     let printInd num (x : 'a) =
         print "%s" (String.replicate (tab * num) " ")
         print x
+
     let statesLim = tables.gotos.GetLength 0 - 1
     let symbolsLim = tables.gotos.GetLength 1 - 1
-    let print2DArr (arr : 'a[,]) printer =
+    let statesCount = statesLim + 1
+    let symbolsCount = symbolsLim + 1
+    let print2DArr (arr : 'a[,]) checker printer
+            name initValue conv =
+        printInd 1 "let small_%s =\n" name
         printInd 2 "[|"
         for i = 0 to statesLim do
             if i <> 0 then printInd 2 " ;"
             print "[|"
+            let mutable first = true
             for j = 0 to symbolsLim do
-                if j <> 0 then print "; "
-                printer arr.[i,j]
+                if checker arr.[i,j] then
+                    if not first then print "; "
+                    else first <- false
+                    print "%d," j
+                    printer arr.[i,j]
             print "|]\n"
         printInd 2 "|]\n"
+        printInd 1 "let %s = Array.zeroCreate %d\n" name statesCount 
+        printInd 1 "for i = 0 to %d do\n" statesLim
+        printInd 2 "%s.[i] <- Array.create %d %s\n" name symbolsCount initValue
+        printInd 2 "for (x,y) in small_%s.[i] do\n" name
+        printInd 3 "%s.[i].[x] <- %s y\n" name conv
 
     let printArr (arr : 'a[]) printer =
         print "[|"
@@ -69,24 +83,25 @@ let printTables (grammar : FinalGrammar) (tables : Tables) (srcFileName : string
     print "\n"
     print "let buildAst<'a> =\n"
 
-    printInd 1 "let gotos =\n"
     print2DArr tables.gotos
-        (function
-         | None -> print "None"
-         | Some x -> print "Some %d" x)
+        (fun x -> x.IsSome)
+        (fun x -> print "%d" x.Value)
+        "gotos" "None" "Some "
     
     let reduces,zeroReduces =
         let res = tables.reduces |> Array2D.map (List.partition (fun (_,x) -> x > 0))
         res |> Array2D.map fst
         , res |> Array2D.map snd
 
-    printInd 1 "let reduces =\n"
     print2DArr reduces
+        (fun l -> not l.IsEmpty)
         (fun l -> printList l (fun (x,y) -> print "%d,%d" x y))
+        "reduces" "[]" ""
 
-    printInd 1 "let zeroReduces =\n"
     print2DArr zeroReduces
+        (fun l -> not l.IsEmpty)
         (fun l -> printList l (fun (x,y) -> print "%d,%d" x y))
+        "zeroReduces" "[]" ""
 
     let accStates = Array.zeroCreate <| tables.gotos.GetLength 0
     for i = 0 to statesLim do

@@ -72,10 +72,19 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             while reductions.Value.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Value.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
+                let compareChildren (ast1 : 'a[]) (ast2 : 'a[]) =
+                    let n = ast1.Length
+                    if ast2.Length <> n then false
+                    else
+                        let rec compare num =
+                            if num = n then true
+                            elif ast1.[num] <> ast2.[num] then false
+                            else compare (num+1)
+                        compare 0
                 let addChildren node (path : MultiAST[]) prod =
                     let astExists = 
                         !node |> List.exists
-                            (fun ast -> ast.nodeType = NonTerm && ast.number = prod && ast.children.Equals path)
+                            (fun ast -> ast.nodeType = NonTerm && ast.number = prod && compareChildren ast.children path)
                     if not astExists then
                         node := (ASTTyper.createNonTerminalTree prod path)::!node
                 let handlePath (path : MultiAST list) (final : Virtex<_,_>) =
@@ -110,11 +119,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         let shift num pushes (stateToVirtex : Dictionary<_,_>) =
             if num <> tokensCount then
-                printf "states: "
+(*                printf "states: "
                 for value in stateToVirtex do
                     printfn "%d " value.Key
                 printfn ""
-                let newPushes = new ResizeArray<_>()
+*)              let newPushes = new ResizeArray<_>()
                 let newAstNode = ASTTyper.createTerminalTree num
                 let newStateToVirtex = new Dictionary<_,_>()
                 for push in pushes do
@@ -144,9 +153,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         else
             let res = ref None
             for value in stateToVirtex do
-                printfn "%d, %d" parserSource.AccStates.Length value.Key
+                printf "(%d, %d) " parserSource.AccStates.Length value.Key
                 if parserSource.AccStates.[value.Key] then
                     res := Some <| Success (value.Value.outEdges.[0].label)
+            printfn ""
             match !res with
             | None -> Error (tokensCount, "There is no accepting state")
             | Some res -> res

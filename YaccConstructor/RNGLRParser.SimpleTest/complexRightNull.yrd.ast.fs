@@ -7,33 +7,48 @@ type Token<'a> =
         | EOF of 'a
 
 let buildAst<'a> =
-    let gotos =
-        [|[|None; Some 1; None; None; Some 2; Some 3; None|]
-         ;[|None; None; None; None; None; None; None|]
-         ;[|None; None; None; None; None; None; None|]
-         ;[|None; None; Some 4; None; None; None; None|]
-         ;[|None; Some 5; None; None; Some 2; Some 3; None|]
-         ;[|None; Some 6; None; None; Some 2; Some 3; None|]
-         ;[|None; None; None; None; None; None; None|]
+    let small_gotos =
+        [|[|1,1; 4,2; 5,3|]
+         ;[||]
+         ;[||]
+         ;[|2,4|]
+         ;[|1,5; 4,2; 5,3|]
+         ;[|1,6; 4,2; 5,3|]
+         ;[||]
         |]
-    let reduces =
-        [|[|[]; []; []; []; []; []; []|]
-         ;[|[]; []; []; []; []; []; []|]
-         ;[|[]; []; []; []; [1,1]; [1,1]; [1,1]|]
-         ;[|[]; []; []; []; [2,1]; [2,1]; [2,1]|]
-         ;[|[]; []; []; []; [2,2]; [2,2]; [2,2]|]
-         ;[|[]; []; []; []; [2,3]; [2,3]; [2,3]|]
-         ;[|[]; []; []; []; [2,4]; [2,4]; [2,4]|]
+    let gotos = Array.zeroCreate 7
+    for i = 0 to 6 do
+        gotos.[i] <- Array.create 7 None
+        for (x,y) in small_gotos.[i] do
+            gotos.[i].[x] <- Some  y
+    let small_reduces =
+        [|[||]
+         ;[||]
+         ;[|4,[1,1]; 5,[1,1]; 6,[1,1]|]
+         ;[|4,[2,1]; 5,[2,1]; 6,[2,1]|]
+         ;[|4,[2,2]; 5,[2,2]; 6,[2,2]|]
+         ;[|4,[2,3]; 5,[2,3]; 6,[2,3]|]
+         ;[|4,[2,4]; 5,[2,4]; 6,[2,4]|]
         |]
-    let zeroReduces =
-        [|[|[]; []; []; []; []; []; [3,0; 0,0]|]
-         ;[|[]; []; []; []; []; []; []|]
-         ;[|[]; []; []; []; []; []; []|]
-         ;[|[]; []; []; []; [4,0]; [4,0]; [4,0]|]
-         ;[|[]; []; []; []; [0,0]; [0,0]; [0,0]|]
-         ;[|[]; []; []; []; [0,0]; [0,0]; [0,0]|]
-         ;[|[]; []; []; []; []; []; []|]
+    let reduces = Array.zeroCreate 7
+    for i = 0 to 6 do
+        reduces.[i] <- Array.create 7 []
+        for (x,y) in small_reduces.[i] do
+            reduces.[i].[x] <-  y
+    let small_zeroReduces =
+        [|[|6,[3,0; 0,0]|]
+         ;[||]
+         ;[||]
+         ;[|4,[4,0]; 5,[4,0]; 6,[4,0]|]
+         ;[|4,[0,0]; 5,[0,0]; 6,[0,0]|]
+         ;[|4,[0,0]; 5,[0,0]; 6,[0,0]|]
+         ;[||]
         |]
+    let zeroReduces = Array.zeroCreate 7
+    for i = 0 to 6 do
+        zeroReduces.[i] <- Array.create 7 []
+        for (x,y) in small_zeroReduces.[i] do
+            zeroReduces.[i].[x] <-  y
     let accStates = [|true; true; false; false; false; false; false|]
     let rules =
         [|[||]

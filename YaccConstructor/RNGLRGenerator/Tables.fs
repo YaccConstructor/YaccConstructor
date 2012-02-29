@@ -47,11 +47,11 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
                 elif grammar.epsilonTailStart.[prod] <= pos then
                     for symbol in la do 
                         reduces.[i, symbol] <- (prod,pos)::reduces.[i, symbol]
-            printfn "\n%d: " i
+(*            printfn "\n%d: " i
             for j = 0 to symbolCount - 1 do
                 printf "%A " reduces.[i,j]
             printfn ""
-        reduces, gotos, acc
+*)      reduces, gotos, acc
 
     member this.reduces = _reduces
     member this.gotos = _gotos

@@ -42,10 +42,10 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\list.yrd "</StartArguments>
+    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\first\first.yrd"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>

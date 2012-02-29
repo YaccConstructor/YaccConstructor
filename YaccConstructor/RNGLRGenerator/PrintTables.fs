@@ -5,7 +5,7 @@
 //
 //  This file is part of YaccConctructor.
 //
-//  YaccConstructor is free software:you can redistribute it and/or modify
+//  YaccConstructor is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
@@ -50,11 +50,13 @@ let printTables (grammar : FinalGrammar) (tables : Tables) (srcFileName : string
             if i <> 0 then print "; "
             printer arr.[i]
         print "|]\n"
+
     let printList l printer = 
         print "["
         l |> List.iteri (fun i x -> if i <> 0 then print "; "
-                                                   printer x)
+                                    printer x)
         print "]"
+
     print "module RNGLR.Parse\n"
     print "open Yard.Generators.RNGLR.Parser\n"
     print "open Yard.Generators.RNGLR\n"
@@ -77,6 +79,7 @@ let printTables (grammar : FinalGrammar) (tables : Tables) (srcFileName : string
         let res = tables.reduces |> Array2D.map (List.partition (fun (_,x) -> x > 0))
         res |> Array2D.map fst
         , res |> Array2D.map snd
+
     printInd 1 "let reduces =\n"
     print2DArr reduces
         (fun l -> printList l (fun (x,y) -> print "%d,%d" x y))

@@ -81,7 +81,26 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
         let res = tokensEnumerator.Current
         res
     getNextToken
-
+let ParseText (s:string) =
+    let buf = bufFromString s    
+    let userDefs = [||]//
+    GrammarParser.currentFilename := ""//
+    let posTo2D pos =
+        let source = s
+        source.ToCharArray(0, min (pos+1) (source.Length))
+        |> Array.fold
+            (fun (col,row) -> function
+                | '\n' -> (col+1, 0)
+                | '\r' -> (col, row)
+                | _ -> (col, row+1)
+            )
+            (1,0)
+    try
+        GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
+    with
+    | Lexer.Lexical_error (msg, pos) ->
+        let pos2D = posTo2D pos
+        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
 let ParseFile (args:string) =
     let path,userDefs =
         let args = args.Trim().Split('%')

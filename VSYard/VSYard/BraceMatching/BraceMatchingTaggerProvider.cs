@@ -1,4 +1,4 @@
-﻿namespace MyCompany.VSYard.BraceMatching
+﻿namespace VSYard.BraceMatching
 {
     using System;
     using System.Collections.Generic;

@@ -6,7 +6,6 @@ stmt: s=use_stmt {s :> IStatement}
     | s=set_stmt {s :> IStatement}
 	| table_stmt {new MsUseStmt(new MsIdent("hello", emptyRange), emptyRange) :> IStatement} 
     ;
-
 set_stmt: 
     set_kw="set" 
     a =( ident =IDENT table=table_name?  action=("on" | "off")  

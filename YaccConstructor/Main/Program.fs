@@ -80,7 +80,12 @@ let () =
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
-         "-def", ArgType.String (fun s -> userDefsStr := s), "User defined constants for YardFrontend lexer."
+         "-D", ArgType.String (fun s -> 
+                                    userDefsStr := 
+                                        if System.String.IsNullOrEmpty !userDefsStr 
+                                        then s 
+                                        else !userDefsStr + ";" + s
+                                ), "User defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -108,8 +113,9 @@ let () =
             let ilTree =                
                 try
                     if System.String.IsNullOrEmpty !userDefsStr
-                    then fe.ParseGrammar grammarFilePath
-                    else grammarFilePath + "%" + !userDefsStr |> fe.ParseGrammar
+                    then grammarFilePath + "%" + !userDefsStr
+                    else grammarFilePath
+                    |> fe.ParseGrammar
                     |> ref
                 with
                 | e -> FEError e.Message |> raise

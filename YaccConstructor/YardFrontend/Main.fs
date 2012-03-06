@@ -114,9 +114,12 @@ let ParseText (s:string) =
 let ParseFile (args:string) =
     let path,userDefs =
         let args = args.Trim().Split('%')
-        if args.Length = 2
-        then args.[0],args.[1].Split(';')
-        else args.[0],[||]
+        let defs = 
+            if args.Length = 2
+            then args.[1].Split(';')
+            else [||]
+        args.[0], defs
+        
 
     let buf = bufFromFile path
     GrammarParser.currentFilename := args

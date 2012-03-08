@@ -111,6 +111,7 @@ let ParseText (s:string) =
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
+
 let ParseFile (args:string) =
     let path,userDefs =
         let args = args.Trim().Split('%')
@@ -120,7 +121,6 @@ let ParseFile (args:string) =
             else [||]
         args.[0], defs
         
-
     let buf = bufFromFile path
     GrammarParser.currentFilename := args
     let posTo2D pos =

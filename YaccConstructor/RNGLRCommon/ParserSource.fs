@@ -22,18 +22,28 @@ namespace Yard.Generators.RNGLR
 
 type ParserSource<'TokenType> (gotos : int option[][]
                                , reduces : list<int * int>[][]
-                               , zeroReduces : list<int * int>[][]
+                               , zeroReduces : list<int>[][]
                                , accStates : bool[]
-                               , rules : int[][]
+                               , rules : int[]
+                               , rulesStart : int[]
                                , leftSide : int[]
                                , startRule : int
                                , eofIndex : int
                                , tokenToNumber : 'TokenType -> int) =
+    let length =
+        let res = Array.zeroCreate <| rulesStart.Length
+        for i=0 to res.Length-2 do
+            res.[i] <- rulesStart.[i+1] - rulesStart.[i]
+        if res.Length > 0 then
+            res.[res.Length-1] <- rules.Length - rulesStart.[res.Length-1]
+        res
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
     member this.AccStates = accStates
     member this.Rules = rules
+    member this.RulesStart = rulesStart
+    member this.Length = length
     member this.LeftSide = leftSide
     member this.StartRule = startRule
     member this.EofIndex = eofIndex

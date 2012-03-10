@@ -20,6 +20,7 @@
 namespace Yard.Generators.RNGLR
 
 open Yard.Core
+open Yard.Core.IL
 open Yard.Generators.RNGLR.InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
@@ -29,15 +30,20 @@ open Yard.Generators.RNGLR.Printer
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Generate definition =
+        override this.Generate (definition, tokenType) =
             let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
             let statesInterpreter = buildStates grammar
             let tables = new Tables(grammar, statesInterpreter)
-            printTables grammar tables definition.info.fileName
+            let tokenTypeOpt =
+                match tokenType with
+                | "" -> None
+                | s -> Some s
+            printTables grammar tables definition.head definition.info.fileName tokenTypeOpt
             printfn "%A" <| System.DateTime.Now - start
             (new YardPrinter()).Generate newDefinition
+        override this.Generate definition = this.Generate (definition, "")
         override this.AcceptableProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
             |> List.map (fun unionCase -> unionCase.Name)

@@ -1,62 +1,57 @@
 module RNGLR.ParseComplexRightNull
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
-type Token<'a> =
-        | A of 'a
-        | B of 'a
-        | EOF of 'a
+type Token =
+        | A of int
+        | B of int
+        | EOF of int
 
 let buildAst<'a> =
+    let inline unpack x = x >>> 16, x <<< 16 >>> 16
     let small_gotos =
-        [|[|1,1; 4,2; 5,3|]
-         ;[||]
-         ;[||]
-         ;[|2,4|]
-         ;[|1,5; 4,2; 5,3|]
-         ;[|1,6; 4,2; 5,3|]
-         ;[||]
-        |]
+        [|0, [|1,1; 4,2; 5,3|]; 3, [|2,4|]; 4, [|1,5; 4,2; 5,3|]; 5, [|1,6; 4,2; 5,3|]|]
     let gotos = Array.zeroCreate 7
     for i = 0 to 6 do
         gotos.[i] <- Array.create 7 None
-        for (x,y) in small_gotos.[i] do
-            gotos.[i].[x] <- Some  y
+    for (i,t) in small_gotos do
+        for (j,x) in t do
+            gotos.[i].[j] <- Some  x
+    let lists_reduces = [|[]; [1,1]; [2,1]; [2,2]; [2,3]; [2,4]|]
     let small_reduces =
-        [|[||]
-         ;[||]
-         ;[|4,[1,1]; 5,[1,1]; 6,[1,1]|]
-         ;[|4,[2,1]; 5,[2,1]; 6,[2,1]|]
-         ;[|4,[2,2]; 5,[2,2]; 6,[2,2]|]
-         ;[|4,[2,3]; 5,[2,3]; 6,[2,3]|]
-         ;[|4,[2,4]; 5,[2,4]; 6,[2,4]|]
-        |]
+        [|131075; 262145; 327681; 393217; 196611; 262146; 327682; 393218; 262147; 262147; 327683; 393219; 327683; 262148; 327684; 393220; 393219; 262149; 327685; 393221|]
     let reduces = Array.zeroCreate 7
     for i = 0 to 6 do
         reduces.[i] <- Array.create 7 []
-        for (x,y) in small_reduces.[i] do
-            reduces.[i].[x] <-  y
+    let init_reduces =
+        let mutable cur = 0
+        while cur < small_reduces.Length do
+            let i,length = unpack small_reduces.[cur]
+            cur <- cur + 1
+            for k = 0 to length-1 do
+                let j,x = unpack small_reduces.[cur + k]
+                reduces.[i].[j] <-  lists_reduces.[x]
+            cur <- cur + length
+    let lists_zeroReduces = [|[]; [3; 0]; [4]; [0]|]
     let small_zeroReduces =
-        [|[|6,[3,0; 0,0]|]
-         ;[||]
-         ;[||]
-         ;[|4,[4,0]; 5,[4,0]; 6,[4,0]|]
-         ;[|4,[0,0]; 5,[0,0]; 6,[0,0]|]
-         ;[|4,[0,0]; 5,[0,0]; 6,[0,0]|]
-         ;[||]
-        |]
+        [|1; 393217; 196611; 262146; 327682; 393218; 262147; 262147; 327683; 393219; 327683; 262147; 327683; 393219|]
     let zeroReduces = Array.zeroCreate 7
     for i = 0 to 6 do
         zeroReduces.[i] <- Array.create 7 []
-        for (x,y) in small_zeroReduces.[i] do
-            zeroReduces.[i].[x] <-  y
-    let accStates = [|true; true; false; false; false; false; false|]
-    let rules =
-        [|[||]
-        ; [|4|]
-        ; [|5; 2; 1; 1|]
-        ; [|1|]
-        ; [||]
-        |]
+    let init_zeroReduces =
+        let mutable cur = 0
+        while cur < small_zeroReduces.Length do
+            let i,length = unpack small_zeroReduces.[cur]
+            cur <- cur + 1
+            for k = 0 to length-1 do
+                let j,x = unpack small_zeroReduces.[cur + k]
+                zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
+            cur <- cur + length
+    let small_acc = [1; 0]
+    let accStates = Array.zeroCreate 7
+    for i = 0 to 6 do
+        accStates.[i] <- List.exists ((=) i) small_acc
+    let rules = [|4; 5; 2; 1; 1; 1|]
+    let rulesStart = [|0; 0; 1; 5; 6|]
     let leftSide =
         [|1; 1; 1; 3; 2|]
     let startRule = 3
@@ -65,5 +60,5 @@ let buildAst<'a> =
         | A _ -> 4
         | B _ -> 5
         | EOF _ -> 6
-    let parserSource = new ParserSource<_> (gotos, reduces, zeroReduces, accStates, rules, leftSide, startRule, eofIndex, tokenToNumber)
+    let parserSource = new ParserSource<_> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
     buildAst<_> parserSource

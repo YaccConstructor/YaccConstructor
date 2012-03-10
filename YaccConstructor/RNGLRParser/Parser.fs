@@ -30,13 +30,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let tokenNums =
         tokens
         |> Seq.map parserSource.TokenToNumber
+        |> Seq.takeWhile (fun t -> t <> parserSource.EofIndex)
         |> (fun s -> seq {yield! s; yield parserSource.EofIndex})
         |> Seq.toArray
     let tokensCount = tokenNums.Length - 1
     let startState = 0
     if tokensCount = 0 then
         if parserSource.AccStates.[startState] then
-            Success <| ASTTyper.createEpsilonTree parserSource.StartRule
+            Success <| ASTTyper.createEpsilonTree parserSource.LeftSide.[parserSource.StartRule]
         else
             Error (0, "This grammar cannot accept empty string")
     else
@@ -52,9 +53,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 dict.[state] <- v
                 if num < tokensCount && parserSource.Gotos.[state].[tokenNums.[num]].IsSome then
                     pushes.Add (v, parserSource.Gotos.[state].[tokenNums.[num]].Value) |> ignore
-                for action in parserSource.ZeroReduces.[state].[tokenNums.[num]] do
-                    let prod, pos = fst action, snd action
-                    (!reductions).Enqueue (v, prod, pos, None)
+                for prod in parserSource.ZeroReduces.[state].[tokenNums.[num]] do
+                    (!reductions).Enqueue (v, prod, 0, None)
                     |> ignore
                 v
             |> (fun v ->
@@ -110,8 +110,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 ()
                 let epsilonPart =
                     let mutable res = []
-                    for i = parserSource.Rules.[prod].Length-1 downto pos do
-                        res <- (ASTTyper.createEpsilonTree parserSource.Rules.[prod].[i]) ::res
+                    for i = parserSource.Length.[prod] - 1 downto pos do
+                        res <- (ASTTyper.createEpsilonTree parserSource.Rules.[parserSource.RulesStart.[prod] + i]) ::res
                     res
 
                 if pos = 0 then handlePath epsilonPart virtex

@@ -16,7 +16,7 @@ let tokens<'lexType>(path) =
         fun (name:string) ->
             printf "%s " name
             let caseCtor = targetUCIs.[name]
-            (caseCtor [|null|]) :?> 'lexType
+            (caseCtor [|2|]) :?> 'lexType
 
     System.IO.File.ReadAllText(path)
         .Split([|' '|])

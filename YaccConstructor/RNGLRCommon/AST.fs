@@ -38,5 +38,6 @@ type ASTTyper =
     static member isEpsilon (a : AST) = a.nodeType = EpsTree
 
     static member createEpsilonTree nTerm = ref [{number = nTerm; nodeType = EpsTree; children = ASTTyper.emptyChildren}]
+    static member createSingleEpsilonTree nTerm = {number = nTerm; nodeType = EpsTree; children = ASTTyper.emptyChildren}
     static member createTerminalTree term = ref [{number = term; nodeType = Term; children = ASTTyper.emptyChildren}]
     static member createNonTerminalTree nTerm children = {number = nTerm; nodeType = NonTerm; children = children}

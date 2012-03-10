@@ -41,21 +41,25 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         else
             Error (0, "This grammar cannot accept empty string")
     else
-        let mutable stateToVirtex = new Dictionary<_,_>()
-        let reductions = new Queue<_>() |> ref
-        let mutable pushes : ResizeArray<_> = new ResizeArray<_>()
+        let stateToVirtex = ref <| new Dictionary<_,_>()
+        let reductions = ref <| new Queue<_>()
+        let pushes = ref <| new ResizeArray<_>()
         let astNodes = new Dictionary<_,_>()
 
-        let inline addVirtex (pushes : ResizeArray<_>) (dict : Dictionary<_,_>) state num edgeOpt addNonZero =
+        let vertices = ref []
+        let addVirtex state num edgeOpt addNonZero =
+            let dict = stateToVirtex.Value
             if dict.ContainsKey state then dict.[state]
             else
+                //printfn "v(%d,%d)" state num
                 let v = new Virtex<_,_>(state, num)
                 dict.[state] <- v
                 if num < tokensCount && parserSource.Gotos.[state].[tokenNums.[num]].IsSome then
-                    pushes.Add (v, parserSource.Gotos.[state].[tokenNums.[num]].Value) |> ignore
+                    pushes.Value.Add (v, parserSource.Gotos.[state].[tokenNums.[num]].Value) |> ignore
                 for prod in parserSource.ZeroReduces.[state].[tokenNums.[num]] do
                     (!reductions).Enqueue (v, prod, 0, None)
                     |> ignore
+                vertices := v::!vertices
                 v
             |> (fun v ->
                     if addNonZero then 
@@ -66,22 +70,36 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     v)
 
         // init, by adding the first virtex in the first set
-        ignore <| addVirtex pushes stateToVirtex startState 0 None true
+        ignore <| addVirtex startState 0 None true
 
-        let makeReductions (stateToVirtex : Dictionary<_,_>) pushes num =
+
+
+        let makeReductions num =
             while reductions.Value.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Value.Dequeue()
+                //if prod = 686 then System.Diagnostics.Debugger.Break()
                 let nonTerm = parserSource.LeftSide.[prod]
-                let compareChildren (ast1 : 'a[]) (ast2 : 'a[]) =
+                let compareChildren (ast1 : MultiAST[]) (ast2 : MultiAST[]) =
                     let n = ast1.Length
                     if ast2.Length <> n then false
                     else
+                        let equalEpsilon = List.forall2 (fun (x:AST) (y:AST) -> x.nodeType = EpsTree && y.nodeType = EpsTree && x.number = y.number)
+                        Array.forall2 (fun x y -> not <| obj.ReferenceEquals(x,y) && (not <| equalEpsilon !x !y)) ast1 ast2
+                        (*
                         let rec compare num =
                             if num = n then true
                             elif ast1.[num] <> ast2.[num] then false
                             else compare (num+1)
                         compare 0
-                let addChildren node (path : MultiAST[]) prod =
+                        *)
+                let inline addEpsilon node nonTerm =
+                    let astExists = 
+                        !node |> List.exists
+                            (fun ast -> ast.nodeType = EpsTree && ast.number = nonTerm)
+                    if not astExists then
+                        node := (ASTTyper.createSingleEpsilonTree nonTerm)::!node
+
+                let inline addChildren node (path : MultiAST[]) prod =
                     let astExists = 
                         !node |> List.exists
                             (fun ast -> ast.nodeType = NonTerm && ast.number = prod && compareChildren ast.children path)
@@ -96,11 +114,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         else astNodes.[(nonTerm, snd final.label)]
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
                     let edge = new Edge<_,_>(final, ast)
-                    let newVirtex = addVirtex pushes stateToVirtex state num (Some edge) (pos > 0)
+                    printfn "r %A" (virtex.label, final.label, prod, pos, (state,num))
+                    let newVirtex = addVirtex state num (Some edge) (pos > 0)
                     if not (newVirtex.outEdges |> Seq.exists (fun e -> e.dest.label = final.label)) then
                         newVirtex.addEdge edge
-                    (*if pos > 0 then *)
-                    addChildren ast (path |> Array.ofList) prod
+                    let isAllEpsilon l = List.forall (fun (x : MultiAST) -> x.Value |> List.forall (fun y -> y.nodeType = EpsTree)) l
+                    if path = [] || isAllEpsilon path then addEpsilon ast parserSource.LeftSide.[prod]
+                    else addChildren ast (path |> Array.ofList) prod
 
                 let rec walk length (virtex : Virtex<_,_>) path =
                     if length = 0 then handlePath path virtex
@@ -108,52 +128,58 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         for e in virtex.outEdges do
                             walk (length - 1) e.dest (e.label::path)
                 ()
-                let epsilonPart =
-                    let mutable res = []
-                    for i = parserSource.Length.[prod] - 1 downto pos do
-                        res <- (ASTTyper.createEpsilonTree parserSource.Rules.[parserSource.RulesStart.[prod] + i]) ::res
-                    res
+                if pos = 0 then
+                    handlePath [] virtex
+                else 
+                    let epsilonPart =
+                        let mutable res = []
+                        for i = parserSource.Length.[prod] - 1 downto pos do
+                            res <- (ASTTyper.createEpsilonTree parserSource.Rules.[parserSource.RulesStart.[prod] + i]) ::res
+                        res
+                    walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest (edgeOpt.Value.label::epsilonPart)
 
-                if pos = 0 then handlePath epsilonPart virtex
-                else walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest (edgeOpt.Value.label::epsilonPart)
-
-        let shift num pushes (stateToVirtex : Dictionary<_,_>) =
+        let shift num =
             if num <> tokensCount then
 (*                printf "states: "
                 for value in stateToVirtex do
                     printfn "%d " value.Key
                 printfn ""
-*)              let newPushes = new ResizeArray<_>()
+*)              let oldPushes = pushes.Value
                 let newAstNode = ASTTyper.createTerminalTree num
-                let newStateToVirtex = new Dictionary<_,_>()
-                for push in pushes do
+                pushes := new ResizeArray<_>()
+                stateToVirtex := new Dictionary<_,_>()
+                for push in oldPushes do
                     let virtex, state = fst push, snd push
                     let edge = new Edge<_,_>(virtex, newAstNode)
-                    let newVirtex = addVirtex newPushes newStateToVirtex state (num + 1) (Some edge) true
+                    //printfn "p %A" (virtex.label, state)
+                    let newVirtex = addVirtex state (num + 1) (Some edge) true
                     newVirtex.addEdge edge
-                newPushes, newStateToVirtex
-            else
-                null, stateToVirtex
         let mutable errorIndex = -1
         for i = 0 to tokensCount do
             if errorIndex = -1 then
-                if stateToVirtex.Count = 0 then
+                if stateToVirtex.Value.Count = 0 then
                     errorIndex <- i
                 else
+                    //printfn "\n!!!! %d " i
                     printf "%d " i
                     astNodes.Clear()
                     let symbol = tokenNums.[i]
-                    makeReductions stateToVirtex pushes i
-                    let res = shift i pushes stateToVirtex
-                    pushes <- fst res
-                    stateToVirtex <- snd res
+                    makeReductions i
+                    shift i
                     ()
+(*
         printfn ""
+        for v in !vertices do
+            printfn "\nv %A:" v.label
+            for e in v.outEdges do
+                printfn "%A %d" e.dest.label e.label.Value.Length
+*)
         if errorIndex <> -1 then Error (errorIndex - 1, "Parse error")
         else
             let res = ref None
-            for value in stateToVirtex do
-                printf "(%d, %d) " parserSource.AccStates.Length value.Key
+            printfn "accs: %A" parserSource.AccStates
+            for value in stateToVirtex.Value do
+                printf "%d " value.Key
                 if parserSource.AccStates.[value.Key] then
                     res := Some <| Success (value.Value.outEdges.[0].label)
             printfn ""

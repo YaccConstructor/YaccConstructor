@@ -113,8 +113,8 @@ let () =
             let ilTree =                
                 try
                     if System.String.IsNullOrEmpty !userDefsStr
-                    then grammarFilePath + "%" + !userDefsStr
-                    else grammarFilePath
+                    then grammarFilePath
+                    else grammarFilePath + "%" + !userDefsStr
                     |> fe.ParseGrammar
                     |> ref
                 with

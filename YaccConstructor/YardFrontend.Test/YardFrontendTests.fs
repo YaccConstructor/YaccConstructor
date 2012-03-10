@@ -293,10 +293,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (15, 16))
                                            binding = None
-                                           checker = None}; {omit = false
-                                                             rule = PToken ("B", (31, 32))
-                                                             binding = None
-                                                             checker = None}],None)
+                                           checker = None}],None)
                             _public = true
                             metaArgs = []}]
                 foot = None}

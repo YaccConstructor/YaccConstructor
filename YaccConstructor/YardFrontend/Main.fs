@@ -57,32 +57,37 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
         let flg = 
             if List.isEmpty !currentDefined 
             then true
-            else (!currentDefined).All(fun (x,y) -> x)
+            else (!currentDefined).All(fun x -> x)
         flg
 
+    let elifCount = ref 0
     let filtered =
         seq{
             for token in tokens do
                 match token with
                 | GrammarParser.SHARPLINE str ->
                     match str with
-                    | IF d -> 
+                    | IF d ->
                         let x = Array.contains d userDefined
-                        currentDefined := (x, x)::!currentDefined
+                        currentDefined := x::!currentDefined
                     | ELIF d ->
                         match !currentDefined with
-                        | (_, prev) :: tl -> 
+                        | hd :: tl -> 
                             let x = Array.contains d userDefined
-                            currentDefined :=  (x, prev || x) :: tl
+                            incr elifCount
+                            currentDefined :=  x :: not hd :: tl
                         | _ -> failwith "Unexpected #ELIF"
                     | ELSE ->
                         match !currentDefined with
-                        | (hd1, hd2) :: tl -> currentDefined :=  (not hd2, hd2) :: tl
+                        | hd :: tl -> currentDefined := not hd :: tl
                         | _ -> failwith "Unexpected #ELSE"
                     | ENDIF ->
-                        match !currentDefined with
-                        | hd :: tl -> currentDefined := tl
-                        | _ -> failwith "Unexpected #ENDIF"
+                        incr elifCount
+                        while !elifCount > 0  do
+                            match !currentDefined with
+                            | hd :: tl -> currentDefined := tl; decr elifCount
+                            | _ -> failwith "Unexpected #ENDIF"
+
                 | t -> if filter t then yield t
             }
     let tokensEnumerator = filtered.GetEnumerator()

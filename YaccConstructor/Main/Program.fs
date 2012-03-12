@@ -43,6 +43,7 @@ let () =
     let ConvertionsManager = ConvertionsManager.ConvertionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
+    let userDefs = ref []
     let userDefsStr = ref ""
 
     feName := // Fill by default value
@@ -80,12 +81,9 @@ let () =
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
-         "-D", ArgType.String (fun s -> 
-                                    userDefsStr := 
-                                        if System.String.IsNullOrEmpty !userDefsStr 
-                                        then s 
-                                        else !userDefsStr + ";" + s
-                                ), "User defined constants for YardFrontend lexer."
+         "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
+         "-U", ArgType.String (fun s -> userDefs := List.filter (fun x -> x <> s) !userDefs), 
+                "Remove previously defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
@@ -112,9 +110,11 @@ let () =
             // Parse grammar    
             let ilTree =                
                 try
-                    if System.String.IsNullOrEmpty !userDefsStr
+                    let defStr = 
+                        List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
+                    if System.String.IsNullOrEmpty defStr
                     then grammarFilePath
-                    else grammarFilePath + "%" + !userDefsStr
+                    else grammarFilePath + "%" + defStr
                     |> fe.ParseGrammar
                     |> ref
                 with

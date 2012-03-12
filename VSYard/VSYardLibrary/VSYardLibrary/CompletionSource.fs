@@ -39,21 +39,17 @@ type YardCompletionSource (buffer : ITextBuffer) =
             | _ -> ()}
         let returnCollection () =            
             let snapshot = buffer.CurrentSnapshot
-            let triggerPoint = session.GetTriggerPoint(snapshot).GetValueOrDefault() //ok?
-            let fffiii = (5 = 3)
-            //check that triggerPoint != null
+            let triggerPoint = session.GetTriggerPoint(snapshot).GetValueOrDefault()
             //вычисляем место, где должен всплыть список
-            if triggerPoint = null 
-            then
-                let line = triggerPoint.GetContainingLine()
-                let start = ref triggerPoint
-                while (!start).Position > line.Start.Position
-                        && not ( Char.IsWhiteSpace((!start - 1).GetChar()) ) do
-                        start := !start - 1
-                let x = new SnapshotSpan(!start, triggerPoint)
-                let applicableTo = snapshot.CreateTrackingSpan(x.Span, SpanTrackingMode.EdgeInclusive)
-                let completionsList = theList.ToList()
-                completionSets.Add(new CompletionSet("All", "All", applicableTo, completionsList, Enumerable.Empty<Completion>()))
+            let line = triggerPoint.GetContainingLine()
+            let start = ref triggerPoint
+            while (!start).Position > line.Start.Position
+                    && not ( Char.IsWhiteSpace((!start - 1).GetChar()) ) do
+                    start := !start - 1
+            let x = new SnapshotSpan(!start, triggerPoint)
+            let applicableTo = snapshot.CreateTrackingSpan(x.Span, SpanTrackingMode.EdgeInclusive)
+            let completionsList = theList.ToList()
+            completionSets.Add(new CompletionSet("All", "All", applicableTo, completionsList, Enumerable.Empty<Completion>()))
         Async.Start recomputeAllCompletions
         returnCollection ()
         

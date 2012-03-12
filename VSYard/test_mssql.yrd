@@ -11,7 +11,7 @@ root_rule:
 start2: 
     sel_expr = ((KW_SELECT ident {})  (KW_FROM ident {}) ) { }
   | GLOBALVAR
-  | GLOBALTEMPOBJ
+  | GLOBALTEMPOBJ 
   | TEMPOBJ
 ;
 

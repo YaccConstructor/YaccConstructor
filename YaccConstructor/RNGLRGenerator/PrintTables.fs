@@ -230,6 +230,6 @@ let printTables (grammar : FinalGrammar) (tables : Tables) head (srcFileName : s
         printInd 2 "| %s _ -> %d\n" (indexator.indexToTerm i) i
 
     printInd 1 "let parserSource = new ParserSource<_> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)\n"
-    printInd 1 "buildAst<_> parserSource"
+    printInd 1 "buildAst<_> parserSource\n\n"
     
     out.Close()

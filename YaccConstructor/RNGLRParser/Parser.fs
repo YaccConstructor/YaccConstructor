@@ -77,7 +77,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let makeReductions num =
             while reductions.Value.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Value.Dequeue()
-                //if prod = 686 then System.Diagnostics.Debugger.Break()
                 let nonTerm = parserSource.LeftSide.[prod]
                 let compareChildren (ast1 : MultiAST[]) (ast2 : MultiAST[]) =
                     let n = ast1.Length
@@ -114,7 +113,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         else astNodes.[(nonTerm, snd final.label)]
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
                     let edge = new Edge<_,_>(final, ast)
-                    printfn "r %A" (virtex.label, final.label, prod, pos, (state,num))
+                    //printfn "r %A->%A->%A (prod: %d,%d) " virtex.label final.label (state,num) prod pos
                     let newVirtex = addVirtex state num (Some edge) (pos > 0)
                     if not (newVirtex.outEdges |> Seq.exists (fun e -> e.dest.label = final.label)) then
                         newVirtex.addEdge edge
@@ -161,7 +160,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     errorIndex <- i
                 else
                     //printfn "\n!!!! %d " i
-                    printf "%d " i
+                    //printf "%d " i
                     astNodes.Clear()
                     let symbol = tokenNums.[i]
                     makeReductions i
@@ -177,7 +176,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         if errorIndex <> -1 then Error (errorIndex - 1, "Parse error")
         else
             let res = ref None
-            printfn "accs: %A" parserSource.AccStates
+            printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
+                                    if parserSource.AccStates.[i] then yield i]
             for value in stateToVirtex.Value do
                 printf "%d " value.Key
                 if parserSource.AccStates.[value.Key] then

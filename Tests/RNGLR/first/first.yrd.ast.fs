@@ -62,3 +62,4 @@ let buildAst<'a> =
         | EOF _ -> 5
     let parserSource = new ParserSource<_> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
     buildAst<_> parserSource
+

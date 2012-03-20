@@ -50,6 +50,7 @@ namespace VSYard.AutoCompletion
     internal sealed class CommandFilter : IOleCommandTarget
     {
         ICompletionSession _currentSession;
+        bool isSessionRunning = false;
 
         public CommandFilter(IWpfTextView textView, ICompletionBroker broker)
         {
@@ -91,6 +92,7 @@ namespace VSYard.AutoCompletion
                     case VSConstants.VSStd2KCmdID.CANCEL:
                         handled = Cancel();
                         break;
+                   // default: Cancel(); break;
                 }
             }
 
@@ -106,9 +108,18 @@ namespace VSYard.AutoCompletion
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                             char ch = GetTypeChar(pvaIn);
                             if (ch == ' ')
-                                StartSession();
-                            else if (_currentSession != null)
-                                Filter();
+                                if (isSessionRunning)
+                                {
+                                    Cancel();
+                                    isSessionRunning = false;
+                                }
+                                else
+                                {
+                                    StartSession();
+                                    isSessionRunning = true;
+                                }
+                                else if (_currentSession != null)
+                                    Filter();
                             break;
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
                             Filter();

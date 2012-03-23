@@ -27,7 +27,8 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                                       checker = None;}],None);
     _public = true;
     metaArgs = [];}];
- foot = None;}
+ foot = None;
+ options = Map.empty}
 
 
 
@@ -54,7 +55,8 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                     checker = None;}],None));
         _public = true;
         metaArgs = [];}];
-     foot = None;}
+     foot = None;
+     options = Map.empty}
 
 let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
     {info = {fileName = "";};
@@ -67,7 +69,8 @@ let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                                 checker = None;}],None);
                  _public = true;
                  metaArgs = [];}];
-     foot = None;}
+     foot = None;
+     options = Map.empty}
 
 [<TestFixture>]
 type ``Irony frontend tests`` () =

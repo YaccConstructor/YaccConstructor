@@ -122,6 +122,7 @@ and  main = parse
      | '-'  {MINUS}
      | ':'  { COLON }
      | ';'  { SEMICOLON }
+     | ','  { COMMA }     
      | '|'  { BAR }
      | '='  {EQUAL}
      | "<<" {DLESS}
@@ -129,6 +130,8 @@ and  main = parse
      | '*'  {STAR}
      | '+'  {PLUS}
      | '?'  {QUESTION}
+     | "#set" 
+        { SET }
      | "(*"
        { comment_depth := 1;
          handle_lexical_error comment lexbuf;
@@ -150,6 +153,11 @@ and  main = parse
                 |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF}
+     | '"'
+        { let n1 = lexbuf.EndPos.AbsoluteOffset in
+         let n2 = handle_lexical_error string lexbuf in
+         VALUE (fst (from_lexbuf lexbuf (n1,n2)))
+       }
      | '{'
        { let n1 = lexbuf.EndPos.AbsoluteOffset in
          brace_depth := 1;
@@ -260,7 +268,7 @@ and param = parse
      
 and string = parse
     '"'
-    { () }
+    { lexbuf.StartPos.AbsoluteOffset }
   | '\\' backslash_escapes
     { store_string_char(char_for_backslash(lexbuf.LexemeChar 1));
       string lexbuf }

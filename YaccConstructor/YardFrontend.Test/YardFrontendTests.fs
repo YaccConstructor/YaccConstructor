@@ -107,7 +107,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
 
     [<Test>]
@@ -126,7 +127,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_0.yrd")+"%ora") expected
 
     [<Test>]
@@ -142,7 +144,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest (cp "test_1.yrd") expected
 
     [<Test>]
@@ -158,7 +161,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_1.yrd")+"%ora") expected
 
     [<Test>]
@@ -174,7 +178,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest (cp "test_2.yrd") expected
 
     [<Test>]
@@ -190,7 +195,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%x") expected
 
     [<Test>]
@@ -209,7 +215,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%ora;x") expected
 
     [<Test>]
@@ -228,7 +235,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%ora") expected
 
     [<Test>]
@@ -245,7 +253,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest (cp "test_3.yrd") expected
 
     [<Test>]
@@ -262,7 +271,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first") expected
 
     [<Test>]
@@ -279,7 +289,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%second") expected
 
     [<Test>]
@@ -299,7 +310,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                              checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
 
 [<TestFixture>]
@@ -337,6 +349,7 @@ type ``YardFrontend Parser tests`` () =
                         metaArgs = []
                     }] 
               foot = None
+              options = Map.empty
             } 
                 
 [<TestFixture>]
@@ -392,4 +405,5 @@ let value x = (x:>Lexeme<string>).value
                         metaArgs = []
                     }]
              foot = None
+             options = Map.empty
             }

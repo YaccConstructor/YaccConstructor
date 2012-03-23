@@ -11,6 +11,8 @@ type token =
   | STRING of (IL.Source.t)
   | LIDENT of (IL.Source.t)
   | UIDENT of (IL.Source.t)
+  | VALUE of (string)
+  | SET
   | INCLUDE
   | COMMUT
   | DLESS
@@ -24,6 +26,7 @@ type token =
   | STAR
   | BAR
   | EQUAL
+  | COMMA
   | SEMICOLON
   | COLON
   | EOF
@@ -36,6 +39,8 @@ type tokenId =
     | TOKEN_STRING
     | TOKEN_LIDENT
     | TOKEN_UIDENT
+    | TOKEN_VALUE
+    | TOKEN_SET
     | TOKEN_INCLUDE
     | TOKEN_COMMUT
     | TOKEN_DLESS
@@ -49,6 +54,7 @@ type tokenId =
     | TOKEN_STAR
     | TOKEN_BAR
     | TOKEN_EQUAL
+    | TOKEN_COMMA
     | TOKEN_SEMICOLON
     | TOKEN_COLON
     | TOKEN_EOF
@@ -78,6 +84,9 @@ type nonTerminalId =
     | NONTERM_meta_params
     | NONTERM_meta_param_opt
     | NONTERM_call
+    | NONTERM_option_opt
+    | NONTERM_option_params
+    | NONTERM_option_param
 /// This function maps integers indexes to symbolic token ids
 val tagOfToken: token -> int
 

@@ -50,7 +50,8 @@ type ``GNESCC generator test`` () =
                                                                checker = None;}],None);
                 _public = false;
                 metaArgs = [];}];
-             foot = None;}
+             foot = None;
+             options = Map.empty}
         let gen = new GNESCCGenerator()
         try
             let res = gen.Generate grammar

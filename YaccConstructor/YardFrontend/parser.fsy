@@ -77,7 +77,6 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 %token COMMUT
 %token INCLUDE
 %token SET
-%token <string> VALUE
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
@@ -193,4 +192,4 @@ option_opt: SET option_params { Some $2 }
 option_params: option_param { Map.empty.Add $1}
     | option_param COMMA option_params {($3).Add $1}
 
-option_param: LIDENT EQUAL VALUE { (Source.toString $1, $3) }
+option_param: LIDENT EQUAL STRING { (Source.toString $1, Source.toString $3) }

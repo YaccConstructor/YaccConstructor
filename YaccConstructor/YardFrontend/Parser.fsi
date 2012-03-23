@@ -11,7 +11,6 @@ type token =
   | STRING of (IL.Source.t)
   | LIDENT of (IL.Source.t)
   | UIDENT of (IL.Source.t)
-  | VALUE of (string)
   | SET
   | INCLUDE
   | COMMUT
@@ -39,7 +38,6 @@ type tokenId =
     | TOKEN_STRING
     | TOKEN_LIDENT
     | TOKEN_UIDENT
-    | TOKEN_VALUE
     | TOKEN_SET
     | TOKEN_INCLUDE
     | TOKEN_COMMUT

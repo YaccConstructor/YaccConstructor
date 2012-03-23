@@ -178,10 +178,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             let res = ref None
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
+            let addTreeTop res = ref [ASTTyper.createNonTerminalTree parserSource.StartRule [|res|]]
             for value in stateToVirtex.Value do
                 printf "%d " value.Key
                 if parserSource.AccStates.[value.Key] then
-                    res := Some <| Success (value.Value.outEdges.[0].label)
+                    res := value.Value.outEdges.[0].label
+                           |> addTreeTop |> Success |> Some
             printfn ""
             match !res with
             | None -> Error (tokensCount, "There is no accepting state")

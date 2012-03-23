@@ -25,8 +25,7 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTables (grammar : FinalGrammar) (tables : Tables) head (srcFileName : string) (tokenTypeOpt : string option) =
-    use out = new System.IO.StreamWriter (srcFileName + ".ast.fs")
+let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO.StreamWriter) (tokenTypeOpt : string option) =
     let tab = 4
     let print (x : 'a) =
         fprintf out x
@@ -232,4 +231,3 @@ let printTables (grammar : FinalGrammar) (tables : Tables) head (srcFileName : s
     printInd 1 "let parserSource = new ParserSource<_> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)\n"
     printInd 1 "buildAst<_> parserSource\n\n"
     
-    out.Close()

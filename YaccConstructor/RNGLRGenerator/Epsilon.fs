@@ -26,24 +26,6 @@ open Yard.Core.IL.Production
 let emptyName = "empty"
 let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
 
-let eliminateEpsilon (ruleList : Rule.t<_,_> list) =
-    let rec eliminateProdEpsilon (*body*) = function
-        | PSeq (s,a) ->
-            s
-            |> List.fold
-                (fun acc e ->
-                    match e.rule with
-                    | PRef (x,_) when (fst x = emptyName) -> acc
-                    | PSeq _ as s1 -> {e with rule = eliminateProdEpsilon s1}::acc
-                    | _ -> e::acc
-                ) []
-            |> List.rev
-            |> (fun x -> PSeq(s,a))
-        | x -> x
-
-    ruleList
-    |> List.map (fun x -> {x with body = eliminateProdEpsilon x.body})
-
 let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
     let result : bool[] = Array.zeroCreate indexator.fullCount
     let mutable modified = true
@@ -63,27 +45,26 @@ let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
 
     result
 
-let getEpsilonCycles (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
+let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let was : int[] = Array.zeroCreate indexator.fullCount
     let result = ref []
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
             let rec dfs u =
                 was.[u] <- 1
-                for i in 0..rules.rulesCount-1 do
-                    if (rules.leftSide i = u) then
-                        let allEpsilon =
-                            rules.rightSide i
-                            |> Array.fold (fun res v -> res && canInferEpsilon.[v]) true
-                        if allEpsilon then
-                            rules.rightSide i
-                            |> Array.iter
-                                (fun v ->
-                                    if was.[v] = 1 then
-                                        result := (indexator.indexToNonTerm v)::!result
-                                    elif was.[v] = 0 then
-                                        dfs v
-                                )
+                for rule in rules.rulesWithLeftSide u do
+                    let allEpsilon =
+                        rules.rightSide rule
+                        |> Array.fold (fun res v -> res && canInferEpsilon.[v]) true
+                    if allEpsilon then
+                        rules.rightSide rule
+                        |> Array.iter
+                            (fun v ->
+                                if was.[v] = 1 then
+                                    result := (indexator.indexToNonTerm v)::!result
+                                elif was.[v] = 0 then
+                                    dfs v
+                            )
                 was.[u] <- 2
             dfs i
     !result
@@ -98,22 +79,40 @@ let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
 
 let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let allEpsilon = epsilonRules rules indexator canInferEpsilon
+    (*
+    printfn "%A" allEpsilon
+    for i in 0..indexator.nonTermCount-1 do
+        printfn "%d %s: %A" i (indexator.indexToNonTerm i) (rules.rulesWithLeftSide i)
+    for i in 0..rules.rulesCount-1 do
+        printfn "%d: %d -> %A" i (rules.leftSide i) (rules.rightSide i)
+    *)
     let result : MultiAST [] = Array.create indexator.nonTermCount (ref [])
     let was : int[] = Array.zeroCreate indexator.nonTermCount
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
             let rec dfs u =
                 was.[u] <- 1
-                for i in 0..rules.rulesCount-1 do
-                    if (rules.leftSide i = u && allEpsilon.[i]) then
-                        rules.rightSide i
+                for rule in rules.rulesWithLeftSide u do
+                    if allEpsilon.[rule] then
+                        rules.rightSide rule
                         |> Array.iter (fun v -> if was.[v] = 0 then dfs v)
                         let asts =
-                            rules.rightSide i
+                            rules.rightSide rule
                             |> Array.map (fun num -> result.[num])
-                        result.[u] := (ASTTyper.createNonTerminalTree i asts)::!result.[u]
+                        result.[u] <- ref <| (ASTTyper.createNonTerminalTree rule asts)::!result.[u]
                 was.[u] <- 2
             dfs i
+    (*
+    for i = 0 to indexator.nonTermCount-1 do
+        printfn "%d:" i
+        for ast in result.[i].Value do
+            printfn "  %d" ast.number
+            for sa in ast.children do
+                printf "    "
+                for j in sa.Value do
+                    printf "%d " j.number
+                printfn ""
+    *)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

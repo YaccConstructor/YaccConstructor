@@ -26,6 +26,7 @@ open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR.Printer
+open Yard.Generators.RNGLR.TranslatorPrinter
 
 type RNGLR() = 
     inherit Generator()
@@ -34,15 +35,28 @@ type RNGLR() =
             let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
-            let statesInterpreter = buildStates grammar
-            let tables = new Tables(grammar, statesInterpreter)
-            let tokenTypeOpt =
-                match tokenType with
-                | "" -> None
-                | s -> Some s
-            printTables grammar tables definition.head definition.info.fileName tokenTypeOpt
-            printfn "%A" <| System.DateTime.Now - start
-            (new YardPrinter()).Generate newDefinition
+            if grammar.EpsilonCyclicNonTerms.Length > 0 then
+                eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
+                grammar.EpsilonCyclicNonTerms
+                |> List.iter (eprintf "%s ")
+                box ()
+            else
+                let statesInterpreter = buildStates grammar
+                let tables = new Tables(grammar, statesInterpreter)
+                let tokenTypeOpt =
+                    match tokenType with
+                    | "" -> None
+                    | s -> Some s
+                use out = new System.IO.StreamWriter (definition.info.fileName + ".fs")
+                printTables grammar definition.head tables out tokenTypeOpt
+                printTranslator grammar newDefinition.grammar out
+                match definition.foot with
+                | None -> ()
+                | Some (s : Source.t) ->
+                    out.WriteLine (Source.toString s)
+                out.Close()
+                printfn "%A" <| System.DateTime.Now - start
+                (new YardPrinter()).Generate newDefinition
         override this.Generate definition = this.Generate (definition, "")
         override this.AcceptableProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)

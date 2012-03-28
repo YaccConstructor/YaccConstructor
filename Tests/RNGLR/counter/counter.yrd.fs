@@ -1,4 +1,4 @@
-module RNGLR.Parse
+module RNGLR.ParseCounter
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 type Token =
@@ -68,62 +68,58 @@ let translate (_rnglr_tokens_init : seq<Token>) =
   let _rnglr_rule_s = Array.zeroCreate 2
   let _rnglr_rule_yard_start_rule = Array.zeroCreate 1
   let rec _rnglr_translate_token_error = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : Yard.Generators.RNGLR.AST.AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm error can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm error expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_error.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<_>) -> 
+          match _rnglr_ast with
+          | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm error can't infer epsilon"
+          | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_error.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_s = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : Yard.Generators.RNGLR.AST.AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm s can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm s expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_s.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<_>) -> 
+          match _rnglr_ast with
+          | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm s can't infer epsilon"
+          | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_s.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_yard_start_rule = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : Yard.Generators.RNGLR.AST.AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm yard_start_rule can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm yard_start_rule expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_yard_start_rule.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<_>) -> 
+          match _rnglr_ast with
+          | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm yard_start_rule can't infer epsilon"
+          | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_yard_start_rule.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   _rnglr_rule_s.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
       [
         for _rnglr_var_0 in 
-         (match _rnglr_tokens.[_rnglr_children.[0].Value.[0].Number] with | A value -> [value] | _-> failwith "Token A expected") 
+         (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (A value) -> [value] | _-> failwith "Token A expected") 
           do
-          yield
-            (1)
+          yield ( 1 )
       ]
     )
   _rnglr_rule_s.[1] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
       [
         for _rnglr_var_0 in 
-         (match _rnglr_tokens.[_rnglr_children.[0].Value.[0].Number] with | A value -> [value] | _-> failwith "Token A expected") 
+         (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (A value) -> [value] | _-> failwith "Token A expected") 
           do
-          for v in  (_rnglr_translate_token_s _rnglr_children.[1])  do
-            yield
-              (1 + v)
+          for v in 
+           (_rnglr_translate_token_s (Yard.Generators.RNGLR.AST.getFamily _rnglr_children.[1]))
+            do
+            yield ( 1 + v )
       ]
     )
   _rnglr_rule_yard_start_rule.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
-      (_rnglr_translate_token_s _rnglr_children.[0])
+     fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
+      (_rnglr_translate_token_s (Yard.Generators.RNGLR.AST.getFamily _rnglr_children.[0]))
     )
-  _rnglr_translate_token_yard_start_rule
-
+  getFamily >> _rnglr_translate_token_yard_start_rule

@@ -17,27 +17,25 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Yard.Generators.RNGLR
+module Yard.Generators.RNGLR.AST
 
-type NodeType = Term | NonTerm | EpsTree
+type AST<'TokenType> =
+    | Epsilon
+    /// Non-terminal expansion: production, family of children
+    | Inner of int * MultiAST<'TokenType> []
 
-type AST = {
-    number : int;
-    nodeType : NodeType;
-    /// Children of root
-    children : MultiAST [];
-}
-/// For one nonTerminal there can be a lot of dirivation trees
-and MultiAST = AST list ref
+/// Family of children - For one nonTerminal there can be a lot of dirivation trees
+and MultiAST<'TokenType> =
+    | NonTerm of AST<'TokenType> list ref
+    | Term of 'TokenType
 
-type ASTTyper =
-    static member private flag = 1 <<< 31
-    static member private emptyChildren = [| |]
-    static member isTerminal (a : AST) = a.nodeType = Term
-    static member isNonTerminal (a : AST) = a.nodeType = NonTerm
-    static member isEpsilon (a : AST) = a.nodeType = EpsTree
+let inline getFamily node = match node with | NonTerm list -> list
 
-    static member createEpsilonTree nTerm = ref [{number = nTerm; nodeType = EpsTree; children = ASTTyper.emptyChildren}]
-    static member createSingleEpsilonTree nTerm = {number = nTerm; nodeType = EpsTree; children = ASTTyper.emptyChildren}
-    static member createTerminalTree term = ref [{number = term; nodeType = Term; children = ASTTyper.emptyChildren}]
-    static member createNonTerminalTree prod children = {number = prod; nodeType = NonTerm; children = children}
+let isEpsilon = function
+    | Epsilon -> true
+    | _ -> false
+
+let isInner = function
+    | Inner _ -> true
+    | _ -> false
+

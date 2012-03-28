@@ -20,6 +20,7 @@
 module Yard.Generators.RNGLR.Epsilon
 
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
@@ -86,7 +87,9 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     for i in 0..rules.rulesCount-1 do
         printfn "%d: %d -> %A" i (rules.leftSide i) (rules.rightSide i)
     *)
-    let result : MultiAST [] = Array.create indexator.nonTermCount (ref [])
+    let result : MultiAST<_> [] = Array.zeroCreate indexator.nonTermCount
+    for i = 0 to result.Length-1 do
+        result.[i] <- NonTerm <| ref []
     let was : int[] = Array.zeroCreate indexator.nonTermCount
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
@@ -99,7 +102,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                         let asts =
                             rules.rightSide rule
                             |> Array.map (fun num -> result.[num])
-                        result.[u] <- ref <| (ASTTyper.createNonTerminalTree rule asts)::!result.[u]
+                        (getFamily result.[u]) := (Inner (rule, asts))::!(getFamily result.[u])
                 was.[u] <- 2
             dfs i
     (*

@@ -23,6 +23,7 @@ module Yard.Generators.RNGLR.TranslatorPrinter
 open Yard.Generators.RNGLR.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
@@ -49,6 +50,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let childrenName = "_rnglr_children"
     let indexName = "_rnglr_index"
     let tokensSeqName = "_rnglr_tokens"
+    let pathToModule = "Yard.Generators.RNGLR.AST."
 
     let printArgsDeclare args other t = 
         args
@@ -101,46 +103,46 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             yield wordL <| sprintf "let %s = Array.zeroCreate %d" (ruleName <| indexator.indexToNonTerm i) count.[i]]
         |> aboveListL
 
-    // Define epsilon-trees
-    let printNodeType = function
-        | EpsTree -> "EpsTree"
-        | NonTerm -> "NonTerm"
-        | Term -> "Term"
-
-    let rec printOnScreenMAst ind (mast : MultiAST) =
+    let rec printOnScreenMAst ind (mast : MultiAST<_>) =
         printf "%s" <| String.replicate ind " "
         printfn "["
-        mast.Value
+        (getFamily mast).Value
         |> List.iter
-            (fun ast ->
+           (function
+            | Inner (num, children) ->
                 printf "%s" <| String.replicate ind " "
-                printfn "{nodeType = %s; number = %d; children = [|" (printNodeType ast.nodeType) ast.number
-                ast.children
+                printfn "NonTerm %d ( " num 
+                children
                 |> Array.iter (printOnScreenMAst (ind+4))
                 printf "%s" <| String.replicate ind " "
-                printfn "|]}")
+                printfn "|]}"
+            | Epsilon -> printfn "Epsilon")
         printf "%s" <| String.replicate ind " "
         printfn "]"
 
-    let rec printMultiAst (mast : MultiAST) =
+    let printMultiAst =
         //printOnScreenMAst 0 mast
-        mast.Value
-        |> List.map
-            (fun ast ->
-                let printChildren =
-                    ast.children
-                    |> Array.map printMultiAst
-                    |> String.concat ";"
-                    |> (fun x -> "[|" + x + "|]")
-                sprintf "{nodeType = %s; number = %d; children = %s}"
-                    (printNodeType ast.nodeType) ast.number printChildren)
-        |> String.concat ";"
-        |> (fun x -> "ref [" + x + "]")
+        let rec inner isFirst (mast : MultiAST<_>) =
+            (getFamily mast).Value
+            |> List.map
+                (function
+                | Inner (num, children) ->
+                    let printChildren =
+                        children
+                        |> Array.map (inner false)
+                        |> String.concat ";"
+                        |> (fun x -> "[|" + x + "|]")
+                    sprintf "%sInner (%d, %s) " pathToModule num printChildren
+                | Epsilon -> pathToModule + "Epsilon")
+            |> String.concat ";"
+            |> (fun x -> if isFirst then "ref [" + x + "]"
+                         else pathToModule + "NonTerm (ref [" + x + "])")
+        inner true
 
     let defineEpsilonTrees = 
         [for i = 0 to nonTermLim do
             if grammar.canInferEpsilon.[i] then
-                yield wordL <| sprintf "let %s = %s" (epsilonName <| indexator.indexToNonTerm i) (printMultiAst grammar.epsilonTrees.[i])]
+                yield wordL <| sprintf "let %s : %sAST<Token> list ref = %s" (epsilonName <| indexator.indexToNonTerm i) pathToModule (printMultiAst grammar.epsilonTrees.[i])]
         |> aboveListL
 
     // Define nonTerms-translation
@@ -151,27 +153,25 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 let epsLayout =
                     if grammar.canInferEpsilon.[i] then
                         printArgsCallList args.[i] (sprintf "%s" <| epsilonName name)
-                        |> sprintf "| EpsTree -> %s %s" (tokenCall name)
+                        |> sprintf "| %sEpsilon -> %s %s" pathToModule (tokenCall name)
                     else
-                        sprintf "| EpsTree -> failwith \"Nonterm %s can't infer epsilon\"" (indexator.indexToNonTerm i)
-                let termLayout = 
-                    sprintf "| Term -> failwithf \"Expected nonTerm %s expansion, but token %%A found\" %s" name (sprintf "%s.[%s.number]" tokensSeqName astName)
+                        sprintf "| %sEpsilon -> failwith \"Nonterm %s can't infer epsilon\"" pathToModule (indexator.indexToNonTerm i)
                 let nonTermLayout = 
-                    printArgsCallList args.[i] (sprintf "%s.children" astName)
-                    |> sprintf "| NonTerm -> %s.[%s.[%s.number]] %s" (ruleName name) indexName astName
-                [ sprintf "match %s.nodeType with" astName
-                ; epsLayout; termLayout; nonTermLayout]
+                    printArgsCallList args.[i] "_rnglr_children"
+                    |> sprintf "| %sInner (_rnglr_number, _rnglr_children) -> %s.[%s.[_rnglr_number]] %s" pathToModule (ruleName name) indexName
+                [ sprintf "match %s with" astName
+                ; epsLayout; nonTermLayout]
                 |> List.map wordL
                 |> aboveListL
             yield
                 wordL (sprintf "let rec %s = " <| tokenCall name)
                 @@-- (
-                    printArgsDeclare args.[i] multiAstName "MultiAST"
+                    printArgsDeclare args.[i] multiAstName (pathToModule + "AST<_> list ref")
                     @@-- (
                         wordL (sprintf "%s.Value" multiAstName)
                         @@ wordL "|> List.map ("
                         @@-- (
-                            wordL (sprintf "fun (%s : AST) -> " astName)
+                            wordL (sprintf "fun (%s : %sAST<_>) -> " astName pathToModule)
                             @@-- body
                         )
                         @@ wordL ")"
@@ -185,12 +185,14 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let rec getProductionLayout num = function
         | PRef (name, args) ->
             incr num
-            sprintf "(%s %s)" (tokenCall <| Source.toString name) (printArgsCallOpt args <| sprintf "%s.[%d]" childrenName !num)
+            sprintf "(%s %s)" (tokenCall <| Source.toString name)
+                (printArgsCallOpt args <| sprintf "(%sgetFamily %s.[%d])" pathToModule childrenName !num)
             |> wordL
         | PToken name -> 
             incr num
             let name = Source.toString name
-            sprintf "(match %s with | %s value -> [value] | _-> failwith \"Token %s expected\") " (sprintf "%s.[%s.[%d].Value.[0].number]" tokensSeqName childrenName !num) name name
+            sprintf "(match %s with | %sTerm (%s value) -> [value] | _-> failwith \"Token %s expected\") "
+                (sprintf "%s.[%d]" childrenName !num) pathToModule name name
             |> wordL
         | PSeq (s, ac) ->
             match ac with
@@ -221,7 +223,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | x -> failwithf "unexpected %A construction" x
 
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) =
-        printArgsDeclare rule.args childrenName "MultiAST[]"
+        printArgsDeclare rule.args childrenName (pathToModule + "MultiAST<_>[]")
         @@-- getProductionLayout (ref -1) rule.body
     let rules = 
         srcGrammar
@@ -242,7 +244,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         |> grammar.rules.leftSide
         |> indexator.indexToNonTerm
         |> tokenCall
-        |> sprintf "%s"
+        |> sprintf "%sgetFamily >> %s" pathToModule
         |> wordL
     [defineIndex; defineEpsilonTrees; declareNonTermsArrays; defineNonTermsTranslation; rules; funRes]
     |> aboveListL

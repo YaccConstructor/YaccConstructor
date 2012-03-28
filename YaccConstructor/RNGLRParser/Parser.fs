@@ -20,13 +20,15 @@
 module Yard.Generators.RNGLR.Parser
 
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 
-type ParseResult =
-    | Success of MultiAST
+type ParseResult<'TokenType> =
+    | Success of MultiAST<'TokenType>
     | Error of int * string
 
-let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
+let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
+    let tokensArr = tokens |> Array.ofSeq
     let tokenNums =
         tokens
         |> Seq.map parserSource.TokenToNumber
@@ -37,7 +39,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let startState = 0
     if tokensCount = 0 then
         if parserSource.AccStates.[startState] then
-            Success <| ASTTyper.createEpsilonTree parserSource.LeftSide.[parserSource.StartRule]
+            ref [Epsilon] |> NonTerm |> Success
         else
             Error (0, "This grammar cannot accept empty string")
     else
@@ -72,52 +74,55 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         // init, by adding the first virtex in the first set
         ignore <| addVirtex startState 0 None true
 
-
-
         let makeReductions num =
             while reductions.Value.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Value.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
-                let compareChildren (ast1 : MultiAST[]) (ast2 : MultiAST[]) =
+                let compareChildren (ast1 : MultiAST<_>[]) (ast2 : MultiAST<_>[]) =
                     let n = ast1.Length
                     if ast2.Length <> n then false
                     else
-                        let equalEpsilon = List.forall2 (fun (x:AST) (y:AST) -> x.nodeType = EpsTree && y.nodeType = EpsTree && x.number = y.number)
-                        Array.forall2 (fun x y -> not <| obj.ReferenceEquals(x,y) && (not <| equalEpsilon !x !y)) ast1 ast2
-                        (*
-                        let rec compare num =
-                            if num = n then true
-                            elif ast1.[num] <> ast2.[num] then false
-                            else compare (num+1)
-                        compare 0
-                        *)
-                let inline addEpsilon node nonTerm =
-                    let astExists = 
-                        !node |> List.exists
-                            (fun ast -> ast.nodeType = EpsTree && ast.number = nonTerm)
-                    if not astExists then
-                        node := (ASTTyper.createSingleEpsilonTree nonTerm)::!node
+                        let equalLeaf (x:MultiAST<_>) (y:MultiAST<_>) =
+                            match x,y with
+                            | Term x, Term y -> true
+                            | NonTerm l1, NonTerm l2 ->
+                                obj.ReferenceEquals(l1, l2)
+                                || List.forall2 (fun (x:AST<_>) (y:AST<_>) -> isEpsilon x && isEpsilon y) !l1 !l2
+                            | _ -> false
+                        Array.forall2 (fun x y -> obj.ReferenceEquals(x,y) || equalLeaf x y) ast1 ast2
 
-                let inline addChildren node (path : MultiAST[]) prod =
-                    let astExists = 
-                        !node |> List.exists
-                            (fun ast -> ast.nodeType = NonTerm && ast.number = prod && compareChildren ast.children path)
+                let inline addEpsilon node nonTerm =
+                    let astExists = (getFamily node).Value |> List.exists isEpsilon
                     if not astExists then
-                        node := (ASTTyper.createNonTerminalTree prod path)::!node
-                let handlePath (path : MultiAST list) (final : Virtex<_,_>) =
+                        getFamily node := Epsilon::!(getFamily node)
+
+                let inline addChildren node (path : MultiAST<_>[]) prod =
+                    let astExists = 
+                        (getFamily node).Value
+                        |> List.exists
+                            (function
+                             | Inner (number,children) -> number = prod && compareChildren children path
+                             | _ -> false )
+                    if not astExists then
+                        (getFamily node) := (Inner (prod, path))::(getFamily node).Value
+                let handlePath (path : MultiAST<_> list) (final : Virtex<_,_>) =
                     let ast = 
                         if not <| astNodes.ContainsKey (nonTerm, snd final.label) then
-                            let ast = ref []
+                            let ast = NonTerm <| ref []
                             astNodes.[(nonTerm, snd final.label)] <- ast
                             ast
                         else astNodes.[(nonTerm, snd final.label)]
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
-                    let edge = new Edge<_,_>(final, ast)
+                    let edge = new Edge<int*int, MultiAST<_>>(final, ast)
                     //printfn "r %A->%A->%A (prod: %d,%d) " virtex.label final.label (state,num) prod pos
                     let newVirtex = addVirtex state num (Some edge) (pos > 0)
                     if not (newVirtex.outEdges |> Seq.exists (fun e -> e.dest.label = final.label)) then
                         newVirtex.addEdge edge
-                    let isAllEpsilon l = List.forall (fun (x : MultiAST) -> x.Value |> List.forall (fun y -> y.nodeType = EpsTree)) l
+                    let isAllEpsilon=
+                        List.forall
+                           (function
+                            | Term _ -> false
+                            | NonTerm x -> x.Value |> List.forall isEpsilon)
                     if path = [] || isAllEpsilon path then addEpsilon ast parserSource.LeftSide.[prod]
                     else addChildren ast (path |> Array.ofList) prod
 
@@ -133,7 +138,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let epsilonPart =
                         let mutable res = []
                         for i = parserSource.Length.[prod] - 1 downto pos do
-                            res <- (ASTTyper.createEpsilonTree parserSource.Rules.[parserSource.RulesStart.[prod] + i]) ::res
+                            res <- (NonTerm <| ref [Epsilon]) ::res
                         res
                     walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest (edgeOpt.Value.label::epsilonPart)
 
@@ -144,7 +149,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     printfn "%d " value.Key
                 printfn ""
 *)              let oldPushes = pushes.Value
-                let newAstNode = ASTTyper.createTerminalTree num
+                let newAstNode = Term tokensArr.[num]
                 pushes := new ResizeArray<_>()
                 stateToVirtex := new Dictionary<_,_>()
                 for push in oldPushes do
@@ -178,7 +183,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             let res = ref None
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
-            let addTreeTop res = ref [ASTTyper.createNonTerminalTree parserSource.StartRule [|res|]]
+            let addTreeTop res = NonTerm <| ref [Inner (parserSource.StartRule, [|res|])]
             for value in stateToVirtex.Value do
                 printf "%d " value.Key
                 if parserSource.AccStates.[value.Key] then

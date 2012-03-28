@@ -1,4 +1,4 @@
-module RNGLR.Parse
+module RNGLR.ParseFirst
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 type Token =

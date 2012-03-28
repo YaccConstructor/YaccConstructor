@@ -1,6 +1,7 @@
 module RNGLR.ParseCalc
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 type Token =
         | A of int
         | ADD of int
@@ -76,123 +77,117 @@ let translate (_rnglr_tokens_init : seq<Token>) =
   let _rnglr_rule_num = Array.zeroCreate 2
   let _rnglr_rule_yard_start_rule = Array.zeroCreate 1
   let rec _rnglr_translate_token_error = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm error can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm error expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_error.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : AST<_>) -> 
+          match _rnglr_ast with
+          | Epsilon -> failwith "Nonterm error can't infer epsilon"
+          | Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_error.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_expr = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm expr can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm expr expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_expr.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : AST<_>) -> 
+          match _rnglr_ast with
+          | Epsilon -> failwith "Nonterm expr can't infer epsilon"
+          | Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_expr.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_fact = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm fact can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm fact expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_fact.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : AST<_>) -> 
+          match _rnglr_ast with
+          | Epsilon -> failwith "Nonterm fact can't infer epsilon"
+          | Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_fact.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_num = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm num can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm num expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_num.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : AST<_>) -> 
+          match _rnglr_ast with
+          | Epsilon -> failwith "Nonterm num can't infer epsilon"
+          | Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_num.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   let rec _rnglr_translate_token_yard_start_rule = 
-     fun (_rnglr_multi_ast : MultiAST) ->
+     fun (_rnglr_multi_ast : AST<_> list ref) ->
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : AST) -> 
-          match _rnglr_ast.nodeType with
-          | EpsTree -> failwith "Nonterm yard_start_rule can't infer epsilon"
-          | Term -> failwithf "Expected nonTerm yard_start_rule expansion, but token %A found" 0
-          | NonTerm -> _rnglr_rule_yard_start_rule.[_rnglr_index.[_rnglr_ast.number]]  _rnglr_ast.children
+        fun (_rnglr_ast : AST<_>) -> 
+          match _rnglr_ast with
+          | Epsilon -> failwith "Nonterm yard_start_rule can't infer epsilon"
+          | Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_yard_start_rule.[_rnglr_index.[_rnglr_number]]  _rnglr_children
         )
         |> List.concat
   _rnglr_rule_expr.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
-        for f in  (_rnglr_translate_token_fact _rnglr_children.[0])  do
-          yield
-            (f)
+        for f in  (_rnglr_translate_token_fact (getFamily _rnglr_children.[0]))
+          do
+          yield ( f )
       ]
     )
   _rnglr_rule_expr.[1] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
-        for a in  (_rnglr_translate_token_expr _rnglr_children.[0])  do
+        for a in  (_rnglr_translate_token_expr (getFamily _rnglr_children.[0]))
+          do
           for _rnglr_var_1 in 
-           (match _rnglr_tokens.[_rnglr_children.[1].Value.[0].number] with | ADD value -> [value] | _-> failwith "Token ADD expected") 
+           (match _rnglr_children.[1] with | Term (ADD value) -> [value] | _-> failwith "Token ADD expected") 
             do
-            for b in  (_rnglr_translate_token_expr _rnglr_children.[2])  do
-              yield
-                (a + b)
+            for b in 
+             (_rnglr_translate_token_expr (getFamily _rnglr_children.[2]))  do
+              yield ( a + b )
       ]
     )
   _rnglr_rule_yard_start_rule.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
-      (_rnglr_translate_token_expr _rnglr_children.[0])
+     fun (_rnglr_children : MultiAST<_>[]) ->
+      (_rnglr_translate_token_expr (getFamily _rnglr_children.[0]))
     )
   _rnglr_rule_fact.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
-        for n in  (_rnglr_translate_token_num _rnglr_children.[0])  do
-          yield
-            (n)
+        for n in  (_rnglr_translate_token_num (getFamily _rnglr_children.[0]))
+          do
+          yield ( n )
       ]
     )
   _rnglr_rule_fact.[1] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
-        for a in  (_rnglr_translate_token_fact _rnglr_children.[0])  do
+        for a in  (_rnglr_translate_token_fact (getFamily _rnglr_children.[0]))
+          do
           for _rnglr_var_1 in 
-           (match _rnglr_tokens.[_rnglr_children.[1].Value.[0].number] with | MUL value -> [value] | _-> failwith "Token MUL expected") 
+           (match _rnglr_children.[1] with | Term (MUL value) -> [value] | _-> failwith "Token MUL expected") 
             do
-            for b in  (_rnglr_translate_token_fact _rnglr_children.[2])  do
-              yield
-                (a * b)
+            for b in 
+             (_rnglr_translate_token_fact (getFamily _rnglr_children.[2]))  do
+              yield ( a * b )
       ]
     )
   _rnglr_rule_num.[0] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
         for _rnglr_var_0 in 
-         (match _rnglr_tokens.[_rnglr_children.[0].Value.[0].number] with | B value -> [value] | _-> failwith "Token B expected") 
+         (match _rnglr_children.[0] with | Term (B value) -> [value] | _-> failwith "Token B expected") 
           do
-          yield
-            (5)
+          yield ( 5 )
       ]
     )
   _rnglr_rule_num.[1] <- (
-     fun (_rnglr_children : MultiAST[]) ->
+     fun (_rnglr_children : MultiAST<_>[]) ->
       [
         for _rnglr_var_0 in 
-         (match _rnglr_tokens.[_rnglr_children.[0].Value.[0].number] with | A value -> [value] | _-> failwith "Token A expected") 
+         (match _rnglr_children.[0] with | Term (A value) -> [value] | _-> failwith "Token A expected") 
           do
-          yield
-            (3)
+          yield ( 3 )
       ]
     )
-  _rnglr_translate_token_yard_start_rule
-
+  getFamily >> _rnglr_translate_token_yard_start_rule

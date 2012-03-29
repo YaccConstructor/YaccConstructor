@@ -97,7 +97,7 @@ module Production = begin
                         | None -> ""
                         | Some var -> var.ToString() + "="
                     omit + bind + x.rule.ToString()
-                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + strAttrs
+                "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->
                 Source.toString name + argsToString args

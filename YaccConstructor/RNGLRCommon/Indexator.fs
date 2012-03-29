@@ -23,6 +23,15 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 
 type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
+    let ppp = 
+        ruleList
+        |> List.iteri
+            (fun i rule ->
+                let args =
+                    rule.args
+                    |> List.map (fun x -> "[" + Source.toString x + "]")
+                    |> String.concat ""
+                printfn "%4d: %s%s = %s" i rule.name args <| rule.body.ToString())
     let unique s = s |> Set.ofSeq |> Array.ofSeq
     let connect x = 
         let dict = x |> Array.mapi (fun i n -> n, i) |> dict
@@ -50,7 +59,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let nonTermsConnect = 
         rules
         |> Array.map (fun x -> x.name)
-        |> Array.append ([|"error"|])
+        //|> Array.append ([|"error"|])
         |> unique
         |> connect
     let termsConnect = connect terms

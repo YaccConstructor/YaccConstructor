@@ -136,7 +136,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
     let incount = ref 0
     let rec dfs initKernelsAndLookAheads =
         incr incount
-        if !incount % 100 = 0 then eprintfn "%d" !incount
+        if !incount % 100 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
         let virtex, newLookAheads, needDfs =

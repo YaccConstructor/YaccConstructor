@@ -18,6 +18,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Yard.Generators.RNGLR.AST
+open System
 
 type AST<'TokenType> =
     | Epsilon
@@ -39,3 +40,78 @@ let isInner = function
     | Inner _ -> true
     | _ -> false
 
+let rec printAst ind (ast : MultiAST<_>) =
+    let printInd num (x : 'a) =
+        printf "%s" (String.replicate (num * 4) " ")
+        printfn x
+    match ast with
+    | Term t -> printInd ind "t: %A" t
+    | NonTerm l ->
+        match !l with
+        | [] -> ()
+        | l ->  if l.Length > 1 then printInd ind "^^^^"
+                l |> List.iteri 
+                    (fun i x -> if i > 0 then
+                                    printInd ind "----"
+                                match x with
+                                | Epsilon -> printInd ind "e"
+                                | Inner (num, children) ->
+                                    printInd ind "prod %d" num
+                                    children
+                                    |> Array.iter (printAst <| ind+1))
+                if l.Length > 1 then printInd ind "vvvv"
+
+let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : MultiAST<'a>) =
+    let next =
+        let cur = ref 0
+        fun () ->
+            incr cur
+            !cur
+
+    let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
+                                                                override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
+                                                                override this.GetHashCode x = x.GetHashCode()})
+    use out = new System.IO.StreamWriter (path : string)
+    out.WriteLine("digraph AST {")
+    let createNode num node (str : string) =
+        if node <> null then
+            nodeToNumber.[node] <- num
+        let label = str.Replace("\n", "\\n").Replace ("\r", "")
+        out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + "]")
+    let createEdge b e isBold (str : string) =
+        let label = str.Replace("\n", "\\n").Replace ("\r", "")
+        let bold = 
+            if not isBold then ""
+            else "style=bold,width=5,"
+        out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+    let rec inner (ast : MultiAST<_>) ind =
+        if nodeToNumber.ContainsKey ast then
+            nodeToNumber.[ast]
+        else
+            let res = next()
+            match ast with
+            | Term t ->
+                createNode res (ast :> Object) ("t " + indToString ind)
+            | NonTerm l ->
+                createNode res (ast :> Object) ("n " + indToString ind)
+                !l |> List.iter
+                       (function
+                        | Epsilon ->
+                            let u = next()
+                            createNode u null "eps"
+                            createEdge res u true ""
+                        | Inner (num, children) ->
+                            let i = ref 0
+                            let u = next()
+                            createNode u null ("prod " + num.ToString())
+                            createEdge res u true ""
+                            for child in ruleToChildren num do
+                                let v = inner children.[!i] child
+                                createEdge u v false ""
+                                incr i
+                        )
+            box res
+    inner ast startInd |> ignore
+    out.WriteLine("}")
+    out.Close()
+    

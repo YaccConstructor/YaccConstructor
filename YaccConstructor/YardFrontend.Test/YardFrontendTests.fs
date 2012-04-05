@@ -41,7 +41,7 @@ let lexerTest str lexemsListCorrect =
 
     printfn "%A" lexemsList
 
-    Assert.AreEqual(lexemsList, lexemsListCorrect)
+    Assert.AreEqual(lexemsListCorrect, lexemsList)
 
 let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
@@ -49,7 +49,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     printfn "ilDef = %A" currentIL
     printfn "ilDefCorrect = %A" expectedIL
 
-    Assert.AreEqual(currentIL, expectedIL)
+    Assert.AreEqual(expectedIL, currentIL)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let buf = LexBuffer<_>.FromString str
@@ -64,6 +64,13 @@ let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
 let completeTest str lexemsListCorrect ilDefCorrect = 
     lexerTest str lexemsListCorrect
     parserTest str ilDefCorrect
+
+let optionsTest path optionsCorrect =
+    let definition = {Main.ParseFile path with info = {fileName =""}}
+    let currentOptions = definition.options
+
+    Assert.AreEqual(currentOptions, optionsCorrect)
+        
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () =    
@@ -107,7 +114,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
 
     [<Test>]
@@ -126,7 +134,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_0.yrd")+"%ora") expected
 
     [<Test>]
@@ -142,7 +151,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest (cp "test_1.yrd") expected
 
     [<Test>]
@@ -158,7 +168,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_1.yrd")+"%ora") expected
 
     [<Test>]
@@ -174,7 +185,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest (cp "test_2.yrd") expected
 
     [<Test>]
@@ -190,7 +202,8 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%x") expected
 
     [<Test>]
@@ -209,7 +222,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%ora;x") expected
 
     [<Test>]
@@ -228,7 +242,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                           checker = None}],None)
                          _public = true
                          metaArgs = []}]
-             foot = None}
+             foot = None
+             options = Map.empty}
         preprocessorTest ((cp "test_2.yrd")+"%ora") expected
 
     [<Test>]
@@ -245,7 +260,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest (cp "test_3.yrd") expected
 
     [<Test>]
@@ -262,7 +278,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first") expected
 
     [<Test>]
@@ -279,7 +296,8 @@ type ``Yard frontend preprocessor tests`` () =
                                            checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%second") expected
 
     [<Test>]
@@ -299,7 +317,8 @@ type ``Yard frontend preprocessor tests`` () =
                                                              checker = None}],None)
                             _public = true
                             metaArgs = []}]
-                foot = None}
+                foot = None
+                options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
 
 [<TestFixture>]
@@ -337,7 +356,39 @@ type ``YardFrontend Parser tests`` () =
                         metaArgs = []
                     }] 
               foot = None
+              options = Map.empty
             } 
+
+[<TestFixture>]
+type ``YardFrontend options tests`` () =  
+    let basePath = "../../../../Tests/YardFrontend/Options"
+    let cp file = System.IO.Path.Combine(basePath,file)  
+
+    [<Test>]
+    member test.``Lexer test for options`` () =
+        lexerTest 
+            "+s:
+#set a = \"smth\"
+A;"
+            [PLUS; LIDENT ("s", (1, 2)); COLON; SET; LIDENT ("a", (10, 11))
+            ; EQUAL; STRING ("smth", (15, 19)); UIDENT ("A", (22, 23)); SEMICOLON; EOF]
+
+    [<Test>]
+    member test.``Basic options test`` () =
+        let rule : Rule.t<Source.t, Source.t> = {
+            Rule.name = "s"
+            Rule._public = true
+            Rule.args = []
+            Rule.body = PSeq ([{omit = false
+                                rule = PToken ("A", (22, 23))
+                                binding = None
+                                checker = None}], None)
+            Rule.metaArgs = []
+            }
+        let optionsForRule = Map.ofList [("a", "smth")]//[("dialect", "ora"), ("comment","smth")]
+
+        optionsTest (cp "options_test_0.yrd") (Map.empty.Add (rule, optionsForRule))
+    
                 
 [<TestFixture>]
 type ``YardFrontend Complete tests`` () =    
@@ -392,4 +443,6 @@ let value x = (x:>Lexeme<string>).value
                         metaArgs = []
                     }]
              foot = None
+             options = Map.empty
             }
+        

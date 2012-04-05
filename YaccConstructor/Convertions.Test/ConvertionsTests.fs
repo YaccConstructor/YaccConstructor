@@ -111,6 +111,7 @@ type ``Convertions tests`` () =
                             |> PAlt
                     }
                 ]
+                options = Map.empty
             }
         let ilTreeConverted = ConvertionsManager.ApplyConvertion "ExpandBrackets" ilTree
 #if DEBUG
@@ -142,6 +143,7 @@ type ``Convertions tests`` () =
                     metaArgs = []
                  }]
             foot = None
+            options = Map.empty
         }
         Assert.AreEqual(ilTreeConverted, correctConverted)
 

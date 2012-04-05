@@ -52,13 +52,14 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                    yield Lexer.main buf  
             }
 
-    let currentDefined = ref []
-    let filter x =
-        let flg = 
-            if List.isEmpty !currentDefined 
-            then true
-            else (!currentDefined).All(fun (x,y) -> x)
-        flg
+    let currentDefined = ref [] 
+    let currentState = ref true
+//    let filter x =
+//        let flg = 
+//            if List.isEmpty !currentDefined 
+//            then true
+//            else (!currentDefined).All(fun (x,y) -> x)
+//        flg
 
     let filtered =
         seq{
@@ -68,22 +69,28 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                     match str with
                     | IF d -> 
                         let x = Array.contains d userDefined
-                        currentDefined := (x, x)::!currentDefined
+                        currentDefined := (x, x, !currentState)::!currentDefined
+                        currentState := x && !currentState
                     | ELIF d ->
                         match !currentDefined with
-                        | (_, prev) :: tl -> 
+                        | (_, prev, upper) :: tl -> 
                             let x = Array.contains d userDefined
-                            currentDefined :=  (x, prev || x) :: tl
+                            currentDefined :=  (x, prev || x, upper) :: tl
+                            currentState := x && upper
                         | _ -> failwith "Unexpected #ELIF"
                     | ELSE ->
                         match !currentDefined with
-                        | (hd1, hd2) :: tl -> currentDefined :=  (not hd2, hd2) :: tl
+                        | (_, prev, upper) :: tl -> 
+                            currentDefined :=  (not prev, prev, upper) :: tl
+                            currentState := (not prev) && upper
                         | _ -> failwith "Unexpected #ELSE"
                     | ENDIF ->
                         match !currentDefined with
-                        | hd :: tl -> currentDefined := tl
+                        | (_, _, upper) :: tl -> 
+                            currentDefined := tl
+                            currentState := upper
                         | _ -> failwith "Unexpected #ENDIF"
-                | t -> if filter t then yield t
+                | t -> if !currentState then yield t
             }
     let tokensEnumerator = filtered.GetEnumerator()
     let getNextToken (lexbuf:Lexing.LexBuffer<_>) =

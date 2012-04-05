@@ -136,7 +136,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
     let incount = ref 0
     let rec dfs initKernelsAndLookAheads =
         incr incount
-        if !incount % 100 = 0 then eprintfn "%d" !incount
+        if !incount % 100 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
         let virtex, newLookAheads, needDfs =
@@ -190,12 +190,18 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
     [| initKernel, initLookAhead|] |> dfs |> ignore
 
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| virtexCount()
+    let printSymbol (symbol : int) =
+        if symbol < grammar.indexator.nonTermCount then
+            grammar.indexator.indexToNonTerm symbol
+        elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
+            grammar.indexator.indexToTerm symbol
+        else grammar.indexator.indexToLiteral symbol
     let print () =
         printfn "\nrules:"
         for i = 0 to grammar.rules.rulesCount-1 do
-            printf "%4d: %d = " i <| grammar.rules.leftSide i
+            printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
             for j = 0 to grammar.rules.length i - 1 do
-                printf "%d " <| grammar.rules.symbol i j
+                printf "%s " <| printSymbol (grammar.rules.symbol i j)
             printfn ""
         printfn "\nstates:"
         for i = 0 to virtexCount()-1 do
@@ -205,12 +211,12 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
             for k = 0 to kernels.Length-1 do
                 printfn "(%d,%d) [%s]" (KernelInterpreter.getProd kernels.[k]) (KernelInterpreter.getPos kernels.[k])
                     <| (lookaheads.[k] |> List.ofSeq
-                        |> List.map (fun x -> x.ToString())
+                        |> List.map (fun x -> printSymbol x)
                         |> String.concat "," )
             printfn "------------------------------"
             let virtex = virtices.[i]
             for edge in virtex.outEdges do
-                printf "(%d,%d) " edge.label edge.dest.label
+                printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
             printfn ""
     print ()
     new StatesInterpreter(virtices.ToArray(), stateToKernels.ToArray(), stateToLookahead.ToArray())

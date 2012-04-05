@@ -97,7 +97,7 @@ module Production = begin
                         | None -> ""
                         | Some var -> var.ToString() + "="
                     omit + bind + x.rule.ToString()
-                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + strAttrs
+                "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->
                 Source.toString name + argsToString args
@@ -143,8 +143,9 @@ module Grammar =  begin
 end 
 
 module Definition = begin
+    
     type info = { fileName: string }
-    type t<'patt,'expr>  = { 
+    type t<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
      /// Contains information (e.g. origin) about this grammar description
      info    : info;
      /// Text before a grammar description ( e.g. some open-s), what will be simply copied
@@ -152,9 +153,10 @@ module Definition = begin
      /// Grammar description itself
      grammar : Grammar.t<'patt,'expr>;
      /// Text after a grammar description, what will be simply copied
-     foot    :'expr option
+     foot    :'expr option;
+     options : Map<Rule.t<'patt, 'expr>, Map<string, string>>
     }    
     
     /// Empty grammar
-    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []}
+    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty}
 end

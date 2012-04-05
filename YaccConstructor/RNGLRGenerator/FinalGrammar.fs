@@ -31,11 +31,13 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     let _canInferEpsilon = canInferEpsilon _numberedRules _indexator
     let _firstSet = firstSet _numberedRules _indexator _canInferEpsilon
     let _followSet = followSet _numberedRules _indexator _canInferEpsilon _firstSet
+    let _epsilonCyclicNonTerms = getEpsilonCyclicNonTerms _numberedRules _indexator _canInferEpsilon
     let _epsilonTrees = epsilonTrees _numberedRules _indexator _canInferEpsilon
     let _epsilonTailStart = epsilonTailStart _numberedRules _canInferEpsilon
     
     member this.indexator = _indexator
     member this.rules = _numberedRules
+    member this.EpsilonCyclicNonTerms = _epsilonCyclicNonTerms
     member this.canInferEpsilon = _canInferEpsilon
     member this.firstSet = _firstSet
     member this.followSet = _followSet

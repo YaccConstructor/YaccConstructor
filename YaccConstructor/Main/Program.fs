@@ -150,15 +150,15 @@ let () =
 
 //                    |> CheckerError
   //                  |> raise
-                try
-                    match !generatorParams with
-                    | None -> gen.Generate (!ilTree)
-                    | Some(genParams) -> gen.Generate(!ilTree, genParams)
-                with
+                //try
+                match !generatorParams with
+                | None -> gen.Generate (!ilTree)
+                | Some(genParams) -> gen.Generate(!ilTree, genParams)
+                //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
 //                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
 //                       |> raise
-                | e -> GenError e.Message |> raise
+                //| e -> GenError e.Message |> raise
 
 //#if DEBUG               
             printf "%s" (result :?> string)

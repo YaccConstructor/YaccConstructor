@@ -21,6 +21,7 @@ open System.Collections.Concurrent
 
 type YardCompletionSource (buffer : ITextBuffer) =
     let mutable _disposed = false
+    let mutable lastTimeWasParserError = false//помещаем дополнительный if
     let theList = new ResizeArray<_>()
 
     let augmentCompletionSession (session : ICompletionSession) (completionSets : IList<CompletionSet>) = 

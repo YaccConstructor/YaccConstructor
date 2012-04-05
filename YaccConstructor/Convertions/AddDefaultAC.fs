@@ -57,7 +57,7 @@ let rec addAcToProduction neededRules ruleBody =
     | PMany p -> PMany(addAcToProduction neededRules p)
     | POpt p -> POpt(addAcToProduction neededRules p)
     //| PMetaRef(_,_,_) -> failwith "ERROR: PMetaRef unexpected in AddDefaultAC"
-    | x -> failwith <| sprintf "ERROR: %A unexpected in AddDefaultAC" x
+    | x -> failwithf "ERROR: %A unexpected in AddDefaultAC" x
 
 let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  = 
     let updatedRules = new HashSet<string>()
@@ -66,11 +66,13 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
     ruleList |> List.iter 
         (fun rule -> 
             rulesMap.Add(rule.name, rule); 
-            if rule._public then (rulesQueueBfs.Enqueue(rule.name) |> ignore)
+            //if rule._public then (rulesQueueBfs.Enqueue(rule.name) |> ignore)
+            rulesQueueBfs.Enqueue(rule.name) |> ignore
         ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
         if not <| updatedRules.Contains bfsFor then    
+            //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
             let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None);
                                 Rule.t._public=false; Rule.t.metaArgs=[]}

@@ -32,7 +32,7 @@ let ParseFile fileName =
     let lexbuf = LexBuffer<_>.FromTextReader reader
     let (grammar, terminals) = ParseAntlr Lexer.main lexbuf
     let terminalsDescr = (terminals |> Seq.fold (fun acc (KeyValue(k,v)) -> acc + (sprintf "%s :\n%s\n\n"  k v)) "(*\nYou need to describe following terminals in lexer:\n") + "*)"
-    {new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = Some(terminalsDescr, (0,0)) and grammar = grammar and foot = None}
+    {new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = Some(terminalsDescr, (0,0)) and grammar = grammar and foot = None and options = Map.empty}
 
 let run () =
     let testPath = ref @"..\..\..\..\Tests\ANTLR"

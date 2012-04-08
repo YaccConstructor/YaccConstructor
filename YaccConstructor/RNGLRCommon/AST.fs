@@ -23,14 +23,19 @@ open System
 type AST<'TokenType> =
     | Epsilon
     /// Non-terminal expansion: production, family of children
-    | Inner of int * MultiAST<'TokenType> []
+    | Inner of int * Node<'TokenType> []
 
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees
 and MultiAST<'TokenType> =
     | NonTerm of AST<'TokenType> list ref
     | Term of 'TokenType
+/// Node : Family of children and reference to result
+and Node<'TokenType> = MultiAST<'TokenType> * int ref
 
-let inline getFamily node = match node with | NonTerm list -> list
+let inline getFamily node =
+    match fst node with
+    | NonTerm list -> list
+    | Term _ -> failwith "Attempt to get family of terminal"
 
 let isEpsilon = function
     | Epsilon -> true
@@ -40,11 +45,44 @@ let isInner = function
     | Inner _ -> true
     | _ -> false
 
-let rec printAst ind (ast : MultiAST<_>) =
+let chooseSingleAst (ast : Node<_>) = 
+    let stack = ref []
+    let result = ref ast
+    stack := (ast, None):: !stack
+    while not stack.Value.IsEmpty do
+        let cur, pos = stack.Value.Head
+        stack := stack.Value.Tail
+        let newTree = 
+            match fst cur with
+            | Term a -> Term a
+            | NonTerm l ->
+                match l.Value with
+                | [] -> []
+                | h::_ -> [h]
+                |> List.map
+                   (function
+                    | Epsilon -> Epsilon
+                    | Inner (prod,arr) ->
+                        let res = Array.zeroCreate arr.Length
+                        for i = 0 to arr.Length - 1 do
+                            stack := (arr.[i], Some (res, i)) :: !stack
+                        Inner (prod,res)
+                    )
+                |> ref
+                |> NonTerm
+            |> (fun res -> res, snd cur)
+        
+        match pos with
+        | None -> result := newTree
+        | Some (arr, pos) -> arr.[pos] <- newTree
+    !result
+
+    
+let rec printAst ind (ast : Node<_>) =
     let printInd num (x : 'a) =
         printf "%s" (String.replicate (num * 4) " ")
         printfn x
-    match ast with
+    match fst ast with
     | Term t -> printInd ind "t: %A" t
     | NonTerm l ->
         match !l with
@@ -61,7 +99,7 @@ let rec printAst ind (ast : MultiAST<_>) =
                                     |> Array.iter (printAst <| ind+1))
                 if l.Length > 1 then printInd ind "vvvv"
 
-let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : MultiAST<'a>) =
+let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : Node<'a>) =
     let next =
         let cur = ref 0
         fun () ->
@@ -84,16 +122,16 @@ let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren 
             if not isBold then ""
             else "style=bold,width=5,"
         out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
-    let rec inner (ast : MultiAST<_>) ind =
-        if nodeToNumber.ContainsKey ast then
-            nodeToNumber.[ast]
+    let rec inner (ast : Node<_>) ind =
+        if nodeToNumber.ContainsKey <| fst ast then
+            nodeToNumber.[fst ast]
         else
             let res = next()
-            match ast with
+            match fst ast with
             | Term t ->
-                createNode res (ast :> Object) ("t " + indToString ind)
+                createNode res (fst ast :> Object) ("t " + indToString ind)
             | NonTerm l ->
-                createNode res (ast :> Object) ("n " + indToString ind)
+                createNode res (fst ast :> Object) ("n " + indToString ind)
                 !l |> List.iter
                        (function
                         | Epsilon ->

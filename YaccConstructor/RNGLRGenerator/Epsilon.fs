@@ -87,9 +87,9 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     for i in 0..rules.rulesCount-1 do
         printfn "%d: %d -> %A" i (rules.leftSide i) (rules.rightSide i)
     *)
-    let result : MultiAST<_> [] = Array.zeroCreate indexator.nonTermCount
+    let result : Node<_> [] = Array.zeroCreate indexator.nonTermCount
     for i = 0 to result.Length-1 do
-        result.[i] <- NonTerm <| ref []
+        result.[i] <- NonTerm (ref []), ref -1
     let was : int[] = Array.zeroCreate indexator.nonTermCount
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then

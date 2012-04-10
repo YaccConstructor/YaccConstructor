@@ -59,13 +59,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let stackCallsName = "_rnglr_stack_calls"
     let stackResName = "_rnglr_stack_res"
 
-    let printArgsDeclare needBraces args other t = 
+    let printArgsDeclare args= 
         args
         |> List.map (fun arg -> sprintf "fun %s ->" (Source.toString arg))
         |> String.concat " "
-        |> (fun x ->
-                if needBraces then wordL (sprintf " fun (%s : %s) -> " other t) @@-- wordL ("(" + x)
-                else wordL (sprintf "fun (%s : %s) -> " other t + x))
+        |> wordL
 
     let printArgsCallList args other = 
         args
@@ -112,10 +110,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         @@ wordL (sprintf "let %s = new ResizeArray<_>()" stackResName)
 
 
-    let dfsCond node name =
+    let dfsCond name =
         let count = resultCountName name
-        [sprintf "if !(_rnglr_treenum %s) = -1 then" node
-        ;sprintf "_rnglr_treenum (%s) := !%s" node count
+        [sprintf "if !num = -1 then"
+        ;sprintf "num := !%s" count
         ; sprintf "incr %s;" count
         ]
         |> List.map wordL
@@ -136,7 +134,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         |> aboveListL
 
     let printNode =
-        let rec inner isFirst (node : Node<_>) =
+        let rec inner isFirst (node : MultiAST<_>) =
             (getFamily node).Value
             |> List.map
                 (function
@@ -149,8 +147,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     sprintf "%sInner (%d, %s) " pathToModule num printChildren
                 | Epsilon -> pathToModule + "Epsilon")
             |> String.concat ";"
-            |> (fun x -> pathToModule + "NonTerm (ref [" + x + "])")
-            |> (fun x -> "(" + x + ", ref -1)")
+            |> (fun x -> pathToModule + "NonTerm (ref [" + x + "], ref -1)")
         inner true
 
     let defineEpsilonTrees = 
@@ -162,8 +159,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let defineUtils = 
         let res = 
-            [sprintf "let inline _rnglr_treenum (x : %sNode<_>) = snd x" pathToModule
-            ;sprintf "let inline _rnglr_treeval (x : %sNode<_>) = fst x" pathToModule
+            [sprintf "let inline _rnglr_treenum x = match x with | %sNonTerm (_,v) -> v | _ -> failwith \"NonTerminal expected, but terminal found.\" " pathToModule
+            //;sprintf "let inline _rnglr_treeval = fst"
             ;sprintf "let inline _rnglr_pop (x : ResizeArray<_>) = " 
             ]
             |> aboveStringListL
@@ -201,15 +198,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveStringListL
             yield
                 //wordL (sprintf "%s.[%d] <- " tokenCall i)
-                wordL (sprintf "%s.[%d] <- " tokenCall (i + indexator.nonTermCount))
+                wordL (sprintf "%s.[%d] <- fun (%s : %sMultiAST<Token>) -> " tokenCall (i + indexator.nonTermCount) nodeName pathToModule)
                 @@-- (
-                    printArgsDeclare true args.[i] nodeName (pathToModule + "Node<Token>")
+                    wordL (sprintf "match %s with" nodeName)
+                    @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
+                    @@ wordL (sprintf "| %sNonTerm (%s,num) ->" pathToModule multiAstName)
                     @@-- (
                         //wordL (sprintf "printfn \"tr %s\"" name)
                         //@@
-                        wordL (sprintf "match _rnglr_treeval %s with" nodeName)
-                        @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
-                        @@ wordL (sprintf "| %sNonTerm %s ->" pathToModule multiAstName)
+                        wordL "("
+                            -- printArgsDeclare args.[i]
                         @@-- (
                             wordL (sprintf "%s.Value" multiAstName)
                             @@ wordL "|> List.map ("
@@ -220,7 +218,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                             @@ wordL ")"
                             @@ wordL "|> List.concat"
                         )
-                        @@ wordL (sprintf ") |> (fun res -> %s.Value.[!(_rnglr_treenum %s)] <- res)" (resultName name) nodeName)
+                        @@ wordL (sprintf ") |> (fun res -> %s.Value.[!num] <- res)" (resultName name))
                     )
                 )
         ]
@@ -244,14 +242,14 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveStringListL
             yield
                 //wordL (sprintf "%s.[%d] <- fun (%s : %sNode<Token>) -> " dfsCall i nodeName pathToModule)
-                wordL (sprintf "%s.[%d] <- fun (%s : %sNode<Token>) -> " tokenCall i nodeName pathToModule)
+                wordL (sprintf "%s.[%d] <- fun (%s : %sMultiAST<Token>) -> " tokenCall i nodeName pathToModule)
                 @@-- (
-                    dfsCond nodeName name
+                    wordL (sprintf "match %s with" nodeName)
+                    @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
+                    @@ wordL (sprintf "| %sNonTerm (%s,num) ->" pathToModule multiAstName)
                     @@-- (
-                        wordL (sprintf "match _rnglr_treeval %s with" nodeName)
-                        @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
-                        @@ wordL (sprintf "| %sNonTerm %s ->" pathToModule multiAstName)
-                        @@-- (
+                        dfsCond name
+                        @@-- ( // Not a bug!!! At least, by design.
                             wordL (stackCallsName + ".Add(" + (sprintf "%d" (i + indexator.nonTermCount)) + "," + nodeName + ");")//::!" + stackCallsName + "; ")
                             @@ wordL (sprintf "%s.Value" multiAstName)
                             @@ wordL "|> List.iter ("
@@ -276,7 +274,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | PToken name -> 
             incr num
             let name = Source.toString name
-            sprintf "(match _rnglr_treeval %s with | %sTerm (%s value) -> [value] | _-> failwith \"Token %s expected\") "
+            sprintf "(match %s with | %sTerm (%s value) -> [value] | _-> failwith \"Token %s expected\") "
                 (sprintf "%s.[%d]" childrenName !num) pathToModule name name
             |> wordL
         | PSeq (s, ac) ->
@@ -308,11 +306,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | x -> failwithf "unexpected %A construction" x
 
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) =
-        printArgsDeclare false rule.args childrenName (pathToModule + "Node<Token>[]")
+        wordL (sprintf "fun (%s : %sMultiAST<Token>[]) -> " childrenName pathToModule)
+        -- printArgsDeclare rule.args
         @@-- getProductionLayout (ref -1) rule.body
 
     let getRuleCallLayout rule =
-        let head = wordL <| sprintf "fun (%s : %sNode<_>[]) ->" childrenName pathToModule
+        let head = wordL <| sprintf "fun (%s : %sMultiAST<_>[]) ->" childrenName pathToModule
         let body =
             let prod = rules.rightSide rule
             [for sub = 0 to prod.Length - 1 do

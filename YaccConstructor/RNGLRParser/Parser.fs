@@ -132,7 +132,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     else
                         for e in virtex.outEdges do
                             walk (length - 1) e.dest (e.label::path)
-                ()
+                
                 if pos = 0 then
                     handlePath [] virtex
                 else 
@@ -145,11 +145,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
 
         let shift num =
             if num <> tokensCount then
-(*                printf "states: "
-                for value in stateToVirtex do
-                    printfn "%d " value.Key
-                printfn ""
-*)              let oldPushes = pushes.Value
+                let oldPushes = pushes.Value
                 let newAstNode = Term tokensArr.[num], ref -1
                 pushes := new ResizeArray<_>()
                 stateToVirtex := new Dictionary<_,_>()
@@ -165,20 +161,11 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 if stateToVirtex.Value.Count = 0 then
                     errorIndex <- i
                 else
-                    //printfn "\n!!!! %d " i
-                    //printf "%d " i
                     astNodes.Clear()
                     let symbol = tokenNums.[i]
                     makeReductions i
                     shift i
                     ()
-(*
-        printfn ""
-        for v in !vertices do
-            printfn "\nv %A:" v.label
-            for e in v.outEdges do
-                printfn "%A %d" e.dest.label e.label.Value.Length
-*)
         if errorIndex <> -1 then Error (errorIndex - 1, "Parse error")
         else
             let res = ref None

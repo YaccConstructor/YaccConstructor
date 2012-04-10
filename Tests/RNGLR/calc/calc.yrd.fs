@@ -110,7 +110,8 @@ let inline _rnglr_pop (x : ResizeArray<_>) =
   let res = x.[pos]
   x.RemoveAt(pos)
   res
-let rec _rnglr_translate_token_expr = 
+let _rnglr_translate_token = Array.zeroCreate 8
+_rnglr_translate_token.[4] <- 
    fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
     (
     match _rnglr_treeval _rnglr_node with
@@ -125,7 +126,7 @@ let rec _rnglr_translate_token_expr =
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_expr.Value.[!(_rnglr_treenum _rnglr_node)] <- res)
-let rec _rnglr_translate_token_fact = 
+_rnglr_translate_token.[5] <- 
    fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
     (
     match _rnglr_treeval _rnglr_node with
@@ -140,7 +141,7 @@ let rec _rnglr_translate_token_fact =
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_fact.Value.[!(_rnglr_treenum _rnglr_node)] <- res)
-let rec _rnglr_translate_token_num = 
+_rnglr_translate_token.[6] <- 
    fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
     (
     match _rnglr_treeval _rnglr_node with
@@ -155,7 +156,7 @@ let rec _rnglr_translate_token_num =
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_num.Value.[!(_rnglr_treenum _rnglr_node)] <- res)
-let rec _rnglr_translate_token_yard_start_rule = 
+_rnglr_translate_token.[7] <- 
    fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
     (
     match _rnglr_treeval _rnglr_node with
@@ -170,14 +171,14 @@ let rec _rnglr_translate_token_yard_start_rule =
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_yard_start_rule.Value.[!(_rnglr_treenum _rnglr_node)] <- res)
-let rec _rnglr_dfs_call_expr (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) = 
+_rnglr_translate_token.[0] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
   if !(_rnglr_treenum _rnglr_node) = -1 then
     _rnglr_treenum (_rnglr_node) := !_rnglr_res_count_expr
     incr _rnglr_res_count_expr;
     match _rnglr_treeval _rnglr_node with
     | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal expr expected, but terminal found" 
     | Yard.Generators.RNGLR.AST.NonTerm _rnglr_multi_ast ->
-      _rnglr_stack_calls.Add(false, _rnglr_translate_token_expr,_rnglr_node);
+      _rnglr_stack_calls.Add(4,_rnglr_node);
       _rnglr_multi_ast.Value
       |> List.iter (
         fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
@@ -185,14 +186,14 @@ let rec _rnglr_dfs_call_expr (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm expr can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_call_rule_expr.[_rnglr_index.[_rnglr_number]] _rnglr_children
         )
-let rec _rnglr_dfs_call_fact (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) = 
+_rnglr_translate_token.[1] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
   if !(_rnglr_treenum _rnglr_node) = -1 then
     _rnglr_treenum (_rnglr_node) := !_rnglr_res_count_fact
     incr _rnglr_res_count_fact;
     match _rnglr_treeval _rnglr_node with
     | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal fact expected, but terminal found" 
     | Yard.Generators.RNGLR.AST.NonTerm _rnglr_multi_ast ->
-      _rnglr_stack_calls.Add(false, _rnglr_translate_token_fact,_rnglr_node);
+      _rnglr_stack_calls.Add(5,_rnglr_node);
       _rnglr_multi_ast.Value
       |> List.iter (
         fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
@@ -200,14 +201,14 @@ let rec _rnglr_dfs_call_fact (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm fact can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_call_rule_fact.[_rnglr_index.[_rnglr_number]] _rnglr_children
         )
-let rec _rnglr_dfs_call_num (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) = 
+_rnglr_translate_token.[2] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
   if !(_rnglr_treenum _rnglr_node) = -1 then
     _rnglr_treenum (_rnglr_node) := !_rnglr_res_count_num
     incr _rnglr_res_count_num;
     match _rnglr_treeval _rnglr_node with
     | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal num expected, but terminal found" 
     | Yard.Generators.RNGLR.AST.NonTerm _rnglr_multi_ast ->
-      _rnglr_stack_calls.Add(false, _rnglr_translate_token_num,_rnglr_node);
+      _rnglr_stack_calls.Add(6,_rnglr_node);
       _rnglr_multi_ast.Value
       |> List.iter (
         fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
@@ -215,14 +216,14 @@ let rec _rnglr_dfs_call_num (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm num can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_call_rule_num.[_rnglr_index.[_rnglr_number]] _rnglr_children
         )
-let rec _rnglr_dfs_call_yard_start_rule (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) = 
+_rnglr_translate_token.[3] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Node<Token>) -> 
   if !(_rnglr_treenum _rnglr_node) = -1 then
     _rnglr_treenum (_rnglr_node) := !_rnglr_res_count_yard_start_rule
     incr _rnglr_res_count_yard_start_rule;
     match _rnglr_treeval _rnglr_node with
     | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal yard_start_rule expected, but terminal found" 
     | Yard.Generators.RNGLR.AST.NonTerm _rnglr_multi_ast ->
-      _rnglr_stack_calls.Add(false, _rnglr_translate_token_yard_start_rule,_rnglr_node);
+      _rnglr_stack_calls.Add(7,_rnglr_node);
       _rnglr_multi_ast.Value
       |> List.iter (
         fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
@@ -232,25 +233,25 @@ let rec _rnglr_dfs_call_yard_start_rule (_rnglr_node : Yard.Generators.RNGLR.AST
         )
 _rnglr_call_rule_expr.[0] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
-    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_fact,_rnglr_children.[0])
+    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(1,_rnglr_children.[0])
     ()
 _rnglr_call_rule_expr.[1] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
-    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_expr,_rnglr_children.[0])
-    if !(_rnglr_treenum _rnglr_children.[2]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_expr,_rnglr_children.[2])
+    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(0,_rnglr_children.[0])
+    if !(_rnglr_treenum _rnglr_children.[2]) = -1 then _rnglr_stack_calls.Add(0,_rnglr_children.[2])
     ()
 _rnglr_call_rule_yard_start_rule.[0] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
-    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_expr,_rnglr_children.[0])
+    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(0,_rnglr_children.[0])
     ()
 _rnglr_call_rule_fact.[0] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
-    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_num,_rnglr_children.[0])
+    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(2,_rnglr_children.[0])
     ()
 _rnglr_call_rule_fact.[1] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
-    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_fact,_rnglr_children.[0])
-    if !(_rnglr_treenum _rnglr_children.[2]) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_fact,_rnglr_children.[2])
+    if !(_rnglr_treenum _rnglr_children.[0]) = -1 then _rnglr_stack_calls.Add(1,_rnglr_children.[0])
+    if !(_rnglr_treenum _rnglr_children.[2]) = -1 then _rnglr_stack_calls.Add(1,_rnglr_children.[2])
     ()
 _rnglr_call_rule_num.[0] <- 
   fun (_rnglr_children : Yard.Generators.RNGLR.AST.Node<_>[]) ->
@@ -327,14 +328,14 @@ let translate node =
   _rnglr_res_count_yard_start_rule := 0
   _rnglr_stack_calls.Clear()
   _rnglr_stack_res.Clear()
-  if !(_rnglr_treenum node) = -1 then _rnglr_stack_calls.Add(true,_rnglr_dfs_call_yard_start_rule,node)
+  if !(_rnglr_treenum node) = -1 then _rnglr_stack_calls.Add(3,node)
   while _rnglr_stack_calls.Count > 0 do
-    let n,f,x = _rnglr_pop _rnglr_stack_calls
-    if n then f x
-    else _rnglr_stack_res.Add(f,x) |> ignore
+    let i,x = _rnglr_pop _rnglr_stack_calls
+    if i < 4 then _rnglr_translate_token.[i] x
+    else _rnglr_stack_res.Add(i,x)
   _rnglr_result_expr := Array.zeroCreate !_rnglr_res_count_expr
   _rnglr_result_fact := Array.zeroCreate !_rnglr_res_count_fact
   _rnglr_result_num := Array.zeroCreate !_rnglr_res_count_num
   _rnglr_result_yard_start_rule := Array.zeroCreate !_rnglr_res_count_yard_start_rule
-  for (f,x) in _rnglr_stack_res do f x
+  for (i,x) in _rnglr_stack_res do _rnglr_translate_token.[i] x
   _rnglr_result_yard_start_rule.Value.[!(_rnglr_treenum node)]

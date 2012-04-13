@@ -2,7 +2,7 @@
 //  - function, which removes all rules with same name except last. It can be useful
 //  for rule's overwriting when one file with gramamr includes other.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2010, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

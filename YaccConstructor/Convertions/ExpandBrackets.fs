@@ -3,8 +3,9 @@
 // separate rules. Basically it is needed for FsYaccPrinter.
 // ExpandMeta and ExpandEBNF should be applied firstly.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
-//
+//  Copyright 
+//      2009, 2010, 2011 Konstantin Ulitin
+//      2011, 2012       Dmitry Avdyukhin
 //  This file is part of YaccConctructor.
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify

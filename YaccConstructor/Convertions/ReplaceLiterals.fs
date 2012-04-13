@@ -2,7 +2,7 @@
 //  - function, which replaces all literals in grammar by tokens and
 //  writes a comment to header about them.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

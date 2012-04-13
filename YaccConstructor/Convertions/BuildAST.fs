@@ -1,8 +1,8 @@
 ﻿//  Module BuildAST contains:
 //  - function, which replaces all action code with code that constructs AST in own format.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
-//
+//  Copyright 2009, 2011 Konstantin Ulitin
+//            2011, 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //  This file is part of YaccConctructor.
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify

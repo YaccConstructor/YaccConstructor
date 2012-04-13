@@ -2,7 +2,7 @@
 //  - function, which adds EOF terminal to the end of start rule.
 //  May add brackets.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

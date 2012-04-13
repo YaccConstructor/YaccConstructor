@@ -1,4 +1,5 @@
-﻿//  Copyright 2010-2011 by Konstantin Ulitin
+﻿//  Copyright 2010, 2011 by Konstantin Ulitin
+//            2012 by Deikin Alexander <eskendirrr@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //

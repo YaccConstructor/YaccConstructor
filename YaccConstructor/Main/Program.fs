@@ -1,4 +1,4 @@
-﻿//  Copyright 2010,2011 Konstantin Ulitin, Semen Grigorev
+﻿//  Copyright 2010,2011,2012 Konstantin Ulitin, Semen Grigorev
 //
 //  This file is part of YaccConctructor.
 //

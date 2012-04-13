@@ -1,5 +1,5 @@
-﻿//  Copyright 2009-2011 Konstantin Ulitin <ulitin.k@gmail.com>
-//
+﻿//  Copyright 2009, 2010, 2011 Konstantin Ulitin <ulitin.k@gmail.com>
+//            2011, 2012 Deikin Alexander <eskendirrr@gmail.com>
 //  This file is part of YaccConctructor.
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify

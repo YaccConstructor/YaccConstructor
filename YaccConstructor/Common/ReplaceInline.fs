@@ -1,7 +1,7 @@
 ﻿//  Module ReplaceInline replace nonterminals, from which only
 //    Pref, PToken or PLiteral can be infered, whit their right sides.
 //
-//  Copyright 2011-2012 Avdyukhin Dmitry
+//  Copyright 2011, 2012 Avdyukhin Dmitry
 //
 //  This file is part of YaccConctructor.
 //

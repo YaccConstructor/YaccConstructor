@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend -g YardPrinter -c ExpandMeta -i "D:\YaccConstructor\Tests\Convertions\Batch\ExpandMeta_literal.yrd"</StartArguments>
+    <StartArguments>-i C:\Projects\recursive-ascent\Tests\RNGLR\calc\calc.yrd -g "RNGLRGenerator int"</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>

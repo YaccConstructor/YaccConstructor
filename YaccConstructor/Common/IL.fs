@@ -1,4 +1,5 @@
-﻿//  Copyright 2009-2011 Jake Kirilenko
+﻿//  Copyright 2009, 2010, 2011, 2012 Jake Kirilenko
+//                        2011, 2012 Dmitry Avdyukhin
 //
 //  This file is part of YaccConctructor.
 //

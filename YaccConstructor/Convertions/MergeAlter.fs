@@ -2,7 +2,7 @@
 //  - function, which merges though alternative sign all rules with same name. It can be useful
 //  for rule's merging when one file with grammar includes other.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2010, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

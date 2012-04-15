@@ -1,6 +1,6 @@
 ﻿// ComponentsLoader.fs contains helper functions for frontends/generators loading
 //
-//  Copyright 2009,2010,2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2009, 2010, 2011, 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -23,12 +23,11 @@ open System
 open System.IO
 
 let private loadByType (desiredType:Type) =
-    let basePath = 
-        AppDomain.CurrentDomain.BaseDirectory
+    let basePath = AppDomain.CurrentDomain.BaseDirectory
     let assemblies =
         System.IO.Directory.GetFiles(basePath,"*.dll")
-        |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x))
-        |> Seq.choose (fun x -> try Reflection.Assembly.Load(x) |> Some with _ -> None)
+        |> Seq.map Path.GetFileNameWithoutExtension
+        |> Seq.choose (fun x -> try Reflection.Assembly.Load x |> Some with _ -> None)
    
     assemblies
     |> Seq.collect (fun assembly -> assembly.GetTypes())
@@ -42,4 +41,4 @@ let private isRealClass (cls:Type) =
 let LoadComponents (desiredType:Type) =
     loadByType desiredType
     |> Seq.filter isRealClass
-    |> Seq.map (fun x -> Activator.CreateInstance(x))
+    |> Seq.map Activator.CreateInstance

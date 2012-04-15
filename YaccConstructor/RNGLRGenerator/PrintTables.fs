@@ -140,7 +140,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
     print "module RNGLR.Parse\n"
     print "open Yard.Generators.RNGLR.Parser\n"
     print "open Yard.Generators.RNGLR\n"
-
+    
     match head with
     | None -> ()
     | Some (s : Source.t) ->
@@ -186,14 +186,14 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
 
     let totalRulesLength = rulesArr |> Array.sumBy (fun x -> x.Length)
     let rules = Array.zeroCreate totalRulesLength
-    let rulesStart = Array.zeroCreate grammar.rules.rulesCount
+    let rulesStart = Array.zeroCreate <| grammar.rules.rulesCount + 1
     let mutable cur = 0
     for i = 0 to grammar.rules.rulesCount-1 do
         rulesStart.[i] <- cur
         for j = 0 to rulesArr.[i].Length-1 do
             rules.[cur] <- rulesArr.[i].[j]
             cur <- cur + 1
-
+    rulesStart.[grammar.rules.rulesCount] <- cur
     print "let rules = "
     printArr rules (print "%d")
 
@@ -203,10 +203,10 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
     print "let startRule = %d\n" grammar.startRule
     print "\n"
 
-    print "let defaultAstToDot<'a> = \n"
+    print "let defaultAstToDot = \n"
     printInd 1 "let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}\n"
     printInd 1 "let startInd = leftSide.[startRule]\n"
-    printInd 1 "Yard.Generators.RNGLR.AST.astToDot startInd numToString getRight\n"
+    printInd 1 "Yard.Generators.RNGLR.AST.astToDot<Token> startInd numToString getRight\n"
 
     print "\n"
     print "let buildAst : (seq<Token> -> ParseResult<Token>) =\n"

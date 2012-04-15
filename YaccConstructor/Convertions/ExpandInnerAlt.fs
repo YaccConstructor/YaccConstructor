@@ -2,8 +2,8 @@
 //  - function, which moves inner alternatives to
 // separate rules. Basically it is needed for RNGLR.
 //
-//  Copyright 2009-2011 Konstantin Ulitin,
-//            2011-2012 Dmitry Avdyukhin
+//  Copyright 2009, 2010, 2011 Konstantin Ulitin,
+//            2011, 2012 Dmitry Avdyukhin
 //
 //  This file is part of YaccConctructor.
 //

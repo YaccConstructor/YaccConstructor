@@ -1,7 +1,7 @@
 ﻿//  Module AddDefaultAC contains:
 //  - function, which adds action code to used productions which haven't any.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2012, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

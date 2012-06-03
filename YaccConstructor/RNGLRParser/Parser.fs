@@ -47,12 +47,15 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         let reductions = ref <| new Queue<_>(10)
         let pushes = ref <| new ResizeArray<_>(20)
         let astNodes = new Dictionary<_,_>(10, HashIdentity.Structural)
+        let statesCount = parserSource.Gotos.Length
+        let usedStates : int[] = Array.zeroCreate statesCount
+        let curLevelCount = ref 0
+        let stateToVirtex : Virtex<_,_>[] = Array.zeroCreate statesCount
 
-        let vertices = ref []
         let inline addVirtex state num edgeOpt addNonZero =
-            let dict = stateToVirtex.Value
+            let dict = stateToVirtex
             let mutable v = Unchecked.defaultof<Virtex<_,_>>
-            if not <| dict.TryGetValue(state, &v) then
+            if dict.[state] = null then
                 //printfn "v(%d,%d)" state num
                 v <- new Virtex<_,_>(state, num)
                 dict.[state] <- v
@@ -60,7 +63,9 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     pushes.Value.Add (v, parserSource.Gotos.[state].[tokenNums.[num]].Value) |> ignore
                 parserSource.ZeroReduces.[state].[tokenNums.[num]]
                 |> List.iter (let v' = v in fun prod -> (!reductions).Enqueue (v', prod, 0, None) |> ignore)
-                vertices := v::!vertices
+                usedStates.[!curLevelCount] <- state
+                incr curLevelCount
+            else v <- dict.[state]
             if addNonZero then 
                parserSource.Reduces.[state].[tokenNums.[num]] 
                |> List.iter (let v' = v in fun (prod, pos) -> (!reductions).Enqueue (v', prod, pos, edgeOpt) |> ignore)
@@ -143,7 +148,9 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 let oldPushes = pushes.Value
                 let newAstNode = Term tokensArr.[num]
                 pushes := new ResizeArray<_>(20)
-                stateToVirtex := new Dictionary<_,_>(10)
+                for i = 0 to !curLevelCount-1 do
+                    stateToVirtex.[usedStates.[i]] <- null
+                curLevelCount := 0
                 for virtex, state in oldPushes do
                     let edge = new Edge<_,_>(virtex, newAstNode)
                     //printfn "p %A" (virtex.label, state)
@@ -152,7 +159,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         let mutable errorIndex = -1
         for i = 0 to tokensCount do
             if errorIndex = -1 then
-                if stateToVirtex.Value.Count = 0 then
+                if !curLevelCount = 0 then
                     errorIndex <- i
                 else
                     astNodes.Clear()
@@ -166,10 +173,10 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
             let addTreeTop res = NonTerm (ref [Inner (parserSource.StartRule, [|res|])], ref -1)
-            for value in stateToVirtex.Value do
-                printf "%d " value.Key
-                if parserSource.AccStates.[value.Key] then
-                    res := value.Value.outEdges.[0].label
+            for i = 0 to !curLevelCount-1 do
+                printf "%d " usedStates.[i]
+                if parserSource.AccStates.[usedStates.[i]] then
+                    res := stateToVirtex.[usedStates.[i]].outEdges.[0].label
                            |> addTreeTop |> Success |> Some
             printfn ""
             match !res with

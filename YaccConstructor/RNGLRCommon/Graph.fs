@@ -19,16 +19,19 @@
 
 namespace Yard.Generators.RNGLR
 
-type Edge<'VirtexLabel, 'EdgeLabel> (destination : Virtex<'VirtexLabel, 'EdgeLabel>, label : 'EdgeLabel) =
-    let mutable _label = label
-    member this.dest = destination
-    member this.label = _label
-    member this.setLabel newLabel = _label <- newLabel
-
-and Virtex<'VirtexLabel, 'EdgeLabel> (label : 'VirtexLabel) =
+[<AllowNullLiteral>]
+type Virtex<'VirtexLabel, 'EdgeLabel> (label : 'VirtexLabel) =
     let out = new ResizeArray<Edge<'VirtexLabel, 'EdgeLabel>>(4)
     let mutable _label = label
     member this.label = _label
     member this.addEdge edge = out.Add edge
     member this.outEdges = out
     member this.setLabel newLabel = _label <- newLabel
+
+and Edge<'VirtexLabel, 'EdgeLabel> (destination : Virtex<'VirtexLabel, 'EdgeLabel>, label : 'EdgeLabel) =
+    let mutable _label = label
+    member this.dest = destination
+    member this.label = _label
+    member this.setLabel newLabel = _label <- newLabel
+
+

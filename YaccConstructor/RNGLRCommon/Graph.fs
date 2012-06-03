@@ -19,8 +19,6 @@
 
 namespace Yard.Generators.RNGLR
 
-open System.Collections.Generic
-
 type Edge<'VirtexLabel, 'EdgeLabel> (destination : Virtex<'VirtexLabel, 'EdgeLabel>, label : 'EdgeLabel) =
     let mutable _label = label
     member this.dest = destination
@@ -28,7 +26,7 @@ type Edge<'VirtexLabel, 'EdgeLabel> (destination : Virtex<'VirtexLabel, 'EdgeLab
     member this.setLabel newLabel = _label <- newLabel
 
 and Virtex<'VirtexLabel, 'EdgeLabel> (label : 'VirtexLabel) =
-    let out = new List<Edge<'VirtexLabel, 'EdgeLabel>>()
+    let out = new ResizeArray<Edge<'VirtexLabel, 'EdgeLabel>>(4)
     let mutable _label = label
     member this.label = _label
     member this.addEdge edge = out.Add edge

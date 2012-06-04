@@ -43,11 +43,14 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         else
             Error (0, "This grammar cannot accept empty string")
     else
-        let stateToVirtex = ref <| new Dictionary<_,_>(10)
-        let reductions = ref <| new Queue<_>(10)
-        let pushes = ref <| new ResizeArray<_>(20)
+        let reductions = new Queue<_>(10)
         let astNodes = new Dictionary<_,_>(10, HashIdentity.Structural)
         let statesCount = parserSource.Gotos.Length
+        let pushes = Array.zeroCreate (statesCount * 2 + 10)
+        let pBeg, pEnd = ref 0, ref 0
+        let inline nextInd n =
+            if !n + 1 <> pushes.Length then n := !n + 1
+            else n := 0
         let usedStates : int[] = Array.zeroCreate statesCount
         let curLevelCount = ref 0
         let stateToVirtex : Virtex<_,_>[] = Array.zeroCreate statesCount
@@ -60,23 +63,24 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 v <- new Virtex<_,_>(state, num)
                 dict.[state] <- v
                 if num < tokensCount && parserSource.Gotos.[state].[tokenNums.[num]].IsSome then
-                    pushes.Value.Add (v, parserSource.Gotos.[state].[tokenNums.[num]].Value) |> ignore
+                    pushes.[!pBeg] <- (v, parserSource.Gotos.[state].[tokenNums.[num]].Value)
+                    nextInd pBeg
                 parserSource.ZeroReduces.[state].[tokenNums.[num]]
-                |> List.iter (let v' = v in fun prod -> (!reductions).Enqueue (v', prod, 0, None) |> ignore)
+                |> List.iter (let v' = v in fun prod -> reductions.Enqueue (v', prod, 0, None) |> ignore)
                 usedStates.[!curLevelCount] <- state
                 incr curLevelCount
             else v <- dict.[state]
             if addNonZero then 
                parserSource.Reduces.[state].[tokenNums.[num]] 
-               |> List.iter (let v' = v in fun (prod, pos) -> (!reductions).Enqueue (v', prod, pos, edgeOpt) |> ignore)
+               |> List.iter (let v' = v in fun (prod, pos) -> reductions.Enqueue (v', prod, pos, edgeOpt) |> ignore)
             v
 
         // init, by adding the first virtex in the first set
         ignore <| addVirtex startState 0 None true
 
         let makeReductions num =
-            while reductions.Value.Count > 0 do
-                let virtex, prod, pos, edgeOpt = reductions.Value.Dequeue()
+            while reductions.Count > 0 do
+                let virtex, prod, pos, edgeOpt = reductions.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
                 let compareChildren (ast1 : MultiAST<_>[]) (ast2 : MultiAST<_>[]) =
                     let n = ast1.Length
@@ -145,17 +149,18 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
 
         let shift num =
             if num <> tokensCount then
-                let oldPushes = pushes.Value
                 let newAstNode = Term tokensArr.[num]
-                pushes := new ResizeArray<_>(20)
                 for i = 0 to !curLevelCount-1 do
                     stateToVirtex.[usedStates.[i]] <- null
                 curLevelCount := 0
-                for virtex, state in oldPushes do
+                let curBeg = !pBeg
+                while curBeg <> !pEnd do
+                    let virtex, state = pushes.[!pEnd]
                     let edge = new Edge<_,_>(virtex, newAstNode)
                     //printfn "p %A" (virtex.label, state)
                     let newVirtex = addVirtex state (num + 1) (Some edge) true
                     newVirtex.addEdge edge
+                    nextInd pEnd
         let mutable errorIndex = -1
         for i = 0 to tokensCount do
             if errorIndex = -1 then

@@ -83,3 +83,14 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Success mAst,tokens ->
             mAst |> printAst 0
             printfn "Result: %A" (RNGLR.ParseCalc.translate mAst)
+
+    [<Test>]
+    member test.``Translate with Attributes``() =
+        let parser = RNGLR.ParseAttrs.buildAst
+        let path = dir + "attributes/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst,tokens ->
+            mAst |> printAst 0
+            printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3)

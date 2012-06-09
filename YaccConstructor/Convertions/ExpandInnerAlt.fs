@@ -29,8 +29,8 @@ open Yard.Core.IL.Production
 
 let private newName () = (Namer.Names.brackets,(0,0)) |> Namer.createNewName |> fst
     
-let private expandInnerAlts (ruleList: Rule.t<'patt, 'expr> list) = 
-    let toExpand = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>(List.toArray ruleList)
+let private expandInnerAlts (ruleList: Rule.t<_, _> list) =
+    let toExpand = new System.Collections.Generic.Queue<Rule.t<_, _>>(List.toArray ruleList)
     let expanded = ref []
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()

@@ -70,7 +70,7 @@ let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
 /// </summary>
 let expandMeta body metaRules expanded res =
     /// Replace formal parameter with its actual value or (if it is not to be replaced) 
-    let tryReplaceActual (formalToAct : (string * Production.t<'a,'b>) list) formal prev = 
+    let tryReplaceActual (formalToAct : (string * Production.t<_,_>) list) formal prev = 
         match List.tryFind (fun x -> fst x = formal) formalToAct with
         | None -> prev
         | Some res -> snd res
@@ -85,7 +85,7 @@ let expandMeta body metaRules expanded res =
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
     let rec expandBody body (metaRules: Dictionary<string,Rule.t<Source.t,Source.t> >)
-            (expanded : Dictionary<string, Production.t<'a,'b>>) res =
+            (expanded : Dictionary<string, Production.t<_,_>>) res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
         let getKey body = body.ToString()

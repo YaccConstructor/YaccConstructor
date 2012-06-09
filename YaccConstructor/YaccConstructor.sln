@@ -100,6 +100,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Statistics", "Statistics\St
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Reports", "Reports\Reports.fsproj", "{B390E0A5-8733-4B8C-ABEE-6BF5A74F6B67}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Traversals", "Traversals\Traversals.fsproj", "{BA2C06AB-F1A4-4CEB-A762-097254FA5765}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -416,6 +418,16 @@ Global
 		{B75AEC02-64BD-4B31-8115-6708C64EE5DC}.Release|Mixed Platforms.Build.0 = Release|x86
 		{B75AEC02-64BD-4B31-8115-6708C64EE5DC}.Release|x86.ActiveCfg = Release|x86
 		{B75AEC02-64BD-4B31-8115-6708C64EE5DC}.Release|x86.Build.0 = Release|x86
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BA2C06AB-F1A4-4CEB-A762-097254FA5765}.Release|x86.ActiveCfg = Release|Any CPU
 		{C64ED336-25F3-4618-AC96-9BFE839010FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C64ED336-25F3-4618-AC96-9BFE839010FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C64ED336-25F3-4618-AC96-9BFE839010FF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

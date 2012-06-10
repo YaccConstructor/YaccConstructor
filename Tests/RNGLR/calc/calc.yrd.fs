@@ -46,12 +46,12 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
     for (i,t) in small_gotos do
         for (j,x) in t do
             gotos.[i].[j] <- Some  x
-    let lists_reduces = [|[]; [1,3]; [0,1]; [4,3]; [3,1]; [6,1]; [5,1]|]
+    let lists_reduces = [|[||]; [|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
     let small_reduces =
         [|196610; 327681; 458753; 262146; 327682; 458754; 393219; 327683; 458755; 524291; 458755; 327684; 458756; 524292; 524291; 327685; 458757; 524293; 589827; 327686; 458758; 524294|]
     let reduces = Array.zeroCreate 10
     for i = 0 to 9 do
-        reduces.[i] <- Array.create 9 []
+        reduces.[i] <- Array.create 9 [||]
     let init_reduces =
         let mutable cur = 0
         while cur < small_reduces.Length do
@@ -61,12 +61,12 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_reduces.[cur + k]
                 reduces.[i].[j] <-  lists_reduces.[x]
             cur <- cur + length
-    let lists_zeroReduces = [|[]|]
+    let lists_zeroReduces = [|[||]|]
     let small_zeroReduces =
         [||]
     let zeroReduces = Array.zeroCreate 10
     for i = 0 to 9 do
-        zeroReduces.[i] <- Array.create 9 []
+        zeroReduces.[i] <- Array.create 9 [||]
     let init_zeroReduces =
         let mutable cur = 0
         while cur < small_zeroReduces.Length do
@@ -264,7 +264,7 @@ _rnglr_rule_expr.[0] <-
     (
       let _rnglr_cycle_res = ref []
       _rnglr_result_fact.Value.[(_rnglr_treenum _rnglr_children.[0]).Value] 
-       |> List.iter (fun f -> 
+       |> List.iter (fun (f) -> 
         _rnglr_cycle_res := ( f )::!_rnglr_cycle_res )
       !_rnglr_cycle_res
     )
@@ -273,11 +273,11 @@ _rnglr_rule_expr.[1] <-
     (
       let _rnglr_cycle_res = ref []
       _rnglr_result_expr.Value.[(_rnglr_treenum _rnglr_children.[0]).Value] 
-       |> List.iter (fun a -> 
+       |> List.iter (fun (a) -> 
         (match _rnglr_children.[1] with | Yard.Generators.RNGLR.AST.Term (ADD value) -> [value] | _-> failwith "Token ADD expected") 
-         |> List.iter (fun _rnglr_var_1 -> 
+         |> List.iter (fun (_rnglr_var_1) -> 
           _rnglr_result_expr.Value.[(_rnglr_treenum _rnglr_children.[2]).Value] 
-           |> List.iter (fun b -> 
+           |> List.iter (fun (b) -> 
             _rnglr_cycle_res := ( a + b )::!_rnglr_cycle_res ) ) )
       !_rnglr_cycle_res
     )
@@ -289,7 +289,7 @@ _rnglr_rule_fact.[0] <-
     (
       let _rnglr_cycle_res = ref []
       _rnglr_result_num.Value.[(_rnglr_treenum _rnglr_children.[0]).Value] 
-       |> List.iter (fun n -> 
+       |> List.iter (fun (n) -> 
         _rnglr_cycle_res := ( n )::!_rnglr_cycle_res )
       !_rnglr_cycle_res
     )
@@ -298,11 +298,11 @@ _rnglr_rule_fact.[1] <-
     (
       let _rnglr_cycle_res = ref []
       _rnglr_result_fact.Value.[(_rnglr_treenum _rnglr_children.[0]).Value] 
-       |> List.iter (fun a -> 
+       |> List.iter (fun (a) -> 
         (match _rnglr_children.[1] with | Yard.Generators.RNGLR.AST.Term (MUL value) -> [value] | _-> failwith "Token MUL expected") 
-         |> List.iter (fun _rnglr_var_1 -> 
+         |> List.iter (fun (_rnglr_var_1) -> 
           _rnglr_result_fact.Value.[(_rnglr_treenum _rnglr_children.[2]).Value] 
-           |> List.iter (fun b -> 
+           |> List.iter (fun (b) -> 
             _rnglr_cycle_res := ( a * b )::!_rnglr_cycle_res ) ) )
       !_rnglr_cycle_res
     )
@@ -311,7 +311,7 @@ _rnglr_rule_num.[0] <-
     (
       let _rnglr_cycle_res = ref []
       (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (B value) -> [value] | _-> failwith "Token B expected") 
-       |> List.iter (fun _rnglr_var_0 -> 
+       |> List.iter (fun (_rnglr_var_0) -> 
         _rnglr_cycle_res := ( 5 )::!_rnglr_cycle_res )
       !_rnglr_cycle_res
     )
@@ -320,7 +320,7 @@ _rnglr_rule_num.[1] <-
     (
       let _rnglr_cycle_res = ref []
       (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (A value) -> [value] | _-> failwith "Token A expected") 
-       |> List.iter (fun _rnglr_var_0 -> 
+       |> List.iter (fun (_rnglr_var_0) -> 
         _rnglr_cycle_res := ( 3 )::!_rnglr_cycle_res )
       !_rnglr_cycle_res
     )

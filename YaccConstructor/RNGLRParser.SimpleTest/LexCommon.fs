@@ -22,3 +22,4 @@ let tokens<'lexType>(path) =
         .Split([|' '|])
     |> Array.filter ((<>) "")
     |> Array.map toLexerTag
+    |> (fun x -> printf "\n"; x)

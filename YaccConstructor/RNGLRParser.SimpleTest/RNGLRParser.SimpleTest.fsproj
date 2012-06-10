@@ -54,6 +54,8 @@
     <Compile Include="calc.yrd.fs" />
     <None Include="attrs.yrd" />
     <Compile Include="attrs.yrd.fs" />
+    <None Include="cycle.yrd" />
+    <Compile Include="cycle.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

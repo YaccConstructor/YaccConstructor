@@ -1,13 +1,15 @@
     YaccConstructor
-    Copyright (C) 2009,2010,2011  
+    Copyright (C) 2009,2010,2011,2012
     Jake Kirilenko <jake.kirilenko@gmail.com>, 
     Iiya Chemodanov <>,                 
     Alexander Lukichev <alexander.s.lukichev@gmail.com>,
     Semen Grigorev <rsdpisuy@gmail.com>, 
     Konstantin Ulitin <ulitin.k@gmail.com>,
     Anastasia Nishnevich <Anastasia.Nishnevich@gmail.com>,
-    Dmitry Avdyukhin <dimonbv@gmail.com>    
-    
+    Dmitry Avdyukhin <dimonbv@gmail.com>
+    Ilya Shenbin <ilya.shenbin@gmail.com>
+    Oleg Shcherbakov <shcherbakov.o@gmail.com>
+    Alexander Deykin <eskendirrr@gmail.com>    
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

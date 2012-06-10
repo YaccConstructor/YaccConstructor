@@ -110,7 +110,7 @@ let () =
                 else _raise ()
 
             // Parse grammar    
-            let ilTree =                
+            let ilTree =  
                 try
                     if System.String.IsNullOrEmpty !userDefsStr
                     then grammarFilePath

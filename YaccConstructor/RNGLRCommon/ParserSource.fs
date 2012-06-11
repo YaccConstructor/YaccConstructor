@@ -21,8 +21,8 @@
 namespace Yard.Generators.RNGLR
 
 type ParserSource<'TokenType> (gotos : int option[][]
-                               , reduces : list<int * int>[][]
-                               , zeroReduces : list<int>[][]
+                               , reduces : (int * int)[][][]
+                               , zeroReduces : int[][][]
                                , accStates : bool[]
                                , rules : int[]
                                , rulesStart : int[]

@@ -1,6 +1,6 @@
 # 1 "Lexer.fsl"
  
-//  Copyright 2010-2011 Konstantin Ulitin
+//  Copyright 2010, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

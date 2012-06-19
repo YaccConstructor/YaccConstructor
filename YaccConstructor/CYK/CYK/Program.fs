@@ -77,7 +77,7 @@ let recognitionTable (rules,_) (s:string) =
          |_           -> ()
    //последующие столбцы
    fillTable 0 1
-   recTable                             
+   recTable
 
 //вывод строки s в грамматике g
 let recognize ((_, start) as g) s =
@@ -91,9 +91,9 @@ let recognize ((_, start) as g) s =
          match currentRule with
          |ToBranch(_,left,right) -> left,right
          |ToLeaf(_,terminal)     -> terminal.ToString(),""  
-      match (i,l) with
-      |(_,0) -> [ToLeaf(top,leftNT.[0])]
-      |_     -> currentRule::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
+      match i,l with
+      | _,0 -> [ToLeaf(top,leftNT.[0])]
+      | _     -> currentRule::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
    let resultRules = if List.exists ((=)start) ((fun (a,_,_,_) -> a) recTable.[0,s.Length-1])
                      then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                      else []

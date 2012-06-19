@@ -94,7 +94,7 @@ let recognize ((_, start) as g) s =
       match i,l with
       | _,0 -> [ToLeaf(top,leftNT.[0])]
       | _     -> currentRule::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
-   let resultRules = if List.exists ((=)start) ((fun (a,_,_,_) -> a) recTable.[0,s.Length-1])
+   let resultRules = if List.exists ((=)start) ((fun (a,_,_,_) -> a) recTable.[0, s.Length-1])
                      then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                      else []
 
@@ -104,7 +104,6 @@ let recognize ((_, start) as g) s =
    //printOutput resultRules start    
 
 
-
 //грамматика, допускающая операции +, * и позволяющая группировать их с помощью скобок, преобразованная в НФХ
 let testGrammar1 = (Array.ofList <| (List.map ToBranch [("E","T","N1");("N1","N2","E");("E","F","N3");("N3","N4","T");("E","N5","N6");("N6","E","N7");("E1","N2","E");("T","F","N3");("T","N5","N6");("T1","N4","T");("F","N5","N6")]) @ (List.map ToLeaf [("N2",'+');("N4",'*');("E",'a');("N5",'(');("N7",')');("T",'a');("F",'a')]),"E")
 let testGrammar2 = ((List.map ToBranch [("S","A","B");("B","N1","N2");("N1","D1","D2")])@(List.map ToLeaf [("A",'a');("D2",'c');("B",'a');("D1",'b');("N2",'d')]),"S")
@@ -112,7 +111,7 @@ let testGrammar2 = ((List.map ToBranch [("S","A","B");("B","N1","N2");("N1","D1"
 //recognize testGrammar1 "a*a+a"
 
 
-let str = List.init 40 (fun i -> "(a+a)*a") |> String.concat "+"
+let str = List.init 100 (fun i -> "(a+a)*a") |> String.concat "+"
 System.Console.WriteLine("Test2:")
 let start = System.DateTime.Now
 recognize testGrammar1 str

@@ -11,13 +11,11 @@ type Rule =
    |ToLeaf of string*char//A->a, а - терминал
 
 //Вывод правил
-let rec printRules rs = 
-   match rs with
-   |(ToBranch(a,b,c))::xs -> System.Console.WriteLine(String.concat "" [a;"->";b;c])
-                             printRules xs
-   |(ToLeaf(a,b))::xs     -> System.Console.WriteLine(String.concat "" [a;"->";b.ToString()])
-                             printRules xs                          
-   |[]                    -> ()
+let printRules =
+   (function
+   | ToBranch(a,b,c) -> System.Console.WriteLine(String.concat "" [a;"->";b;c])                 
+   | ToLeaf(a,b)     -> System.Console.WriteLine(String.concat "" [a;"->";b.ToString()]))
+   |> List.iter
 
 //Последовательное применение правил rs, начиная с первого левого нетерминала start                             
 let printOutput rs start =
@@ -33,8 +31,7 @@ let printOutput rs start =
                                 match x with //замена l в соответствии с правилом x
                                 |ToBranch(a,b,c) -> b::c::ls
                                 |ToLeaf(a,b)     -> b.ToString()::ls
-                             else
-                                l::(newForm ls)
+                             else l::(newForm ls)
                    |_     -> []
                 System.Console.Write(String.concat "" ("->"::(newForm current)))                   
                 sentForm (newForm current) xs
@@ -45,7 +42,7 @@ let printOutput rs start =
                                                                        
 let recognitionTable (rules,_) (s:string) = 
            
-   let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length ([],(0,0),(0,0),[]) 
+   let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length ([],(0,0),(0,0),[])
    //recTable(i,l), для l > 0
 
    let inline processRule rule i k l =
@@ -54,7 +51,7 @@ let recognitionTable (rules,_) (s:string) =
                             let nonTerminals2,_,_,_ = recTable.[k+i+1,l-k-1]
                             let nonTerminals,_,_,rules = recTable.[i,l]
                             if (List.exists ((=)b) nonTerminals1) && (List.exists ((=)c) nonTerminals2)
-                            then recTable.[i,l] <- ((a::nonTerminals),(i,k),(k+i+1,l-k-1),(rule::rules))
+                            then recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),(rule::rules)
         |_               -> ()   
 
    let elem i l = rules |>  Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
@@ -63,7 +60,7 @@ let recognitionTable (rules,_) (s:string) =
    let rec fillTable i l =
         if l = s.Length-1
         then elem i l//последний элемент таблицы
-        elif (i+l) <= (s.Length-1)
+        elif i+l <= s.Length-1
         then
              elem i l
              fillTable (i+1) l//продолжаем заполнять столбец
@@ -74,7 +71,7 @@ let recognitionTable (rules,_) (s:string) =
    for rule in rules do
       for k in 0..(s.Length-1) do
          match rule with
-         |ToLeaf(a,b) -> if(b = s.[k])then
+         |ToLeaf(a,b) -> if b = s.[k] then
                             let nonTerminals,_,_,rules = recTable.[k,0]
                             recTable.[k,0] <- ((a::nonTerminals),(-1,-1),(-1,-1),(rule::rules))
          |_           -> ()
@@ -83,7 +80,7 @@ let recognitionTable (rules,_) (s:string) =
    recTable                             
 
 //вывод строки s в грамматике g
-let recognize ((rules, start)as g) s =
+let recognize ((_, start) as g) s =
    let recTable = recognitionTable g s
    //восстановление вывода по таблице начиная с ячейки recTable(i,l) нетерминала top
    let rec subRecognize i l top = 
@@ -94,15 +91,15 @@ let recognize ((rules, start)as g) s =
          match currentRule with
          |ToBranch(_,left,right) -> left,right
          |ToLeaf(_,terminal)     -> terminal.ToString(),""  
-      match (i,l) with 
+      match (i,l) with
       |(_,0) -> [ToLeaf(top,leftNT.[0])]
       |_     -> currentRule::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
    let resultRules = if List.exists ((=)start) ((fun (a,_,_,_) -> a) recTable.[0,s.Length-1])
                      then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                      else []
 
-   System.Console.WriteLine(s)
-   System.Console.WriteLine("Rules:")
+   System.Console.WriteLine s
+   System.Console.WriteLine "Rules:"
    printRules resultRules
    //printOutput resultRules start    
 

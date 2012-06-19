@@ -24,7 +24,7 @@ open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 
 type ParseResult<'TokenType> =
-    | Success of MultiAST<'TokenType>
+    | Success of AST<'TokenType>
     | Error of int * string
 
 let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
@@ -89,7 +89,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             while reductions.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
-                let compareChildren (ast1 : MultiAST<_>[]) (ast2 : MultiAST<_>[]) =
+                let compareChildren (ast1 : AST<_>[]) (ast2 : AST<_>[]) =
                     let n = ast1.Length
                     if ast2.Length <> n then false
                     else
@@ -100,7 +100,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     if not astExists then
                         getFamily node := Epsilon::!(getFamily node)
 
-                let inline addChildren node (path : MultiAST<_>[]) prod =
+                let inline addChildren node (path : AST<_>[]) prod =
                     let astExists = 
                         (getFamily node).Value
                         |> List.exists
@@ -112,8 +112,8 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                         (getFamily node) := (Inner (prod, path))::(getFamily node).Value
                     //else
                     //    printf "Rejected: %A\n" path
-                let handlePath (path : MultiAST<_> list) (final : Virtex<_,_>) =
-                    let ast = ref Unchecked.defaultof<MultiAST<'TokenType>>
+                let handlePath (path : AST<_> list) (final : Virtex<_,_>) =
+                    let ast = ref Unchecked.defaultof<AST<'TokenType>>
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
                     //printf "r %A->%A->%A (prod: %d,%d)\n" virtex.label final.label (state,num) prod pos
                     let newVirtex = addVirtex state num None
@@ -125,7 +125,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                                                                        true)
                     then
                         ast := NonTerm(ref[], ref -1)
-                        let edge = new Edge<int*int, MultiAST<_>>(final, !ast)
+                        let edge = new Edge<int*int, AST<_>>(final, !ast)
                         newVirtex.addEdge edge
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[tokenNums.[num]] do

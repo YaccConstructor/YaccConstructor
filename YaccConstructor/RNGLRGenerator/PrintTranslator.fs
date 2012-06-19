@@ -137,7 +137,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         |> aboveListL
 
     let printNode =
-        let rec inner isFirst (node : MultiAST<_>) =
+        let rec inner isFirst (node : AST<_>) =
             (getFamily node).Value
             |> List.map
                 (function
@@ -201,7 +201,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveStringListL
             yield
                 //wordL (sprintf "%s.[%d] <- " tokenCall i)
-                wordL (sprintf "%s.[%d] <- fun (%s : %sMultiAST<Token>) -> " tokenCall (i + indexator.nonTermCount) nodeName pathToModule)
+                wordL (sprintf "%s.[%d] <- fun (%s : %sAST<Token>) -> " tokenCall (i + indexator.nonTermCount) nodeName pathToModule)
                 @@-- (
                     wordL (sprintf "match %s with" nodeName)
                     @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
@@ -215,7 +215,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                             wordL (sprintf "%s.Value" multiAstName)
                             @@ wordL "|> List.map ("
                             @@-- (
-                                wordL (sprintf "fun (%s : %sAST<Token>) -> " astName pathToModule)
+                                wordL (sprintf "fun (%s : %sChild<Token>) -> " astName pathToModule)
                                 @@-- body
                             )
                             @@ wordL ")"
@@ -245,7 +245,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> aboveStringListL
             yield
                 //wordL (sprintf "%s.[%d] <- fun (%s : %sNode<Token>) -> " dfsCall i nodeName pathToModule)
-                wordL (sprintf "%s.[%d] <- fun (%s : %sMultiAST<Token>) -> " tokenCall i nodeName pathToModule)
+                wordL (sprintf "%s.[%d] <- fun (%s : %sAST<Token>) -> " tokenCall i nodeName pathToModule)
                 @@-- (
                     wordL (sprintf "match %s with" nodeName)
                     @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
@@ -259,7 +259,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                             @@ wordL (sprintf "%s.Value" multiAstName)
                             @@ wordL "|> List.iter ("
                             @@-- (
-                                wordL (sprintf "fun (%s : %sAST<Token>) -> " astName pathToModule)
+                                wordL (sprintf "fun (%s : %sChild<Token>) -> " astName pathToModule)
                                 @@-- body
                             )
                             @@ wordL ")"
@@ -315,12 +315,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | x -> failwithf "unexpected %A construction" x
 
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) =
-        wordL (sprintf "fun (%s : %sMultiAST<Token>[]) -> " childrenName pathToModule)
+        wordL (sprintf "fun (%s : %sAST<Token>[]) -> " childrenName pathToModule)
         -- printArgsDeclare rule.args
         @@-- getProductionLayout (ref -1) rule.body
 
     let getRuleCallLayout rule =
-        let head = wordL <| sprintf "fun (%s : %sMultiAST<_>[]) ->" childrenName pathToModule
+        let head = wordL <| sprintf "fun (%s : %sAST<_>[]) ->" childrenName pathToModule
         let body =
             let prod = rules.rightSide rule
             [for sub = 0 to prod.Length - 1 do

@@ -38,24 +38,24 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <None Include="first.yrd" />
-    <Compile Include="first.yrd.ast.fs" />
-    <None Include="list.yrd" />
-    <Compile Include="list.yrd.ast.fs" />
-    <None Include="simpleRightNull.yrd" />
-    <Compile Include="simpleRightNull.yrd.ast.fs" />
-    <None Include="expr.yrd" />
-    <Compile Include="expr.yrd.ast.fs" />
-    <None Include="complexRightNull.yrd" />
-    <Compile Include="complexRightNull.yrd.ast.fs" />
-    <None Include="counter.yrd" />
-    <Compile Include="counter.yrd.fs" />
-    <None Include="calc.yrd" />
-    <Compile Include="calc.yrd.fs" />
-    <None Include="attrs.yrd" />
-    <Compile Include="attrs.yrd.fs" />
-    <None Include="cycle.yrd" />
-    <Compile Include="cycle.yrd.fs" />
+    <None Include="First.yrd" />
+    <Compile Include="First.yrd.fs" />
+    <None Include="List.yrd" />
+    <Compile Include="List.yrd.fs" />
+    <None Include="SimpleRightNull.yrd" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
+    <None Include="Expr.yrd" />
+    <Compile Include="Expr.yrd.ast.fs" />
+    <None Include="ComplexRightNull.yrd" />
+    <Compile Include="ComplexRightNull.yrd.fs" />
+    <None Include="Counter.yrd" />
+    <Compile Include="Counter.yrd.fs" />
+    <None Include="Calc.yrd" />
+    <Compile Include="Calc.yrd.fs" />
+    <None Include="Attrs.yrd" />
+    <Compile Include="Attrs.yrd.fs" />
+    <None Include="Cycle.yrd" />
+    <Compile Include="Cycle.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

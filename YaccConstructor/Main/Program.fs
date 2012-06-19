@@ -75,7 +75,7 @@ let () =
             (fun s -> 
                 match Array.toList (s.Split(' ')) with
                 | name::[] -> generatorName := Some(name); generatorParams := None
-                | name::parameters -> generatorName := Some(name); generatorParams := Some(String.concat " " parameters)
+                | name::parameters -> generatorName := Some(name); generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
@@ -88,7 +88,6 @@ let () =
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
-    let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
     let run () =

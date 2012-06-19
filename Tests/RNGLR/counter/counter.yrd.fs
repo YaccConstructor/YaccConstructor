@@ -92,35 +92,35 @@ let inline _rnglr_pop (x : ResizeArray<_>) =
   x.RemoveAt(pos)
   res
 let private _rnglr_translate_token = Array.zeroCreate 4
-_rnglr_translate_token.[2] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.MultiAST<Token>) -> 
+_rnglr_translate_token.[2] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.AST<Token>) -> 
   match _rnglr_node with
   | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal s expected, but terminal found" 
   | Yard.Generators.RNGLR.AST.NonTerm (_rnglr_multi_ast,num) ->
     ( 
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.Child<Token>) -> 
           match _rnglr_ast with
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm s can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_s.[_rnglr_index.[_rnglr_number]] _rnglr_children 
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_s.Value.[!num] <- res)
-_rnglr_translate_token.[3] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.MultiAST<Token>) -> 
+_rnglr_translate_token.[3] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.AST<Token>) -> 
   match _rnglr_node with
   | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal yard_start_rule expected, but terminal found" 
   | Yard.Generators.RNGLR.AST.NonTerm (_rnglr_multi_ast,num) ->
     ( 
       _rnglr_multi_ast.Value
       |> List.map (
-        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.Child<Token>) -> 
           match _rnglr_ast with
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm yard_start_rule can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_rule_yard_start_rule.[_rnglr_index.[_rnglr_number]] _rnglr_children 
         )
         |> List.concat
       ) |> (fun res -> _rnglr_result_yard_start_rule.Value.[!num] <- res)
-_rnglr_translate_token.[0] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.MultiAST<Token>) -> 
+_rnglr_translate_token.[0] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.AST<Token>) -> 
   match _rnglr_node with
   | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal s expected, but terminal found" 
   | Yard.Generators.RNGLR.AST.NonTerm (_rnglr_multi_ast,num) ->
@@ -131,12 +131,12 @@ _rnglr_translate_token.[0] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Multi
       _rnglr_stack_calls_node.Push(_rnglr_node)
       _rnglr_multi_ast.Value
       |> List.iter (
-        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.Child<Token>) -> 
           match _rnglr_ast with
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm s can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_call_rule_s.[_rnglr_index.[_rnglr_number]] _rnglr_children
         )
-_rnglr_translate_token.[1] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.MultiAST<Token>) -> 
+_rnglr_translate_token.[1] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.AST<Token>) -> 
   match _rnglr_node with
   | Yard.Generators.RNGLR.AST.Term _ -> failwith "Nonterminal yard_start_rule expected, but terminal found" 
   | Yard.Generators.RNGLR.AST.NonTerm (_rnglr_multi_ast,num) ->
@@ -147,24 +147,24 @@ _rnglr_translate_token.[1] <- fun (_rnglr_node : Yard.Generators.RNGLR.AST.Multi
       _rnglr_stack_calls_node.Push(_rnglr_node)
       _rnglr_multi_ast.Value
       |> List.iter (
-        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.AST<Token>) -> 
+        fun (_rnglr_ast : Yard.Generators.RNGLR.AST.Child<Token>) -> 
           match _rnglr_ast with
           | Yard.Generators.RNGLR.AST.Epsilon -> failwith "Nonterm yard_start_rule can't infer epsilon"
           | Yard.Generators.RNGLR.AST.Inner (_rnglr_number, _rnglr_children) -> _rnglr_call_rule_yard_start_rule.[_rnglr_index.[_rnglr_number]] _rnglr_children
         )
 _rnglr_call_rule_s.[0] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<_>[]) ->
     ()
 _rnglr_call_rule_s.[1] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<_>[]) ->
     if !(_rnglr_treenum _rnglr_children.[1]) = -1 then (_rnglr_stack_calls_ind.Push(0);_rnglr_stack_calls_node.Push(_rnglr_children.[1]))
     ()
 _rnglr_call_rule_yard_start_rule.[0] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<_>[]) ->
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<_>[]) ->
     if !(_rnglr_treenum _rnglr_children.[0]) = -1 then (_rnglr_stack_calls_ind.Push(0);_rnglr_stack_calls_node.Push(_rnglr_children.[0]))
     ()
 _rnglr_rule_s.[0] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<Token>[]) ->  
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<Token>[]) ->  
     (
       let _rnglr_cycle_res = ref []
       (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (A value) -> [value] | _-> failwith "Token A expected") 
@@ -173,7 +173,7 @@ _rnglr_rule_s.[0] <-
       !_rnglr_cycle_res
     )
 _rnglr_rule_s.[1] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<Token>[]) ->  
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<Token>[]) ->  
     (
       let _rnglr_cycle_res = ref []
       (match _rnglr_children.[0] with | Yard.Generators.RNGLR.AST.Term (A value) -> [value] | _-> failwith "Token A expected") 
@@ -184,7 +184,7 @@ _rnglr_rule_s.[1] <-
       !_rnglr_cycle_res
     )
 _rnglr_rule_yard_start_rule.[0] <- 
-  fun (_rnglr_children : Yard.Generators.RNGLR.AST.MultiAST<Token>[]) ->  
+  fun (_rnglr_children : Yard.Generators.RNGLR.AST.AST<Token>[]) ->  
     _rnglr_result_s.Value.[(_rnglr_treenum _rnglr_children.[0]).Value] 
 let translate node = 
   _rnglr_res_count_s := 0

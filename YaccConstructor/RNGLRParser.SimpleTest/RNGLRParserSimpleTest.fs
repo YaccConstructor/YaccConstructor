@@ -90,7 +90,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Translate with Attributes``() =
         let parser = RNGLR.ParseAttrs.buildAst
-        let path = dir + "attributes/input.txt"
+        let path = dir + "attrs/input.txt"
 
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message

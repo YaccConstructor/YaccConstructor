@@ -51,7 +51,10 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst |> printAst 0
+        | Parser.Success mAst,_ ->
+            mAst |> printAst 0
+            RNGLR.ParseComplexRightNull.defaultAstToDot "ast.dot" mAst
+        
 
     [<Test>]
     member test.``Expression test``() =
@@ -83,3 +86,26 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Success mAst,tokens ->
             mAst |> printAst 0
             printfn "Result: %A" (RNGLR.ParseCalc.translate mAst)
+
+    [<Test>]
+    member test.``Translate with Attributes``() =
+        let parser = RNGLR.ParseAttrs.buildAst
+        let path = dir + "attributes/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst,tokens ->
+            mAst |> printAst 0
+            printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3)
+
+    [<Test>]
+    member test.``AST, containing cycles``() =
+        let parser = RNGLR.ParseCycle.buildAst
+        let path = dir + "cycle/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
+        | Parser.Success mAst,tokens ->
+            //mAst |> printAst 0
+            printf "OK\n"
+            //printfn "Result: %A" (RNGLR.ParseCycle.translate mAst)

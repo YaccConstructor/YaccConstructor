@@ -39,12 +39,12 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
     for (i,t) in small_gotos do
         for (j,x) in t do
             gotos.[i].[j] <- Some  x
-    let lists_reduces = [|[]; [1,1]; [2,1]; [2,2]; [2,3]; [2,4]|]
+    let lists_reduces = [|[||]; [|1,1|]; [|2,1|]; [|2,2|]; [|2,3|]; [|2,4|]|]
     let small_reduces =
         [|131075; 196609; 262145; 327681; 196611; 196610; 262146; 327682; 262147; 196611; 262147; 327683; 327683; 196612; 262148; 327684; 393219; 196613; 262149; 327685|]
     let reduces = Array.zeroCreate 7
     for i = 0 to 6 do
-        reduces.[i] <- Array.create 6 []
+        reduces.[i] <- Array.create 6 [||]
     let init_reduces =
         let mutable cur = 0
         while cur < small_reduces.Length do
@@ -54,12 +54,12 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_reduces.[cur + k]
                 reduces.[i].[j] <-  lists_reduces.[x]
             cur <- cur + length
-    let lists_zeroReduces = [|[]; [3; 0]; [4]; [0]|]
+    let lists_zeroReduces = [|[||]; [|3; 0|]; [|4|]; [|0|]|]
     let small_zeroReduces =
         [|1; 327681; 196611; 196610; 262146; 327682; 262147; 196611; 262147; 327683; 327683; 196611; 262147; 327683|]
     let zeroReduces = Array.zeroCreate 7
     for i = 0 to 6 do
-        zeroReduces.[i] <- Array.create 6 []
+        zeroReduces.[i] <- Array.create 6 [||]
     let init_zeroReduces =
         let mutable cur = 0
         while cur < small_zeroReduces.Length do

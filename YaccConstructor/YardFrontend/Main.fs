@@ -74,7 +74,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                     | ELIF d ->
                         match !currentDefined with
                         | (_, prev, upper) :: tl -> 
-                            let x = Array.contains d userDefined
+                            let x = (Array.contains d userDefined) && (not prev)
                             currentDefined :=  (x, prev || x, upper) :: tl
                             currentState := x && upper
                         | _ -> failwith "Unexpected #ELIF"

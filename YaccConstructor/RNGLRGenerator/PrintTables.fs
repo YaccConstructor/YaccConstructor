@@ -51,6 +51,12 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
                                     printer x)
         print "]"
 
+    let printListAsArray l printer = 
+        print "[|"
+        l |> List.iteri (fun i x -> if i <> 0 then print "; "
+                                    printer x)
+        print "|]"
+
     let print2DArr (arr : 'a[,]) checker printer
             name initValue conv =
         printInd 1 "let small_%s =\n" name
@@ -224,13 +230,13 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
 
     print2DArrList reduces
         (fun l -> not l.IsEmpty)
-        (fun l -> printList l (fun (x,y) -> print "%d,%d" x y))
-        "reduces" "[]" ""
+        (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
+        "reduces" "[||]" ""
 
     print2DArrList zeroReduces
         (fun l -> not l.IsEmpty)
-        (fun l -> printList l (fun (x,y) -> print "%d" x))
-        "zeroReduces" "[]" ""
+        (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
+        "zeroReduces" "[||]" ""
 
     printInd 1 "let small_acc = "
     printList tables.acc (fun x -> print "%d" x)

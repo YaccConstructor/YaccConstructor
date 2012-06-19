@@ -44,6 +44,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let multiAstName = "_rnglr_multi_ast"
     let astName = "_rnglr_ast"
+    let resCycleName = "_rnglr_cycle_res"
     let nodeName = "_rnglr_node"
     let tokenCall = "_rnglr_translate_token"
     let ruleName name = "_rnglr_rule_" + name
@@ -56,7 +57,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let indexName = "_rnglr_index"
     let tokensSeqName = "_rnglr_tokens"
     let pathToModule = "Yard.Generators.RNGLR.AST."
-    let stackCallsName = "_rnglr_stack_calls"
+    let stackCallsIndName = "_rnglr_stack_calls_ind"
+    let stackCallsNodeName = "_rnglr_stack_calls_node"
     let stackResName = "_rnglr_stack_res"
 
     let printArgsDeclare args= 
@@ -105,7 +107,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         |> wordL
 
     let declareStacks =
-        wordL (sprintf "let %s = new ResizeArray<_>()" stackCallsName)
+        wordL (sprintf "let %s = new System.Collections.Generic.Stack<_>()" stackCallsIndName)
+        @@ wordL (sprintf "let %s = new System.Collections.Generic.Stack<_>()" stackCallsNodeName)
         //@@ wordL (sprintf "let %s = ref []" stackResName) System.Collections.Generic.Queue
         @@ wordL (sprintf "let %s = new ResizeArray<_>()" stackResName)
 
@@ -120,8 +123,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         |> (function (h::t) -> h @@-- (aboveListL t) | _ -> emptyL)
 
     let addNodeToStack node ind =
-        sprintf "if !(_rnglr_treenum %s) = -1 then " node
-                    + stackCallsName + ".Add(" + (sprintf "%d" ind) + "," + node + ")";//::!" + stackCallsName + "; "
+        sprintf "if !(_rnglr_treenum %s) = -1 then (" node
+                    + stackCallsIndName + ".Push(" + (sprintf "%d" ind) + ");"+ stackCallsNodeName + ".Push(" + node + "))";//::!" + stackCallsName + "; "
 
 
     let declareNonTermsArrays =
@@ -175,7 +178,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         )
 
     let declareNonTems =
-        [sprintf "let %s = Array.zeroCreate %d" tokenCall (indexator.nonTermCount * 2)
+        [sprintf "let private %s = Array.zeroCreate %d" tokenCall (indexator.nonTermCount * 2)
         //;sprintf "let %s = Array.zeroCreate %d" dfsCall indexator.nonTermCount
         ]
         |> aboveStringListL
@@ -250,7 +253,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     @@-- (
                         dfsCond name
                         @@-- ( // Not a bug!!! At least, by design.
-                            wordL (stackCallsName + ".Add(" + (sprintf "%d" (i + indexator.nonTermCount)) + "," + nodeName + ");")//::!" + stackCallsName + "; ")
+                            //wordL (stackCallsName + ".Push(" + (sprintf "%d" (i + indexator.nonTermCount)) + "," + nodeName + ");")//::!" + stackCallsName + "; ")
+                            wordL (stackCallsIndName + ".Push(" + (sprintf "%d" (i + indexator.nonTermCount)) + ")")
+                            @@ wordL (stackCallsNodeName + ".Push(" + nodeName + ")")
                             @@ wordL (sprintf "%s.Value" multiAstName)
                             @@ wordL "|> List.iter ("
                             @@-- (
@@ -294,15 +299,19 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                             if e.binding.IsNone || e.omit then (sprintf "_rnglr_var_%d" <| !num + 1)
                             else Source.toString e.binding.Value
                         let prod = getProductionLayout num e.rule
-                        wordL ("for " + var + " in ")
-                        -- prod
-                        -- wordL (" do")
+                        prod
+                        -- wordL ("|> List.iter (fun (" + var + ") -> ")
+                        //-- wordL (" do")
                     )
                 |> List.rev
                 |> List.fold
-                    (fun acc x -> x @@-- acc)
-                    (wordL "yield (" -- actionCodeLayout -- wordL ")")
-                |> (fun x -> (wordL "[" @@-- x) @@ wordL "]")
+                    (fun acc x -> x @@-- acc -- wordL ")")
+                    (wordL (resCycleName + " := (") -- actionCodeLayout -- wordL (")::!" + resCycleName))
+                |> (fun x -> [wordL <| "let " + resCycleName + " = ref []"
+                              x
+                              wordL <| "!" + resCycleName
+                             ] |> aboveListL)
+                |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected %A construction" x
 
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) =
@@ -356,17 +365,23 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 ;sprintf "if n then %s.[i] x" dfsCall
                 ;sprintf "else %s.Add(i,x) |> ignore" stackResName
                 ]*)
-                [sprintf "let i,x = _rnglr_pop %s" stackCallsName
-                ;sprintf "if i < %d then %s.[i] x" indexator.nonTermCount tokenCall
-                ;sprintf "else %s.Add(i,x)" stackResName
+                [
+                 //sprintf "let i,x = %s.Pop()" stackCallsName
+                 sprintf "let i = %s.Pop()" stackCallsIndName
+                 sprintf "let x = %s.Pop()" stackCallsNodeName
+                 sprintf "if i < %d then %s.[i] x" indexator.nonTermCount tokenCall
+                 sprintf "else %s.Add(i,x)" stackResName
                 ]
                 |> List.map wordL
                 |> aboveListL
-            [(sprintf "%s.Clear()" stackCallsName)
+            [
+             //sprintf "%s.Clear()" stackCallsName
+             sprintf "%s.Clear()" stackCallsIndName
+             sprintf "%s.Clear()" stackCallsNodeName
             //;(sprintf "%s := []" stackResName)
-            ;(sprintf "%s.Clear()" stackResName)
-            ;addNodeToStack "node" startInd
-            ;(sprintf "while %s.Count > 0 do" stackCallsName)
+             sprintf "%s.Clear()" stackResName
+             addNodeToStack "node" startInd
+             sprintf "while %s.Count > 0 do" stackCallsIndName
             ]
             |> aboveStringListL
             |> (fun x -> x @@-- cycleBody)

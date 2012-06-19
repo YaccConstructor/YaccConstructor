@@ -1,7 +1,7 @@
 ﻿//  Module RemoveAST contains:
 //  - function, which remove all action code.
 //
-//  Copyright 2012 Konstantin Ulitin
+//  Copyright 2012 Semen Grigorev
 //
 //  This file is part of YaccConctructor.
 //

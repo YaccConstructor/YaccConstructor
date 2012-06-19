@@ -43,7 +43,6 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
 
 type RemoveAC() =
     inherit Convertion()
-        override this.Name = "RemoveAC"
-        override this.ConvertList(ruleList,_) =             
-            removeAC ruleList
-        override this.EliminatedProductionTypes = [""]
+    override this.Name = "RemoveAC"
+    override this.ConvertList(ruleList,_) = removeAC ruleList
+    override this.EliminatedProductionTypes = [""]

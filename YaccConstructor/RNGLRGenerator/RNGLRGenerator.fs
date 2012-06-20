@@ -27,11 +27,28 @@ open Yard.Generators.YardPrinter
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR.Printer
 open Yard.Generators.RNGLR.TranslatorPrinter
+open Option
 
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Generate (definition, tokenType) =
+        override this.Generate (definition, args) =
+            let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
+            let pairs = Array.zeroCreate <| args.Length / 2
+            for i = 0 to pairs.Length-1 do
+                pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
+            let mutable moduleName = ""
+            let mutable tokenType = ""
+            let mutable needTranslate = true
+            for opt, value in pairs do
+                match opt with
+                | "-module" -> moduleName <- value
+                | "-token" -> tokenType <- value
+                | "-translate" ->
+                    if value = "true" then needTranslate <- true
+                    elif value = "false" then needTranslate <- false
+                    else failwith "Unexpected translate value"
+                // In other cases causes error
             let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
@@ -43,13 +60,25 @@ type RNGLR() =
             else
                 let statesInterpreter = buildStates grammar
                 let tables = new Tables(grammar, statesInterpreter)
-                let tokenTypeOpt =
-                    match tokenType with
-                    | "" -> None
-                    | s -> Some s
                 use out = new System.IO.StreamWriter (definition.info.fileName + ".fs")
-                printTables grammar definition.head tables out tokenTypeOpt
-                printTranslator grammar newDefinition.grammar out
+                fprintf out "module %s\n"
+                <|  match moduleName with
+                    | "" -> "RNGLR.Parse"
+                    | s -> s
+
+                fprintf out "open Yard.Generators.RNGLR.Parser\n"
+                fprintf out "open Yard.Generators.RNGLR\n"
+    
+                match definition.head with
+                | None -> ()
+                | Some (s : Source.t) ->
+                    fprintf out "%s" (Source.toString s)
+                    fprintf out "\n"
+
+                printTables grammar definition.head tables out moduleName tokenType
+                if needTranslate then
+                    printTranslator grammar newDefinition.grammar out
+
                 match definition.foot with
                 | None -> ()
                 | Some (s : Source.t) ->

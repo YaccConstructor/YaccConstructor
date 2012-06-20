@@ -25,7 +25,8 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO.StreamWriter) (tokenTypeOpt : string option) =
+let printTables (grammar : FinalGrammar) head (tables : Tables)
+        (out : System.IO.StreamWriter) (moduleName : string) (tokenType : string) =
     let tab = 4
     let print (x : 'a) =
         fprintf out x
@@ -143,26 +144,16 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (out : System.IO
         printInd 4 "%s.[i].[j] <- %s lists_%s.[x]\n" name conv name
         printInd 3 "cur <- cur + length\n"
 
-    print "module RNGLR.Parse\n"
-    print "open Yard.Generators.RNGLR.Parser\n"
-    print "open Yard.Generators.RNGLR\n"
-    
-    match head with
-    | None -> ()
-    | Some (s : Source.t) ->
-        print "%s" (Source.toString s)
-        print "\n"
-
     print "type Token%s =\n"
-    <|  match tokenTypeOpt with
-        | None -> "<'a>"
-        | Some _ -> ""
+    <|  match tokenType with
+        | "" -> "<'a>"
+        | _ -> ""
     let indexator = grammar.indexator
     for i = indexator.termsStart to indexator.termsEnd do
         printInd 1 "| %s of %s\n" (indexator.indexToTerm i)
-        <|  match tokenTypeOpt with
-            | None -> "'a"
-            | Some s -> s
+        <|  match tokenType with
+            | "" -> "'a"
+            | s -> s
 
     print "\n"
     print "let numToString = function \n"

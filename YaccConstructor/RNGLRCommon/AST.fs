@@ -20,15 +20,15 @@
 module Yard.Generators.RNGLR.AST
 open System
 
-type AST<'TokenType> =
+type Child<'TokenType> =
     | Epsilon
     /// Non-terminal expansion: production, family of children
-    | Inner of int * MultiAST<'TokenType> []
+    | Inner of int * AST<'TokenType> []
 
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
 /// int - reference to result.
-and MultiAST<'TokenType> =
-    | NonTerm of AST<'TokenType> list ref * int ref
+and AST<'TokenType> =
+    | NonTerm of Child<'TokenType> list ref * int ref
     | Term of 'TokenType
 
 let inline getFamily node =
@@ -44,7 +44,7 @@ let isInner = function
     | Inner _ -> true
     | _ -> false
 
-let chooseSingleAst (ast : MultiAST<_>) = 
+let chooseSingleAst (ast : AST<_>) = 
     let stack = new System.Collections.Generic.Stack<_>()
     //let stack = new ResizeArray<_>()
     let result = ref ast
@@ -75,7 +75,7 @@ let chooseSingleAst (ast : MultiAST<_>) =
     !result
 
     
-let rec printAst ind (ast : MultiAST<_>) =
+let rec printAst ind (ast : AST<_>) =
     let printInd num (x : 'a) =
         printf "%s" (String.replicate (num * 4) " ")
         printfn x
@@ -96,7 +96,7 @@ let rec printAst ind (ast : MultiAST<_>) =
                                     |> Array.iter (printAst <| ind+1))
                 if l.Length > 1 then printInd ind "vvvv"
 
-let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : MultiAST<'a>) =
+let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : AST<'a>) =
     let next =
         let cur = ref 0
         fun () ->
@@ -119,7 +119,7 @@ let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren 
             if not isBold then ""
             else "style=bold,width=5,"
         out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
-    let rec inner (ast : MultiAST<_>) ind =
+    let rec inner (ast : AST<_>) ind =
         if nodeToNumber.ContainsKey <| ast then
             nodeToNumber.[ast]
         else

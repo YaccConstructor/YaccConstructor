@@ -56,6 +56,7 @@
     <Compile Include="EliminateLeftRecursion.fs" />
     <Compile Include="ExpandInnerAlt.fs" />
     <Compile Include="RemoveAC.fs" />
+    <Compile Include="ReplaceInline.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

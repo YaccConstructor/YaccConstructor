@@ -148,7 +148,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Completion\CompletionSource.fs" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

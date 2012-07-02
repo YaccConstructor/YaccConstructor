@@ -441,7 +441,7 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 4 -> ( 
 # 123 "Lexer.fsl"
-                             SEMICOLON 
+                            SEMICOLON (Range (lexbuf.StartPos,lexbuf.EndPos))
 # 445 "Lexer.fs"
           )
   | 5 -> ( 

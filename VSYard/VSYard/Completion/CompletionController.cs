@@ -21,10 +21,19 @@ namespace VSYard.AutoCompletion
     #region Command Filter
 
     [Export(typeof(IVsTextViewCreationListener))]
-    [ContentType("text")]
+    [ContentType("yardtype")]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     internal sealed class VsTextViewCreationListener : IVsTextViewCreationListener
     {
+        [Export]
+        [Name("yardtype")]
+        [BaseDefinition("plaintext")]
+        internal static ContentTypeDefinition YARDContentType = null;
+
+        [Export]
+        [FileExtension(".yrd")]
+        [ContentType("yardtype")]
+        internal static FileExtensionToContentTypeDefinition YARDFileType = null;
         [Import]
         IVsEditorAdaptersFactoryService AdaptersFactory = null;
 
@@ -71,73 +80,74 @@ namespace VSYard.AutoCompletion
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            bool handled = false;
             int hresult = VSConstants.S_OK;
+            bool handled = false;
 
-            // 1. Pre-process
+
+
+
+        // 1. Pre-process
+        if (pguidCmdGroup == VSConstants.VSStd2K)
+        {
+            switch ((VSConstants.VSStd2KCmdID)nCmdID)
+            {
+                case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
+                case VSConstants.VSStd2KCmdID.COMPLETEWORD:
+                    handled = StartSession();
+                    break;
+                case VSConstants.VSStd2KCmdID.RETURN:
+                    handled = Complete(false);
+                    break;
+                case VSConstants.VSStd2KCmdID.TAB:
+                    handled = Complete(true);
+                    break;
+                case VSConstants.VSStd2KCmdID.CANCEL:
+                    handled = Cancel();
+                    break;
+                // default: Cancel(); break;
+            }
+        }
+
+        if (!handled)
+            hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
+        if (ErrorHandler.Succeeded(hresult))
+        {
             if (pguidCmdGroup == VSConstants.VSStd2K)
             {
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
-                    case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                    case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                        handled = StartSession();
+                    case VSConstants.VSStd2KCmdID.TYPECHAR:
+                        char ch = GetTypeChar(pvaIn);
+                        if (ch == ' ')
+                            if (isSessionRunning)
+                            {
+                                Cancel();
+                                isSessionRunning = false;
+                            }
+                            else
+                            {
+                                StartSession();
+                                isSessionRunning = true;
+                                if (_currentSession != null)
+                                    _currentSession.Recalculate();
+                            }
+                        else if (_currentSession != null)
+                            _currentSession.Filter();
                         break;
-                    case VSConstants.VSStd2KCmdID.RETURN:
-                        handled = Complete(false);
+                    case VSConstants.VSStd2KCmdID.BACKSPACE:
+                        if (_currentSession != null)
+                        { 
+                            _currentSession.Filter(); 
+                        }
                         break;
-                    case VSConstants.VSStd2KCmdID.TAB:
-                        handled = Complete(true);
-                        break;
-                    case VSConstants.VSStd2KCmdID.CANCEL:
-                        handled = Cancel();
-                        break;
-                   // default: Cancel(); break;
                 }
             }
-
-            if (!handled)
-                hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-
-            if (ErrorHandler.Succeeded(hresult))
-            {
-                if (pguidCmdGroup == VSConstants.VSStd2K)
-                {
-                    switch ((VSConstants.VSStd2KCmdID)nCmdID)
-                    {
-                        case VSConstants.VSStd2KCmdID.TYPECHAR:
-                            char ch = GetTypeChar(pvaIn);
-                            if (ch == ' ')
-                                if (isSessionRunning)
-                                {
-                                    Cancel();
-                                    isSessionRunning = false;
-                                }
-                                else
-                                {
-                                    StartSession();
-                                    isSessionRunning = true;
-                                }
-                                else if (_currentSession != null)
-                                    Filter();
-                            break;
-                        case VSConstants.VSStd2KCmdID.BACKSPACE:
-                            Filter();
-                            break;
-                    }
-                }
-            }
-
-            return hresult;
         }
 
-        private void Filter()
-        {
-            if (_currentSession == null)
-                return;
+            else handled = StartSession();
 
-            _currentSession.SelectedCompletionSet.SelectBestMatch();
-            _currentSession.SelectedCompletionSet.Recalculate();
+            return hresult;
         }
 
         bool Cancel()
@@ -187,6 +197,7 @@ namespace VSYard.AutoCompletion
 
             _currentSession.Start();
 
+
             return true;
         }
 
@@ -204,6 +215,7 @@ namespace VSYard.AutoCompletion
             }
             return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
+
     }
 
     #endregion

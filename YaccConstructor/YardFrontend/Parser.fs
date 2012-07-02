@@ -92,7 +92,7 @@ type token =
   | BAR
   | EQUAL
   | COMMA
-  | SEMICOLON
+  | SEMICOLON of (Range)
   | COLON
   | EOF
 // This type is used to give symbolic names to token indexes, useful for error messages
@@ -180,7 +180,7 @@ let tagOfToken (t:token) =
   | BAR  -> 20 
   | EQUAL  -> 21 
   | COMMA  -> 22 
-  | SEMICOLON  -> 23 
+  | SEMICOLON  _ -> 23 
   | COLON  -> 24 
   | EOF  -> 25 
 
@@ -303,7 +303,7 @@ let token_to_string (t:token) =
   | BAR  -> "BAR" 
   | EQUAL  -> "EQUAL" 
   | COMMA  -> "COMMA" 
-  | SEMICOLON  -> "SEMICOLON" 
+  | SEMICOLON _ -> "SEMICOLON" 
   | COLON  -> "COLON" 
   | EOF  -> "EOF" 
 
@@ -333,7 +333,7 @@ let _fsyacc_dataOfToken (t:token) =
   | BAR  -> (null : System.Object) 
   | EQUAL  -> (null : System.Object) 
   | COMMA  -> (null : System.Object) 
-  | SEMICOLON  -> (null : System.Object) 
+  | SEMICOLON _ -> (null : System.Object) 
   | COLON  -> (null : System.Object) 
   | EOF  -> (null : System.Object) 
 let _fsyacc_gotos = [| 0us; 65535us; 1us; 65535us; 0us; 1us; 3us; 65535us; 0us; 2us; 3us; 4us; 34us; 35us; 3us; 65535us; 2us; 3us; 8us; 9us; 11us; 12us; 3us; 65535us; 2us; 7us; 8us; 7us; 11us; 7us; 3us; 65535us; 2us; 14us; 8us; 14us; 11us; 14us; 1us; 65535us; 15us; 16us; 2us; 65535us; 22us; 23us; 25us; 26us; 2us; 65535us; 16us; 17us; 66us; 67us; 2us; 65535us; 19us; 20us; 54us; 55us; 2us; 65535us; 28us; 29us; 31us; 32us; 3us; 65535us; 19us; 28us; 30us; 31us; 54us; 28us; 2us; 65535us; 33us; 34us; 37us; 38us; 5us; 65535us; 19us; 33us; 30us; 33us; 33us; 37us; 37us; 37us; 54us; 33us; 5us; 65535us; 19us; 39us; 30us; 39us; 33us; 39us; 37us; 39us; 54us; 39us; 1us; 65535us; 40us; 41us; 1us; 65535us; 39us; 40us; 1us; 65535us; 39us; 44us; 4us; 65535us; 39us; 47us; 45us; 46us; 59us; 50us; 61us; 50us; 2us; 65535us; 59us; 59us; 61us; 59us; 2us; 65535us; 59us; 60us; 61us; 62us; 2us; 65535us; 48us; 66us; 65us; 66us; 4us; 65535us; 39us; 57us; 45us; 57us; 59us; 57us; 61us; 57us; 1us; 65535us; 18us; 19us; 2us; 65535us; 68us; 69us; 71us; 72us; 2us; 65535us; 68us; 70us; 71us; 70us; |]

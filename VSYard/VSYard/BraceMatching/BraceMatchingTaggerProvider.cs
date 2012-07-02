@@ -27,7 +27,7 @@
 
 
     [Export(typeof(IViewTaggerProvider))]
-    [ContentType("text")]
+    [ContentType("yardtype")]
     [TagType(typeof(TextMarkerTag))]
     internal class BraceMatchingTaggerProvider : IViewTaggerProvider
     {

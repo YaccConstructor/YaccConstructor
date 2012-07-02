@@ -7,7 +7,6 @@ root_rule:
 |   GO          {}
 |   start2      {} 
 ;
-
 start2: 
     sel_expr = ((KW_SELECT ident {})  (KW_FROM ident {}) ) { }
   | GLOBALVAR

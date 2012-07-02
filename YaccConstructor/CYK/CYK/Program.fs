@@ -1,14 +1,10 @@
-﻿(*
-Курсовая работа Лебедковой Татьяны, 361гр
-на тему "Реализация алгоритма CYK для разбора языков, порожденных
-контекстно-свободными грамматиками в нормальной форме Хомского"
-по курсу "Программирование на F#"
-*)
+﻿//CYK for research :) 
+// It is part of YaccConstructor.
 
 //Правила контекстно-свободной грамматики в нормальной форме Хомского
 type Rule = 
    |ToBranch of string*string*string//А->BC, A,B,C - нетерминалы
-   |ToLeaf of string*char//A->a, а - терминал
+   |ToLeaf of string*char//A->a, а - терминал 
 
 //Вывод правил
 let printRules =
@@ -111,7 +107,7 @@ let testGrammar2 = ((List.map ToBranch [("S","A","B");("B","N1","N2");("N1","D1"
 //recognize testGrammar1 "a*a+a"
 
 
-let str = List.init 100 (fun i -> "(a+a)*a") |> String.concat "+"
+let str = List.init 20 (fun i -> "(a+a)*a") |> String.concat "+"
 System.Console.WriteLine("Test2:")
 let start = System.DateTime.Now
 recognize testGrammar1 str

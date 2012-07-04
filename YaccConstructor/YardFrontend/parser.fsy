@@ -61,7 +61,7 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 
 %token EOF
 %token COLON
-%token SEMICOLON
+%token <Range> SEMICOLON
 %token COMMA
 %token EQUAL
 %token BAR

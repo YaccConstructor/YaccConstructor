@@ -26,7 +26,7 @@ type token =
   | BAR
   | EQUAL
   | COMMA
-  | SEMICOLON
+  | SEMICOLON of (Range)
   | COLON
   | EOF
 type tokenId = 

@@ -2,12 +2,18 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSYard", "VSYard\VSYard.csproj", "{709FCBF0-4A6F-4C34-A250-8E95B7003EA8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {A090E3B0-0516-44F3-9FBA-6EF8CB21926E}
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VSYardLibrary", "VSYardLibrary\VSYardLibrary\VSYardLibrary.fsproj", "{465D7B80-550A-40BF-B108-86418AD5E565}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "..\YaccConstructor\YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {A090E3B0-0516-44F3-9FBA-6EF8CB21926E}
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "..\YaccConstructor\Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "..\YaccConstructor\YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +29,14 @@ Global
 		{465D7B80-550A-40BF-B108-86418AD5E565}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{465D7B80-550A-40BF-B108-86418AD5E565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{465D7B80-550A-40BF-B108-86418AD5E565}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,14 +3,15 @@
 
 //Правила контекстно-свободной грамматики в нормальной форме Хомского
 type Rule = 
-   |ToBranch of string*string*string*Option<string> //А->BC, A,B,C - нетерминалы
-   |ToLeaf of string*char*Option<string> //A->a, а - терминал 
+   |ToBranch of string*string*string*Option<string> //А->BC<lbl>, A,B,C - нетерминалы
+   |ToLeaf of string*char*Option<string> //A->a<lbl>, а - терминал 
 
 //Вывод правил
 let printRules =
    (function
-   | ToBranch(a,b,c,l) -> System.Console.WriteLine(String.concat "" [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")])
-   | ToLeaf(a,b,l)     -> System.Console.WriteLine(String.concat "" [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]))
+     | ToBranch(a,b,c,l) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
+     | ToLeaf(a,b,l)     -> [a; "->"; b.ToString(); "  "; (match l with | Some t -> t | None -> "")]
+    >> String.concat "" >> printfn "%s")
    |> List.iter
 
 //Последовательное применение правил rs, начиная с первого левого нетерминала start                             
@@ -51,7 +52,7 @@ let recognitionTable (rules,_) (s:string) =
             then recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),rule_lbl,(rule::rules)
         |_               -> ()   
 
-   let elem i l = rules |>  Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
+   let elem i l = rules |> Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
 
    //Заполнение RecognitionTable
    let rec fillTable i l =

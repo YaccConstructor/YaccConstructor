@@ -2,7 +2,7 @@
 // MUST match guids.h
 using System;
 
-namespace MyCompany.VSYard
+namespace YC.VSYard
 {
     static class GuidList
     {

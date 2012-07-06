@@ -6,7 +6,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 
-namespace MyCompany.VSYard.Helpers
+namespace YC.VSYard.Helpers
 {
     class SolutionNavigatorHelper
     {

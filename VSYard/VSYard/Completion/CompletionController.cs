@@ -16,7 +16,7 @@ using Microsoft.VisualStudio.Shell;//added
 using VSYardNS;
 
 
-namespace VSYard.AutoCompletion
+namespace YC.VSYard.AutoCompletion
 {
     #region Command Filter
 

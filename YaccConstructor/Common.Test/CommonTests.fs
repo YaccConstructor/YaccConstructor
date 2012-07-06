@@ -18,8 +18,7 @@ type ``Components loader tests`` () =
             List.ofSeq GeneratorsManager.Available
             |> List.sort
         let expetedResult = 
-            ["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"TreeDump";"YardPrinter"]
-            //["FParsecGenerator";"FsYaccPrinter";"GNESCCGenerator";"YardPrinter"]
+            ["FParsecGenerator"; "FsYaccPrinter"; "TreeDump"; "YardPrinter"]            
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
@@ -64,7 +63,7 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``Get generators name`` () =
         let GeneratorsManager = GeneratorsManager.GeneratorsManager()
-        let VerificatedGenerators  = [("FParsecGenerator",true);("FsYaccPrinter",true);("GNESCCGenerator",true);("TreeDump",true);("YardPrinter",true)]
+        let VerificatedGenerators  = [("FParsecGenerator",true);("FsYaccPrinter",true);("TreeDump",true);("YardPrinter",true)]
 
         let genfun (x,y)  = 
             match (x |> GeneratorsManager.Component  ) with

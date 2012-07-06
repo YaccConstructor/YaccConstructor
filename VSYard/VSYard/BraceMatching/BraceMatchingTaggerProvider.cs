@@ -41,12 +41,9 @@
             var t = YC.VSYard.Helpers.SolutionNavigatorHelper.GetRootYrd
                     (YC.VSYard.Helpers.SolutionNavigatorHelper.GetActiveProject());
 
-            if (textView == null)
-                return null;
-
-            //provide highlighting only on the top-level buffer
-            if (textView.TextBuffer != buffer)
-                return null;
+            if (textView == null
+               || textView.TextBuffer != buffer) //provide highlighting only on the top-level buffer
+               return null;
 
             return new VSYardNS.BraceMatchingTagger(textView, buffer) as ITagger<T>;
         }

@@ -57,5 +57,5 @@ let () =
 
 [<EntryPoint>]
 let f _ = 
-   GNESCCCoreTests.``GNESCC core tests``().arithm_glr_5()
+   //GNESCCCoreTests.``GNESCC core tests``().arithm_glr_5()
    0

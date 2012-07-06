@@ -67,21 +67,6 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FAL\FAL.fsproj">
-      <Name>FAL</Name>
-      <Project>{87813c95-a950-43cd-a783-3b71c51b852a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
-      <Name>GNESCCCommon</Name>
-      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
-      <Name>GNESCCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

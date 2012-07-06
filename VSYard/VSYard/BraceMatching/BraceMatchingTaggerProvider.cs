@@ -1,4 +1,4 @@
-﻿namespace VSYard.BraceMatching
+﻿namespace YC.VSYard.BraceMatching
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +10,9 @@
     using Microsoft.VisualStudio.Utilities;
     using System.Linq;
     using System.Windows.Media;
+    using EnvDTE;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;    
 
     [Export(typeof(EditorFormatDefinition))]
     [Name("green")]
@@ -25,14 +28,19 @@
         }
     }
 
-
     [Export(typeof(IViewTaggerProvider))]
     [ContentType("yardtype")]
     [TagType(typeof(TextMarkerTag))]
     internal class BraceMatchingTaggerProvider : IViewTaggerProvider
-    {
+    {        
+
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
+            //It is exampe of getting root *.yrd file of active project.
+            //Should be removed
+            var t = YC.VSYard.Helpers.SolutionNavigatorHelper.GetRootYrd
+                    (YC.VSYard.Helpers.SolutionNavigatorHelper.GetActiveProject());
+
             if (textView == null)
                 return null;
 

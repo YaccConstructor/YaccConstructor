@@ -67,11 +67,11 @@ type YardCompletionSource (buffer : ITextBuffer) =
                     let getNonterminals (tree: Yard.Core.IL.Definition.t<_,_> ) = 
                       tree.grammar |> List.map (fun node -> node.name)
                     try 
-                    let parsed = ParseText fileText
-                    let getText (completion : Completion) = completion.DisplayText
-                    let r = (getNonterminals parsed).Distinct() |> List.ofSeq |> List.sort
-                    let result = List.map (fun x -> new Completion(x)) r
-                    lock theList (fun () -> theList.Clear(); theList.AddRange result)
+                        let parsed = ParseText fileText
+                        let getText (completion : Completion) = completion.DisplayText
+                        let r = (getNonterminals parsed).Distinct() |> List.ofSeq |> List.sort
+                        let result = List.map (fun x -> new Completion(x)) r
+                        lock theList (fun () -> theList.Clear(); theList.AddRange result)
                     with
                     | _ -> ()
                     if theList.Count > 0 then l <- List.ofArray <| theList.ToArray() }

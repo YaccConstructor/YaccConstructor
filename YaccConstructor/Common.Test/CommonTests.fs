@@ -51,9 +51,9 @@ type ``Components loader tests`` () =
             List.ofSeq ConvertionsManager.Available
             |> List.sort
         let expetedResult =
-            ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "EliminateLeftRecursion";
-             "ExpandAlter"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
-             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals";]
+            ["AddDefaultAC";"BuildAstSimple";"MergeAlter";"ExpandEbnf";"BuildAST";"LeaveLast"
+             ;"ReplaceLiterals";"AddEOF";"ExpandBrackets";"ExpandMeta"//;"ExpandEbnfStrict"
+             ;"ExpandAlter"]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"

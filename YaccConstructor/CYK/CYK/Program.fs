@@ -9,9 +9,9 @@ type Rule =
 //Вывод правил
 let printRules =
    (function
-     | ToBranch(a,b,c,l) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
-     | ToLeaf(a,b,l)     -> [a; "->"; b.ToString(); "  "; (match l with | Some t -> t | None -> "")]
-    >> String.concat "" >> printfn "%s")
+   | ToBranch(a,b,c,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
+   | ToLeaf(a,b,_),l     -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]
+   >> String.concat "" >> printfn "%s")
    |> List.iter
 
 //Последовательное применение правил rs, начиная с первого левого нетерминала start                             
@@ -39,17 +39,35 @@ let printOutput rs start =
                                                                        
 let recognitionTable (rules,_) (s:string) = 
            
-   let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length ([],(0,0),(0,0),None,[])
+   //let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length ([],(0,0),(0,0),None,[])
+   let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length ([],(0,0),(0,0),[],[])
    //recTable(i,l), для l > 0
 
-   let inline processRule rule i k l =
+   let processRule rule i k l =
         match rule with
         |ToBranch(a,b,c,rule_lbl) ->
-            let nonTerminals1,_,_,lbl,_ = recTable.[i,k]
-            let nonTerminals2,_,_,lbl,_ = recTable.[k+i+1,l-k-1]
+            let nonTerminals1,_,_,lbl1,_ = recTable.[i,k]
+            let nonTerminals2,_,_,lbl2,_ = recTable.[k+i+1,l-k-1]
             let nonTerminals,_,_,lbl,rules = recTable.[i,l]
             if (List.exists ((=)b) nonTerminals1) && (List.exists ((=)c) nonTerminals2)
-            then recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),rule_lbl,(rule::rules)
+            then 
+    (*            let new_lbl =
+                    match lbl1,lbl2 with
+                    | Some v1, Some v2 when v1<>v2 -> Some("conflict")
+                    | None, None -> Some("None")
+                    //| _ -> List.find (Option.isSome) [lbl1.Head;lbl2.Head]
+                    | _ -> Some("one of") 
+             
+                recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),new_lbl,(rule::rules)
+      *)      
+                let new_lbl =
+                    match lbl1.Head,lbl2.Head with
+                    | Some v1, Some v2 when v1<>v2 -> Some("conflict")
+                    | None, None -> rule_lbl
+                    | _ -> List.find (Option.isSome) [lbl1.Head;lbl2.Head] 
+             
+                recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),(new_lbl::lbl),(rule::rules)
+            
         |_               -> ()   
 
    let elem i l = rules |> Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
@@ -71,7 +89,8 @@ let recognitionTable (rules,_) (s:string) =
          match rule with
          |ToLeaf(a,b,l) -> if b = s.[k] then
                             let nonTerminals,_,_,lbl,rules = recTable.[k,0]
-                            recTable.[k,0] <- ((a::nonTerminals),(-1,-1),(-1,-1),l,(rule::rules))
+                            //recTable.[k,0] <- ((a::nonTerminals),(-1,-1),(-1,-1),l,(rule::rules))
+                            recTable.[k,0] <- ((a::nonTerminals),(-1,-1),(-1,-1),(l::lbl),(rule::rules))
          |_           -> ()
    //последующие столбцы
    fillTable 0 1
@@ -82,16 +101,18 @@ let recognize ((_, start) as g) s =
    let recTable = recognitionTable g s
    //восстановление вывода по таблице начиная с ячейки recTable(i,l) нетерминала top
    let rec subRecognize i l top = 
-      let nonTerminals,(leftI,leftL),(rightI,rightL),lbl,rs = recTable.[i,l]
+      let nonTerminals,(leftI,leftL),(rightI,rightL),lbls,rs = recTable.[i,l]
       //правило вида А->_, где А = top
-      let currentRule = List.find (fun (ToBranch(st,_,_,l)|ToLeaf(st,_,l)) -> st = top) rs
+      let currentRuleIndex = List.findIndex (fun (ToBranch(st,_,_,l)|ToLeaf(st,_,l)) -> st = top) rs
+      let currentRule = rs.[currentRuleIndex]
+      let lbl = lbls.[currentRuleIndex]
       let leftNT,rightNT = 
          match currentRule with
          |ToBranch(_,left,right,l) -> left,right
          |ToLeaf(_,terminal,l)     -> terminal.ToString(),""  
       match i,l with
-      | _,0 -> [ToLeaf(top,leftNT.[0],None)]
-      | _     -> currentRule::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
+      | _,0 -> [(ToLeaf(top,leftNT.[0],None),lbl)]
+      | _     -> (currentRule,lbl)::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
    let resultRules = if List.exists ((=)start) ((fun (a,_,_,_,l) -> a) recTable.[0, s.Length-1])
                      then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                      else []
@@ -117,7 +138,7 @@ let start = System.DateTime.Now
 //recognize testGrammar1 str
 printfn "Time = %A" (System.DateTime.Now - start)
 
-recognize testGrammar_lbl1 "a*a+"
+recognize testGrammar_lbl1 "a*a*a+"
 
 //System.Console.WriteLine("Test3:")
 //recognize testGrammar2 "abcd"

@@ -2,21 +2,55 @@
 // It is part of YaccConstructor.
 namespace CYK
 
+//(16|   16| 16|8       |       8  |) 
+//(E |->  Z|  X|<lblName|lblWeight>|)
+type rule = int64 
+
+[<AutoOpen>]
+module RuleHelpers =
+    let buildRule rName r1 r2 lblName lblWeight =
+        let lbl = (int16 lblName <<< 8) ||| int16 lblWeight
+        let r1 = (int32 rName <<< 16) ||| int32 r1
+        let r2 = (int32 r2 <<< 16) ||| int32 lbl
+        ((int64 r1) <<< 32) ||| int64 r2
+
+    let getRule (rule:int64) =
+        let r1,r2 = int32 ((rule >>> 32) &&& int64 0xFFFFFFFF), int32 (rule &&& int64 0xFFFFFFFF)
+        let rName,r1 = int16 ((r1 >>> 16) &&& 0xFFFFFFFF), int16 (r1 &&& 0xFFFFFFFF)
+        let r2,lbl = int16 ((r2 >>> 16) &&& 0xFFFFFFFF), int16 (r2 &&& 0xFFFFFFFF)
+        let lblName,lblWeight = int8 ((lbl >>> 8) &&& int16 0xFFFFFFFF), int8 (lbl &&& int16 0xFFFFFFFF)
+        rName,r1, r2,lblName,lblWeight
+
 //Правила контекстно-свободной грамматики в нормальной форме Хомского
 type Rule = 
    |ToBranch of string*string*string*Option<string>*Option<int> //А->BC<lbl>, A,B,C - нетерминалы
    |ToLeaf of string*char*Option<string> //A->a<lbl>, а - терминал 
-
 
 type CYKParser()=
     //Вывод правил
     let printRules =
        (function
        | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
-       | ToLeaf(a,b,_),l     -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]
+       | ToLeaf(a,b,_),l       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]
        >> String.concat "")
        |> List.map
        >> String.concat "\n"
+
+    let printTableRules =
+        (function
+        | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
+        | ToLeaf(a,b,l)       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
+        >> String.concat "")
+        |> List.map
+        >> String.concat "; "
+
+    let printTableLabels = 
+        (function
+        | Some v -> v
+        | None -> "--")
+        |> List.map
+        >>String.concat "; "
+            
 
     //Последовательное применение правил rs, начиная с первого левого нетерминала start                             
     let printOutput rs start =
@@ -83,31 +117,7 @@ type CYKParser()=
                  elem i l
                  fillTable (i+1) l//продолжаем заполнять столбец
             else
-                 fillTable 0 (l+1)//переход на новый столбец
-
-       let printTableRules =
-            (function
-            | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
-            | ToLeaf(a,b,l)    -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
-            >> String.concat "")
-            |> List.map
-            >> String.concat "; "
-
-       let printTableLabels = 
-            (function
-            | Some v -> v
-            | None -> "--")
-            |> List.map
-            >>String.concat "; "
-
-//       let printTableWeights (weights:List<Option<int>>) : string = 
-//            (function
-//            | Some v -> "" + v.tostring()
-//            | None -> "0"
-//            >> String.concat "")
-//            |> List.map
-//            >> String.concat "; "
-            
+                 fillTable 0 (l+1)//переход на новый столбец       
 
        let printElem i l =
             let _,_,_,lbls,weights,rules = recTable.[i,l]
@@ -179,8 +189,7 @@ type CYKParser()=
 
                         
        System.Console.Write "\nParse weights: "
-       parseWeightCalc ws (s.Length - 1)
-       //printOutput resultRules start    
+       parseWeightCalc ws (s.Length - 1)       
 
     member this.Recognize grammar str = recognize grammar str
 

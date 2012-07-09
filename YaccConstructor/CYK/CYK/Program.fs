@@ -54,7 +54,7 @@ type Rule =
 type CYKParser () =
 
     //Вывод правил
-    let printRules sep =
+    let printRules =
        (function
        | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
        | ToLeaf(a,b,_),l       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
@@ -63,7 +63,12 @@ type CYKParser () =
        >> String.concat "\n"
 
     let printTableRules =
-        printRules "; "
+        (function
+        | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
+        | ToLeaf(a,b,l)       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
+        >> String.concat "")
+        |> List.map
+        >> String.concat "; "
 
     let printTableLabels = 
         (function
@@ -148,15 +153,15 @@ type CYKParser () =
        let rec printTable i l =
             if l = s.Length-1
             then 
-                 System.Console.WriteLine ("")
+                 printfn ""
                  printElem i l//последний элемент таблицы
             elif i+l <= s.Length-1
             then
-                 System.Console.WriteLine ("")
+                 printfn ""
                  printElem i l
                  printTable (i+1) l//продолжаем заполнять столбец
             else 
-                 System.Console.WriteLine ("row " + (l+1).ToString())
+                 printfn "row %i" (l+1)
                  printTable 0 (l+1)//переход на новый столбец
 
        //первый столбец таблицы для правил, выводящих терминал
@@ -197,7 +202,7 @@ type CYKParser () =
 
        //System.Console.WriteLine s
        //System.Console.WriteLine "Rules:"
-       //printRules "\n" resultRules |> printfn "%s"
+       //printRules resultRules |> printfn "%s"
        
        let _,_,_,_,ws,_ = recTable.[0,s.Length-1]
 

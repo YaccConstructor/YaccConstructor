@@ -51,23 +51,19 @@ type Rule =
    |ToBranch of string*string*string*Option<string>*Option<int> //А->BC<lbl>, A,B,C - нетерминалы
    |ToLeaf of string*char*Option<string> //A->a<lbl>, а - терминал 
 
-type CYKParser()=
+type CYKParser () =
+
     //Вывод правил
-    let printRules =
+    let printRules sep =
        (function
-       | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
-       | ToLeaf(a,b,_),l       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]
+       | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
+       | ToLeaf(a,b,_),l       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
        >> String.concat "")
        |> List.map
        >> String.concat "\n"
 
     let printTableRules =
-        (function
-        | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
-        | ToLeaf(a,b,l)       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
-        >> String.concat "")
-        |> List.map
-        >> String.concat "; "
+        printRules "; "
 
     let printTableLabels = 
         (function
@@ -199,9 +195,9 @@ type CYKParser()=
                          then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                          else []
 
-       System.Console.WriteLine s
-       System.Console.WriteLine "Rules:"
-       printRules resultRules
+       //System.Console.WriteLine s
+       //System.Console.WriteLine "Rules:"
+       //printRules "\n" resultRules |> printfn "%s"
        
        let _,_,_,_,ws,_ = recTable.[0,s.Length-1]
 

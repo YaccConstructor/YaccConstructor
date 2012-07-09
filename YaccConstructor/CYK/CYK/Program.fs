@@ -1,6 +1,6 @@
 ﻿//CYK for research :) 
 // It is part of YaccConstructor.
-namespace CYK
+namespace Yard.Generators.CYKGenerator
 
 
 //(16|   16| 16|8       |       8  |)
@@ -17,7 +17,7 @@ module RuleHelpers =
         let lbl = (uint16 lblName <<< 8) ||| uint16 lblWeight
         let r1 = (uint32 rName <<< 16) ||| uint32 r1
         let r2 = (uint32 r2 <<< 16) ||| uint32 lbl
-        let r = ((uint64 r1) <<< 32) ||| uint64 r2
+        let r =  (uint64 r1 <<< 32) ||| uint64 r2
         r
 
     let getRule (rule:rule) =

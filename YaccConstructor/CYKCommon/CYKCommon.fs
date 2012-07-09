@@ -1,4 +1,4 @@
-﻿//  CYK.fs
+﻿//  CYK.fs contains common types and functions for CYK.
 //
 //  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -17,13 +17,5 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Yard.Generators.CYKGenerator
-
-open Yard.Core
-
-type CYKGenerator() = 
-    inherit Generator()
-        override this.Name = "CYKGenerator"
-        override this.Generate t = box ()
-        override this.AcceptableProductionTypes = ["seq"]
+module Module1
 

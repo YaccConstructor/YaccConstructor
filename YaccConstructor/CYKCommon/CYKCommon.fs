@@ -19,3 +19,26 @@
 
 namespace Yard.Generators.CYKGenerator
 
+//(16|   16| 16|8       |       8  |)
+//(E |->  Z|  X|<lblName|lblWeight>|)
+type rule = uint64 
+
+type CYKGrammar = array<rule>
+
+[<AutoOpen>]
+module RuleHelpers =
+    
+    let buildRule rName r1 r2 lblName lblWeight =
+        let lbl = (uint16 lblName <<< 8) ||| uint16 lblWeight
+        let r1 = (uint32 rName <<< 16) ||| uint32 r1
+        let r2 = (uint32 r2 <<< 16) ||| uint32 lbl
+        let r =  (uint64 r1 <<< 32) ||| uint64 r2
+        r
+
+    let getRule (rule:rule) =
+        let r1,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
+        let rName,r1 = uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu), uint16 (r1 &&& 0xFFFFFFFFu)
+        let r2,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
+        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
+        rName, r1, r2, lblName, lblWeight
+

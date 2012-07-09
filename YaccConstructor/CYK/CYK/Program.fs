@@ -9,17 +9,17 @@ type rule = int64
 [<AutoOpen>]
 module RuleHelpers =
     let buildRule rName r1 r2 lblName lblWeight =
-        let lbl = (int16 lblName <<< 8) ||| int16 lblWeight
-        let r1 = (int32 rName <<< 16) ||| int32 r1
-        let r2 = (int32 r2 <<< 16) ||| int32 lbl
-        ((int64 r1) <<< 32) ||| int64 r2
+        let lbl = (uint16 lblName <<< 8) ||| uint16 lblWeight
+        let r1 = (uint32 rName <<< 16) ||| uint32 r1
+        let r2 = (uint32 r2 <<< 16) ||| uint32 lbl
+        ((uint64 r1) <<< 32) ||| uint64 r2
 
-    let getRule (rule:int64) =
-        let r1,r2 = int32 ((rule >>> 32) &&& int64 0xFFFFFFFF), int32 (rule &&& int64 0xFFFFFFFF)
-        let rName,r1 = int16 ((r1 >>> 16) &&& 0xFFFFFFFF), int16 (r1 &&& 0xFFFFFFFF)
-        let r2,lbl = int16 ((r2 >>> 16) &&& 0xFFFFFFFF), int16 (r2 &&& 0xFFFFFFFF)
-        let lblName,lblWeight = int8 ((lbl >>> 8) &&& int16 0xFFFFFFFF), int8 (lbl &&& int16 0xFFFFFFFF)
-        rName,r1, r2,lblName,lblWeight
+    let getRule (rule:uint64) =
+        let r1,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
+        let rName,r1 = uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu), uint16 (r1 &&& 0xFFFFFFFFu)
+        let r2,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
+        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint8 0xFFFFFFFFu), uint8 (lbl &&& uint8 0xFFFFFFFFu)
+        rName, r1, r2, lblName, lblWeight
 
 //Правила контекстно-свободной грамматики в нормальной форме Хомского
 type Rule = 

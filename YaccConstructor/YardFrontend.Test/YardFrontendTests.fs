@@ -464,7 +464,7 @@ type ``Yardfrontend label tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (13, 14))
+                                           rule = PToken ("A", (12, 13))
                                            binding = None
                                            checker = None}],None)
                             _public = true

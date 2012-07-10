@@ -9,3 +9,4 @@ YaccConstructor/Development/Utils/tests.fsproj.inc
 *.user
 ook_based_test/report/picts/*
 *.ompv
+VSYard/VSYard/VSYard.csproj.user

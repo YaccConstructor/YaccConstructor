@@ -64,7 +64,7 @@ namespace VSYard.AutoCompletion
         public CommandFilter(IWpfTextView textView, ICompletionBroker broker)
         {
             _currentSession = null;
-
+             
             TextView = textView;
             Broker = broker;
         }
@@ -84,68 +84,80 @@ namespace VSYard.AutoCompletion
             bool handled = false;
 
 
-
-
-        // 1. Pre-process
-        if (pguidCmdGroup == VSConstants.VSStd2K)
-        {
-            switch ((VSConstants.VSStd2KCmdID)nCmdID)
-            {
-                case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                    handled = StartSession();
-                    break;
-                case VSConstants.VSStd2KCmdID.RETURN:
-                    handled = Complete(false);
-                    break;
-                case VSConstants.VSStd2KCmdID.TAB:
-                    handled = Complete(true);
-                    break;
-                case VSConstants.VSStd2KCmdID.CANCEL:
-                    handled = Cancel();
-                    break;
-                // default: Cancel(); break;
-            }
-        }
-
-        if (!handled)
-            hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-
-        if (ErrorHandler.Succeeded(hresult))
-        {
+            // 1. Pre-process
             if (pguidCmdGroup == VSConstants.VSStd2K)
             {
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
-                    case VSConstants.VSStd2KCmdID.TYPECHAR:
-                        char ch = GetTypeChar(pvaIn);
-                        if (ch == ' ')
-                            if (isSessionRunning)
-                            {
-                                Cancel();
-                                isSessionRunning = false;
-                            }
-                            else
-                            {
-                                StartSession();
-                                isSessionRunning = true;
-                                if (_currentSession != null)
-                                    _currentSession.Recalculate();
-                            }
-                        else if (_currentSession != null)
-                            _currentSession.Filter();
+                    case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
                         break;
-                    case VSConstants.VSStd2KCmdID.BACKSPACE:
-                        if (_currentSession != null)
-                        { 
-                            _currentSession.Filter(); 
-                        }
+                    case VSConstants.VSStd2KCmdID.COMPLETEWORD: // Нажатие Ctrl+Space
+                        handled = StartSession();
                         break;
+                    case VSConstants.VSStd2KCmdID.RETURN: // Нажатие Enter
+                        handled = Complete(false);
+                        break;
+                    case VSConstants.VSStd2KCmdID.TAB:    // Нажатие Tab
+                        handled = Complete(true);
+                        break;
+                    case VSConstants.VSStd2KCmdID.CANCEL: // Нажатие Esc
+                        handled = Cancel();
+                        break;
+                    //default: Cancel(); break;
                 }
             }
-        }
 
-            else handled = StartSession();
+            if (!handled)
+                hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
+            if (ErrorHandler.Succeeded(hresult))
+            {
+                if (pguidCmdGroup == VSConstants.VSStd2K)
+                {
+                    if (isSessionRunning)
+                    {
+                        //Cancel();
+                        //isSessionRunning = false;
+                    }
+                    else
+                    {
+                        StartSession();
+                        isSessionRunning = true;
+                        if (_currentSession != null)
+                            _currentSession.Recalculate();
+                    }
+
+                    switch ((VSConstants.VSStd2KCmdID)nCmdID)
+                    {
+                        case VSConstants.VSStd2KCmdID.TYPECHAR:
+                            char ch = GetTypeChar(pvaIn);
+                            if (ch == ' ')
+                                if (isSessionRunning)
+                                {
+                                    Cancel();
+                                    isSessionRunning = false;
+                                }
+                                else
+                                {
+                                    StartSession();
+                                    isSessionRunning = true;
+                                    if (_currentSession != null)
+                                        _currentSession.Recalculate(); 
+                                }
+                            else if (_currentSession != null)
+                                _currentSession.Filter();
+                            break;
+                        case VSConstants.VSStd2KCmdID.BACKSPACE:
+                            if (_currentSession != null)
+                            {
+                                _currentSession.Filter();
+                            }
+                            break;
+                    } 
+                }
+            }
+
+            //else handled = StartSession();
 
             return hresult;
         }
@@ -182,7 +194,7 @@ namespace VSYard.AutoCompletion
             if (_currentSession != null)
                 return false;
 
-            SnapshotPoint caret = TextView.Caret.Position.BufferPosition;
+            SnapshotPoint caret = TextView.Caret.Position.BufferPosition; // Расположение каретки
             ITextSnapshot snapshot = caret.Snapshot;
 
             if (!Broker.IsCompletionActive(TextView))

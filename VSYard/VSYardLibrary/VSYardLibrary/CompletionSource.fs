@@ -28,10 +28,10 @@ type YardCompletionSource (buffer : ITextBuffer) =
         let tokens = buffer.CurrentSnapshot.GetText() |> LexString |> List.ofSeq //все токены
         let f = function 
             | SEMICOLON _ -> true
-            |_ -> false
+            | _ -> false
         let rec getNumberOfSemicolumns = function
-            |[] -> 0
-            |h::t when f h -> 1 + getNumberOfSemicolumns t
+            | [] -> 0
+            | h::t when f h -> 1 + getNumberOfSemicolumns t
             | _::t -> getNumberOfSemicolumns t
         let roolsNumber =
             getNumberOfSemicolumns tokens
@@ -89,8 +89,10 @@ type YardCompletionSource (buffer : ITextBuffer) =
             let mutable completionsList = theList.ToList()
             if theList.Count = 0 then completionsList <- l.ToList()
             completionSets.Add(new CompletionSet("All", "All", applicableTo, completionsList, Enumerable.Empty<Completion>()))
-        [recomputeAllCompletions]|> Async.Parallel  |> Async.RunSynchronously |> ignore
+        //[recomputeAllCompletions]|> Async.Parallel  |> Async.RunSynchronously |> ignore
+        recomputeAllCompletions |> Async.Start
         returnCollection ()
+        
         
     let dispose () = 
         _disposed <- true

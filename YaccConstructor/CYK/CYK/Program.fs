@@ -73,7 +73,7 @@ type CYKParser()=
                         for n in 0..(nonTerminals2.Length - 1) do
                             if (nonTerminals1.[m] = b) && (nonTerminals2.[n] = c)
                             then
-                                //обновляем ссылки на записываемые списки
+                                //обновляем ссылки на дополняемые списки
                                 let nonTerminals,_,_,lbls,weights,rules = recTable.[i,l]
                                 recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),(newLbl ruleLbl lbls1 lbls2::lbls),(newWeight ruleWeight weights1 weights2::weights),(rule::rules)    
             |_               -> ()   
@@ -105,15 +105,6 @@ type CYKParser()=
             | None -> "--")
             |> List.map
             >>String.concat "; "
-
-//       let printTableWeights (weights:List<Option<int>>) : string = 
-//            (function
-//            | Some v -> "" + v.tostring()
-//            | None -> "0"
-//            >> String.concat "")
-//            |> List.map
-//            >> String.concat "; "
-            
 
        let printElem i l =
             let _,_,_,lbls,weights,rules = recTable.[i,l]
@@ -156,7 +147,7 @@ type CYKParser()=
        let rec subRecognize i l top = 
           let nonTerminals,(leftI,leftL),(rightI,rightL),lbls,ws,rs = recTable.[i,l]
           //правило вида А->_, где А = top
-          let currentRuleIndex = List.findIndex (fun (ToBranch(st,_,_,l,_)|ToLeaf(st,_,l)) -> st = top) rs
+          let currentRuleIndex = List.findIndex (fun (ToBranch(st,_,_,_,_)|ToLeaf(st,_,_)) -> st = top) rs
           let currentRule = rs.[currentRuleIndex]
           let lbl = lbls.[currentRuleIndex]
           let weight = ws.[currentRuleIndex]
@@ -171,10 +162,9 @@ type CYKParser()=
                          then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                          else []
 
-
        System.Console.WriteLine s
-       System.Console.WriteLine "Rules:"
-//       printRules resultRules
+       System.Console.WriteLine "Rules:"    
+       printRules resultRules
 
        let _,_,_,_,ws,_ = recTable.[0,s.Length-1]
 

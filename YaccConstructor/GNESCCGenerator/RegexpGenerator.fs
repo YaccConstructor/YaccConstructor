@@ -73,7 +73,7 @@ type RegexpGenerator(outPath: string) =
             let indentString l = String.replicate l "    "
                 
             match body with 
-            | PSeq(elems,expr) ->   
+            | PSeq(elems,expr,_) ->   
 
                 let genElem i gNum elem =                    
                     generateBody typeToTagMap gNum (indentSize + 1) elem asFun

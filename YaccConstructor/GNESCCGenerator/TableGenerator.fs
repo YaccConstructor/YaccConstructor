@@ -45,7 +45,7 @@ type TableGenerator (outPath: string) =
 
         let rec getAllSymbols production = 
             match production with
-                | PSeq (seq,attr)   -> 
+                | PSeq (seq,attr,_)   -> 
                     List.iter (fun t -> getAllSymbols t.rule) seq                    
                 | PAlt (l,r)        -> 
                     getAllSymbols l
@@ -75,7 +75,7 @@ type TableGenerator (outPath: string) =
             let builder = new AtmBuilder(stateEnumerator)
             let rec build production =
                 match production with
-                | PSeq (seq,attr)   -> 
+                | PSeq (seq,attr,_)   -> 
                     let automataLst = List.map (fun t -> build t.rule) seq
                     let seqNum = enumerator.Next()
                     List.reduce (fun x y -> builder.Concat x y (FA.Epsilon,[[]]))  automataLst

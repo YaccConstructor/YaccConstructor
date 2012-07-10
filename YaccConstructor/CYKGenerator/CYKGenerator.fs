@@ -33,8 +33,8 @@ type CYKGeneartorImpl () =
             let name = r.name
             let body = r.body
             match body with
-            | Production.PSeq ([t],_) -> ""
-            | Production.PSeq ([nt1;nt2],_) -> ""
+            | Production.PSeq ([t],_,_) -> ""
+            | Production.PSeq ([nt1;nt2],_,_) -> ""
             | _ -> failwith "CYK. Incorrect rule structure. Must be in CNF"
             
         il.grammar |> List.map processRule

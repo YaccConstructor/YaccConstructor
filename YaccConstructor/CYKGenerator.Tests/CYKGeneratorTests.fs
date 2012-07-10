@@ -24,7 +24,7 @@ type ``CYK generator tests`` () =
         Assert.AreEqual(result.[0], 281479271743488UL)
 
     [<Test>]
-    member test.``Simple one rule with lable without weight test`` () =        
+    member test.``Simple one rule with lable without weight test`` () = 
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_LBL_no_weight.yrd"))
         let result = generator.GenRulesList il
         Assert.AreEqual(result.Length,1)

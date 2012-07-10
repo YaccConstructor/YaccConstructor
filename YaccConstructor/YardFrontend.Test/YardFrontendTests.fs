@@ -123,6 +123,8 @@ type ``Yard frontend preprocessor tests`` () =
                 options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
 
+
+
     [<Test>]
     member test.if_endif () =
         let expected = 
@@ -322,7 +324,7 @@ type ``Yard frontend preprocessor tests`` () =
                 foot = None
                 options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
-
+             
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    
     [<Test>]
@@ -448,3 +450,25 @@ let value x = (x:>Lexeme<string>).value
              options = Map.empty
             }
         
+[<TestFixture>]
+type ``Yardfrontend label tests`` () =
+    let basePath = "../../../../Tests/YardFrontend/Label"
+    let cp file = System.IO.Path.Combine(basePath,file)
+
+    [<Test>]
+    member test.``label test.`` () = 
+        let expected = 
+            {
+                info = {fileName =""}
+                head = None
+                grammar = [{name = "s"
+                            args = []
+                            body = PSeq ([{omit = false
+                                           rule = PToken ("A", (12, 13))
+                                           binding = None
+                                           checker = None}],None)
+                            _public = true
+                            metaArgs = []}]
+                foot = None
+                options = Map.empty}
+        preprocessorTest (cp "test_0.yrd") expected

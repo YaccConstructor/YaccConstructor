@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
 
-namespace VSYard.AutoCompletion
+namespace YC.VSYard.AutoCompletion
 {
     [Export(typeof(ICompletionSourceProvider))]
     [ContentType("yardtype")]

@@ -11,7 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Yard.Generators.GNESCCGenerator;
 
 namespace Yard.Development.Tools.FrontendImpl
 {
@@ -42,10 +41,11 @@ namespace Yard.Development.Tools.FrontendImpl
                 var il = fe.Value.ParseGrammar(yc_OpenGrammar.GrammarFilePath);
             
                 var be = GeneratorsManager.Component(yc_GeneratorsContainer.SelectedConponent);
-                var res = Development.Tools.TablesPrinter.formatRaccGenresult((GNESCCGenerator)be.Value, il);
-                foreach (var g in res)
-                    tbc_Graphs.Items.Add(new UIComponents.YCGraphEditor() { ClipToBounds = true, Graph = g });
-                tb_TableView.Text = Development.Tools.TablesPrinter.res;
+                // GNESCC is removed
+                //List<Microsoft.Glee.GleeGraph> res = Development.Tools.TablesPrinter.formatRaccGenresult(be.Value, il);
+                //foreach (var g in res)
+                //    tbc_Graphs.Items.Add(new UIComponents.YCGraphEditor() { ClipToBounds = true, Graph = g });
+                //tb_TableView.Text = Development.Tools.TablesPrinter.res;
             }
             catch
             {

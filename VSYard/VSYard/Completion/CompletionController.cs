@@ -12,11 +12,11 @@ using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio;
 using System.Windows;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Shell;//added
+using Microsoft.VisualStudio.Shell;
 using VSYardNS;
 
 
-namespace VSYard.AutoCompletion
+namespace YC.VSYard.AutoCompletion
 {
     #region Command Filter
 
@@ -82,7 +82,6 @@ namespace VSYard.AutoCompletion
         {
             int hresult = VSConstants.S_OK;
             bool handled = false;
-
 
             // 1. Pre-process
             if (pguidCmdGroup == VSConstants.VSStd2K)

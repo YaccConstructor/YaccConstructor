@@ -81,6 +81,7 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
 %token <string> SHARPLINE
+%token <IL.Source.t> DLABEL
 
 
 %start file
@@ -146,8 +147,12 @@ alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3)}  
               | BAR seq {$2}
 
-seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3) }
+seq: no_lbl_seq {$1} | lbl_seq {$1}
+
+no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3) }
    | ACTION {PSeq([],Some $1)}
+
+lbl_seq: DLABEL LPAREN no_lbl_seq RPAREN {$3}
 
 seq_elem_list: seq_elem seq_elem_list {$1::$2}
              | /* empty */ {[]}

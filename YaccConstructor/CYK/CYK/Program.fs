@@ -1,22 +1,39 @@
 ﻿//CYK for research :) 
 // It is part of YaccConstructor.
-namespace CYK
+namespace Yard.Generators.CYKGenerator
+
 
 //Правила контекстно-свободной грамматики в нормальной форме Хомского
 type Rule = 
    |ToBranch of string*string*string*Option<string>*Option<int> //А->BC<lbl>, A,B,C - нетерминалы
    |ToLeaf of string*char*Option<string> //A->a<lbl>, а - терминал 
 
+type CYKParser () =
 
-type CYKParser()=
     //Вывод правил
     let printRules =
        (function
-       | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "")]
-       | ToLeaf(a,b,_),l     -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "") ]
+       | ToBranch(a,b,c,_,_),l -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
+       | ToLeaf(a,b,_),l       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
        >> String.concat "")
        |> List.map
        >> String.concat "\n"
+
+    let printTableRules =
+        (function
+        | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
+        | ToLeaf(a,b,l)       -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
+        >> String.concat "")
+        |> List.map
+        >> String.concat "; "
+
+    let printTableLabels = 
+        (function
+        | Some v -> v
+        | None   -> "--")
+        |> List.map
+        >>String.concat "; "
+            
 
     //Последовательное применение правил rs, начиная с первого левого нетерминала start                             
     let printOutput rs start =
@@ -50,7 +67,7 @@ type CYKParser()=
              match lbls1.Head,lbls2.Head with
              | Some v1, Some v2 when v1<>v2 -> Some("conflict")
              | None, None -> ruleLbl
-             | _ -> List.find (Option.isSome) [lbls1.Head;lbls2.Head] 
+             | _ -> List.find (Option.isSome) [lbls1.Head; lbls2.Head] 
 
        let newWeight ruleWeight (weights1:List<Option<int>>) (weights2:List<Option<int>>) : Option<int> = 
              match (weights1.IsEmpty,weights2.IsEmpty) with
@@ -89,22 +106,7 @@ type CYKParser()=
                  elem i l
                  fillTable (i+1) l//продолжаем заполнять столбец
             else
-                 fillTable 0 (l+1)//переход на новый столбец
-
-       let printTableRules =
-            (function
-            | ToBranch(a,b,c,l,w) -> [a; "->"; b; c; "  "; (match l with | Some t -> t | None -> "--")]
-            | ToLeaf(a,b,l)    -> [a;"->";b.ToString();"  "; (match l with | Some t -> t | None -> "--") ]
-            >> String.concat "")
-            |> List.map
-            >> String.concat "; "
-
-       let printTableLabels = 
-            (function
-            | Some v -> v
-            | None -> "--")
-            |> List.map
-            >>String.concat "; "
+                 fillTable 0 (l+1)//переход на новый столбец       
 
        let printElem i l =
             let _,_,_,lbls,weights,rules = recTable.[i,l]
@@ -114,15 +116,15 @@ type CYKParser()=
        let rec printTable i l =
             if l = s.Length-1
             then 
-                 System.Console.WriteLine ("")
+                 printfn ""
                  printElem i l//последний элемент таблицы
             elif i+l <= s.Length-1
             then
-                 System.Console.WriteLine ("")
+                 printfn ""
                  printElem i l
                  printTable (i+1) l//продолжаем заполнять столбец
             else 
-                 System.Console.WriteLine ("row " + (l+1).ToString())
+                 printfn "row %i" (l+1)
                  printTable 0 (l+1)//переход на новый столбец
 
        //первый столбец таблицы для правил, выводящих терминал
@@ -162,9 +164,9 @@ type CYKParser()=
                          then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                          else []
 
-       System.Console.WriteLine s
-       System.Console.WriteLine "Rules:"    
-       printRules resultRules
+       //System.Console.WriteLine s
+       //System.Console.WriteLine "Rules:"
+       //printRules resultRules |> printfn "%s"
 
        let _,_,_,_,ws,_ = recTable.[0,s.Length-1]
 
@@ -177,8 +179,7 @@ type CYKParser()=
 
                         
        System.Console.Write "\nParse weights: "
-       parseWeightCalc ws (s.Length - 1)
-       //printOutput resultRules start    
+       parseWeightCalc ws (s.Length - 1)       
 
     member this.Recognize grammar str = recognize grammar str
 

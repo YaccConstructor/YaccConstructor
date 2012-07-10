@@ -36,9 +36,9 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
     def.grammar.All 
         (fun r ->
             match r.body with
-            | PSeq([{rule = PToken(_);omit =_ ;binding =_;checker = _}],_)
+            | PSeq([{rule = PToken(_);omit =_ ;binding =_;checker = _}],_,_)
             | PSeq([{rule = PRef(_);omit =_ ;binding =_;checker = _}
-                   ;{rule = PRef(_);omit =_ ;binding =_;checker = _}],_) -> true 
+                   ;{rule = PRef(_);omit =_ ;binding =_;checker = _}],_,_) -> true 
             | _ -> false)
 
 let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
@@ -58,7 +58,7 @@ let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
         | PMetaRef (name,_,exprList) ->  
             addUndeclaredRule name additionRules
             exprList |> List.iter getUndeclaredRulesCurried 
-        | PSeq (exprList,_) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r.rule)
+        | PSeq (exprList,_,_) -> exprList |> List.iter (fun r -> getUndeclaredRulesCurried r.rule)
         | PPerm exprList    -> exprList |> List.iter getUndeclaredRulesCurried 
         | PRepet (expr,_,_)
         | PMany expr
@@ -96,7 +96,7 @@ let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
         | PMetaRef (name,_,exprList) ->  
             addReachedRule name additionRules
             exprList |> List.iter getReachableRulesCurried 
-        | PSeq (exprList,_) -> exprList |> List.iter (fun r -> getReachableRulesCurried r.rule)
+        | PSeq (exprList,_,_) -> exprList |> List.iter (fun r -> getReachableRulesCurried r.rule)
         | PPerm exprList    -> exprList |> List.iter getReachableRulesCurried
         | PRepet (expr,_,_)
         | PMany expr

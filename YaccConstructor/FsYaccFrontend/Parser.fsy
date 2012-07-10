@@ -40,7 +40,7 @@ open Yard.Core.IL.Production
 %%
 
 alternative : yard_list_13 ACTION_CODE
-              {let lst=$1 in let ac=$2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0))) }
+              {let lst=$1 in let ac=$2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0)), None) }
 
 yard_list_13 : { [] }
              | yard_item_2 yard_list_13

@@ -111,7 +111,7 @@ let expandMeta body metaRules expanded res =
                     | POpt r
                     | PSome r
                     | PMany r -> canUseBinding r
-                    | PSeq(s,ac) ->
+                    | PSeq(s,ac,_) ->
                         if (ac.IsSome) then true
                         else s |> List.exists (fun elem -> canUseBinding elem.rule)
                     | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
@@ -171,14 +171,14 @@ let expandMeta body metaRules expanded res =
                 | PAlt (l, r) ->
                     (expandBody l metaRules expanded [], simpleExpand r)
                     |> (fun (x, y) -> (PAlt (fst x, fst y), (snd x)@(snd y)))
-                | PSeq (ruleList, actionCode) ->
+                | PSeq (ruleList, actionCode, l) ->
                     ruleList
                     |> List.fold
                         (fun (curSeq, accRes) elem' ->
                             let bodyExp = expandBody elem'.rule metaRules expanded accRes
                             (applyToRes (fun h -> {elem' with rule = h}::curSeq) bodyExp)
                         ) ([], res)
-                    |> applyToRes (fun x -> PSeq (List.rev x, actionCode))
+                    |> applyToRes (fun x -> PSeq (List.rev x, actionCode, l))
                 | PLiteral _ as literal -> (literal, res)
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
@@ -203,8 +203,8 @@ let expandMeta body metaRules expanded res =
         | PRef(name, attrs) as prev ->
             (tryReplaceActual formalToAct (Source.toString name) prev)
         | PAlt (l, r) -> PAlt(replace l, replace r)
-        | PSeq (ruleList, actionCode) ->
-            PSeq (List.map (fun x ->  {x with rule = replace x.rule}) ruleList, actionCode)
+        | PSeq (ruleList, actionCode, l) ->
+            PSeq (List.map (fun x ->  {x with rule = replace x.rule}) ruleList, actionCode, l)
         | PLiteral _ as literal -> literal
         | PToken _ as token -> token
         | PMetaRef (name, attrs, metaArgs) -> 

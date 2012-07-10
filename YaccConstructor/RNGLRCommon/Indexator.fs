@@ -44,7 +44,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let terms, literals =
         let rec collectTermsAndLits (accTerms, accLiterals) (*body*) = function (*body*)
             | PRef _ | PMetaRef _ -> (accTerms, accLiterals)
-            | PSeq (s, _) ->
+            | PSeq (s, _, _) ->
                 s |> List.map (fun e -> e.rule)
                 |> List.fold collectTermsAndLits (accTerms, accLiterals)
             | PLiteral lit -> (accTerms, (fst lit)::accLiterals)

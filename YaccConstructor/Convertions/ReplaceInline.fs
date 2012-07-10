@@ -48,10 +48,10 @@ let replaceInline (rules : Rule.t<_,_> list) =
         |> closure
     
     let rec modifyBody (*body*) = function
-        | PSeq (elems, ac) ->
+        | PSeq (elems, ac, l) ->
             let newElems =
                 elems |> List.map (fun x -> {x with rule = modifyBody x.rule})
-            PSeq(newElems, ac)
+            PSeq(newElems, ac, l)
         | PAlt (l,r) -> PAlt(modifyBody l, modifyBody r)
         | PRef ((name,_),_) as prev ->
             if inlines.ContainsKey name then inlines.Item name

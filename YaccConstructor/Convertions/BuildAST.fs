@@ -46,8 +46,8 @@ let isTyped = ref false
 let leafConstr = ref (fun token binding -> sprintf "Leaf(\"%s\")" token)
 
 let seqify = function
-    | PSeq(x, y) -> PSeq(x, y)
-    | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None)
+    | PSeq(x, y,l) -> PSeq(x, y,l)
+    | production -> PSeq([{new elem<Source.t, Source.t> with omit=false and rule=production and binding=None and checker=None}], None,None)
 
 let printSeqProduction binding = function
     | POpt x -> sprintf "(match %s with None -> Node(\"opt\", []) | Some(ast) -> ast)" binding 
@@ -63,9 +63,9 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
         | PAlt _ -> true
         | _ -> false
     match production with
-    | PSeq(elements, _) ->
+    | PSeq(elements, _,l) ->
         if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
-            PSeq(elements, Some("Node(\"empty\", [])", (0,0)))
+            PSeq(elements, Some("Node(\"empty\", [])", (0,0)),l)
         else
             PSeq(
                 elements
@@ -93,7 +93,7 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                     |> String.concat "; "
                     |> sprintf "Node(\"%s\", [%s])" ruleName
                     , (0,0)
-                )|> Some)
+                )|> Some,l)
     | PAlt(left,right) -> 
         PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName 1) left,_buildAST (sprintf "%s_Alt%dR" ruleName 1) right)
     | x -> seqify x |> _buildAST ruleName

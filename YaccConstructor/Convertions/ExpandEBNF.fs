@@ -60,7 +60,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             metaArgs
             |> List.map (fun x -> PRef (x, None))
         match production with
-        | PSeq(elem_list, ac) ->
+        | PSeq(elem_list, ac, l) ->
             PSeq(elem_list
                  |> List.fold
                     (fun (res,curAttrs) elem ->
@@ -71,7 +71,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     ([],attrs)
                  |> fst
                  |> List.rev
-                 , ac)
+                 , ac, l)
         | PAlt(left, right) -> PAlt(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
         | PSome(p) ->
             let generatedName = genSomeName()
@@ -80,7 +80,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
             let newBody =
                 PAlt(
-                    PSeq([{default_elem with rule = expandedBody; binding=genBinding "yard_elem"}], genAction "[yard_elem]") ,
+                    PSeq([{default_elem with rule = expandedBody; binding=genBinding "yard_elem"}], genAction "[yard_elem]", None) ,
                     PSeq([
                             {omit=false;
                                 rule = expandedBody;
@@ -91,7 +91,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                                 binding=genBinding "yard_tail";
                                 checker=None}
                             ]
-                            , genAction "yard_head::yard_tail")
+                            , genAction "yard_head::yard_tail", None)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
@@ -109,7 +109,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
             let newBody = 
                 PAlt(
-                    PSeq([], genAction "[]") ,
+                    PSeq([], genAction "[]", None) ,
                     PSeq([
                             {omit=false;
                                 rule=expandedBody;
@@ -120,7 +120,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                                 binding=genBinding "yard_tail";
                                 checker=None}
                             ]
-                            , genAction "yard_head::yard_tail")
+                            , genAction "yard_head::yard_tail", None)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
@@ -138,8 +138,8 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
             let newBody =
                 PAlt(
-                    PSeq([], genAction "None"),
-                    PSeq([{default_elem with rule=expandedBody; binding=genBinding "yard_elem"}], genAction "Some(yard_elem)")
+                    PSeq([], genAction "None",None),
+                    PSeq([{default_elem with rule=expandedBody; binding=genBinding "yard_elem"}], genAction "Some(yard_elem)",None)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 

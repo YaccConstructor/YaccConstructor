@@ -32,7 +32,7 @@ let RuleLength (def:Yard.Core.IL.Definition.t<_,_>) =
         | PMetaRef _
         | PLiteral _ 
         | PToken _  -> 1 
-        | PSeq (exprList,_) -> List.length exprList 
+        | PSeq (exprList,_,_) -> List.length exprList 
         | PPerm _    
         | PRepet _
         | PMany _

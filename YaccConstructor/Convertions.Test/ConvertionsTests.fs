@@ -44,13 +44,13 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
 
     let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
         let rec reduceSeq (*il*) = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None) ->
+            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None, None) ->
 //                printfn "seq %s" <| r.ToString()
                 reduceSeq r
             | x -> x
         //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
         match (reduceSeq il1, reduceSeq il2) with
-        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
+        | PSeq(elems1, ac1, _), PSeq(elems2, ac2, _) -> 
             List.length elems1 = List.length elems2 &&
                 List.zip elems1 elems2 
                 |> List.forall 
@@ -105,7 +105,7 @@ type ``Convertions tests`` () =
                                 {dummyRule with rule=PToken("NUMBER",(0,0))};
                                 {dummyRule with rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
                                 {dummyRule with rule=PToken("CHUMBER",(0,0))};
-                            ], None)
+                            ], None, None)
                             |> PSeq
                             , PToken("OUTER",(0,0)))
                             |> PAlt
@@ -130,7 +130,7 @@ type ``Convertions tests`` () =
                                     {dummyRule with rule = PToken ("NUMBER", (0, 0))};
                                     {dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}; 
                                     {dummyRule with rule = PToken ("CHUMBER", (0, 0))}
-                            ],None)
+                            ],None, None)
                             , PToken ("OUTER", (0, 0)))
                     _public = true
                     metaArgs = []
@@ -170,7 +170,7 @@ type ``Convertions tests`` () =
                 (fun rule ->
                     let rec eachProd = function
                         | PAlt(a,b) -> eachProd a && eachProd b
-                        | PSeq(elements, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
+                        | PSeq(elements, _, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
                         | _ -> true
                     eachProd rule.body
                 )

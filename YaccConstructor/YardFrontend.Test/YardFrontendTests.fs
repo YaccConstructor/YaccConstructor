@@ -116,7 +116,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("R", (28, 29))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None
@@ -138,7 +138,7 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}; {omit = false
                                                           rule = PToken ("R", (28, 29))
                                                           binding = None
-                                                          checker = None}],None)
+                                                          checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -155,7 +155,7 @@ type ``Yard frontend preprocessor tests`` () =
                          body = PSeq ([{omit = false
                                         rule = PToken ("R", (29, 30))
                                         binding = None
-                                        checker = None}],None)
+                                        checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -172,7 +172,7 @@ type ``Yard frontend preprocessor tests`` () =
                          body = PSeq ([{omit = false
                                         rule = PToken ("N", (17, 18))
                                         binding = None
-                                        checker = None}],None)
+                                        checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -189,7 +189,7 @@ type ``Yard frontend preprocessor tests`` () =
                          body = PSeq ([{omit = false
                                         rule = PToken ("Q", (57, 58))
                                         binding = None
-                                        checker = None}],None)
+                                        checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -206,7 +206,7 @@ type ``Yard frontend preprocessor tests`` () =
                          body = PSeq ([{omit = false
                                         rule = PToken ("Q", (57, 58))
                                         binding = None
-                                        checker = None}],None)
+                                        checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -226,7 +226,7 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}; {omit = false
                                                           rule = PToken ("G", (27, 28))
                                                           binding = None
-                                                          checker = None}],None)
+                                                          checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -246,7 +246,7 @@ type ``Yard frontend preprocessor tests`` () =
                                         checker = None}; {omit = false
                                                           rule = PToken ("H", (38, 39))
                                                           binding = None
-                                                          checker = None}],None)
+                                                          checker = None}],None,None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -264,7 +264,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("C", (40, 41))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None
@@ -282,7 +282,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (15, 16))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None
@@ -300,7 +300,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("B", (31, 32))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None
@@ -318,7 +318,7 @@ type ``Yard frontend preprocessor tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (15, 16))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None
@@ -355,7 +355,7 @@ type ``YardFrontend Parser tests`` () =
                                     binding = None
                                     checker = None
                                 }],
-                                None)
+                                None,None)
                         _public = true
                         metaArgs = []
                     }] 
@@ -386,7 +386,7 @@ A;"
             Rule.body = PSeq ([{omit = false
                                 rule = PToken ("A", (22, 23))
                                 binding = None
-                                checker = None}], None)
+                                checker = None}], None,None)
             Rule.metaArgs = []
             }
         let optionsForRule = Map.ofList [("a", "smth")]//[("dialect", "ora"), ("comment","smth")]
@@ -428,7 +428,7 @@ let value x = (x:>Lexeme<string>).value
                                     binding = Some ("res:int", (54, 61))
                                     checker = None
                                 }],
-                                Some ("res", (71, 74)))
+                                Some ("res", (71, 74)),None)
                         _public = true
                         metaArgs = []
                       }; { 
@@ -442,7 +442,7 @@ let value x = (x:>Lexeme<string>).value
                                     binding = Some ("n", (84, 85))
                                     checker = None
                                 }],
-                                Some ("(value n |> int) + i", (94, 114)))
+                                Some ("(value n |> int) + i", (94, 114)),None)
                         _public = false
                         metaArgs = []
                     }]
@@ -466,7 +466,7 @@ type ``Yardfrontend label tests`` () =
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (12, 13))
                                            binding = None
-                                           checker = None}],None)
+                                           checker = None}],None,None)
                             _public = true
                             metaArgs = []}]
                 foot = None

@@ -34,7 +34,7 @@ let getLastName() = sprintf "yard_start_%d" !nameIndex
 let rec eachProduction f productionList =
     List.iter 
         (function    
-        | PSeq(elements, actionCode) -> f(PSeq(elements, actionCode)); eachProduction f (List.map (fun elem -> elem.rule) elements)
+        | PSeq(elements, actionCode, l) -> f(PSeq(elements, actionCode, l)); eachProduction f (List.map (fun elem -> elem.rule) elements)
         | PAlt(left, right) -> f(PAlt(left, right)); eachProduction f [left; right]
         | PMany(x) -> f(PMany(x)); eachProduction f [x]
         | PSome(x) -> f(PSome(x)); eachProduction f [x]
@@ -44,11 +44,11 @@ let rec eachProduction f productionList =
         productionList 
 
 let addEOFToProduction = function
-    | PSeq(elements, actionCode) -> 
+    | PSeq(elements, actionCode, l) -> 
         (
             elements 
             @ [{omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}]
-            ,actionCode
+            ,actionCode, l
         ) 
         |> PSeq
     | x -> (
@@ -56,7 +56,7 @@ let addEOFToProduction = function
                     {omit=false; rule=x; binding=None; checker=None}; 
                     {omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}
                 ]
-                ,None
+                ,None, None
            )
            |> PSeq
 
@@ -86,7 +86,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                                     {omit=false; rule=PRef((rule.name, (0,0)), None); binding=Some(getLastName(), (0,0)); checker=None}; 
                                     {omit=false; rule=PToken("EOF", (0,0)); binding=None; checker=None}
                                   ]
-                                  ,Some(getLastName(),(0,0))
+                                  ,Some(getLastName(),(0,0)), None
                         )
                     }]
                 else

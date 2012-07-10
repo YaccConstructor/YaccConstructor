@@ -26,7 +26,8 @@ open System
 let extract_one_rule (rule:Rule.t<'a,'b>) = 
     let rec expand = function
     |PAlt     (a,b) -> expand a  @ expand b
-    |PSeq     (a,b) -> let wrap = List.map (fun x -> (x.rule, fun r -> {x with rule = r})) a
+    |PSeq     (a,b,l) -> 
+        let wrap = List.map (fun x -> (x.rule, fun r -> {x with rule = r})) a
                                   |> List.unzip
                        in
                        let rec gen = function
@@ -34,7 +35,7 @@ let extract_one_rule (rule:Rule.t<'a,'b>) =
                            | []     -> []
                        in 
                        fst wrap |> List.map expand |> gen 
-                       |> List.map (fun x -> PSeq ((List.map2 ( |> ) x (snd wrap)),b))
+                       |> List.map (fun x -> PSeq ((List.map2 ( |> ) x (snd wrap)),b,l))
     |PRef   _ 
     |PLiteral _
     |PToken   _ as t   -> [t]

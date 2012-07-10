@@ -50,7 +50,7 @@ let tokenName literal token_format=
 let rec eachProduction f productionList =
     List.iter 
         (function    
-        | PSeq(elements, actionCode) -> f(PSeq(elements, actionCode)); eachProduction f (List.map (fun elem -> elem.rule) elements)
+        | PSeq(elements, actionCode, l) -> f(PSeq(elements, actionCode, l)); eachProduction f (List.map (fun elem -> elem.rule) elements)
         | PAlt(left, right) -> f(PAlt(left, right)); eachProduction f [left; right]
         | PMany(x) -> f(PMany(x)); eachProduction f [x]
         | PSome(x) -> f(PSome(x)); eachProduction f [x]
@@ -61,11 +61,11 @@ let rec eachProduction f productionList =
 
 let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, string>) (grammarTokens:HashSet<string>) token_format= 
     let rec _replaceLiterals = function
-        | PSeq(elements, actionCode) -> 
+        | PSeq(elements, actionCode, l) -> 
             (
                 elements 
                 |> List.map (fun elem -> {elem with rule=(_replaceLiterals elem.rule)})
-                ,actionCode
+                ,actionCode, l
             )
             |> PSeq
         | PAlt(left, right) -> PAlt(_replaceLiterals left, _replaceLiterals right)

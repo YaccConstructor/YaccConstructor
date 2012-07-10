@@ -89,7 +89,6 @@ namespace YC.VSYard.AutoCompletion
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
                     case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                        break;
                     case VSConstants.VSStd2KCmdID.COMPLETEWORD: // Нажатие Ctrl+Space
                         handled = StartSession();
                         break;

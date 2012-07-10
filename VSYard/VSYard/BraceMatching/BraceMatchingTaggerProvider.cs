@@ -38,8 +38,8 @@
         {
             //It is exampe of getting root *.yrd file of active project.
             //Should be removed
-            var t = YC.VSYard.Helpers.SolutionNavigatorHelper.GetRootYrd
-                    (YC.VSYard.Helpers.SolutionNavigatorHelper.GetActiveProject());
+            //var t = YC.VSYard.Helpers.SolutionNavigatorHelper.GetRootYrd
+            //        (YC.VSYard.Helpers.SolutionNavigatorHelper.GetActiveProject());
 
             if (textView == null
                || textView.TextBuffer != buffer) //provide highlighting only on the top-level buffer

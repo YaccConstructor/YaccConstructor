@@ -134,6 +134,9 @@
     <Compile Include="Completion\CompletionSource.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Helpers\SolutionNavigatorHelper.cs" />
+    <Compile Include="PluginDataStructure\CurrentSessionData.cs" />
+    <Compile Include="PluginDataStructure\ProjectData.cs" />
+    <Compile Include="PluginDataStructure\SolutionData.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

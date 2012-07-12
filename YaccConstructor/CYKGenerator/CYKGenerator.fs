@@ -22,8 +22,47 @@ namespace Yard.Generators.CYKGenerator
 open Yard.Core
 open System.Collections.Generic
 open Yard.Core.IL
+open Microsoft.FSharp.Text.StructuredFormat
+open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 type CYKGeneartorImpl () =
+    let header =
+        [
+         "namespace Yard.Generators.CYK"
+         ; ""
+         ; "open Yard.Core"
+        ]
+        |> List.map wordL |> aboveListL
+
+    let footer = []
+
+    let tokenTypes (termDict:Dictionary<string,_>) =
+        ("type cykToken = "|> wordL)
+        @@-- ([for kvp in termDict -> [wordL "|"; wordL kvp.Key] |> spaceListL] |> aboveListL)
+            
+    let getTokenTypeTag (termDict:Dictionary<string,_>) =
+        ("let getTag token = "|> wordL)
+        @@-- (("match token with "|> wordL)
+             @@ ([for kvp in termDict -> ["|"; kvp.Key; "->"; string kvp.Value]|> List.map wordL |> spaceListL] |> aboveListL))
+
+    let rulesArray rules = 
+        ("let rules = "|> wordL)
+        @@-- (([wordL "["; [for rule in rules -> string rule + "u" |> wordL] |> semiListL; wordL "]"]|>spaceListL)
+             @@ (wordL "|> Array.ofList"))
+
+    let layoutToStr = 
+        StructuredFormat.Display.layout_to_string 
+          {StructuredFormat.FormatOptions.Default with PrintWidth=100}
+      
+
+    let code rules termDict =
+        [ header
+         ; tokenTypes termDict
+         ; getTokenTypeTag termDict
+         ; rulesArray rules ]
+        |> aboveListL
+        |> layoutToStr
+
     // Now we are not support action code. So skip it.
     let grammarFromIL (il:Yard.Core.IL.Definition.t<_,_>) =
         let ntermDict = new Dictionary<_,_>()
@@ -89,16 +128,21 @@ type CYKGeneartorImpl () =
             | _ -> failwith "CYK. Incorrect rule structure. Must be in CNF"
             
         il.grammar |> List.map processRule
+        , termDict
         
     let print rule = 
         let rName, r1, r2, lblName, lblWeight = getRule rule
         [rName]
 
-    static member Generate grammar = ()
-    member x.GenRulesList grammar = grammarFromIL grammar
+    member x.Generate grammar = 
+        let rules, termDict = grammarFromIL grammar
+        code rules termDict
+    member x.GenRulesList grammar = grammarFromIL grammar |> fst
 
 type CYKGenerator() =    
     inherit Generator()
         override this.Name = "CYKGenerator"
-        override this.Generate t = CYKGeneartorImpl.Generate t |> box
+        override this.Generate t = 
+            let g = new CYKGeneartorImpl()
+            g.Generate t |> box
         override this.AcceptableProductionTypes = ["seq"]

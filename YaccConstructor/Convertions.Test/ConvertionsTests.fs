@@ -32,6 +32,7 @@ let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
+
 let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
         if (fst a = fst b) then true
@@ -43,9 +44,8 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | _ -> printfn "badOpt %A %A" a b; false
 
     let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
-        let rec reduceSeq (*il*) = function
+        let rec reduceSeq = function
             | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None, None) ->
-//                printfn "seq %s" <| r.ToString()
                 reduceSeq r
             | x -> x
         //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
@@ -79,9 +79,6 @@ let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
             rule1.name = rule2.name
         ) g1 g2
-
-//let printTree tree = 
-//    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
 
 [<TestFixture>]
 type ``Convertions tests`` () =
@@ -146,7 +143,6 @@ type ``Convertions tests`` () =
             options = Map.empty
         }
         Assert.AreEqual(ilTreeConverted, correctConverted)
-
     
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
@@ -184,48 +180,7 @@ type ``Convertions tests`` () =
 #endif
         Assert.True(hasNotInnerSeq)  
 
-    [<Test>]
-    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
-    /// Expected result 'sourceFileName.res'
-    member test.``Meta tests in Tests\Convertions\Meta .``()=
-        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
-        let frontend =
-            match FrontendsManager.Component "YardFrontend" with
-                   | Some fron -> fron
-                   | None -> failwith "YardFrontend is not found." 
-        (*let generator = 
-           match GeneratorsManager.Component "YardPrinter" with
-           | Some gen -> gen
-           | None -> failwith "YardPrinter is not found." 
-        printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
-        |> Seq.iter 
-            (fun srcFile ->  
-                Namer.resetRuleEnumerator()
-                printfn "file %s" srcFile
-                // all convertions are in name without descr.yrd
-                let convertions = [|"ExpandMeta"|]
-                printfn "%A" convertions
-                Namer.resetRuleEnumerator()
-                let ilTree = (srcFile |> frontend.ParseGrammar)
-                printfn "after Parsing"
-                let reorder f a b = f b a
-//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                printfn "after Convertion"
-                Namer.resetRuleEnumerator()
-                let expected =
-                    try
-                        srcFile + ".ans" |> frontend.ParseGrammar 
-                    with
-                        | e -> printfn "%s" e.Message
-                               raise <| FEError e.Message
-                printfn "after result parsing"
-                //printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
-
-            )
-        Assert.True(true)
+    
         
     [<Test>]
     /// Source file name have to be in format 'convName1_convName2_descr.yrd'.

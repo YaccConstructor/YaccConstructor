@@ -39,10 +39,33 @@ type ``CYK generator tests`` () =
 
     [<Test>]
     member test.``Simple one rule term without lable test`` () =        
-        let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_noLBL.yrd"))
+        let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_noLBL.yrd"))        
         let result = generator.GenRulesList il
         Assert.AreEqual(result.Length,1)
         Assert.AreEqual(result.[0], 281479271677952UL)
+
+    [<Test>]
+    member test.``Simple one rule term without lable code gen test`` () =        
+        let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_noLBL.yrd"))
+        let expectedCode = 
+            ["namespace Yard.Generators.CYK"
+            ; ""
+            ; "open Yard.Core"
+            ; "type cykToken = "
+            ; "  | NUM"
+            ; "let getTag token = "
+            ; "  match token with "
+            ; "  | NUM -> 1"
+            ; "let rules = "
+            ; "  [ 281479271677952u ]"
+            ; "  |> Array.ofList"
+            ] |> String.concat "\n"
+
+        let code = generator.Generate il
+        printfn "%s" expectedCode
+        printfn "%s" "**************************"
+        printfn "%s" code        
+        Assert.AreEqual(expectedCode, code)        
 
 
 

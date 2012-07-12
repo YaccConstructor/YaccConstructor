@@ -25,6 +25,7 @@ open Yard.Core.IL
 open Production
 open Namer
 open TransformAux
+open Yard.Core.IL.Rule
 
 let s2source s = (s, (0,0))
 let generatedSomesCount = ref 0
@@ -94,14 +95,15 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                             , genAction "yard_head::yard_tail", None)
                 ) 
             addedBnfRules := (
-                {new Rule.t<Source.t,Source.t> 
-                 with name = generatedName 
-                 and args = formList attrs 
-                 and body = newBody
-                 and _public=false
-                 and metaArgs = metaArgs
+                {
+                 name = generatedName 
+                 args = formList attrs 
+                 body = newBody
+                 _public=false
+                 metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
+
         | PMany(p) -> 
             let generatedName = genManyName()
             let expandedBody = replaceEbnf p attrs metaArgs
@@ -123,14 +125,15 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                             , genAction "yard_head::yard_tail", None)
                 ) 
             addedBnfRules := (
-                {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
-                 and args = formList attrs
-                 and body= newBody
-                 and _public=false
-                 and metaArgs = metaArgs
+                {
+                 name=generatedName 
+                 args = formList attrs
+                 body= newBody
+                 _public=false
+                 metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
+
         | POpt(p) -> 
             let generatedName = genOptName()
             let expandedBody = replaceEbnf p attrs metaArgs
@@ -142,14 +145,15 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                     PSeq([{default_elem with rule=expandedBody; binding=genBinding "yard_elem"}], genAction "Some(yard_elem)",None)
                 ) 
             addedBnfRules := (
-                {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
-                 and args = formList attrs
-                 and body= newBody
-                 and _public=false
-                 and metaArgs = metaArgs
+                {
+                 name=generatedName 
+                 args = formList attrs
+                 body= newBody
+                 _public=false
+                 metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
+
         | x -> x
     {rule with body=replaceEbnf rule.body (List.zip rule.args rule.args) rule.metaArgs}::(List.rev !addedBnfRules)
 

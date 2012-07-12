@@ -85,7 +85,7 @@ let expandMeta body metaRules expanded res =
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
     let rec expandBody body (metaRules: Dictionary<string,Rule.t<Source.t,Source.t> >)
-            (expanded : Dictionary<string, Production.t<'a,'b>>) res =
+            (expanded : Dictionary<string, Production.t<_,_>>) res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
         let getKey body = body.ToString()
@@ -184,8 +184,8 @@ let expandMeta body metaRules expanded res =
                 | PMetaRef (name, attrs, metaArgs) as x -> 
                     if (metaArgs.IsEmpty) then (PRef(name, attrs), res)
                     else expandMetaRef (Source.toString name) attrs metaArgs 
-                | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
-                | PRepet (_) -> failwith "Unrealised meta-expanding of permutation"
+                | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
+                | PRepet _ -> failwith "Unrealised meta-expanding of permutation"
             if not (expanded.ContainsKey key) then
                 expanded.Add(key, rule)
 //            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule res
@@ -210,8 +210,8 @@ let expandMeta body metaRules expanded res =
         | PMetaRef (name, attrs, metaArgs) -> 
             if (metaArgs.IsEmpty) then (tryReplaceActual formalToAct (Source.toString name) (PRef(name, attrs)) )
             else PMetaRef(name, attrs, List.map replace metaArgs)
-        | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
-        | PRepet (_) -> failwith "Unrealised meta-expanding of repetition"
+        | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
+        | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
 
     expandBody body metaRules expanded res
 
@@ -233,10 +233,8 @@ let expandMetaRules rules =
     let rec collectMeta rules (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) = 
         match rules with 
         | [] -> ()
-        | h::t -> 
-            if (isMetaRule h) then 
-                metaRulesTbl.Add(h.name,h)        
-            collectMeta t metaRulesTbl
+        | h::t -> if (isMetaRule h) then metaRulesTbl.Add(h.name,h)        
+                  collectMeta t metaRulesTbl
     
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl
     let rec replaceMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >), refsTbl) res = 

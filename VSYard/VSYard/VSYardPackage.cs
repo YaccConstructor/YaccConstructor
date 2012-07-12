@@ -87,6 +87,7 @@ namespace YC.VSYard
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
+            var paths = "";
             var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
@@ -96,6 +97,11 @@ namespace YC.VSYard
                 foreach (EnvDTE.Project i in m_dte.Solution.Projects)
                 {
                     Trace.WriteLine(i.FullName);
+                    foreach (EnvDTE.ProjectItem pi in i.ProjectItems)
+                    {
+                        paths += pi.Properties.Item("FullPath").Value;
+                        paths += ";\n";
+                    }
                 }
             }
             return VSConstants.S_OK;

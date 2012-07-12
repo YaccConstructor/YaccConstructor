@@ -34,7 +34,10 @@ type CYKGeneartorImpl () =
         ]
         |> List.map wordL |> aboveListL
 
-    let footer = []
+    let tokenStreamEncoder = 
+        wordL "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "
+        @@-- (wordL "stream |> Seq.map (fun t -> getTag t.Tag)")
+        
 
     let tokenTypes (termDict:Dictionary<string,_>) =
         ("type cykToken = "|> wordL)
@@ -52,14 +55,15 @@ type CYKGeneartorImpl () =
 
     let layoutToStr = 
         StructuredFormat.Display.layout_to_string 
-          {StructuredFormat.FormatOptions.Default with PrintWidth=100}
+          {StructuredFormat.FormatOptions.Default with PrintWidth=80}
       
 
     let code rules termDict =
         [ header
          ; tokenTypes termDict
          ; getTokenTypeTag termDict
-         ; rulesArray rules ]
+         ; rulesArray rules 
+         ; tokenStreamEncoder]
         |> aboveListL
         |> layoutToStr
 

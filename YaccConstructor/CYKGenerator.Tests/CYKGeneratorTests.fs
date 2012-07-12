@@ -59,6 +59,8 @@ type ``CYK generator tests`` () =
             ; "let rules = "
             ; "  [ 281479271677952u ]"
             ; "  |> Array.ofList"
+            ; "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "
+            ; "  stream |> Seq.map (fun t -> getTag t.Tag)"
             ] |> String.concat "\n"
 
         let code = generator.Generate il

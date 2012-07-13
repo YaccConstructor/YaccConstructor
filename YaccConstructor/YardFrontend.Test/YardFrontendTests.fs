@@ -41,7 +41,12 @@ let lexerTest str lexemsListCorrect =
 
     printfn "%A" lexemsList
 
-    Assert.AreEqual(lexemsListCorrect, lexemsList)
+    let areEqual lexemsListCorrect lexemsList =
+        try 
+            List.map2 (fun x y -> match x,y with | LPAREN _, LPAREN _ |RPAREN _ ,RPAREN _| SEMICOLON _, SEMICOLON _ -> true | x,y -> x =y) lexemsListCorrect lexemsList
+            |> List.reduce (&&)
+        with _ -> false
+    Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
 
 let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     let currentIL = {Main.ParseFile path with info = {fileName =""}}
@@ -67,26 +72,26 @@ let completeTest str lexemsListCorrect ilDefCorrect =
 
 let optionsTest path optionsCorrect =
     let definition = {Main.ParseFile path with info = {fileName =""}}
-    let currentOptions = definition.options
-
+    let currentOptions = definition.options    
     Assert.AreEqual(currentOptions, optionsCorrect)
         
+let dummyRange = Range (Lexing.Position.Empty,Lexing.Position.Empty)
 
 [<TestFixture>]
-type ``YardFrontend lexer tests`` () =    
+type ``YardFrontend lexer tests`` () = 
     [<Test>]
     member test.``Lexer seq test`` () =
         lexerTest 
             "+s: NUMBER PLUS NUMBER;"
             [PLUS; LIDENT ("s", (1, 2)); COLON; UIDENT ("NUMBER", (4, 10))
-            ; UIDENT ("PLUS", (11, 15)); UIDENT ("NUMBER", (16, 22)); SEMICOLON; EOF]
+            ; UIDENT ("PLUS", (11, 15)); UIDENT ("NUMBER", (16, 22)); SEMICOLON dummyRange; EOF]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
             "+s: (MINUS|PLUS)*;"
             [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10)); BAR
-            ; UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON; EOF]
+            ; UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON dummyRange; EOF]
 
     [<Test>]            
     member test.``Include test`` () =
@@ -94,7 +99,7 @@ type ``YardFrontend lexer tests`` () =
 include ""test_included.yrd""
 +s:PLUS;"
             [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33))
-            ; COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON; EOF]
+            ; COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON dummyRange; EOF]
 
 [<TestFixture>]
 type ``Yard frontend preprocessor tests`` () =
@@ -117,6 +122,8 @@ type ``Yard frontend preprocessor tests`` () =
                 foot = None
                 options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
+
+
 
     [<Test>]
     member test.if_endif () =
@@ -255,7 +262,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("C", (46, 47))
+                                           rule = PToken ("C", (40, 41))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -273,7 +280,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (17, 18))
+                                           rule = PToken ("A", (15, 16))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -291,7 +298,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("B", (35, 36))
+                                           rule = PToken ("B", (31, 32))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -309,7 +316,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (17, 18))
+                                           rule = PToken ("A", (15, 16))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -317,7 +324,7 @@ type ``Yard frontend preprocessor tests`` () =
                 foot = None
                 options = Map.empty}
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
-
+             
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    
     [<Test>]
@@ -368,7 +375,7 @@ type ``YardFrontend options tests`` () =
 #set a = \"smth\"
 A;"
             [PLUS; LIDENT ("s", (1, 2)); COLON; SET; LIDENT ("a", (10, 11))
-            ; EQUAL; STRING ("smth", (15, 19)); UIDENT ("A", (22, 23)); SEMICOLON; EOF]
+            ; EQUAL; STRING ("smth", (15, 19)); UIDENT ("A", (22, 23)); SEMICOLON dummyRange; EOF]
 
     [<Test>]
     member test.``Basic options test`` () =
@@ -403,9 +410,9 @@ let value x = (x:>Lexeme<string>).value
                 (3, 46)); PLUS;
                 LIDENT ("s", (50, 51)); COLON; PATTERN ("res:int", (54, 61)); EQUAL;
                 LIDENT ("e", (65, 66)); PARAM ("1", (67, 68)); ACTION ("res", (71, 74));
-                SEMICOLON; LIDENT ("e", (78, 79)); PARAM ("i", (80, 81)); COLON;
+                SEMICOLON dummyRange; LIDENT ("e", (78, 79)); PARAM ("i", (80, 81)); COLON;
                 LIDENT ("n", (84, 85)); EQUAL; UIDENT ("NUMBER", (86, 92));
-                ACTION ("(value n |> int) + i", (94, 114)); SEMICOLON; EOF]
+                ACTION ("(value n |> int) + i", (94, 114)); SEMICOLON dummyRange; EOF]
             {
              info = { fileName = ""; }
              head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
@@ -443,3 +450,25 @@ let value x = (x:>Lexeme<string>).value
              options = Map.empty
             }
         
+[<TestFixture>]
+type ``Yardfrontend label tests`` () =
+    let basePath = "../../../../Tests/YardFrontend/Label"
+    let cp file = System.IO.Path.Combine(basePath,file)
+
+    [<Test>]
+    member test.``label test.`` () = 
+        let expected = 
+            {
+                info = {fileName =""}
+                head = None
+                grammar = [{name = "s"
+                            args = []
+                            body = PSeq ([{omit = false
+                                           rule = PToken ("A", (12, 13))
+                                           binding = None
+                                           checker = None}],None)
+                            _public = true
+                            metaArgs = []}]
+                foot = None
+                options = Map.empty}
+        preprocessorTest (cp "test_0.yrd") expected

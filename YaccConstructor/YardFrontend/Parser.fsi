@@ -3,6 +3,7 @@
 module Yard.Frontends.YardFrontend.GrammarParser
 open Yard.Core
 type token = 
+  | DLABEL of (IL.Source.t)
   | SHARPLINE of (string)
   | PATTERN of (IL.Source.t)
   | PARAM of (IL.Source.t)
@@ -26,10 +27,11 @@ type token =
   | BAR
   | EQUAL
   | COMMA
-  | SEMICOLON
+  | SEMICOLON of (Range)
   | COLON
   | EOF
 type tokenId = 
+    | TOKEN_DLABEL
     | TOKEN_SHARPLINE
     | TOKEN_PATTERN
     | TOKEN_PARAM
@@ -71,6 +73,8 @@ type nonTerminalId =
     | NONTERM_alts
     | NONTERM_bar_seq_nlist
     | NONTERM_seq
+    | NONTERM_no_lbl_seq
+    | NONTERM_lbl_seq
     | NONTERM_seq_elem_list
     | NONTERM_seq_elem
     | NONTERM_omit_opt

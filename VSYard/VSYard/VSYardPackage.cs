@@ -9,8 +9,9 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 
-namespace MyCompany.VSYard
+namespace YC.VSYard
 {
+
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
     ///
@@ -28,8 +29,12 @@ namespace MyCompany.VSYard
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [Guid(GuidList.guidVSYardPkgString)]
-    public sealed class VSYardPackage : Package
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
+    public sealed class VSYardPackage : Package, IVsSolutionEvents, IVsSolutionEvents2, IVsSolutionEvents3, IVsSolutionEvents4, IVsSolutionEventsProjectUpgrade
     {
+
+        uint m_solutionCookie = 0;
+
         /// <summary>
         /// Default constructor of the package.
         /// Inside this method you can place any initialization code that does not require 
@@ -56,9 +61,147 @@ namespace MyCompany.VSYard
         {
             Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
-
+            IVsSolution solution = (IVsSolution)GetService(typeof(SVsSolution));
+            ErrorHandler.ThrowOnFailure(solution.AdviseSolutionEvents(this, out m_solutionCookie));
         }
         #endregion
 
+
+        public int OnAfterCloseSolution(object pUnkReserved)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
+        {
+            var paths = "";
+            var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
+            if (m_dte == null)
+                ErrorHandler.ThrowOnFailure(1);
+            if (m_dte.Solution != null)
+            {
+                Trace.WriteLine(m_dte.Solution.FullName);
+                foreach (EnvDTE.Project i in m_dte.Solution.Projects)
+                {
+                    Trace.WriteLine(i.FullName);
+                    foreach (EnvDTE.ProjectItem pi in i.ProjectItems)
+                    {
+                        paths += pi.Properties.Item("FullPath").Value;
+                        paths += ";\n";
+                    }
+                }
+            }
+            return VSConstants.S_OK;
+        }
+
+        public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnBeforeCloseSolution(object pUnkReserved)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnBeforeUnloadProject(IVsHierarchy pRealHierarchy, IVsHierarchy pStubHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnQueryCloseSolution(object pUnkReserved, ref int pfCancel)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnQueryUnloadProject(IVsHierarchy pRealHierarchy, ref int pfCancel)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+
+        public int OnAfterClosingChildren(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterMergeSolution(object pUnkReserved)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterOpeningChildren(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnBeforeClosingChildren(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnBeforeOpeningChildren(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterUpgradeProject(IVsHierarchy pHierarchy, uint fUpgradeFlag, string bstrCopyLocation, SYSTEMTIME stUpgradeTime, IVsUpgradeLogger pLogger)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterAsynchOpenProject(IVsHierarchy pHierarchy, int fAdded)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterChangeProjectParent(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnAfterRenameProject(IVsHierarchy pHierarchy)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
+
+        public int OnQueryChangeProjectParent(IVsHierarchy pHierarchy, IVsHierarchy pNewParentHier, ref int pfCancel)
+        {
+            //throw new NotImplementedException();
+            return VSConstants.S_OK;
+        }
     }
 }

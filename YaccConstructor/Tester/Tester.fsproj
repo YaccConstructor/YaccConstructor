@@ -50,9 +50,7 @@
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
-    <Reference Include="nunit.framework">
-      <HintPath>C:\Program Files (x86)\NUnit 2.5.9\bin\net-2.0\framework\nunit.framework.dll</HintPath>
-    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -75,29 +73,9 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator.Test\GNESCCGenerator.Test.fsproj">
-      <Name>GNESCCGenerator.Test</Name>
-      <Project>{47a4bcb4-06e1-4217-8935-ac751985d647}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\IronyFrontend.Test\IronyFrontend.Test.fsproj">
       <Name>IronyFrontend.Test</Name>
       <Project>{dff3e1ae-8919-42a9-8320-a6cc5e4e154f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FAL.Test\FAL.Test.fsproj">
-      <Name>FAL.Test</Name>
-      <Project>{f9edef43-8a01-42e2-bd3c-daac07a68293}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
-      <Name>GNESCCCommon</Name>
-      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCCore.Test\GNESCCCore.Test.fsproj">
-      <Name>GNESCCCore.Test</Name>
-      <Project>{a4a7a18d-971e-46aa-bd73-18ae9234f450}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">

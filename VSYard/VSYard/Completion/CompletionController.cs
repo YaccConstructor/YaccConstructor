@@ -12,19 +12,28 @@ using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio;
 using System.Windows;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Shell;//added
+using Microsoft.VisualStudio.Shell;
 using VSYardNS;
 
 
-namespace VSYard.AutoCompletion
+namespace YC.VSYard.AutoCompletion
 {
     #region Command Filter
 
     [Export(typeof(IVsTextViewCreationListener))]
-    [ContentType("text")]
+    [ContentType("yardtype")]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     internal sealed class VsTextViewCreationListener : IVsTextViewCreationListener
     {
+        [Export]
+        [Name("yardtype")]
+        [BaseDefinition("plaintext")]
+        internal static ContentTypeDefinition YARDContentType = null;
+
+        [Export]
+        [FileExtension(".yrd")]
+        [ContentType("yardtype")]
+        internal static FileExtensionToContentTypeDefinition YARDFileType = null;
         [Import]
         IVsEditorAdaptersFactoryService AdaptersFactory = null;
 
@@ -55,7 +64,7 @@ namespace VSYard.AutoCompletion
         public CommandFilter(IWpfTextView textView, ICompletionBroker broker)
         {
             _currentSession = null;
-
+             
             TextView = textView;
             Broker = broker;
         }
@@ -71,8 +80,8 @@ namespace VSYard.AutoCompletion
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            bool handled = false;
             int hresult = VSConstants.S_OK;
+            bool handled = false;
 
             // 1. Pre-process
             if (pguidCmdGroup == VSConstants.VSStd2K)
@@ -80,19 +89,19 @@ namespace VSYard.AutoCompletion
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
                     case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                    case VSConstants.VSStd2KCmdID.COMPLETEWORD:
+                    case VSConstants.VSStd2KCmdID.COMPLETEWORD: // Нажатие Ctrl+Space
                         handled = StartSession();
                         break;
-                    case VSConstants.VSStd2KCmdID.RETURN:
+                    case VSConstants.VSStd2KCmdID.RETURN: // Нажатие Enter
                         handled = Complete(false);
                         break;
-                    case VSConstants.VSStd2KCmdID.TAB:
+                    case VSConstants.VSStd2KCmdID.TAB:    // Нажатие Tab
                         handled = Complete(true);
                         break;
-                    case VSConstants.VSStd2KCmdID.CANCEL:
+                    case VSConstants.VSStd2KCmdID.CANCEL: // Нажатие Esc
                         handled = Cancel();
                         break;
-                   // default: Cancel(); break;
+                    //default: Cancel(); break;
                 }
             }
 
@@ -103,6 +112,19 @@ namespace VSYard.AutoCompletion
             {
                 if (pguidCmdGroup == VSConstants.VSStd2K)
                 {
+                    if (isSessionRunning)
+                    {
+                        //Cancel();
+                        //isSessionRunning = false;
+                    }
+                    else
+                    {
+                        StartSession();
+                        isSessionRunning = true;
+                        if (_currentSession != null)
+                            _currentSession.Recalculate();
+                    }
+
                     switch ((VSConstants.VSStd2KCmdID)nCmdID)
                     {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
@@ -117,27 +139,25 @@ namespace VSYard.AutoCompletion
                                 {
                                     StartSession();
                                     isSessionRunning = true;
+                                    if (_currentSession != null)
+                                        _currentSession.Recalculate(); 
                                 }
-                                else if (_currentSession != null)
-                                    Filter();
+                            else if (_currentSession != null)
+                                _currentSession.Filter();
                             break;
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
-                            Filter();
+                            if (_currentSession != null)
+                            {
+                                _currentSession.Filter();
+                            }
                             break;
-                    }
+                    } 
                 }
             }
 
+            //else handled = StartSession();
+
             return hresult;
-        }
-
-        private void Filter()
-        {
-            if (_currentSession == null)
-                return;
-
-            _currentSession.SelectedCompletionSet.SelectBestMatch();
-            _currentSession.SelectedCompletionSet.Recalculate();
         }
 
         bool Cancel()
@@ -172,7 +192,7 @@ namespace VSYard.AutoCompletion
             if (_currentSession != null)
                 return false;
 
-            SnapshotPoint caret = TextView.Caret.Position.BufferPosition;
+            SnapshotPoint caret = TextView.Caret.Position.BufferPosition; // Расположение каретки
             ITextSnapshot snapshot = caret.Snapshot;
 
             if (!Broker.IsCompletionActive(TextView))
@@ -186,6 +206,7 @@ namespace VSYard.AutoCompletion
             _currentSession.Dismissed += (sender, args) => _currentSession = null;
 
             _currentSession.Start();
+
 
             return true;
         }
@@ -204,6 +225,7 @@ namespace VSYard.AutoCompletion
             }
             return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
+
     }
 
     #endregion

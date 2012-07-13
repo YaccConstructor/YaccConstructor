@@ -1,7 +1,7 @@
 ﻿module Yard.Development.Tools.TablesPrinter
 
-open Yard.Generators.GNESCCGenerator.LALR
-open Yard.Generators.GNESCCGenerator.CommonTypes
+//open Yard.Generators.GNESCCGenerator.LALR
+//open Yard.Generators.GNESCCGenerator.CommonTypes
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
@@ -10,21 +10,21 @@ let layoutTable table layoutItem tabName =
     |> fun l -> (wordL tabName) @@-- l
     |> Display.layout_to_string {FormatOptions.Default with PrintWidth = 500}
 
-let tableForPrint actionTable gotoTable =
-    layoutTable
-        actionTable
-        (
-            Set.ofList
-            >> Set.map
-                (function
-                    | _,Error   -> "Error"
-                    | _,Accept   -> "Accept" 
-                    | _,Shift i  -> "Shift " + i.ToString() 
-                    | _,Reduce i -> "Reduce " + i.ToString()
-                    )
-            >> String.concat "; "    
-            >> fun l -> "["+l+"]")
-        "let actionTable = "
+let tableForPrint actionTable gotoTable = "GNESCC is removed."
+//    layoutTable
+//        actionTable
+//        (
+//            Set.ofList
+//            >> Set.map
+//                (function
+//                    | _,Error   -> "Error"
+//                    | _,Accept   -> "Accept" 
+//                    | _,Shift i  -> "Shift " + i.ToString() 
+//                    | _,Reduce i -> "Reduce " + i.ToString()
+//                    )
+//            >> String.concat "; "    
+//            >> fun l -> "["+l+"]")
+//        "let actionTable = "
     //|> write
 //    let actionPart = 
 //        actionTable
@@ -59,22 +59,13 @@ let tableForPrint actionTable gotoTable =
 let mutable res = ""
 
 let printToCSV 
-    ((prodTab:ProductionTable),states,startKernelIdxs,
+    ((prodTab),states,startKernelIdxs,
      actionTable, gotoTable,
      idx, nonTerminals, symbolIdx, kernalToItem, ntTab) =
     
     res <- tableForPrint actionTable gotoTable
+    Seq.empty
 
-    prodTab.AllProds()
-    |> Seq.map 
-        (function
-         | x,Production(nt,fa) 
-            -> let populator = QuickGraph.Glee.GleeGraphExtensions.CreateGleePopulator(fa)
-               populator.Compute()
-               populator.GleeGraph)
-
-let formatRaccGenresult (g:Yard.Generators.GNESCCGenerator.GNESCCGenerator) il =         
-    g.DbgGenerate il
-    |> snd
-    |> printToCSV
+let formatRaccGenresult g il =
+    Seq.empty
 

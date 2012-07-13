@@ -120,7 +120,7 @@ and  main = parse
               }
      | '-'  {MINUS}
      | ':'  { COLON }
-     | ';'  { SEMICOLON }
+     | ';'  {SEMICOLON (Range (lexbuf.StartPos,lexbuf.EndPos))}
      | ','  { COMMA }     
      | '|'  { BAR }
      | '='  {EQUAL}
@@ -142,6 +142,7 @@ and  main = parse
          let n2 = handle_lexical_error predicate lexbuf in
          PREDICATE (from_lexbuf lexbuf (n1,n2))
        }
+     | '@' identstart identbody * {DLABEL(lex2source lexbuf)}
      | identstart identbody *
        {  let text = lex2source lexbuf in
           match (fst text) with

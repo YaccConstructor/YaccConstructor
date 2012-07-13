@@ -42,6 +42,7 @@
     <Compile Include="ConvertionsTests.fs" />
     <Compile Include="ExpandMetaTests.fs" />
     <Compile Include="ExpandInnerAltTests.fs" />
+    <Compile Include="ExpandSubseqTests.fs" />
     <Compile Include="EntryPoint.fs" />
   </ItemGroup>
   <ItemGroup>

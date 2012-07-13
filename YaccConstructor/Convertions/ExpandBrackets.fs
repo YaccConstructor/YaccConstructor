@@ -36,7 +36,7 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
-            | PSeq(elements, actionCode, l) -> 
+            | PSeq(elements, actionCode, l) ->
                 (elements
                  |>List.fold
                     (fun (res, attrs) elem ->
@@ -48,10 +48,10 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
                                 let newName = newName()
                                 toExpand.Enqueue({name = newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
                                 { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
-                            | PAlt(_,_) -> 
+                            (*| PAlt(_,_) -> 
                                 let newName = newName()
                                 toExpand.Enqueue({name=newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
+                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }*)
                             | _ -> elem
                         newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
                     )

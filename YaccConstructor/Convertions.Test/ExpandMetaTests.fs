@@ -62,7 +62,7 @@ type ``Convertions expand metarules tests`` () =
         
         treeDump.Generate expected |> string |> printfn "%s"
         treeDump.Generate ilTreeConverted |> string |> printfn "%s"
-        Assert.IsTrue (grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+        Assert.IsTrue (ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 
     [<Test>]    
     member test.``Meta test 1``()=runMetaTest("meta_1.yrd")

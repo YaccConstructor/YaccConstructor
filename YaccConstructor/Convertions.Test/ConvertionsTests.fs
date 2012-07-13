@@ -33,53 +33,6 @@ let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
 
-let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
-    let srcEquals (a:Source.t) (b:Source.t) =
-        if (fst a = fst b) then true
-        else printfn "bad %A %A" a b; false
-    let srcOptEquals a b =
-        match a,b with
-        | Some(sa), Some(sb) -> srcEquals sa sb
-        | None, None -> true
-        | _ -> printfn "badOpt %A %A" a b; false
-
-    let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
-        let rec reduceSeq = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None, None) ->
-                reduceSeq r
-            | x -> x
-        //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
-        match (reduceSeq il1, reduceSeq il2) with
-        | PSeq(elems1, ac1, _), PSeq(elems2, ac2, _) -> 
-            List.length elems1 = List.length elems2 &&
-                List.zip elems1 elems2 
-                |> List.forall 
-                    (fun (elem1, elem2) ->
-                        srcOptEquals elem1.binding elem2.binding && srcOptEquals elem1.checker elem2.checker &&
-                            elem1.omit = elem2.omit && ilTreeEqualsWithoutLineNumbers elem1.rule elem2.rule
-                    )
-        | PAlt(left1, right1), PAlt(left2, right2) -> 
-            ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
-        | PToken(t1), PToken(t2) -> srcEquals t1 t2
-        | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
-        | PMany(t1), PMany(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PSome(t1), PSome(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | POpt(t1), POpt(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
-            srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
-                List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
-        | PLiteral(s1), PLiteral(s2) -> srcEquals s1 s2
-        | _ -> false
-
-    List.forall2  
-        (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
-            rule1._public = rule2._public &&
-            List.forall2 srcEquals (createParams rule1.args) (createParams rule2.args) &&
-            ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
-            List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name = rule2.name
-        ) g1 g2
-
 [<TestFixture>]
 type ``Convertions tests`` () =
     [<Test>]

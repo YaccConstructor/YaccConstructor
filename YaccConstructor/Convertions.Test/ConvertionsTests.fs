@@ -29,16 +29,30 @@ open NUnit.Framework
 
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
+
+let getFrontend name =
+        match FrontendsManager.Component name with
+        | Some fe -> fe
+        | None -> failwith (name + " is not found.")
+
+let getBE name =
+    match GeneratorsManager.Component name with
+    | Some be -> be
+    | None -> failwith (name + " is not found.")
+
+let treeDump = getBE "TreeDump"
+
+let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
 
 [<TestFixture>]
 type ``Convertions tests`` () =
     [<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
-        Namer.resetRuleEnumerator()
-        let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
+        Namer.resetRuleEnumerator()        
         let ilTree = 
             {
                 info = { fileName = "" } 
@@ -133,3 +147,151 @@ type ``Convertions tests`` () =
 #endif
         Assert.True(hasNotInnerSeq)
    
+[<TestFixture>]
+type ``Expand rop level alters`` () =
+    let basePath = System.IO.Path.Combine(convertionTestPath, "ExpandTopLevelAlters")
+    let fe = getFrontend("YardFrontend")
+    let conversion = "ExpandTopLevelAlt"
+
+    [<Test>]
+    member test.``No alter`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"noAlters.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("d", (0, 0)),None)}                                      
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "d"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PToken ("NUM", (0, 0))}
+                                ],None, None)                        
+                            _public = false
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
+
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
+    [<Test>]
+    member test.``One alter`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"oneAlter.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("c", (0, 0)),None)}                                      
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("d", (0, 0)),None)}
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
+
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
+
+    [<Test>]
+    member test.``Multi alters`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"multiAlters.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("x", (0, 0)),None)}                                      
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("y", (0, 0)),None)}
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("z", (0, 0)),None)}
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body =
+                        
+                                PSeq([                                        
+                                        {dummyRule with rule = PRef (("m", (0, 0)),None)}
+                                ],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
+
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)

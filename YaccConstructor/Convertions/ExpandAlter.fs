@@ -27,8 +27,8 @@ open System
 
 let extractOneRule (rule:Rule.t<'a,'b>) = 
     let rec expand = function
-    | PAlt (a,b) -> {rule with body = a}  :: expand b
-    | _   -> [rule]    
+    | PAlt (a,b) -> {rule with body = a} :: expand b
+    | a   -> [{rule with body = a}]    
     expand rule.body
 
 type ExpandTopLevelAlt() = 

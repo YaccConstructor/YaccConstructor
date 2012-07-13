@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="ConvertionsTests.fs" />
     <Compile Include="ExpandMetaTests.fs" />
+    <Compile Include="EntryPoint.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">

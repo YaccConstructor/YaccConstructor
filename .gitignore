@@ -10,3 +10,4 @@ YaccConstructor/Development/Utils/tests.fsproj.inc
 ook_based_test/report/picts/*
 *.ompv
 *.csproj.user
+Tests/RNGLR/*/log_*.txt

@@ -1,0 +1,9 @@
+m[e]:  v;
+
+yard_rule_1:  m[b];
+
+yard_rule_a_2[q]:  yard_rule_1;
+
+t[b]:  yard_rule_a_2[p];
+
++s:  t[b];

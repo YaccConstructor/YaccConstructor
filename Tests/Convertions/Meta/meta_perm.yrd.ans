@@ -1,40 +1,18 @@
-yard_rule_1:  a;
+yard_rule_perm2_4: 
+      <v0> = a <v1> = b {(v0,v1)}
+    | <v1> = b <v0> = a {(v0,v1)};
 
-yard_rule_2:  b;
+yard_rule_perm2_3: 
+      <v0> = a <v1> = c {(v0,v1)}
+    | <v1> = c <v0> = a {(v0,v1)};
 
-yard_rule_3:  c;
+yard_rule_perm2_2: 
+      <v0> = b <v1> = c {(v0,v1)}
+    | <v1> = c <v0> = b {(v0,v1)};
 
-yard_rule_24[v2]:  yard_rule_1;
+yard_rule_perm3_1: 
+      <v0> = a <(v1,v2)> = yard_rule_perm2_2 {(v0, v1, v2)}
+    | <v1> = b <(v0,v2)> = yard_rule_perm2_3 {(v0, v1, v2)}
+    | <v2> = c <(v0,v1)> = yard_rule_perm2_4 {(v0, v1, v2)};
 
-yard_rule_25[v2]:  yard_rule_2;
-
-yard_rule_perm2_26[yard_arg_23]: 
-      <v0> = yard_rule_24[yard_arg_23] <v1> = yard_rule_25[yard_arg_23]
-        {(v0,v1)}
-    | <v1> = yard_rule_25[yard_arg_23] <v0> = yard_rule_24[yard_arg_23]
-        {(v0,v1)};
-
-yard_rule_15[v1]:  yard_rule_1;
-
-yard_rule_16[v1]:  yard_rule_3;
-
-yard_rule_perm2_17[yard_arg_14]: 
-      <v0> = yard_rule_15[yard_arg_14] <v1> = yard_rule_16[yard_arg_14]
-        {(v0,v1)}
-    | <v1> = yard_rule_16[yard_arg_14] <v0> = yard_rule_15[yard_arg_14]
-        {(v0,v1)};
-
-yard_rule_6[v0]:  yard_rule_2;
-
-yard_rule_7[v0]:  yard_rule_3;
-
-yard_rule_perm2_8[yard_arg_5]: 
-      <v0> = yard_rule_6[yard_arg_5] <v1> = yard_rule_7[yard_arg_5] {(v0,v1)}
-    | <v1> = yard_rule_7[yard_arg_5] <v0> = yard_rule_6[yard_arg_5] {(v0,v1)};
-
-yard_rule_perm3_4: 
-      <v0> = yard_rule_1 <(v1,v2)> = yard_rule_perm2_8[v0] {(v0, v1, v2)}
-    | <v1> = yard_rule_2 <(v0,v2)> = yard_rule_perm2_17[v1] {(v0, v1, v2)}
-    | <v2> = yard_rule_3 <(v0,v1)> = yard_rule_perm2_26[v2] {(v0, v1, v2)};
-
-+s:  yard_rule_perm3_4;
++s:  yard_rule_perm3_1;

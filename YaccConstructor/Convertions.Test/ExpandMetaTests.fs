@@ -68,10 +68,10 @@ type ``Convertions expand metarules tests`` () =
     member test.``Meta test 1``()=runMetaTest("meta_1.yrd")
 
     [<Test>]    
-    member test.``Meta test args``()=runMetaTest("meta_args.yrd")
+    member test.``Meta test args``()=runMetaTest("meta_args_bad.yrd")
 
     [<Test>]    
-    member test.``Meta test args order``()=runMetaTest("meta_args_order.yrd")
+    member test.``Meta test args order``()=runMetaTest("meta_args_order_bad.yrd")
 
     [<Test>]    
     member test.``Meta test attributes``()=runMetaTest("meta_attrs.yrd")
@@ -80,22 +80,19 @@ type ``Convertions expand metarules tests`` () =
     member test.``Meta test bindings``()=runMetaTest("meta_bind.yrd")
 
     [<Test>]    
-    member test.``Meta test diff``()=runMetaTest("meta_diff.yrd")
+    member test.``Meta test diff``()=runMetaTest("meta_diff_bad.yrd")
 
     [<Test>]    
     member test.``Meta test duplicate``()=runMetaTest("meta_duplicate.yrd")
 
     [<Test>]    
-    member test.``Meta test enclosure``()=runMetaTest("meta_enclosure.yrd")
+    member test.``Meta test enclosure``()=runMetaTest("meta_enclosure_bad.yrd")
 
     [<Test>]    
-    member test.``Meta test enclosure simple``()=runMetaTest("meta_enclosure_simple.yrd")
+    member test.``Meta test enclosure simple``()=runMetaTest("meta_enclosure_simple_bad.yrd")
 
     [<Test>]    
     member test.``Meta test group``()=runMetaTest("meta_group.yrd")
-
-    [<Test>]    
-    member test.``Meta test inner args``()=runMetaTest("meta_inner_args.yrd")
 
     [<Test>]    
     member test.``Meta test 2``()=runMetaTest("meta_meta.yrd")

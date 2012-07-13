@@ -178,55 +178,5 @@ type ``Convertions tests`` () =
            | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif
-        Assert.True(hasNotInnerSeq)  
-
-    
-        
-    [<Test>]
-    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
-    /// Expected result 'sourceFileName.res'
-    member test.``Batch tests in Tests\Convertions\Batch .``()=
-        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
-        let frontend =
-            match FrontendsManager.Component "YardFrontend" with
-               | Some fron -> fron
-               | None -> failwith "YardFrontend is not found."
-        (*let generator = 
-           match GeneratorsManager.Component "YardPrinter" with
-           | Some gen -> gen
-           | None -> failwith "YardPrinter is not found."
-        printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
-        |> Seq.iter 
-            (fun srcFile ->  
-                Namer.resetRuleEnumerator()
-                printfn "file %s" srcFile
-                let srcFileName = System.IO.Path.GetFileName(srcFile)
-                let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
-                let prefixSplitted = srcPrefix.Split('_')
-                printfn "1" 
-                // all convertions are in name without descr.yrd
-                let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
-                printfn "2: %A" convertions
-                Namer.resetRuleEnumerator()
-                let ilTree = (srcFile |> frontend.ParseGrammar)
-                printfn "3"
-                let reorder f a b = f b a
-//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                printfn "4"
-                Namer.resetRuleEnumerator()
-                let expected =
-                    try
-                        srcFile + ".res" |> frontend.ParseGrammar 
-                    with
-                        | e -> printfn "%s" e.Message
-                               raise <| FEError e.Message
-                printfn "5"
-                printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
-//                     with e ->
-//                        printfn "%A" e 
-
-            )
-        Assert.True(true)
+        Assert.True(hasNotInnerSeq)
+   

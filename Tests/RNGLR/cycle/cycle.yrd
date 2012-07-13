@@ -1,2 +1,2 @@
-+r : f=s B {f};
-s : A  {0} | r=s {r+1};
+s : A  {0} | v=s {v+1};
++start : f=s B {f};

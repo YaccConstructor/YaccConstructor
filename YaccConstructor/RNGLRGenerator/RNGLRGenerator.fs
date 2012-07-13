@@ -68,7 +68,8 @@ type RNGLR() =
 
                 fprintf out "open Yard.Generators.RNGLR.Parser\n"
                 fprintf out "open Yard.Generators.RNGLR\n"
-    
+                fprintf out "open Yard.Generators.RNGLR.AST\n"
+
                 match definition.head with
                 | None -> ()
                 | Some (s : Source.t) ->

@@ -87,35 +87,34 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     for i in 0..rules.rulesCount-1 do
         printfn "%d: %d -> %A" i (rules.leftSide i) (rules.rightSide i)
     *)
-    let result : AST<_> [] = Array.zeroCreate indexator.nonTermCount
-    for i = 0 to result.Length-1 do
-        result.[i] <- NonTerm (ref [], ref -1)
-    let was : int[] = Array.zeroCreate indexator.nonTermCount
-    for i in 0..indexator.nonTermCount-1 do
-        if (was.[i] = 0 && canInferEpsilon.[i]) then
-            let rec dfs u =
-                was.[u] <- 1
-                for rule in rules.rulesWithLeftSide u do
+    let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
+    let pos = Array.zeroCreate indexator.nonTermCount
+    for u = 0 to indexator.nonTermCount-1 do
+        if (canInferEpsilon.[u]) then
+            let order = new ResizeArray<_>()
+            let res = new ResizeArray<_>()
+            for j = 0 to indexator.nonTermCount-1 do
+                pos.[j] <- -1
+            pos.[u] <- 0
+            order.Add u
+            let mutable i = 0
+            while i < order.Count do
+                let v = order.[i]
+                i <- i + 1
+                [for rule in rules.rulesWithLeftSide v do
                     if allEpsilon.[rule] then
-                        rules.rightSide rule
-                        |> Array.iter (fun v -> if was.[v] = 0 then dfs v)
-                        let asts =
+                        let children =
                             rules.rightSide rule
-                            |> Array.map (fun num -> result.[num])
-                        (getFamily result.[u]) := (Inner (rule, asts))::!(getFamily result.[u])
-                was.[u] <- 2
-            dfs i
-    (*
-    for i = 0 to indexator.nonTermCount-1 do
-        printfn "%d:" i
-        for ast in result.[i].Value do
-            printfn "  %d" ast.number
-            for sa in ast.children do
-                printf "    "
-                for j in sa.Value do
-                    printf "%d " j.number
-                printfn ""
-    *)
+                            |> Array.map
+                                (fun w ->
+                                    if pos.[w] = -1 then
+                                        pos.[w] <- order.Count
+                                        order.Add w
+                                    pos.[w])
+                        yield (rule, children)]
+                |> (fun x -> NonTerm (ref x, ref -1))
+                |> res.Add
+            result.[u] <- new Tree<_>(res.ToArray(), 0)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

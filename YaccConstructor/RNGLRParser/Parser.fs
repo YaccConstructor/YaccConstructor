@@ -24,7 +24,7 @@ open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 
 type ParseResult<'TokenType> =
-    | Success of AST<'TokenType>
+    | Success of Tree<'TokenType>
     | Error of int * string
 
 let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
@@ -37,18 +37,23 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         |> Seq.toArray
     let tokensCount = tokenNums.Length - 1
     let startState = 0
+    let startRule = parserSource.LeftSide.[parserSource.StartRule]
     if tokensCount = 0 then
         if parserSource.AccStates.[startState] then
-            NonTerm (ref [Epsilon], ref -1) |> Success
+            let res = Array.create 1 <| NonTerm (ref [], ref startRule)
+            new Tree<_>(res, 0) |> Success
         else
             Error (0, "This grammar cannot accept empty string")
     else
+        /// Here will be collected all nodes in AST
+        let nodes = new ResizeArray<_>()
         // Must be number of non-terminals, but doesn't matter
         let nonTermsCountLimit = max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
         let epsilons = Array.zeroCreate nonTermsCountLimit
         for i = 0 to nonTermsCountLimit-1 do
-            epsilons.[i] <- NonTerm (ref [Epsilon], ref -1)
-
+            epsilons.[i] <- nodes.Count
+            nodes.Add <| NonTerm (ref [], ref i)
+            
         let reductions = new Queue<_>(10)
         let astNodes = new Dictionary<_,_>(10, HashIdentity.Structural)
         let statesCount = parserSource.Gotos.Length
@@ -61,7 +66,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         let curLevelCount = ref 0
         let stateToVirtex : Virtex<_,_>[] = Array.zeroCreate statesCount
 
-        let inline addVirtex state num (edgeOpt : option<Edge<_,_>>) =
+        let inline addVirtex state num (edgeOpt : option<Edge<_,int>>) =
             let dict = stateToVirtex
             let mutable v = Unchecked.defaultof<Virtex<_,_>>
             if dict.[state] = null then
@@ -89,31 +94,27 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             while reductions.Count > 0 do
                 let virtex, prod, pos, edgeOpt = reductions.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
-                let compareChildren (ast1 : AST<_>[]) (ast2 : AST<_>[]) =
+                let compareChildren (ast1 : int[]) (ast2 : int[]) =
                     let n = ast1.Length
                     if ast2.Length <> n then false
                     else
-                        Array.forall2 (fun x y -> obj.ReferenceEquals(x,y)) ast1 ast2
+                        Array.forall2 (=) ast1 ast2
 
-                let inline addEpsilon node nonTerm =
-                    let astExists = (getFamily node).Value |> List.exists isEpsilon
-                    if not astExists then
-                        getFamily node := Epsilon::!(getFamily node)
+                let inline addEpsilon node nonTerm = (getEpsilon node) := nonTerm
 
-                let inline addChildren node (path : AST<_>[]) prod =
+                let inline addChildren node (path : int[]) prod =
+                    let family = getFamily node
                     let astExists = 
-                        (getFamily node).Value
+                        family.Value
                         |> List.exists
-                            (function
-                             | Inner (number,children) -> number = prod && compareChildren children path
-                             | _ -> false )
+                            (function (number,children) -> number = prod && compareChildren children path)
                     if not astExists then
                         //printf "Children: %A\n" path
-                        (getFamily node) := (Inner (prod, path))::(getFamily node).Value
+                        family := (prod, path)::family.Value
                     //else
                     //    printf "Rejected: %A\n" path
-                let handlePath (path : AST<_> list) (final : Virtex<_,_>) =
-                    let ast = ref Unchecked.defaultof<AST<'TokenType>>
+                let handlePath (path : int list) (final : Virtex<_,_>) =
+                    let ast = ref -1
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
                     //printf "r %A->%A->%A (prod: %d,%d)\n" virtex.label final.label (state,num) prod pos
                     let newVirtex = addVirtex state num None
@@ -124,15 +125,16 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                                                                   else ast := e.label
                                                                        true)
                     then
-                        ast := NonTerm(ref[], ref -1)
-                        let edge = new Edge<int*int, AST<_>>(final, !ast)
+                        ast := nodes.Count
+                        let edge = new Edge<int*int, int>(final, !ast)
+                        nodes.Add <| NonTerm (ref [], ref -1)
                         newVirtex.addEdge edge
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[tokenNums.[num]] do
                                 //printf "%A %A %d %d\n" newVirtex.label newVirtex.outEdges prod pos
                                 reductions.Enqueue (newVirtex, prod, pos, Some edge)
-                    if path = [] then addEpsilon !ast parserSource.LeftSide.[prod]
-                    else addChildren !ast (path |> List.toArray) prod
+                    if path = [] then addEpsilon nodes.[!ast] parserSource.LeftSide.[prod]
+                    else addChildren nodes.[!ast] (path |> List.toArray) prod
                     //for e in newVirtex.outEdges do
                     //    printf "el2: %A %A\n" e.label e.dest.label
 
@@ -162,7 +164,8 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 let curBeg = !pBeg
                 while curBeg <> !pEnd do
                     let virtex, state = pushes.[!pEnd]
-                    let edge = new Edge<_,_>(virtex, newAstNode)
+                    let edge = new Edge<_,_>(virtex, nodes.Count)
+                    nodes.Add newAstNode
                     //printf "p %A\n" (virtex.label, state)
                     let newVirtex = addVirtex state (num + 1) (Some edge)
                     newVirtex.addEdge edge
@@ -180,16 +183,18 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     ()
         if errorIndex <> -1 then Error (errorIndex - 1, "Parse error")
         else
-            let res = ref None
+            let root = ref None
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
-            let addTreeTop res = NonTerm (ref [Inner (parserSource.StartRule, [|res|])], ref -1)
+            let addTreeTop res = NonTerm (ref [parserSource.StartRule, [|res|]], ref -1)
             for i = 0 to !curLevelCount-1 do
                 printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then
-                    res := stateToVirtex.[usedStates.[i]].outEdges.[0].label
-                           |> addTreeTop |> Success |> Some
+                    root := Some nodes.Count
+                    stateToVirtex.[usedStates.[i]].outEdges.[0].label
+                    |> addTreeTop
+                    |> nodes.Add
             printfn ""
-            match !res with
+            match !root with
             | None -> Error (tokensCount, "There is no accepting state")
-            | Some res -> res
+            | Some res -> Success <| new Tree<_>(nodes.ToArray(), res)

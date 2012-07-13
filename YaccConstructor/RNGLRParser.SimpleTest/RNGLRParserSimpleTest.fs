@@ -24,7 +24,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst |> printAst 0
+        | Parser.Success mAst,_ -> mAst.PrintAst()
 
     [<Test>]
     member test.``List test``() =
@@ -33,7 +33,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, message), _ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst |> printAst 0
+        | Parser.Success mAst,_ -> mAst.PrintAst()
 
     [<Test>]
     member test.``Simple Right Null test``() =
@@ -42,7 +42,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst |> printAst 0
+        | Parser.Success mAst,_ -> mAst.PrintAst()
 
     [<Test>]
     member test.``Complex Right Null test``() =
@@ -52,8 +52,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,_ ->
-            mAst |> printAst 0
-            RNGLR.ParseComplexRightNull.defaultAstToDot "ast.dot" mAst
+            mAst.PrintAst()
+            RNGLR.ParseComplexRightNull.defaultAstToDot mAst "ast.dot"
         
 
     [<Test>]
@@ -63,7 +63,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst |> printAst 0
+        | Parser.Success mAst,_ -> mAst.PrintAst()
 
     [<Test>]
     member test.``Counter test - simple for translator``() =
@@ -73,7 +73,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,tokens ->
-            mAst |> printAst 0
+            mAst.PrintAst()
             printfn "Result: %A" (RNGLR.ParseCounter.translate mAst)
 
     [<Test>]
@@ -84,7 +84,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,tokens ->
-            mAst |> printAst 0
+            mAst.PrintAst()
             printfn "Result: %A" (RNGLR.ParseCalc.translate mAst)
 
     [<Test>]
@@ -95,7 +95,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,tokens ->
-            mAst |> printAst 0
+            mAst.PrintAst()
             printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3)
 
     [<Test>]
@@ -106,6 +106,6 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,tokens ->
-            //mAst |> printAst 0
+            //mAst.PrintAst
             printf "OK\n"
             //printfn "Result: %A" (RNGLR.ParseCycle.translate mAst)

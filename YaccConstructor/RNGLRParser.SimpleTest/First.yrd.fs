@@ -1,6 +1,7 @@
 module RNGLR.ParseFirst
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 type Token =
     | A of int
     | B of int
@@ -26,7 +27,7 @@ let startRule = 2
 let defaultAstToDot = 
     let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}
     let startInd = leftSide.[startRule]
-    Yard.Generators.RNGLR.AST.astToDot<Token> startInd numToString getRight
+    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)
 
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     let inline unpack x = x >>> 16, x <<< 16 >>> 16

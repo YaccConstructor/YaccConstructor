@@ -42,29 +42,20 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let indexator = grammar.indexator
     let nonTermLim = indexator.nonTermCount - 1
 
-    let multiAstName = "_rnglr_multi_ast"
-    let astName = "_rnglr_ast"
     let resCycleName = "_rnglr_cycle_res"
     let nodeName = "_rnglr_node"
     let tokenCall = "_rnglr_translate_token"
-    let ruleName name = "_rnglr_rule_" + name
-    let ruleCall name = "_rnglr_call_rule_" + name
-    let epsilonName name = "_rnglr_epsilon_" + name
-    let resultCountName name = "_rnglr_res_count_" + name
-    let resultName name = "_rnglr_result_" + name
-    //let dfsCall = "_rnglr_dfs_call"
+    let ruleName = "_rnglr_rule_"
+    let epsilonName = "_rnglr_epsilons"
     let childrenName = "_rnglr_children"
-    let indexName = "_rnglr_index"
-    let tokensSeqName = "_rnglr_tokens"
-    let pathToModule = "Yard.Generators.RNGLR.AST."
-    let stackCallsIndName = "_rnglr_stack_calls_ind"
-    let stackCallsNodeName = "_rnglr_stack_calls_node"
-    let stackResName = "_rnglr_stack_res"
+    let concatsName = "_rnglr_concats"
+    //let pathToModule = "Yard.Generators.RNGLR.AST."
 
     let printArgsDeclare args= 
         args
         |> List.map (fun arg -> sprintf "fun %s ->" (Source.toString arg))
         |> String.concat " "
+        |> fun s -> s.Trim()
         |> wordL
 
     let printArgsCallList args other = 
@@ -78,7 +69,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | None -> ""
         | Some str -> Source.toString str
 
-    // Delare non-term arrays
+    // Declare non-term arrays
     let count = Array.zeroCreate indexator.nonTermCount
     let index = Array.zeroCreate rules.rulesCount
     let args = Array.zeroCreate indexator.nonTermCount
@@ -100,187 +91,52 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         append "|]"
         res.ToString()
 
+    let printList (list : list<'a>) (printer: 'a -> string) =
+        let res = new System.Text.StringBuilder()
+        let append (s : string) = res.Append s |> ignore
+        append "["
+        list |> List.iteri
+            (fun i x ->
+                if i <> 0 then append "; "
+                append (printer x))
+        append "]"
+        res.ToString()
+
     let aboveStringListL = List.map wordL >> aboveListL
 
-    let defineIndex = 
-        sprintf "let %s = %s" indexName (printArr index (fun x -> x.ToString()))
-        |> wordL
-
-    let declareStacks =
-        wordL (sprintf "let %s = new System.Collections.Generic.Stack<_>()" stackCallsIndName)
-        @@ wordL (sprintf "let %s = new System.Collections.Generic.Stack<_>()" stackCallsNodeName)
-        //@@ wordL (sprintf "let %s = ref []" stackResName) System.Collections.Generic.Queue
-        @@ wordL (sprintf "let %s = new ResizeArray<_>()" stackResName)
+    (*let declareNonTermsArrays = 
+        wordL ("let " + ruleName + " = Array.zeroCreate " + rules.rulesCount.ToString())
+        @@ wordL ("let " + concatsName + " = Array.zeroCreate " + args.Length.ToString())*)
 
 
-    let dfsCond name =
-        let count = resultCountName name
-        [sprintf "if !num = -1 then"
-        ;sprintf "num := !%s" count
-        ; sprintf "incr %s;" count
-        ]
-        |> List.map wordL
-        |> (function (h::t) -> h @@-- (aboveListL t) | _ -> emptyL)
-
-    let addNodeToStack node ind =
-        sprintf "if !(_rnglr_treenum %s) = -1 then (" node
-                    + stackCallsIndName + ".Push(" + (sprintf "%d" ind) + ");"+ stackCallsNodeName + ".Push(" + node + "))";//::!" + stackCallsName + "; "
-
-
-    let declareNonTermsArrays =
-        [for i = 0 to indexator.nonTermCount - 1 do
-            yield wordL <| sprintf "let %s = Array.zeroCreate %d" (ruleName <| indexator.indexToNonTerm i) count.[i]
-            yield wordL <| sprintf "let %s = Array.zeroCreate %d" (ruleCall <| indexator.indexToNonTerm i) count.[i]
-            yield wordL <| sprintf "let %s = ref 0" (resultCountName <| indexator.indexToNonTerm i)
-            yield wordL <| sprintf "let %s = ref <| Array.zeroCreate 0" (resultName <| indexator.indexToNonTerm i)
-        ]
-        |> aboveListL
-
-    let printNode =
-        let rec inner isFirst (node : AST<_>) =
-            (getFamily node).Value
-            |> List.map
+    let toStr (x : int) = x.ToString()
+    let defineEpsilonTrees =
+        let printChild (prod, arr) = "(" + toStr prod + "," + printArr arr toStr + ")"
+        let printAst =
+            function
+            | Term _ -> failwith "Term was not expected in epsilon tree"
+            | NonTerm (list,eps) ->
+                "NonTerm (ref " + printList !list printChild + ", ref " + eps.Value.ToString() + ")"
+        "let " + epsilonName + " : Tree<Token>[] = " +
+            printArr grammar.epsilonTrees
                 (function
-                | Inner (num, children) ->
-                    let printChildren =
-                        children
-                        |> Array.map (inner false)
-                        |> String.concat ";"
-                        |> (fun x -> "[|" + x + "|]")
-                    sprintf "%sInner (%d, %s) " pathToModule num printChildren
-                | Epsilon -> pathToModule + "Epsilon")
-            |> String.concat ";"
-            |> (fun x -> pathToModule + "NonTerm (ref [" + x + "], ref -1)")
-        inner true
-
-    let defineEpsilonTrees = 
-        [for i = 0 to nonTermLim do
-            if grammar.canInferEpsilon.[i] then
-                yield wordL <| sprintf "let %s = %s |> %schooseSingleAst" (epsilonName <| indexator.indexToNonTerm i)
-                                    (printNode grammar.epsilonTrees.[i]) pathToModule]
-        |> aboveListL
-
-    let defineUtils = 
-        let res = 
-            [sprintf "let inline _rnglr_treenum x = match x with | %sNonTerm (_,v) -> v | _ -> failwith \"NonTerminal expected, but terminal found.\" " pathToModule
-            //;sprintf "let inline _rnglr_treeval = fst"
-            ;sprintf "let inline _rnglr_pop (x : ResizeArray<_>) = " 
-            ]
-            |> aboveStringListL
-        res
-        @@-- (
-            ["let pos = x.Count - 1"
-            ;"let res = x.[pos]"
-            ;"x.RemoveAt(pos)"
-            ;"res"
-            ]
-            |> aboveStringListL
-        )
-
-    let declareNonTems =
-        [sprintf "let private %s = Array.zeroCreate %d" tokenCall (indexator.nonTermCount * 2)
-        //;sprintf "let %s = Array.zeroCreate %d" dfsCall indexator.nonTermCount
-        ]
-        |> aboveStringListL
-
-    let defineNonTermsTranslation = 
-        [for i = 0 to nonTermLim do
-            let name = indexator.indexToNonTerm i
-            let body =
-                let epsLayout =
-                    if grammar.canInferEpsilon.[i] then
-                        printArgsCallList args.[i] ""
-                        |> sprintf "| %sEpsilon -> %s.Value.[!(_rnglr_treenum %s)] %s" pathToModule (resultName name) (epsilonName name)
-                    else
-                        sprintf "| %sEpsilon -> failwith \"Nonterm %s can't infer epsilon\"" pathToModule (indexator.indexToNonTerm i)
-                let nonTermLayout = 
-                    printArgsCallList args.[i] "_rnglr_children"
-                    |> sprintf "| %sInner (_rnglr_number, _rnglr_children) -> %s.[%s.[_rnglr_number]] %s" pathToModule (ruleName name) indexName
-                [ sprintf "match %s with" astName
-                ; epsLayout; nonTermLayout]
-                |> aboveStringListL
-            yield
-                //wordL (sprintf "%s.[%d] <- " tokenCall i)
-                wordL (sprintf "%s.[%d] <- fun (%s : %sAST<Token>) -> " tokenCall (i + indexator.nonTermCount) nodeName pathToModule)
-                @@-- (
-                    wordL (sprintf "match %s with" nodeName)
-                    @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
-                    @@ wordL (sprintf "| %sNonTerm (%s,num) ->" pathToModule multiAstName)
-                    @@-- (
-                        //wordL (sprintf "printfn \"tr %s\"" name)
-                        //@@
-                        wordL "("
-                            -- printArgsDeclare args.[i]
-                        @@-- (
-                            wordL (sprintf "%s.Value" multiAstName)
-                            @@ wordL "|> List.map ("
-                            @@-- (
-                                wordL (sprintf "fun (%s : %sChild<Token>) -> " astName pathToModule)
-                                @@-- body
-                            )
-                            @@ wordL ")"
-                            @@ wordL "|> List.concat"
-                        )
-                        @@ wordL (sprintf ") |> (fun res -> %s.Value.[!num] <- res)" (resultName name))
-                    )
-                )
-        ]
-        |> aboveListL
-
-    // Define nonTerms-translation
-    let defineNonTermsStackCalls = 
-        [for i = 0 to nonTermLim do
-            let name = indexator.indexToNonTerm i
-            let body =
-                let epsLayout =
-                    if grammar.canInferEpsilon.[i] then
-                        sprintf "| %sEpsilon -> " pathToModule
-                           + (addNodeToStack (epsilonName name) i)
-                    else
-                        sprintf "| %sEpsilon -> failwith \"Nonterm %s can't infer epsilon\"" pathToModule (indexator.indexToNonTerm i)
-                let nonTermLayout = 
-                    sprintf "| %sInner (_rnglr_number, _rnglr_children) -> %s.[%s.[_rnglr_number]] _rnglr_children" pathToModule (ruleCall name) indexName
-                [ sprintf "match %s with" astName
-                ; epsLayout; nonTermLayout]
-                |> aboveStringListL
-            yield
-                //wordL (sprintf "%s.[%d] <- fun (%s : %sNode<Token>) -> " dfsCall i nodeName pathToModule)
-                wordL (sprintf "%s.[%d] <- fun (%s : %sAST<Token>) -> " tokenCall i nodeName pathToModule)
-                @@-- (
-                    wordL (sprintf "match %s with" nodeName)
-                    @@ wordL (sprintf "| %sTerm _ -> failwith \"Nonterminal %s expected, but terminal found\" " pathToModule name)
-                    @@ wordL (sprintf "| %sNonTerm (%s,num) ->" pathToModule multiAstName)
-                    @@-- (
-                        dfsCond name
-                        @@-- ( // Not a bug!!! At least, by design.
-                            //wordL (stackCallsName + ".Push(" + (sprintf "%d" (i + indexator.nonTermCount)) + "," + nodeName + ");")//::!" + stackCallsName + "; ")
-                            wordL (stackCallsIndName + ".Push(" + (sprintf "%d" (i + indexator.nonTermCount)) + ")")
-                            @@ wordL (stackCallsNodeName + ".Push(" + nodeName + ")")
-                            @@ wordL (sprintf "%s.Value" multiAstName)
-                            @@ wordL "|> List.iter ("
-                            @@-- (
-                                wordL (sprintf "fun (%s : %sChild<Token>) -> " astName pathToModule)
-                                @@-- body
-                            )
-                            @@ wordL ")"
-                        )
-                    )
-                )
-        ]
-        |> aboveListL
+                 | null -> "null"
+                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",0)")
+        |> wordL
 
     // Realise rules
     let rec getProductionLayout num = function
         | PRef (name, args) ->
             incr num
-            let value = sprintf "%s.Value.[(_rnglr_treenum %s.[%d]).Value] " (resultName (Source.toString name)) childrenName !num
+            let name = Source.toString name
+            let value = sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 
             incr num
             let name = Source.toString name
-            sprintf "(match %s with | %sTerm (%s value) -> [value] | _-> failwith \"Token %s expected\") "
-                (sprintf "%s.[%d]" childrenName !num) pathToModule name name
+            sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+                childrenName !num name name
             |> wordL
         | PSeq (s, ac) ->
             match ac with
@@ -312,98 +168,66 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                               wordL <| "!" + resCycleName
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
-        | x -> failwithf "unexpected %A construction" x
+        | x -> failwithf "unexpected construction: %A" x
 
-    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) =
-        wordL (sprintf "fun (%s : %sAST<Token>[]) -> " childrenName pathToModule)
-        -- printArgsDeclare rule.args
-        @@-- getProductionLayout (ref -1) rule.body
-
-    let getRuleCallLayout rule =
-        let head = wordL <| sprintf "fun (%s : %sAST<_>[]) ->" childrenName pathToModule
-        let body =
-            let prod = rules.rightSide rule
-            [for sub = 0 to prod.Length - 1 do
-                if prod.[sub] < indexator.nonTermCount then
-                    yield addNodeToStack (sprintf "%s.[%d]" childrenName sub) prod.[sub]
-             yield "()"
-            ]
-            |> aboveStringListL
-        head @@-- body
+    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
+        let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
+        wordL (sprintf "fun (%s : array<_>) -> " childrenName)
+        @@-- (wordL "box ("
+              @@-- (wordL "(" ++ printArgsDeclare rule.args
+                    @@-- getProductionLayout (ref -1) rule.body
+                    -- wordL (") : '_rnglr_type_" + nonTermName + ")" )
+                    )
+             )
 
     let aboveArrayL = List.ofArray >> aboveListL
-    let callsRules = 
-        srcGrammar
-        |> Array.mapi
-            (fun i rule ->
-                wordL (sprintf "%s.[%d] <- " (ruleCall <| indexator.indexToNonTerm (rules.leftSide i)) index.[i])
-                @@-- getRuleCallLayout i)
+    let concats =
+        let getConcat i = 
+            let typeName = "'_rnglr_type_" + indexator.indexToNonTerm i
+            let called = printArgsCallList args.[i] ""
+            let args = printArgsDeclare args.[i]
+            let listName = "_rnglr_list"
+            let itemName = "_rnglr_item"
+            wordL ("(fun (" + listName + " : list<_>) -> ")
+            @@-- (wordL "box (" -- args)
+            @@-- (wordL <| listName + " |> List.map (fun " + itemName
+                            + " -> ((unbox " + itemName + ") : " + typeName + ") " + called
+                            + " ) |> List.concat));")
+        [|for i = 0 to args.Length - 1 do 
+            yield getConcat i|]
         |> aboveArrayL
-    let rules = 
-        srcGrammar
-        |> Array.mapi
-            (fun i rule ->
-                wordL (sprintf "%s.[%d] <- " (ruleName <| indexator.indexToNonTerm (rules.leftSide i)) index.[i])
-                @@-- getRuleLayout rule)
-        |> aboveArrayL
-    let funHead = wordL "let translate node = "
+
     let funRes =
-        let startInd = 
-            grammar.startRule
-            |> grammar.rules.leftSide
-        let start_name = 
-            startInd
-            |> indexator.indexToNonTerm
-        let initCounts =
-            [for i = 0 to indexator.nonTermCount - 1 do
-                yield wordL <| sprintf "%s := 0" (resultCountName <| indexator.indexToNonTerm i)
-            ]
-            |> aboveListL
-        let buildCallStack =
-            let cycleBody =
-                (*[sprintf "let n,i,x = _rnglr_pop %s" stackCallsName
-                ;sprintf "if n then %s.[i] x" dfsCall
-                ;sprintf "else %s.Add(i,x) |> ignore" stackResName
-                ]*)
-                [
-                 //sprintf "let i,x = %s.Pop()" stackCallsName
-                 sprintf "let i = %s.Pop()" stackCallsIndName
-                 sprintf "let x = %s.Pop()" stackCallsNodeName
-                 sprintf "if i < %d then %s.[i] x" indexator.nonTermCount tokenCall
-                 sprintf "else %s.Add(i,x)" stackResName
-                ]
-                |> List.map wordL
-                |> aboveListL
-            [
-             //sprintf "%s.Clear()" stackCallsName
-             sprintf "%s.Clear()" stackCallsIndName
-             sprintf "%s.Clear()" stackCallsNodeName
-            //;(sprintf "%s := []" stackResName)
-             sprintf "%s.Clear()" stackResName
-             addNodeToStack "node" startInd
-             sprintf "while %s.Count > 0 do" stackCallsIndName
-            ]
-            |> aboveStringListL
-            |> (fun x -> x @@-- cycleBody)
-        let setDimensions = 
-            [for i = 0 to indexator.nonTermCount - 1 do
-                let name = indexator.indexToNonTerm i
-                yield wordL <| sprintf "%s := Array.zeroCreate !%s" (resultName name) (resultCountName name)
-            ]
-            |> aboveListL
-        let calculateRes =
-            //stackResName + ".Value |> List.iter (fun (f,x) -> f x)"
-            "for (i,x) in " + stackResName + (sprintf " do %s.[i] x" tokenCall)
-             //sprintf "%s (%sgetFamily node)" (tokenCall start_name) pathToModule
+        let funHead = wordL ("fun (tree : Tree<_>) -> ")
+        let body = 
+            let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
+            "unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName + " " + epsilonName + ") : " + typeName
             |> wordL
-        
-        let res = resultName start_name +  ".Value.[!(_rnglr_treenum node)]" |> wordL
-        [initCounts; buildCallStack; setDimensions; calculateRes; res]
-        |> aboveListL
-    [defineIndex; declareStacks; defineEpsilonTrees; declareNonTermsArrays; defineUtils;
-     declareNonTems; defineNonTermsTranslation; defineNonTermsStackCalls; callsRules; rules]
+        funHead @@-- body
+
+    let rules =
+        wordL ("let translate = ")
+        @@--
+         (wordL ("let " + ruleName + ", " + concatsName + " = ")
+          @@--
+              (wordL "[|"
+               @@
+               (srcGrammar
+                |> Array.mapi
+                    (fun i rule ->
+                        wordL "("
+                        @@-- getRuleLayout rule i
+                        @@-- wordL ");")
+                |> aboveArrayL)
+                @@ (wordL "|] , [|"
+                    @@-- concats)
+                @@ wordL "|] "))
+           @@ funRes
+
+    let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+
+    [nowarn; defineEpsilonTrees; (*declareNonTermsArrays;*) rules]
     |> aboveListL
-    |> (fun body -> body @@ funHead @@-- funRes)
     |> Display.layout_to_string(FormatOptions.Default)
     |> out.WriteLine
     

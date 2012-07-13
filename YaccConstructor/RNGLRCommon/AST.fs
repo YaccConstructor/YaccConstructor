@@ -20,133 +20,201 @@
 module Yard.Generators.RNGLR.AST
 open System
 
-type Child<'TokenType> =
-    | Epsilon
+type Child =
     /// Non-terminal expansion: production, family of children
-    | Inner of int * AST<'TokenType> []
+    /// All nodes are stored in array, so there is a correspondence between integer and node.
+    int * int []
 
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
-/// int - reference to result.
-and AST<'TokenType> =
-    | NonTerm of Child<'TokenType> list ref * int ref
+/// int - number of token, if there is an epsilon-tree derivation, -1 otherwise.
+type AST<'TokenType> =
+    | NonTerm of (Child list ref) * int ref
     | Term of 'TokenType
 
 let inline getFamily node =
     match node with
-    | NonTerm (list,_) -> list
+    | NonTerm (list, eps) -> list
     | Term _ -> failwith "Attempt to get family of terminal"
 
-let isEpsilon = function
-    | Epsilon -> true
-    | _ -> false
+let inline getEpsilon node =
+    match node with
+    | NonTerm (list, eps) -> eps
+    | Term _ -> failwith "Attempt to get epsilon of terminal"
 
-let isInner = function
-    | Inner _ -> true
-    | _ -> false
+[<AllowNullLiteral>]
+type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
+    let pos = Array.create nodes.Length -1
+    let reachable = Array.zeroCreate nodes.Length
+    let order =
+        let stack = new System.Collections.Generic.Stack<_>()
+        stack.Push root
+        let res = new ResizeArray<_>(nodes.Length)
+        let inline iterChildren children =
+            for j in snd children do
+                if not reachable.[j] then
+                    stack.Push j
+            
+        while stack.Count > 0 do
+            let u = stack.Pop()
+            if u < 0 then
+                res.Add <| -u-1
+            else
+                stack.Push <| -u-1
+                reachable.[u] <- true
+                match nodes.[u] with
+                | Term _ -> ()
+                | NonTerm (list, eps) ->
+                    !list |> List.iter iterChildren
+            
+        let ret = res.ToArray()
+        for i = 0 to ret.Length-1 do
+            pos.[ret.[i]] <- i
+        ret
 
-let chooseSingleAst (ast : AST<_>) = 
-    let stack = new System.Collections.Generic.Stack<_>()
-    //let stack = new ResizeArray<_>()
-    let result = ref ast
-    stack.Push(ast, None)
-    while stack.Count > 0 do
-        let cur, pos = stack.Pop()
-        let newTree = 
-            match cur with
-            | Term a -> Term a
-            | NonTerm (l, num) ->
-                match l.Value with
-                | [] -> []
-                | h::_ -> [h]
-                |> List.map
-                   (function
-                    | Epsilon -> Epsilon
-                    | Inner (prod,arr) ->
-                        let res = Array.zeroCreate arr.Length
-                        for i = 0 to arr.Length - 1 do
-                            stack.Push(arr.[i], Some (res, i))
-                        Inner (prod,res)
-                    )
-                |> (fun x -> NonTerm(ref x, num))
-        
-        match pos with
-        | None -> result := newTree
-        | Some (arr, pos) -> arr.[pos] <- newTree
-    !result
+    member this.Nodes = nodes
+    member this.Order = order
 
-    
-let rec printAst ind (ast : AST<_>) =
-    let printInd num (x : 'a) =
-        printf "%s" (String.replicate (num * 4) " ")
-        printfn x
-    match ast with
-    | Term t -> printInd ind "t: %A" t
-    | NonTerm (l,num) ->
-        match !l with
-        | [] -> ()
-        | l ->  if l.Length > 1 then printInd ind "^^^^"
-                l |> List.iteri 
-                    (fun i x -> if i > 0 then
-                                    printInd ind "----"
-                                match x with
-                                | Epsilon -> printInd ind "e"
-                                | Inner (num, children) ->
-                                    printInd ind "prod %d" num
-                                    children
-                                    |> Array.iter (printAst <| ind+1))
-                if l.Length > 1 then printInd ind "vvvv"
+    member this.EliminateCycles() =
+        let proper = Array.create nodes.Length true
+        for x in order do
+            match nodes.[x] with
+            | Term _ -> ()
+            | NonTerm (list, eps) ->
+                list := 
+                    !list |> List.filter (
+                        fun (_, children) ->
+                            children
+                            |> Array.forall (fun j -> pos.[j] < pos.[x] && reachable.[j]))
+                if list.Value.IsEmpty then
+                    reachable.[x] <- false
+                
+    member this.ChooseSingleAst () = 
+        this.EliminateCycles()
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term _ -> ()
+                | NonTerm (list, eps) ->
+                    match !list with
+                    | h::_::_ -> list := [h]
+                    | _ -> ()
+        for x in order do
+            reachable.[x] <- false
+        reachable.[root] <- true
+        let inline iterChildren children =
+            for j in snd children do
+                reachable.[j] <- true
+        for i = order.Length-1 downto 0 do
+            let x = order.[i]
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term _ -> ()
+                | NonTerm (list, eps) ->
+                    !list |> List.iter iterChildren
 
-let astToDot<'a> (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) (ast : AST<'a>) =
-    let next =
-        let cur = ref 0
-        fun () ->
-            incr cur
-            !cur
+    member this.Translate (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (epsilons : array<Tree<_>>) =
+        let result = Array.zeroCreate nodes.Length
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term t -> result.[x] <- box t
+                | NonTerm (list, eps) ->
+                    let res = 
+                        !list
+                        |> List.map (
+                            fun (prod, children) ->
+                                funs.[prod] (children |> Array.map (fun i -> result.[i]))
+                            )
+                        |> (fun r ->
+                                if !eps = -1 then r
+                                else (epsilons.[!eps].Translate funs leftSides concat epsilons)::r)
+                    result.[x] <- 
+                        match res with
+                        | [single] -> single
+                        | _ ->
+                            let nonTerm =
+                                if !eps <> -1 then !eps
+                                else leftSides.[fst list.Value.Head]
+                            concat.[nonTerm] res
+        result.[root]
+            
+    member this.PrintAst() =            
+        let rec printAst ind ast =
+            let printInd num (x : 'a) =
+                printf "%s" (String.replicate (num * 4) " ")
+                printfn x
+            match nodes.[ast] with
+            | Term t -> printInd ind "t: %A" t
+            | NonTerm (l, eps) ->
+                match !l with
+                | [] -> ()
+                | l ->  let needGroup =
+                            l.Length + (if !eps <> -1 then 1 else 0) > 1
+                        if needGroup then printInd ind "^^^^"
+                        l |> List.iteri 
+                            (fun i (num, children) ->
+                                        if i > 0 then
+                                            printInd ind "----"
+                                        printInd ind "prod %d" num
+                                        children
+                                        |> Array.iter (printAst <| ind+1))
+                        if !eps <> -1 then
+                            if needGroup then
+                                printInd ind "----"
+                            printInd ind "e"
+                        if needGroup then printInd ind "vvvv"
+        printAst 0 root
 
-    let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
-                                                                override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
-                                                                override this.GetHashCode x = x.GetHashCode()})
-    use out = new System.IO.StreamWriter (path : string)
-    out.WriteLine("digraph AST {")
-    let createNode num node (str : string) =
-        if node <> null then
-            nodeToNumber.[node] <- num
-        let label = str.Replace("\n", "\\n").Replace ("\r", "")
-        out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + "]")
-    let createEdge b e isBold (str : string) =
-        let label = str.Replace("\n", "\\n").Replace ("\r", "")
-        let bold = 
-            if not isBold then ""
-            else "style=bold,width=5,"
-        out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
-    let rec inner (ast : AST<_>) ind =
-        if nodeToNumber.ContainsKey <| ast then
-            nodeToNumber.[ast]
-        else
-            let res = next()
-            match ast with
-            | Term t ->
-                createNode res (ast :> Object) ("t " + indToString ind)
-            | NonTerm (l, num) ->
-                createNode res (ast :> Object) ("n " + indToString ind)
-                !l |> List.iter
-                       (function
-                        | Epsilon ->
-                            let u = next()
-                            createNode u null "eps"
-                            createEdge res u true ""
-                        | Inner (num, children) ->
-                            let i = ref 0
-                            let u = next()
-                            createNode u null ("prod " + num.ToString())
-                            createEdge res u true ""
-                            for child in ruleToChildren num do
-                                let v = inner children.[!i] child
-                                createEdge u v false ""
-                                incr i
-                        )
-            box res
-    inner ast startInd |> ignore
-    out.WriteLine("}")
-    out.Close()
+    member this.AstToDot (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) =
+        let next =
+            let cur = ref 0
+            fun () ->
+                incr cur
+                !cur
+
+        let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
+                                                                    override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
+                                                                    override this.GetHashCode x = x.GetHashCode()})
+        use out = new System.IO.StreamWriter (path : string)
+        out.WriteLine("digraph AST {")
+        let createNode num node (str : string) =
+            if node <> null then
+                nodeToNumber.[node] <- num
+            let label = str.Replace("\n", "\\n").Replace ("\r", "")
+            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + "]")
+        let createEdge b e isBold (str : string) =
+            let label = str.Replace("\n", "\\n").Replace ("\r", "")
+            let bold = 
+                if not isBold then ""
+                else "style=bold,width=5,"
+            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+        let rec inner ast ind =
+            if nodeToNumber.ContainsKey <| ast then
+                nodeToNumber.[ast]
+            else
+                let res = next()
+                match ast with
+                | Term t ->
+                    createNode res (ast :> Object) ("t " + indToString ind)
+                | NonTerm (l, eps) ->
+                    createNode res (ast :> Object) ("n " + indToString ind)
+                    !l |> List.iter
+                           (fun (num, children) ->
+                                let i = ref 0
+                                let u = next()
+                                createNode u null ("prod " + num.ToString())
+                                createEdge res u true ""
+                                for child in ruleToChildren num do
+                                    let v = inner nodes.[children.[!i]] child
+                                    createEdge u v false ""
+                                    incr i
+                            )
+                    if !eps <> -1 then
+                        let u = next()
+                        createNode u null "eps"
+                        createEdge res u true ""
+                box res
+        inner nodes.[root] startInd |> ignore
+        out.WriteLine("}")
+        out.Close()
     

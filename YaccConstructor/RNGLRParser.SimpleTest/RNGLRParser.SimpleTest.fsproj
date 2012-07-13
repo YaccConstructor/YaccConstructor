@@ -45,7 +45,7 @@
     <None Include="SimpleRightNull.yrd" />
     <Compile Include="SimpleRightNull.yrd.fs" />
     <None Include="Expr.yrd" />
-    <Compile Include="Expr.yrd.ast.fs" />
+    <Compile Include="Expr.yrd.fs" />
     <None Include="ComplexRightNull.yrd" />
     <Compile Include="ComplexRightNull.yrd.fs" />
     <None Include="Counter.yrd" />

@@ -203,7 +203,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     print "let defaultAstToDot = \n"
     printInd 1 "let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}\n"
     printInd 1 "let startInd = leftSide.[startRule]\n"
-    printInd 1 "Yard.Generators.RNGLR.AST.astToDot<Token> startInd numToString getRight\n"
+    printInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)\n"
 
     print "\n"
     print "let buildAst : (seq<Token> -> ParseResult<Token>) =\n"

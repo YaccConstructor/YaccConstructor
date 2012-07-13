@@ -50,7 +50,7 @@ let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,
 
 [<TestFixture>]
 type ``Convertions tests`` () =
-    [<Test>]
+    //[<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
         Namer.resetRuleEnumerator()        
         let ilTree = 

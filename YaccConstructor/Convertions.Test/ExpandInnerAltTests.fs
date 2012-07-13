@@ -174,8 +174,7 @@ type ``Expand inner alts tests`` () =
                      [{
                             name = "s"
                             args = []
-                            body =                        
-                                PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)
                             _public = true
                             metaArgs = []
                          };

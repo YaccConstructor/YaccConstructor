@@ -46,9 +46,7 @@ type ``Expand subseq tests`` () =
                      [{
                             name = "s"
                             args = []
-                            body =
-                        
-                                PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)                        
+                            body = PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
@@ -127,8 +125,7 @@ type ``Expand subseq tests`` () =
                      [{
                             name = "s"
                             args = []
-                            body =
-                                PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)                        
+                            body = PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
@@ -158,4 +155,3 @@ type ``Expand subseq tests`` () =
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
-

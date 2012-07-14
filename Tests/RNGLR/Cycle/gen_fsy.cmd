@@ -1,0 +1,1 @@
+C:\Projects\recursive-ascent\YaccConstructor\Main\bin\Release\YaccConstructor.exe -i cycle.yrd -g "FsYaccPrinter int"

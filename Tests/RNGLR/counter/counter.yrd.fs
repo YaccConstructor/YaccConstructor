@@ -76,49 +76,49 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 let _rnglr_epsilons : Tree<Token>[] = [|null; null|]
-let translate = 
-  let _rnglr_rule_, _rnglr_concats = 
-    [|
-    (
-      fun (_rnglr_children : array<_>) -> 
-        box (
-          ( 
-            (
-              let _rnglr_cycle_res = ref []
-              (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_0) -> 
-                _rnglr_cycle_res := ( 1 )::!_rnglr_cycle_res )
-              !_rnglr_cycle_res
-            ) ) : '_rnglr_type_s)
-        );
-    (
-      fun (_rnglr_children : array<_>) -> 
-        box (
-          ( 
-            (
-              let _rnglr_cycle_res = ref []
-              (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_0) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_s) 
-                 |> List.iter (fun (v) -> 
-                  _rnglr_cycle_res := ( 1 + v )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) ) : '_rnglr_type_s)
-        );
-    (
-      fun (_rnglr_children : array<_>) -> 
-        box (
-          ( 
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
-             ) : '_rnglr_type_yard_start_rule)
-        );
-    |] , [|
-      (fun (_rnglr_list : list<_>) -> 
-        box ( 
-          _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_s)   ) |> List.concat));
-      (fun (_rnglr_list : list<_>) -> 
-        box ( 
-          _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
-    |] 
-  fun (tree : Tree<_>) -> 
-    unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons) : '_rnglr_type_yard_start_rule
+let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
+  (Array.zeroCreate 0 : array<'_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
+  [|
+  (
+    fun (_rnglr_children : array<_>) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_rnglr_var_0) -> 
+              _rnglr_cycle_res := ( 1 )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_s)
+      );
+  (
+    fun (_rnglr_children : array<_>) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_rnglr_var_0) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_s) 
+               |> List.iter (fun (v) -> 
+                _rnglr_cycle_res := ( 1 + v )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_s)
+      );
+  (
+    fun (_rnglr_children : array<_>) -> 
+      box (
+        ( 
+          ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
+           ) : '_rnglr_type_yard_start_rule)
+      );
+  |] , [|
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_s)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
+  |] 
+let translate (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons) : '_rnglr_type_yard_start_rule

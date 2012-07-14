@@ -87,12 +87,13 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null|]
-let _rnglr_rule_, _rnglr_concats = 
+let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
+  (Array.zeroCreate 0 : array<'_rnglr_type_expr * '_rnglr_type_fact * '_rnglr_type_num * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_fact) 
@@ -103,8 +104,8 @@ let _rnglr_rule_, _rnglr_concats =
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
@@ -119,15 +120,15 @@ let _rnglr_rule_, _rnglr_concats =
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
            ) : '_rnglr_type_yard_start_rule)
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_num) 
@@ -138,8 +139,8 @@ let _rnglr_rule_, _rnglr_concats =
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_fact) 
@@ -154,8 +155,8 @@ let _rnglr_rule_, _rnglr_concats =
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
@@ -166,8 +167,8 @@ let _rnglr_rule_, _rnglr_concats =
       );
   (
     fun (_rnglr_children : array<_>) -> 
-      box ((
-        
+      box (
+        ( 
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
@@ -189,6 +190,6 @@ let _rnglr_rule_, _rnglr_concats =
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
-  |]
-let translate (tree : Tree<_>) = 
+  |] 
+let translate (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
   unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons) : '_rnglr_type_yard_start_rule

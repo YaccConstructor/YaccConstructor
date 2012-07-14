@@ -197,36 +197,38 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             yield getConcat i|]
         |> aboveArrayL
 
+    let rules =
+        let allTypes =
+            [for i = 0 to args.Length - 1 do
+                yield "'_rnglr_type_" + indexator.indexToNonTerm i ]
+            |> List.reduce (fun l r -> l + " * " + r)
+        wordL ("let _rnglr_extra_array, " + ruleName + ", " + concatsName + " = ")
+        @@--
+           (wordL ("(Array.zeroCreate 0 : array<" + allTypes + ">), ")
+            @@ wordL "[|"
+            @@
+            (srcGrammar
+             |> Array.mapi
+                (fun i rule ->
+                    wordL "("
+                    @@-- getRuleLayout rule i
+                    @@-- wordL ");")
+             |> aboveArrayL)
+            @@ (wordL "|] , [|"
+                @@-- concats)
+            @@ wordL "|] ")
+
     let funRes =
-        let funHead = wordL ("fun (tree : Tree<_>) -> ")
+        let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
+        let funHead = wordL ("let translate (tree : Tree<_>) : " + typeName + " = ")
         let body = 
-            let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
             "unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName + " " + epsilonName + ") : " + typeName
             |> wordL
         funHead @@-- body
 
-    let rules =
-        wordL ("let translate = ")
-        @@--
-         (wordL ("let " + ruleName + ", " + concatsName + " = ")
-          @@--
-              (wordL "[|"
-               @@
-               (srcGrammar
-                |> Array.mapi
-                    (fun i rule ->
-                        wordL "("
-                        @@-- getRuleLayout rule i
-                        @@-- wordL ");")
-                |> aboveArrayL)
-                @@ (wordL "|] , [|"
-                    @@-- concats)
-                @@ wordL "|] "))
-           @@ funRes
-
     let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-    [nowarn; defineEpsilonTrees; (*declareNonTermsArrays;*) rules]
+    [nowarn; defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
     |> out.WriteLine

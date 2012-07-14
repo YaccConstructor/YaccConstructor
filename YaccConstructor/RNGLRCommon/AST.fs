@@ -85,7 +85,7 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                         fun (_, children) ->
                             children
                             |> Array.forall (fun j -> pos.[j] < pos.[x] && reachable.[j]))
-                if list.Value.IsEmpty then
+                if list.Value.IsEmpty && !eps = -1 then
                     reachable.[x] <- false
                 
     member this.ChooseSingleAst () = 

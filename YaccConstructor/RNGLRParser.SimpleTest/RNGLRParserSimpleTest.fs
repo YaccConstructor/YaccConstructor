@@ -7,6 +7,7 @@ open Yard.Generators.RNGLR.AST
 open NUnit.Framework
 open Yard.Generators
 open LexCommon
+open FsYaccCycle
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
@@ -96,7 +97,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
         | Parser.Success mAst,tokens ->
             mAst.PrintAst()
-            printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3)
+            printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3 : int list)
 
     [<Test>]
     member test.``AST, containing cycles``() =
@@ -108,4 +109,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Success mAst,tokens ->
             //mAst.PrintAst
             printf "OK\n"
-            //printfn "Result: %A" (RNGLR.ParseCycle.translate mAst)
+            RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
+            mAst.EliminateCycles()
+            RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
+            printfn "Result: %A" (RNGLR.ParseCycle.translate mAst)

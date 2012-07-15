@@ -28,17 +28,20 @@ type Child =
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
 /// int - number of token, if there is an epsilon-tree derivation, -1 otherwise.
 type AST<'TokenType> =
-    | NonTerm of (Child list ref) * int ref
+    | NonTerm of (Child list ref)
+    | Epsilon of int
     | Term of 'TokenType
 
 let inline getFamily node =
     match node with
-    | NonTerm (list, eps) -> list
+    | NonTerm list -> list
+    | Epsilon _ -> failwith "Attempt to get family of epsilon"
     | Term _ -> failwith "Attempt to get family of terminal"
 
 let inline getEpsilon node =
     match node with
-    | NonTerm (list, eps) -> eps
+    | Epsilon eps -> eps
+    | NonTerm list -> failwith "Attempt to get epsilon of non-terminal"
     | Term _ -> failwith "Attempt to get epsilon of terminal"
 
 [<AllowNullLiteral>]
@@ -62,9 +65,9 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                 stack.Push <| -u-1
                 reachable.[u] <- true
                 match nodes.[u] with
-                | Term _ -> ()
-                | NonTerm (list, eps) ->
+                | NonTerm list ->
                     !list |> List.iter iterChildren
+                | _ -> ()
             
         let ret = res.ToArray()
         for i = 0 to ret.Length-1 do
@@ -78,26 +81,26 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
         let proper = Array.create nodes.Length true
         for x in order do
             match nodes.[x] with
-            | Term _ -> ()
-            | NonTerm (list, eps) ->
+            | NonTerm list ->
                 list := 
                     !list |> List.filter (
                         fun (_, children) ->
                             children
                             |> Array.forall (fun j -> pos.[j] < pos.[x] && reachable.[j]))
-                if list.Value.IsEmpty && !eps = -1 then
+                if list.Value.IsEmpty then
                     reachable.[x] <- false
+            | _ -> ()
                 
     member this.ChooseSingleAst () = 
         this.EliminateCycles()
         for x in order do
             if reachable.[x] then
                 match nodes.[x] with
-                | Term _ -> ()
-                | NonTerm (list, eps) ->
+                | NonTerm list ->
                     match !list with
                     | h::_::_ -> list := [h]
                     | _ -> ()
+                | _ -> ()
         for x in order do
             reachable.[x] <- false
         reachable.[root] <- true
@@ -108,9 +111,9 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
             let x = order.[i]
             if reachable.[x] then
                 match nodes.[x] with
-                | Term _ -> ()
-                | NonTerm (list, eps) ->
+                | NonTerm list ->
                     !list |> List.iter iterChildren
+                | _ -> ()
 
     member this.Translate (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (epsilons : array<Tree<_>>) =
         let result = Array.zeroCreate nodes.Length
@@ -118,23 +121,20 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
             if reachable.[x] then
                 match nodes.[x] with
                 | Term t -> result.[x] <- box t
-                | NonTerm (list, eps) ->
+                | Epsilon eps ->
+                    result.[x] <- epsilons.[eps].Translate funs leftSides concat epsilons
+                | NonTerm list ->
                     let res = 
                         !list
                         |> List.map (
                             fun (prod, children) ->
                                 funs.[prod] (children |> Array.map (fun i -> result.[i]))
                             )
-                        |> (fun r ->
-                                if !eps = -1 then r
-                                else (epsilons.[!eps].Translate funs leftSides concat epsilons)::r)
                     result.[x] <- 
                         match res with
                         | [single] -> single
                         | _ ->
-                            let nonTerm =
-                                if !eps <> -1 then !eps
-                                else leftSides.[fst list.Value.Head]
+                            let nonTerm = leftSides.[fst list.Value.Head]
                             concat.[nonTerm] res
         result.[root]
             
@@ -145,11 +145,11 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                 printfn x
             match nodes.[ast] with
             | Term t -> printInd ind "t: %A" t
-            | NonTerm (l, eps) ->
+            | Epsilon _ -> printInd ind "e"
+            | NonTerm l ->
                 match !l with
                 | [] -> ()
-                | l ->  let needGroup =
-                            l.Length + (if !eps <> -1 then 1 else 0) > 1
+                | l ->  let needGroup = l.Length > 1
                         if needGroup then printInd ind "^^^^"
                         l |> List.iteri 
                             (fun i (num, children) ->
@@ -158,10 +158,6 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                                         printInd ind "prod %d" num
                                         children
                                         |> Array.iter (printAst <| ind+1))
-                        if !eps <> -1 then
-                            if needGroup then
-                                printInd ind "----"
-                            printInd ind "e"
                         if needGroup then printInd ind "vvvv"
         printAst 0 root
 
@@ -196,7 +192,12 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                 match ast with
                 | Term t ->
                     createNode res (ast :> Object) ("t " + indToString ind)
-                | NonTerm (l, eps) ->
+                | Epsilon eps ->
+                    createNode res (ast :> Object) ("n " + indToString ind)
+                    let u = next()
+                    createNode u null "eps"
+                    createEdge res u true ""
+                | NonTerm l ->
                     createNode res (ast :> Object) ("n " + indToString ind)
                     !l |> List.iter
                            (fun (num, children) ->
@@ -209,10 +210,6 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                                     createEdge u v false ""
                                     incr i
                             )
-                    if !eps <> -1 then
-                        let u = next()
-                        createNode u null "eps"
-                        createEdge res u true ""
                 box res
         inner nodes.[root] startInd |> ignore
         out.WriteLine("}")

@@ -112,7 +112,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         order.Add w
                                     pos.[w])
                         yield (rule, children)]
-                |> (fun x -> NonTerm (ref x, ref -1))
+                |> (fun x -> NonTerm (ref x))
                 |> res.Add
             result.[u] <- new Tree<_>(res.ToArray(), 0)
     result

@@ -115,8 +115,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         let printAst =
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"
-            | NonTerm (list,eps) ->
-                "NonTerm (ref " + printList !list printChild + ", ref " + eps.Value.ToString() + ")"
+            | Epsilon _ -> failwith "Epsilon was not expected in epsilon tree"
+            | NonTerm list ->
+                "NonTerm (ref " + printList !list printChild + ")"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function

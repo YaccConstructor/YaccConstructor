@@ -40,7 +40,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
     let startRule = parserSource.LeftSide.[parserSource.StartRule]
     if tokensCount = 0 then
         if parserSource.AccStates.[startState] then
-            let res = Array.create 1 <| NonTerm (ref [], ref startRule)
+            let res = Array.create 1 <| Epsilon (startRule)
             new Tree<_>(res, 0) |> Success
         else
             Error (0, "This grammar cannot accept empty string")
@@ -52,7 +52,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
         let epsilons = Array.zeroCreate nonTermsCountLimit
         for i = 0 to nonTermsCountLimit-1 do
             epsilons.[i] <- nodes.Count
-            nodes.Add <| NonTerm (ref [], ref i)
+            nodes.Add <| Epsilon i
             
         let reductions = new Queue<_>(10)
         let astNodes = new Dictionary<_,_>(10, HashIdentity.Structural)
@@ -100,7 +100,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     else
                         Array.forall2 (=) ast1 ast2
 
-                let inline addEpsilon node nonTerm = (getEpsilon node) := nonTerm
+                //let inline addEpsilon node nonTerm = (getEpsilon node) := nonTerm
 
                 let inline addChildren node (path : int[]) prod =
                     let family = getFamily node
@@ -127,13 +127,13 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     then
                         ast := nodes.Count
                         let edge = new Edge<int*int, int>(final, !ast)
-                        nodes.Add <| NonTerm (ref [], ref -1)
+                        nodes.Add <| NonTerm (ref [])
                         newVirtex.addEdge edge
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[tokenNums.[num]] do
                                 //printf "%A %A %d %d\n" newVirtex.label newVirtex.outEdges prod pos
                                 reductions.Enqueue (newVirtex, prod, pos, Some edge)
-                    if path = [] then addEpsilon nodes.[!ast] parserSource.LeftSide.[prod]
+                    if path = [] then nodes.[!ast] <- Epsilon parserSource.LeftSide.[prod]
                     else addChildren nodes.[!ast] (path |> List.toArray) prod
                     //for e in newVirtex.outEdges do
                     //    printf "el2: %A %A\n" e.label e.dest.label
@@ -186,7 +186,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             let root = ref None
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
-            let addTreeTop res = NonTerm (ref [parserSource.StartRule, [|res|]], ref -1)
+            let addTreeTop res = NonTerm (ref [parserSource.StartRule, [|res|]])
             for i = 0 to !curLevelCount-1 do
                 printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then

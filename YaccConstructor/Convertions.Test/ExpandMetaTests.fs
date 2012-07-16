@@ -31,21 +31,10 @@ open ConvertionsTests
 [<TestFixture>]
 type ``Convertions expand metarules tests`` () =
     
-    let basePath = System.IO.Path.Combine(convertionTestPath, "Meta")
-    let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
+    let basePath = System.IO.Path.Combine(convertionTestPath, "Meta")    
     let convertion = "ExpandMeta" 
-    let getFrontend name =
-        match FrontendsManager.Component name with
-        | Some fe -> fe
-        | None -> failwith (name + " is not found.")
 
-    let getBE name =
-        match GeneratorsManager.Component name with
-        | Some be -> be
-        | None -> failwith (name + " is not found.")
-
-    let frontend = getFrontend "YardFrontend"
-    let treeDump = getBE "TreeDump"
+    let frontend = getFrontend "YardFrontend"    
 
     let runMetaTest srcFile =
         let srcFile = System.IO.Path.Combine(basePath, srcFile)                                         
@@ -62,7 +51,7 @@ type ``Convertions expand metarules tests`` () =
         
         treeDump.Generate expected |> string |> printfn "%s"
         treeDump.Generate ilTreeConverted |> string |> printfn "%s"
-        Assert.IsTrue (grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+        Assert.IsTrue (ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 
     [<Test>]    
     member test.``Meta test 1``()=runMetaTest("meta_1.yrd")

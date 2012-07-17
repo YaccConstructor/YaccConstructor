@@ -217,7 +217,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 43 "Parser.fsy"
-                                    let lst=_1 in let ac=_2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0))) 
+                                    let lst=_1 in let ac=_2 in  PSeq(List.map (fun prod -> {new Production.elem<Source.t, Source.t> with omit=false and rule=prod and binding=None and checker=None}) lst, Some(ac,(0,0)), None) 
                    )
 # 43 "Parser.fsy"
                  : 'alternative));

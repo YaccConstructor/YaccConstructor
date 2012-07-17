@@ -29,66 +29,30 @@ open NUnit.Framework
 
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
-let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
-    let srcEquals (a:Source.t) (b:Source.t) =
-        if (fst a = fst b) then true
-        else printfn "bad %A %A" a b; false
-    let srcOptEquals a b =
-        match a,b with
-        | Some(sa), Some(sb) -> srcEquals sa sb
-        | None, None -> true
-        | _ -> printfn "badOpt %A %A" a b; false
 
-    let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
-        let rec reduceSeq (*il*) = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None) ->
-//                printfn "seq %s" <| r.ToString()
-                reduceSeq r
-            | x -> x
-        //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
-        match (reduceSeq il1, reduceSeq il2) with
-        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
-            List.length elems1 = List.length elems2 &&
-                List.zip elems1 elems2 
-                |> List.forall 
-                    (fun (elem1, elem2) ->
-                        srcOptEquals elem1.binding elem2.binding && srcOptEquals elem1.checker elem2.checker &&
-                            elem1.omit = elem2.omit && ilTreeEqualsWithoutLineNumbers elem1.rule elem2.rule
-                    )
-        | PAlt(left1, right1), PAlt(left2, right2) -> 
-            ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
-        | PToken(t1), PToken(t2) -> srcEquals t1 t2
-        | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
-        | PMany(t1), PMany(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PSome(t1), PSome(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | POpt(t1), POpt(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
-            srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
-                List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
-        | PLiteral(s1), PLiteral(s2) -> srcEquals s1 s2
-        | _ -> false
+let getFrontend name =
+        match FrontendsManager.Component name with
+        | Some fe -> fe
+        | None -> failwith (name + " is not found.")
 
-    List.forall2  
-        (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
-            rule1._public = rule2._public &&
-            List.forall2 srcEquals (createParams rule1.args) (createParams rule2.args) &&
-            ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
-            List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name = rule2.name
-        ) g1 g2
+let getBE name =
+    match GeneratorsManager.Component name with
+    | Some be -> be
+    | None -> failwith (name + " is not found.")
 
-//let printTree tree = 
-//    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
+let treeDump = getBE "TreeDump"
+
+let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
 
 [<TestFixture>]
 type ``Convertions tests`` () =
-    [<Test>]
+    //[<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
-        Namer.resetRuleEnumerator()
-        let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
+        Namer.resetRuleEnumerator()        
         let ilTree = 
             {
                 info = { fileName = "" } 
@@ -105,7 +69,7 @@ type ``Convertions tests`` () =
                                 {dummyRule with rule=PToken("NUMBER",(0,0))};
                                 {dummyRule with rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
                                 {dummyRule with rule=PToken("CHUMBER",(0,0))};
-                            ], None)
+                            ], None, None)
                             |> PSeq
                             , PToken("OUTER",(0,0)))
                             |> PAlt
@@ -130,7 +94,7 @@ type ``Convertions tests`` () =
                                     {dummyRule with rule = PToken ("NUMBER", (0, 0))};
                                     {dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}; 
                                     {dummyRule with rule = PToken ("CHUMBER", (0, 0))}
-                            ],None)
+                            ],None, None)
                             , PToken ("OUTER", (0, 0)))
                     _public = true
                     metaArgs = []
@@ -146,7 +110,6 @@ type ``Convertions tests`` () =
             options = Map.empty
         }
         Assert.AreEqual(ilTreeConverted, correctConverted)
-
     
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
@@ -170,7 +133,7 @@ type ``Convertions tests`` () =
                 (fun rule ->
                     let rec eachProd = function
                         | PAlt(a,b) -> eachProd a && eachProd b
-                        | PSeq(elements, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
+                        | PSeq(elements, _, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
                         | _ -> true
                     eachProd rule.body
                 )
@@ -182,96 +145,121 @@ type ``Convertions tests`` () =
            | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif
-        Assert.True(hasNotInnerSeq)  
+        Assert.True(hasNotInnerSeq)
+   
+[<TestFixture>]
+type ``Expand rop level alters`` () =
+    let basePath = System.IO.Path.Combine(convertionTestPath, "ExpandTopLevelAlters")
+    let fe = getFrontend("YardFrontend")
+    let conversion = "ExpandTopLevelAlt"
 
     [<Test>]
-    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
-    /// Expected result 'sourceFileName.res'
-    member test.``Meta tests in Tests\Convertions\Meta .``()=
-        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
-        let frontend =
-            match FrontendsManager.Component "YardFrontend" with
-                   | Some fron -> fron
-                   | None -> failwith "YardFrontend is not found." 
-        (*let generator = 
-           match GeneratorsManager.Component "YardPrinter" with
-           | Some gen -> gen
-           | None -> failwith "YardPrinter is not found." 
-        printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
-        |> Seq.iter 
-            (fun srcFile ->  
-                Namer.resetRuleEnumerator()
-                printfn "file %s" srcFile
-                // all convertions are in name without descr.yrd
-                let convertions = [|"ExpandMeta"|]
-                printfn "%A" convertions
-                Namer.resetRuleEnumerator()
-                let ilTree = (srcFile |> frontend.ParseGrammar)
-                printfn "after Parsing"
-                let reorder f a b = f b a
-//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                printfn "after Convertion"
-                Namer.resetRuleEnumerator()
-                let expected =
-                    try
-                        srcFile + ".ans" |> frontend.ParseGrammar 
-                    with
-                        | e -> printfn "%s" e.Message
-                               raise <| FEError e.Message
-                printfn "after result parsing"
-                //printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+    member test.``No alter`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"noAlters.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("d", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "d"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PToken ("NUM", (0, 0))}],None, None)
+                            _public = false
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
 
-            )
-        Assert.True(true)
-        
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
     [<Test>]
-    /// Source file name have to be in format 'convName1_convName2_descr.yrd'.
-    /// Expected result 'sourceFileName.res'
-    member test.``Batch tests in Tests\Convertions\Batch .``()=
-        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
-        let frontend =
-            match FrontendsManager.Component "YardFrontend" with
-               | Some fron -> fron
-               | None -> failwith "YardFrontend is not found."
-        (*let generator = 
-           match GeneratorsManager.Component "YardPrinter" with
-           | Some gen -> gen
-           | None -> failwith "YardPrinter is not found."
-        printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Batch/","*.yrd") 
-        |> Seq.iter 
-            (fun srcFile ->  
-                Namer.resetRuleEnumerator()
-                printfn "file %s" srcFile
-                let srcFileName = System.IO.Path.GetFileName(srcFile)
-                let srcPrefix = System.IO.Path.GetFileNameWithoutExtension(srcFileName)
-                let prefixSplitted = srcPrefix.Split('_')
-                printfn "1" 
-                // all convertions are in name without descr.yrd
-                let convertions = prefixSplitted.[0..(Array.length prefixSplitted - 2)]
-                printfn "2: %A" convertions
-                Namer.resetRuleEnumerator()
-                let ilTree = (srcFile |> frontend.ParseGrammar)
-                printfn "3"
-                let reorder f a b = f b a
-//                    let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                let ilTreeConverted = Array.fold (reorder ConvertionsManager.ApplyConvertion) ilTree convertions
-                printfn "4"
-                Namer.resetRuleEnumerator()
-                let expected =
-                    try
-                        srcFile + ".res" |> frontend.ParseGrammar 
-                    with
-                        | e -> printfn "%s" e.Message
-                               raise <| FEError e.Message
-                printfn "5"
-                printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
-//                     with e ->
-//                        printfn "%A" e 
+    member test.``One alter`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"oneAlter.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("c", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("d", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
 
-            )
-        Assert.True(true)
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
+
+
+    [<Test>]
+    member test.``Multi alters`` () =
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"multiAlters.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversion loadIL
+        let expected = 
+            {
+                info = {fileName = ""}
+                head = None
+                grammar =
+                     [{
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("x", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("y", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("z", (0, 0)),None)}],None, None)
+                            _public = true
+                            metaArgs = []
+                         };
+                         {
+                            name = "s"
+                            args = []
+                            body = PSeq([{dummyRule with rule = PRef (("m", (0, 0)),None)}],None, None)                        
+                            _public = true
+                            metaArgs = []
+                         }]
+                foot = None
+                options = Map.empty
+            }
+
+        expected |> treeDump.Generate |> string |> printfn "%s"
+        printfn "%s" "************************"
+        result |> treeDump.Generate |> string |> printfn "%s"
+        Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)

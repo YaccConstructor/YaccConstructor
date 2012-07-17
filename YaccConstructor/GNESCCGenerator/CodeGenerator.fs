@@ -64,7 +64,7 @@ type CodeGenerator(outPath: string) =
             let indentString l = String.replicate l "    "
                 
             match body with 
-            | PSeq(elems,expr) -> 
+            | PSeq(elems,expr,_) -> 
                 let num = Enumerator()
                 let namesPair = 
                     List.map 

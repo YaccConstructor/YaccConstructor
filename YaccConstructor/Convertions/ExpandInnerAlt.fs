@@ -29,21 +29,21 @@ open Yard.Core.IL.Production
 
 let private newName () = (Namer.Names.brackets,(0,0)) |> Namer.createNewName |> fst
     
-let private expandInnerAlts (ruleList: Rule.t<'patt, 'expr> list) = 
-    let toExpand = new System.Collections.Generic.Queue<Rule.t<'patt, 'expr>>(List.toArray ruleList)
+let private expandInnerAlts (ruleList: Rule.t<_,_> list) = 
+    let toExpand = new System.Collections.Generic.Queue<Rule.t<_,_>>(List.toArray ruleList)
     let expanded = ref []
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
-            | PSeq(elements, actionCode) -> 
+            | PSeq(elements, actionCode, l) -> 
                 (elements
                  |>List.fold
                     (fun (res, attrs) elem ->
                         let newElem =
                             match elem.rule with 
-                            | PSeq(subelements, None) when List.length subelements = 1 -> 
+                            | PSeq(subelements, None, l) when List.length subelements = 1 -> 
                                 { elem with rule = (List.head subelements).rule }
-                            | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
+                            | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = newName()
                                 toExpand.Enqueue({name = newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
                                 { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
@@ -56,7 +56,7 @@ let private expandInnerAlts (ruleList: Rule.t<'patt, 'expr> list) =
                     )
                     ([], attrs)
                  |> fst |> List.rev
-                 ,actionCode)
+                 ,actionCode, l)
                 |> PSeq
             | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x

@@ -47,7 +47,7 @@ type ``GNESCC generator test`` () =
                                             checker = None;}; {omit = false;
                                                                rule = PToken ("N", (7, 8));
                                                                binding = None;
-                                                               checker = None;}],None);
+                                                               checker = None;}],None,None);
                 _public = false;
                 metaArgs = [];}];
              foot = None;

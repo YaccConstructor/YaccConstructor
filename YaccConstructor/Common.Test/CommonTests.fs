@@ -51,7 +51,7 @@ type ``Components loader tests`` () =
             |> List.sort
         let expetedResult =
              ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "EliminateLeftRecursion";
-             "ExpandAlter"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
+             "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
              "RemoveAC"; "ReplaceInline"; "ReplaceLiterals";]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions

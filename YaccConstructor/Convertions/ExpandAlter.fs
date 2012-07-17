@@ -1,4 +1,5 @@
 ﻿//  Copyright 2009 by Ilia Chemodanov
+//  Copyright 2012 by Semen Grigorev <rsdpiduy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -15,36 +16,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Core.Convertions.ExpandAlter
+module Yard.Core.Convertions.ExpandTopLevelAlt
 
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
+open Yard.Core.IL.Production
 
 open System
 
-let extract_one_rule (rule:Rule.t<'a,'b>) = 
+let extractOneRule (rule:Rule.t<'a,'b>) = 
     let rec expand = function
-    |PAlt     (a,b) -> expand a  @ expand b
-    |PSeq     (a,b) -> let wrap = List.map (fun x -> (x.rule, fun r -> {x with rule = r})) a
-                                  |> List.unzip
-                       in
-                       let rec gen = function
-                           | hd::tl -> [for x in hd -> x :: ( gen tl |> List.concat)]
-                           | []     -> []
-                       in 
-                       fst wrap |> List.map expand |> gen 
-                       |> List.map (fun x -> PSeq ((List.map2 ( |> ) x (snd wrap)),b))
-    |PRef   _ 
-    |PLiteral _
-    |PToken   _ as t   -> [t]
-    | _             -> (System.Console.WriteLine("incorrect tree for alternative expanding!")
-                        ; failwith "incorrect tree for alternative expanding!")
-    in 
-    expand rule.body |> List.map (fun x -> {rule with body = x})
+    | PAlt (a,b) -> {rule with body = a} :: expand b
+    | a   -> [{rule with body = a}]    
+    expand rule.body
 
-type ExpandAlter() = 
+type ExpandTopLevelAlt() = 
     inherit Convertion()
-        override this.Name = "ExpandAlter"
-        override this.ConvertList (ruleList,_) = List.collect extract_one_rule ruleList
+        override this.Name = "ExpandTopLevelAlt"
+        override this.ConvertList (ruleList,_) = List.collect extractOneRule ruleList
         override this.EliminatedProductionTypes = ["PAlt"]

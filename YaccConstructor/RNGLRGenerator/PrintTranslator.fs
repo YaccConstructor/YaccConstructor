@@ -282,7 +282,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             sprintf "(match %s with | %sTerm (%s value) -> [value] | _-> failwith \"Token %s expected\") "
                 (sprintf "%s.[%d]" childrenName !num) pathToModule name name
             |> wordL
-        | PSeq (s, ac) ->
+        | PSeq (s, ac, _) ->
             match ac with
             | None -> wordL "[]"
             | Some ac ->

@@ -29,7 +29,7 @@ open Yard.Core.Convertions.TransformAux
 /// Adds action code to production considering it is used somewhere
 let rec addAcToProduction neededRules ruleBody = 
     match ruleBody with
-    | PSeq(elements, Some(ac)) -> 
+    | PSeq(elements, Some(ac), l) -> 
         PSeq(
             elements 
             |> List.map 
@@ -38,16 +38,16 @@ let rec addAcToProduction neededRules ruleBody =
                     | Some(binding) -> { elem with rule=addAcToProduction neededRules elem.rule }
                     | None -> elem
                 )
-            , Some(ac)
+            , Some(ac), l
         )
-    | PSeq(elements, None) -> 
+    | PSeq(elements, None, l) -> 
         let getBinding i elem =
             if elem.omit 
             then None
             else Some(sprintf "S%d" (i+1), (0,0))
         PSeq(
             elements |> List.mapi (fun i elem ->  {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
-            , Some(elements |> List.mapi getBinding |> List.choose id |> List.map fst |> String.concat ", ", (0,0))       
+            , Some(elements |> List.mapi getBinding |> List.choose id |> List.map fst |> String.concat ", ", (0,0)), l       
         )
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
     | PRef((ref,(_,_)), _) as x -> neededRules := ref::!neededRules; x
@@ -74,7 +74,7 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         if not <| updatedRules.Contains bfsFor then    
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
-            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None);
+            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None, None);
                                 Rule.t._public=false; Rule.t.metaArgs=[]}
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then

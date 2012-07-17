@@ -30,7 +30,7 @@ let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) =
     grammar |> List.map (fun rule -> if List.exists ((=) rule.name) starts then { rule with _public=true } else rule)
 
 let rec _addBindings = function
-    | PSeq(elements, Some(ac,_)) -> 
+    | PSeq(elements, Some(ac,_), l) -> 
         (elements
          |> List.mapi 
             (
@@ -40,9 +40,9 @@ let rec _addBindings = function
                     else 
                         { elem with rule=_addBindings elem.rule} 
             ) 
-        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0)))
+        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0)), l)
         |> PSeq
-    | PSeq(elements, None) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None)
+    | PSeq(elements, None, l) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None, l)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
     | PSome(x) -> PSome(_addBindings x)
     | POpt(x) -> POpt(_addBindings x)

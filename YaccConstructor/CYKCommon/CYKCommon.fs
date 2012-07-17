@@ -42,3 +42,7 @@ module RuleHelpers =
         let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
         rName, r1, r2, lblName, lblWeight
 
+type CYKToken<'tag,'value>(tag:'tag, value:'value) =
+    member x.Tag = tag
+    member x.Value = value
+

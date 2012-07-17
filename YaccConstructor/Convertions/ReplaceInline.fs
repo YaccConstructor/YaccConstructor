@@ -25,7 +25,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
 
-let replaceInline (rules : Rule.t<_,_> list) =
+let private replaceInline (rules : Rule.t<_,_> list) =
     let closure (inlines : (string * t<_,_>) list) = 
         let inlinesDict = inlines |> dict
         let getName = function
@@ -34,7 +34,7 @@ let replaceInline (rules : Rule.t<_,_> list) =
         [for (k,v) in inlines do
             let cur = ref v
             while getName !cur |> inlinesDict.ContainsKey do
-                cur := inlinesDict.Item (getName !cur)
+                cur := inlinesDict.[getName !cur]
             yield (k,!cur)] |> dict
     let inlines = 
         rules
@@ -47,17 +47,17 @@ let replaceInline (rules : Rule.t<_,_> list) =
             []
         |> closure
     
-    let rec modifyBody (*body*) = function
+    let rec modifyBody = function
         | PSeq (elems, ac, l) ->
             let newElems =
                 elems |> List.map (fun x -> {x with rule = modifyBody x.rule})
             PSeq(newElems, ac, l)
         | PAlt (l,r) -> PAlt(modifyBody l, modifyBody r)
         | PRef ((name,_),_) as prev ->
-            if inlines.ContainsKey name then inlines.Item name
+            if inlines.ContainsKey name then inlines.[name]
             else prev
         | PMetaRef ((name,_),_,_) as prev ->
-            if inlines.ContainsKey name then inlines.Item name
+            if inlines.ContainsKey name then inlines.[name]
             else prev
         | PMany x -> PMany <| modifyBody x
         | PSome x -> PSome <| modifyBody x
@@ -65,12 +65,12 @@ let replaceInline (rules : Rule.t<_,_> list) =
         | x -> x
         
     rules
-    (*
     |> List.choose
         (fun rule -> 
-            if inlines.ContainsKey rule.name && not rule._public then None
+            if inlines.ContainsKey rule.name && not rule._public
+            then None
             else Some <| {rule with body = modifyBody rule.body})
-            *)
+            
 type ReplaceInline() = 
     inherit Convertion()
         override this.Name = "ReplaceInline"

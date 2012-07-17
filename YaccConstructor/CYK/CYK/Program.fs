@@ -84,9 +84,15 @@ type CYKParser () =
                 let nonTerminals1,_,_,lbls1,weights1,_ = recTable.[i,k]
                 let nonTerminals2,_,_,lbls2,weights2,_ = recTable.[k+i+1,l-k-1]
                 let nonTerminals,_,_,lbls,weights,rules = recTable.[i,l]
-                if (List.exists ((=)b) nonTerminals1) && (List.exists ((=)c) nonTerminals2)
+                if (nonTerminals1.Length > 0) && (nonTerminals2.Length > 0)
                 then
-                    recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),(newLbl ruleLbl lbls1 lbls2 ::lbls),(newWeight ruleWeight weights1 weights2 ::weights),(rule::rules)    
+                    for m in 0..(nonTerminals1.Length - 1) do
+                        for n in 0..(nonTerminals2.Length - 1) do
+                            if (nonTerminals1.[m] = b) && (nonTerminals2.[n] = c)
+                            then
+                                //обновляем ссылки на дополняемые списки
+                                let nonTerminals,_,_,lbls,weights,rules = recTable.[i,l]
+                                recTable.[i,l] <- (a::nonTerminals),(i,k),(k+i+1,l-k-1),(newLbl ruleLbl lbls1 lbls2::lbls),(newWeight ruleWeight weights1 weights2::weights),(rule::rules)    
             |_               -> ()   
 
        let elem i l = rules |> Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
@@ -105,7 +111,7 @@ type CYKParser () =
        let printElem i l =
             let _,_,_,lbls,weights,rules = recTable.[i,l]
             let outputElem = "" + i.ToString() + ") " + "lbls: " + printTableLabels lbls + ";; weights: " + weights.ToString() + ";; rules: " + printTableRules rules 
-            System.Console.WriteLine (outputElem + "\n")
+            printfn "%s" outputElem
 
        let rec printTable i l =
             if l = s.Length-1
@@ -143,24 +149,25 @@ type CYKParser () =
        let rec subRecognize i l top = 
           let nonTerminals,(leftI,leftL),(rightI,rightL),lbls,ws,rs = recTable.[i,l]
           //правило вида А->_, где А = top
-          let currentRuleIndex = List.findIndex (fun (ToBranch(st,_,_,l,_)|ToLeaf(st,_,l)) -> st = top) rs
+          let currentRuleIndex = List.findIndex (fun (ToBranch(st,_,_,_,_)|ToLeaf(st,_,_)) -> st = top) rs
           let currentRule = rs.[currentRuleIndex]
           let lbl = lbls.[currentRuleIndex]
+          let weight = ws.[currentRuleIndex]
           let leftNT,rightNT = 
              match currentRule with
-             |ToBranch(_,left,right,l,w) -> left,right
-             |ToLeaf(_,terminal,l)     -> terminal.ToString(),""  
+             |ToBranch(_,left,right,_,_) -> left,right
+             |ToLeaf(_,terminal,_)     -> terminal.ToString(),""  
           match i,l with
           | _,0 -> [(ToLeaf(top,leftNT.[0],None),lbl)]
           | _     -> (currentRule,lbl)::(subRecognize leftI leftL leftNT)@(subRecognize rightI rightL rightNT)
-       let resultRules = if List.exists ((=)start) ((fun (a,_,_,_,l,w) -> a) recTable.[0, s.Length-1])
+       let resultRules = if List.exists ((=)start) ((fun (a,_,_,_,_,_) -> a) recTable.[0, s.Length-1])
                          then subRecognize 0 (s.Length-1) start//если цепочка принадлежит языку L(g)
                          else []
 
        //System.Console.WriteLine s
        //System.Console.WriteLine "Rules:"
        //printRules resultRules |> printfn "%s"
-       
+
        let _,_,_,_,ws,_ = recTable.[0,s.Length-1]
 
        let parseWeightCalc weights (n:int) = 

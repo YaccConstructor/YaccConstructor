@@ -33,7 +33,7 @@ type ``Inline tests`` () =
     let basePath = System.IO.Path.Combine(convertionTestPath, "Inline")
     let fe = getFrontend("YardFrontend")
     let conversion = "ReplaceInline"
-    [<Test>]
+    //[<Test>]
     member test.``Inline 1`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"inline1.yrd"))

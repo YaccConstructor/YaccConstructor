@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Program.fs" />
     <Compile Include="Run.fs" />
+    <Compile Include="CYKCore.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.fsproj">

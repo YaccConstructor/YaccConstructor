@@ -107,6 +107,9 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYK", "CYK\CYK\CYK.fsproj", "{5B565622-649A-4A65-9761-4980DD3AC648}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DCYK", "DCYK", "{D89F8F1D-A9F1-4A31-B547-CF9151EE9761}"
+	ProjectSection(SolutionItems) = preProject
+		CYK\CYK.Test\CYK.Test.fsproj = CYK\CYK.Test\CYK.Test.fsproj
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKGenerator", "CYKGenerator\CYKGenerator.fsproj", "{94EEEA1D-60E8-45F8-B6CB-BA0B0FB487B8}"
 EndProject

@@ -148,7 +148,12 @@ type CYKGenerator() =
         override this.Name = "CYKGenerator"
         override this.Generate t = 
             let g = new CYKGeneartorImpl()
-            let code = g.Generate t 
-            File.WriteAllText(Path.Combine(Path.GetFullPath(t.info.fileName),"CYK.fs"),code)
+            let code = g.Generate t
+            let fileName = Path.GetFileName t.info.fileName
+            let fullName = Path.GetFullPath t.info.fileName + ".CYK.fs"
+            fullName |> printfn "%s"
+            if File.Exists fullName then File.Delete fullName
+            (File.CreateText fullName).Close()
+            File.WriteAllText(fullName, code)
             code|> box
         override this.AcceptableProductionTypes = ["seq"]

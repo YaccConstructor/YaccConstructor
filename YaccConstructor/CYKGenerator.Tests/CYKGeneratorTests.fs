@@ -9,10 +9,18 @@ open NUnit.Framework
 open System.Linq
 open System.IO
 
+let generated = "Generated"
+
+let filesAreEqual file1 file2 =
+    let all1 = File.ReadAllBytes file1
+    let all2 = File.ReadAllBytes file2
+    Assert.AreEqual (all1.Length, all2.Length)
+    Assert.IsTrue(Array.forall2 (=) all1 all2)
 
 [<TestFixture>]
 type ``CYK generator tests`` () =
     let generator = new Yard.Generators.CYKGenerator.CYKGeneartorImpl()
+    let iGenerator = new Yard.Generators.CYKGenerator.CYKGenerator()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
     let basePath = "../../../../Tests/CYK"
 
@@ -67,7 +75,17 @@ type ``CYK generator tests`` () =
         printfn "%s" expectedCode
         printfn "%s" "**************************"
         printfn "%s" code        
-        Assert.AreEqual(expectedCode, code)        
+        Assert.AreEqual(expectedCode, code)
 
-
-
+    [<Test>]
+    member test.``Simple one rule term without lable code gen to file test`` () =
+        let inFile = "basic_term_noLBL.yrd"
+        let resultFile = inFile + ".CYK.fs"
+        let inFullPath = Path.Combine(basePath, inFile)
+        let resultFullPath = Path.Combine(basePath, resultFile)
+        let expectedFullPath = Path.Combine [|basePath; generated; resultFile|]
+        let il = parser.ParseGrammar inFullPath
+        let code = iGenerator.Generate il
+        System.IO.File.Exists resultFullPath |> Assert.IsTrue
+        filesAreEqual resultFullPath expectedFullPath
+        

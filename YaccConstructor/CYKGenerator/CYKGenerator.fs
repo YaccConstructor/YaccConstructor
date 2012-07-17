@@ -24,6 +24,7 @@ open System.Collections.Generic
 open Yard.Core.IL
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open System.IO
 
 type CYKGeneartorImpl () =
     let header =
@@ -56,7 +57,6 @@ type CYKGeneartorImpl () =
     let layoutToStr = 
         StructuredFormat.Display.layout_to_string 
           {StructuredFormat.FormatOptions.Default with PrintWidth=80}
-      
 
     let code rules termDict =
         [ header
@@ -148,5 +148,7 @@ type CYKGenerator() =
         override this.Name = "CYKGenerator"
         override this.Generate t = 
             let g = new CYKGeneartorImpl()
-            g.Generate t |> box
+            let code = g.Generate t 
+            File.WriteAllText(Path.Combine(Path.GetFullPath(t.info.fileName),"CYK.fs"),code)
+            code|> box
         override this.AcceptableProductionTypes = ["seq"]

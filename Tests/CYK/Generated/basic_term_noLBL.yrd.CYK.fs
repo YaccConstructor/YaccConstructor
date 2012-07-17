@@ -9,5 +9,6 @@ let getTag token =
 let rules = 
   [ 281479271677952UL ]
   |> Array.ofList
+let StartNTerm =  1
 let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = 
   stream |> Seq.map (fun t -> getTag t.Tag)

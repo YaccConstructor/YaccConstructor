@@ -51,7 +51,7 @@ type CYKGeneartorImpl () =
 
     let rulesArray rules = 
         ("let rules = "|> wordL)
-        @@-- (([wordL "["; [for rule in rules -> string rule + "u" |> wordL] |> semiListL; wordL "]"]|>spaceListL)
+        @@-- (([wordL "["; [for rule in rules -> string rule + "UL" |> wordL] |> semiListL; wordL "]"]|>spaceListL)
              @@ (wordL "|> Array.ofList"))
 
     let layoutToStr = 

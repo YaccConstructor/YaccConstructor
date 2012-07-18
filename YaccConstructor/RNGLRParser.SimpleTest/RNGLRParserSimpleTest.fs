@@ -11,9 +11,10 @@ open FsYaccCycle
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
-    astBuilder tokens, tokens
+    astBuilder tokens
 
 let dir = @"../../../../Tests/RNGLR/"
+let inline printErr (num, token : 'a, msg) = printfn "Error in position %d on Token %A: %s" num token msg
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
@@ -24,8 +25,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "first/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst.PrintAst()
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst -> mAst.PrintAst()
 
     [<Test>]
     member test.``List test``() =
@@ -33,8 +34,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "list/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message), _ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst.PrintAst()
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst -> mAst.PrintAst()
 
     [<Test>]
     member test.``Simple Right Null test``() =
@@ -42,8 +43,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "simpleRightNull/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst.PrintAst()
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst -> mAst.PrintAst()
 
     [<Test>]
     member test.``Complex Right Null test``() =
@@ -51,8 +52,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "complexRightNull/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             mAst.PrintAst()
             RNGLR.ParseComplexRightNull.defaultAstToDot mAst "ast.dot"
         
@@ -63,8 +64,8 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "expr/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,_ -> mAst.PrintAst()
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst -> mAst.PrintAst()
 
     [<Test>]
     member test.``Counter test - simple for translator``() =
@@ -72,10 +73,13 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "counter/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,tokens ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             mAst.PrintAst()
-            printfn "Result: %A" (RNGLR.ParseCounter.translate mAst)
+            let res = RNGLR.ParseCounter.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual([5], res)
+
 
     [<Test>]
     member test.``Calc test - simple for translator``() =
@@ -83,10 +87,12 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "calc/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,tokens ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             mAst.PrintAst()
-            printfn "Result: %A" (RNGLR.ParseCalc.translate mAst)
+            let res = RNGLR.ParseCalc.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual(List.replicate 8 105, res)
 
     [<Test>]
     member test.``Translate with Attributes``() =
@@ -94,10 +100,12 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "attrs/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,tokens ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             mAst.PrintAst()
-            printfn "Result: %A" (RNGLR.ParseAttrs.translate mAst 3 : int list)
+            let res = RNGLR.ParseAttrs.translate mAst 3 : int list
+            printfn "Result: %A" res
+            Assert.AreEqual([48], res)
 
     [<Test>]
     member test.``AST, containing cycles``() =
@@ -105,11 +113,13 @@ type ``RNGLR parser tests with simple lexer`` () =
         let path = dir + "cycle/input.txt"
 
         match run path parser with
-        | Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-        | Parser.Success mAst,tokens ->
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
             //mAst.PrintAst
             printf "OK\n"
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
             mAst.EliminateCycles()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
-            printfn "Result: %A" (RNGLR.ParseCycle.translate mAst)
+            let res = RNGLR.ParseCycle.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual([0], res)

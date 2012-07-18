@@ -3,6 +3,11 @@
 //(ruleIndex |lblState |lblName |lblWeght )
 type tblData = uint64 
 
+type lblState =
+     | Defined = 0
+     | Undefined = 1
+     | Conflict = 2
+    
 [<AutoOpen>]
 module CellHelpers =
     
@@ -54,27 +59,25 @@ type CYKCore(rules:ResizeArray<uint64>) =
         let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<uint64>(),(0,0),(0,0))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) (lState1:uint16) (lState2:uint16) = 
-            let defined = (uint16)0
-            let undefined = (uint16)1
-            let conflict = (uint16)2
+            let conflictLbl = (0uy,lblState.Conflict)
             let nolbl = 0uy
             match lState1,lState2,lbl1,lbl2,ruleLabel with
-            |conflict,_,_,_,_ -> (0uy,conflict)
-            |_,conflict,_,_,_ -> (0uy,conflict)
-            |_,_,v1,v2,v3 when (v1 = nolbl && v2 = nolbl && v3 = nolbl) -> (0uy,undefined)
-            |_,_,v1,v2,_  when (v1 = nolbl && v2 = nolbl)-> (ruleLabel,defined)
-            |_,_,v1,nolbl,v2 when (v2<>0uy && v1<>v2) -> (0uy,conflict)
-            |_,_,nolbl,v1,v2 when (v2<>0uy && v1<>v2) -> (0uy,conflict)
-            |_,_,v1,v2,_ when v1<>v2 -> (0uy,conflict)
-            |_,_,v1,v2,v3 when (v1=v2 && v3<>0uy && v1<>v3) -> (0uy,conflict)
-            |_ -> ((List.find ((<>) 0uy) [lbl1;lbl2;ruleLabel]),defined)
+            |conflict,_,_,_,_ -> conflictLbl
+            |_,conflict,_,_,_ -> conflictLbl
+            |_,_,v1,v2,v3 when (v1 = nolbl && v2 = nolbl && v3 = nolbl) -> (0uy,lblState.Undefined)
+            |_,_,v1,v2,_  when (v1 = nolbl && v2 = nolbl)-> (ruleLabel,lblState.Defined)
+            |_,_,v1,nolbl,v2 when (v2<>0uy && v1<>v2) -> conflictLbl
+            |_,_,nolbl,v1,v2 when (v2<>0uy && v1<>v2) -> conflictLbl
+            |_,_,v1,v2,_ when v1<>v2 -> conflictLbl
+            |_,_,v1,v2,v3 when (v1=v2 && v3<>0uy && v1<>v3) -> conflictLbl
+            |_ -> ((List.find ((<>) 0uy) [lbl1;lbl2;ruleLabel]),lblState.Defined)
 
         
         let processRule (rule:uint64) i k l =
             let a,b,c,rl,rw = getRule rule
             let ruleIndex = ResizeArray.findIndex ((=)rule) rules
             match c with
-            |v when v<>(uint16)0 ->
+            |v when v<>0us ->
                         let nonTerminals1,_,_,_,_,lStates1,lbls1,weights1= getCellData recTable.[i,k]
                         let nonTerminals2,_,_,_,_,lStates2,lbls2,weights2 = getCellData recTable.[k+i+1,l-k-1]
                         let nonTerminals,_,_,_,_,lStates,lbls,weights = getCellData recTable.[i,l]
@@ -112,11 +115,9 @@ type CYKCore(rules:ResizeArray<uint64>) =
                 |0 -> if b = s.[k] then
                         let nonTerminals,_,_,_,_,lStates,lbls,weights = getCellData recTable.[k,0]
                         let lState =
-                            let defined = (uint16)0
-                            let undefined = (uint16)1 
-                            match (int)rl with
-                            |0 -> undefined
-                            |_ -> defined
+                            match rl with
+                            | 0uy -> lblState.Undefined
+                            | _   -> lblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         let updatedArray = ResizeArray.append ((fun (array,(_,_),(_,_)) -> array) recTable.[k,0]) (ResizeArray.ofArray [|currentElem|])
                         recTable.[k,0] <- updatedArray,(-1,-1),(-1,-1)

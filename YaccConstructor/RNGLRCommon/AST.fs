@@ -104,15 +104,13 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
         for x in order do
             reachable.[x] <- false
         reachable.[root] <- true
-        let inline iterChildren children =
-            for j in snd children do
-                reachable.[j] <- true
         for i = order.Length-1 downto 0 do
             let x = order.[i]
             if reachable.[x] then
                 match nodes.[x] with
-                | NonTerm list ->
-                    !list |> List.iter iterChildren
+                | NonTerm x ->
+                    for j in snd x.Value.Head do
+                        reachable.[j] <- true
                 | _ -> ()
 
     member this.Translate (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (epsilons : array<Tree<_>>) =

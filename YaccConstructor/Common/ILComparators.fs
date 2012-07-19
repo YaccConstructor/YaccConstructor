@@ -41,12 +41,12 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
 
     let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
         let rec reduceSeq = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None, None) ->
+            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None) ->
                 reduceSeq r
             | x -> x
         //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
         match (reduceSeq il1, reduceSeq il2) with
-        | PSeq(elems1, ac1, _), PSeq(elems2, ac2, _) -> 
+        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
             List.length elems1 = List.length elems2 &&
                 List.zip elems1 elems2 
                 |> List.forall 

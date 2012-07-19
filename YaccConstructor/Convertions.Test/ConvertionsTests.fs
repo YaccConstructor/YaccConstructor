@@ -32,12 +32,6 @@ let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
-        let rec reduceSeq = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None, None) ->
-//                printfn "seq %s" <| r.ToString()
-        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
-//let printTree tree = 
-//    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
 
 [<TestFixture>]
 type ``Convertions tests`` () =
@@ -178,7 +172,7 @@ type ``Convertions tests`` () =
                                raise <| FEError e.Message
                 printfn "after result parsing"
                 //printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+                Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 
             )
         Assert.True(true)
@@ -225,7 +219,7 @@ type ``Convertions tests`` () =
                                raise <| FEError e.Message
                 printfn "5"
                 printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+                Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 //                     with e ->
 //                        printfn "%A" e 
 

@@ -54,7 +54,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     printfn "ilDef = %A" currentIL
     printfn "ilDefCorrect = %A" expectedIL
 
-    Assert.AreEqual(expectedIL, currentIL)
+    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let buf = LexBuffer<_>.FromString str
@@ -114,7 +114,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "e"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("R", (28, 29))
+                                           rule = PToken ("R", (28, 29, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -133,10 +133,10 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken ("N", (16, 17, ""))
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("R", (28, 29))
+                                                          rule = PToken ("R", (28, 29, ""))
                                                           binding = None
                                                           checker = None}],None)
                          _public = true
@@ -153,7 +153,7 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("R", (29, 30))
+                                        rule = PToken ("R", (29, 30, ""))
                                         binding = None
                                         checker = None}],None)
                          _public = true
@@ -170,7 +170,7 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (17, 18))
+                                        rule = PToken ("N", (17, 18, ""))
                                         binding = None
                                         checker = None}],None)
                          _public = true
@@ -187,7 +187,7 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58))
+                                        rule = PToken ("Q", (57, 58, ""))
                                         binding = None
                                         checker = None}],None)
                          _public = true
@@ -204,7 +204,7 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58))
+                                        rule = PToken ("Q", (57, 58, ""))
                                         binding = None
                                         checker = None}],None)
                          _public = true
@@ -221,10 +221,10 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken ("N", (16, 17, ""))
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("G", (27, 28))
+                                                          rule = PToken ("G", (27, 28, ""))
                                                           binding = None
                                                           checker = None}],None)
                          _public = true
@@ -241,10 +241,10 @@ type ``Yard frontend preprocessor tests`` () =
              grammar = [{name = "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken ("N", (16, 17, ""))
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("H", (38, 39))
+                                                          rule = PToken ("H", (38, 39, ""))
                                                           binding = None
                                                           checker = None}],None)
                          _public = true
@@ -262,7 +262,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("C", (40, 41))
+                                           rule = PToken ("C", (40, 41, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -280,7 +280,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16))
+                                           rule = PToken ("A", (15, 16, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -298,7 +298,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("B", (31, 32))
+                                           rule = PToken ("B", (31, 32, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -316,7 +316,7 @@ type ``Yard frontend preprocessor tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16))
+                                           rule = PToken ("A", (15, 16, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true
@@ -341,17 +341,17 @@ type ``YardFrontend Parser tests`` () =
                             PSeq(
                                 [{ 
                                     omit = false
-                                    rule = PToken ("NUMBER", (4, 10))
+                                    rule = PToken ("NUMBER", (4, 10, ""))
                                     binding = None
                                     checker = None
                                 }; { 
                                     omit = false
-                                    rule = PToken ("PLUS", (11, 15))
+                                    rule = PToken ("PLUS", (11, 15, ""))
                                     binding = None
                                     checker = None
                                 }; {
                                     omit = false
-                                    rule = PToken ("NUMBER", (16, 22))
+                                    rule = PToken ("NUMBER", (16, 22, ""))
                                     binding = None
                                     checker = None
                                 }],
@@ -384,7 +384,7 @@ A;"
             Rule._public = true
             Rule.args = []
             Rule.body = PSeq ([{omit = false
-                                rule = PToken ("A", (22, 23))
+                                rule = PToken ("A", (22, 23, ""))
                                 binding = None
                                 checker = None}], None)
             Rule.metaArgs = []
@@ -415,7 +415,7 @@ let value x = (x:>Lexeme<string>).value
                 ACTION ("(value n |> int) + i", (94, 114, "")); SEMICOLON dummyRange; EOF]
             {
              info = { fileName = ""; }
-             head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
+             head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46, ""))
              grammar = 
                     [{ 
                         name = "s"
@@ -424,25 +424,25 @@ let value x = (x:>Lexeme<string>).value
                             PSeq (
                                 [{
                                     omit = false
-                                    rule = PRef (("e", (65, 66)),Some ("1", (67, 68)))
-                                    binding = Some ("res:int", (54, 61))
+                                    rule = PRef (("e", (65, 66, "")),Some ("1", (67, 68, "")))
+                                    binding = Some ("res:int", (54, 61, ""))
                                     checker = None
                                 }],
-                                Some ("res", (71, 74)))
+                                Some ("res", (71, 74, "")))
                         _public = true
                         metaArgs = []
                       }; { 
                         name = "e"
-                        args = [("i", (80, 81))]
+                        args = [("i", (80, 81, ""))]
                         body = 
                             PSeq (
                                 [{
                                     omit = false
-                                    rule = PToken ("NUMBER", (86, 92))
-                                    binding = Some ("n", (84, 85))
+                                    rule = PToken ("NUMBER", (86, 92, ""))
+                                    binding = Some ("n", (84, 85, ""))
                                     checker = None
                                 }],
-                                Some ("(value n |> int) + i", (94, 114)))
+                                Some ("(value n |> int) + i", (94, 114, "")))
                         _public = false
                         metaArgs = []
                     }]
@@ -464,7 +464,7 @@ type ``Yardfrontend label tests`` () =
                 grammar = [{name = "s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (12, 13))
+                                           rule = PToken ("A", (12, 13, ""))
                                            binding = None
                                            checker = None}],None)
                             _public = true

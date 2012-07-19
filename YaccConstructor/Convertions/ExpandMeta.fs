@@ -39,7 +39,7 @@ let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName =
 let addBindingPair attrs (*binding*) = function
     | None -> attrs
     | Some b -> if List.exists (fun x -> snd x = b) attrs  then attrs
-                else (createNewName ("arg", (0,0)), b)::attrs
+                else (createNewName ("arg", (0,0,"")), b)::attrs
 
 let getFormals, getActuals = fst, snd
 
@@ -53,7 +53,7 @@ let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
             |> List.filter (fun s -> s <> "")
         let curRes =
             List.fold
-                (fun res x -> addBindingPair res (Some (x,(0,0))))
+                (fun res x -> addBindingPair res (Some (x,(0,0,""))))
                 [] splitted
         accBindings (curRes @ res) t
     | [] -> res
@@ -127,7 +127,7 @@ let expandMeta body metaRules expanded res =
                                 |> (fun (body, accRes) ->
                                         if not <| canUseBinding body then (body::accMeta, accRes)
                                         else
-                                            let newMetaArgName = (createNewName ("rule", (0,0)))
+                                            let newMetaArgName = createNewName (TransformAux.createSource "rule")
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
                                                 {name = Source.toString newMetaArgName;
@@ -142,7 +142,7 @@ let expandMeta body metaRules expanded res =
                         |> applyToRes (List.rev)
                     // TODO catch exception
                     let metaRule = findMetaRule metaRules name
-                    let newRuleName = createNewName ("rule_" + name, (0,0))
+                    let newRuleName = createNewName ("rule_" + name, (0,0,""))
                     let formalArgs = metaRule.args
                     let substitution = PRef(newRuleName, attrs)
                     let newKey = getKey (PMetaRef(createSource name, attrs, newMetaArgs))

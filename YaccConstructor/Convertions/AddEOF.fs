@@ -47,14 +47,14 @@ let addEOFToProduction = function
     | PSeq(elements, actionCode) -> 
         (
             elements 
-            @ [{omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}]
+            @ [{omit=true; rule=PToken("EOF",(0,0,"")); binding=None; checker=None}]
             ,actionCode
         ) 
         |> PSeq
     | x -> (
                 [
                     {omit=false; rule=x; binding=None; checker=None}; 
-                    {omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}
+                    {omit=true; rule=PToken("EOF",(0,0,"")); binding=None; checker=None}
                 ]
                 ,None
            )
@@ -83,10 +83,10 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                         _public=true
                         metaArgs=[] 
                         body=PSeq([
-                                    {omit=false; rule=PRef((rule.name, (0,0)), None); binding=Some(getLastName(), (0,0)); checker=None}; 
-                                    {omit=false; rule=PToken("EOF", (0,0)); binding=None; checker=None}
+                                    {omit=false; rule=PRef((rule.name, (0,0,"")), None); binding=Some(getLastName(), (0,0,"")); checker=None}; 
+                                    {omit=false; rule=PToken("EOF", (0,0,"")); binding=None; checker=None}
                                   ]
-                                  ,Some(getLastName(),(0,0))
+                                  ,Some(getLastName(),(0,0,""))
                         )
                     }]
                 else

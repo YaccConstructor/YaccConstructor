@@ -25,6 +25,7 @@ module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 let private bufFromFile path = 
     let content = System.IO.File.ReadAllText(path)
     Lexer.currentFileContent := content;
+    Lexer.currentFile := path
     let reader = new System.IO.StringReader(content) in
     LexBuffer<_>.FromTextReader reader
 

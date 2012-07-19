@@ -19,10 +19,10 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
   [{name = "s";
     args = [];
     body = PSeq ([{omit = false;
-                   rule = PToken ("MULT", (-419, -419));
+                   rule = PToken ("MULT", (-419, -419,""));
                    binding = None;
                    checker = None;}; {omit = false;
-                                      rule = PToken ("PLUS", (-419, -419));
+                                      rule = PToken ("PLUS", (-419, -419,""));
                                       binding = None;
                                       checker = None;}],None);
     _public = true;
@@ -42,15 +42,15 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
          PAlt
            (PAlt
               (PSeq ([{omit = false;
-                       rule = PToken ("GREATER", (-419, -419));
+                       rule = PToken ("GREATER", (-419, -419,""));
                        binding = None;
                        checker = None;}],None),
                PSeq ([{omit = false;
-                       rule = PToken ("LESS", (-419, -419));
+                       rule = PToken ("LESS", (-419, -419,""));
                        binding = None;
                        checker = None;}],None)),
             PSeq ([{omit = false;
-                    rule = PToken ("EQUAL", (-419, -419));
+                    rule = PToken ("EQUAL", (-419, -419,""));
                     binding = None;
                     checker = None;}],None));
         _public = true;
@@ -64,7 +64,7 @@ let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
      grammar = [{name = "myNonTerm";
                  args = [];
                  body = PSeq ([{omit = false;
-                                rule = PToken ("LESS", (-419, -419));
+                                rule = PToken ("LESS", (-419, -419,""));
                                 binding = None;
                                 checker = None;}],None);
                  _public = true;

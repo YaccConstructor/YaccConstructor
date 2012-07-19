@@ -158,11 +158,11 @@ Modifier: PLUS { "+" }
 SimpleProduction: IDENTIFIER { PRef($1, None) }
     | LITERAL DOUBLE_DOT LITERAL { 
         match (($1), ($3)) with
-        | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0)) "'0'..'9'"
-        | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0))  "'\\0'..'\\255'"
-        | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0)) "'a'..'z'"
-        | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0)) "'A'..'Z'"
-        | ((a,_), (b, _)) -> makeToken ("", (0,0)) (a+".."+b)
+        | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0,"")) "'0'..'9'"
+        | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0,""))  "'\\0'..'\\255'"
+        | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0,"")) "'a'..'z'"
+        | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0,"")) "'A'..'Z'"
+        | ((a,_), (b, _)) -> makeToken ("", (0,0,"")) (a+".."+b)
         }
     | LITERAL { PLiteral($1) }
     | TERMINAL { PToken($1) }

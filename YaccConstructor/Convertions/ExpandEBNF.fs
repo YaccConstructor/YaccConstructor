@@ -26,7 +26,7 @@ open Production
 open Namer
 open TransformAux
 
-let s2source s = (s, (0,0))
+let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0
 let genSomeName () =
     generatedSomesCount := !generatedSomesCount + 1

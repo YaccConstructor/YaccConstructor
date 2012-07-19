@@ -44,13 +44,13 @@ let rec addAcToProduction neededRules ruleBody =
         let getBinding i elem =
             if elem.omit 
             then None
-            else Some(sprintf "S%d" (i+1), (0,0))
+            else Some(sprintf "S%d" (i+1), (0,0,""))
         PSeq(
             elements |> List.mapi (fun i elem ->  {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
-            , Some(elements |> List.mapi getBinding |> List.choose id |> List.map fst |> String.concat ", ", (0,0))       
+            , Some(elements |> List.mapi getBinding |> List.choose id |> List.map fst |> String.concat ", ", (0,0,""))       
         )
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
-    | PRef((ref,(_,_)), _) as x -> neededRules := ref::!neededRules; x
+    | PRef((ref,(_,_,_)), _) as x -> neededRules := ref::!neededRules; x
     | PLiteral _ as x -> x
     | PToken _ as x -> x
     | PSome p -> PSome(addAcToProduction neededRules p)

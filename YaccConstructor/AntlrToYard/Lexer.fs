@@ -28,7 +28,7 @@ let comment_depth = ref 0
 let source = ref ""
 let lexeme_start = ref 0
 
-let make_lexeme (n1, n2) = source.Value.Substring(n1, n2-n1), (n1, n2)
+let make_lexeme (n1, n2, n3) = source.Value.Substring(n1, n2-n1), (n1, n2, n3)
 
 // checks if the given identifier is keyword
 let identifier lexeme = 
@@ -183,12 +183,12 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 1 -> ( 
 # 50 "Lexer.fsl"
-                                    CAT_CODE(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset)) 
+                                    CAT_CODE(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset, "")) 
 # 187 "Lexer.fs"
           )
   | 2 -> ( 
 # 51 "Lexer.fsl"
-                                     ACTION_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+2, lexbuf.EndPos.AbsoluteOffset)) 
+                                     ACTION_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+2, lexbuf.EndPos.AbsoluteOffset, "")) 
 # 192 "Lexer.fs"
           )
   | 3 -> ( 
@@ -213,7 +213,7 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 7 -> ( 
 # 56 "Lexer.fsl"
-                                identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) 
+                                identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset, "")) 
 # 217 "Lexer.fs"
           )
   | 8 -> ( 
@@ -283,7 +283,7 @@ and _fslex_main  _fslex_state lexbuf =
           )
   | 21 -> ( 
 # 70 "Lexer.fsl"
-                         TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) 
+                         TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset, "")) 
 # 287 "Lexer.fs"
           )
   | 22 -> ( 
@@ -352,7 +352,7 @@ and _fslex_action_code  _fslex_state lexbuf =
   | 1 -> ( 
 # 90 "Lexer.fsl"
                      decr comment_depth;
-                     if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf 
+                     if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset, "")) else action_code lexbuf 
 # 356 "Lexer.fs"
           )
   | 2 -> ( 
@@ -381,7 +381,7 @@ and _fslex_literal  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 97 "Lexer.fsl"
-                          LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
+                          LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset, "")) 
 # 385 "Lexer.fs"
           )
   | 1 -> ( 
@@ -395,7 +395,7 @@ and _fslex_literal2  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 100 "Lexer.fsl"
-                         LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
+                         LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset, "")) 
 # 399 "Lexer.fs"
           )
   | 1 -> ( 

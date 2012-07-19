@@ -70,8 +70,8 @@ module Converter =
                                             (fun (bnfTerm : BnfTerm)-> 
                                                 ({omit = false; 
                                                 rule = match bnfTerm with
-                                                        | :? NonTerminal as term -> PRef((formatNontermName term.Name, (-419,-419)), None)
-                                                        | :? Terminal as term -> PToken(formatTermName term.Name, (-419,-419))
+                                                        | :? NonTerminal as term -> PRef((formatNontermName term.Name, (-419,-419,"")), None)
+                                                        | :? Terminal as term -> PToken(formatTermName term.Name, (-419,-419,""))
                                                         | _ -> failwith "Not supported BnfTerm type"
                                                         ;
                                                 binding=None; 

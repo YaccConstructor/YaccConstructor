@@ -36,11 +36,11 @@ let rec _addBindings = function
             (
                 fun i elem -> 
                     if Regex.Match(ac, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
-                        { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0)) } 
+                        { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0,"")) } 
                     else 
                         { elem with rule=_addBindings elem.rule} 
             ) 
-        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0)))
+        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0,"")))
         |> PSeq
     | PSeq(elements, None) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
@@ -58,7 +58,7 @@ let ParseFile fileName =
     let lexbuf = LexBuffer<_>.FromTextReader reader
     try 
         let (res:System.Tuple<string option, string list, string list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
-        let defHead = match res.Item1 with Some(str) -> Some(str, (0,0)) | _ -> None
+        let defHead = match res.Item1 with Some(str) -> Some(str, (0,0,"")) | _ -> None
         { new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = defHead and grammar = addBindings (addStarts res.Item3 res.Item4) and foot = None and options = Map.empty}
     with e -> // when e.Message="parse error" -> 
         let pos = lexbuf.EndPos

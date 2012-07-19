@@ -32,9 +32,9 @@ let curNum = ref 0
 
 let resetRuleEnumerator () = curNum := 0
 
-let private genYardName n (l, c) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c)
+let private genYardName n (l, c, f) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c, f)
 
-let createName ((n:string), (l, c)) =     
+let createName ((n:string), (l, c, f)) =     
     let addPrefix = 
       try
         let yardPrefix = withPrefix ""
@@ -42,7 +42,7 @@ let createName ((n:string), (l, c)) =
         then fun x->x 
         else withPrefix
       with (*Invalid_argument*) _ -> withPrefix
-    in sprintf "%s_%d" (addPrefix n) !curNum, (l, c)
+    in sprintf "%s_%d" (addPrefix n) !curNum, (l, c, f)
 
 /// Create new Source.t item with name, consisting of yard prefix, specified middle
 ///    and postfix, generated as regularly incrementing number

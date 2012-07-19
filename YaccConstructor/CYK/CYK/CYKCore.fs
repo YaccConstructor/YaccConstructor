@@ -26,6 +26,9 @@ module CellHelpers =
 
 type CYKCore(rules:ResizeArray<uint64>) =
     
+    [<Literal>]
+    let noLbl = 0uy
+
     let getCellData (cellContent:ResizeArray<uint64>,(_,_),(_,_)) =
             let ruleNums = new ResizeArray<uint32>()
             let lStates = new ResizeArray<uint16>()
@@ -59,18 +62,17 @@ type CYKCore(rules:ResizeArray<uint64>) =
         let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<uint64>(),(0,0),(0,0))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) (lState1:uint16) (lState2:uint16) = 
-            let conflictLbl = (0uy,lblState.Conflict)
-            let nolbl = 0uy
+            let conflictLbl = (noLbl,lblState.Conflict)            
             match lState1,lState2,lbl1,lbl2,ruleLabel with
             |conflict,_,_,_,_ -> conflictLbl
             |_,conflict,_,_,_ -> conflictLbl
-            |_,_,v1,v2,v3 when (v1 = nolbl && v2 = nolbl && v3 = nolbl) -> (0uy,lblState.Undefined)
-            |_,_,v1,v2,_  when (v1 = nolbl && v2 = nolbl)-> (ruleLabel,lblState.Defined)
-            |_,_,v1,nolbl,v2 when (v2<>0uy && v1<>v2) -> conflictLbl
-            |_,_,nolbl,v1,v2 when (v2<>0uy && v1<>v2) -> conflictLbl
+            |_,_,v1,v2,v3 when (v1 = noLbl && v2 = noLbl && v3 = noLbl) -> (noLbl,lblState.Undefined)
+            |_,_,v1,v2,_  when (v1 = noLbl && v2 = noLbl)-> (ruleLabel,lblState.Defined)
+            |_,_,v1,noLbl,v2 when (v2<>noLbl && v1<>v2) -> conflictLbl
+            |_,_,noLbl,v1,v2 when (v2<>noLbl && v1<>v2) -> conflictLbl
             |_,_,v1,v2,_ when v1<>v2 -> conflictLbl
-            |_,_,v1,v2,v3 when (v1=v2 && v3<>0uy && v1<>v3) -> conflictLbl
-            |_ -> ((List.find ((<>) 0uy) [lbl1;lbl2;ruleLabel]),lblState.Defined)
+            |_,_,v1,v2,v3 when (v1=v2 && v3<>noLbl && v1<>v3) -> conflictLbl
+            |_ -> ((List.find ((<>) noLbl) [lbl1;lbl2;ruleLabel]),lblState.Defined)
 
         
         let processRule (rule:uint64) i k l =

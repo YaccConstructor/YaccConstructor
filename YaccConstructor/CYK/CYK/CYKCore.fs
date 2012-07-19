@@ -18,10 +18,11 @@ module CellHelpers =
         let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
         rNum, lState, lblName, lblWeight
 
-
-type CYKCore(rules:ResizeArray<uint64>) =
+type CYKCore() =
     
-    let getCellData (cellContent:ResizeArray<uint64>,(_,_),(_,_)) =
+    let mutable rules : ResizeArray<rule> = null
+
+    let getCellData (cellContent:ResizeArray<tblData>,(_,_),(_,_)) =
             let ruleNums = new ResizeArray<uint32>()
             let lStates = new ResizeArray<uint16>()
             let cls,cws = new ResizeArray<uint8>(),new ResizeArray<uint8>()
@@ -31,27 +32,27 @@ type CYKCore(rules:ResizeArray<uint64>) =
         
             for i in 0..(cellContent.Count-1) do
                 let currn,curls,curcls,curcws = getData cellContent.[i]
-                ruleNums.[i] <- currn
-                lStates.[i] <- curls
-                cls.[i] <- curcls
-                cws.[i] <- curcws
+                ruleNums.Add currn
+                lStates.Add curls
+                cls.Add curcls
+                cws.Add curcws
 
-                cellRules.[i] <- rules.[(int)ruleNums.[i]]
+                cellRules.Add rules.[(int)ruleNums.[i]]
                 let cas,cbs,ccs,crls,crws = getRule cellRules.[i]
-                aS.[i] <- cas
-                bS.[i] <- cbs
-                cS.[i] <- ccs
-                rls.[i] <- crls
-                rws.[i] <- crws 
+                aS.Add cas
+                bS.Add cbs
+                cS.Add ccs
+                rls.Add crls
+                rws.Add crws 
 
             aS,bS,cS,rls,rws,lStates,cls,cws
 
     let getCellCoordinates (_,(li,ll),(ri,rl)) = 
         li,ll,ri,rl
 
-    let recognitionTable (rules:ResizeArray<uint64>,_) (s:uint16[]) weightCalcFun =
+    let recognitionTable (rules:ResizeArray<rule>,_) (s:uint16[]) weightCalcFun =
         
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<uint64>(),(0,0),(0,0))
+        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<tblData>(),(0,0),(0,0))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) (lState1:uint16) (lState2:uint16) = 
             let defined = (uint16)0
@@ -126,9 +127,9 @@ type CYKCore(rules:ResizeArray<uint64>) =
 
         recTable
 
-    let recognize ((_, start) as g) s weightCalcFun =
+    let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
-
+        (*
         let rec derivation i l top = 
             let nonterminals,bs,cs,rls,rws,lStates,cls,cws = getCellData recTable.[i,l]
             let leftI,leftL,rightI,rightL = getCellCoordinates recTable.[i,l]
@@ -149,7 +150,25 @@ type CYKCore(rules:ResizeArray<uint64>) =
                      else []
 
         result
-    //let testG = (ResizeArray.ofList [buildRule (uint16)1 (uint16)2 (uint16)3 (uint8)11 0uy; buildRule (uint16)2 (uint16)4 (uint16)0 11uy 1uy; buildRule (uint16)3 (uint16)5 (uint16)0 11uy 0uy]
+        *)
+        let _,_,_,_,_,lStates,cellLbls,cellWeights = getCellData recTable.[0, s.Length-1]
 
+        let getString (state:uint16) (lbl:uint8) (weight:uint8) : string = 
+            let stateString = 
+                match state with
+                |0us -> "defined"
+                |1us -> "undefined"
+                |2us -> "conflict"
+                |_ -> ""
+            String.concat " " [stateString;(lbl.ToString());(weight.ToString())]
+            
+        let rec out i last= 
+            match i with
+            |v when (v = last) -> getString lStates.[i] cellLbls.[i] cellWeights.[i]
+            |_ -> String.concat "\n" [(getString lStates.[i] cellLbls.[i] cellWeights.[i]); out (i+1) last]
 
-    
+        (string)(out 0 (lStates.Count-1))
+
+    member this.Recognize ((grules, start) as g) s weightCalcFun = 
+        rules <- grules
+        recognize g s weightCalcFun 

@@ -51,6 +51,11 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\CYKCommon\CYKCommon.fsproj">
+      <Name>CYKCommon</Name>
+      <Project>{95fb7038-c27d-4c27-a149-d9c9b747c222}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\CYKGenerator\CYKGenerator.fsproj">
       <Name>CYKGenerator</Name>
       <Project>{94eeea1d-60e8-45f8-b6cb-ba0b0fb487b8}</Project>

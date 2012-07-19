@@ -34,6 +34,7 @@ let dummyPos s = (s,(0,0,""))
 
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
+    Lexer.currentFile := ""
     Lexer.currentFileContent := str
     let lexemsSeq = seq {
         while not buf.IsPastEndOfStream do
@@ -42,10 +43,14 @@ let lexerTest str lexemsListCorrect =
     let lexemsList = Seq.toList lexemsSeq
 
     printfn "%A" lexemsList
+   
+    printfn "%s" "*************************"
+
+    printfn "%A" lexemsListCorrect
 
     let areEqual lexemsListCorrect lexemsList =
         try 
-            List.map2 (fun x y -> match x,y with | LPAREN _, LPAREN _ |RPAREN _ ,RPAREN _| SEMICOLON _, SEMICOLON _ -> true | x,y -> x =y) lexemsListCorrect lexemsList
+            List.map2 (fun x y -> match x,y with | LPAREN _, LPAREN _ |RPAREN _ ,RPAREN _| SEMICOLON _, SEMICOLON _ -> true | x,y -> x = y) lexemsListCorrect lexemsList
             |> List.reduce (&&)
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
@@ -66,7 +71,7 @@ let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
 
-    Assert.AreEqual(ilDef, ilDefCorrect)
+    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar)
 
 let completeTest str lexemsListCorrect ilDefCorrect = 
     lexerTest str lexemsListCorrect
@@ -74,8 +79,12 @@ let completeTest str lexemsListCorrect ilDefCorrect =
 
 let optionsTest path optionsCorrect =
     let definition = {Main.ParseFile path with info = {fileName =""}}
-    let currentOptions = definition.options    
-    Assert.AreEqual(currentOptions, optionsCorrect)
+    let currentOptions = definition.options
+    let optionsAreEq (m1:Map<Rule.t<_,_>,_>) (m2:Map<Rule.t<_,_>,_>) = 
+        Assert.AreEqual (m1.Count,m2.Count)
+        Assert.IsTrue (m2 |> Seq.forall2 (fun (x1:System.Collections.Generic.KeyValuePair<Rule.t<_,_>,_>) x2 
+                                             -> fst x1.Key.name = fst x2.Key.name && x1.Value = x2.Value) m1)
+    optionsAreEq currentOptions optionsCorrect
         
 let dummyRange = Range (Lexing.Position.Empty,Lexing.Position.Empty)
 

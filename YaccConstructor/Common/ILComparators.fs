@@ -73,6 +73,6 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             argsAreEqual rule1.args rule2.args &&
             ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name = rule2.name
+            fst rule1.name = fst rule2.name
         ) g1 g2
 

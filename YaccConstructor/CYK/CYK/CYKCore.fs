@@ -59,7 +59,7 @@ type CYKCore(rules:ResizeArray<uint64>) =
 
     let recognitionTable (rules:ResizeArray<uint64>,_) (s:uint16[]) weightCalcFun =
         
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<uint64>(),(0,0),(0,0))
+        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<tblData>(),(0,0),(0,0))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) (lState1:uint16) (lState2:uint16) = 
             let conflictLbl = (noLbl,lblState.Conflict)            
@@ -88,7 +88,7 @@ type CYKCore(rules:ResizeArray<uint64>) =
                         then
                             for m in 0..(nonTerminals1.Count - 1) do
                                 for n in 0..(nonTerminals2.Count - 1) do
-                                    if (nonTerminals1.[m] = b) && (nonTerminals2.[n] = (uint16)c)
+                                    if (nonTerminals1.[m] = b) && (nonTerminals2.[n] = c)
                                     then
                                         let newLabel,newlState = chooseNewLabel rl lbls1.[m] lbls2.[n] lStates1.[m] lStates2.[n]
                                         let newWeight = weightCalcFun rw weights1.[m] weights2.[n]

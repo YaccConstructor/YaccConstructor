@@ -102,7 +102,7 @@ let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
     if System.String.IsNullOrEmpty tokenType then
         leafConstr := (sprintf "Leaf(\"%s\", %s)")
         isTyped := true
-    ruleList |> List.map (fun rule -> {rule with body=(_buildAST rule.name rule.body) } )
+    ruleList |> List.map (fun rule -> {rule with body=(_buildAST (fst (rule.name)) rule.body) } )
 
 type BuildAST() =
     inherit Convertion()

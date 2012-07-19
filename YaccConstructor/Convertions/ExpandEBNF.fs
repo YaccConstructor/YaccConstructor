@@ -26,6 +26,8 @@ open Production
 open Namer
 open TransformAux
 
+let dummyPos s = (s,(0,0,""))
+
 let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0
 let genSomeName () =
@@ -95,7 +97,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name = generatedName 
+                 with name = dummyPos generatedName 
                  and args = formList attrs 
                  and body = newBody
                  and _public=false
@@ -124,7 +126,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
+                 with name= dummyPos generatedName 
                  and args = formList attrs
                  and body= newBody
                  and _public=false
@@ -143,7 +145,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
+                 with name= dummyPos generatedName 
                  and args = formList attrs
                  and body= newBody
                  and _public=false

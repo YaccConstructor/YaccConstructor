@@ -31,7 +31,7 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     let left = rules |> Array.map (fun x -> x.name |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function
-            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| fst nTerm)::acc
+            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| nTerm)::acc
             | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| fst token)::acc
             | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| fst lit)::acc
             | PSeq (s,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc

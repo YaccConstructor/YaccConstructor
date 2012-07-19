@@ -38,7 +38,7 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
         [] allTokens
 
 let findStartRules (grammar:Rule.t<Source.t, Source.t> list) =
-    grammar |> List.choose (fun rule -> if rule._public then Some(rule.name) else None)
+    grammar |> List.choose (fun rule -> if rule._public then Some(fst rule.name) else None)
    
 let indentedListL = List.reduce (---) 
 
@@ -83,7 +83,7 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
         | PSome _ -> wordL "$UNEXPECTED SOME$"
         | POpt _ -> wordL "$UNEXPECTED OPT$"
 //        | _ -> wordL "$UNEXPECTED$"
-    let layout = (^^) (wordL (yardRule.name + " :")) (layoutProduction true yardRule.body)
+    let layout = (^^) (wordL (fst yardRule.name + " :")) (layoutProduction true yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
 let generate2 (ilDef:Definition.t<Source.t, Source.t>) tokenType =

@@ -27,7 +27,7 @@ open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
 let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> if List.exists ((=) rule.name) starts then { rule with _public=true } else rule)
+    grammar |> List.map (fun rule -> if List.exists ((fst >> (=)) rule.name) starts then { rule with _public=true } else rule)
 
 let rec _addBindings = function
     | PSeq(elements, Some(ac,_)) -> 

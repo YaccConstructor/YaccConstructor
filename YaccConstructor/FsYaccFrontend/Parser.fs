@@ -265,7 +265,7 @@ let _fsyacc_reductions ()  =    [|
                    (
 # 52 "Parser.fsy"
                              let name=_1 in let alt=_4 in let opt_alts=_5 in  { new Rule.t<Source.t, Source.t> with 
-                                 name=name 
+                                 name= name,(0,0,"") 
                                  and args=[] 
                                  and body=if opt_alts=[] then alt else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
                                  and _public=false

@@ -1,16 +1,23 @@
 ﻿namespace VSYardNS
-
+(*
 open System.Collections.Generic
 open System
 open System.ComponentModel.Composition
+open Microsoft.VisualStudio.Text
+open Microsoft.VisualStudio.Text.Classification
+open Microsoft.VisualStudio.Text.Editor
+open Microsoft.VisualStudio.Text.Tagging
+open Microsoft.VisualStudio.Utilities
+open System.Linq
+open Yard.Frontends.YardFrontend.Main
+open Yard.Frontends.YardFrontend.GrammarParser
+open Microsoft.VisualStudio.Language.Intellisense
+open Yard.Core.Checkers
+open System.Collections.Concurrent
 
 module SolutionData = 
-    let private x = Lazy.Create(fun () -> new Solution())
-    let GetData() = x
-
-
 ////
-////               YardFile
+////                YardFile
 ////
     type YardInfo (id : string,
                    fileName : string,
@@ -26,13 +33,32 @@ module SolutionData =
          member this.WordLength = wordLength
          member this.EndCoordinate = startCoordinate + wordLength
 
-    type YardFile (yardInfo: YardInfo) as this = 
+    type YardFile (yardInfo: YardInfo) as this =
+         let tokens = reMakeTokens ("")  //Текущие токены (сначала пустые)
+         let tree = ParseText("")
+
+         let reMakeTokens (fileText: string) = fileText |> LexString |> List.ofSeq // Получаем токены    
+
+
+         let getNonterminals (newTree: Yard.Core.IL.Definition.t<_,_> ) = 
+                      newTree.grammar |> List.iter (fun elem ->
+                      this.NotTermToDEFPosition.Add(fst elem.name)
+                      )
+         
+         // Парсим string
+         let parseText(fileText: string) =
+            tokens = reMakeTokens (fileText)
+            tree = ParseText (fileText)
+            
+
+         let reparse() = ParseFile (this.Info.FullPath + this.Info.FileName)
          member this.Info = yardInfo
       //   member this.PositionToNotTerm
          member this.NotTermToPosition = new Dictionary<string, List<CoordinateWord>>()
          member this.NotTermToDEFPosition = new Dictionary<string, CoordinateWord>()
-        // let reparse() = ;
-        // member ReParse() = reparse()
+
+
+         member ReParse() = reparse()
          
       //   member this.Tokens = new Array<>
       //   let Reparse() = 
@@ -54,8 +80,8 @@ module SolutionData =
 
     type Project (projectInfo : ProjectInfo) as this =
          member this.Info = projectInfo
-       //  let reparse() = this.Info.RootYard.ReParse()
-       //  member this.Reparse() = reparse()
+         let reparse() = this.Info.RootYard.ReParse()
+         member this.Reparse() = reparse()
 
 
 ////
@@ -64,7 +90,12 @@ module SolutionData =
 
     type Solution () as this =
          let projects = new Dictionary<string, Project>()
-         let FirstRunAddProjects (projects: Dictionary<string, Project>) = pr
+         let FirstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
+       //  let AddProject
          member this.Projects = projects
-       //  member this.ReParseSolution() = for x in Projects do x.Reparse()
+         member this.ReParseSolution() = for x in Projects do x.Reparse()
 
+    let private x = Lazy<_>.Create(fun () -> new Solution())
+    let GetData() = x
+
+    *)

@@ -26,6 +26,8 @@ open Production
 open Yard.Core.Namer
 open TransformAux
 
+let dummyPos s = (s,(0,0,""))
+
 type Dictionary<'a,'b> = System.Collections.Generic.Dictionary<'a,'b>
 
 /// find metarule with given name in hash map of collected metarules
@@ -130,7 +132,7 @@ let expandMeta body metaRules expanded res =
                                             let newMetaArgName = createNewName (TransformAux.createSource "rule")
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
-                                                {name = Source.toString newMetaArgName;
+                                                {name = dummyPos (Source.toString newMetaArgName);
                                                 args = [];
                                                 metaArgs = [];
                                                 _public = false;
@@ -156,7 +158,7 @@ let expandMeta body metaRules expanded res =
                 
                     let metaExp = expandBody (replaceMeta newFormalToAct metaRule.body) metaRules expanded newRes
                     let (newRule: Rule.t<_,_>) =
-                        {name = Source.toString newRuleName;
+                        {name = dummyPos( Source.toString newRuleName);
                         args = formalArgs;
                         metaArgs = [];
                         _public = false;
@@ -235,7 +237,7 @@ let expandMetaRules rules =
         | [] -> ()
         | h::t -> 
             if (isMetaRule h) then 
-                metaRulesTbl.Add(h.name,h)        
+                metaRulesTbl.Add(fst h.name,h)        
             collectMeta t metaRulesTbl
     
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl

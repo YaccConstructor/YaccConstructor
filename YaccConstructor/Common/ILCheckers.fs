@@ -42,7 +42,7 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
             | _ -> false)
 
 let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
-    let declaredRules = def.grammar |> List.map (fun r -> r.name)
+    let declaredRules = def.grammar |> List.map (fun r -> fst r.name)
     let undeclaredRules = new HashSet<_>()
     let addUndeclaredRule (name_,_) additionRules = 
         let name = name_.ToString()
@@ -114,12 +114,12 @@ let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
            || Seq.exists ((=) name) reachedRules)
         then
             reachedRules.Add name |> ignore
-            let rule = rules |> List.find (fun r -> r.name = name)
+            let rule = rules |> List.find (fun r -> fst r.name = name)
             let newAdditionRules = getAdditionRules rule
             getReachableRules newAdditionRules rule.body
 
     let start_rule = rules |> List.find (fun r -> r._public)
-    reachedRules.Add start_rule.name |> ignore
+    fst start_rule.name |> reachedRules.Add |> ignore
     getReachableRules (getAdditionRules start_rule) start_rule.body
     reachedRules |> Seq.toList
 
@@ -128,4 +128,4 @@ let reachableRulesInfo (def: Yard.Core.IL.Definition.t<_,_>) =
 
 let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
   let reachedRules = reachableRulesInfo def
-  def.grammar |> List.exists (fun r -> reachedRules |> Seq.exists (fun n -> n = r.name) |> not)
+  def.grammar |> List.exists (fun r -> reachedRules |> Seq.exists (fun n -> n = fst r.name) |> not)

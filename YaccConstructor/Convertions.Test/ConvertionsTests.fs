@@ -27,6 +27,9 @@ open Yard.Core.IL.Definition
 open Convertions.TransformAux
 open NUnit.Framework
 
+
+let dummyPos s = (s,(0,0,""))
+
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 
@@ -46,7 +49,7 @@ type ``Convertions tests`` () =
                 foot = None 
                 grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         metaArgs = []
                         _public = true
@@ -72,7 +75,7 @@ type ``Convertions tests`` () =
             head = None;
             grammar = 
                 [{
-                    name = "s"
+                    name = dummyPos"s"
                     args = []
                     body =
                         PAlt(
@@ -86,7 +89,7 @@ type ``Convertions tests`` () =
                     metaArgs = []
                  };
                  {
-                    name = "yard_exp_brackets_1"
+                    name = dummyPos"yard_exp_brackets_1"
                     args = []
                     body = PAlt (PToken ("ALT1", (0, 0, "")),PToken ("ALT2", (0, 0, "")))
                     _public = false

@@ -26,7 +26,11 @@ open Yard.Core.IL.Rule
 open Irony.Parsing
 open Microsoft.FSharp.Collections
 
+
 module Converter =
+
+
+    let dummyPos s = (s,(0,0,""))
 
     let formatTermName termName = 
         String.collect (
@@ -84,7 +88,7 @@ module Converter =
                             None
                             nt.Rule.Data
                     match productionOpt with
-                    | Some(pr)  -> {name = formatNontermName nt.Name; args = []; body = pr; metaArgs = []; _public = (nt = (ironyGrammar.Root))}
+                    | Some(pr)  -> {name = dummyPos( formatNontermName nt.Name); args = []; body = pr; metaArgs = []; _public = (nt = (ironyGrammar.Root))}
                     | None      -> failwith "minimum 1 alternative is required" )
                 nonTerminals
         grammar

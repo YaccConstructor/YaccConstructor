@@ -25,6 +25,8 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Convertions.TransformAux
 
+let dummyPos s = (s,(0,0,""))
+
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
         let wasStart = ref false
@@ -36,8 +38,8 @@ let initialConvert (def : Definition.t<_,_>) =
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
                     let startRule : Rule.t<_,_> =
-                        {_public = true; name = "yard_start_rule"; args = rule.args;
-                         metaArgs = []; body = PRef(createSource rule.name, rule.args |> createParams |> list2opt)}
+                        {_public = true; name = dummyPos"yard_start_rule"; args = rule.args;
+                         metaArgs = []; body = PRef(createSource (fst rule.name), rule.args |> createParams |> list2opt)}
                     startRule::{rule with _public = false}::res
             )
             []
@@ -60,7 +62,7 @@ let initialConvert (def : Definition.t<_,_>) =
         ruleList
         |> List.iter
             (fun (rule : Rule.t<_,_>) ->
-                let str = rule.name
+                let str = fst rule.name
                 count.[str] <- getCount str + 1)
         let rec reachable =
             function
@@ -77,7 +79,7 @@ let initialConvert (def : Definition.t<_,_>) =
                         if reachable rule.body then true
                         else
                             iter := true
-                            count.[rule.name] <- count.[rule.name] - 1
+                            count.[fst rule.name] <- count.[fst rule.name] - 1
                             false)
             if not !iter then res
             else inner res

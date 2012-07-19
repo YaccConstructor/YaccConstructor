@@ -527,7 +527,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 120 "Parser.fsy"
-                                                                                            { new Rule.t<Source.t, Source.t> with name = fst(_1) and args = [] and body = _6 and _public = false and metaArgs = [] } 
+                                                                                            { new Rule.t<Source.t, Source.t> with name = (_1) and args = [] and body = _6 and _public = false and metaArgs = [] } 
                    )
 # 120 "Parser.fsy"
                  : 'Rule));

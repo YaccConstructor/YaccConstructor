@@ -125,7 +125,7 @@ module Rule = begin
     /// </summary>
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
-        name    : string;
+        name    : Source.t;
         /// Heritable arguments of rule
         args    : 'patt list;
         /// Rule body (production).

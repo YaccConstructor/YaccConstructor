@@ -91,7 +91,7 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
     | x -> _buildAstSimple ruleName (seqify x)
 
 let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  = 
-    ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple rule.name rule.body) } )
+    ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple (fst rule.name) rule.body) } )
 
 type BuildAstSimple() = 
     inherit Convertion()

@@ -7,6 +7,8 @@ open NUnit.Framework
 open Yard.Core.IL.Definition
 open Yard.Core.IL.Production
 
+let dummyPos s = (s,(0,0,""))
+
 let run ironyGrammar =
     let frontend = new IronyFrontend() :> Frontend
     let ilTree = frontend.ParseGrammar ironyGrammar
@@ -16,7 +18,7 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
  {info = {fileName = "";};
  head = None;
  grammar =
-  [{name = "s";
+  [{name = dummyPos"s";
     args = [];
     body = PSeq ([{omit = false;
                    rule = PToken ("MULT", (-419, -419,""));
@@ -36,7 +38,7 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
     {info = {fileName = "";};
      head = None;
      grammar =
-      [{name = "start";
+      [{name = dummyPos"start";
         args = [];
         body =
          PAlt
@@ -61,7 +63,7 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
 let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
     {info = {fileName = "";};
      head = None;
-     grammar = [{name = "myNonTerm";
+     grammar = [{name = dummyPos"myNonTerm";
                  args = [];
                  body = PSeq ([{omit = false;
                                 rule = PToken ("LESS", (-419, -419,""));

@@ -30,6 +30,8 @@ open NUnit.Framework
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
+let dummyPos s = (s,(0,0,""))
+
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFileContent := str
@@ -111,7 +113,7 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "e"
+                grammar = [{name = dummyPos "e"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("R", (28, 29, ""))
@@ -130,7 +132,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("N", (16, 17, ""))
@@ -150,7 +152,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("R", (29, 30, ""))
@@ -167,7 +169,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("N", (17, 18, ""))
@@ -184,7 +186,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("Q", (57, 58, ""))
@@ -201,7 +203,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("Q", (57, 58, ""))
@@ -218,7 +220,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("N", (16, 17, ""))
@@ -238,7 +240,7 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos "e"
                          args = []
                          body = PSeq ([{omit = false
                                         rule = PToken ("N", (16, 17, ""))
@@ -259,7 +261,7 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("C", (40, 41, ""))
@@ -277,7 +279,7 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (15, 16, ""))
@@ -295,7 +297,7 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("B", (31, 32, ""))
@@ -313,7 +315,7 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (15, 16, ""))
@@ -335,7 +337,7 @@ type ``YardFrontend Parser tests`` () =
               head = None  
               grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         body =
                             PSeq(
@@ -380,7 +382,7 @@ A;"
     [<Test>]
     member test.``Basic options test`` () =
         let rule : Rule.t<Source.t, Source.t> = {
-            Rule.name = "s"
+            Rule.name = dummyPos"s"
             Rule._public = true
             Rule.args = []
             Rule.body = PSeq ([{omit = false
@@ -418,7 +420,7 @@ let value x = (x:>Lexeme<string>).value
              head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46, ""))
              grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         body = 
                             PSeq (
@@ -432,7 +434,7 @@ let value x = (x:>Lexeme<string>).value
                         _public = true
                         metaArgs = []
                       }; { 
-                        name = "e"
+                        name = dummyPos"e"
                         args = [("i", (80, 81, ""))]
                         body = 
                             PSeq (
@@ -461,7 +463,7 @@ type ``Yardfrontend label tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
                                            rule = PToken ("A", (12, 13, ""))

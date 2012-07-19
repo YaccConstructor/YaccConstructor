@@ -81,7 +81,7 @@ type YardCompletionSource (buffer : ITextBuffer) =
                         let parsed = ParseText fileText  // Запуск парсера
                         let getText (completion : Completion) = completion.DisplayText
                         let r = (getNonterminals parsed).Distinct() |> List.ofSeq |> List.sort
-                        let result = List.map (fun x -> new Completion(x)) r
+                        let result = List.map (fun x -> new Completion(fst x)) r
                         lock theList (fun () -> theList.Clear(); theList.AddRange result)
                     with
                     | _ -> ()

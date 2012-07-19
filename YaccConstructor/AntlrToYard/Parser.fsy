@@ -117,7 +117,7 @@ TopLevelDef: Rule { [$1] }
 ActionNameOpt: ACTION_NAME { }
     | { }
     
-Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
+Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = ($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
 
 ScopeOpt: T_SCOPE TERMINAL SEMICOLON { }
     | { }

@@ -58,14 +58,14 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             else n := 0
         let usedStates : int[] = Array.zeroCreate statesCount
         let curLevelCount = ref 0
-        let stateToVirtex : Virtex<_,_>[] = Array.zeroCreate statesCount
+        let stateToVertex : Vertex<_,_>[] = Array.zeroCreate statesCount
 
-        let inline addVirtex state num (edgeOpt : option<Edge<_,int>>) =
-            let dict = stateToVirtex
-            let mutable v = Unchecked.defaultof<Virtex<_,_>>
+        let inline addVertex state num (edgeOpt : option<Edge<_,int>>) =
+            let dict = stateToVertex
+            let mutable v = Unchecked.defaultof<Vertex<_,_>>
             if dict.[state] = null then
                 //printfn "v(%d,%d)" state num
-                v <- new Virtex<_,_>(state, num)
+                v <- new Vertex<_,_>(state, num)
                 dict.[state] <- v
                 if parserSource.Gotos.[state].[!curNum].IsSome then
                     pushes.[!pBeg] <- (v, parserSource.Gotos.[state].[!curNum].Value)
@@ -81,11 +81,11 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     reductions.Enqueue (v, prod, pos, edgeOpt)
             v
 
-        ignore <| addVirtex startState 0 None
+        ignore <| addVertex startState 0 None
 
         let makeReductions num =
             while reductions.Count > 0 do
-                let virtex, prod, pos, edgeOpt = reductions.Dequeue()
+                let vertex, prod, pos, edgeOpt = reductions.Dequeue()
                 let nonTerm = parserSource.LeftSide.[prod]
 
                 let inline addChildren node (path : int[]) prod =
@@ -96,32 +96,32 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                             (function (number,children) -> number = prod && Array.forall2 (=) children path)
                     if not astExists then
                         family := (prod, path)::family.Value
-                let handlePath (path : int list) (final : Virtex<_,_>) =
+                let handlePath (path : int list) (final : Vertex<_,_>) =
                     let ast = ref -1
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
-                    let newVirtex = addVirtex state num None
-                    if not <| newVirtex.outEdges.Exists (fun e -> if not (e.dest.label = final.label) then false
+                    let newVertex = addVertex state num None
+                    if not <| newVertex.outEdges.Exists (fun e -> if not (e.dest.label = final.label) then false
                                                                   else ast := e.label
                                                                        true)
                     then
                         ast := nodes.Count
                         let edge = new Edge<int*int, int>(final, !ast)
                         nodes.Add <| NonTerm (ref [])
-                        newVirtex.addEdge edge
+                        newVertex.addEdge edge
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[!curNum] do
-                                reductions.Enqueue (newVirtex, prod, pos, Some edge)
+                                reductions.Enqueue (newVertex, prod, pos, Some edge)
                     if path = [] then nodes.[!ast] <- Epsilon parserSource.LeftSide.[prod]
                     else addChildren nodes.[!ast] (path |> List.toArray) prod
 
-                let rec walk length (virtex : Virtex<_,_>) path =
-                    if length = 0 then handlePath path virtex
+                let rec walk length (vertex : Vertex<_,_>) path =
+                    if length = 0 then handlePath path vertex
                     else
-                        virtex.outEdges |> ResizeArray.iter
+                        vertex.outEdges |> ResizeArray.iter
                             (fun e -> walk (length - 1) e.dest (e.label::path))
                 
                 if pos = 0 then
-                    handlePath [] virtex
+                    handlePath [] vertex
                 else 
                     let epsilonPart =
                         let mutable res = []
@@ -140,16 +140,16 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     if enum.MoveNext() then parserSource.TokenToNumber enum.Current
                     else parserSource.EofIndex
                 for i = 0 to !curLevelCount-1 do
-                    stateToVirtex.[usedStates.[i]] <- null
+                    stateToVertex.[usedStates.[i]] <- null
                 curLevelCount := 0
                 let curBeg = !pBeg
                 while curBeg <> !pEnd do
-                    let virtex, state = pushes.[!pEnd]
-                    let edge = new Edge<_,_>(virtex, nodes.Count)
+                    let vertex, state = pushes.[!pEnd]
+                    let edge = new Edge<_,_>(vertex, nodes.Count)
                     nodes.Add newAstNode
-                    //printf "p %A\n" (virtex.label, state)
-                    let newVirtex = addVirtex state num (Some edge)
-                    newVirtex.addEdge edge
+                    //printf "p %A\n" (vertex.label, state)
+                    let newVertex = addVertex state num (Some edge)
+                    newVertex.addEdge edge
                     nextInd pEnd
         let mutable errorIndex = -1
         while errorIndex = -1 && not !isEnd do
@@ -170,7 +170,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then
                     root := Some nodes.Count
-                    stateToVirtex.[usedStates.[i]].outEdges.[0].label
+                    stateToVertex.[usedStates.[i]].outEdges.[0].label
                     |> addTreeTop
                     |> nodes.Add
             printfn ""

@@ -75,19 +75,19 @@ type KernelIndexator (grammar : FinalGrammar) =
     member this.indexToKernel index = kernels.[index]
     member this.kernelToIndex kernel = kernelToIdx.Item kernel
 *)
-type StatesInterpreter (stateToVirtex : Virtex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
-    member this.count = stateToVirtex.Length
-    member this.virtex i = stateToVirtex.[i]
+type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
+    member this.count = stateToVertex.Length
+    member this.vertex i = stateToVertex.[i]
     member this.kernels i = stateToKernels.[i]
     member this.lookaheads i = stateToLookahead.[i]
     
 let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
-    let nextIndex, virtexCount =
+    let nextIndex, vertexCount =
         let num = ref -1
         (fun () -> incr num; !num)
         , (fun () -> !num + 1)
-    let kernelsToVirtex = new Dictionary<string, Virtex<int,int>>()
-    let virtices = new ResizeArray<Virtex<int,int> >()
+    let kernelsToVertex = new Dictionary<string, Vertex<int,int>>()
+    let virtices = new ResizeArray<Vertex<int,int> >()
     let stateToKernels = new ResizeArray<Kernel[]>()
     let stateToLookahead = new ResizeArray<Set<int>[] >()
     let curSymbol kernel = KernelInterpreter.symbol grammar kernel
@@ -139,10 +139,10 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
         if !incount % 100 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
-        let virtex, newLookAheads, needDfs =
-            if kernelsToVirtex.ContainsKey key then
-                let virtex = kernelsToVirtex.Item key
-                let alreadySets = stateToLookahead.Item virtex.label
+        let vertex, newLookAheads, needDfs =
+            if kernelsToVertex.ContainsKey key then
+                let vertex = kernelsToVertex.Item key
+                let alreadySets = stateToLookahead.Item vertex.label
                 let needDfs = ref false
 //                printfn "============"
 //                printfn "%A" alreadySets
@@ -152,22 +152,22 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                         alreadySets.[i] <- Set.union alreadySets.[i] diffSet
                         if not diffSet.IsEmpty then needDfs := true
 //                        for s in diffSet do
-//                            System.Diagnostics.Debug.Assert <| (stateToLookahead.Item virtex.label).[i].Contains s
+//                            System.Diagnostics.Debug.Assert <| (stateToLookahead.Item vertex.label).[i].Contains s
                         yield diffSet|]
-                virtex, diff, !needDfs
+                vertex, diff, !needDfs
             else
                 //printfn "%A" <| key
-                let virtex = new Virtex<int,int>(nextIndex())
+                let vertex = new Vertex<int,int>(nextIndex())
                 wasEdge.Add Set.empty
-                virtices.Add virtex
-                kernelsToVirtex.Add(key, virtex)
+                virtices.Add vertex
+                kernelsToVertex.Add(key, vertex)
                 //System.Diagnostics.Debug.Assert(result.ContainsKey key)
                 stateToKernels.Add(kernels)
                 stateToLookahead.Add(lookaheads)
-                virtex, lookaheads, true
+                vertex, lookaheads, true
                 // adding edges
         if needDfs then
-//            printfn "%d" virtex.label
+//            printfn "%d" vertex.label
 //            printfn "%A" kernels
 //            printfn "%A" newLookAheads
             for i = 0 to grammar.indexator.fullCount - 1 do
@@ -180,16 +180,16 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                                 yield (KernelInterpreter.incPos kernels.[j], newLookAheads.[j])
                         |]
                     if destStates.Length > 0 && !newSymbols then
-                        let newVirtex : Virtex<_,_> = dfs destStates
-                        if not <| wasEdge.[virtex.label].Contains newVirtex.label then
-                            wasEdge.[virtex.label] <- wasEdge.[virtex.label].Add newVirtex.label
-                            virtex.addEdge(new Edge<_,_>(newVirtex, i))
-        virtex
+                        let newVertex : Vertex<_,_> = dfs destStates
+                        if not <| wasEdge.[vertex.label].Contains newVertex.label then
+                            wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
+                            vertex.addEdge(new Edge<_,_>(newVertex, i))
+        vertex
     let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
     [| initKernel, initLookAhead|] |> dfs |> ignore
 
-    //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| virtexCount()
+    //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()
     let printSymbol (symbol : int) =
         if symbol < grammar.indexator.nonTermCount then
             grammar.indexator.indexToNonTerm symbol
@@ -204,7 +204,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                 printf "%s " <| printSymbol (grammar.rules.symbol i j)
             printfn ""
         printfn "\nstates:"
-        for i = 0 to virtexCount()-1 do
+        for i = 0 to vertexCount()-1 do
             printfn "==============================\n%d:" i
             let kernels = stateToKernels.[i]
             let lookaheads = stateToLookahead.[i]
@@ -214,8 +214,8 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                         |> List.map (fun x -> printSymbol x)
                         |> String.concat "," )
             printfn "------------------------------"
-            let virtex = virtices.[i]
-            for edge in virtex.outEdges do
+            let vertex = virtices.[i]
+            for edge in vertex.outEdges do
                 printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
             printfn ""
     print ()

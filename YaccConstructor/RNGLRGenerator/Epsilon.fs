@@ -25,7 +25,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 
 let emptyName = "empty"
-let emptyNum (indexator : Indexator) = indexator.nonTermToIndex (emptyName,(0,0,""))
+let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
 
 let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
     let result : bool[] = Array.zeroCreate indexator.fullCount

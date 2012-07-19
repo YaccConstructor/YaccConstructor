@@ -61,12 +61,16 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
             let u = stack.Pop()
             if u < 0 then
                 res.Add <| -u-1
-            else
+            elif not reachable.[u] then
                 stack.Push <| -u-1
                 reachable.[u] <- true
                 match nodes.[u] with
                 | NonTerm list ->
-                    !list |> List.iter iterChildren
+                    !list |> List.iter (
+                        fun (_,children) ->
+                            for j in children do
+                                if not reachable.[j] then
+                                    stack.Push j)
                 | _ -> ()
             
         let ret = res.ToArray()
@@ -92,14 +96,22 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
             | _ -> ()
                 
     member this.ChooseSingleAst () = 
-        this.EliminateCycles()
         for x in order do
             if reachable.[x] then
                 match nodes.[x] with
                 | NonTerm list ->
-                    match !list with
-                    | h::_::_ -> list := [h]
-                    | _ -> ()
+                    match
+                        !list |> List.tryFind
+                            (fun (_, children) ->
+                                children
+                                |> Array.forall (fun j -> pos.[j] < pos.[x] && reachable.[j]))
+                        with
+                    | Some v ->
+                        if list.Value.Length > 1 then
+                            list := [v]
+                    | None ->
+                        reachable.[x] <- false
+                        list := []
                 | _ -> ()
         for x in order do
             reachable.[x] <- false
@@ -120,7 +132,7 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                 match nodes.[x] with
                 | Term t -> result.[x] <- box t
                 | Epsilon eps ->
-                    result.[x] <- epsilons.[eps].Translate funs leftSides concat epsilons
+                    result.[x] <- epsilons.[eps].Translate funs leftSides concat [||]//epsilons
                 | NonTerm list ->
                     let res = 
                         !list

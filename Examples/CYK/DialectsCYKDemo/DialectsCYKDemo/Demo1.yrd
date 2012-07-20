@@ -1,4 +1,7 @@
-﻿+s : x y;
-x : @l1(NUM);
-y : @l2(PLUS);
-y : @l3(y y);
+﻿+s : x z;
+x : NUM;
+y : PLUS;
+k : @l1(MULT);
+z : y x;
+z : k x;
+z : y s;

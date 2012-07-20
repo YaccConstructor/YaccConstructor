@@ -44,10 +44,10 @@ type CYKCore() =
         
         let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<tblData>(),new ResizeArray<int>())
 
-        let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) (lState1:uint16) (lState2:uint16) = 
-            let defined = (uint16)0
-            let undefined = (uint16)1
-            let conflict = (uint16)2
+        let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 = 
+            let defined = 0us
+            let undefined = 1us
+            let conflict = 2us
             let nolbl = 0uy
             match lState1,lState2,lbl1,lbl2,ruleLabel with
             |conflict,_,_,_,_ -> (0uy,conflict)
@@ -155,10 +155,12 @@ type CYKCore() =
             String.concat " " [stateString;(lbl.ToString());(weight.ToString())]
             
         let rec out i last= 
-            let state,lbl,weight = getCellData recTable.[0, s.Length-1] i
-            match i with
-            |v when (v = last) -> getString state lbl weight
-            |_ -> String.concat "\n" [(getString state lbl weight); out (i+1) last]
+            if (i <= last)
+            then let state,lbl,weight = getCellData recTable.[0, s.Length-1] i
+                 match i with
+                 |v when (v = last) -> getString state lbl weight
+                 |_ -> String.concat "\n" [(getString state lbl weight); out (i+1) last]
+            else ""
 
         let lastIndex = ((fun (array:ResizeArray<_>,_) -> array.Count) recTable.[0,s.Length-1]) - 1
         (string)(out 0 lastIndex)

@@ -1,0 +1,4 @@
++s : x y;
+x : @l1(NUM);
+y : @l2(PLUS);
+y : @l3(y y);

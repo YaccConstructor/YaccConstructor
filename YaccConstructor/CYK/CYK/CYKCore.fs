@@ -3,6 +3,11 @@
 //(ruleIndex |lblState |lblName |lblWeght )
 type tblData = uint64 
 
+type lblState =
+     | Defined = 0
+     | Undefined = 1
+     | Conflict = 2
+    
 [<AutoOpen>]
 module CellHelpers =
     
@@ -22,6 +27,9 @@ type CYKCore() =
     
     // правила грамматики, инициализируются в Recognize
     let mutable rules : ResizeArray<rule> = null
+    [<Literal>]
+    let noLbl = 0uy
+
 
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellContent:ResizeArray<tblData>,_) i =
@@ -45,27 +53,24 @@ type CYKCore() =
         let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<tblData>(),new ResizeArray<int>())
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 = 
-            let defined = 0us
-            let undefined = 1us
-            let conflict = 2us
-            let nolbl = 0uy
+            let conflictLbl = (noLbl,lblState.Conflict)            
             match lState1,lState2,lbl1,lbl2,ruleLabel with
-            |conflict,_,_,_,_ -> (0uy,conflict)
-            |_,conflict,_,_,_ -> (0uy,conflict)
-            |_,_,v1,v2,v3 when (v1 = nolbl && v2 = nolbl && v3 = nolbl) -> (0uy,undefined)
-            |_,_,v1,v2,_  when (v1 = nolbl && v2 = nolbl)-> (ruleLabel,defined)
-            |_,_,v1,nolbl,v2 when (v2<>0uy && v1<>v2) -> (0uy,conflict)
-            |_,_,nolbl,v1,v2 when (v2<>0uy && v1<>v2) -> (0uy,conflict)
-            |_,_,v1,v2,_ when v1<>v2 -> (0uy,conflict)
-            |_,_,v1,v2,v3 when (v1=v2 && v3<>0uy && v1<>v3) -> (0uy,conflict)
-            |_ -> ((List.find ((<>) 0uy) [lbl1;lbl2;ruleLabel]),defined)
+            |conflict,_,_,_,_ -> conflictLbl
+            |_,conflict,_,_,_ -> conflictLbl
+            |_,_,v1,v2,v3 when (v1 = noLbl && v2 = noLbl && v3 = noLbl) -> (noLbl,lblState.Undefined)
+            |_,_,v1,v2,_  when (v1 = noLbl && v2 = noLbl)-> (ruleLabel,lblState.Defined)
+            |_,_,v1,noLbl,v2 when (v2<>noLbl && v1<>v2) -> conflictLbl
+            |_,_,noLbl,v1,v2 when (v2<>noLbl && v1<>v2) -> conflictLbl
+            |_,_,v1,v2,_ when v1<>v2 -> conflictLbl
+            |_,_,v1,v2,v3 when (v1=v2 && v3<>noLbl && v1<>v3) -> conflictLbl
+            |_ -> ((List.find ((<>) noLbl) [lbl1;lbl2;ruleLabel]),lblState.Defined)
 
         
         let processRule (rule:uint64) i k l =
             let a,b,c,rl,rw = getRule rule
             let ruleIndex = ResizeArray.findIndex ((=)rule) rules
             match c with
-            |v when v<>(uint16)0 ->
+            |v when v<>0us ->
                         let left = recTable.[i,k]
                         let right = recTable.[k+i+1,l-k-1]
                         let count1 = (fun (array:ResizeArray<_>,_) -> array.Count) left
@@ -106,11 +111,9 @@ type CYKCore() =
                 match (int)c with
                 |0 -> if b = s.[k] then
                         let lState =
-                            let defined = (uint16)0
-                            let undefined = (uint16)1 
-                            match (int)rl with
-                            |0 -> undefined
-                            |_ -> defined
+                            match rl with
+                            | 0uy -> lblState.Undefined
+                            | _   -> lblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         let updatedArray = ResizeArray.append ((fun (array,_) -> array) recTable.[k,0]) (ResizeArray.ofArray [|currentElem|])
                         recTable.[k,0] <- updatedArray,null

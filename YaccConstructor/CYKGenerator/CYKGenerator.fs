@@ -26,6 +26,13 @@ open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open System.IO
 
+type GrammarInfo =
+    {        
+        rules: uint64 array
+        termDict : Dictionary<string,int>
+        nTermDict : Dictionary<string,int>
+    }
+
 type CYKGeneartorImpl () =
     let header =
         [
@@ -58,15 +65,24 @@ type CYKGeneartorImpl () =
         StructuredFormat.Display.layout_to_string 
           {StructuredFormat.FormatOptions.Default with PrintWidth=80}
 
-    let code rules termDict =
+    let genStartNTermID id =
+        [wordL "let StartNTerm = "
+        ; (string id |> wordL)]
+        |> spaceListL
+    
+    let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
+        ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name]
+
+    let code il grammarInfo =
         [ header
-         ; tokenTypes termDict
-         ; getTokenTypeTag termDict
-         ; rulesArray rules 
+         ; tokenTypes grammarInfo.termDict
+         ; getTokenTypeTag grammarInfo.termDict
+         ; rulesArray grammarInfo.rules
+         ; startNTerm il grammarInfo.nTermDict |> genStartNTermID
          ; tokenStreamEncoder]
         |> aboveListL
-        |> layoutToStr
-
+        |> layoutToStr    
+    
     // Now we are not support action code. So skip it.
     let grammarFromIL (il:Yard.Core.IL.Definition.t<_,_>) =
         let ntermDict = new Dictionary<_,_>()
@@ -131,17 +147,22 @@ type CYKGeneartorImpl () =
 
             | _ -> failwith "CYK. Incorrect rule structure. Must be in CNF"
             
-        il.grammar |> List.map processRule
-        , termDict
+        {
+            rules = il.grammar |> List.map processRule |> Array.ofList
+            termDict = termDict
+            nTermDict = ntermDict
+        }
         
     let print rule = 
         let rName, r1, r2, lblName, lblWeight = getRule rule
         [rName]
 
     member x.Generate grammar = 
-        let rules, termDict = grammarFromIL grammar
-        code rules termDict
-    member x.GenRulesList grammar = grammarFromIL grammar |> fst
+        let grammarInfo = grammarFromIL grammar
+        code grammar grammarInfo
+    member x.GenRulesList grammar = 
+        let grammarInfo = grammarFromIL grammar
+        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict
 
 type CYKGenerator() =    
     inherit Generator()

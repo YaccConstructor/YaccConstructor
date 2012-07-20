@@ -34,18 +34,30 @@ type GrammarInfo =
     }
 
 type CYKGeneartorImpl () =
+    
+    [<Literal>]
+    let eof = "EOF"
+
+    [<Literal>]
+    let eofNum = 0
+
     let header =
         [
-         "namespace Yard.Generators.CYK"
+         "module Yard.Generators.CYK"
          ; ""
          ; "open Yard.Core"
+         ; "open Yard.Generators.CYKGenerator"
         ]
         |> List.map wordL |> aboveListL
 
     let tokenStreamEncoder = 
         wordL "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "
-        @@-- (wordL "stream |> Seq.map (fun t -> getTag t.Tag)")
-        
+        @@-- (wordL "stream"
+              @@ ((wordL "|> Seq.choose (fun t ->"
+                  @@-- ([wordL "let tag = getTag t.Tag"
+                       ;"if tag <> " + string eofNum + "us then Some tag else None)" |> wordL]
+                       |> aboveListL)))
+              @@ (wordL "|> Array.ofSeq"))
 
     let tokenTypes (termDict:Dictionary<string,_>) =
         ("type cykToken = "|> wordL)
@@ -54,7 +66,7 @@ type CYKGeneartorImpl () =
     let getTokenTypeTag (termDict:Dictionary<string,_>) =
         ("let getTag token = "|> wordL)
         @@-- (("match token with "|> wordL)
-             @@ ([for kvp in termDict -> ["|"; kvp.Key; "->"; string kvp.Value]|> List.map wordL |> spaceListL] |> aboveListL))
+             @@ ([for kvp in termDict -> ["|"; kvp.Key; "->"; string kvp.Value + "us"]|> List.map wordL |> spaceListL] |> aboveListL))
 
     let rulesArray rules = 
         ("let rules = "|> wordL)
@@ -66,7 +78,7 @@ type CYKGeneartorImpl () =
           {StructuredFormat.FormatOptions.Default with PrintWidth=80}
 
     let genStartNTermID id =
-        [wordL "let StartNTerm = "
+        [wordL "let StartNTerm ="
         ; (string id |> wordL)]
         |> spaceListL
     
@@ -87,6 +99,7 @@ type CYKGeneartorImpl () =
     let grammarFromIL (il:Yard.Core.IL.Definition.t<_,_>) =
         let ntermDict = new Dictionary<_,_>()
         let termDict = new Dictionary<_,_>()
+        termDict.Add(eof,eofNum)
         let lblDict = new Dictionary<_,_>()
         let ntermNum = ref 1
         let termNum = ref 1

@@ -72,9 +72,9 @@ type CYKTests () =
 let f _ =
     let tests = new CYKTests()
     let x1 = tests.noLbl()
-    let x2 = tests.oneLbl()
-    let x3 = tests.twoLbls()
-    let x4 = tests.twoLblsTwoDials()
+    //let x2 = tests.oneLbl()
+    //let x3 = tests.twoLbls()
+    //let x4 = tests.twoLblsTwoDials()
     0
 
 

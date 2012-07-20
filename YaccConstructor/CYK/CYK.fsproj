@@ -5,24 +5,25 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1df25ecb-5cbd-4ba5-9c20-0e7fefcc4c99}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>CYK.Test</RootNamespace>
-    <AssemblyName>CYK.Test</AssemblyName>
+    <ProjectGuid>{5b565622-649a-4a65-9761-4980dd3ac648}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CYK</RootNamespace>
+    <AssemblyName>CYK</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <Name>CYK.Test</Name>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <Name>CYK</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
+    <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\CYK.Test.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\CYK.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -31,45 +32,27 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Release\CYK.Test.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\CYK.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack.Parallel.Seq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CYKTests.fs" />
+    <Compile Include="Program.fs" />
+    <Compile Include="Run.fs" />
+    <Compile Include="CYKCore.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CYKCommon\CYKCommon.fsproj">
+    <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">
       <Name>CYKCommon</Name>
       <Project>{95fb7038-c27d-4c27-a149-d9c9b747c222}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CYKGenerator\CYKGenerator.fsproj">
-      <Name>CYKGenerator</Name>
-      <Project>{94eeea1d-60e8-45f8-b6cb-ba0b0fb487b8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\YardFrontend\YardFrontend.fsproj">
-      <Name>YardFrontend</Name>
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\CYK\CYK.fsproj">
-      <Name>CYK</Name>
-      <Project>{5b565622-649a-4a65-9761-4980dd3ac648}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -7,7 +7,7 @@ open System.IO
 type CYKTests () =
     let generator = new Yard.Generators.CYKGenerator.CYKGeneartorImpl()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
-    let basePath = "../../../../../Tests/CYK"
+    let basePath = "../../../../Tests/CYK"
 
     [<Test>]
     member test.test1 () =

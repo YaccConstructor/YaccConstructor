@@ -59,20 +59,27 @@ type ``CYK generator tests`` () =
     member test.``Simple one rule term without lable code gen test`` () =        
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_noLBL.yrd"))
         let expectedCode = 
-            ["namespace Yard.Generators.CYK"
+            ["module Yard.Generators.CYK"
             ; ""
             ; "open Yard.Core"
+            ; "open Yard.Generators.CYKGenerator"
             ; "type cykToken = "
+            ; "  | EOF"
             ; "  | NUM"
             ; "let getTag token = "
             ; "  match token with "
-            ; "  | NUM -> 1"
+            ; "  | EOF -> 0us"
+            ; "  | NUM -> 1us"
             ; "let rules = "
             ; "  [ 281479271677952UL ]"
             ; "  |> Array.ofList"
-            ; "let StartNTerm =  1"
+            ; "let StartNTerm = 1"
             ; "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "
-            ; "  stream |> Seq.map (fun t -> getTag t.Tag)"
+            ; "  stream"
+            ; "  |> Seq.choose (fun t ->"
+            ; "    let tag = getTag t.Tag"
+            ; "    if tag <> 0us then Some tag else None)"
+            ; "  |> Array.ofSeq"
             ] |> String.concat "\n"
 
         let code = generator.Generate il

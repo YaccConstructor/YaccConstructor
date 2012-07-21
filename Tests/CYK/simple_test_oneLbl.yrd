@@ -1,3 +1,4 @@
 +s : x y;
++s : y y;
 x: @l(NUM);
 y: PLUS;

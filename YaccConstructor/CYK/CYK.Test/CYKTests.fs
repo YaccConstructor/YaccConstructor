@@ -13,10 +13,9 @@ type CYKTests () =
     member test.test1 () =
         let il = parser.ParseGrammar(Path.Combine(basePath, "simple_test_2.yrd"))
         let rules,start = generator.GenRulesList il
-        let result = new ResizeArray<_>(rules)
         let code = generator.Generate(il)
         let input = [|1us;2us|]
-        let res = (new CYKCore()).Recognize (result,1us) input (fun l1 l2 l3 -> 0uy)
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         Assert.IsTrue(true)
         //let expected = "E->EE  conflict E->EE  l1 E->TX  l1 T->a   X->*   E->TX  l1 T->a   X->*   E->TY  l2 T->a   Y->+  "
         //let testGrammar_lbl1 = (Array.ofList <| (List.map ToBranch [("E","T","X",Some("l1"));("E","T","Y",Some("l2"));("E","E","E",None)]) @ (List.map ToLeaf [("T",'a',None);("X",'*',None);("Y",'+',None)]),"E")
@@ -27,10 +26,8 @@ type CYKTests () =
     member test.noLbl () =
         let il = parser.ParseGrammar(Path.Combine(basePath, "simple_test.yrd"))
         let rules,start = generator.GenRulesList il
-        let result = new ResizeArray<_>(rules)
-        let code = generator.Generate(il)
         let input = [|1us;1us|]
-        let res = (new CYKCore()).Recognize (result,1us) input (fun l1 l2 l3 -> 0uy)
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         let expected = "undefined 0 0" 
         Assert.AreEqual(expected,res)
 
@@ -38,10 +35,8 @@ type CYKTests () =
     member test.oneLbl() = 
         let il = parser.ParseGrammar(Path.Combine(basePath, "simple_test_oneLbl.yrd"))
         let rules,start = generator.GenRulesList il
-        let result = new ResizeArray<_>(rules)
-        let code = generator.Generate(il)
         let input = [|1us;2us|]
-        let res = (new CYKCore()).Recognize (result,1us) input (fun l1 l2 l3 -> 0uy)
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         let expected = "defined 1 0"
         Assert.AreEqual(expected,res)
         
@@ -49,10 +44,8 @@ type CYKTests () =
     member test.twoLbls() = 
         let il = parser.ParseGrammar(Path.Combine(basePath, "simple_test_twoLbls.yrd"))
         let rules,start = generator.GenRulesList il
-        let result = new ResizeArray<_>(rules)
-        let code = generator.Generate(il)
         let input = [|1us;2us|]
-        let res = (new CYKCore()).Recognize (result,1us) input (fun l1 l2 l3 -> 0uy)
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         let expected = "defined 1 0"
         Assert.AreEqual(expected,res)
 
@@ -60,11 +53,9 @@ type CYKTests () =
     member test.twoLblsTwoDials() = 
         let il = parser.ParseGrammar(Path.Combine(basePath, "simple_test_twoLblsTwoDial.yrd"))
         let rules,start = generator.GenRulesList il
-        let result = new ResizeArray<_>(rules)
-        let extracted = result |> ResizeArray.map getRule 
         let code = generator.Generate(il)
         let input = [|1us;2us;2us|]
-        let res = (new CYKCore()).Recognize (result,1us) input (fun l1 l2 l3 -> 0uy)
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         let expected = "conflict 0 0"
         Assert.AreEqual(expected,res)
 

@@ -3,13 +3,20 @@
 //(ruleIndex |lblState |lblName |lblWeght )
 type tblData = uint64 
 
+type CellContent = 
+    struct
+        val Data: tblData
+        val K: int
+        new(data: tblData, k: int) = {Data = data; K = k}
+    end
+
 type LblState =
      | Defined = 0
      | Undefined = 1
      | Conflict = 2
     
 [<AutoOpen>]
-module CellHelpers =
+module TableDataHelpers =
     
     let buildData rNum lState (lblName:byte) lblWeight =
         let lbl = (uint16 lblName <<< 8) ||| uint16 lblWeight
@@ -32,20 +39,20 @@ module CellHelpers =
 type CYKCore() =
 
     // правила грамматики, инициализируются в Recognize
-    let mutable rules : ResizeArray<rule> = null
+    let mutable rules : rule[] = null
 
     [<Literal>]
     let noLbl = 0uy
 
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
-    let getCellRuleTop (cellContent:ResizeArray<tblData>,_) i =
-        let curRuleNum,_,_,_ = getData cellContent.[i]
+    let getCellRuleTop (cellContent:ResizeArray<CellContent>) i =
+        let curRuleNum,_,_,_ = getData cellContent.[i].Data
         let curNT,_,_,_,_ = getRule rules.[(int)curRuleNum]
         curNT
 
     // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
-    let getCellData (cellContent:ResizeArray<tblData>,_) i =
-        let _,curlblState,curcl,curcw = getData cellContent.[i]
+    let getCellData (cellContent:ResizeArray<CellContent>) i =
+        let _,curlblState,curcl,curcw = getData cellContent.[i].Data
         curlblState,curcl,curcw
 
     // возвращает координаты дочерних ячеек 
@@ -56,7 +63,7 @@ type CYKCore() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
         
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<tblData>(),new ResizeArray<int>())
+        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<_>())
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 = 
             let conflictLbl = (noLbl,LblState.Conflict)            
@@ -73,15 +80,15 @@ type CYKCore() =
                 else noLbl,LblState.Conflict
                 
                     
-        let processRule (rule:uint64) i k l =
+        let processRule (rule:rule) i k l =
             let a,b,c,rl,rw = getRule rule
-            let ruleIndex = ResizeArray.findIndex ((=)rule) rules
+            let ruleIndex = Array.findIndex ((=)rule) rules
             match c with
             |v when v<>0us ->
                 let left = recTable.[i,k]
                 let right = recTable.[k+i+1,l-k-1]
-                let count1 = (fun (array:ResizeArray<_>,_) -> array.Count) left
-                let count2 = (fun (array:ResizeArray<_>,_) -> array.Count) right
+                let count1 = left.Count
+                let count2 = right.Count
                         
                 if (count1 > 0) && (count2 > 0)
                 then
@@ -94,12 +101,11 @@ type CYKCore() =
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                let updatedData = ResizeArray.append ((fun (array,_) -> array) recTable.[i,l]) (ResizeArray.ofArray [|currentElem|])
-                                let updatedCoord = ResizeArray.append ((fun (_,array) -> array) recTable.[i,l]) (ResizeArray.ofArray [|k|])
-                                recTable.[i,l] <- updatedData,updatedCoord    
+                                let updatedData = ResizeArray.append (recTable.[i,l]) (ResizeArray.ofArray [|new CellContent(currentElem,k)|])
+                                recTable.[i,l] <- updatedData
             |_ -> ()   
 
-        let elem i l = rules |> ResizeArray.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
+        let elem i l = rules |> Array.iter (fun rule -> for k in 0..(l-1) do processRule rule i k l)
 
         let rec fillTable i l =
                 if l = s.Length-1
@@ -114,7 +120,7 @@ type CYKCore() =
         for rule in rules do
             for k in 0..(s.Length-1) do
                 let a,b,c,rl,rw = getRule rule
-                let ruleIndex = ResizeArray.findIndex ((=)rule) rules
+                let ruleIndex = Array.findIndex ((=)rule) rules
                 match (int)c with
                 |0 -> if b = s.[k] then
                         let lState =
@@ -122,8 +128,8 @@ type CYKCore() =
                             | 0uy -> LblState.Undefined
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
-                        let updatedArray = ResizeArray.append ((fun (array,_) -> array) recTable.[k,0]) (ResizeArray.ofArray [|currentElem|])
-                        recTable.[k,0] <- updatedArray,null
+                        let updatedArray = ResizeArray.append (recTable.[k,0]) (ResizeArray.ofArray [|new CellContent(currentElem,-1)|])
+                        recTable.[k,0] <- updatedArray
                 |_ -> ()
     
         fillTable 0 1
@@ -173,8 +179,7 @@ type CYKCore() =
                  |_ -> String.concat "\n" [(getString state lbl weight); out (i+1) last]
             else ""
 
-        let lastIndex = ((fun (array:ResizeArray<_>,_) -> array.Count) recTable.[0,s.Length-1]) - 1
-        out 0 lastIndex
+        out 0 (recTable.[0,s.Length-1].Count - 1)
 
     member this.Recognize ((grules, start) as g) s weightCalcFun = 
         rules <- grules

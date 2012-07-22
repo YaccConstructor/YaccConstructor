@@ -116,8 +116,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"
             | Epsilon _ -> failwith "Epsilon was not expected in epsilon tree"
-            | NonTerm list ->
-                "NonTerm (ref " + printList !list printChild + ")"
+            | NonTerm arr ->
+                "NonTerm (new ResizeArray<_>(" + printList (ResizeArray.toList arr) printChild + "))"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function

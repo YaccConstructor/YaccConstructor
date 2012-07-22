@@ -91,11 +91,11 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                 let inline addChildren node (path : int[]) prod =
                     let family = getFamily node
                     let astExists = 
-                        family.Value
-                        |> List.exists
+                        family
+                        |> ResizeArray.exists
                             (function (number,children) -> number = prod && Array.forall2 (=) children path)
                     if not astExists then
-                        family := (prod, path)::family.Value
+                        family.Add (prod, path)
                 let handlePath (path : int list) (final : Vertex<_,_>) =
                     let ast = ref -1
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
@@ -106,7 +106,7 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
                     then
                         ast := nodes.Count
                         let edge = new Edge<int*int, int>(final, !ast)
-                        nodes.Add <| NonTerm (ref [])
+                        nodes.Add <| NonTerm (new ResizeArray<_>(1))
                         newVertex.addEdge edge
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[!curNum] do
@@ -165,7 +165,10 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             let root = ref None
             printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
                                     if parserSource.AccStates.[i] then yield i]
-            let addTreeTop res = NonTerm (ref [parserSource.StartRule, [|res|]])
+            let addTreeTop res =
+                let children = new ResizeArray<_>(1)
+                children.Add (parserSource.StartRule, [|res|])
+                NonTerm children
             for i = 0 to !curLevelCount-1 do
                 printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then

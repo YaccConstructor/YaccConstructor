@@ -101,9 +101,10 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
             while i < order.Count do
                 let v = order.[i]
                 i <- i + 1
-                [for rule in rules.rulesWithLeftSide v do
+                let children = new ResizeArray<_>()
+                for rule in rules.rulesWithLeftSide v do
                     if allEpsilon.[rule] then
-                        let children =
+                        let nodes =
                             rules.rightSide rule
                             |> Array.map
                                 (fun w ->
@@ -111,9 +112,8 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         pos.[w] <- order.Count
                                         order.Add w
                                     pos.[w])
-                        yield (rule, children)]
-                |> (fun x -> NonTerm (ref x))
-                |> res.Add
+                        children.Add (rule, nodes)
+                res.Add (NonTerm children)
             result.[u] <- new Tree<_>(res.ToArray(), 0)
     result
 

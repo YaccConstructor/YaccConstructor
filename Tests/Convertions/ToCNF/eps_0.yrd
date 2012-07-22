@@ -1,0 +1,7 @@
+﻿+e: s STRING;
+s:  {None};
+g:  {None};
+s: s s;
+s: STRING s STRING;
+g: @label1(s);
+g: ( s e ) STRING g;

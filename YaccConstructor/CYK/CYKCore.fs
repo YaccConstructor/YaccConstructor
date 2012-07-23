@@ -182,5 +182,5 @@ type CYKCore() =
         out 0 lastIndex
 
     member this.Recognize ((grules, start) as g) s weightCalcFun = 
-        rules <- ResizeArray.toArray grules
+        rules <- grules
         recognize g s weightCalcFun 

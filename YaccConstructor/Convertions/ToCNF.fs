@@ -4,6 +4,7 @@
 //  Copyright 2011, 2012 Avdyukhin Dmitry
 //
 //  This file is part of YaccConctructor.
+//  This is war
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -39,7 +40,51 @@ let print (obj:'a) =
 
 //--Функция которая удаляет правила в правиле------------------------------------------------------
 
-let newRuleForRuleInRule (ruleList: Rule.t<_, _> list) = 
+let reductionRule (ruleList: Rule.t<_, _> list) = 
+
+    let reduction = ref []
+    
+    let rec addRule (rule: Rule.t<_, _>) (elements: elem<_, _> list) = 
+        [{
+            Rule.t.name = rule.name
+            Rule.t.args=rule.args
+            Rule.t._public=rule._public
+            Rule.t.metaArgs=rule.metaArgs
+            Rule.t.body=PSeq(elements 
+                |> List.collect
+                    (fun elem -> 
+                        match elem.rule with
+                        |PSeq(e, a, l) -> 
+                            incr index
+                            let i = !index
+                            reduction := addRule {                         
+                                    Rule.t.name = "newRuleInRule" + (!index).ToString()
+                                    Rule.t.args=[]
+                                    Rule.t._public=false
+                                    Rule.t.metaArgs=[]
+                                    Rule.t.body=elem.rule
+                                } e @ !reduction
+                            [{
+                                Production.elem.omit = false
+                                Production.elem.binding = None
+                                Production.elem.checker = None
+                                Production.elem.rule = Production.t.PRef(("newRuleInRule" + (i).ToString(), (0, 0)), None)
+                            }]
+                        |x -> [elem]
+                    ), None, None)
+        }]
+
+    let newRule = 
+        ruleList |> List.collect
+            (fun rule ->
+                match rule.body with
+                |PSeq(elements, actionCode, lbl) when not elements.IsEmpty -> addRule rule elements
+                |PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule]
+                |x -> []
+            )
+
+    newRule @ !reduction
+                
 
 //--Функция для удаления эпсилон-правил------------------------------------------------------------
 
@@ -63,35 +108,33 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
     
     //--Список эпсилон-правил входящих в данное правило--------------------------------------------     
 
-    let rec epsInRule (elements: elem<_,_> list) = 
+    let rec epsInRule (elements: elem<_, _> list) = 
         elements |> List.collect
                     (fun elem ->
                         match elem.rule with
-                        |PSeq(e,a,l) -> epsInRule e
-                        |PRef(t,_) -> isEps (fst t)
+                        |PSeq(e, a, l) -> epsInRule e
+                        |PRef(t, _) -> isEps (fst t)
                         |x -> []
                     )
                         
     //--Функция для добавления нового правила------------------------------------------------------
 
-    let newRule (rule: Rule.t<_,_>) (epsRef: string list) = 
+    let newRule (rule: Rule.t<_, _>) (epsRef: string list) = 
         incr index
         [{
             Rule.t.name="newEpsRule" + (!index).ToString()
             Rule.t.args=[]
             Rule.t._public=false
             Rule.t.metaArgs=[] 
-            Rule.t.body=PSeq([],None,None)
+            Rule.t.body=PSeq([], None, None)
         }]
 
     //--Добавляем новые правила--------------------------------------------------------------------
-
-    ruleList |> List.collect
+    
+    reductionRule ruleList |> List.collect
         (fun rule -> 
-            print ("Rule: [" + rule.name + "]")
             match rule.body with
             |PSeq(elements, actionCode, lbl) when not elements.IsEmpty -> 
-                print (epsInRule elements)
                 newRule rule (epsInRule elements) @ [rule]
             |x -> []
         )
@@ -105,7 +148,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) = ruleList
 let toCNF (ruleList: Rule.t<_, _> list) = 
     let cnf (rules: Rule.t<_, _> list) = rules
     ruleList
-    |> newRuleForRuleInRule
+    |> reductionRule
     |> deleteEpsRule
     |> deleteChainRule
     |> cnf

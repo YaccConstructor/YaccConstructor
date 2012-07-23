@@ -99,10 +99,11 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
         let res = tokensEnumerator.Current
         res
     getNextToken
-let ParseText (s:string) =
+let ParseText (s:string) path =
     let buf = bufFromString s    
     let userDefs = [||]//
-    GrammarParser.currentFilename := ""//
+    GrammarParser.currentFilename := path
+    Lexer.currentFile := path
     let posTo2D pos =
         let source = s
         source.ToCharArray(0, min (pos+1) (source.Length))

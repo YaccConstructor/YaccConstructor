@@ -1,5 +1,5 @@
 ﻿namespace VSYardNS
-(*
+
 open System.Collections.Generic
 open System
 open System.ComponentModel.Composition
@@ -13,9 +13,17 @@ open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
 open Microsoft.VisualStudio.Language.Intellisense
 open Yard.Core.Checkers
+open Yard.Core.IL.Production
+open Yard.Core.IL.Definition
 open System.Collections.Concurrent
 
 module SolutionData = 
+
+    type CoordinateWord (startCoordinate : int, wordLength : int) = 
+         member this.StartCoordinate = startCoordinate
+         member this.WordLength = wordLength
+         member this.EndCoordinate = startCoordinate + wordLength
+         
 ////
 ////                YardFile
 ////
@@ -28,40 +36,76 @@ module SolutionData =
          member this.FullPath = fullPath
          member this.Included = included
 
-    type CoordinateWord (startCoordinate : int, wordLength : int) = 
-         member this.StartCoordinate = startCoordinate
-         member this.WordLength = wordLength
-         member this.EndCoordinate = startCoordinate + wordLength
-
     type YardFile (yardInfo: YardInfo) as this =
-         let tokens = reMakeTokens ("")  //Текущие токены (сначала пустые)
-         let tree = ParseText("")
-
+         let info = yardInfo
          let reMakeTokens (fileText: string) = fileText |> LexString |> List.ofSeq // Получаем токены    
+         let mutable tokens = reMakeTokens (String.Empty)  //Текущие токены (сначала пустые)
+         let mutable tree = ParseText(String.Empty)
+         let mutable positionToNotTerm = Array.create 0 ""
+         let notTermToPosition = new Dictionary<string, List<CoordinateWord>>()
+         let notTermToDEFPosition = new Dictionary<string, CoordinateWord>()
+         
+         let addNotTermToDEFPosition node = 
+                      let coorWord = CoordinateWord(match node with (a, (b,c,d)) -> b,c)
+                      notTermToDEFPosition.Add( fst node, coorWord)
+                      for i in coorWord.StartCoordinate .. coorWord.EndCoordinate do
+                          Array.set positionToNotTerm i (fst node)
 
+         let rec addNotTermToPosition elem =
+                      match elem with
+                      |  PRef ((name, (staCoordinate, endCoordinate, _)) , _) -> if (notTermToPosition.ContainsKey(name))
+                                                                                 then notTermToPosition.[name].Add(CoordinateWord (staCoordinate, endCoordinate))
+                                                                                 else let listCoor = new ResizeArray<CoordinateWord>()
+                                                                                      listCoor.Add(CoordinateWord (staCoordinate, endCoordinate))
+                                                                                      notTermToPosition.Add(name, listCoor)
+                                                                                 for i in staCoordinate .. endCoordinate do
+                                                                                      Array.set positionToNotTerm i name
+                                                                             
+                      |  PMetaRef ((name, (staCoordinate, endCoordinate, _)),_,exprList) ->  
+                            if (notTermToPosition.ContainsKey(name))
+                            then notTermToPosition.[name].Add(CoordinateWord (staCoordinate, endCoordinate))
+                            else let listCoor = new ResizeArray<CoordinateWord>()
+                                 listCoor.Add(CoordinateWord (staCoordinate, endCoordinate))
+                                 notTermToPosition.Add(name, listCoor)
+                            for i in staCoordinate .. endCoordinate do
+                                 Array.set positionToNotTerm i name
+                            exprList |> List.iter addNotTermToPosition
+                      |  PSeq (exprList,_) -> exprList |> List.iter (fun r -> addNotTermToPosition r.rule)
+                      |  PPerm exprList    -> exprList |> List.iter (fun r -> addNotTermToPosition r)
+                      |  PRepet (expr,_,_)
+                      |  PMany expr
+                      |  PSome expr
+                      |  POpt  expr -> addNotTermToPosition expr
+                      |  PAlt (lExpr,rExpr) -> 
+                           addNotTermToPosition lExpr
+                           addNotTermToPosition rExpr
+                      |  PLiteral _ -> ()
+                      |  PToken _  -> ()
 
-         let getNonterminals (newTree: Yard.Core.IL.Definition.t<_,_> ) = 
-                      newTree.grammar |> List.iter (fun elem ->
-                      this.NotTermToDEFPosition.Add(fst elem.name)
-                      )
+         let getNonterminals newTree = 
+                      newTree.grammar |> List.iter (fun node ->
+                                                    if (match node.name with (_,(_,_,path)) -> String.Compare(path, info.FullPath) = 0)
+                                                    then addNotTermToDEFPosition (node.name)
+                                                         addNotTermToPosition (node.body)
+                                                   )
          
          // Парсим string
-         let parseText(fileText: string) =
-            tokens = reMakeTokens (fileText)
-            tree = ParseText (fileText)
+         let parseText (fileText: string) =
+             //Чистка списков должна быть !!!!!
+             positionToNotTerm <- Array.create fileText.Length ""
+             tokens <- reMakeTokens (fileText)
+             tree <- ParseText (fileText)
             
-
-         let reparse() = ParseFile (this.Info.FullPath + this.Info.FileName)
-         member this.Info = yardInfo
-      //   member this.PositionToNotTerm
-         member this.NotTermToPosition = new Dictionary<string, List<CoordinateWord>>()
-         member this.NotTermToDEFPosition = new Dictionary<string, CoordinateWord>()
-
-
-         member ReParse() = reparse()
          
-      //   member this.Tokens = new Array<>
-      //   let Reparse() = 
+         let reparse() = ParseFile (info.FullPath + info.FileName)
+         member this.Info = info
+         member this.PositionToNotTerm = positionToNotTerm
+         member this.NotTermToPosition = notTermToPosition
+         member this.NotTermToDEFPosition = notTermToDEFPosition
+
+
+         member this.ReParse() = reparse()
+
 
 ////
 ////               Project
@@ -79,9 +123,10 @@ module SolutionData =
          member this.DicYard = dicYard
 
     type Project (projectInfo : ProjectInfo) as this =
-         member this.Info = projectInfo
-         let reparse() = this.Info.RootYard.ReParse()
-         member this.Reparse() = reparse()
+         let info = projectInfo
+         let reparse() = info.RootYard.ReParse()
+         member this.Info = info
+         member this.ReParse() = reparse()
 
 
 ////
@@ -93,9 +138,9 @@ module SolutionData =
          let FirstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
        //  let AddProject
          member this.Projects = projects
-         member this.ReParseSolution() = for x in Projects do x.Reparse()
+         member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
     let private x = Lazy<_>.Create(fun () -> new Solution())
     let GetData() = x
 
-    *)
+    

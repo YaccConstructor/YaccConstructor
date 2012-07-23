@@ -26,6 +26,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
+open Yard.Core.IL.Rule
 
 //--Тестовые функции-------------------------------------------------------------------------------
 
@@ -40,38 +41,40 @@ let print (obj:'a) =
 
 //--Функция которая удаляет правила в правиле------------------------------------------------------
 
-let reductionRule (ruleList: Rule.t<_, _> list) = 
+let private reductionRule (ruleList: Rule.t<_, _> list) = 
 
     let reduction = ref []
     
     let rec addRule (rule: Rule.t<_, _>) (elements: elem<_, _> list) = 
         [{
-            Rule.t.name = rule.name
-            Rule.t.args=rule.args
-            Rule.t._public=rule._public
-            Rule.t.metaArgs=rule.metaArgs
-            Rule.t.body=PSeq(elements 
+            name = rule.name
+            args=rule.args
+            _public=rule._public
+            metaArgs=rule.metaArgs
+            body=PSeq(elements 
                 |> List.collect
-                    (fun elem -> 
-                        match elem.rule with
-                        |PSeq(e, a, l) -> 
-                            incr index
-                            let i = !index
-                            reduction := addRule {                         
-                                    Rule.t.name = "newRuleInRule" + (!index).ToString()
-                                    Rule.t.args=[]
-                                    Rule.t._public=false
-                                    Rule.t.metaArgs=[]
-                                    Rule.t.body=elem.rule
-                                } e @ !reduction
-                            [{
-                                Production.elem.omit = false
-                                Production.elem.binding = None
-                                Production.elem.checker = None
-                                Production.elem.rule = Production.t.PRef(("newRuleInRule" + (i).ToString(), (0, 0)), None)
-                            }]
-                        |x -> [elem]
-                    ), None, None)
+                            (fun elem -> 
+                                match elem.rule with
+                                |PSeq(e, a, l) -> 
+                                    incr index
+                                    let i = !index
+                                    reduction := addRule {                         
+                                            name = "newRuleInRule" + (!index).ToString()
+                                            args=[]
+                                            _public=false
+                                            metaArgs=[]
+                                            body=elem.rule
+                                        } e @ !reduction
+                                    [{
+                                        omit = false
+                                        binding = None
+                                        checker = None
+                                        rule = PRef(("newRuleInRule" + (i).ToString(), (0, 0)), None)
+                                    }]
+                                |x -> [elem]
+                            ), 
+                            (match rule.body with PSeq(e, a, l) -> a | x -> None), 
+                            (match rule.body with PSeq(e, a, l) -> l | x -> None) )
         }]
 
     let newRule = 
@@ -120,18 +123,31 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
     //--Функция для добавления нового правила------------------------------------------------------
 
     let newRule (rule: Rule.t<_, _>) (epsRef: string list) = 
-        incr index
-        [{
-            Rule.t.name="newEpsRule" + (!index).ToString()
-            Rule.t.args=[]
-            Rule.t._public=false
-            Rule.t.metaArgs=[] 
-            Rule.t.body=PSeq([], None, None)
-        }]
+        
+        if not epsRef.IsEmpty then
+            incr index
+            [{
+                name=rule.name
+                args=[]
+                _public=rule._public
+                metaArgs=[]
+                body=PSeq(
+                                (match rule.body with PSeq(e, a, l) -> e | x -> []) |> List.collect 
+                                    (fun elem ->
+                                        match elem.rule with
+                                        |PRef(t, _) when not (isEps (fst t)).IsEmpty -> []
+                                        |x -> [elem]
+                                    )
+                                ,
+                                (match rule.body with PSeq(e, a, l) -> a | x -> None), 
+                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
+            }]
+        else
+            []
 
     //--Добавляем новые правила--------------------------------------------------------------------
     
-    reductionRule ruleList |> List.collect
+    ruleList |> List.collect
         (fun rule -> 
             match rule.body with
             |PSeq(elements, actionCode, lbl) when not elements.IsEmpty -> 
@@ -141,7 +157,52 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
 
 //--Функция для удаления цепных правил-------------------------------------------------------------
                 
-let deleteChainRule (ruleList: Rule.t<_, _> list) = ruleList
+let deleteChainRule (ruleList: Rule.t<_, _> list) = 
+    
+    let rec newRule (mainRule: Rule.t<_, _>) (name: string)  = 
+        ruleList |> List.collect
+            (fun rule ->
+
+                let isOneRule rule = 
+                    match rule.body with
+                    |PSeq(elements, actionCode, lbl) 
+                        when elements.Length = 1
+                        && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> true
+                    |x -> false
+
+                if rule.name = name then 
+                    if isOneRule rule then
+                        newRule mainRule 
+                            (match rule.body with
+                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> (fst t) | x -> "")
+                             |x -> ""
+                            )
+                    else
+                        [{
+                            name=mainRule.name
+                            args=rule.args
+                            _public=mainRule._public
+                            metaArgs=rule.metaArgs
+                            body=rule.body
+                        }] 
+                else
+                    []
+            )
+        
+
+    ruleList |> List.collect
+        (fun rule -> 
+            match rule.body with
+            |PSeq(elements, actionCode, lbl) 
+                when elements.Length = 1
+                && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> 
+                newRule rule (match elements.Head.rule with PRef(t, _) -> (fst t) | x -> "")
+            |x -> [rule]
+        )
+
+//--Переименование терминалов в нетерминалы в неподходящих правилах---------------------------
+
+let renameTerm (ruleList: Rule.t<_, _> list) = ruleList
 
 //--Преобразование в КНФ---------------------------------------------------------------------------
 
@@ -152,6 +213,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
     |> deleteEpsRule
     |> deleteChainRule
     |> cnf
+    |> renameTerm
 
 type ToCNF() = 
     inherit Convertion()

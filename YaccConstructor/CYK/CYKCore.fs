@@ -1,7 +1,16 @@
 ﻿namespace Yard.Generators.CYKGenerator
+
+open System.Collections.Generic
+
 //(32        |16       |8       |8        )
 //(ruleIndex |lblState |lblName |lblWeght )
-type tblData = uint64 
+type tblData = uint64
+
+[<Struct>]
+type CellData =
+    val rData : tblData
+    val _k : uint32
+    new (r, k) = {rData=r;_k=k}
 
 type CellContent = 
     struct
@@ -14,7 +23,7 @@ type LblState =
      | Defined = 0
      | Undefined = 1
      | Conflict = 2
-    
+
 [<AutoOpen>]
 module TableDataHelpers =
     
@@ -39,7 +48,9 @@ module TableDataHelpers =
 type CYKCore() =
 
     // правила грамматики, инициализируются в Recognize
-    let mutable rules : rule[] = null
+    let mutable rules: rule[] = null
+
+    let mutable recTable = null
 
     [<Literal>]
     let noLbl = 0uy
@@ -62,24 +73,23 @@ type CYKCore() =
         (i,k),(k+i+1,l-k-1)
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
-        
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<_>())
 
-        let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 = 
-            let conflictLbl = (noLbl,LblState.Conflict)            
+        recTable <- Microsoft.FSharp.Collections.Array2D.create s.Length s.Length (new ResizeArray<_>())
+
+        let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
+            let conflictLbl = (noLbl,LblState.Conflict)
             match lState1,lState2 with
             |LblState.Conflict,_ -> conflictLbl
             |_,LblState.Conflict -> conflictLbl
-            |LblState.Undefined,LblState.Undefined when ruleLabel = 0uy -> noLbl,LblState.Undefined 
+            |LblState.Undefined,LblState.Undefined when ruleLabel = 0uy -> noLbl,LblState.Undefined
             |_ ->
-                let notEmptyLbls = List.filter ((<>) noLbl) [lbl1;lbl2;ruleLabel]
+                let notEmptyLbls = Array.filter ((<>) noLbl) [|lbl1;lbl2;ruleLabel|]
                 if notEmptyLbls.Length = 1
                 then notEmptyLbls.[0],LblState.Defined
-                elif List.forall ((=)notEmptyLbls.[0]) notEmptyLbls
+                elif Array.forall ((=)notEmptyLbls.[0]) notEmptyLbls
                 then notEmptyLbls.[0],LblState.Defined
                 else noLbl,LblState.Conflict
-                
-                    
+
         let processRule (rule:rule) i k l =
             let a,b,c,rl,rw = getRule rule
             let ruleIndex = Array.findIndex ((=)rule) rules
@@ -89,12 +99,11 @@ type CYKCore() =
                 let right = recTable.[k+i+1,l-k-1]
                 let count1 = left.Count
                 let count2 = right.Count
-                        
                 if (count1 > 0) && (count2 > 0)
                 then
                     for m in 0..(count1 - 1) do
                         for n in 0..(count2 - 1) do
-                            if (getCellRuleTop left m = b) && (getCellRuleTop right n = (uint16)c)
+                            if (getCellRuleTop left m = b) && (getCellRuleTop right n = c)
                             then
                                 let lState1,lbl1,weight1 = getCellData left m
                                 let lState2,lbl2,weight2 = getCellData right n
@@ -131,13 +140,28 @@ type CYKCore() =
                         let updatedArray = ResizeArray.append (recTable.[k,0]) (ResizeArray.ofArray [|new CellContent(currentElem,-1)|])
                         recTable.[k,0] <- updatedArray
                 |_ -> ()
-    
+
         fillTable 0 1
 
         recTable
 
+    // на вход подаем элемент списка ячейки i l
+    let rec trackConflict (cell:CellContent) i l =
+         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l cell.K
+         let ruleIndex,_,_,_ = getData cell.Data
+         let _,b,c,_,_ = getRule rules.[(int)ruleIndex]
+         let left:ResizeArray<CellContent> = recTable.[leftI,leftL]
+         let right:ResizeArray<CellContent> = recTable.[rightI,rightL]
+
+         ResizeArray.iter (fun (a:CellContent) -> 
+                                let ind,state,_,_ = getData a.Data
+                                let curA,_,_,_,_ = getRule rules.[int ind]
+                                if (curA = b && state = LblState.Conflict)
+                                then trackConflict a leftI leftL
+                                else ()) left
+
     let recognize ((grules, start) as g) s weightCalcFun =
-        let recTable = recognitionTable g s weightCalcFun
+        recTable <- recognitionTable g s weightCalcFun
         (*
         let rec derivation i l top = 
             let nonterminals,bs,cs,rls,rws,lStates,cls,cws = getCellData recTable.[i,l]
@@ -173,7 +197,7 @@ type CYKCore() =
             
         let rec out i last = 
             if (i <= last)
-            then let state,lbl,weight = getCellData recTable.[0, s.Length-1] i
+            then let state,lbl,weight = getCellData (recTable.[0, s.Length-1]) i
                  match i with
                  |v when (v = last) -> getString state lbl weight
                  |_ -> String.concat "\n" [(getString state lbl weight); out (i+1) last]

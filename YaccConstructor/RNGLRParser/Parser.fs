@@ -22,25 +22,26 @@ module Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
+open Microsoft.FSharp.Text.Lexing
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of int * 'TokenType * string
 
-let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
+let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     let startState = 0
     let startRule = parserSource.LeftSide.[parserSource.StartRule]
     if not <| enum.MoveNext() then
         if parserSource.AccStates.[startState] then
-            let res = Array.create 1 <| Epsilon (startRule)
+            let res = new ResizeArray<_>([Epsilon startRule])
             new Tree<_>(res, 0) |> Success
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
         let curToken = ref enum.Current
         let curNum = ref (parserSource.TokenToNumber enum.Current)
-        /// Here will be collected all nodes in AST
+        /// Here all nodes in AST will be collected
         let nodes = new ResizeArray<_>()
         // Must be number of non-terminals, but doesn't matter
         let nonTermsCountLimit = max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
@@ -136,9 +137,11 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             if !curNum = parserSource.EofIndex then isEnd := true
             else
                 let newAstNode = Term enum.Current
-                curNum := 
-                    if enum.MoveNext() then parserSource.TokenToNumber enum.Current
-                    else parserSource.EofIndex
+                if enum.MoveNext() then
+                    curToken := enum.Current
+                    curNum := parserSource.TokenToNumber enum.Current
+                else
+                    curNum := parserSource.EofIndex
                 for i = 0 to !curLevelCount-1 do
                     stateToVertex.[usedStates.[i]] <- null
                 curLevelCount := 0
@@ -179,4 +182,4 @@ let buildAst<'TokenType when 'TokenType:equality> (parserSource : ParserSource<'
             printfn ""
             match !root with
             | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state")
-            | Some res -> Success <| new Tree<_>(nodes.ToArray(), res)
+            | Some res -> Success <| new Tree<_>(nodes, res)

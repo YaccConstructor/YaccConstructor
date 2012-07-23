@@ -29,7 +29,8 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter) =
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter)
+        tokenToRangeFunction positionType =
     let tab = 4
     let print (x : 'a) =
         fprintf out x
@@ -122,7 +123,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printArr grammar.epsilonTrees
                 (function
                  | null -> "null"
-                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",0)")
+                 | tree -> "new Tree<_>(new ResizeArray<_>(" + printArr (tree.Nodes.ToArray()) printAst + "),0)")
         |> wordL
 
     // Realise rules
@@ -173,7 +174,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
         let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
-        wordL (sprintf "fun (%s : array<_>) -> " childrenName)
+        wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
@@ -219,12 +220,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 @@-- concats)
             @@ wordL "|] ")
 
+    let isDefaultName = tokenToRangeFunction = "_rnglr_tokenToEmptyRange"
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate (tree : Tree<_>) : " + typeName + " = ")
-        let body = 
-            "unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName + " " + epsilonName + ") : " + typeName
-            |> wordL
+        let funHead = wordL ("let translate " + (if isDefaultName then "" else tokenToRangeFunction) + " (tree : Tree<_>) : " + typeName + " = ")
+        let body =
+            [if isDefaultName then
+                yield wordL "let inline _rnglr_tokenToEmptyRange (x : 'a) = Microsoft.FSharp.Text.Lexing.Position.Empty, Microsoft.FSharp.Text.Lexing.Position.Empty"
+             yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
+                            + " " + epsilonName + " " + tokenToRangeFunction + ") : " + typeName)
+            ] |> aboveListL
         funHead @@-- body
 
     let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"

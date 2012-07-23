@@ -19,16 +19,14 @@
 
 module Yard.Generators.RNGLR.AST
 open System
-
-type Child =
-    /// Non-terminal expansion: production, family of children
-    /// All nodes are stored in array, so there is a correspondence between integer and node.
-    int * int []
+open Microsoft.FSharp.Text.Lexing
 
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
 /// int - number of token, if there is an epsilon-tree derivation, -1 otherwise.
 type AST<'TokenType> =
-    | NonTerm of (ResizeArray<Child>)
+    /// Non-terminal expansion: production, family of children
+    /// All nodes are stored in array, so there is a correspondence between integer and node.
+    | NonTerm of (ResizeArray<int * int []>)
     | Epsilon of int
     | Term of 'TokenType
 
@@ -38,21 +36,17 @@ let inline getFamily node =
     | Epsilon _ -> failwith "Attempt to get family of epsilon"
     | Term _ -> failwith "Attempt to get family of terminal"
 
-let inline getEpsilon node =
-    match node with
-    | Epsilon eps -> eps
-    | NonTerm list -> failwith "Attempt to get epsilon of non-terminal"
-    | Term _ -> failwith "Attempt to get epsilon of terminal"
-
 [<AllowNullLiteral>]
-type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
-    let pos = Array.create nodes.Length -1
-    let reachable = Array.zeroCreate nodes.Length
+type Tree<'TokenType> (nodes : ResizeArray<AST<'TokenType>>, root : int) =
+    let scaleSize = int <| double nodes.Count * 1.2
+    let reachable = new ResizeArray<_>(scaleSize)
     let order =
+        for i = 0 to nodes.Count-1 do
+            reachable.Add false
         let stack = new System.Collections.Generic.Stack<_>()
         stack.Push root
-        let res = new ResizeArray<_>(nodes.Length)
-            
+        let res = new ResizeArray<_>(int <| double nodes.Count * 1.2)
+        
         while stack.Count > 0 do
             let u = stack.Pop()
             if u < 0 then
@@ -63,22 +57,33 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                 match nodes.[u] with
                 | NonTerm children ->
                     children |> ResizeArray.iter (
-                        fun (_,nodes) ->
-                            for j in nodes do
-                                if not reachable.[j] then
-                                    stack.Push j)
+                        fun (_,family) ->
+                            for j = 0 to family.Length - 1 do
+                                if not reachable.[family.[j]] then
+                                    match nodes.[family.[j]] with
+                                    | Epsilon eps ->
+                                        family.[j] <- nodes.Count
+                                        nodes.Add <| Epsilon eps
+                                        reachable.Add true
+                                        res.Add family.[j]
+                                    | Term _ ->
+                                        reachable.[family.[j]] <- true
+                                        res.Add family.[j]
+                                    | _ -> stack.Push family.[j])
                 | _ -> ()
-            
-        let ret = res.ToArray()
-        for i = 0 to ret.Length-1 do
-            pos.[ret.[i]] <- i
-        ret
+        res.ToArray()
 
+    let pos =
+        let ret = Array.zeroCreate nodes.Count
+        for i = 0 to order.Length-1 do
+            ret.[order.[i]] <- i
+        ret
+    
     member this.Nodes = nodes
     member this.Order = order
 
     member this.EliminateCycles() =
-        let proper = Array.create nodes.Length true
+        let proper = Array.create nodes.Count true
         for x in order do
             match nodes.[x] with
             | NonTerm children ->
@@ -123,23 +128,73 @@ type Tree<'TokenType> (nodes : AST<'TokenType>[], root : int) =
                         reachable.[j] <- true
                 | _ -> ()
 
-    member this.Translate (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (epsilons : array<Tree<_>>) =
-        let result = Array.zeroCreate nodes.Length
+    member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
+        let result = Array.zeroCreate nodes.Count
         for x in order do
             if reachable.[x] then
                 match nodes.[x] with
-                | Term t -> result.[x] <- box t
-                | Epsilon eps ->
-                    result.[x] <- epsilons.[eps].Translate funs leftSides concat [||]//epsilons
                 | NonTerm children ->
                     result.[x] <- 
                         if children.Count = 1 then
-                            funs.[fst children.[0]] (snd children.[0] |> Array.map (fun i -> result.[i]))
+                            funs.[fst children.[0]] (snd children.[0] |> Array.map (fun i -> result.[i])) range
                         else
                             children
                             |> ResizeArray.map (
                                 fun (prod, children) ->
-                                    funs.[prod] (children |> Array.map (fun i -> result.[i]))
+                                    funs.[prod] (children |> Array.map (fun i -> result.[i])) range
+                                )
+                            |> ResizeArray.toList
+                            |> concat.[leftSides.[fst children.[0]]]
+                | x -> failwith "%A was not expected in epsilon-translation" x
+        result.[root]
+            
+    member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
+                            (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) =
+        let result = Array.zeroCreate nodes.Count
+        let ranges : ('Position * 'Position)[] = Array.zeroCreate nodes.Count
+        // Set Positions
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term t -> ranges.[x] <- tokenToRange t
+                | Epsilon _ -> ()
+                | NonTerm children ->
+                    let family = snd children.[0]
+                    let mutable j, k = 0, family.Length-1
+                    let inline isEpsilon x = match nodes.[x] with Epsilon _ -> true | _ -> false
+                    while isEpsilon family.[j] do
+                        j <- j + 1
+                    while isEpsilon family.[k] do
+                        k <- k - 1
+                    let beginPos = fst ranges.[family.[j]]
+                    ranges.[x] <- beginPos, (snd ranges.[family.[k]])
+                    //let beginRange = beginPos, beginPos
+                    children |> ResizeArray.iter
+                        (fun (_,family) ->
+                            if isEpsilon family.[0] then
+                                ranges.[family.[0]] <- beginPos, beginPos
+                            for i = 1 to family.Length-1 do
+                                if isEpsilon family.[i] then
+                                    let end' = snd ranges.[family.[i-1]]
+                                    ranges.[family.[i]] <- end', end'
+                        )
+
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term t ->
+                    result.[x] <- box t
+                | Epsilon eps ->
+                    result.[x] <- epsilons.[eps].TranslateEpsilon funs leftSides concat ranges.[x]//epsilons
+                | NonTerm children ->
+                    result.[x] <- 
+                        if children.Count = 1 then
+                            funs.[fst children.[0]] (snd children.[0] |> Array.map (fun i -> result.[i])) ranges.[x]
+                        else
+                            children
+                            |> ResizeArray.map (
+                                fun (prod, children) ->
+                                    funs.[prod] (children |> Array.map (fun i -> result.[i])) ranges.[x]
                                 )
                             |> ResizeArray.toList
                             |> concat.[leftSides.[fst children.[0]]]

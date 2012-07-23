@@ -114,7 +114,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                     pos.[w])
                         children.Add (rule, nodes)
                 res.Add (NonTerm children)
-            result.[u] <- new Tree<_>(res.ToArray(), 0)
+            result.[u] <- new Tree<_>(res, 0)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

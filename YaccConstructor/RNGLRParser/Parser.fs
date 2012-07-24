@@ -96,7 +96,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             (function (number,children) -> number = prod && Array.forall2 (=) children path)
                     if not astExists then
                         family.Add (prod, path)
-                let handlePath (path : int list) (final : Vertex<_,_>) =
+
+                let handlePath (path : int[]) (final : Vertex<_,_>) =
                     let ast = ref -1
                     let state = parserSource.Gotos.[fst final.label].[nonTerm].Value
                     let newVertex = addVertex state num None
@@ -111,24 +112,28 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         if (pos > 0) then
                             for (prod, pos) in parserSource.Reduces.[state].[!curNum] do
                                 reductions.Enqueue (newVertex, prod, pos, Some edge)
-                    if path = [] then nodes.[!ast] <- Epsilon parserSource.LeftSide.[prod]
-                    else addChildren nodes.[!ast] (path |> List.toArray) prod
+                    addChildren nodes.[!ast] (Microsoft.FSharp.Collections.Array.copy path) prod
 
-                let rec walk length (vertex : Vertex<_,_>) path =
-                    if length = 0 then handlePath path vertex
+                let rec walk remainLength (vertex : Vertex<_,_>) path =
+                    if remainLength = 0 then handlePath path vertex
                     else
                         vertex.outEdges |> ResizeArray.iter
-                            (fun e -> walk (length - 1) e.dest (e.label::path))
+                            (fun e ->
+                                path.[remainLength - 1] <- e.label
+                                walk (remainLength - 1) e.dest path)
                 
                 if pos = 0 then
-                    handlePath [] vertex
+                    let state = parserSource.Gotos.[fst vertex.label].[nonTerm].Value
+                    let newVertex = addVertex state num None
+                    if newVertex.outEdges |> ResizeArray.forall (fun e -> e.dest.label <> vertex.label) then
+                        let edge = new Edge<int*int, int>(vertex, epsilons.[parserSource.LeftSide.[prod]])
+                        newVertex.addEdge edge
                 else 
-                    let epsilonPart =
-                        let mutable res = []
-                        for i = parserSource.Length.[prod] - 1 downto pos do
-                            res <- (epsilons.[parserSource.Rules.[parserSource.RulesStart.[prod] + i]]) ::res
-                        res
-                    walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest (edgeOpt.Value.label::epsilonPart)
+                    let path = Array.zeroCreate parserSource.Length.[prod]
+                    for i = path.Length - 1 downto pos do
+                        path.[i] <- epsilons.[parserSource.Rules.[parserSource.RulesStart.[prod] + i]]
+                    path.[pos - 1] <- edgeOpt.Value.label
+                    walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest path
 
         let curInd = ref 0
         let isEnd = ref false

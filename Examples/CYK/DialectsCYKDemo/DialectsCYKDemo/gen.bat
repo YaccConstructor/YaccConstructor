@@ -1,0 +1,1 @@
+..\..\yc\YaccConstructor.exe -g CYKGenerator -i Demo1.yrd

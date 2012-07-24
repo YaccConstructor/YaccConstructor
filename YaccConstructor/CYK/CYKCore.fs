@@ -86,9 +86,9 @@ type CYKCore() =
 
         let processRule rule ruleIndex i k l =
             let a,b,c,rl,rw = getRule rule
-            if c<>0us then
-                let left = recTable.[i,k]
-                let right = recTable.[k+i+1,l-k-1]
+            if c <> 0us then
+                let left = recTable.[i, k]
+                let right = recTable.[k+i+1, l-k-1]
                 let count1 = left.Count
                 let count2 = right.Count
 

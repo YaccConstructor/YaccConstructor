@@ -218,12 +218,12 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
 
 let renameTerm ruleList = 
     
-    let isToken (elem: elem<_, _>) = match elem.rule with PToken(_, _) -> true | x -> false
-    let isRef (elem: elem<_, _>) = match elem.rule with PRef(_, _) -> true | x -> false
-    let isCNF (rule: Rule.t<_, _>) = 
+    let isToken (elem: elem<_,_>) = match elem.rule with PToken(_,_) -> true | x -> false
+    let isRef (elem: elem<_,_>) = match elem.rule with PRef(_,_) -> true | x -> false
+    let isCNF (rule: Rule.t<_,_>) = 
         match rule.body with
-        |PSeq(elements, _, _) when elements.Length = 1 && isToken elements.Head -> true
-        |PSeq(elements, _, _) when elements.Length = 2 && isRef (elements.Item(0)) && isRef (elements.Item(1)) -> true
+        |PSeq(elements,_,_) when elements.Length = 1 && isToken elements.Head -> true
+        |PSeq(elements,_,_) when elements.Length = 2 && isRef elements.[0] && isRef elements.[1] -> true
         |x -> false
 
     let list1 = ref []
@@ -244,7 +244,7 @@ let renameTerm ruleList =
                     omit = elem.omit
                     binding=elem.binding
                     checker=elem.checker
-                    rule=PRef(( newName , (0, 0)), None)
+                    rule=PRef((newName, (0, 0)), None)
                 }
             else elem
         let elements = match rule.body with PSeq(e, a, l) -> e | x -> []
@@ -253,7 +253,7 @@ let renameTerm ruleList =
             args = rule.args
             _public = rule._public
             metaArgs = rule.metaArgs 
-            body = PSeq([rename (elements.Item(0)); rename (elements.Item(1))], 
+            body = PSeq([rename elements.[0]; rename elements.[1]], 
                                 (match rule.body with PSeq(e, a, l) -> a | x -> None),
                                 (match rule.body with PSeq(e, a, l) -> l | x -> None))
             
@@ -284,10 +284,10 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                 "newCnfRule" + (!i).ToString()
             let cutRule = 
                 if elements.Length > 2 then
-                    ((((elements |> List.rev).Tail).Tail) |> List.rev) @ 
+                    ((elements |> List.rev).Tail.Tail |> List.rev) @ 
                         [{
                             omit = false
-                            rule = PRef(((addRule (elements.Item(elements.Length - 2)) (elements.Item(elements.Length - 1))), (0, 0)), None)
+                            rule = PRef((addRule elements.[elements.Length - 2] elements.[elements.Length - 1], (0, 0)), None)
                             binding = None
                             checker = None
                         }]

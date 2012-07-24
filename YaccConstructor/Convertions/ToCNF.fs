@@ -30,24 +30,23 @@ open Yard.Core.IL.Rule
 
 //--Функция для удаления эпсилон-правил------------------------------------------------------------
 
-let deleteEpsRule (ruleList: Rule.t<_, _> list) = 
+let deleteEpsRule (ruleList: Rule.t<_,_> list) = 
     
     //--Генерация перестановок---------------------------------------------------------------------
         
-    let genPermutation (N: int) = 
+    let genPermutation N = 
         let genList = ref [[]]
-        let addInList (list: int list list) = 
+        let addInList list = 
             genList := list @ !genList
             list
-        let startList = [1 .. N] |> List.collect (fun i -> [[i]])
+        let startList = [for i in [1 .. N] -> [i]]
         genList := startList
-        let rec iter (listList: int list list) = 
-            if listList.Length <> 1 then
+        let rec iter listList = 
+            if List.length listList <> 1 then
                 listList |> List.collect 
-                    (fun i -> [(i |> List.max) + 1 .. N] |> List.collect (fun j -> [ i @ [j] ])) 
+                    (fun i -> [List.max i + 1 .. N] |> List.collect (fun j -> [ i @ [j] ])) 
                 |> addInList 
-                |> iter
-            else []      
+                |> iter                  
         iter startList
         !genList
         
@@ -63,13 +62,13 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
 
     //--Функция для проверки вхождения эпсилон-правила---------------------------------------------
 
-    let isEps (s:string) = 
+    let isEps s = 
         epsList |> List.collect
             (fun eps -> if s = eps then [eps] else [])
     
     //--Список эпсилон-правил входящих в данное правило--------------------------------------------     
 
-    let rec epsInRule (elements: elem<_, _> list) = 
+    let rec epsInRule elements = 
         elements |> List.collect
                     (fun elem ->
                         match elem.rule with
@@ -80,7 +79,7 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
                         
     //--Функция для добавления нового правила------------------------------------------------------
 
-    let newRule (rule: Rule.t<_, _>) (epsRef: string list) = 
+    let newRule (rule: Rule.t<_, _>) (epsRef: list<string>) = 
         if not epsRef.IsEmpty then
             let numberEpsRef = genPermutation epsRef.Length 
             let numberBody = 
@@ -144,10 +143,8 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
                     body=numberBody
                 }
             numberEpsRef |> List.collect
-                (fun eps ->
-                    addRule numberRule eps)
-        else
-            []
+                (fun eps -> addRule numberRule eps)
+        else []
             
             
     //--Добавляем новые правила--------------------------------------------------------------------
@@ -164,7 +161,7 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
                 
 let deleteChainRule (ruleList: Rule.t<_, _> list) = 
     
-    let rec newRule (mainRule: Rule.t<_, _>) (name: string)  = 
+    let rec newRule (mainRule: Rule.t<_, _>) name = 
         ruleList |> List.collect
             (fun rule ->
 
@@ -191,7 +188,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                     if isOneRule rule then
                         newRule mainRule 
                             (match rule.body with
-                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> (fst t) | x -> "")
+                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> fst t | x -> "")
                              |x -> ""
                             )
                     else
@@ -219,7 +216,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
 
 //--Переименование терминалов в нетерминалы в неподходящих правилах---------------------------
 
-let renameTerm (ruleList: Rule.t<_, _> list) = 
+let renameTerm ruleList = 
     
     let isToken (elem: elem<_, _>) = match elem.rule with PToken(_, _) -> true | x -> false
     let isRef (elem: elem<_, _>) = match elem.rule with PRef(_, _) -> true | x -> false
@@ -269,12 +266,12 @@ let renameTerm (ruleList: Rule.t<_, _> list) =
 
 let toCNF (ruleList: Rule.t<_, _> list) = 
 
-    let cnf (rules: Rule.t<_, _> list) =    
+    let cnf rules =    
         let i = ref 0
         let list2 = ref []
         let rec newRule (rule: Rule.t<_, _>) =  
             let elements = match rule.body with PSeq(e, a, l) -> e | x -> [] 
-            let addRule (elem1: elem<_, _>) (elem2: elem<_, _>) =
+            let addRule elem1 elem2 =
                 incr i
                 list2 :=
                     [{

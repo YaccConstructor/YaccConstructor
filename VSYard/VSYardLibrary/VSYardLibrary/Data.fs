@@ -114,7 +114,7 @@ module SolutionData =
     type ProjectInfo (id : string,
                       fileName : string,
                       fullPath : string,
-                      rootYard : YardFile,
+                      rootYard : string,
                       dicYard: Dictionary<string, YardFile>) =
          member this.extenderCATID = id
          member this.FileName = fileName
@@ -124,9 +124,9 @@ module SolutionData =
 
     type Project (projectInfo : ProjectInfo) as this =
          let info = projectInfo
-         let reparse() = info.RootYard.ReParse()
+     //    let reparse() = info.RootYard.ReParse()
          member this.Info = info
-         member this.ReParse() = reparse()
+     //    member this.ReParse() = reparse()
 
 
 ////
@@ -135,12 +135,14 @@ module SolutionData =
 
     type Solution () as this =
          let projects = new Dictionary<string, Project>()
-         let FirstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
+         let firstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
        //  let AddProject
          member this.Projects = projects
-         member this.ReParseSolution() = for x in projects do x.Value.ReParse()
+         member this.FirstRunAddProjects(y) = firstRunAddProjects(y)
+    //     member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
-    let private x = Lazy<_>.Create(fun () -> new Solution())
-    let GetData() = x
+
+    let private x = new Solution()//Lazy<_>.Create(fun () -> new Solution())
+    let GetSolution() = x
 
     

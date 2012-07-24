@@ -28,8 +28,8 @@ let tokenToNumber = function
     | MUL _ -> 8
 
 let leftSide = [|0; 0; 3; 1; 1; 2; 2|]
-let rules = [|1; 0; 5; 0; 0; 2; 1; 8; 1; 6; 4|]
-let rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
+let private rules = [|1; 0; 5; 0; 0; 2; 1; 8; 1; 6; 4|]
+let private rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
 let startRule = 2
 
 let defaultAstToDot = 
@@ -37,23 +37,22 @@ let defaultAstToDot =
     let startInd = leftSide.[startRule]
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)
 
-let buildAst : (seq<Token> -> ParseResult<Token>) =
-    let inline unpack x = x >>> 16, x <<< 16 >>> 16
-    let small_gotos =
+let inline unpack x = x >>> 16, x <<< 16 >>> 16
+let private small_gotos =
         [|0, [|0,1; 1,4; 2,7; 4,8; 6,9|]; 1, [|5,2|]; 2, [|0,3; 1,4; 2,7; 4,8; 6,9|]; 3, [|5,2|]; 4, [|8,5|]; 5, [|1,6; 2,7; 4,8; 6,9|]; 6, [|8,5|]|]
-    let gotos = Array.zeroCreate 10
-    for i = 0 to 9 do
+let private gotos = Array.zeroCreate 10
+for i = 0 to 9 do
         gotos.[i] <- Array.create 9 None
-    for (i,t) in small_gotos do
+for (i,t) in small_gotos do
         for (j,x) in t do
             gotos.[i].[j] <- Some  x
-    let lists_reduces = [|[||]; [|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
-    let small_reduces =
+let private lists_reduces = [|[||]; [|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
+let private small_reduces =
         [|196610; 327681; 458753; 262146; 327682; 458754; 393219; 327683; 458755; 524291; 458755; 327684; 458756; 524292; 524291; 327685; 458757; 524293; 589827; 327686; 458758; 524294|]
-    let reduces = Array.zeroCreate 10
-    for i = 0 to 9 do
+let reduces = Array.zeroCreate 10
+for i = 0 to 9 do
         reduces.[i] <- Array.create 9 [||]
-    let init_reduces =
+let init_reduces =
         let mutable cur = 0
         while cur < small_reduces.Length do
             let i,length = unpack small_reduces.[cur]
@@ -62,13 +61,13 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_reduces.[cur + k]
                 reduces.[i].[j] <-  lists_reduces.[x]
             cur <- cur + length
-    let lists_zeroReduces = [|[||]|]
-    let small_zeroReduces =
+let private lists_zeroReduces = [|[||]|]
+let private small_zeroReduces =
         [||]
-    let zeroReduces = Array.zeroCreate 10
-    for i = 0 to 9 do
+let zeroReduces = Array.zeroCreate 10
+for i = 0 to 9 do
         zeroReduces.[i] <- Array.create 9 [||]
-    let init_zeroReduces =
+let init_zeroReduces =
         let mutable cur = 0
         while cur < small_zeroReduces.Length do
             let i,length = unpack small_zeroReduces.[cur]
@@ -77,12 +76,13 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_zeroReduces.[cur + k]
                 zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
             cur <- cur + length
-    let small_acc = [1]
-    let accStates = Array.zeroCreate 10
-    for i = 0 to 9 do
+let private small_acc = [1]
+let private accStates = Array.zeroCreate 10
+for i = 0 to 9 do
         accStates.[i] <- List.exists ((=) i) small_acc
-    let eofIndex = 7
-    let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let eofIndex = 7
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type

@@ -17,8 +17,8 @@ let tokenToNumber = function
     | EOF _ -> 3
 
 let leftSide = [|0; 0; 1|]
-let rules = [|2; 2; 0; 0|]
-let rulesStart = [|0; 1; 3; 4|]
+let private rules = [|2; 2; 0; 0|]
+let private rulesStart = [|0; 1; 3; 4|]
 let startRule = 2
 
 let defaultAstToDot = 
@@ -26,23 +26,22 @@ let defaultAstToDot =
     let startInd = leftSide.[startRule]
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)
 
-let buildAst : (seq<Token> -> ParseResult<Token>) =
-    let inline unpack x = x >>> 16, x <<< 16 >>> 16
-    let small_gotos =
+let inline unpack x = x >>> 16, x <<< 16 >>> 16
+let private small_gotos =
         [|0, [|0,1; 2,2|]; 2, [|0,3; 2,2|]|]
-    let gotos = Array.zeroCreate 4
-    for i = 0 to 3 do
+let private gotos = Array.zeroCreate 4
+for i = 0 to 3 do
         gotos.[i] <- Array.create 4 None
-    for (i,t) in small_gotos do
+for (i,t) in small_gotos do
         for (j,x) in t do
             gotos.[i].[j] <- Some  x
-    let lists_reduces = [|[||]; [|0,1|]; [|1,2|]|]
-    let small_reduces =
+let private lists_reduces = [|[||]; [|0,1|]; [|1,2|]|]
+let private small_reduces =
         [|131073; 196609; 196609; 196610|]
-    let reduces = Array.zeroCreate 4
-    for i = 0 to 3 do
+let reduces = Array.zeroCreate 4
+for i = 0 to 3 do
         reduces.[i] <- Array.create 4 [||]
-    let init_reduces =
+let init_reduces =
         let mutable cur = 0
         while cur < small_reduces.Length do
             let i,length = unpack small_reduces.[cur]
@@ -51,13 +50,13 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_reduces.[cur + k]
                 reduces.[i].[j] <-  lists_reduces.[x]
             cur <- cur + length
-    let lists_zeroReduces = [|[||]|]
-    let small_zeroReduces =
+let private lists_zeroReduces = [|[||]|]
+let private small_zeroReduces =
         [||]
-    let zeroReduces = Array.zeroCreate 4
-    for i = 0 to 3 do
+let zeroReduces = Array.zeroCreate 4
+for i = 0 to 3 do
         zeroReduces.[i] <- Array.create 4 [||]
-    let init_zeroReduces =
+let init_zeroReduces =
         let mutable cur = 0
         while cur < small_zeroReduces.Length do
             let i,length = unpack small_zeroReduces.[cur]
@@ -66,12 +65,13 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
                 let j,x = unpack small_zeroReduces.[cur + k]
                 zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
             cur <- cur + length
-    let small_acc = [1]
-    let accStates = Array.zeroCreate 4
-    for i = 0 to 3 do
+let private small_acc = [1]
+let private accStates = Array.zeroCreate 4
+for i = 0 to 3 do
         accStates.[i] <- List.exists ((=) i) small_acc
-    let eofIndex = 3
-    let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let eofIndex = 3
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type

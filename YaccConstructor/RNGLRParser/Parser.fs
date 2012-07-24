@@ -34,8 +34,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let startRule = parserSource.LeftSide.[parserSource.StartRule]
     if not <| enum.MoveNext() then
         if parserSource.AccStates.[startState] then
-            let res = new ResizeArray<_>([Epsilon startRule])
-            new Tree<_>(res, 0) |> Success
+            new Tree<_>([|Epsilon startRule|], 0) |> Success
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
@@ -182,4 +181,4 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             printfn ""
             match !root with
             | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state")
-            | Some res -> Success <| new Tree<_>(nodes, res)
+            | Some res -> Success <| new Tree<_>(nodes.ToArray(), res)

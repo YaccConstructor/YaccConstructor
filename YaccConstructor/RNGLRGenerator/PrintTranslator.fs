@@ -123,7 +123,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printArr grammar.epsilonTrees
                 (function
                  | null -> "null"
-                 | tree -> "new Tree<_>(new ResizeArray<_>(" + printArr (tree.Nodes.ToArray()) printAst + "),0)")
+                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",0)")
         |> wordL
 
     // Realise rules

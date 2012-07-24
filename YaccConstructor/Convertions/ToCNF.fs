@@ -51,15 +51,15 @@ let private reductionRule (ruleList: Rule.t<_, _> list) =
                                     let i = !index
                                     reduction := addRule {                         
                                             name = "newRuleInRule" + (!index).ToString()
-                                            args=[]
+                                            args=rule.args
                                             _public=false
-                                            metaArgs=[]
+                                            metaArgs=rule.metaArgs
                                             body=elem.rule
                                         } e @ !reduction
                                     [{
-                                        omit = false
-                                        binding = None
-                                        checker = None
+                                        omit = elem.omit
+                                        binding = elem.binding
+                                        checker = elem.checker
                                         rule = PRef(("newRuleInRule" + (i).ToString(), (0, 0)), None)
                                     }]
                                 |x -> [elem]
@@ -264,7 +264,65 @@ let renameTerm (ruleList: Rule.t<_, _> list) = ruleList
 //--Преобразование в КНФ---------------------------------------------------------------------------
 
 let toCNF (ruleList: Rule.t<_, _> list) = 
-    let cnf (rules: Rule.t<_, _> list) = rules
+    let cnf (rules: Rule.t<_, _> list) = 
+        
+        let isToken (elem: elem<_, _>) = match elem.rule with PToken(_, _) -> true | x -> false
+        let isRef (elem: elem<_, _>) = match elem.rule with PRef(_, _) -> true | x -> false
+        let isCNF (rule: Rule.t<_, _>) = 
+            match rule.body with
+            |PSeq(elements, _, _) when elements.Length = 1 && isToken elements.Head -> true
+            |PSeq(elements, _, _) when elements.Length = 2 && isRef (elements.Item(0)) && isRef (elements.Item(1)) -> true
+            |x -> false
+        
+        let i = ref 0
+        let list2 = ref []
+        let rec newRule (rule: Rule.t<_, _>) =  
+            let elements = match rule.body with PSeq(e, a, l) -> e | x -> [] 
+            let addRule (elem1: elem<_, _>) (elem2: elem<_, _>) =
+                incr i
+                list2 :=
+                    [{
+                        name = "newCnfRule" + (!i).ToString()
+                        args = rule.args
+                        _public = false
+                        metaArgs = rule.metaArgs 
+                        body = PSeq([elem1; elem2], 
+                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
+                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
+                    }] @ !list2
+                "newCnfRule" + (!i).ToString()
+            let cutRule = 
+                if elements.Length > 2 then
+                    ((((elements |> List.rev).Tail).Tail) |> List.rev) @ 
+                        [{
+                            omit = false
+                            rule = PRef(((addRule (elements.Item(elements.Length - 2)) (elements.Item(elements.Length - 1))), (0, 0)), None)
+                            binding = None
+                            checker = None
+                        }]
+                else []       
+            if elements.Length > 2 then
+                newRule 
+                    {
+                        name = rule.name
+                        args = rule.args
+                        _public = rule._public
+                        metaArgs = rule.metaArgs
+                        body = PSeq(cutRule, 
+                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
+                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
+                    }
+            else 
+                [rule]
+
+        (
+            ruleList |> List.collect
+                (fun rule ->
+                    if isCNF rule then [rule]
+                    else newRule rule
+                ) 
+        ) @ !list2
+
     ruleList
     |> reductionRule
     |> deleteEpsRule

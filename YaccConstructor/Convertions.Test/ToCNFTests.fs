@@ -37,35 +37,53 @@ type ``CNF tests`` () =
     let conversionEps = "DeleteEpsRule"
 
     [<Test>]
-    member test.``Delete eps rule`` () =
+    member test.``ToCNF test`` () =
         Namer.resetRuleEnumerator()
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_0.yrd"))
-        let result = ConvertionsManager.ApplyConvertion conversionEps loadIL
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"cnf_0.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversionCNF loadIL
         let expected = 
             {
                 info = {fileName = ""}
                 head = None
-                grammar =
-                     [{
-                            name = "s"
-                            args = []
-                            body =
-                        
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (("x", (0, 0)),None)}
-                                        ;{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = "yard_exp_brackets_1"
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (("y", (7, 8)),None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (("z", (9, 10)),None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
+                grammar = [{
+                                name = "e"
+                                args = []
+                                body = 
+                                    PSeq (
+                                            [{
+                                                omit = false
+                                                rule = PRef (("new_A", (0, 0)),None)
+                                                binding = None
+                                                checker = None
+                                            }; 
+                                            {
+                                                omit = false
+                                                rule = PRef (("e", (6, 7)),None)
+                                                binding = None
+                                                checker = None
+                                            }],
+                                            None,
+                                            None)
+                                _public = true
+                                metaArgs = []
+                          };
+                          {
+                                name = "new_A"
+                                args = []
+                                body = 
+                                    PSeq (
+                                            [{
+                                                omit = false
+                                                rule = PToken ("A", (4, 5))
+                                                binding = None
+                                                checker = None
+                                            }],
+                                            None,
+                                            None
+                                         )   
+                                _public = false
+                                metaArgs = []
+                          }]
                 foot = None
                 options = Map.empty
             }
@@ -82,33 +100,31 @@ type ``CNF tests`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"chain_0.yrd"))
         let result = ConvertionsManager.ApplyConvertion conversionChain loadIL
         let expected = 
-             {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = "s"
-                            args = []
-                            body =
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (("x", (0, 0)),None)}
-                                        ;{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}
-                                        ;{dummyRule with rule = PRef (("m", (0, 0)),None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = "yard_exp_brackets_1"
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (("y", (7, 8)),None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (("z", (9, 10)),None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+            {info = {fileName = ""}
+             head = None
+             grammar =
+                [{
+                        name = "e"
+                        args = []
+                        body = PSeq ([{omit = false
+                                       rule = PToken ("STRING", (11, 17))
+                                       binding = None
+                                       checker = None}],None,None)
+                        _public = true
+                        metaArgs = []
+                }; 
+                {
+                        name = "s"
+                        args = []
+                        body = PSeq ([{ omit = false
+                                        rule = PToken ("STRING", (11, 17))
+                                        binding = None
+                                        checker = None}],None,None)
+                        _public = false
+                        metaArgs = []
+                }]
+             foot = None
+             options = Map.empty}
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -116,49 +132,42 @@ type ``CNF tests`` () =
         Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers expected.grammar result.grammar)
 
     [<Test>]
-    member test.``to CNF`` () =
+    member test.``delete Eps rule test`` () =
         Namer.resetRuleEnumerator()
-        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"cnf_0.yrd"))
-        let result = ConvertionsManager.ApplyConvertion conversionCNF loadIL
+        let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_0.yrd"))
+        let result = ConvertionsManager.ApplyConvertion conversionEps loadIL
         let expected = 
-             {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = "s"
-                            args = []
-                            body =
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (("x", (0, 0)),None)}
-                                        ;{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}
-                                        ;{dummyRule with rule = PRef (("yard_exp_brackets_2", (0, 0)),None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = "yard_exp_brackets_1"
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (("y", (7, 8)),None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (("z", (9, 10)),None)}],None,None));
-                            _public = false
-                            metaArgs = []
-                         };
-                         {
-                            name = "yard_exp_brackets_2"
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (("m", (7, 8)),None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (("n", (9, 10)),None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
-
+            {info = {fileName = ""}
+             head = None
+             grammar =
+                 [{
+                         name = "e"
+                         args = []
+                         body = PSeq ([],None,None)
+                         _public = true
+                         metaArgs = []
+                 }; 
+                 {       name = "e"
+                         args = []
+                         body = PSeq ([{ omit = false
+                                         rule = PRef (("s", (4, 5)),None)
+                                         binding = None
+                                         checker = None}],None,None)
+                         _public = true
+                         metaArgs = []
+                 };
+                 {
+                         name = "s"
+                         args = []
+                         body = PSeq ([{omit = false
+                                        rule = PToken ("STRING", (23, 29))
+                                        binding = None
+                                        checker = None}],None,None)
+                         _public = false
+                         metaArgs = []
+                 }]
+             foot = None
+             options = Map.empty}
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

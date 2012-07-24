@@ -179,6 +179,7 @@ prim: prim STAR           {PMany $1}
     | prim QUESTION       {POpt $1}
     | LPAREN alts RPAREN  {$2}
     | call                {$1}
+	| lbl_seq             {$1}
     | STRING              {PLiteral $1}
 
 meta_param: prim {$1}

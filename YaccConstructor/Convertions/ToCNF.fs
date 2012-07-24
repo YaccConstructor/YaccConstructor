@@ -78,61 +78,57 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                         
     //--Функция для добавления нового правила------------------------------------------------------
 
-    let newRule (rule: Rule.t<_, _>) (epsRef: list<string>) = 
+    let newRule (rule: Rule.t<_, _>) (epsRef: list<string>) =         
         if not epsRef.IsEmpty then
-            let numberEpsRef = genPermutation epsRef.Length 
-            let numberBody = 
-                let i = ref 0
+            let numberEpsRef = genPermutation epsRef.Length
+            let ac,lbl = match rule.body with PSeq(e, a, l) -> a,l | x -> None,None
+            let i = ref 0
+            let newBody elements =
+                elements 
+                |> List.collect
+                    (fun elem ->
+                        match elem.rule with
+                        |PRef(t, _) when fst t |> isEps |> List.isEmpty |> not-> 
+                            incr i
+                            [{
+                                omit = elem.omit
+                                rule = PRef((string !i, (0, 0)), None)
+                                binding = elem.binding
+                                checker = elem.checker
+                            }]
+                        |x -> [elem]
+                    )
+            let numberBody =                
                 match rule.body with
                 |PSeq(elements, _, _) -> 
-                    PSeq(
-                        elements |> List.collect
-                            (fun elem ->
-                                match elem.rule with
-                                |PRef(t, _) when fst t |> isEps |> List.isEmpty |> not-> 
-                                    incr i
+                    PSeq(newBody elements, ac, lbl)
+                |x -> rule.body
+            let addRule (numberRule: Rule.t<_, _>) eps =
+                let epsWithNameExists t = 
+                    eps
+                    |> List.map string
+                    |> List.exists ((=) (fst t))
+                let ac,lbl = match numberRule.body with PSeq(e, a, l) -> a,l | x -> None,None
+                let newBody = 
+                    match numberRule.body with PSeq(e, a, l) -> e | x -> []
+                    |> List.collect 
+                        (fun elem ->
+                            match elem.rule with
+                            |PRef(t,_) when epsWithNameExists t -> []
+                            |PRef(t,_) when not <| epsWithNameExists t -> 
                                     [{
                                         omit = elem.omit
-                                        rule = PRef(( (!i).ToString(), (0, 0)), None)
+                                        rule = PRef((epsRef.[int (fst t) - 1], (0, 0)), None)
                                         binding = elem.binding
                                         checker = elem.checker
                                     }]
-                                |x -> [elem]
-                            ),
-                            (match rule.body with PSeq(e, a, l) -> a | x -> None),
-                            (match rule.body with PSeq(e, a, l) -> l | x -> None))
-                |x -> rule.body
-            let addRule (numberRule: Rule.t<_, _>) eps =                
+                            |x -> [elem])
                 [{
                     name=numberRule.name
                     args=numberRule.args
                     _public=numberRule._public
                     metaArgs=numberRule.metaArgs
-                    body=PSeq(
-                                (match numberRule.body with PSeq(e, a, l) -> e | x -> [])
-                                |> List.collect 
-                                    (fun elem ->
-                                        match elem.rule with
-                                        |PRef(t, _) when 
-                                            eps
-                                            |> List.map (fun e -> string e) 
-                                            |> List.exists (fun e -> e = fst t) -> []
-                                        |PRef(t, _) when 
-                                            not (
-                                                eps 
-                                                |> List.map (fun e -> e.ToString()) 
-                                                |> List.exists (fun e -> (e = (fst t)))) -> 
-                                             [{
-                                                omit = elem.omit
-                                                rule = PRef((epsRef.Item(System.Convert.ToInt32(fst t) - 1).ToString(), (0, 0)), None)
-                                                binding = elem.binding
-                                                checker = elem.checker
-                                            }]
-                                        |x -> [elem]
-                                    )
-                                ,
-                                (match numberRule.body with PSeq(e, a, l) -> a | x -> None), 
-                                (match numberRule.body with PSeq(e, a, l) -> l | x -> None))
+                    body=PSeq(newBody, ac, lbl)
                 }]
             let numberRule = 
                 {
@@ -142,8 +138,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                     metaArgs=rule.metaArgs
                     body=numberBody
                 }
-            numberEpsRef |> List.collect
-                (fun eps -> addRule numberRule eps)
+            numberEpsRef |> List.collect (addRule numberRule)
         else []
             
             

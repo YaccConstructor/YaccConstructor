@@ -28,20 +28,11 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.IL.Rule
 
-//--Тестовые функции-------------------------------------------------------------------------------
-
-let file = new FileStream(@"E:\out.txt", FileMode.OpenOrCreate, FileAccess.Write)
-let cout = new StreamWriter(file)
-
-let index = ref 0
-
-let print (obj:'a) = 
-    cout.WriteLine(obj)
-    cout.Flush()
-
 //--Функция которая удаляет правила в правиле------------------------------------------------------
 
 let private reductionRule (ruleList: Rule.t<_, _> list) = 
+
+    let index = ref 0
 
     let reduction = ref []
     
@@ -93,6 +84,25 @@ let private reductionRule (ruleList: Rule.t<_, _> list) =
 
 let deleteEpsRule (ruleList: Rule.t<_, _> list) = 
     
+    //--Генерация перестановок---------------------------------------------------------------------
+        
+    let genPermutation (N: int) = 
+        let genList = ref [[]]
+        let addInList (list: int list list) = 
+            genList := list @ !genList
+            list
+        let startList = [1 .. N] |> List.collect (fun i -> [[i]])
+        genList := startList
+        let rec iter (listList: int list list) = 
+            if listList.Length <> 1 then
+                listList |> List.collect 
+                    (fun i -> [(i |> List.max) + 1 .. N] |> List.collect (fun j -> [ i @ [j] ])) 
+                |> addInList 
+                |> iter
+            else []      
+        iter startList
+        !genList
+        
     //--Находим все эпсилон-правила----------------------------------------------------------------
 
     let epsList = 
@@ -123,28 +133,75 @@ let deleteEpsRule (ruleList: Rule.t<_, _> list) =
     //--Функция для добавления нового правила------------------------------------------------------
 
     let newRule (rule: Rule.t<_, _>) (epsRef: string list) = 
-        
         if not epsRef.IsEmpty then
-            incr index
-            [{
-                name=rule.name
-                args=[]
-                _public=rule._public
-                metaArgs=[]
-                body=PSeq(
-                                (match rule.body with PSeq(e, a, l) -> e | x -> []) |> List.collect 
+            let numberEpsRef = genPermutation epsRef.Length 
+            let numberBody = 
+                let i = ref 0
+                match rule.body with
+                |PSeq(elements, _, _) -> 
+                    PSeq(
+                        elements |> List.collect
+                            (fun elem ->
+                                match elem.rule with
+                                |PRef(t, _) when not (isEps (fst t)).IsEmpty -> 
+                                    incr i
+                                    [{
+                                        omit = elem.omit
+                                        rule = PRef(( (!i).ToString(), (0, 0)), None)
+                                        binding = elem.binding
+                                        checker = elem.checker
+                                    }]
+                                |x -> [elem]
+                            ),
+                            (match rule.body with PSeq(e, a, l) -> a | x -> None),
+                            (match rule.body with PSeq(e, a, l) -> l | x -> None))
+                |x -> rule.body
+            let addRule (numberRule: Rule.t<_, _>) (eps: int list) = 
+                [{
+                    name=numberRule.name
+                    args=numberRule.args
+                    _public=numberRule._public
+                    metaArgs=numberRule.metaArgs
+                    body=PSeq(
+                                (match numberRule.body with PSeq(e, a, l) -> e | x -> []) |> List.collect 
                                     (fun elem ->
                                         match elem.rule with
-                                        |PRef(t, _) when not (isEps (fst t)).IsEmpty -> []
+                                        |PRef(t, _) when 
+                                            eps 
+                                            |> List.map (fun e -> e.ToString()) 
+                                            |> List.exists (fun e -> (e = (fst t))) -> []
+                                        |PRef(t, _) when 
+                                            not (
+                                                eps 
+                                                |> List.map (fun e -> e.ToString()) 
+                                                |> List.exists (fun e -> (e = (fst t)))) -> 
+                                             [{
+                                                omit = elem.omit
+                                                rule = PRef((epsRef.Item(System.Convert.ToInt32(fst t) - 1).ToString(), (0, 0)), None)
+                                                binding = elem.binding
+                                                checker = elem.checker
+                                            }]
                                         |x -> [elem]
                                     )
                                 ,
-                                (match rule.body with PSeq(e, a, l) -> a | x -> None), 
-                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
-            }]
+                                (match numberRule.body with PSeq(e, a, l) -> a | x -> None), 
+                                (match numberRule.body with PSeq(e, a, l) -> l | x -> None))
+                }]
+            let numberRule = 
+                {
+                    name=rule.name
+                    args=rule.args
+                    _public=rule._public
+                    metaArgs=rule.metaArgs
+                    body=numberBody
+                }
+            numberEpsRef |> List.collect
+                (fun eps ->
+                    addRule numberRule eps)
         else
             []
-
+            
+            
     //--Добавляем новые правила--------------------------------------------------------------------
     
     ruleList |> List.collect

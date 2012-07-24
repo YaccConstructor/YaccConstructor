@@ -28,58 +28,6 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.IL.Rule
 
-//--Функция которая удаляет правила в правиле------------------------------------------------------
-
-let private reductionRule (ruleList: Rule.t<_, _> list) = 
-
-    let index = ref 0
-
-    let reduction = ref []
-    
-    let rec addRule (rule: Rule.t<_, _>) (elements: elem<_, _> list) = 
-        [{
-            name = rule.name
-            args=rule.args
-            _public=rule._public
-            metaArgs=rule.metaArgs
-            body=PSeq(elements 
-                |> List.collect
-                            (fun elem -> 
-                                match elem.rule with
-                                |PSeq(e, a, l) -> 
-                                    incr index
-                                    let i = !index
-                                    reduction := addRule {                         
-                                            name = "newRuleInRule" + (!index).ToString()
-                                            args=rule.args
-                                            _public=false
-                                            metaArgs=rule.metaArgs
-                                            body=elem.rule
-                                        } e @ !reduction
-                                    [{
-                                        omit = elem.omit
-                                        binding = elem.binding
-                                        checker = elem.checker
-                                        rule = PRef(("newRuleInRule" + (i).ToString(), (0, 0)), None)
-                                    }]
-                                |x -> [elem]
-                            ), 
-                            (match rule.body with PSeq(e, a, l) -> a | x -> None), 
-                            (match rule.body with PSeq(e, a, l) -> l | x -> None) )
-        }]
-
-    let newRule = 
-        ruleList |> List.collect
-            (fun rule ->
-                match rule.body with
-                |PSeq(elements, actionCode, lbl) when not elements.IsEmpty -> addRule rule elements
-                |PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule]
-                |x -> []
-            )
-
-    newRule @ !reduction
-                
-
 //--Функция для удаления эпсилон-правил------------------------------------------------------------
 
 let deleteEpsRule (ruleList: Rule.t<_, _> list) = 
@@ -226,7 +174,19 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                         when elements.Length = 1
                         && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> true
                     |x -> false
-
+                let label (rl: Rule.t<_, _>) = match rl.body with PSeq(_, _, l) -> l | x -> None
+                let bodyChange (mR: Rule.t<_, _>) (r: Rule.t<_, _>) = 
+                    if label mR = None then r.body
+                    else
+                        if label r = None then PSeq(
+                                                (match r.body with PSeq(e, _, _) -> e | x -> []),
+                                                (match r.body with PSeq(_, a, _) -> a | x -> None),
+                                                label mR)
+                        else 
+                            printfn "label1 and label2 confict"
+                            PSeq((match r.body with PSeq(e, _, _) -> e | x -> []),
+                                 (match r.body with PSeq(_, a, _) -> a | x -> None),
+                                 label mR)
                 if rule.name = name then 
                     if isOneRule rule then
                         newRule mainRule 
@@ -237,10 +197,10 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                     else
                         [{
                             name=mainRule.name
-                            args=rule.args
+                            args=mainRule.args
                             _public=mainRule._public
-                            metaArgs=rule.metaArgs
-                            body=rule.body
+                            metaArgs=mainRule.metaArgs
+                            body=(bodyChange mainRule rule)
                         }] 
                 else
                     []
@@ -259,21 +219,57 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
 
 //--Переименование терминалов в нетерминалы в неподходящих правилах---------------------------
 
-let renameTerm (ruleList: Rule.t<_, _> list) = ruleList
+let renameTerm (ruleList: Rule.t<_, _> list) = 
+    
+    let isToken (elem: elem<_, _>) = match elem.rule with PToken(_, _) -> true | x -> false
+    let isRef (elem: elem<_, _>) = match elem.rule with PRef(_, _) -> true | x -> false
+    let isCNF (rule: Rule.t<_, _>) = 
+        match rule.body with
+        |PSeq(elements, _, _) when elements.Length = 1 && isToken elements.Head -> true
+        |PSeq(elements, _, _) when elements.Length = 2 && isRef (elements.Item(0)) && isRef (elements.Item(1)) -> true
+        |x -> false
+
+    let list1 = ref []
+    let renameRule (rule: Rule.t<_, _>) = 
+        let rename (elem: elem<_, _>) = 
+            if isToken elem then 
+                let newName = "new_" + (match elem.rule with PToken(t, _) -> t | x -> "")
+                if not (!list1 |> List.exists (fun rl -> rl.name = newName)) then
+                    list1 :=
+                        [{
+                            name = newName
+                            args = rule.args
+                            _public = false
+                            metaArgs = rule.metaArgs 
+                            body = PSeq([elem], None, None)
+                        }] @ !list1
+                {
+                    omit = elem.omit
+                    binding=elem.binding
+                    checker=elem.checker
+                    rule=PRef(( newName , (0, 0)), None)
+                }
+            else elem
+        let elements = match rule.body with PSeq(e, a, l) -> e | x -> []
+        [{
+            name = rule.name
+            args = rule.args
+            _public = rule._public
+            metaArgs = rule.metaArgs 
+            body = PSeq([rename (elements.Item(0)); rename (elements.Item(1))], 
+                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
+                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
+            
+        }]
+    
+    (ruleList |> List.collect 
+        (fun rule -> if isCNF rule then [rule] else renameRule rule)) @ !list1
 
 //--Преобразование в КНФ---------------------------------------------------------------------------
 
 let toCNF (ruleList: Rule.t<_, _> list) = 
-    let cnf (rules: Rule.t<_, _> list) = 
-        
-        let isToken (elem: elem<_, _>) = match elem.rule with PToken(_, _) -> true | x -> false
-        let isRef (elem: elem<_, _>) = match elem.rule with PRef(_, _) -> true | x -> false
-        let isCNF (rule: Rule.t<_, _>) = 
-            match rule.body with
-            |PSeq(elements, _, _) when elements.Length = 1 && isToken elements.Head -> true
-            |PSeq(elements, _, _) when elements.Length = 2 && isRef (elements.Item(0)) && isRef (elements.Item(1)) -> true
-            |x -> false
-        
+
+    let cnf (rules: Rule.t<_, _> list) =    
         let i = ref 0
         let list2 = ref []
         let rec newRule (rule: Rule.t<_, _>) =  
@@ -286,9 +282,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                         args = rule.args
                         _public = false
                         metaArgs = rule.metaArgs 
-                        body = PSeq([elem1; elem2], 
-                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
-                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
+                        body = PSeq([elem1; elem2], None, None)
                     }] @ !list2
                 "newCnfRule" + (!i).ToString()
             let cutRule = 
@@ -315,16 +309,9 @@ let toCNF (ruleList: Rule.t<_, _> list) =
             else 
                 [rule]
 
-        (
-            ruleList |> List.collect
-                (fun rule ->
-                    if isCNF rule then [rule]
-                    else newRule rule
-                ) 
-        ) @ !list2
+        ( rules |> List.collect (fun rule -> newRule rule) ) @ !list2
 
     ruleList
-    |> reductionRule
     |> deleteEpsRule
     |> deleteChainRule
     |> cnf

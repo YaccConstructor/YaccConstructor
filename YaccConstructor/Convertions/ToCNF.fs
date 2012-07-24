@@ -63,8 +63,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
     //--Функция для проверки вхождения эпсилон-правила---------------------------------------------
 
     let isEps s = 
-        epsList |> List.collect
-            (fun eps -> if s = eps then [eps] else [])
+        epsList |> List.collect (fun eps -> if s = eps then [eps] else [])
     
     //--Список эпсилон-правил входящих в данное правило--------------------------------------------     
 
@@ -90,7 +89,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                         elements |> List.collect
                             (fun elem ->
                                 match elem.rule with
-                                |PRef(t, _) when not (isEps (fst t)).IsEmpty -> 
+                                |PRef(t, _) when fst t |> isEps |> List.isEmpty |> not-> 
                                     incr i
                                     [{
                                         omit = elem.omit
@@ -103,20 +102,21 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                             (match rule.body with PSeq(e, a, l) -> a | x -> None),
                             (match rule.body with PSeq(e, a, l) -> l | x -> None))
                 |x -> rule.body
-            let addRule (numberRule: Rule.t<_, _>) (eps: int list) = 
+            let addRule (numberRule: Rule.t<_, _>) eps =                
                 [{
                     name=numberRule.name
                     args=numberRule.args
                     _public=numberRule._public
                     metaArgs=numberRule.metaArgs
                     body=PSeq(
-                                (match numberRule.body with PSeq(e, a, l) -> e | x -> []) |> List.collect 
+                                (match numberRule.body with PSeq(e, a, l) -> e | x -> [])
+                                |> List.collect 
                                     (fun elem ->
                                         match elem.rule with
                                         |PRef(t, _) when 
-                                            eps 
-                                            |> List.map (fun e -> e.ToString()) 
-                                            |> List.exists (fun e -> (e = (fst t))) -> []
+                                            eps
+                                            |> List.map (fun e -> string e) 
+                                            |> List.exists (fun e -> e = fst t) -> []
                                         |PRef(t, _) when 
                                             not (
                                                 eps 

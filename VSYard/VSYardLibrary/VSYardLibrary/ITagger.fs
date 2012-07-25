@@ -112,6 +112,48 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
                 let t = word.Span.GetText()
                 let x =  FindNewSpans  t
                 wordSpans <- wordSpans @ x
+
+                //START
+                let pos = ref 0
+
+                let fileText = _view.TextBuffer.CurrentSnapshot.GetText()//u//buffer.CurrentSnapshot.GetText()
+
+                let getNonterminals (tree: Yard.Core.IL.Definition.t<_,_> ) = 
+                    tree.grammar |> List.map (fun node -> node.name)
+                try 
+                    let parsed = ParseText fileText ""  // Запуск парсера
+                    let nonterminals = (getNonterminals parsed).Distinct() |> List.ofSeq |> List.sort
+                    let isCurrent str (nonterm : Yard.Core.IL.Source.t) = 
+                       match nonterm with
+                       | n, (s,e,_) when n = str -> pos := s
+                       | _ -> ()
+                    List.iter (isCurrent t)  nonterminals
+                with
+                |_-> ()
+                let lineNumberToGo = _view.TextBuffer.CurrentSnapshot.GetLineFromPosition(!pos).LineNumber
+                let currentLineNumber = _view.TextSnapshot.GetLineNumberFromPosition _view.Caret.Position.BufferPosition.Position
+                //let positionFromTopToGo = _view.LineHeight * (lineNumberToGo |> float)
+
+                let rec scroll i = 
+                    match i with
+                    | 0 -> ()
+                    | n when n < 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
+                                      scroll (n+1)
+                    | n when n > 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
+                                      scroll (n-1)
+
+                scroll (lineNumberToGo - currentLineNumber)
+                ()
+
+
+                //Caret moving - begin
+
+
+                if not x.IsEmpty then
+                    _view.Caret.MoveTo(new SnapshotPoint(_view.TextSnapshot, !pos)) |> ignore
+
+                //Caret moving end
+
             if (currentRequest = _requestedPoint) then
                 SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(wordSpans), new Nullable<_>(currentWord))
                     

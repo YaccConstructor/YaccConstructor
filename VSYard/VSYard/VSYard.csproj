@@ -134,6 +134,7 @@
     <Compile Include="Completion\CompletionSource.cs" />
     <Compile Include="GoToDef\HighlightingDefenitions.cs" />
     <Compile Include="GoToDef\ITagger.cs" />
+    <Compile Include="GoToDef\KeyProcessorProvider.cs" />
     <Compile Include="GoToDef\TaggerProvider.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Helpers\SolutionNavigatorHelper.cs" />

@@ -132,25 +132,26 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
                 |_-> ()
                 let lineNumberToGo = _view.TextBuffer.CurrentSnapshot.GetLineFromPosition(!pos).LineNumber
                 let currentLineNumber = _view.TextSnapshot.GetLineNumberFromPosition _view.Caret.Position.BufferPosition.Position
+                ()
                 //let positionFromTopToGo = _view.LineHeight * (lineNumberToGo |> float)
 
-                let rec scroll i = 
-                    match i with
-                    | 0 -> ()
-                    | n when n < 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
-                                      scroll (n+1)
-                    | n when n > 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
-                                      scroll (n-1)
-
-                if (x.Count() > 0)
-                    then scroll (lineNumberToGo - currentLineNumber) //scrolling
+//                let rec scroll i = 
+//                    match i with
+//                    | 0 -> ()
+//                    | n when n < 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
+//                                      scroll (n+1)
+//                    | n when n > 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
+//                                      scroll (n-1)
+//
+//                if (x.Count() > 0)
+//                    then scroll (lineNumberToGo - currentLineNumber) //scrolling
 
 
                 //Caret moving - begin
 
 
-                if not x.IsEmpty then
-                    _view.Caret.MoveTo(new SnapshotPoint(_view.TextSnapshot, !pos)) |> ignore
+//                if not x.IsEmpty then
+//                    _view.Caret.MoveTo(new SnapshotPoint(_view.TextSnapshot, !pos)) |> ignore
 
                 //Caret moving end
 

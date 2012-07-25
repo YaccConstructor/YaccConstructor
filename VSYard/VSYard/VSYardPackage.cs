@@ -90,6 +90,8 @@ namespace YC.VSYard
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
             var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
+
+            // m_dte.ActiveDocument.ExtenderCATID.ToString();
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
             if (m_dte.Solution != null)
@@ -103,6 +105,7 @@ namespace YC.VSYard
                     string fullPath =  i.Properties.Item("FullPath").Value.ToString();
                     string rootYard = null;
                     Dictionary<string, SolutionData.YardFile> dictionaryOfYard = new Dictionary<string, SolutionData.YardFile>();
+                    
 
                     foreach (EnvDTE.ProjectItem pi in i.ProjectItems)
                     {
@@ -114,8 +117,7 @@ namespace YC.VSYard
                             dictionaryOfYard.Add(yardExtenderCATID,
                                                  new SolutionData.YardFile(new SolutionData.YardInfo(yardExtenderCATID,
                                                                                                      yardFileName,
-                                                                                                     yardFullPath,
-                                                                                                     false)));//не знаю что делать с include =(
+                                                                                                     yardFullPath)));
                             if(rootYard == null)
                             {
                                 rootYard = yardExtenderCATID;

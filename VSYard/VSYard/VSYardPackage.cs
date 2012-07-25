@@ -91,7 +91,17 @@ namespace YC.VSYard
         {
             var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
 
-            // m_dte.ActiveDocument.ExtenderCATID.ToString();
+            var w = m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open();
+    //        m_dte.ActiveSolutionProjects
+     //       w.Activate();
+
+            /*
+            Открыть докумнет: (наверное)
+            m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open
+            
+            Активный документ:
+            m_dte.ActiveDocument.ExtenderCATID.ToString();
+            */
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
             if (m_dte.Solution != null)

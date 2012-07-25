@@ -41,13 +41,11 @@ module SolutionData =
          let mutable positionToNotTerm = Array.create 0 ""
          let notTermToPosition = new Dictionary<string, List<CoordinateWord>>()
          let notTermToDEFPosition = new Dictionary<string, CoordinateWord>()
-         //let listOfVisibleYardFile = []
+         
+         (* Пока что ненужно, но пригодится.
+         let listOfVisibleYardFile = []
          //let listOfVisibleYardFileHelper = [] : string list
-         
-         
-         
-
-         (*let findInlistOfVisibleYardFileHelper  elem = 
+           let findInlistOfVisibleYardFileHelper  elem = 
              let isCompair x y =  x = y
              match List.tryFind (isCompair elem) listOfVisibleYardFileHelper with
              | None -> listOfVisibleYardFileHelper = elem :: listOfVisibleYardFileHelper
@@ -111,6 +109,7 @@ module SolutionData =
          member this.PositionToNotTerm = positionToNotTerm
          member this.NotTermToPosition = notTermToPosition
          member this.NotTermToDEFPosition = notTermToDEFPosition
+         member this.Tokens = tokens
 
 
          member this.ReParseText(fileText) = reParseText(fileText)

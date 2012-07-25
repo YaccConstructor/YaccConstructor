@@ -11,8 +11,11 @@ open Microsoft.VisualStudio.Utilities
 open System.Linq
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
+open EnvDTE
+open SolutionData
 
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : EnvDTE.DTE) =
+    let dte = m_dte
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>()
@@ -104,7 +107,15 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
                 let currentPosition = currentChar.Value.Position
                 let lexeredText = ref List.Empty
                 try
-                    lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                    let activeSolutionProjects = dte.ActiveSolutionProjects :?> Array
+                    let activeProject =  activeSolutionProjects.GetValue(0) :?> EnvDTE.Project
+                    let yaFile = dte.ActiveDocument :?> EnvDTE.Document
+                    let solution1 = SolutionData.GetSolution()
+                    let projectFileName = activeProject.Properties.Item("FileName").Value.ToString()
+                    let yardFileName = yaFile.Name
+                    lexeredText := (solution1.ReParseFile(projectFileName,yardFileName, SourceBuffer.CurrentSnapshot.GetText())).Tokens
+                    // lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                    // Вставить всё сюда
                 with
                 |_ -> ()
                 let parentheses = List.filter isParenthesis !lexeredText

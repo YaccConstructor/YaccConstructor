@@ -44,8 +44,8 @@
             if (textView == null
                || textView.TextBuffer != buffer) //provide highlighting only on the top-level buffer
                return null;
-
-            return new VSYardNS.BraceMatchingTagger(textView, buffer) as ITagger<T>;
+            DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+            return new VSYardNS.BraceMatchingTagger(textView, buffer, dte) as ITagger<T>;
         }
     }
 }

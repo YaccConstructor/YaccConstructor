@@ -41,13 +41,11 @@ module SolutionData =
          let mutable positionToNotTerm = Array.create 0 ""
          let notTermToPosition = new Dictionary<string, List<CoordinateWord>>()
          let notTermToDEFPosition = new Dictionary<string, CoordinateWord>()
-         //let listOfVisibleYardFile = []
+         
+         (* Пока что ненужно, но пригодится.
+         let listOfVisibleYardFile = []
          //let listOfVisibleYardFileHelper = [] : string list
-         
-         
-         
-
-         (*let findInlistOfVisibleYardFileHelper  elem = 
+           let findInlistOfVisibleYardFileHelper  elem = 
              let isCompair x y =  x = y
              match List.tryFind (isCompair elem) listOfVisibleYardFileHelper with
              | None -> listOfVisibleYardFileHelper = elem :: listOfVisibleYardFileHelper
@@ -111,6 +109,7 @@ module SolutionData =
          member this.PositionToNotTerm = positionToNotTerm
          member this.NotTermToPosition = notTermToPosition
          member this.NotTermToDEFPosition = notTermToDEFPosition
+         member this.Tokens = tokens
 
 
          member this.ReParseText(fileText) = reParseText(fileText)
@@ -135,12 +134,12 @@ module SolutionData =
          let info = projectInfo
      //    let reparse() = info.RootYard.ReParse()
          member this.Info = info
-         member this.ReParseFile(externalCATIDYardFile, text) = 
-            let r = info.DicYard.[externalCATIDYardFile]
+         member this.ReParseFile(yardFileName, text) = 
+            let r = info.DicYard.[yardFileName]
             r.ReParseText(text)
             r
 
-         member this.GetParseFile(externalCATIDYardFile) = info.DicYard.[externalCATIDYardFile]
+         member this.GetParseFile(yardFileName) = info.DicYard.[yardFileName]
      //    member this.ReParse() = reparse()
 
 
@@ -154,8 +153,8 @@ module SolutionData =
        //  let AddProject
          member this.Projects = projects
          member this.FirstRunAddProjects(y) = firstRunAddProjects(y)
-         member this.ReParseFile (externalCATIDProject, externalCATIDYardFile, text) = projects.[externalCATIDProject].ReParseFile(externalCATIDYardFile, text)
-         member this.GetParseFile (externalCATIDProject, externalCATIDYardFile) = projects.[externalCATIDProject].GetParseFile(externalCATIDYardFile)
+         member this.ReParseFile (projectFileName, yardFileName, text) = projects.[projectFileName].ReParseFile(yardFileName, text)
+         member this.GetParseFile (projectFileName, yardFileName) = projects.[projectFileName].GetParseFile(yardFileName)
     //     member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
 

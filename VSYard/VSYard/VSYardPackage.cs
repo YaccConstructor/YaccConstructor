@@ -91,7 +91,17 @@ namespace YC.VSYard
         {
             var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
 
-            // m_dte.ActiveDocument.ExtenderCATID.ToString();
+    //        var w = m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open();
+    //        m_dte.ActiveSolutionProjects
+     //       w.Activate();
+
+            /*
+            Открыть докумнет: (наверное)
+            m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open
+            
+            Активный документ:
+            m_dte.ActiveDocument.ExtenderCATID.ToString();
+            */
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
             if (m_dte.Solution != null)
@@ -114,7 +124,7 @@ namespace YC.VSYard
                             string yardFileName = pi.Properties.Item("FileName").Value.ToString();
                             string yardExtenderCATID = pi.Properties.Item("ExtenderCATID").Value.ToString();
                             string yardFullPath = pi.Properties.Item("FullPath").Value.ToString();
-                            dictionaryOfYard.Add(yardExtenderCATID,
+                            dictionaryOfYard.Add(yardFileName,
                                                  new SolutionData.YardFile(new SolutionData.YardInfo(yardExtenderCATID,
                                                                                                      yardFileName,
                                                                                                      yardFullPath)));
@@ -125,7 +135,7 @@ namespace YC.VSYard
                         }
                     }
                     SolutionData.Project project = new SolutionData.Project(new SolutionData.ProjectInfo(extenderCATID, fileName,fullPath, rootYard, dictionaryOfYard));
-                    projects.Add(extenderCATID, project);
+                    projects.Add(fileName, project);
                 }
 
                 SolutionData.Solution solution = SolutionData.GetSolution();

@@ -1,6 +1,10 @@
 ﻿namespace Yard.Generators.CYKGenerator
 
 open System.Collections.Generic
+open Microsoft.ParallelArrays
+
+type PA = Microsoft.ParallelArrays.ParallelArrays
+type FPA = Microsoft.ParallelArrays.FloatParallelArray
 
 //(32        |16       |8       |8        )
 //(ruleIndex |lblState |lblName |lblWeght )
@@ -65,10 +69,12 @@ type CYKCore() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
         
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length null
+        let r = new PA() //(null,[|s.Length;s.Length|])        
 
-        for i in 0..s.Length-1 do
-            for j in 0..s.Length-1 do recTable.[i,j]<-new ResizeArray<CellData>(2)
+        let recTable = Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun i j -> new ResizeArray<CellData>(2))
+
+        //for i in 0..s.Length-1 do
+          //  for j in 0..s.Length-1 do recTable.[i,j]<-new ResizeArray<CellData>(2)
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
             let conflictLbl = (noLbl,LblState.Conflict)

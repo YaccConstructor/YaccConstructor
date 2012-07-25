@@ -134,12 +134,12 @@ module SolutionData =
          let info = projectInfo
      //    let reparse() = info.RootYard.ReParse()
          member this.Info = info
-         member this.ReParseFile(externalCATIDYardFile, text) = 
-            let r = info.DicYard.[externalCATIDYardFile]
+         member this.ReParseFile(yardFileName, text) = 
+            let r = info.DicYard.[yardFileName]
             r.ReParseText(text)
             r
 
-         member this.GetParseFile(externalCATIDYardFile) = info.DicYard.[externalCATIDYardFile]
+         member this.GetParseFile(yardFileName) = info.DicYard.[yardFileName]
      //    member this.ReParse() = reparse()
 
 
@@ -153,8 +153,8 @@ module SolutionData =
        //  let AddProject
          member this.Projects = projects
          member this.FirstRunAddProjects(y) = firstRunAddProjects(y)
-         member this.ReParseFile (externalCATIDProject, externalCATIDYardFile, text) = projects.[externalCATIDProject].ReParseFile(externalCATIDYardFile, text)
-         member this.GetParseFile (externalCATIDProject, externalCATIDYardFile) = projects.[externalCATIDProject].GetParseFile(externalCATIDYardFile)
+         member this.ReParseFile (projectFileName, yardFileName, text) = projects.[projectFileName].ReParseFile(yardFileName, text)
+         member this.GetParseFile (projectFileName, yardFileName) = projects.[projectFileName].GetParseFile(yardFileName)
     //     member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
 

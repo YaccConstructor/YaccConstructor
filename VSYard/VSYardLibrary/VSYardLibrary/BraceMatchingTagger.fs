@@ -12,7 +12,6 @@ open System.Linq
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
 open EnvDTE
-open YC.VSYard.Helpers
 open SolutionData
 
 type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : EnvDTE.DTE) =
@@ -112,8 +111,10 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
                     let activeProject =  activeSolutionProjects.GetValue(0) :?> EnvDTE.Project
                     let yaFile = dte.ActiveDocument :?> EnvDTE.Document
                     let solution1 = SolutionData.GetSolution()
-                    lexeredText := (solution1.ReParseFile(activeProject.Properties.Item("ExtenderCATID").Value.ToString(), yaFile.ExtenderCATID, SourceBuffer.CurrentSnapshot.GetText())).Tokens
-                   // lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                    let projectFileName = activeProject.Properties.Item("FileName").Value.ToString()
+                    let yardFileName = yaFile.Name
+                    lexeredText := (solution1.ReParseFile(projectFileName,yardFileName, SourceBuffer.CurrentSnapshot.GetText())).Tokens
+                    // lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
                     // Вставить всё сюда
                 with
                 |_ -> ()

@@ -31,8 +31,7 @@ exception GenError of string
 exception CheckerError of string
 
 let () =
-    let a:Source.t = "aa",(0,1)
-    let b:Source.t = "aa",(1,2)
+    
     let feName = ref None
     let generatorName = ref None
     let generatorParams = ref None

@@ -471,7 +471,7 @@ let _fsyacc_reductions ()  =    [|
 # 119 "Parser.fsy"
                              
                              let newRule = {Rule._public = _1
-                                             ; Rule.name = Source.toString _2
+                                             ; Rule.name = _2
                                              ; Rule.metaArgs = getList _3
                                              ; Rule.body = _7
                                              ; Rule.args = o2l _4

@@ -135,7 +135,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction false opt)); yield Str("?")}
         | _ -> Seq.singleton <| Str("ERROR")
 
-    seq {yield Line(seq{yield Str(startSign + rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  ) + (printArgs rule.args) + ":");
+    seq {yield Line(seq{yield Str(startSign + fst rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  ) + (printArgs rule.args) + ":");
          yield Str(" "); yield! printProduction false rule.body; yield Str(";\n")})}
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =

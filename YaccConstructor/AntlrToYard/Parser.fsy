@@ -117,7 +117,7 @@ TopLevelDef: Rule { [$1] }
 ActionNameOpt: ACTION_NAME { }
     | { }
     
-Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = fst($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
+Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = ($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
 
 ScopeOpt: T_SCOPE TERMINAL SEMICOLON { }
     | { }
@@ -158,11 +158,11 @@ Modifier: PLUS { "+" }
 SimpleProduction: IDENTIFIER { PRef($1, None) }
     | LITERAL DOUBLE_DOT LITERAL { 
         match (($1), ($3)) with
-        | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0)) "'0'..'9'"
-        | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0))  "'\\0'..'\\255'"
-        | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0)) "'a'..'z'"
-        | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0)) "'A'..'Z'"
-        | ((a,_), (b, _)) -> makeToken ("", (0,0)) (a+".."+b)
+        | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0,"")) "'0'..'9'"
+        | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0,""))  "'\\0'..'\\255'"
+        | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0,"")) "'a'..'z'"
+        | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0,"")) "'A'..'Z'"
+        | ((a,_), (b, _)) -> makeToken ("", (0,0,"")) (a+".."+b)
         }
     | LITERAL { PLiteral($1) }
     | TERMINAL { PToken($1) }

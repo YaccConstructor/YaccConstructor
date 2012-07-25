@@ -20,7 +20,7 @@
 module Yard.Core.IL
 module Source = begin
     /// Type of elementary part of source grammar
-    type t = string * (int * int) 
+    type t = string * (int * int * string) 
     // TODO: make something with toString overriding of Source.t   
     let toString ((r,_):t):string = r
 end
@@ -125,7 +125,7 @@ module Rule = begin
     /// </summary>
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
-        name    : string;
+        name    : Source.t;
         /// Heritable arguments of rule
         args    : 'patt list;
         /// Rule body (production).

@@ -31,6 +31,8 @@ let commut_depth = ref 0
 
 let currentFileContent = ref ""
 
+let currentFile = ref ""
+
 exception Lexical_error of string * int
 
 let initial_string_buffer = Array.create 256 ' ' //String.create 256
@@ -91,7 +93,7 @@ let _lexeme lexbuf (n,n') =
   let len = n' - n in
   currentFileContent.Value.Substring(n,len)
 
-let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) loc = _lexeme lexbuf loc, loc
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) = _lexeme lexbuf (lStart,lEnd), (lStart, lEnd, !currentFile)
 let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos.AbsoluteOffset,lexbuf.EndPos.AbsoluteOffset)
 
 }

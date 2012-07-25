@@ -77,7 +77,7 @@ let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     
     let header = printArg input_grammar.head 
     let functions = List.map (fun e -> (if e._public then "public " else "private " ) 
-                                      + e.name + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+                                      + fst e.name + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
                                       + printBody "" e.body ) 
                          input_grammar.grammar
 

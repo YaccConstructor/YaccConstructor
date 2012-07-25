@@ -27,6 +27,8 @@ open Yard.Core.IL.Production
 
 open System.Collections.Generic
 
+let dummyPos s = (s,(0,0,""))
+
 let nameIndex = ref 0
 let createName() = nameIndex := !nameIndex + 1 ;sprintf "yard_start_%d" !nameIndex
 let getLastName() = sprintf "yard_start_%d" !nameIndex
@@ -47,14 +49,14 @@ let addEOFToProduction = function
     | PSeq(elements, actionCode) -> 
         (
             elements 
-            @ [{omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}]
+            @ [{omit=true; rule=PToken("EOF",(0,0,"")); binding=None; checker=None}]
             ,actionCode
         ) 
         |> PSeq
     | x -> (
                 [
                     {omit=false; rule=x; binding=None; checker=None}; 
-                    {omit=true; rule=PToken("EOF",(0,0)); binding=None; checker=None}
+                    {omit=true; rule=PToken("EOF",(0,0,"")); binding=None; checker=None}
                 ]
                 ,None
            )
@@ -62,7 +64,7 @@ let addEOFToProduction = function
 
 let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
     let startRules = new HashSet<string>()
-    ruleList |> List.iter (fun rule -> if rule._public then startRules.Add(rule.name)|>ignore )
+    ruleList |> List.iter (fun rule -> if rule._public then startRules.Add(fst rule.name)|>ignore )
     let usedRules = new HashSet<string>()
     eachProduction 
         (function
@@ -75,18 +77,18 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
     ruleList |> List.collect 
         (fun rule -> 
             if rule._public then
-                if usedStartRules.Contains(rule.name) then
+                if usedStartRules.Contains(fst rule.name) then
                     [{rule with _public=false}; 
                     {
-                        name=createName()
+                        name= dummyPos (createName())
                         args=[]
                         _public=true
                         metaArgs=[] 
                         body=PSeq([
-                                    {omit=false; rule=PRef((rule.name, (0,0)), None); binding=Some(getLastName(), (0,0)); checker=None}; 
-                                    {omit=false; rule=PToken("EOF", (0,0)); binding=None; checker=None}
+                                    {omit=false; rule=PRef((fst rule.name, (0,0,"")), None); binding=Some(getLastName(), (0,0,"")); checker=None}; 
+                                    {omit=false; rule=PToken("EOF", (0,0,"")); binding=None; checker=None}
                                   ]
-                                  ,Some(getLastName(),(0,0))
+                                  ,Some(getLastName(),(0,0,""))
                         )
                     }]
                 else

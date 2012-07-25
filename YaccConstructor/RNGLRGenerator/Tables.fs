@@ -35,7 +35,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
         if grammar.canInferEpsilon.[grammar.startRule] then acc <- (*startState*)0::acc
         let endRule = KernelInterpreter.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
         for i = 0 to states.count-1 do
-            let vertex = states.virtex i
+            let vertex = states.vertex i
             for e in vertex.outEdges do
                 let symbol = e.label
                 gotos.[i, symbol] <- Some(e.dest.label)

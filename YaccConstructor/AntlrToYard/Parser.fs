@@ -527,7 +527,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 120 "Parser.fsy"
-                                                                                            { new Rule.t<Source.t, Source.t> with name = fst(_1) and args = [] and body = _6 and _public = false and metaArgs = [] } 
+                                                                                            { new Rule.t<Source.t, Source.t> with name = (_1) and args = [] and body = _6 and _public = false and metaArgs = [] } 
                    )
 # 120 "Parser.fsy"
                  : 'Rule));
@@ -836,11 +836,11 @@ let _fsyacc_reductions ()  =    [|
 # 159 "Parser.fsy"
                                                         
                              match ((_1), (_3)) with
-                             | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0)) "'0'..'9'"
-                             | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0))  "'\\0'..'\\255'"
-                             | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0)) "'a'..'z'"
-                             | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0)) "'A'..'Z'"
-                             | ((a,_), (b, _)) -> makeToken ("", (0,0)) (a+".."+b)
+                             | (("0",_), ("9", _)) -> makeToken ("NUMBER", (0,0,"")) "'0'..'9'"
+                             | (("\\0",_), ("\\255", _)) -> makeToken ("CHAR", (0,0,""))  "'\\0'..'\\255'"
+                             | (("a",_), ("z", _)) -> makeToken ("LOWER_LATIN", (0,0,"")) "'a'..'z'"
+                             | (("A",_), ("Z", _)) -> makeToken ("UPPER_LATIN", (0,0,"")) "'A'..'Z'"
+                             | ((a,_), (b, _)) -> makeToken ("", (0,0,"")) (a+".."+b)
                              
                    )
 # 159 "Parser.fsy"

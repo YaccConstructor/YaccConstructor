@@ -28,7 +28,7 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     let start =
         rules
         |> Array.findIndex (fun rule -> rule._public)
-    let left = rules |> Array.map (fun x -> x.name |> indexator.nonTermToIndex)
+    let left = rules |> Array.map (fun x -> x.name |> fst |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function
             | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| fst nTerm)::acc

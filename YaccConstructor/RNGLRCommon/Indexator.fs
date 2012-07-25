@@ -31,7 +31,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
                     rule.args
                     |> List.map (fun x -> "[" + Source.toString x + "]")
                     |> String.concat ""
-                printfn "%4d: %s%s = %s" i rule.name args <| rule.body.ToString())
+                printfn "%4d: %s%s = %s" i (fst rule.name) args <| rule.body.ToString())
     let unique s = s |> Set.ofSeq |> Array.ofSeq
     let connect x = 
         let dict = x |> Array.mapi (fun i n -> n, i) |> dict
@@ -58,7 +58,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
 
     let nonTermsConnect = 
         rules
-        |> Array.map (fun x -> x.name)
+        |> Array.map (fun x -> fst x.name)
         //|> Array.append ([|"error"|])
         |> unique
         |> connect

@@ -42,7 +42,7 @@ let replaceInline (rules : Rule.t<_,_> list) =
             (fun inlines cur ->
                 match cur.body with
                 | PRef (_, None) | PToken _ | PLiteral _ ->
-                    (cur.name, cur.body)::inlines
+                    (fst cur.name, cur.body)::inlines
                 | _ -> inlines)
             []
         |> closure

@@ -118,7 +118,7 @@ rule_nlist: rule SEMICOLON rule_nlist
 rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON option_opt alts
       { 
         let newRule = {Rule._public = $1
-                        ; Rule.name = Source.toString $2
+                        ; Rule.name = $2
                         ; Rule.metaArgs = getList $3
                         ; Rule.body = $7
                         ; Rule.args = o2l $4

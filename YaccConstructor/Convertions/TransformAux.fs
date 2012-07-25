@@ -55,9 +55,9 @@ let createSimpleRule name args body =
     createRule name args body false []
 
 /// Replace first (name) field in Source.t with new source 
-let getNewSource (_, (l, c)) n = (n, (l, c))
+let getNewSource (_, (l, c,f)) n = (n, (l, c,f))
 
-let createSource n = (n, (0, 0))
+let createSource n = (n, (0, 0,""))
 
 let createRef ruleName _params = PRef (createSource ruleName, _params)
 

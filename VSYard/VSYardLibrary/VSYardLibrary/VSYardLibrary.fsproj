@@ -37,6 +37,7 @@
     <Compile Include="Data.fs" />
     <Compile Include="BraceMatchingTagger.fs" />
     <Compile Include="CompletionSource.fs" />
+    <Compile Include="ITagger.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />

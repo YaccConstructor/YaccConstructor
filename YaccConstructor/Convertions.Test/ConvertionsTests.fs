@@ -127,7 +127,7 @@ type ``Convertions tests`` () =
             |> ConvertionsManager.ApplyConvertion "ExpandMeta"   
             |> ConvertionsManager.ApplyConvertion "ExpandEbnf"
             |> ConvertionsManager.ApplyConvertion "ExpandInnerAlt"
-            |> ConvertionsManager.ApplyConvertion "ExpandBrackets"   
+            |> ConvertionsManager.ApplyConvertion "ExpandBrackets"
         let hasNotInnerSeq = 
             ilTreeConverted.grammar 
             |> List.forall 

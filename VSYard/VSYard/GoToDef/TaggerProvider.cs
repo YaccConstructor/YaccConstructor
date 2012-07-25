@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;   
 
 //taken from http://msdn.microsoft.com/ru-ru/library/dd885121.aspx
 
@@ -35,7 +38,8 @@ namespace YC.VSYard.GoToDef
             ITextStructureNavigator textStructureNavigator =
                 TextStructureNavigatorSelector.GetTextStructureNavigator(buffer);
 
-            return new VSYardNS.HighlightWordTagger(textView, buffer, TextSearchService, textStructureNavigator) as ITagger<T>;
+            DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+            return new VSYardNS.HighlightWordTagger(textView, buffer, TextSearchService, textStructureNavigator, dte) as ITagger<T>;
         }
 
 

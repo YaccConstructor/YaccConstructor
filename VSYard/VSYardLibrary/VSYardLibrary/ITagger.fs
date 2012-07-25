@@ -14,6 +14,7 @@ open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
 open System.Threading
 open System.Windows.Media
+open DataHelper
 
 
 type HighlightWordTag () = 
@@ -22,7 +23,7 @@ type HighlightWordTag () =
     //do ()
 
 
-type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSearchService : ITextSearchService, textStructureNavigator : ITextStructureNavigator) =
+type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSearchService : ITextSearchService, textStructureNavigator : ITextStructureNavigator, m_dte: EnvDTE.DTE) =
     let TagsChanged = new Event<_>()
     let mutable _view : ITextView = null
     let mutable _sourceBuffer : ITextBuffer = null
@@ -40,11 +41,10 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
         let getNonterminals (tree: Yard.Core.IL.Definition.t<_,_> ) = 
             tree.grammar |> List.map (fun node -> node.name)
 
-        try 
-            let parsed = ParseText fileText ""  // Запуск парсера
-            let nonterminals = (getNonterminals parsed).Distinct() |> List.ofSeq |> List.sort
+        try
             //finding all ocurrences
-            let lexered = LexString fileText |> List.ofSeq
+            //let lexered = LexString fileText |> List.ofSeq
+            let lexered = ReParseFileInActiveWindow(m_dte, _sourceBuffer.CurrentSnapshot.GetText()).Tokens
             let checkAndAdd (t:token) = 
                 match t with
                 | LIDENT (name, (s,e,_))  when name = w -> 

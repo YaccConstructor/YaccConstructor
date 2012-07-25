@@ -35,6 +35,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="Data.fs" />
+    <Compile Include="DataHelper.fs" />
     <Compile Include="BraceMatchingTagger.fs" />
     <Compile Include="CompletionSource.fs" />
     <Compile Include="ITagger.fs" />

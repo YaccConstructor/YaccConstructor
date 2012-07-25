@@ -188,59 +188,52 @@ type CYKCore() =
         let out = "label value = " + lblValue.ToString() + " left = " + leftI.ToString() + " right = " + (leftI+rightL+leftL+1).ToString()
         printfn "%s" out
 
-    let rec trackLabel i l (cell:CellData) lblValue flag =
+    let rec trackLabel i l (cell:CellData)  flag =
         let ruleInd,_,curL,_ = getData cell.rData
         let _,b,c,lbl,_ = getRule rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
-        
-        let left = ResizeArray.tryFind (fun (x:CellData) -> 
-                                        let ind,lSt,lbl,_ = getData x.rData
-                                        //let lblCheck = (lbl = lblValue)
-                                        let top,_,_,_,_ = getRule rules.[int ind]
-                                        let topCheck = (top = b)
-                                        (*lblCheck &&*) 
-                                        topCheck) recTable.[leftI,leftL]
-        let right = 
-            if (rightL >= 0)  
-            then                
-                ResizeArray.tryFind (fun (x:CellData) -> 
+        if l = 0
+        then if curL <> noLbl
+             then print curL leftI rightL leftL
+        else 
+            let left = ResizeArray.tryFind (fun (x:CellData) -> 
                                             let ind,lSt,lbl,_ = getData x.rData
                                             //let lblCheck = (lbl = lblValue)
                                             let top,_,_,_,_ = getRule rules.[int ind]
-                                            let topCheck = (top = c)
-                                            ((*lblCheck &&*) topCheck)) recTable.[rightI,rightL]
-            else None
+                                            let topCheck = (top = b)
+                                            (*lblCheck &&*) 
+                                            topCheck) recTable.[leftI,leftL]
+            let right =                
+                    ResizeArray.tryFind (fun (x:CellData) -> 
+                                                let ind,lSt,lbl,_ = getData x.rData
+                                                //let lblCheck = (lbl = lblValue)
+                                                let top,_,_,_,_ = getRule rules.[int ind]
+                                                let topCheck = (top = c)
+                                                ((*lblCheck &&*) topCheck)) recTable.[rightI,rightL]
 
-        if curL = lblValue
-        then     
-            match right with 
+            
+            match right with
             | Some right ->
                 match left with 
                 | Some left ->
                     let _,_,lLbl,_ = getData left.rData
                     let _,_,rLbl,_ = getData right.rData
-                    if lLbl = noLbl && rLbl = noLbl
-                    then print lblValue leftI rightL leftL
+                    if curL <> noLbl && lLbl = noLbl && rLbl = noLbl
+                    then print curL leftI rightL leftL
                     else
-                      if (leftL > 0)
-                      then trackLabel leftI leftL left lblValue true
-                      if (rightL > 0)
-                      then trackLabel rightI rightL right lblValue true
+                        trackLabel leftI leftL left  true
+                        trackLabel rightI rightL right  true
                 | None -> ()
-                
             | None ->
-                if flag && (lbl = lblValue)
-                then print lblValue leftI rightL leftL
+                if flag && (lbl <> noLbl)
+                then print curL leftI rightL leftL
             
     let labelTracking lastInd = 
         let i,l = 0,(lastInd)
-        ResizeArray.iteri (fun k (x:CellData) -> 
-                            let _,_,lbl,_ = getData x.rData
-                            if (lbl <> 0uy)
-                            then
-                                let out = "derivation #" + k.ToString()
-                                printfn "%s" out
-                                trackLabel i l x lbl false
+        ResizeArray.iteri (fun k x ->
+                    let out = "derivation #" + k.ToString()
+                    printfn "%s" out
+                    trackLabel i l x false
         ) recTable.[i, l]
             
     

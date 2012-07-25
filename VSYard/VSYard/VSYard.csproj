@@ -132,6 +132,9 @@
     <Compile Include="BraceMatching\BraceMatchingTaggerProvider.cs" />
     <Compile Include="Completion\CompletionController.cs" />
     <Compile Include="Completion\CompletionSource.cs" />
+    <Compile Include="GoToDef\HighlightingDefenitions.cs" />
+    <Compile Include="GoToDef\ITagger.cs" />
+    <Compile Include="GoToDef\TaggerProvider.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Helpers\SolutionNavigatorHelper.cs" />
     <Compile Include="PluginDataStructure\CurrentSessionData.cs" />

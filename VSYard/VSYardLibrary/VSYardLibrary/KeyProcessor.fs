@@ -31,8 +31,10 @@ type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView) =
     override this.KeyUp (args : KeyEventArgs) =
         let currentPoint = _view.Caret.Position.BufferPosition
         let mutable word : TextExtent = _navigator.GetExtentOfWord(currentPoint)
+        let isF12 = (args.Key = Key.F12)
 
-        if word.IsSignificant then
+
+        if word.IsSignificant && isF12 then
 
             let pos = ref 0
         

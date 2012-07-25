@@ -110,7 +110,7 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
                 //let a = new SnapshotSpan(new SnapshotPoint(_view.TextSnapshot, 13), 9)
                 //let b = new SnapshotSpan(new SnapshotPoint(_view.TextSnapshot, 38), 9)
                 let t = word.Span.GetText()
-                let x =  FindNewSpans  t
+                let x =  FindNewSpans t
                 wordSpans <- wordSpans @ x
 
                 //START
@@ -142,8 +142,8 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
                     | n when n > 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
                                       scroll (n-1)
 
-                scroll (lineNumberToGo - currentLineNumber)
-                ()
+                if (x.Count() > 0)
+                    then scroll (lineNumberToGo - currentLineNumber) //scrolling
 
 
                 //Caret moving - begin

@@ -43,6 +43,8 @@ type CYKCore() =
     // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
+    let mutable recTable = null
+
     [<Literal>]
     let noLbl = 0uy
 
@@ -65,7 +67,7 @@ type CYKCore() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
         
-        let recTable = Microsoft.FSharp.Collections.Array2D.create s.Length s.Length null
+        recTable <- Microsoft.FSharp.Collections.Array2D.create s.Length s.Length null
 
         for i in 0..s.Length-1 do
             for j in 0..s.Length-1 do recTable.[i,j]<-new ResizeArray<CellData>(2)
@@ -181,6 +183,72 @@ type CYKCore() =
         let lastIndex = (recTable.[0,s.Length-1]).Count - 1
         out 0 lastIndex
 
+
+    let print lblValue leftI rightL leftL =
+        let out = "label value = " + lblValue.ToString() + " left = " + leftI.ToString() + " right = " + (leftI+rightL+leftL+1).ToString()
+        printfn "%s" out
+
+    let rec trackLabel i l (cell:CellData) lblValue flag =
+        let ruleInd,_,curL,_ = getData cell.rData
+        let _,b,c,lbl,_ = getRule rules.[int ruleInd]
+        let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
+        
+        let left = ResizeArray.tryFind (fun (x:CellData) -> 
+                                        let ind,lSt,lbl,_ = getData x.rData
+                                        //let lblCheck = (lbl = lblValue)
+                                        let top,_,_,_,_ = getRule rules.[int ind]
+                                        let topCheck = (top = b)
+                                        (*lblCheck &&*) 
+                                        topCheck) recTable.[leftI,leftL]
+        let right = 
+            if (rightL >= 0)  
+            then                
+                ResizeArray.tryFind (fun (x:CellData) -> 
+                                            let ind,lSt,lbl,_ = getData x.rData
+                                            //let lblCheck = (lbl = lblValue)
+                                            let top,_,_,_,_ = getRule rules.[int ind]
+                                            let topCheck = (top = c)
+                                            ((*lblCheck &&*) topCheck)) recTable.[rightI,rightL]
+            else None
+
+        if curL = lblValue
+        then     
+            match right with 
+            | Some right ->
+                match left with 
+                | Some left ->
+                    let _,_,lLbl,_ = getData left.rData
+                    let _,_,rLbl,_ = getData right.rData
+                    if lLbl = noLbl && rLbl = noLbl
+                    then print lblValue leftI rightL leftL
+                    else
+                      if (leftL > 0)
+                      then trackLabel leftI leftL left lblValue true
+                      if (rightL > 0)
+                      then trackLabel rightI rightL right lblValue true
+                | None -> ()
+                
+            | None ->
+                if flag && (lbl = lblValue)
+                then print lblValue leftI rightL leftL
+            
+    let labelTracking lastInd = 
+        let i,l = 0,(lastInd)
+        ResizeArray.iteri (fun k (x:CellData) -> 
+                            let _,_,lbl,_ = getData x.rData
+                            if (lbl <> 0uy)
+                            then
+                                let out = "derivation #" + k.ToString()
+                                printfn "%s" out
+                                trackLabel i l x lbl false
+        ) recTable.[i, l]
+            
+    
     member this.Recognize ((grules, start) as g) s weightCalcFun = 
         rules <- grules
-        recognize g s weightCalcFun 
+        let out = recognize g s weightCalcFun
+        match out with
+        | "" -> "Строка не выводима в заданной грамматике."
+        | _ -> 
+            labelTracking (s.Length - 1)
+            out

@@ -76,15 +76,35 @@ type CYKTests () =
         let expected = "conflict 0 0"
         Assert.AreEqual(expected,res)
 
+    [<Test>]
+    member test.labelTracking() = 
+        let il = parser.ParseGrammar(Path.Combine(basePath, "labelTracking.yrd"))
+        let rules,start = generator.GenRulesList il
+        let input = [|1us;2us;2us;2us;1us;2us;2us;2us;1us;2us;2us;2us;|]
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
+        Assert.IsTrue true
+        System.Console.ReadKey()
+
+    [<Test>]
+    member test.labelTracking2() = 
+        let il = parser.ParseGrammar(Path.Combine(basePath, "labelTracking2.yrd"))
+        let rules,start = generator.GenRulesList il
+        let input = [|1us;2us;2us;2us;|]
+        let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
+        Assert.IsTrue true
+        System.Console.ReadKey()
+
 [<EntryPoint>]
 let f _ =
     let tests = new CYKTests()
-    let x1 = tests.noLbl()
-    //let x2 = tests.oneLbl()
-    let x3 = tests.oneLblNoInputLbl()
-    let x4 = tests.twoLbls()
-    let x5 = tests.twoLblsOneInputDial()
-    let x6 = tests.twoLblsTwoDials()
+//    let x1 = tests.noLbl()
+//    let x2 = tests.oneLbl()
+//    let x3 = tests.oneLblNoInputLbl()
+//    let x4 = tests.twoLbls()
+//    let x5 = tests.twoLblsOneInputDial()
+//    let x6 = tests.twoLblsTwoDials()
+    let x7 = tests.labelTracking();
+    //let x8 = tests.labelTracking2();
     0
 
 

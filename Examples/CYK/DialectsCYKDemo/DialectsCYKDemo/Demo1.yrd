@@ -1,7 +1,4 @@
-﻿+s : x z;
-x : NUM;
-y : PLUS;
-k : @l1(MULT);
-z : y x;
-z : k x;
-z : y s;
+﻿+s :  NUM (PLUS|MULT|pow) s
+    | NUM;
+
+pow : @l1(BAR) | @l2(STAR);

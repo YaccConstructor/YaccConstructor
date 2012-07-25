@@ -9,7 +9,7 @@
         |> Yard.Generators.CYK.CodeTokenStream
         
     let cyk = new Yard.Generators.CYKGenerator.CYKCore()
-    cyk.Recognize (new ResizeArray<_>(Yard.Generators.CYK.rules),Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy)
+    cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy)
 
 let time () =    
     let start = System.DateTime.Now
@@ -21,6 +21,6 @@ let time () =
          )
     printfn "%s" res
     printfn "%A" (System.DateTime.Now - start)
-    System.Console.ReadKey()
+    //System.Console.ReadKey() |> ignore
 do 
     time ()

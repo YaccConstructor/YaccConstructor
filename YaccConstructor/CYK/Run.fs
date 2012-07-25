@@ -22,18 +22,4 @@ printfn "Time = %A" (System.DateTime.Now - start)
 
 //System.Console.WriteLine("Test3:")
 //recognize testGrammar2 "abcd"
-System.Console.ReadLine()   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+System.Console.ReadLine() |> ignore

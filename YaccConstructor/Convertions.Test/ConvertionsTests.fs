@@ -126,6 +126,7 @@ type ``Convertions tests`` () =
             ilTree 
             |> ConvertionsManager.ApplyConvertion "ExpandMeta"   
             |> ConvertionsManager.ApplyConvertion "ExpandEbnf"
+            |> ConvertionsManager.ApplyConvertion "ExpandInnerAlt"
             |> ConvertionsManager.ApplyConvertion "ExpandBrackets"   
         let hasNotInnerSeq = 
             ilTreeConverted.grammar 
@@ -145,6 +146,9 @@ type ``Convertions tests`` () =
            | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif
+
+        //treeDump.Generate expected |> string |> printfn "%s"
+        treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         Assert.True(hasNotInnerSeq)
    
 [<TestFixture>]

@@ -17,10 +17,12 @@ open Microsoft.VisualStudio.Utilities
 open Microsoft.VisualStudio.Shell
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
+open DataHelper
 
-type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView) =
+type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView, m_dte : EnvDTE.DTE) =
     inherit KeyProcessor ()
 
+    let dte = m_dte
     let mutable _view : ITextView = null
     let mutable _navigator : ITextStructureNavigator = null
     do
@@ -40,25 +42,30 @@ type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView) =
         
             let t = word.Span.GetText()
 
-            let fileText = _view.TextBuffer.CurrentSnapshot.GetText()//u//buffer.CurrentSnapshot.GetText()
+            let fileText = _view.TextBuffer.CurrentSnapshot.GetText()
 
             let getNonterminals (tree: Yard.Core.IL.Definition.t<_,_> ) = 
                 tree.grammar |> List.map (fun node -> node.name)
             try 
-                let parsed = ParseText fileText ""  // Запуск парсера
-                let nonterminals = (getNonterminals parsed)(*.Distinct()*) |> List.ofSeq |> List.sort
-                let isCurrent str (nonterm : Yard.Core.IL.Source.t) = 
+                let parsed = ReParseFileForActiveWindow(dte, fileText)
+                //let parsed = ParseText fileText ""  // Запуск парсера
+                let nonterminals = parsed.NotTermToDEFPosition
+
+                pos:=nonterminals.[t].StartCoordinate
+                //let nonterminals = (getNonterminals parsed)(*.Distinct()*) |> List.ofSeq |> List.sort
+             (* let isCurrent str (nonterm : Yard.Core.IL.Source.t) = // СЮДА СМОТРИ
                     match nonterm with
                     | n, (s,e,_) when n = str -> pos := s
                     | _ -> ()
-                List.iter (isCurrent t)  nonterminals
+                List.iter (isCurrent t)  nonterminals                 // ЗДЕСЬ КОНЧАЙ СМОТРЕТЬ
+             *)
             with
             |_-> () 
             
-            let lineNumberToGo = _view.TextBuffer.CurrentSnapshot.GetLineFromPosition(!pos).LineNumber
-            let currentLineNumber = _view.TextSnapshot.GetLineNumberFromPosition _view.Caret.Position.BufferPosition.Position
+            let lineNumberToGo = _view.TextBuffer.CurrentSnapshot.GetLineFromPosition(!pos).LineNumber                        // Здесь мы считаем куда перейти
+            let currentLineNumber = _view.TextSnapshot.GetLineNumberFromPosition _view.Caret.Position.BufferPosition.Position // Где стоит коретка
             
-            let rec scroll i = 
+            let rec scroll i =                                                                                                // Скролинг до нужного места
                 match i with
                 | 0 -> ()
                 | n when n < 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
@@ -72,7 +79,7 @@ type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView) =
                 //Caret moving - begin
 
 
-            _view.Caret.MoveTo(new SnapshotPoint(_view.TextSnapshot, !pos)) |> ignore
+            _view.Caret.MoveTo(new SnapshotPoint(_view.TextSnapshot, !pos)) |> ignore                                          // Премещение каретки
 
                 //Caret moving end
             ()

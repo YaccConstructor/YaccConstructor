@@ -18,10 +18,10 @@ open Yard.Core.IL.Definition
 open System.Collections.Concurrent
 
 module SolutionData = 
-    type CoordinateWord (startCoordinate : int, wordLength : int) = 
+    type CoordinateWord (startCoordinate : int, endCoordinate : int) = 
          member this.StartCoordinate = startCoordinate
-         member this.WordLength = wordLength
-         member this.EndCoordinate = startCoordinate + wordLength
+         member this.WordLength = startCoordinate - endCoordinate
+         member this.EndCoordinate = endCoordinate
          
 ////
 ////                YardFile
@@ -37,7 +37,7 @@ module SolutionData =
          let info = yardInfo
          let reMakeTokens (fileText: string) = fileText |> LexString |> List.ofSeq // Получаем токены    
          let mutable tokens = reMakeTokens (String.Empty)  //Текущие токены (сначала пустые)
-         let mutable tree = ParseText(String.Empty)
+         let mutable tree = ParseText String.Empty String.Empty
          let mutable positionToNotTerm = Array.create 0 ""
          let notTermToPosition = new Dictionary<string, List<CoordinateWord>>()
          let notTermToDEFPosition = new Dictionary<string, CoordinateWord>()
@@ -92,7 +92,7 @@ module SolutionData =
                                                                      if (match node.name with (_,(_,_,path)) -> String.Compare(path, info.FullPath) = 0)
                                                                      then addNotTermToDEFPosition (node.name)
                                                                           addNotTermToPosition (node.body)
-                                                                   //  else (match node.name with (_,(_,_,path)) ->  findInlistOfVisibleYardFileHelper path)
+                                                                 //  else (match node.name with (_,(_,_,path)) ->  findInlistOfVisibleYardFileHelper path)
                                                                     )
          
          // Парсим string
@@ -101,7 +101,8 @@ module SolutionData =
              notTermToDEFPosition.Clear()
              positionToNotTerm <- Array.create fileText.Length ""
              tokens <- reMakeTokens (fileText)
-             tree <- ParseText (fileText)
+             tree <- ParseText fileText info.FullPath
+             getNonterminals (tree)
             
          
          let reparse() = ParseFile (info.FullPath + info.FileName)
@@ -155,6 +156,7 @@ module SolutionData =
          member this.FirstRunAddProjects(y) = firstRunAddProjects(y)
          member this.ReParseFile (projectFileName, yardFileName, text) = projects.[projectFileName].ReParseFile(yardFileName, text)
          member this.GetParseFile (projectFileName, yardFileName) = projects.[projectFileName].GetParseFile(yardFileName)
+         member this.GetParseProject (projectFileName) = projects.[projectFileName]
     //     member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
 

@@ -98,9 +98,6 @@ namespace YC.VSYard
             /*
             Открыть докумнет: (наверное)
             m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open
-            
-            Активный документ:
-            m_dte.ActiveDocument.ExtenderCATID.ToString();
             */
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);

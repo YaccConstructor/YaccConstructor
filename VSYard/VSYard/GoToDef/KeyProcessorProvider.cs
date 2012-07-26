@@ -13,6 +13,8 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Shell;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;   
 
 namespace YC.VSYard.GoToDef
 {
@@ -31,8 +33,10 @@ namespace YC.VSYard.GoToDef
             ITextStructureNavigator textStructureNavigator =
                 TextStructureNavigatorSelector.GetTextStructureNavigator(view.TextBuffer);
 
+            DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+
             return view.Properties.GetOrCreateSingletonProperty(typeof(VSYardNS.GoToDefKeyProcessor),
-                                                                () => new VSYardNS.GoToDefKeyProcessor(textStructureNavigator, view));
+                                                                () => new VSYardNS.GoToDefKeyProcessor(textStructureNavigator, view, dte));
         }
     }
 

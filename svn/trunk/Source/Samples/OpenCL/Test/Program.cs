@@ -121,14 +121,14 @@ namespace Test
                                 provider.Loop(1, size,
                                     kIndices =>
                                         from l in kIndices
-                                        let _base = provider.CompileFunction((int32 _l, int32 _size) => (int32)(_l * _size * 5))
-                                        let v = (float32)(i < size - l && k < l-1 ? ((a[_base(l - k - 1, size) + i] + a[_base(l - k - 1, size) + i + 1])) : 0)
-                                        select new[] { a[l * size + i] <= v })
+                                        let _base = provider.CompileFunction((int32 _l, int32 _size, int32 _nTerms) => (int32)(_l * _size * 5 * _nTerms))
+                                        let v = (float32)(i < size - l && k < l ? ((a[_base(l - k - 1, size, nTerms) + i*nTerms*5] + a[_base(l - k - 1, size, nTerms) + (i+ 1)*nTerms*5 ])) : 0)
+                                        select new[] { a[_base(l, size, nTerms) + i * nTerms * 5] <= v })
                               select new[] { a[0] <= a[0] });
 
             commandQueue.Add(recognize.Run(new _2D(size - 1, size), buffer))
                     .Finish();
-            commandQueue.Add(buffer.Read(0, size * size, bArr))
+            commandQueue.Add(buffer.Read(0, size * size * nTerms * 5, bArr))
                 .Finish();
             foreach (var x in bArr)
             {
@@ -138,18 +138,6 @@ namespace Test
 
             commandQueue.Dispose();
             provider.Dispose();
-
-            //var recognize = provider.Compile<_1D, Buffer<float32>>(
-            //    (range, a) => from r in range
-            //                  let i = r.GlobalID0
-            //                  let value = default(float32)
-            //                  let sum =
-            //                    provider.Loop(1, size,
-            //                        kIndices =>
-            //                            from l in kIndices
-            //                            let v = (i < (size - l)) ? ((float32)(a[(l - (int32)1) * size + i] + a[(l - (int32)1) * size + i + (int32)1])) : ((float32)0)
-            //                            select new[] { a[l * size + i] <= v })
-            //                  select new[] { a[0] <= a[0] });
         }
     }
 }

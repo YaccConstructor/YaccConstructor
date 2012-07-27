@@ -332,6 +332,7 @@ namespace Brahma.OpenCL
                         break;
 
                     case ExpressionType.And:
+                    case ExpressionType.AndAlso:
                         _code.Append(" & ");
                         break;
                     

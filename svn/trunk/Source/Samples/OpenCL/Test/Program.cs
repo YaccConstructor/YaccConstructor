@@ -90,7 +90,15 @@ namespace Test
 
         static void Do()
         {
-            var inArr = new uint32[] {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 };
+
+            var inArr = new int32[702] 
+                             // { 2, 1, 2 }
+                             //{2, 2, 2, 2, 2, 2, 2, 1, 2 }
+                            //{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
+                            //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
+                            ;
+            for (int _i = 0; _i < 702; _i++) { inArr[_i] = 2; }
+            inArr[701] = 1;
             int32 size = inArr.Length;
 
             var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0),new Rule(2,3,2,0,0)
@@ -120,17 +128,16 @@ namespace Test
 
             for (int i = 0; i < size; i++)
             {
-
                 for (int j = 0; j < rules.Length; j++)
                 {
                     if (inArr[i] == (rules[j]).b && (rules[j]).c == 0)
                     {
                         var _base = i * nTerms * 5 + (int) (rules[j].a -1) * 5;
-                        bArr[_base] = (BT.int32)rules[j].a;
-                        bArr[_base + 1] = (BT.int32)0;
-                        bArr[_base + 2] = (BT.int32)(rules[j].lblNum == 0 ? 1 : 0);
-                        bArr[_base + 3] = (BT.int32)rules[j].lblNum;
-                        bArr[_base + 4] = (BT.int32)rules[j].lblWeight;
+                        bArr[_base] = rules[j].a;
+                        bArr[_base + 1] = 0;
+                        bArr[_base + 2] = (rules[j].lblNum == 0 ? 1 : 0);
+                        bArr[_base + 3] = rules[j].lblNum;
+                        bArr[_base + 4] = rules[j].lblWeight;
                     }
                 }
             }
@@ -148,19 +155,19 @@ namespace Test
             var rulesBuf = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
 
             var processRow =
-                provider.Compile<_2D, int32, int32, Buffer<int32>, Buffer<int32>>(
-                (range, l, rule_id, a, _rulesBuf) => 
+                provider.Compile<_1D, int32, int32, int32, Buffer<int32>, Buffer<int32>>(
+                (range, l, rule_id, k, a, _rulesBuf) => 
                     from r in range
-                    let i = r.GlobalID0
-                    let k = r.GlobalID1
+                    let i = r.GlobalID0                    
                     let _base = provider.CompileFunction((int32 _l, int32 _size, int32 _nTerms) => (int32)(_l * _size * 5 * _nTerms))
                     let left_base_idx = _base(k, size, nTerms) + i * nTerms * 5
-                    let right_base_id = _base((l - k - 1), size, nTerms) + (k + i + 1) * nTerms * 5
-                    let rule_a = _rulesBuf[(rule_id * 5)]
-                    let rule_b = _rulesBuf[(rule_id * 5) + 1]
-                    let rule_c = _rulesBuf[(rule_id * 5) + 2]
+                    let right_base_idx = _base((l - k - 1), size, nTerms) + (k + i + 1) * nTerms * 5
+                    let rule_base = (rule_id * 5)
+                    let rule_a = _rulesBuf[rule_base]
+                    let rule_b = _rulesBuf[rule_base + 1]
+                    let rule_c = _rulesBuf[rule_base + 2]
                     let left = a[left_base_idx + (rule_b - 1) * 5]
-                    let right = a[right_base_id + (rule_c - 1) * 5]
+                    let right = a[right_base_idx + (rule_c - 1) * 5]
                     let v = (rule_b == left && rule_c == right && rule_c != 0)
                             ? rule_a
                             : a[_base(l, size, nTerms) + i * nTerms * 5 + (rule_a - 1) * 5]
@@ -168,14 +175,17 @@ namespace Test
 
             for (int l = 1; l < size; l++)
             {
-                for (int rId = 0; rId < rules.Length; rId++)
+                for (int k = 0; k < l; k++)
                 {
-                    commandQueue.Add(processRow.Run(new _2D(size - l, l), l, rId, buffer, rulesBuf)).Barrier();
+                    for (int rId = 0; rId < rules.Length; rId++)
+                    {
+                        commandQueue.Add(processRow.Run(new _1D(size - l), l, rId, k, buffer, rulesBuf)).Barrier();
+                    }
                 }
             }
             commandQueue.Finish();
             commandQueue.Add(buffer.Read(0, size * size * nTerms * 5, bArr)).Finish();
-            toMatrix(bArr, (int) (size * nTerms * 5));
+            //toMatrix(bArr, (int) (size * nTerms * 5));
             buffer.Dispose();
 
             commandQueue.Dispose();

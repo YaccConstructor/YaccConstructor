@@ -218,8 +218,7 @@ namespace Brahma.OpenCL
                 Visit(conditional.IfTrue);
                 _code.Append(" : ");
                 Visit(conditional.IfFalse);
-                
-                _code.Append(")");
+                _code.Append(");");
                 
                 return conditional;
             }
@@ -292,8 +291,7 @@ namespace Brahma.OpenCL
                     case ExpressionType.LessThanOrEqual:
                         if (binary.Type.IsConcreteGenericOf(typeof(Set<>)))
                         {
-                            _code.Append(" = ");
-                            isResultAssignment = true;
+                            _code.Append(" = ");                            
                         }
                         else
                             _code.Append(" <= ");

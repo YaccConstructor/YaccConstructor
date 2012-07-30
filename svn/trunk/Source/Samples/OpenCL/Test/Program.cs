@@ -91,14 +91,14 @@ namespace Test
         static void Do()
         {
 
-            var inArr = new int32[702] 
+            var inArr = new int32[102] 
                              // { 2, 1, 2 }
                              //{2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             ;
-            for (int _i = 0; _i < 702; _i++) { inArr[_i] = 2; }
-            inArr[701] = 1;
+            for (int _i = 0; _i < 102; _i++) { inArr[_i] = 2; }
+            inArr[101] = 1;
             int32 size = inArr.Length;
 
             var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0),new Rule(2,3,2,0,0)
@@ -168,10 +168,11 @@ namespace Test
                     let rule_c = _rulesBuf[rule_base + 2]
                     let left = a[left_base_idx + (rule_b - 1) * 5]
                     let right = a[right_base_idx + (rule_c - 1) * 5]
-                    let v = (rule_b == left && rule_c == right && rule_c != 0)
+                    let res_id = _base(l, size, nTerms) + i * nTerms * 5 + (rule_a - 1) * 5 
+                    let v = (rule_c != 0 && rule_b == left && rule_c == right)
                             ? rule_a
-                            : a[_base(l, size, nTerms) + i * nTerms * 5 + (rule_a - 1) * 5]
-                    select new[] { a[_base(l, size, nTerms) + i * nTerms * 5 + (rule_a - 1) * 5] <= v });
+                            : a[res_id]
+                    select new[] { a[res_id] <= v });
 
             for (int l = 1; l < size; l++)
             {

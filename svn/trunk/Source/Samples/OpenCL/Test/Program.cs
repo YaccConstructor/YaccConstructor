@@ -153,26 +153,21 @@ namespace Test
                 //rulesArr[_base + 4] = rules[i].lblWeight;
             }
 
-            var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
-            var rulesBuf = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
+            var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);            
 
             var processRow =
-                provider.Compile<_1D, int32, int32, int32, Buffer<int32>, Buffer<int32>>(
-                (range, l, rule_id, k, a, _rulesBuf) => 
+                provider.Compile<_1D, int32, int32,int32, int32, int32, Buffer<int32>>(
+                (range, l, rule_a, rule_b, rule_c, k, a) => 
                     from r in range
-                    let i = r.GlobalID0
-                    let _base = provider.CompileFunction((int32 _l, int32 _size, int32 _nTerms, int32 _magicConst) => (int32)(_l * _size * _magicConst * _nTerms))
-                    let nT = nTerms * magicConst                    
-                    let rule_base = rule_id * magicConst
-                    let rule_a = _rulesBuf[rule_base]
-                    let rule_b = _rulesBuf[rule_base + 1]
-                    let rule_c = _rulesBuf[rule_base + 2]
-                    let left_base_idx = _base(k, size, nTerms, magicConst) + i * nT
-                    let right_base_idx = _base((l - k - 1), size, nTerms, magicConst) + (k + i + 1) * nT
+                    let i = r.GlobalID0                    
+                    let nT = nTerms * magicConst
+                    let _base = nT * size
+                    let left_base_idx = (k * _base) + i * nT
+                    let right_base_idx = ((l - k - 1) * _base) + (k + i + 1) * nT
                     let left = a[left_base_idx + (rule_b - 1) * magicConst]
                     let right = a[right_base_idx + (rule_c - 1) * magicConst]
-                    let res_id = _base(l, size, nTerms, magicConst) + i * nT + (rule_a - 1) * magicConst
-                    let v = (rule_c != 0 && rule_b == left && rule_c == right)
+                    let res_id = (l * _base) + i * nT + (rule_a - 1) * magicConst
+                    let v = (rule_c != 0 && rule_c == right  && rule_b == left)
                             ? rule_a
                             : a[res_id]
                     select new[] { a[res_id] <= v });
@@ -183,7 +178,11 @@ namespace Test
                 {
                     for (int rId = 0; rId < rules.Length; rId++)
                     {
-                        commandQueue.Add(processRow.Run(new _1D(size - l), l, rId, k, buffer, rulesBuf)).Barrier();
+                        var rule_base = rId * magicConst;
+                        var rule_a = rulesArr[rule_base];
+                        var rule_b = rulesArr[rule_base + 1];
+                        var rule_c = rulesArr[rule_base + 2];
+                        commandQueue.Add(processRow.Run(new _1D(size - l), l, rule_a,rule_b,rule_c, k, buffer)).Barrier();
                     }
                 }
             }

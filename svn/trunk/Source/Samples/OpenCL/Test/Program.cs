@@ -172,7 +172,7 @@ namespace Test
                     let left = a[left_base_idx + (rule_b - 1)]
                     let right = a[right_base_idx + (rule_c - 1)]
                     let res_id = (l * _base) + i * nT + (rule_a - 1)
-                    let v = (rule_c != 0 && rule_c == right && rule_b == left)
+                    let v = (rule_c != 0 & rule_c == right & rule_b == left)
                             ? rule_a
                             : a[res_id]
                     select new[] 

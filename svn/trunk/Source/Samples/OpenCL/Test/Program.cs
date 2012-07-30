@@ -59,6 +59,7 @@ namespace Test
 
     class Program
     {
+        static int32 magicConst = 3;
         static void Main(string[] args)
         {
             var start = System.DateTime.Now;
@@ -77,8 +78,8 @@ namespace Test
                     //{
                     //    System.Console.Write("|");
                     //}
-                    
-                    if ((j) % 5 == 0)
+
+                    if ((j) % magicConst == 0)
                     {
                         System.Console.Write(arr[i * size + j]);
                         System.Console.Write("|");
@@ -91,14 +92,14 @@ namespace Test
         static void Do()
         {
 
-            var inArr = new int32[102] 
+            var inArr = new int32[1002] 
                              // { 2, 1, 2 }
                              //{2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             ;
-            for (int _i = 0; _i < 102; _i++) { inArr[_i] = 2; }
-            inArr[101] = 1;
+            for (int _i = 0; _i < 1002; _i++) { inArr[_i] = 2; }
+            inArr[1001] = 1;
             int32 size = inArr.Length;
 
             var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0),new Rule(2,3,2,0,0)
@@ -123,8 +124,8 @@ namespace Test
 
             var commandQueue = new CommandQueue(provider, provider.Devices.First());
 
-            var bArr = new int32[size * size * nTerms * 5];
-            var rulesArr = new int32[rules.Length * 5];
+            var bArr = new int32[size * size * nTerms * magicConst];
+            var rulesArr = new int32[rules.Length * magicConst];
 
             for (int i = 0; i < size; i++)
             {
@@ -132,23 +133,24 @@ namespace Test
                 {
                     if (inArr[i] == (rules[j]).b && (rules[j]).c == 0)
                     {
-                        var _base = i * nTerms * 5 + (int) (rules[j].a -1) * 5;
+                        var _base = i * nTerms * magicConst + (int)(rules[j].a - 1) * magicConst;
                         bArr[_base] = rules[j].a;
                         bArr[_base + 1] = 0;
                         bArr[_base + 2] = (rules[j].lblNum == 0 ? 1 : 0);
-                        bArr[_base + 3] = rules[j].lblNum;
-                        bArr[_base + 4] = rules[j].lblWeight;
+                        ///bArr[_base + 3] = rules[j].lblNum;
+                        //bArr[_base + 4] = rules[j].lblWeight;
                     }
                 }
             }
 
             for (int i = 0; i < rules.Length; i++)
             {
-                rulesArr[i * 5] = rules[i].a;
-                rulesArr[i * 5 + 1] = rules[i].b;
-                rulesArr[i * 5 + 2] = rules[i].c;
-                rulesArr[i * 5 + 3] = rules[i].lblNum;
-                rulesArr[i * 5 + 4] = rules[i].lblWeight;
+                var _base =  i * magicConst;
+                rulesArr[_base] = rules[i].a;
+                rulesArr[_base + 1] = rules[i].b;
+                rulesArr[_base + 2] = rules[i].c;
+                //rulesArr[_base + 3] = rules[i].lblNum;
+                //rulesArr[_base + 4] = rules[i].lblWeight;
             }
 
             var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
@@ -158,17 +160,18 @@ namespace Test
                 provider.Compile<_1D, int32, int32, int32, Buffer<int32>, Buffer<int32>>(
                 (range, l, rule_id, k, a, _rulesBuf) => 
                     from r in range
-                    let i = r.GlobalID0                    
-                    let _base = provider.CompileFunction((int32 _l, int32 _size, int32 _nTerms) => (int32)(_l * _size * 5 * _nTerms))
-                    let left_base_idx = _base(k, size, nTerms) + i * nTerms * 5
-                    let right_base_idx = _base((l - k - 1), size, nTerms) + (k + i + 1) * nTerms * 5
-                    let rule_base = (rule_id * 5)
+                    let i = r.GlobalID0
+                    let _base = provider.CompileFunction((int32 _l, int32 _size, int32 _nTerms, int32 _magicConst) => (int32)(_l * _size * _magicConst * _nTerms))
+                    let nT = nTerms * magicConst                    
+                    let rule_base = rule_id * magicConst
                     let rule_a = _rulesBuf[rule_base]
                     let rule_b = _rulesBuf[rule_base + 1]
                     let rule_c = _rulesBuf[rule_base + 2]
-                    let left = a[left_base_idx + (rule_b - 1) * 5]
-                    let right = a[right_base_idx + (rule_c - 1) * 5]
-                    let res_id = _base(l, size, nTerms) + i * nTerms * 5 + (rule_a - 1) * 5 
+                    let left_base_idx = _base(k, size, nTerms, magicConst) + i * nT
+                    let right_base_idx = _base((l - k - 1), size, nTerms, magicConst) + (k + i + 1) * nT
+                    let left = a[left_base_idx + (rule_b - 1) * magicConst]
+                    let right = a[right_base_idx + (rule_c - 1) * magicConst]
+                    let res_id = _base(l, size, nTerms, magicConst) + i * nT + (rule_a - 1) * magicConst
                     let v = (rule_c != 0 && rule_b == left && rule_c == right)
                             ? rule_a
                             : a[res_id]
@@ -185,7 +188,7 @@ namespace Test
                 }
             }
             commandQueue.Finish();
-            commandQueue.Add(buffer.Read(0, size * size * nTerms * 5, bArr)).Finish();
+            commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst, bArr)).Finish();
             //toMatrix(bArr, (int) (size * nTerms * 5));
             buffer.Dispose();
 

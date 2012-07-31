@@ -212,6 +212,17 @@ namespace Brahma.OpenCL
 
             protected override Expression VisitConditional(ConditionalExpression conditional)
             {
+                if (conditional.IfFalse is ConstantExpression && (conditional.IfFalse as ConstantExpression).Value == null)
+                {
+                    _code.Append("if(");
+                    Visit(conditional.Test);
+                    _code.Append("){");
+                    Visit(conditional.IfTrue);
+                    _code.Append(";}");
+
+                    }
+                else
+                {
                 _code.Append("(");
                 Visit(conditional.Test);
                 _code.Append(" ? ");
@@ -219,6 +230,7 @@ namespace Brahma.OpenCL
                 _code.Append(" : ");
                 Visit(conditional.IfFalse);
                 _code.Append(");");
+                }
                 
                 return conditional;
             }
@@ -445,7 +457,11 @@ namespace Brahma.OpenCL
                         {
                             Visit(method.Arguments[0]);
                         }
-                        Visit(method.Arguments[1]);
+                        if (!(method.Arguments[1] is LambdaExpression
+                            && (method.Arguments[1] as LambdaExpression).Body is ConstantExpression
+                            && ((method.Arguments[1] as LambdaExpression).Body as ConstantExpression).Value == null))
+                            Visit(method.Arguments[1]);
+
                         _code.AppendLine(";");
 
                         break;
@@ -620,7 +636,7 @@ namespace Brahma.OpenCL
                 kernelSource.Append(_code.ToString());
                 kernelSource.AppendLine("}");
 
-                return kernelSource.ToString();
+                return kernelSource.ToString().Replace(";\r\n;","");
             }
 
             public IEnumerable<MemberExpression> Closures

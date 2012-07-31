@@ -158,12 +158,12 @@ namespace Test
 
             var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
             var rulesBuffer = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
-            var db = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, new int32[1]);
+            //var db = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, new int32[1]);
             int32 rLength = rules.Length;
 
             var processRow =
-                                provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>, Buffer<int32>>(
-                (range, l, a, _rules, dBuf) =>
+                                provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
+                (range, l, a, _rules) =>
                     from r in range
                     let i = r.GlobalID0
                     let nT = nTerms
@@ -187,13 +187,13 @@ namespace Test
                             let res_id =  res_id_base + (rule_a - 1)
                             select new[]{(rule_c != 0 & rule_c == right & rule_b == left)
                                           ? a[res_id] <= rule_a
-                                          : dBuf[0] <= dBuf[0]})
-                        select new[] { dBuf[0] <= dBuf[0] })
-                    select new[] { dBuf[0] <= dBuf[0] });
+                                          : ((Brahma.Set<int32>)null)})
+                        select ((Brahma.Set<int32>[])null))
+                    select ((Brahma.Set<int32>[])null));
 
             for (int l = 1; l < size; l++)
             {
-                commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer, db)).Finish();
+                commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer)).Finish();
             }
             //commandQueue.Finish();
             commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();

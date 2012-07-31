@@ -92,17 +92,17 @@ namespace Test
 
         static void Do()
         {
-
+            var c = 1002;
             var inArr = new int32
                              //[]
-                             [3002] 
+                             [c] 
                              //{ 2, 1, 2 }
                              //{2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             ;
-            for (int _i = 0; _i < 3002; _i++) { inArr[_i] = 2; }
-            inArr[3001] = 1;
+            for (int _i = 0; _i < c; _i++) { inArr[_i] = 2; }
+            inArr[c-1] = 1;
             int32 size = inArr.Length;
 
             var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,3,2,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0)
@@ -156,39 +156,45 @@ namespace Test
                 //rulesArr[_base + 4] = rules[i].lblWeight;
             }            
 
-            var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);            
+            var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
+            var rulesBuffer = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
             var db = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, new int32[1]);
+            int32 rLength = rules.Length;
 
             var processRow =
-                provider.Compile<_1D, int32, int32, int32, int32, Buffer<int32>>(
-                (range, l, rule_a, rule_b, rule_c, a) =>
+                provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>, Buffer<int32>>(
+                (range, l, a, _rules, dBuf) =>
                     from r in range
                     let i = r.GlobalID0
                     let nT = nTerms
                     let _base = nT * size
-                    let iter = provider.Loop(0, l, kIdx=>from k in kIdx 
-                        let left_base_idx = (k * _base) + i * nT
-                        let right_base_idx = ((l - k - 1) * _base) + (k + i + 1) * nT
-                        let left = a[left_base_idx + (rule_b - 1)]
-                        let right = a[right_base_idx + (rule_c - 1)]
-                        let res_id = (l * _base) + i * nT + (rule_a - 1)
-                        let v = (rule_c != 0 & rule_c == right & rule_b == left)
-                                ? rule_a
-                                : a[res_id]
-                        select new[] {a[res_id] <= v})
-                    select new[] { a[0] <= a[0] });
+                    let i_s = i * nT
+                    let res_id_base = (l * _base) + i_s
+                    let l_s = (l-1) * _base
+                    let i_s_1 = i_s + 1
+                    let iter = provider.Loop(0, l, kIdx=>
+                        from k in kIdx
+                        let right_base_idx = l_s - k * _base + k * nT + i_s_1
+                        let left_base_idx = (k * _base) + i_s
+                        let iter2 = provider.Loop(0, rLength, rIdxs =>
+                            from rId in rIdxs
+                            let rule_base = rId * magicConst
+                            let rule_a = _rules[rule_base]
+                            let rule_b = _rules[rule_base + 1]
+                            let rule_c = _rules[rule_base + 2]
+                            let left = a[left_base_idx + (rule_b - 1)]
+                            let right = a[right_base_idx + (rule_c - 1)]
+                            let res_id =  res_id_base + (rule_a - 1)
+                            let v = (rule_c != 0 & rule_c == right & rule_b == left)
+                                    ? rule_a
+                                    : a[res_id]
+                            select new[] {a[res_id] <= v})
+                        select new[] { dBuf[0] <= dBuf[0] })
+                    select new[] { dBuf[0] <= dBuf[0] });
 
             for (int l = 1; l < size; l++)
             {
-                for (int rId = 0; rId < rules.Length; rId++)
-                {
-                        var rule_base = rId * magicConst;
-                        var rule_a = rulesArr[rule_base];
-                        var rule_b = rulesArr[rule_base + 1];
-                        var rule_c = rulesArr[rule_base + 2];
-                        commandQueue.Add(processRow.Run(new _1D(size - l), l, rule_a, rule_b, rule_c, buffer)).Finish();
-                }
-                //commandQueue.Finish();
+                commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer, db)).Finish();
             }
             //commandQueue.Finish();
             commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();

@@ -92,7 +92,7 @@ namespace Test
 
         static void Do()
         {
-            var c = 1002;
+            var c = 2002;
             var inArr = new int32
                              //[]
                              [c] 
@@ -102,7 +102,7 @@ namespace Test
                             //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
                             ;
             for (int _i = 0; _i < c; _i++) { inArr[_i] = 2; }
-            inArr[c-1] = 1;
+            inArr[c-2] = 1;
             int32 size = inArr.Length;
 
             var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,3,2,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0)
@@ -162,22 +162,22 @@ namespace Test
             int32 rLength = rules.Length;
 
             var processRow =
-                provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>, Buffer<int32>>(
+                provider.Compile<_2D, int32, Buffer<int32>, Buffer<int32>, Buffer<int32>>(
                 (range, l, a, _rules, dBuf) =>
                     from r in range
                     let i = r.GlobalID0
-                    let nT = nTerms
-                    let _base = nT * size
-                    let i_s = i * nT
+                    let rId = r.GlobalID1
+                    let _base = nTerms * size
+                    let i_s = i * nTerms
                     let res_id_base = (l * _base) + i_s
-                    let l_s = (l-1) * _base
-                    let i_s_1 = i_s + 1
+                    //let l_s = (l-1) * _base
+                    //let i_s_1 = i_s + 1
                     let iter = provider.Loop(0, l, kIdx=>
                         from k in kIdx
-                        let right_base_idx = l_s - k * _base + k * nT + i_s_1
-                        let left_base_idx = (k * _base) + i_s
-                        let iter2 = provider.Loop(0, rLength, rIdxs =>
-                            from rId in rIdxs
+                        let left_base_idx = (k * _base) + i * nTerms
+                        let right_base_idx = ((l - k - 1) * _base) + (k + i + 1) * nTerms
+                        //let iter2 = provider.Loop(0, rLength, rIdxs =>
+                            //from rId in rIdxs
                             let rule_base = rId * magicConst
                             let rule_a = _rules[rule_base]
                             let rule_b = _rules[rule_base + 1]
@@ -185,16 +185,19 @@ namespace Test
                             let left = a[left_base_idx + (rule_b - 1)]
                             let right = a[right_base_idx + (rule_c - 1)]
                             let res_id =  res_id_base + (rule_a - 1)
-                            let v = (rule_c != 0 & rule_c == right & rule_b == left)
+                            /*let v = (rule_c != 0 & rule_c == right & rule_b == left)
                                     ? rule_a
-                                    : a[res_id]
-                            select new[] {a[res_id] <= v})
-                        select new[] { dBuf[0] <= dBuf[0] })
+                                    : a[res_id]*/
+                            select new[]{(rule_c != 0 & rule_c == right & rule_b == left)
+                                          ? a[res_id] <= rule_a
+                                          : dBuf[0] <= dBuf[0]}) 
+                            //{a[res_id] <= v})
+                        //select new[] { dBuf[0] <= dBuf[0] })
                     select new[] { dBuf[0] <= dBuf[0] });
 
             for (int l = 1; l < size; l++)
             {
-                commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer, db)).Finish();
+                commandQueue.Add(processRow.Run(new _2D(size - l, rLength), l, buffer, rulesBuffer, db)).Finish();
             }
             //commandQueue.Finish();
             commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();

@@ -92,7 +92,7 @@ namespace Test
 
         static void Do()
         {
-            var c = 3002;
+            var c = 2002;
             var inArr = new int32
                              //[]
                              [c] 
@@ -161,8 +161,7 @@ namespace Test
             //var db = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, new int32[1]);
             int32 rLength = rules.Length;
 
-            var processRow =
-                                provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
+            var processRow = provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
                 (range, l, a, _rules) =>
                     from r in range
                     let i = r.GlobalID0
@@ -170,7 +169,7 @@ namespace Test
                     let _base = nT * size
                     let i_s = i * nT
                     let res_id_base = (l * _base) + i_s
-                    let l_s = (l-1) * _base
+                    let l_s = (l - 1) * _base
                     let i_s_1 = i_s + 1
                     let iter = provider.Loop(0, l, kIdx=>
                         from k in kIdx
@@ -182,10 +181,10 @@ namespace Test
                             let rule_a = _rules[rule_base]
                             let rule_b = _rules[rule_base + 1]
                             let rule_c = _rules[rule_base + 2]
-                            let left = a[left_base_idx + (rule_b - 1)]
-                            let right = a[right_base_idx + (rule_c - 1)]
-                            let res_id =  res_id_base + (rule_a - 1)
-                            select new[]{(rule_c != 0 & rule_c == right & rule_b == left)
+                            let res_id = res_id_base + (rule_a - 1)
+                            select new[]{(rule_c != 0
+                                          & rule_c == a[right_base_idx + (rule_c - 1)] 
+                                          & rule_b == a[left_base_idx + (rule_b - 1)])
                                           ? a[res_id] <= rule_a
                                           : ((Brahma.Set<int32>)null)})
                         select ((Brahma.Set<int32>[])null))

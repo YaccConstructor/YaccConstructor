@@ -18,33 +18,39 @@ open Yard.Core.IL.Definition
 open System.Collections.Concurrent
 
 module SolutionData = 
-
-    type CoordinateWord (startCoordinate : int, wordLength : int) = 
+    type CoordinateWord (startCoordinate : int, endCoordinate : int) = 
          member this.StartCoordinate = startCoordinate
-         member this.WordLength = wordLength
-         member this.EndCoordinate = startCoordinate + wordLength
+         member this.WordLength = startCoordinate - endCoordinate
+         member this.EndCoordinate = endCoordinate
          
 ////
 ////                YardFile
 ////
     type YardInfo (id : string,
                    fileName : string,
-                   fullPath : string,
-                   included: bool) = 
+                   fullPath : string) = 
          member this.Id = id
          member this.FileName = fileName
          member this.FullPath = fullPath
-         member this.Included = included
 
     type YardFile (yardInfo: YardInfo) as this =
          let info = yardInfo
          let reMakeTokens (fileText: string) = fileText |> LexString |> List.ofSeq // Получаем токены    
          let mutable tokens = reMakeTokens (String.Empty)  //Текущие токены (сначала пустые)
-         let mutable tree = ParseText(String.Empty)
+         let mutable tree = ParseText String.Empty String.Empty
          let mutable positionToNotTerm = Array.create 0 ""
          let notTermToPosition = new Dictionary<string, List<CoordinateWord>>()
          let notTermToDEFPosition = new Dictionary<string, CoordinateWord>()
          
+         (* Пока что ненужно, но пригодится.
+         let listOfVisibleYardFile = []
+         //let listOfVisibleYardFileHelper = [] : string list
+           let findInlistOfVisibleYardFileHelper  elem = 
+             let isCompair x y =  x = y
+             match List.tryFind (isCompair elem) listOfVisibleYardFileHelper with
+             | None -> listOfVisibleYardFileHelper = elem :: listOfVisibleYardFileHelper
+             | Some _ -> 
+         *)
          let addNotTermToDEFPosition node = 
                       let coorWord = CoordinateWord(match node with (a, (b,c,d)) -> b,c)
                       notTermToDEFPosition.Add( fst node, coorWord)
@@ -82,19 +88,21 @@ module SolutionData =
                       |  PLiteral _ -> ()
                       |  PToken _  -> ()
 
-         let getNonterminals newTree = 
-                      newTree.grammar |> List.iter (fun node ->
-                                                    if (match node.name with (_,(_,_,path)) -> String.Compare(path, info.FullPath) = 0)
-                                                    then addNotTermToDEFPosition (node.name)
-                                                         addNotTermToPosition (node.body)
-                                                   )
+         let getNonterminals newTree = newTree.grammar |> List.iter (fun node ->
+                                                                     if (match node.name with (_,(_,_,path)) -> String.Compare(path, info.FullPath) = 0)
+                                                                     then addNotTermToDEFPosition (node.name)
+                                                                          addNotTermToPosition (node.body)
+                                                                 //  else (match node.name with (_,(_,_,path)) ->  findInlistOfVisibleYardFileHelper path)
+                                                                    )
          
          // Парсим string
-         let parseText (fileText: string) =
-             //Чистка списков должна быть !!!!!
+         let reParseText (fileText: string) =
+             notTermToPosition.Clear()
+             notTermToDEFPosition.Clear()
              positionToNotTerm <- Array.create fileText.Length ""
              tokens <- reMakeTokens (fileText)
-             tree <- ParseText (fileText)
+             tree <- ParseText fileText info.FullPath
+             getNonterminals (tree)
             
          
          let reparse() = ParseFile (info.FullPath + info.FileName)
@@ -102,9 +110,10 @@ module SolutionData =
          member this.PositionToNotTerm = positionToNotTerm
          member this.NotTermToPosition = notTermToPosition
          member this.NotTermToDEFPosition = notTermToDEFPosition
+         member this.Tokens = tokens
 
 
-         member this.ReParse() = reparse()
+         member this.ReParseText(fileText) = reParseText(fileText)
 
 
 ////
@@ -114,7 +123,7 @@ module SolutionData =
     type ProjectInfo (id : string,
                       fileName : string,
                       fullPath : string,
-                      rootYard : YardFile,
+                      rootYard : string,
                       dicYard: Dictionary<string, YardFile>) =
          member this.extenderCATID = id
          member this.FileName = fileName
@@ -124,9 +133,15 @@ module SolutionData =
 
     type Project (projectInfo : ProjectInfo) as this =
          let info = projectInfo
-         let reparse() = info.RootYard.ReParse()
+     //    let reparse() = info.RootYard.ReParse()
          member this.Info = info
-         member this.ReParse() = reparse()
+         member this.ReParseFile(yardFileName, text) = 
+            let r = info.DicYard.[yardFileName]
+            r.ReParseText(text)
+            r
+
+         member this.GetParseFile(yardFileName) = info.DicYard.[yardFileName]
+     //    member this.ReParse() = reparse()
 
 
 ////
@@ -135,12 +150,17 @@ module SolutionData =
 
     type Solution () as this =
          let projects = new Dictionary<string, Project>()
-         let FirstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
+         let firstRunAddProjects (addProjects: Dictionary<_,_>) = for kvp in addProjects do projects.Add(kvp.Key,kvp.Value)
        //  let AddProject
          member this.Projects = projects
-         member this.ReParseSolution() = for x in projects do x.Value.ReParse()
+         member this.FirstRunAddProjects(y) = firstRunAddProjects(y)
+         member this.ReParseFile (projectFileName, yardFileName, text) = projects.[projectFileName].ReParseFile(yardFileName, text)
+         member this.GetParseFile (projectFileName, yardFileName) = projects.[projectFileName].GetParseFile(yardFileName)
+         member this.GetParseProject (projectFileName) = projects.[projectFileName]
+    //     member this.ReParseSolution() = for x in projects do x.Value.ReParse()
 
-    let private x = Lazy<_>.Create(fun () -> new Solution())
-    let GetData() = x
+
+    let private x = new Solution()//Lazy<_>.Create(fun () -> new Solution())
+    let GetSolution() = x
 
     

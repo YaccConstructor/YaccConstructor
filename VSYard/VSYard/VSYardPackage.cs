@@ -3,11 +3,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
+using System.Collections.Generic;
 using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
+using VSYardNS;
 
 namespace YC.VSYard
 {
@@ -59,7 +61,7 @@ namespace YC.VSYard
         /// </summary>
         protected override void Initialize()
         {
-            Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
             IVsSolution solution = (IVsSolution)GetService(typeof(SVsSolution));
             ErrorHandler.ThrowOnFailure(solution.AdviseSolutionEvents(this, out m_solutionCookie));
@@ -87,22 +89,54 @@ namespace YC.VSYard
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
-            var paths = "";
             var m_dte = (EnvDTE.DTE)this.GetService(typeof(EnvDTE.DTE));
+
+    //        var w = m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open();
+    //        m_dte.ActiveSolutionProjects
+     //       w.Activate();
+
+            /*
+            Открыть докумнет: (наверное)
+            m_dte.Solution.Projects.Item("").ProjectItems.Item("").Open
+            */
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
             if (m_dte.Solution != null)
             {
-                Trace.WriteLine(m_dte.Solution.FullName);
+                Dictionary<string, SolutionData.Project> projects = new Dictionary<string, SolutionData.Project>(); // Создание списка проектов
+                
                 foreach (EnvDTE.Project i in m_dte.Solution.Projects)
-                {
-                    Trace.WriteLine(i.FullName);
+                {   
+                    string extenderCATID = i.Properties.Item("ExtenderCATID").Value.ToString();
+                    string fileName = i.Properties.Item("FileName").Value.ToString();
+                    string fullPath =  i.Properties.Item("FullPath").Value.ToString();
+                    string rootYard = null;
+                    Dictionary<string, SolutionData.YardFile> dictionaryOfYard = new Dictionary<string, SolutionData.YardFile>();
+                    
+
                     foreach (EnvDTE.ProjectItem pi in i.ProjectItems)
                     {
-                        paths += pi.Properties.Item("FullPath").Value;
-                        paths += ";\n";
+                        if (pi.Properties.Item("Extension").Value.ToString() == ".yrd")
+                        {
+                            string yardFileName = pi.Properties.Item("FileName").Value.ToString();
+                            string yardExtenderCATID = pi.Properties.Item("ExtenderCATID").Value.ToString();
+                            string yardFullPath = pi.Properties.Item("FullPath").Value.ToString();
+                            dictionaryOfYard.Add(yardFileName,
+                                                 new SolutionData.YardFile(new SolutionData.YardInfo(yardExtenderCATID,
+                                                                                                     yardFileName,
+                                                                                                     yardFullPath)));
+                            if(rootYard == null)
+                            {
+                                rootYard = yardExtenderCATID;
+                            }
+                        }
                     }
+                    SolutionData.Project project = new SolutionData.Project(new SolutionData.ProjectInfo(extenderCATID, fileName,fullPath, rootYard, dictionaryOfYard));
+                    projects.Add(fileName, project);
                 }
+
+                SolutionData.Solution solution = SolutionData.GetSolution();
+                solution.FirstRunAddProjects(projects);
             }
             return VSConstants.S_OK;
         }

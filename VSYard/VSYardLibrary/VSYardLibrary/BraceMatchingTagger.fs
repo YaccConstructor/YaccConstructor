@@ -11,8 +11,10 @@ open Microsoft.VisualStudio.Utilities
 open System.Linq
 open Yard.Frontends.YardFrontend.Main
 open Yard.Frontends.YardFrontend.GrammarParser
+open DataHelper
 
-type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
+type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : EnvDTE.DTE) =
+    let dte = m_dte
     let mutable View : ITextView = null
     let mutable SourceBuffer : ITextBuffer = null
     let mutable CurrentChar : Nullable<SnapshotPoint> = new Nullable<SnapshotPoint>()
@@ -104,7 +106,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer) =
                 let currentPosition = currentChar.Value.Position
                 let lexeredText = ref List.Empty
                 try
-                    lexeredText := List.ofSeq <| LexString ( SourceBuffer.CurrentSnapshot.GetText() )
+                    lexeredText := ReParseFileForActiveWindow(m_dte, SourceBuffer.CurrentSnapshot.GetText()).Tokens
                 with
                 |_ -> ()
                 let parentheses = List.filter isParenthesis !lexeredText

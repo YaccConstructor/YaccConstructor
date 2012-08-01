@@ -213,9 +213,9 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                         if needGroup then printInd ind "vvvv"
         printAst 0 root
 
-    member this.AstToDot (startInd : int) (indToString : int -> string) (ruleToChildren : int -> seq<int>) (path : string) =
+    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =
-            let cur = ref 0
+            let cur = ref nodes.Length
             fun () ->
                 incr cur
                 !cur
@@ -225,51 +225,44 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                                                                     override this.GetHashCode x = x.GetHashCode()})
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
-        let createNode num node (str : string) =
-            if node <> null then
-                nodeToNumber.[node] <- num
+        let createNode num (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + "]")
-        let createEdge b e isBold (str : string) =
+        let createEdge (b : int) (e : int) isBold (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
                 if not isBold then ""
-                else "style=bold,width=5,"
+                else "style=bold,width=10,"
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
         let createEpsilon ind = 
             let res = next()
-            createNode res null ("n " + indToString (-1-ind))
+            createNode res ("n " + indToString (-1-ind))
             let u = next()
-            createNode u null "eps"
+            createNode u "eps"
             createEdge res u true ""
-            box res
-        let rec inner ast ind =
-            if nodeToNumber.ContainsKey <| ast then
-                nodeToNumber.[ast]
-            else
-                let res = next()
-                match ast with
-                | Term t ->
-                    createNode res (ast :> Object) ("t " + indToString ind)
-                | NonTerm children ->
-                    createNode res (ast :> Object) ("n " + indToString ind)
-                    children |> ResizeArray.iter
-                           (fun (num, children) ->
-                                let i = ref 0
-                                let u = next()
-                                createNode u null ("prod " + num.ToString())
-                                createEdge res u true ""
-                                for child in ruleToChildren num do
-                                    let v =
-                                        if children.[!i] >= 0 then inner nodes.[children.[!i]] child
-                                        else createEpsilon children.[!i]
-                                    createEdge u v false ""
-                                    incr i
-                            )
-                box res
-        if not isEpsilon then inner nodes.[root] startInd
-        else createEpsilon root
-        |> ignore
+            res
+        if not isEpsilon then
+            for i in order do
+                if reachable.[i] then
+                    let ast = nodes.[i]
+                    match ast with
+                    | Term t ->
+                        createNode i  ("t " + indToString (tokenToNumber t))
+                    | NonTerm children ->
+                        createNode i  ("n " + indToString leftSide.[fst children.[0]])
+                        children |> ResizeArray.iter
+                                (fun (num, children) ->
+                                    let u = next()
+                                    createNode u ("prod " + num.ToString())
+                                    createEdge i u true ""
+                                    for child in children do
+                                        let v =
+                                            if child >= 0 then child
+                                            else createEpsilon child
+                                        createEdge u v false ""
+                                )
+        else createEpsilon root |> ignore
+        
         out.WriteLine("}")
         out.Close()
     

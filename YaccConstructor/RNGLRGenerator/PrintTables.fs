@@ -201,9 +201,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     print "\n"
 
     print "let defaultAstToDot = \n"
-    printInd 1 "let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}\n"
-    printInd 1 "let startInd = leftSide.[startRule]\n"
-    printInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)\n"
+    printInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)\n"
 
     print "\n"
     printInd 0 "let inline unpack x = x >>> 16, x <<< 16 >>> 16\n"

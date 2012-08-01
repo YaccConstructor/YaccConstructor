@@ -29,9 +29,7 @@ let private rulesStart = [|0; 1; 4; 5; 6; 7|]
 let startRule = 2
 
 let defaultAstToDot = 
-    let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}
-    let startInd = leftSide.[startRule]
-    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot startInd numToString getRight)
+    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
 let inline unpack x = x >>> 16, x <<< 16 >>> 16
 let private small_gotos =

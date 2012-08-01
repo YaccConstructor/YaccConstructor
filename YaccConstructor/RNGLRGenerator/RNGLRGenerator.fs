@@ -39,20 +39,19 @@ type RNGLR() =
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
             let mutable moduleName = ""
             let mutable tokenType = ""
-            let mutable tokenToRangeFunction = "_rnglr_tokenToEmptyRange"
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
             let mutable needTranslate = true
             for opt, value in pairs do
                 match opt with
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
-                | "-toRange" -> tokenToRangeFunction <- value
                 | "-pos" -> positionType <- value
                 | "-translate" ->
                     if value = "true" then needTranslate <- true
                     elif value = "false" then needTranslate <- false
                     else failwith "Unexpected translate value"
                 // In other cases causes error
+                | _ -> failwithf "Unknown option %A" opt
             let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
@@ -82,7 +81,7 @@ type RNGLR() =
 
                 printTables grammar definition.head tables out moduleName tokenType
                 if needTranslate then
-                    printTranslator grammar newDefinition.grammar out tokenToRangeFunction positionType
+                    printTranslator grammar newDefinition.grammar out positionType
 
                 match definition.foot with
                 | None -> ()

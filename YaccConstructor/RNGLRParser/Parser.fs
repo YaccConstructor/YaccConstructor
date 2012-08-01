@@ -31,10 +31,11 @@ type ParseResult<'TokenType> =
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     let startState = 0
-    let startRule = parserSource.LeftSide.[parserSource.StartRule]
+    let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
+    let inline getEpsilon i = -1-i
     if not <| enum.MoveNext() then
         if parserSource.AccStates.[startState] then
-            new Tree<_>([|Epsilon startRule|], 0) |> Success
+            new Tree<_>([||], getEpsilon startNonTerm) |> Success
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
@@ -44,10 +45,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let nodes = new ResizeArray<_>()
         // Must be number of non-terminals, but doesn't matter
         let nonTermsCountLimit = max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
-        let epsilons = Array.zeroCreate nonTermsCountLimit
-        for i = 0 to nonTermsCountLimit-1 do
-            epsilons.[i] <- nodes.Count
-            nodes.Add <| Epsilon i
             
         let reductions = new Queue<_>(10)
         let statesCount = parserSource.Gotos.Length
@@ -126,12 +123,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let state = parserSource.Gotos.[fst vertex.label].[nonTerm].Value
                     let newVertex = addVertex state num None
                     if newVertex.outEdges |> ResizeArray.forall (fun e -> e.dest.label <> vertex.label) then
-                        let edge = new Edge<int*int, int>(vertex, epsilons.[parserSource.LeftSide.[prod]])
+                        let edge = new Edge<int*int, int>(vertex, getEpsilon parserSource.LeftSide.[prod])
                         newVertex.addEdge edge
                 else 
                     let path = Array.zeroCreate parserSource.Length.[prod]
                     for i = path.Length - 1 downto pos do
-                        path.[i] <- epsilons.[parserSource.Rules.[parserSource.RulesStart.[prod] + i]]
+                        path.[i] <- getEpsilon parserSource.Rules.[parserSource.RulesStart.[prod] + i]
                     path.[pos - 1] <- edgeOpt.Value.label
                     walk (pos - 1) (edgeOpt.Value : Edge<_,_>).dest path
 

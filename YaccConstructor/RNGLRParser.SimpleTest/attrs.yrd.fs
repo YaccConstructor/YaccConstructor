@@ -80,7 +80,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
   (Array.zeroCreate 0 : array<'_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
   [|
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( fun arg ->
           (
@@ -92,7 +92,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           ) ) : '_rnglr_type_s)
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( fun arg ->
           (
@@ -106,7 +106,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           ) ) : '_rnglr_type_s)
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( fun arg ->
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) arg
@@ -120,6 +120,5 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( fun arg ->
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)  arg ) |> List.concat));
   |] 
-let translate  (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
-  let inline _rnglr_tokenToEmptyRange (x : 'a) = Microsoft.FSharp.Text.Lexing.Position.Empty, Microsoft.FSharp.Text.Lexing.Position.Empty
-  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons _rnglr_tokenToEmptyRange) : '_rnglr_type_yard_start_rule
+let translate tokenToRangeFunction zeroPosition (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons tokenToRangeFunction zeroPosition) : '_rnglr_type_yard_start_rule

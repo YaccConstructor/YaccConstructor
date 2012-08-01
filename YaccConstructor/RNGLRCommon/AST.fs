@@ -27,45 +27,42 @@ type AST<'TokenType> =
     /// Non-terminal expansion: production, family of children
     /// All nodes are stored in array, so there is a correspondence between integer and node.
     | NonTerm of (ResizeArray<int * int []>)
-    | Epsilon of int
     | Term of 'TokenType
 
 let inline getFamily node =
     match node with
     | NonTerm list -> list
-    | Epsilon _ -> failwith "Attempt to get family of epsilon"
     | Term _ -> failwith "Attempt to get family of terminal"
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
     let scaleSize = int <| double nodes.Length * 1.2
     let reachable = Array.zeroCreate nodes.Length
+    let isEpsilon = root < 0
     let order =
         let stack = new System.Collections.Generic.Stack<_>()
         stack.Push root
         let res = new ResizeArray<_>(scaleSize)
-        
-        while stack.Count > 0 do
-            let u = stack.Pop()
-            if u < 0 then
-                res.Add <| -u-1
-            elif not reachable.[u] then
-                stack.Push <| -u-1
-                reachable.[u] <- true
-                match nodes.[u] with
-                | NonTerm children ->
-                    children |> ResizeArray.iter (
-                        fun (_,family) ->
-                            for j = 0 to family.Length - 1 do
-                                if not reachable.[family.[j]] then
-                                    match nodes.[family.[j]] with
-                                    | Epsilon eps ->
-                                        family.[j] <- -eps-1
-                                    | Term _ ->
-                                        reachable.[family.[j]] <- true
-                                        res.Add family.[j]
-                                    | _ -> stack.Push family.[j])
-                | _ -> ()
+        if not isEpsilon then
+            while stack.Count > 0 do
+                let u = stack.Pop()
+                if u < 0 then
+                    res.Add <| -u-1
+                elif not reachable.[u] then
+                    stack.Push <| -u-1
+                    reachable.[u] <- true
+                    match nodes.[u] with
+                    | NonTerm children ->
+                        children |> ResizeArray.iter (
+                            fun (_,family) ->
+                                for j = 0 to family.Length - 1 do
+                                    if family.[j] >= 0 && not reachable.[family.[j]] then
+                                        match nodes.[family.[j]] with
+                                        | Term _ ->
+                                            reachable.[family.[j]] <- true
+                                            res.Add family.[j]
+                                        | _ -> stack.Push family.[j])
+                    | _ -> ()
         res.ToArray()
 
     let pos =
@@ -78,51 +75,53 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
     member this.Order = order
 
     member this.EliminateCycles() =
-        let proper = Array.create nodes.Length true
-        for x in order do
-            match nodes.[x] with
-            | NonTerm children ->
-                children.RemoveAll (
-                    fun (_, children) ->
-                        children
-                        |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j])
-                        |> not)
-                |> ignore
-                if children.Count = 0 then
-                    reachable.[x] <- false
-            | _ -> ()
-                
-    member this.ChooseSingleAst () = 
-        for x in order do
-            if reachable.[x] then
+        if not isEpsilon then
+            let proper = Array.create nodes.Length true
+            for x in order do
                 match nodes.[x] with
                 | NonTerm children ->
-                    match
-                        children |> ResizeArray.tryFind
-                            (fun (_, children) ->
-                                children
-                                |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
-                        with
-                    | Some v ->
-                        if children.Count > 1 then
-                            children.Clear()
-                            children.Add v
-                    | None ->
+                    children.RemoveAll (
+                        fun (_, children) ->
+                            children
+                            |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j])
+                            |> not)
+                    |> ignore
+                    if children.Count = 0 then
                         reachable.[x] <- false
-                        children.Clear()
                 | _ -> ()
-        for x in order do
-            reachable.[x] <- false
-        reachable.[root] <- true
-        for i = order.Length-1 downto 0 do
-            let x = order.[i]
-            if reachable.[x] then
-                match nodes.[x] with
-                | NonTerm x ->
-                    for j in snd x.[0] do
-                        if j >= 0 then
-                            reachable.[j] <- true
-                | _ -> ()
+                
+    member this.ChooseSingleAst () = 
+        if not isEpsilon then
+            for x in order do
+                if reachable.[x] then
+                    match nodes.[x] with
+                    | NonTerm children ->
+                        match
+                            children |> ResizeArray.tryFind
+                                (fun (_, children) ->
+                                    children
+                                    |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
+                            with
+                        | Some v ->
+                            if children.Count > 1 then
+                                children.Clear()
+                                children.Add v
+                        | None ->
+                            reachable.[x] <- false
+                            children.Clear()
+                    | _ -> ()
+            for x in order do
+                reachable.[x] <- false
+            reachable.[root] <- true
+            for i = order.Length-1 downto 0 do
+                let x = order.[i]
+                if reachable.[x] then
+                    match nodes.[x] with
+                    | NonTerm x ->
+                        for j in snd x.[0] do
+                            if j >= 0 then
+                                reachable.[j] <- true
+                    | _ -> ()
 
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
         let result = Array.zeroCreate nodes.Length
@@ -145,52 +144,51 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
         result.[root]
             
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
-                            (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) =
-        let result = Array.zeroCreate nodes.Length
-        let ranges : ('Position * 'Position)[] = Array.zeroCreate nodes.Length
-        // Set Positions
-        for x in order do
-            if reachable.[x] then
-                match nodes.[x] with
-                | Term t -> ranges.[x] <- tokenToRange t
-                | Epsilon _ -> ()
-                | NonTerm children ->
-                    let family = snd children.[0]
-                    let mutable j, k = 0, family.Length-1
-                    let inline isEpsilon x = x < 0
-                    while isEpsilon family.[j] do
-                        j <- j + 1
-                    while isEpsilon family.[k] do
-                        k <- k - 1
-                    ranges.[x] <- (fst ranges.[family.[j]]), (snd ranges.[family.[k]])
+                            (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) =
+        if isEpsilon then epsilons.[-root-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
+        else
+            let result = Array.zeroCreate nodes.Length
+            let ranges : ('Position * 'Position)[] = Array.zeroCreate nodes.Length
+            // Set Positions
+            for x in order do
+                if reachable.[x] then
+                    match nodes.[x] with
+                    | Term t -> ranges.[x] <- tokenToRange t
+                    | NonTerm children ->
+                        let family = snd children.[0]
+                        let mutable j, k = 0, family.Length-1
+                        let inline isEpsilon x = x < 0
+                        while isEpsilon family.[j] do
+                            j <- j + 1
+                        while isEpsilon family.[k] do
+                            k <- k - 1
+                        ranges.[x] <- (fst ranges.[family.[j]]), (snd ranges.[family.[k]])
 
-        let inline getRes prevRange i = 
-            if i < 0 then epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
-            else
-                prevRange := snd ranges.[i]
-                result.[i]
-        for x in order do
-            if reachable.[x] then
-                match nodes.[x] with
-                | Term t ->
-                    result.[x] <- box t
-                | Epsilon eps ->
-                    result.[x] <- epsilons.[eps].TranslateEpsilon funs leftSides concat ranges.[x]//epsilons
-                | NonTerm children ->
-                    result.[x] <-
-                        if children.Count = 1 then
-                            let prevRange = fst ranges.[x] |> ref
-                            funs.[fst children.[0]] (snd children.[0] |> Array.map (getRes prevRange)) ranges.[x]
-                        else
-                            children
-                            |> ResizeArray.map (
-                                fun (prod, children) ->
-                                    let prevRange = fst ranges.[x] |> ref
-                                    funs.[prod] (children |> Array.map (getRes prevRange)) ranges.[x]
-                                )
-                            |> ResizeArray.toList
-                            |> concat.[leftSides.[fst children.[0]]]
-        result.[root]
+            let inline getRes prevRange i = 
+                if i < 0 then epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                else
+                    prevRange := snd ranges.[i]
+                    result.[i]
+            for x in order do
+                if reachable.[x] then
+                    match nodes.[x] with
+                    | Term t ->
+                        result.[x] <- box t
+                    | NonTerm children ->
+                        result.[x] <-
+                            if children.Count = 1 then
+                                let prevRange = fst ranges.[x] |> ref
+                                funs.[fst children.[0]] (snd children.[0] |> Array.map (getRes prevRange)) ranges.[x]
+                            else
+                                children
+                                |> ResizeArray.map (
+                                    fun (prod, children) ->
+                                        let prevRange = fst ranges.[x] |> ref
+                                        funs.[prod] (children |> Array.map (getRes prevRange)) ranges.[x]
+                                    )
+                                |> ResizeArray.toList
+                                |> concat.[leftSides.[fst children.[0]]]
+            result.[root]
             
     member this.PrintAst() =            
         let rec printAst ind ast =
@@ -201,7 +199,6 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
             else
                 match nodes.[ast] with
                 | Term t -> printInd ind "t: %A" t
-                | Epsilon _ -> printInd ind "e"
                 | NonTerm children ->
                     if children.Count > 0 then
                         let needGroup = children.Count > 1
@@ -239,6 +236,13 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                 if not isBold then ""
                 else "style=bold,width=5,"
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+        let createEpsilon ind = 
+            let res = next()
+            createNode res null ("n " + indToString (-1-ind))
+            let u = next()
+            createNode u null "eps"
+            createEdge res u true ""
+            box res
         let rec inner ast ind =
             if nodeToNumber.ContainsKey <| ast then
                 nodeToNumber.[ast]
@@ -247,11 +251,6 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                 match ast with
                 | Term t ->
                     createNode res (ast :> Object) ("t " + indToString ind)
-                | Epsilon eps ->
-                    createNode res (ast :> Object) ("n " + indToString ind)
-                    let u = next()
-                    createNode u null "eps"
-                    createEdge res u true ""
                 | NonTerm children ->
                     createNode res (ast :> Object) ("n " + indToString ind)
                     children |> ResizeArray.iter
@@ -263,18 +262,14 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                                 for child in ruleToChildren num do
                                     let v =
                                         if children.[!i] >= 0 then inner nodes.[children.[!i]] child
-                                        else 
-                                            let res = next()
-                                            createNode res null ("n " + indToString ind)
-                                            let u = next()
-                                            createNode u null "eps"
-                                            createEdge res u true ""
-                                            box res
+                                        else createEpsilon children.[!i]
                                     createEdge u v false ""
                                     incr i
                             )
                 box res
-        inner nodes.[root] startInd |> ignore
+        if not isEpsilon then inner nodes.[root] startInd
+        else createEpsilon root
+        |> ignore
         out.WriteLine("}")
         out.Close()
     

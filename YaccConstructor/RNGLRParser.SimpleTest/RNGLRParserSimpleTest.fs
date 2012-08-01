@@ -15,6 +15,11 @@ let run path astBuilder =
 
 let dir = @"../../../../Tests/RNGLR/"
 let inline printErr (num, token : 'a, msg) = printfn "Error in position %d on Token %A: %s" num token msg
+let inline tokenToRange _ = 0,0
+let zeroPos = 0
+
+let inline translate (f : ('a -> int*int) -> int -> 'b -> 'c) (ast : 'b) =
+    f tokenToRange zeroPos ast
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
@@ -76,7 +81,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            let res = RNGLR.ParseCounter.translate mAst
+            let res = translate RNGLR.ParseCounter.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([5], res)
 
@@ -90,7 +95,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            let res = RNGLR.ParseCalc.translate mAst
+            let res = translate RNGLR.ParseCalc.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual(List.replicate 8 105, res)
 
@@ -103,7 +108,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            let res = RNGLR.ParseAttrs.translate mAst 3 : int list
+            let res = translate RNGLR.ParseAttrs.translate mAst 3 : int list
             printfn "Result: %A" res
             Assert.AreEqual([48], res)
 
@@ -120,6 +125,6 @@ type ``RNGLR parser tests with simple lexer`` () =
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
             mAst.EliminateCycles()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
-            let res = RNGLR.ParseCycle.translate mAst
+            let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([0], res)

@@ -29,8 +29,7 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter)
-        tokenToRangeFunction positionType =
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter) positionType =
     let tab = 4
     let print (x : 'a) =
         fprintf out x
@@ -116,7 +115,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         let printAst =
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"
-            | Epsilon _ -> failwith "Epsilon was not expected in epsilon tree"
             | NonTerm arr ->
                 "NonTerm (new ResizeArray<_>(" + printList (ResizeArray.toList arr) printChild + "))"
         "let " + epsilonName + " : Tree<Token>[] = " +
@@ -220,15 +218,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 @@-- concats)
             @@ wordL "|] ")
 
-    let isDefaultName = tokenToRangeFunction = "_rnglr_tokenToEmptyRange"
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate " + (if isDefaultName then "" else tokenToRangeFunction) + " (tree : Tree<_>) : " + typeName + " = ")
+        let funHead = wordL ("let translate tokenToRangeFunction zeroPosition (tree : Tree<_>) : " + typeName + " = ")
         let body =
-            [if isDefaultName then
-                yield wordL "let inline _rnglr_tokenToEmptyRange (x : 'a) = Microsoft.FSharp.Text.Lexing.Position.Empty, Microsoft.FSharp.Text.Lexing.Position.Empty"
-             yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
-                            + " " + epsilonName + " " + tokenToRangeFunction + ") : " + typeName)
+            [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
+                            + " " + epsilonName + " tokenToRangeFunction zeroPosition) : " + typeName)
             ] |> aboveListL
         funHead @@-- body
 

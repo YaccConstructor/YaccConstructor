@@ -25,6 +25,8 @@ let private rules = [|3; 4; 1; 0; 0; 0|]
 let private rulesStart = [|0; 0; 1; 5; 6; 6|]
 let startRule = 3
 
+let acceptEmptyInput = true
+
 let defaultAstToDot = 
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
@@ -72,7 +74,7 @@ let private accStates = Array.zeroCreate 7
 for i = 0 to 6 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 5
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

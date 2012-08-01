@@ -33,8 +33,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let startState = 0
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let inline getEpsilon i = -1-i
-    if not <| enum.MoveNext() then
-        if parserSource.AccStates.[startState] then
+    if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
+        if parserSource.AcceptEmptyInput then
             new Tree<_>([||], getEpsilon startNonTerm) |> Success
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")

@@ -14,7 +14,9 @@ let run path astBuilder =
     astBuilder tokens
 
 let dir = @"../../../../Tests/RNGLR/"
-let inline printErr (num, token : 'a, msg) = printfn "Error in position %d on Token %A: %s" num token msg
+let inline printErr (num, token : 'a, msg) =
+    printfn "Error in position %d on Token %A: %s" num token msg
+    Assert.Fail()
 let inline tokenToRange _ = 0,0
 let zeroPos = 0
 
@@ -128,3 +130,15 @@ type ``RNGLR parser tests with simple lexer`` () =
             let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([0], res)
+
+    [<Test>]
+    member test.``Parse empty string``() =
+        let parser = RNGLR.ParseEpsilon.buildAst
+        let path = dir + "Epsilon/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
+            RNGLR.ParseEpsilon.defaultAstToDot mAst "epsilon.dot"
+            let res = translate RNGLR.ParseEpsilon.translate mAst
+            Assert.AreEqual([3], res)

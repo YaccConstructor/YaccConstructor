@@ -58,6 +58,8 @@
     <Compile Include="Cycle.yrd.fs" />
     <Compile Include="cycle.yrd_yacc.fsi" />
     <Compile Include="cycle.yrd_yacc.fs" />
+    <None Include="Epsilon.yrd" />
+    <Compile Include="Epsilon.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

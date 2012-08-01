@@ -29,7 +29,8 @@ type ParserSource<'TokenType> (gotos : int option[][]
                                , leftSide : int[]
                                , startRule : int
                                , eofIndex : int
-                               , tokenToNumber : 'TokenType -> int) =
+                               , tokenToNumber : 'TokenType -> int
+                               , acceptEmptyInput : bool) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
         for i=0 to res.Length-1 do
@@ -46,3 +47,4 @@ type ParserSource<'TokenType> (gotos : int option[][]
     member this.StartRule = startRule
     member this.EofIndex = eofIndex
     member this.TokenToNumber = tokenToNumber
+    member this.AcceptEmptyInput = acceptEmptyInput

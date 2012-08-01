@@ -200,6 +200,9 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     print "let startRule = %d\n" grammar.startRule
     print "\n"
 
+    print "let acceptEmptyInput = %A\n" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+    print "\n"
+
     print "let defaultAstToDot = \n"
     printInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)\n"
 
@@ -235,7 +238,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
 
     printInd 0 "let eofIndex = %d\n" grammar.indexator.eofIndex
 
-    printInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)\n"
+    printInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)\n"
 
     print "let buildAst : (seq<Token> -> ParseResult<Token>) =\n"
     printInd 1 "buildAst<Token> parserSource\n\n"

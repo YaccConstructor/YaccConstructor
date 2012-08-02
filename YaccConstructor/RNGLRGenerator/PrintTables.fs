@@ -27,11 +27,10 @@ open Yard.Core.IL
 
 let printTables (grammar : FinalGrammar) head (tables : Tables)
         (out : System.IO.StreamWriter) (moduleName : string) (tokenType : string) =
-    let tab = 4
-    let print (x : 'a) =
+    let inline print (x : 'a) =
         fprintf out x
-    let printInd num (x : 'a) =
-        print "%s" (String.replicate (tab * num) " ")
+    let inline printInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
         print x
 
     let statesLim = tables.gotos.GetLength 0 - 1
@@ -114,16 +113,19 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
         let mutable firstI = true
         for i = 0 to statesLim do
             let mutable firstJ = true
-            let good = [for j = 0 to symbolsLim do
-                            if checker arr.[i,j] then yield j]
-            if good.Length > 0 then
+            let good = new ResizeArray<_>(symbolsLim)
+            for j = 0 to symbolsLim do
+                 if checker arr.[i,j] then
+                    good.Add j
+            if good.Count > 0 then
                 if not firstI then print "; "
                 else firstI <- false
 
-                print "%d" <| pack i good.Length
-                for j in good do
+                print "%d" <| pack i good.Count
+                for v = 0 to good.Count - 1 do
+                    let j = good.[v]
                     print "; "
-                    print "%d" <| pack j (lists.Item arr.[i,j])
+                    print "%d" <| pack j (lists.[arr.[i,j]])
                     cur <- cur + 1
                     if cur > next then
                         next <- next + 1000
@@ -242,4 +244,3 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
 
     print "let buildAst : (seq<Token> -> ParseResult<Token>) =\n"
     printInd 1 "buildAst<Token> parserSource\n\n"
-    

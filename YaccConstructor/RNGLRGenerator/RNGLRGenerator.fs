@@ -33,6 +33,7 @@ type RNGLR() =
     inherit Generator()
         override this.Name = "RNGLRGenerator"
         override this.Generate (definition, args) =
+            let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length-1 do
@@ -52,7 +53,6 @@ type RNGLR() =
                     else failwith "Unexpected translate value"
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
-            let start = System.DateTime.Now
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
             if grammar.EpsilonCyclicNonTerms.Length > 0 then
@@ -88,8 +88,9 @@ type RNGLR() =
                 | Some (s : Source.t) ->
                     out.WriteLine (Source.toString s)
                 out.Close()
-                printfn "%A" <| System.DateTime.Now - start
-                (new YardPrinter()).Generate newDefinition
+                eprintfn "Generation time: %A" <| System.DateTime.Now - start
+                //(new YardPrinter()).Generate newDefinition
+                box ()
         override this.Generate definition = this.Generate (definition, "")
         override this.AcceptableProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)

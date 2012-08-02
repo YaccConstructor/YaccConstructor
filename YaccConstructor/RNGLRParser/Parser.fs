@@ -59,7 +59,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         let inline addVertex state num (edgeOpt : option<Edge<_,int>>) =
             let dict = stateToVertex
-            let mutable v = Unchecked.defaultof<Vertex<_,_>>
+            let mutable v = null
             if dict.[state] = null then
                 //printfn "v(%d,%d)" state num
                 v <- new Vertex<_,_>(state, num)

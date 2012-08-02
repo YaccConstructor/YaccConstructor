@@ -143,18 +143,14 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
             if kernelsToVertex.ContainsKey key then
                 let vertex = kernelsToVertex.Item key
                 let alreadySets = stateToLookahead.Item vertex.label
-                let needDfs = ref false
-//                printfn "============"
-//                printfn "%A" alreadySets
-                let diff =
-                    [|for i = 0 to kernels.Length - 1 do
-                        let diffSet = Set.difference lookaheads.[i] alreadySets.[i]
-                        alreadySets.[i] <- Set.union alreadySets.[i] diffSet
-                        if not diffSet.IsEmpty then needDfs := true
-//                        for s in diffSet do
-//                            System.Diagnostics.Debug.Assert <| (stateToLookahead.Item vertex.label).[i].Contains s
-                        yield diffSet|]
-                vertex, diff, !needDfs
+                let mutable needDfs = false
+                let diff = Array.zeroCreate kernels.Length
+                for i = 0 to kernels.Length - 1 do
+                    let diffSet = Set.difference lookaheads.[i] alreadySets.[i]
+                    alreadySets.[i] <- Set.union alreadySets.[i] diffSet
+                    if not diffSet.IsEmpty then needDfs <- true
+                    diff.[i] <- diffSet
+                vertex, diff, needDfs
             else
                 //printfn "%A" <| key
                 let vertex = new Vertex<int,int>(nextIndex())
@@ -172,14 +168,19 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
 //            printfn "%A" newLookAheads
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
-                    let newSymbols = ref false
-                    let destStates =
-                        [|for j = 0 to kernels.Length-1 do
+                    let mutable newSymbols = false
+                    let mutable count = 0
+                    for j = 0 to kernels.Length-1 do
+                        if curSymbol kernels.[j] = i then
+                            if not newLookAheads.[j].IsEmpty then newSymbols <- true
+                            count <- count + 1
+                    if count > 0 && newSymbols then
+                        let destStates = Array.zeroCreate count
+                        let mutable curi = 0
+                        for j = 0 to kernels.Length-1 do
                             if curSymbol kernels.[j] = i then
-                                if not newLookAheads.[j].IsEmpty then newSymbols := true
-                                yield (KernelInterpreter.incPos kernels.[j], newLookAheads.[j])
-                        |]
-                    if destStates.Length > 0 && !newSymbols then
+                                destStates.[curi] <- KernelInterpreter.incPos kernels.[j], newLookAheads.[j]
+                                curi <- curi + 1
                         let newVertex : Vertex<_,_> = dfs destStates
                         if not <| wasEdge.[vertex.label].Contains newVertex.label then
                             wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
@@ -190,13 +191,13 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
     [| initKernel, initLookAhead|] |> dfs |> ignore
 
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()
-    let printSymbol (symbol : int) =
-        if symbol < grammar.indexator.nonTermCount then
-            grammar.indexator.indexToNonTerm symbol
-        elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
-            grammar.indexator.indexToTerm symbol
-        else grammar.indexator.indexToLiteral symbol
     let print () =
+        let printSymbol (symbol : int) =
+            if symbol < grammar.indexator.nonTermCount then
+                grammar.indexator.indexToNonTerm symbol
+            elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
+                grammar.indexator.indexToTerm symbol
+            else grammar.indexator.indexToLiteral symbol
         printfn "\nrules:"
         for i = 0 to grammar.rules.rulesCount-1 do
             printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
@@ -218,5 +219,5 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
             for edge in vertex.outEdges do
                 printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
             printfn ""
-    print ()
+    //print ()
     new StatesInterpreter(virtices.ToArray(), stateToKernels.ToArray(), stateToLookahead.ToArray())

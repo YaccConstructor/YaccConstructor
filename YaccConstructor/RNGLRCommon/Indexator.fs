@@ -23,15 +23,6 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 
 type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
-    let ppp = 
-        ruleList
-        |> List.iteri
-            (fun i rule ->
-                let args =
-                    rule.args
-                    |> List.map (fun x -> "[" + Source.toString x + "]")
-                    |> String.concat ""
-                printfn "%4d: %s%s = %s" i (fst rule.name) args <| rule.body.ToString())
     let unique s = s |> Set.ofSeq |> Array.ofSeq
     let connect x = 
         let dict = x |> Array.mapi (fun i n -> n, i) |> dict
@@ -65,32 +56,33 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let termsConnect = connect terms
     let literalsConnect = connect literals
     
-    let fst = fun (x,_,_) -> x
-    let snd = fun (_,x,_) -> x
-    let trd = fun (_,_,x) -> x
-
     let nonTermsShift = 0
-    let termsShift = trd nonTermsConnect
-    let literalsShift = termsShift + trd termsConnect
+    let (_,_,termsShift) = nonTermsConnect
+    let literalsShift = termsShift + (let (_,_,x) = termsConnect in x)
+    let _eofIndex = (let (x,_,_) = termsConnect in x "EOF") + termsShift
 
-    let add value f = fun x -> (f x) + value
-    let sub value f = fun x -> f (x - value)
+    static member inline private fst (x,_,_) = x
+    static member inline private snd (_,x,_) = x
+    static member inline private trd (_,_,x) = x
 
-    member this.nonTermToIndex = add nonTermsShift <| fst nonTermsConnect
-    member this.indexToNonTerm = sub nonTermsShift <| snd nonTermsConnect
-    member this.nonTermCount = trd nonTermsConnect
+    static member inline private add value f x = (f x) + value
+    static member inline private sub value f x = f (x - value)
 
-    member this.termToIndex = add termsShift <| fst termsConnect
-    member this.indexToTerm = sub termsShift <| snd termsConnect
-    member this.termCount = trd termsConnect
+    member this.nonTermToIndex nt = Indexator.add nonTermsShift (Indexator.fst nonTermsConnect) nt
+    member this.indexToNonTerm i = Indexator.sub nonTermsShift (Indexator.snd nonTermsConnect) i
+    member this.nonTermCount = Indexator.trd nonTermsConnect
+
+    member this.termToIndex t = Indexator.add termsShift (Indexator.fst termsConnect) t
+    member this.indexToTerm i = Indexator.sub termsShift (Indexator.snd termsConnect) i
+    member this.termCount = Indexator.trd termsConnect
     member this.termsStart = termsShift
     member this.termsEnd = termsShift + this.termCount - 1
 
-    member this.literalToIndex = add literalsShift <| fst literalsConnect
-    member this.indexToLiteral = sub literalsShift <| snd literalsConnect
-    member this.literalsCount = trd literalsConnect
+    member this.literalToIndex lit = Indexator.add literalsShift (Indexator.fst literalsConnect) lit
+    member this.indexToLiteral i = Indexator.sub literalsShift (Indexator.snd literalsConnect) i
+    member this.literalsCount = Indexator.trd literalsConnect
     member this.literalsStart = literalsShift
     member this.literalsEnd = literalsShift + this.literalsCount - 1
 
-    member this.fullCount = (trd literalsConnect) + (trd termsConnect) + (trd nonTermsConnect)
-    member this.eofIndex = this.termToIndex "EOF"
+    member this.fullCount = (Indexator.trd literalsConnect) + (Indexator.trd termsConnect) + (Indexator.trd nonTermsConnect)
+    member this.eofIndex = _eofIndex

@@ -31,11 +31,6 @@ open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter) positionType =
     let tab = 4
-    let print (x : 'a) =
-        fprintf out x
-    let printInd num (x : 'a) =
-        print "%s" (String.replicate (tab * num) " ")
-        print x
 
     let rules = grammar.rules
     let srcGrammar = Array.ofList srcGrammar

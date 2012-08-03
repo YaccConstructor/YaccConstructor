@@ -158,7 +158,7 @@ namespace Test
 
             var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
             var rulesBuffer = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
-            //var db = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, new int32[1]);
+            
             int32 rLength = rules.Length;
 
             var processRow = provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
@@ -187,14 +187,14 @@ namespace Test
                                           & rule_b == a[left_base_idx + (rule_b - 1)])
                                           ? a[res_id] <= rule_a
                                           : ((Brahma.Set<int32>)null)})
-                        select ((Brahma.Set<int32>[])null))
-                    select ((Brahma.Set<int32>[])null));
+                        select (Brahma.Set<int32>[])null)
+                    select (Brahma.Set<int32>[])null);
 
             for (int l = 1; l < size; l++)
             {
                 commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer)).Finish();
             }
-            //commandQueue.Finish();
+            
             commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();
             //toMatrix(bArr, (int)(size * nTerms * magicConst_c));
             buffer.Dispose();

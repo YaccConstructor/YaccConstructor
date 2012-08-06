@@ -45,8 +45,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
-    <Compile Include="Run.fs" />
     <Compile Include="CYKCore.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Performance1.psess = Performance1.psess
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SQLSelectDemo", "SQLSelectDemo\SQLSelectDemo.fsproj", "{166F2FAA-F2A3-496C-9433-49CAB4FBEA80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -18,6 +20,10 @@ Global
 		{472ADC53-355C-4F8D-BEB2-4B13DDA3FE73}.Debug|x86.Build.0 = Debug|x86
 		{472ADC53-355C-4F8D-BEB2-4B13DDA3FE73}.Release|x86.ActiveCfg = Release|x86
 		{472ADC53-355C-4F8D-BEB2-4B13DDA3FE73}.Release|x86.Build.0 = Release|x86
+		{166F2FAA-F2A3-496C-9433-49CAB4FBEA80}.Debug|x86.ActiveCfg = Debug|x86
+		{166F2FAA-F2A3-496C-9433-49CAB4FBEA80}.Debug|x86.Build.0 = Debug|x86
+		{166F2FAA-F2A3-496C-9433-49CAB4FBEA80}.Release|x86.ActiveCfg = Release|x86
+		{166F2FAA-F2A3-496C-9433-49CAB4FBEA80}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

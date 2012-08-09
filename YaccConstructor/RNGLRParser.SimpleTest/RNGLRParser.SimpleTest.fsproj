@@ -38,28 +38,17 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <None Include="First.yrd" />
     <Compile Include="First.yrd.fs" />
-    <None Include="List.yrd" />
     <Compile Include="List.yrd.fs" />
-    <None Include="SimpleRightNull.yrd" />
     <Compile Include="SimpleRightNull.yrd.fs" />
-    <None Include="Expr.yrd" />
     <Compile Include="Expr.yrd.fs" />
-    <None Include="ComplexRightNull.yrd" />
     <Compile Include="ComplexRightNull.yrd.fs" />
-    <None Include="Counter.yrd" />
     <Compile Include="Counter.yrd.fs" />
-    <None Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
-    <None Include="Attrs.yrd" />
     <Compile Include="Attrs.yrd.fs" />
-    <None Include="Cycle.yrd" />
     <Compile Include="Cycle.yrd.fs" />
-    <Compile Include="cycle.yrd_yacc.fsi" />
-    <Compile Include="cycle.yrd_yacc.fs" />
-    <None Include="Epsilon.yrd" />
     <Compile Include="Epsilon.yrd.fs" />
+    <Compile Include="Cond.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,7 +30,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
     let _reduces, _gotos, _acc =
         let symbolCount = grammar.indexator.fullCount
         let reduces : list<int * int>[,] = Array2D.create states.count symbolCount []
-        let gotos : int option[,] = Array2D.create states.count symbolCount None
+        let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
         if grammar.canInferEpsilon.[grammar.startRule] then acc <- (*startState*)0::acc
         let endRule = KernelInterpreter.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
@@ -38,7 +38,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
             let vertex = states.vertex i
             for e in vertex.outEdges do
                 let symbol = e.label
-                gotos.[i, symbol] <- Some(e.dest.label)
+                gotos.[i, symbol] <- e.dest.label::gotos.[i, symbol]
             let kernels, lookaheads = states.kernels i, states.lookaheads i
             for j = 0 to kernels.Length - 1 do
                 let k, la = kernels.[j], lookaheads.[j]
@@ -47,11 +47,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
                 elif grammar.epsilonTailStart.[prod] <= pos then
                     for symbol in la do 
                         reduces.[i, symbol] <- (prod,pos)::reduces.[i, symbol]
-(*            printfn "\n%d: " i
-            for j = 0 to symbolCount - 1 do
-                printf "%A " reduces.[i,j]
-            printfn ""
-*)      reduces, gotos, acc
+        reduces, gotos, acc
 
     member this.reduces = _reduces
     member this.gotos = _gotos

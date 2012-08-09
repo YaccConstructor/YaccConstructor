@@ -142,28 +142,43 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                             |> concat.[leftSides.[fst children.[0]]]
                 | x -> failwith "%A was not expected in epsilon-translation" x
         result.[root]
-            
+    
+    member this.SetRanges tokenToRange =
+        let ranges : ('Position * 'Position)[] = Array.zeroCreate nodes.Length
+        // Set Positions
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term t -> ranges.[x] <- tokenToRange t
+                | NonTerm children ->
+                    let family = snd children.[0]
+                    let mutable j, k = 0, family.Length-1
+                    let inline isEpsilon x = x < 0
+                    while isEpsilon family.[j] do
+                        j <- j + 1
+                    while isEpsilon family.[k] do
+                        k <- k - 1
+                    ranges.[x] <- (fst ranges.[family.[j]]), (snd ranges.[family.[k]])
+        ranges
+
+    member this.collectWarnings tokenToRange =
+        let ranges = this.SetRanges tokenToRange
+        let res = new ResizeArray<_>()
+        for x in order do
+            if reachable.[x] then
+                match nodes.[x] with
+                | Term _ -> ()
+                | NonTerm children ->
+                    if children.Count > 1 then
+                        res.Add (ranges.[x], ResizeArray.map fst children)
+        res
+
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
                             (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) =
         if isEpsilon then epsilons.[-root-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
         else
             let result = Array.zeroCreate nodes.Length
-            let ranges : ('Position * 'Position)[] = Array.zeroCreate nodes.Length
-            // Set Positions
-            for x in order do
-                if reachable.[x] then
-                    match nodes.[x] with
-                    | Term t -> ranges.[x] <- tokenToRange t
-                    | NonTerm children ->
-                        let family = snd children.[0]
-                        let mutable j, k = 0, family.Length-1
-                        let inline isEpsilon x = x < 0
-                        while isEpsilon family.[j] do
-                            j <- j + 1
-                        while isEpsilon family.[k] do
-                            k <- k - 1
-                        ranges.[x] <- (fst ranges.[family.[j]]), (snd ranges.[family.[k]])
-
+            let ranges = this.SetRanges tokenToRange
             let inline getRes prevRange i = 
                 if i < 0 then epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                 else
@@ -225,9 +240,15 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                                                                     override this.GetHashCode x = x.GetHashCode()})
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
-        let createNode num (str : string) =
-            let label = str.Replace("\n", "\\n").Replace ("\r", "")
-            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + "]")
+        let createNode num isAmbiguous (str : string) =
+            let label =
+                let cur = str.Replace("\n", "\\n").Replace ("\r", "")
+                if not isAmbiguous then cur
+                else cur + " !"
+            let color =
+                if not isAmbiguous then ""
+                else ",style=\"filled\",fillcolor=red"
+            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
@@ -236,9 +257,9 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
         let createEpsilon ind = 
             let res = next()
-            createNode res ("n " + indToString (-1-ind))
+            createNode res false ("n " + indToString (-1-ind))
             let u = next()
-            createNode u "eps"
+            createNode u false "eps"
             createEdge res u true ""
             res
         if not isEpsilon then
@@ -247,13 +268,13 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                     let ast = nodes.[i]
                     match ast with
                     | Term t ->
-                        createNode i  ("t " + indToString (tokenToNumber t))
+                        createNode i false  ("t " + indToString (tokenToNumber t))
                     | NonTerm children ->
-                        createNode i  ("n " + indToString leftSide.[fst children.[0]])
+                        createNode i (children.Count > 1) ("n " + indToString leftSide.[fst children.[0]])
                         children |> ResizeArray.iter
                                 (fun (num, children) ->
                                     let u = next()
-                                    createNode u ("prod " + num.ToString())
+                                    createNode u false ("prod " + num.ToString())
                                     createEdge i u true ""
                                     for child in children do
                                         let v =

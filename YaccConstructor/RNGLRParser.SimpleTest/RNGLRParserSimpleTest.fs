@@ -7,7 +7,6 @@ open Yard.Generators.RNGLR.AST
 open NUnit.Framework
 open Yard.Generators
 open LexCommon
-open FsYaccCycle
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)
@@ -142,3 +141,15 @@ type ``RNGLR parser tests with simple lexer`` () =
             RNGLR.ParseEpsilon.defaultAstToDot mAst "epsilon.dot"
             let res = translate RNGLR.ParseEpsilon.translate mAst
             Assert.AreEqual([3], res)
+
+    [<Test>]
+    member test.``If Then Else``() =
+        let parser = RNGLR.ParseCond.buildAst
+        let path = dir + "Cond/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
+            let res = translate RNGLR.ParseCond.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual([40; 22], res)

@@ -48,8 +48,6 @@
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
     <Compile Include="States.fs" />
-    <Compile Include="GenerateActions.fs" />
-    <Compile Include="GenerateTranslator.fs" />
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
     <Compile Include="PrintTranslator.fs" />

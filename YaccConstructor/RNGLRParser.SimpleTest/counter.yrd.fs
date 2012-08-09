@@ -16,6 +16,7 @@ let tokenToNumber = function
     | A _ -> 2
     | EOF _ -> 3
 
+let mutable private cur = 0
 let leftSide = [|0; 0; 1|]
 let private rules = [|2; 2; 0; 0|]
 let private rulesStart = [|0; 1; 3; 4|]
@@ -26,45 +27,54 @@ let acceptEmptyInput = false
 let defaultAstToDot = 
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let inline unpack x = x >>> 16, x <<< 16 >>> 16
+let private lists_gotos = [|[|1|]; [||]; [|2|]; [|3|]|]
 let private small_gotos =
-        [|0, [|0,1; 2,2|]; 2, [|0,3; 2,2|]|]
-let private gotos = Array.zeroCreate 4
+        [|2; 0; 131074; 131074; 3; 131074|]
+let gotos = Array.zeroCreate 4
 for i = 0 to 3 do
-        gotos.[i] <- Array.create 4 None
-for (i,t) in small_gotos do
-        for (j,x) in t do
-            gotos.[i].[j] <- Some  x
+        gotos.[i] <- Array.zeroCreate 4
+cur <- 0
+while cur < small_gotos.Length do
+    let i = small_gotos.[cur] >>> 16
+    let length = small_gotos.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_gotos.[cur + k] >>> 16
+        let x = small_gotos.[cur + k] &&& 65535
+        gotos.[i].[j] <- lists_gotos.[x]
+    cur <- cur + length
 let private lists_reduces = [|[||]; [|0,1|]; [|1,2|]|]
 let private small_reduces =
         [|131073; 196609; 196609; 196610|]
 let reduces = Array.zeroCreate 4
 for i = 0 to 3 do
-        reduces.[i] <- Array.create 4 [||]
-let init_reduces =
-        let mutable cur = 0
-        while cur < small_reduces.Length do
-            let i,length = unpack small_reduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_reduces.[cur + k]
-                reduces.[i].[j] <-  lists_reduces.[x]
-            cur <- cur + length
+        reduces.[i] <- Array.zeroCreate 4
+cur <- 0
+while cur < small_reduces.Length do
+    let i = small_reduces.[cur] >>> 16
+    let length = small_reduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_reduces.[cur + k] >>> 16
+        let x = small_reduces.[cur + k] &&& 65535
+        reduces.[i].[j] <- lists_reduces.[x]
+    cur <- cur + length
 let private lists_zeroReduces = [|[||]|]
 let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 4
 for i = 0 to 3 do
-        zeroReduces.[i] <- Array.create 4 [||]
-let init_zeroReduces =
-        let mutable cur = 0
-        while cur < small_zeroReduces.Length do
-            let i,length = unpack small_zeroReduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_zeroReduces.[cur + k]
-                zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
-            cur <- cur + length
+        zeroReduces.[i] <- Array.zeroCreate 4
+cur <- 0
+while cur < small_zeroReduces.Length do
+    let i = small_zeroReduces.[cur] >>> 16
+    let length = small_zeroReduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_zeroReduces.[cur + k] >>> 16
+        let x = small_zeroReduces.[cur + k] &&& 65535
+        zeroReduces.[i].[j] <- lists_zeroReduces.[x]
+    cur <- cur + length
 let private small_acc = [1]
 let private accStates = Array.zeroCreate 4
 for i = 0 to 3 do

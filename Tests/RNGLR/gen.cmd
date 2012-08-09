@@ -4,7 +4,7 @@
      -g "RNGLRGenerator -pos int -token int -module RNGLR.ParseEpsilon -translate true" > Epsilon\log_Epsilon.txt
 copy Epsilon\Epsilon.yrd.fs ..\..\YaccConstructor\RNGLRParser.SimpleTest\Epsilon.yrd.fs 
 
-for %%i in (Attrs,Calc,Counter,Cycle) do (
+for %%i in (Cond,Attrs,Calc,Counter,Cycle) do (
     ..\..\YaccConstructor\Main\bin\Release\YaccConstructor.exe -i %%i\%%i.yrd -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -translate true" > %%i\log_%%i.txt
     copy %%i\%%i.yrd.fs ..\..\YaccConstructor\RNGLRParser.SimpleTest\%%i.yrd.fs
 )

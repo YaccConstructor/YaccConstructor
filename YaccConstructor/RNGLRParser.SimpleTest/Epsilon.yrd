@@ -1,5 +1,0 @@
-+s : op<<A>> op<<B>> op<<C>>;
-op<<a>> : r=a? {
-    match r with
-    | Some x -> 10
-    | None -> 1 };

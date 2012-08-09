@@ -27,6 +27,7 @@ let tokenToNumber = function
     | EOF _ -> 7
     | MUL _ -> 8
 
+let mutable private cur = 0
 let leftSide = [|0; 0; 3; 1; 1; 2; 2|]
 let private rules = [|1; 0; 5; 0; 0; 2; 1; 8; 1; 6; 4|]
 let private rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
@@ -37,45 +38,54 @@ let acceptEmptyInput = false
 let defaultAstToDot = 
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let inline unpack x = x >>> 16, x <<< 16 >>> 16
+let private lists_gotos = [|[|1|]; [|4|]; [|7|]; [||]; [|8|]; [|9|]; [|2|]; [|3|]; [|5|]; [|6|]|]
 let private small_gotos =
-        [|0, [|0,1; 1,4; 2,7; 4,8; 6,9|]; 1, [|5,2|]; 2, [|0,3; 1,4; 2,7; 4,8; 6,9|]; 3, [|5,2|]; 4, [|8,5|]; 5, [|1,6; 2,7; 4,8; 6,9|]; 6, [|8,5|]|]
-let private gotos = Array.zeroCreate 10
+        [|5; 0; 65537; 131074; 262148; 393221; 65537; 327686; 131077; 7; 65537; 131074; 262148; 393221; 196609; 327686; 262145; 524296; 327684; 65545; 131074; 262148; 393221; 393217; 524296|]
+let gotos = Array.zeroCreate 10
 for i = 0 to 9 do
-        gotos.[i] <- Array.create 9 None
-for (i,t) in small_gotos do
-        for (j,x) in t do
-            gotos.[i].[j] <- Some  x
+        gotos.[i] <- Array.zeroCreate 9
+cur <- 0
+while cur < small_gotos.Length do
+    let i = small_gotos.[cur] >>> 16
+    let length = small_gotos.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_gotos.[cur + k] >>> 16
+        let x = small_gotos.[cur + k] &&& 65535
+        gotos.[i].[j] <- lists_gotos.[x]
+    cur <- cur + length
 let private lists_reduces = [|[||]; [|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
 let private small_reduces =
         [|196610; 327681; 458753; 262146; 327682; 458754; 393219; 327683; 458755; 524291; 458755; 327684; 458756; 524292; 524291; 327685; 458757; 524293; 589827; 327686; 458758; 524294|]
 let reduces = Array.zeroCreate 10
 for i = 0 to 9 do
-        reduces.[i] <- Array.create 9 [||]
-let init_reduces =
-        let mutable cur = 0
-        while cur < small_reduces.Length do
-            let i,length = unpack small_reduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_reduces.[cur + k]
-                reduces.[i].[j] <-  lists_reduces.[x]
-            cur <- cur + length
+        reduces.[i] <- Array.zeroCreate 9
+cur <- 0
+while cur < small_reduces.Length do
+    let i = small_reduces.[cur] >>> 16
+    let length = small_reduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_reduces.[cur + k] >>> 16
+        let x = small_reduces.[cur + k] &&& 65535
+        reduces.[i].[j] <- lists_reduces.[x]
+    cur <- cur + length
 let private lists_zeroReduces = [|[||]|]
 let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 10
 for i = 0 to 9 do
-        zeroReduces.[i] <- Array.create 9 [||]
-let init_zeroReduces =
-        let mutable cur = 0
-        while cur < small_zeroReduces.Length do
-            let i,length = unpack small_zeroReduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_zeroReduces.[cur + k]
-                zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
-            cur <- cur + length
+        zeroReduces.[i] <- Array.zeroCreate 9
+cur <- 0
+while cur < small_zeroReduces.Length do
+    let i = small_zeroReduces.[cur] >>> 16
+    let length = small_zeroReduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_zeroReduces.[cur + k] >>> 16
+        let x = small_zeroReduces.[cur + k] &&& 65535
+        zeroReduces.[i].[j] <- lists_zeroReduces.[x]
+    cur <- cur + length
 let private small_acc = [1]
 let private accStates = Array.zeroCreate 10
 for i = 0 to 9 do

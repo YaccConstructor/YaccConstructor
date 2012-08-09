@@ -1,0 +1,234 @@
+module RNGLR.ParseCond
+open Yard.Generators.RNGLR.Parser
+open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
+type Token =
+    | A of int
+    | ELSE of int
+    | EOF of int
+    | IF of int
+
+let numToString = function 
+    | 0 -> "good"
+    | 1 -> "if"
+    | 2 -> "if_else"
+    | 3 -> "s"
+    | 4 -> "stmt"
+    | 5 -> "yard_start_rule"
+    | 6 -> "A"
+    | 7 -> "ELSE"
+    | 8 -> "EOF"
+    | 9 -> "IF"
+    | _ -> ""
+let tokenToNumber = function
+    | A _ -> 6
+    | ELSE _ -> 7
+    | EOF _ -> 8
+    | IF _ -> 9
+
+let mutable private cur = 0
+let leftSide = [|3; 5; 1; 1; 2; 0; 0; 4; 4|]
+let private rules = [|1; 3; 2; 9; 4; 9; 0; 7; 4; 2; 4; 1; 6|]
+let private rulesStart = [|0; 1; 2; 3; 5; 9; 10; 11; 12; 13|]
+let startRule = 1
+
+let acceptEmptyInput = false
+
+let defaultAstToDot = 
+    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+
+let private lists_gotos = [|[||]; [|1|]; [|2|]; [|3|]; [|4|]; [|5|]; [|7|]; [|10|]; [|11|]; [|9|]; [|6|]; [|8|]|]
+let private small_gotos =
+        [|4; 65537; 131074; 196611; 589828; 262150; 5; 65542; 131079; 262152; 393225; 589828; 327681; 458762; 393221; 65542; 131074; 262155; 393225; 589828|]
+let gotos = Array.zeroCreate 12
+for i = 0 to 11 do
+        gotos.[i] <- Array.zeroCreate 10
+cur <- 0
+while cur < small_gotos.Length do
+    let i = small_gotos.[cur] >>> 16
+    let length = small_gotos.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_gotos.[cur + k] >>> 16
+        let x = small_gotos.[cur + k] &&& 65535
+        gotos.[i].[j] <- lists_gotos.[x]
+    cur <- cur + length
+let private lists_reduces = [|[||]; [|0,1|]; [|2,1|]; [|7,1|]; [|4,4|]; [|8,1|]; [|5,1; 2,1|]; [|6,1; 3,2|]; [|3,2|]|]
+let private small_reduces =
+        [|65537; 524289; 131074; 458754; 524290; 458754; 458755; 524291; 524290; 458756; 524292; 589826; 458757; 524293; 655362; 458758; 524290; 720898; 458759; 524296|]
+let reduces = Array.zeroCreate 12
+for i = 0 to 11 do
+        reduces.[i] <- Array.zeroCreate 10
+cur <- 0
+while cur < small_reduces.Length do
+    let i = small_reduces.[cur] >>> 16
+    let length = small_reduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_reduces.[cur + k] >>> 16
+        let x = small_reduces.[cur + k] &&& 65535
+        reduces.[i].[j] <- lists_reduces.[x]
+    cur <- cur + length
+let private lists_zeroReduces = [|[||]|]
+let private small_zeroReduces =
+        [||]
+let zeroReduces = Array.zeroCreate 12
+for i = 0 to 11 do
+        zeroReduces.[i] <- Array.zeroCreate 10
+cur <- 0
+while cur < small_zeroReduces.Length do
+    let i = small_zeroReduces.[cur] >>> 16
+    let length = small_zeroReduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_zeroReduces.[cur + k] >>> 16
+        let x = small_zeroReduces.[cur + k] &&& 65535
+        zeroReduces.[i].[j] <- lists_zeroReduces.[x]
+    cur <- cur + length
+let private small_acc = [3]
+let private accStates = Array.zeroCreate 12
+for i = 0 to 11 do
+        accStates.[i] <- List.exists ((=) i) small_acc
+let eofIndex = 8
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let buildAst : (seq<Token> -> ParseResult<Token>) =
+    buildAst<Token> parserSource
+
+#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
+let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null|]
+let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
+  (Array.zeroCreate 0 : array<'_rnglr_type_good * '_rnglr_type_if * '_rnglr_type_if_else * '_rnglr_type_s * '_rnglr_type_stmt * '_rnglr_type_yard_start_rule>), 
+  [|
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_if) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := ( r )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_s)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
+           ) : '_rnglr_type_yard_start_rule)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := ( r )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_if)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with IF _rnglr_val -> [_rnglr_val] | a -> failwith "IF expected, but %A found" a )
+             |> List.iter (fun (_rnglr_var_0) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_stmt) 
+               |> List.iter (fun (r) -> 
+                _rnglr_cycle_res := ( r * 10 )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_if)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with IF _rnglr_val -> [_rnglr_val] | a -> failwith "IF expected, but %A found" a )
+             |> List.iter (fun (_rnglr_var_0) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_good) 
+               |> List.iter (fun (t) -> 
+                (match ((unbox _rnglr_children.[2]) : Token) with ELSE _rnglr_val -> [_rnglr_val] | a -> failwith "ELSE expected, but %A found" a )
+                 |> List.iter (fun (_rnglr_var_2) -> 
+                  ((unbox _rnglr_children.[3]) : '_rnglr_type_stmt) 
+                   |> List.iter (fun (f) -> 
+                    _rnglr_cycle_res := ( t+f )::!_rnglr_cycle_res ) ) ) )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_if_else)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := ( r )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_good)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_stmt) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := ( r )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_good)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_if) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := ( r )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_stmt)
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_rnglr_var_0) -> 
+              _rnglr_cycle_res := ( 2 )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          ) ) : '_rnglr_type_stmt)
+      );
+  |] , [|
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_good)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_if)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_if_else)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_s)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_stmt)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
+  |] 
+let translate tokenToRangeFunction zeroPosition (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons tokenToRangeFunction zeroPosition) : '_rnglr_type_yard_start_rule

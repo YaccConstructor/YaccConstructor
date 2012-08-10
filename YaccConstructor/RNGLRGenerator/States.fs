@@ -44,12 +44,13 @@ type KernelInterpreter =
     static member inline symbolAndLookAheads (grammar : FinalGrammar) (kernel, endLookeheads) =
         let rule = KernelInterpreter.getProd kernel
         let pos = KernelInterpreter.getPos kernel
-        if grammar.rules.length rule = pos then (grammar.indexator.eofIndex, Set.empty)
+        if grammar.rules.length rule = pos then
+            grammar.indexator.eofIndex, Set.empty
         else
             let lookAheads =
                 if grammar.epsilonTailStart.[rule] > pos + 1 then grammar.followSet.[rule].[pos]
                 else Set.union grammar.followSet.[rule].[pos] endLookeheads
-            (grammar.rules.symbol rule pos, lookAheads)
+            grammar.rules.symbol rule pos, lookAheads
 
 type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kernel[][], stateToLookahead : Set<int>[][]) =
     member this.count = stateToVertex.Length
@@ -69,6 +70,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
     let curSymbol kernel = KernelInterpreter.symbol grammar kernel
     let symbolAndLookAheads (*kernel lookAheads*) = KernelInterpreter.symbolAndLookAheads grammar
     let wasEdge = new ResizeArray<Set<int> >()
+    let wasNonTerm = Array.zeroCreate grammar.indexator.fullCount
     let wasNTermSymbol : bool[,] = Array2D.zeroCreate grammar.indexator.fullCount grammar.indexator.fullCount
     let addedNTermsSymbols = new ResizeArray<_>(grammar.indexator.fullCount * grammar.indexator.fullCount)
 
@@ -82,6 +84,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                 if not wasNTermSymbol.[nonTerm, symbol] then
                     wasNTermSymbol.[nonTerm, symbol] <- true
                     addedNTermsSymbols.Add(nonTerm, symbol)
+                    wasNonTerm.[nonTerm] <- true
                     true
                 else false
             let newSymbolSet = Set.filter checkWas symbolSet
@@ -99,16 +102,18 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                         kernelToLookAhead.Add(kernel, symbolSet)
                         symbolSet
                     else
-                        let newSymbolSet = Set.difference symbolSet (kernelToLookAhead.Item kernel)
-                        kernelToLookAhead.[kernel] <- Set.union (kernelToLookAhead.Item kernel) newSymbolSet
+                        let newSymbolSet = Set.difference symbolSet kernelToLookAhead.[kernel]
+                        kernelToLookAhead.[kernel] <- Set.union kernelToLookAhead.[kernel] newSymbolSet
                         newSymbolSet
-                if grammar.rules.length rule > 0 && not newSymbolSet.IsEmpty then
-                    enqueue <| symbolAndLookAheads (KernelInterpreter.toKernel(rule,0), newSymbolSet)
-        for pair in addedNTermsSymbols do
-            wasNTermSymbol.[fst pair, snd pair] <- false
+                if grammar.rules.length rule > 0 && (not newSymbolSet.IsEmpty || not wasNonTerm.[grammar.rules.symbol rule 0]) then
+                    enqueue <| symbolAndLookAheads (kernel, newSymbolSet)
+        for (f,s) in addedNTermsSymbols do
+            wasNonTerm.[f] <- false
+            wasNTermSymbol.[f,s] <- false
         addedNTermsSymbols.Clear()
         Array.ofSeq result
         |> (fun ks -> ks , ks |> Array.map (fun x -> kernelToLookAhead.[x]))
+
     let incount = ref 0
     let rec dfs initKernelsAndLookAheads =
         incr incount
@@ -117,7 +122,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
         let key = String.concat "|" (kernels |> Array.map (sprintf "%d"))
         let vertex, newLookAheads, needDfs =
             if kernelsToVertex.ContainsKey key then
-                let vertex = kernelsToVertex.Item key
+                let vertex = kernelsToVertex.[key]
                 let alreadySets = stateToLookahead.[vertex.label]
                 let mutable needDfs = false
                 let diff = Array.zeroCreate kernels.Length
@@ -128,20 +133,14 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                     diff.[i] <- diffSet
                 vertex, diff, needDfs
             else
-                //printfn "%A" <| key
                 let vertex = new Vertex<int,int>(nextIndex())
                 wasEdge.Add Set.empty
                 vertices.Add vertex
                 kernelsToVertex.[key] <- vertex
-                //System.Diagnostics.Debug.Assert(result.ContainsKey key)
                 stateToKernels.Add kernels
                 stateToLookahead.Add lookaheads
                 vertex, lookaheads, true
-                // adding edges
         if needDfs then
-//            printfn "%d" vertex.label
-//            printfn "%A" kernels
-//            printfn "%A" newLookAheads
             for i = 0 to grammar.indexator.fullCount - 1 do
                 if i <> grammar.indexator.eofIndex then
                     let mutable newSymbols = false
@@ -160,7 +159,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                         let newVertex : Vertex<_,_> = dfs destStates
                         if not <| wasEdge.[vertex.label].Contains newVertex.label then
                             wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
-                            vertex.addEdge(new Edge<_,_>(newVertex, i))
+                            vertex.addEdge <| new Edge<_,_>(newVertex, i)
         vertex
     let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]

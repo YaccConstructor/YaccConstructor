@@ -99,7 +99,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
             fun () -> incr num; !num
         for i = 0 to statesLim do
             for j = 0 to symbolsLim do
-                if not <| lists.ContainsKey arr.[i,j] then
+                if checker arr.[i,j] && not <| lists.ContainsKey arr.[i,j] then
                     lists.Add (arr.[i,j], next())
         let listsArr = Array.zeroCreate lists.Count
         for v in lists do
@@ -214,7 +214,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
 
     print2DArrList tables.gotos
         (fun x -> not x.IsEmpty)
-        (fun x -> printListAsArray x (print "%d") )
+        (fun x -> print "%d" x.[0])
         "gotos"
     
     let reduces,zeroReduces =

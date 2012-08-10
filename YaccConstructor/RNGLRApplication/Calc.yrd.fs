@@ -38,9 +38,9 @@ let acceptEmptyInput = false
 let defaultAstToDot = 
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|[|1|]; [|4|]; [|7|]; [||]; [|8|]; [|9|]; [|2|]; [|3|]; [|5|]; [|6|]|]
+let private lists_gotos = [|1; 4; 7; 8; 9; 2; 3; 5; 6|]
 let private small_gotos =
-        [|5; 0; 65537; 131074; 262148; 393221; 65537; 327686; 131077; 7; 65537; 131074; 262148; 393221; 196609; 327686; 262145; 524296; 327684; 65545; 131074; 262148; 393221; 393217; 524296|]
+        [|5; 0; 65537; 131074; 262147; 393220; 65537; 327685; 131077; 6; 65537; 131074; 262147; 393220; 196609; 327685; 262145; 524295; 327684; 65544; 131074; 262147; 393220; 393217; 524295|]
 let gotos = Array.zeroCreate 10
 for i = 0 to 9 do
         gotos.[i] <- Array.zeroCreate 9
@@ -54,9 +54,9 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[||]; [|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
+let private lists_reduces = [|[|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
 let private small_reduces =
-        [|196610; 327681; 458753; 262146; 327682; 458754; 393219; 327683; 458755; 524291; 458755; 327684; 458756; 524292; 524291; 327685; 458757; 524293; 589827; 327686; 458758; 524294|]
+        [|196610; 327680; 458752; 262146; 327681; 458753; 393219; 327682; 458754; 524290; 458755; 327683; 458755; 524291; 524291; 327684; 458756; 524292; 589827; 327685; 458757; 524293|]
 let reduces = Array.zeroCreate 10
 for i = 0 to 9 do
         reduces.[i] <- Array.zeroCreate 9
@@ -70,7 +70,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[||]|]
+let private lists_zeroReduces = [||]
 let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 10

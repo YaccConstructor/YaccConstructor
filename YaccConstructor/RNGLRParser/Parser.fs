@@ -98,11 +98,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 //printfn "v(%d,%d)" state num
                 v <- new Vertex(state, num)
                 dict.[state] <- v
-                let arr = parserSource.Gotos.[state].[!curNum] 
-                if arr <> null then
-                    for push in  arr do
-                        pushes.[!pBeg] <- (v, push)
-                        nextInd pBeg
+                let push = parserSource.Gotos.[state].[!curNum]
+                if push <> 0 then
+                    pushes.[!pBeg] <- (v, push)
+                    nextInd pBeg
                 let arr = parserSource.ZeroReduces.[state].[!curNum]
                 if arr <> null then
                     for prod in arr do
@@ -137,24 +136,24 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
                 let handlePath (path : int[]) (final : Vertex) =
                     //uses.[prod] <- uses.[prod] + 1
-                    for state in  parserSource.Gotos.[final.State].[nonTerm] do
-                        //printfn "f: %d %d" final.Level final.State
-                        let ast = ref -1
-                        let newVertex = addVertex state num None
-                        let ast = 
-                            match newVertex.FindIndex final.State final.Level with
-                            | -1 -> 
-                                let edge = new Edge(final, nodes.Count)
-                                nodes.Add <| NonTerm (new ResizeArray<_>(1))
-                                newVertex.addEdge edge
-                                if (pos > 0) then
-                                    let arr = parserSource.Reduces.[state].[!curNum]
-                                    if arr <> null then
-                                        for (prod, pos) in arr do
-                                            reductions.Enqueue (newVertex, prod, pos, Some edge)
-                                edge.Ast
-                            | x -> (newVertex.Edge x).Ast
-                        addChildren nodes.[ast] (Microsoft.FSharp.Collections.Array.copy path) prod
+                    let state = parserSource.Gotos.[final.State].[nonTerm]
+                    //printfn "f: %d %d" final.Level final.State
+                    let ast = ref -1
+                    let newVertex = addVertex state num None
+                    let ast = 
+                        match newVertex.FindIndex final.State final.Level with
+                        | -1 -> 
+                            let edge = new Edge(final, nodes.Count)
+                            nodes.Add <| NonTerm (new ResizeArray<_>(1))
+                            newVertex.addEdge edge
+                            if (pos > 0) then
+                                let arr = parserSource.Reduces.[state].[!curNum]
+                                if arr <> null then
+                                    for (prod, pos) in arr do
+                                        reductions.Enqueue (newVertex, prod, pos, Some edge)
+                            edge.Ast
+                        | x -> (newVertex.Edge x).Ast
+                    addChildren nodes.[ast] (Microsoft.FSharp.Collections.Array.copy path) prod
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
@@ -166,11 +165,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                 walk (remainLength - 1) e.Dest path)
                 
                 if pos = 0 then
-                    for state in parserSource.Gotos.[vertex.State].[nonTerm] do
-                        let newVertex = addVertex state num None
-                        if newVertex.FindIndex vertex.State vertex.Level = -1 then
-                            let edge = new Edge(vertex, getEpsilon parserSource.LeftSide.[prod])
-                            newVertex.addEdge edge
+                    let state = parserSource.Gotos.[vertex.State].[nonTerm]
+                    let newVertex = addVertex state num None
+                    if newVertex.FindIndex vertex.State vertex.Level = -1 then
+                        let edge = new Edge(vertex, getEpsilon parserSource.LeftSide.[prod])
+                        newVertex.addEdge edge
                 else 
                     let path = Array.zeroCreate parserSource.Length.[prod]
                     for i = path.Length - 1 downto pos do

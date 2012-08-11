@@ -43,9 +43,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Indexator.fs" />
-    <Compile Include="Graph.fs" />
-    <Compile Include="NumberedRules.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ParserSource.fs" />
   </ItemGroup>

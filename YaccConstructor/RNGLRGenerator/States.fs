@@ -180,7 +180,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
             for j = 0 to grammar.rules.length i - 1 do
                 printf "%s " <| printSymbol (grammar.rules.symbol i j)
             printfn ""
-        
+        (*
         printfn "\nstates:"
         for i = 0 to vertexCount()-1 do
             printfn "==============================\n%d:" i
@@ -195,6 +195,6 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
             let vertex = vertices.[i]
             for edge in vertex.outEdges do
                 printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
-            printfn ""
+            printfn ""*)
     print ()
     new StatesInterpreter(vertices.ToArray(), stateToKernels.ToArray(), stateToLookahead.ToArray())

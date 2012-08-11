@@ -23,6 +23,7 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
+open Yard.Generators.RNGLR.DataStructures
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
@@ -75,7 +76,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         //printfn "%A" !curToken
         let curNum = ref (parserSource.TokenToNumber enum.Current)
         /// Here all nodes in AST will be collected
-        let nodes = new ResizeArray<_>()
+        let nodes = new BlockResizeArray<_>()
         // Must be number of non-terminals, but doesn't matter
         let nonTermsCountLimit = max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
             
@@ -118,7 +119,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             v
 
         ignore <| addVertex startState 0 None
-
         let makeReductions num =
             while reductions.Count > 0 do
                 let vertex, prod, pos, edgeOpt = reductions.Dequeue()

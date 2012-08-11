@@ -39,6 +39,8 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
             for e in vertex.outEdges do
                 let symbol = e.label
                 gotos.[i, symbol] <- e.dest.label::gotos.[i, symbol]
+                if gotos.[i, symbol].Length > 1 then
+                    eprintfn "Several gotos form state %d on symbol %d: %A" i symbol gotos.[i, symbol]
             let kernels, lookaheads = states.kernels i, states.lookaheads i
             for j = 0 to kernels.Length - 1 do
                 let k, la = kernels.[j], lookaheads.[j]

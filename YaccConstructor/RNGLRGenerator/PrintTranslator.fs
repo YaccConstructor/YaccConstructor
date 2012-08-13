@@ -106,17 +106,17 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let printChild (prod, arr) = "(" + toStr prod + "," + printArr arr toStr + ")"
+        let printChild family = "{prod = " + toStr family.prod + "; nodes = " + printArr family.nodes toStr + "}"
         let printAst =
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"
             | NonTerm arr ->
-                "NonTerm (new ResizeArray<_>(" + printList (ResizeArray.toList arr) printChild + "))"
+                "NonTerm (" + printArr arr printChild + ")"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function
                  | null -> "null"
-                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",0)")
+                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",null,0)")
         |> wordL
 
     // Realise rules

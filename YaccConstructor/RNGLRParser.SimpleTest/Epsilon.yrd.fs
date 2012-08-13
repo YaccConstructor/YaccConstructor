@@ -94,7 +94,7 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>([|NonTerm (new ResizeArray<_>([(6,[|1; 2; 3|])])); NonTerm (new ResizeArray<_>([(0,[||])])); NonTerm (new ResizeArray<_>([(2,[||])])); NonTerm (new ResizeArray<_>([(4,[||])]))|],0); new Tree<_>([|NonTerm (new ResizeArray<_>([(0,[||])]))|],0); new Tree<_>([|NonTerm (new ResizeArray<_>([(2,[||])]))|],0); new Tree<_>([|NonTerm (new ResizeArray<_>([(4,[||])]))|],0); new Tree<_>([|NonTerm (new ResizeArray<_>([(7,[|1|])])); NonTerm (new ResizeArray<_>([(6,[|2; 3; 4|])])); NonTerm (new ResizeArray<_>([(0,[||])])); NonTerm (new ResizeArray<_>([(2,[||])])); NonTerm (new ResizeArray<_>([(4,[||])]))|],0)|]
+let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>([|NonTerm ([|{prod = 6; nodes = [|1; 2; 3|]}|]); NonTerm ([|{prod = 0; nodes = [||]}|]); NonTerm ([|{prod = 2; nodes = [||]}|]); NonTerm ([|{prod = 4; nodes = [||]}|])|],null,0); new Tree<_>([|NonTerm ([|{prod = 0; nodes = [||]}|])|],null,0); new Tree<_>([|NonTerm ([|{prod = 2; nodes = [||]}|])|],null,0); new Tree<_>([|NonTerm ([|{prod = 4; nodes = [||]}|])|],null,0); new Tree<_>([|NonTerm ([|{prod = 7; nodes = [|1|]}|]); NonTerm ([|{prod = 6; nodes = [|2; 3; 4|]}|]); NonTerm ([|{prod = 0; nodes = [||]}|]); NonTerm ([|{prod = 2; nodes = [||]}|]); NonTerm ([|{prod = 4; nodes = [||]}|])|],null,0)|]
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_s * '_rnglr_type_yard_rule_op_1 * '_rnglr_type_yard_rule_op_2 * '_rnglr_type_yard_rule_op_3 * '_rnglr_type_yard_start_rule>), 
   [|

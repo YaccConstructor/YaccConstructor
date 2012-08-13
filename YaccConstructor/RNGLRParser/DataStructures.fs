@@ -5,7 +5,7 @@ open System
 type BlockResizeArray<'T> () =
     let initArraysCount = 1
     let mutable count = 0
-    let shift = 15
+    let shift = 17
     let blockSize = 1 <<< shift
     let smallPart = blockSize - 1
     let mutable arrays = Array.init initArraysCount (fun _ -> Array.zeroCreate blockSize)
@@ -30,6 +30,10 @@ type BlockResizeArray<'T> () =
     member this.Item i =
         if i >= count then raise <| System.ArgumentOutOfRangeException()
         else arrays.[i >>> shift].[i &&& smallPart]
+
+    member this.Set i value =
+        if i >= count then raise <| System.ArgumentOutOfRangeException()
+        else arrays.[i >>> shift].[i &&& smallPart] <- value
 
     member this.Count = count
 

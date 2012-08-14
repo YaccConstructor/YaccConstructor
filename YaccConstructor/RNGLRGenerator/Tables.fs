@@ -21,11 +21,6 @@ open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR
 
-type Action =
-    | Reduce of int(*rule*) * int(*length of non-Epsilon part*)
-    | Shift of int
-    | Accepted
-
 type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
     let _reduces, _gotos, _acc =
         let symbolCount = grammar.indexator.fullCount

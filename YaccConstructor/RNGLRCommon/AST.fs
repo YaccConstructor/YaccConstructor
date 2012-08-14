@@ -27,12 +27,18 @@ type Family =
     new (p,n) = {prod = p; nodes = n}
 
 
+[<Struct>]
+type UsualOne<'T> =
+    val mutable first : 'T
+    val mutable other : 'T[]
+    new (f,o) = {first = f; other = o}
+
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
 /// int - number of token, if there is an epsilon-tree derivation, -1 otherwise.
 type AST =
     /// Non-terminal expansion: production, family of children
     /// All nodes are stored in array, so there is a correspondence between integer and node.
-    | NonTerm of array<Family>
+    | NonTerm of UsualOne<Family>
     | Term of int
 
 let inline getFamily node =
@@ -59,7 +65,7 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                     reachable.[u] <- true
                     match nodes.[u] with
                     | NonTerm children ->
-                        for family in children do
+                        let inline handle (family : Family) = 
                             let family = family.nodes
                             for j = 0 to family.Length - 1 do
                                 if family.[j] >= 0 && not reachable.[family.[j]] then
@@ -68,6 +74,10 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                                         reachable.[family.[j]] <- true
                                         res.Add family.[j]
                                     | _ -> stack.Push family.[j]
+                        handle children.first
+                        if children.other <> null then
+                            for family in children.other do
+                                handle family
                     | _ -> ()
         res.ToArray()
 
@@ -80,20 +90,27 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
     member this.Nodes = nodes
     member this.Order = order
 
-    member this.EliminateCycles() =
+    (*member this.EliminateCycles() =
         if not isEpsilon then
             let proper = Array.create nodes.Length true
             for x in order do
                 match nodes.[x] with
                 | NonTerm children ->
                     let arr =
-                        children |> Array.filter (fun family ->
+                        children.other |> Array.filter (fun family ->
                             family.nodes
                             |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
-                    if arr.Length = 0 then
-                        reachable.[x] <- false
-                    else nodes.[x] <- NonTerm arr
-                | _ -> ()
+                    if children.first.nodes |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]) then
+                        if arr.Length = 0 then
+                            children.other <- null
+                        else
+                            children.other <- arr
+                    else
+                        if arr.Length = 0 then
+                            children.other <- null
+                            reachable.[x] <- false
+                        else nodes.[x] <- NonTerm arr
+                | _ -> ()*)
                 
     member this.ChooseSingleAst () = 
         if not isEpsilon then
@@ -101,18 +118,24 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 if reachable.[x] then
                     match nodes.[x] with
                     | NonTerm children ->
-                        match
-                            children |> Array.tryFind
-                                (fun family ->
-                                    family.nodes
-                                    |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
-                            with
-                        | Some v ->
-                            if children.Length > 1 then
-                                nodes.[x] <- NonTerm [|v|]
-                        | None ->
-                            reachable.[x] <- false
-                            nodes.[x] <- Unchecked.defaultof<_>
+                        if children.first.nodes |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]) then
+                            nodes.[x] <- NonTerm <| new UsualOne<_> (children.first, null)
+                        else
+                            if children.other = null then
+                                reachable.[x] <- false
+                                nodes.[x] <- Unchecked.defaultof<_>
+                            else
+                                match
+                                    children.other |> Array.tryFind
+                                        (fun family ->
+                                            family.nodes
+                                            |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
+                                    with
+                                | Some v ->
+                                    nodes.[x] <- NonTerm <| new UsualOne<_> (v, null)
+                                | None ->
+                                    reachable.[x] <- false
+                                    nodes.[x] <- Unchecked.defaultof<_>
                     | _ -> ()
             for x in order do
                 reachable.[x] <- false
@@ -122,7 +145,7 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 if reachable.[x] then
                     match nodes.[x] with
                     | NonTerm x ->
-                        for j in x.[0].nodes do
+                        for j in x.first.nodes do
                             if j >= 0 then
                                 reachable.[j] <- true
                     | _ -> ()
@@ -134,16 +157,18 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 match nodes.[x] with
                 | NonTerm children ->
                     result.[x] <- 
-                        if children.Length = 1 then
-                            funs.[children.[0].prod] (children.[0].nodes |> Array.map (fun i -> result.[i])) range
+                        let firstRes = funs.[children.first.prod] (children.first.nodes |> Array.map (fun i -> result.[i])) range
+                        if children.other = null then
+                            firstRes
                         else
-                            children
+                            children.other
                             |> Array.map (
                                 fun family ->
                                     funs.[family.prod] (family.nodes |> Array.map (fun i -> result.[i])) range
                                 )
                             |> Array.toList
-                            |> concat.[leftSides.[children.[0].prod]]
+                            |> (fun x -> firstRes::x)
+                            |> concat.[leftSides.[children.first.prod]]
                 | x -> failwith "%A was not expected in epsilon-translation" x
         result.[root]
     
@@ -155,7 +180,7 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 match nodes.[x] with
                 | Term t -> ranges.[x] <- tokenToRange tokens.[t]
                 | NonTerm children ->
-                    let family = children.[0].nodes
+                    let family = children.first.nodes
                     let mutable j, k = 0, family.Length-1
                     let inline isEpsilon x = x < 0
                     while isEpsilon family.[j] do
@@ -173,8 +198,8 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 match nodes.[x] with
                 | Term _ -> ()
                 | NonTerm children ->
-                    if children.Length > 1 then
-                        res.Add (ranges.[x], children |> Array.map (fun family -> family.prod))
+                    if children.other <> null then
+                        res.Add (ranges.[x], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
@@ -194,18 +219,21 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                     | Term t -> result.[x] <- box tokens.[t]
                     | NonTerm children ->
                         result.[x] <-
-                            if children.Length = 1 then
+                            let firstRes = 
                                 let prevRange = fst ranges.[x] |> ref
-                                funs.[children.[0].prod] (children.[0].nodes |> Array.map (getRes prevRange)) ranges.[x]
+                                funs.[children.first.prod] (children.first.nodes |> Array.map (getRes prevRange)) ranges.[x]
+                            if children.other = null then
+                                firstRes
                             else
-                                children
+                                children.other
                                 |> Array.map (
                                     fun family ->
                                         let prevRange = fst ranges.[x] |> ref
                                         funs.[family.prod] (family.nodes |> Array.map (getRes prevRange)) ranges.[x]
                                     )
                                 |> Array.toList
-                                |> concat.[leftSides.[children.[0].prod]]
+                                |> (fun x -> firstRes::x)
+                                |> concat.[leftSides.[children.first.prod]]
             result.[root]
             
     member this.PrintAst() =            
@@ -218,17 +246,19 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 match nodes.[ast] with
                 | Term t -> printInd ind "t: %A" tokens.[t]
                 | NonTerm children ->
-                    if children.Length > 0 then
-                        let needGroup = children.Length > 1
-                        if needGroup then printInd ind "^^^^"
-                        children |> Array.iteri 
-                            (fun i family ->
-                                        if i > 0 then
-                                            printInd ind "----"
-                                        printInd ind "prod %d" family.prod
-                                        family.nodes
-                                        |> Array.iter (printAst <| ind+1))
-                        if needGroup then printInd ind "vvvv"
+                    let needGroup = children.other <> null
+                    if needGroup then printInd ind "^^^^"
+                    let inline handle separate (family : Family) =
+                        if separate then
+                            printInd ind "----"
+                        printInd ind "prod %d" family.prod
+                        family.nodes
+                        |> Array.iter (printAst <| ind+1)
+                    children.first |> handle false
+                    if needGroup then
+                        children.other |> Array.iter (handle true)
+                       
+                    if needGroup then printInd ind "vvvv"
         printAst 0 root
 
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
@@ -274,18 +304,19 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                     | Term t ->
                         createNode i false  ("t " + indToString (tokenToNumber tokens.[t]))
                     | NonTerm children ->
-                        createNode i (children.Length > 1) ("n " + indToString leftSide.[children.[0].prod])
-                        children |> Array.iter
-                                (fun family ->
-                                    let u = next()
-                                    createNode u false ("prod " + family.prod.ToString())
-                                    createEdge i u true ""
-                                    for child in family.nodes do
-                                        let v =
-                                            if child >= 0 then child
-                                            else createEpsilon child
-                                        createEdge u v false ""
-                                )
+                        createNode i (children.other <> null) ("n " + indToString leftSide.[children.first.prod])
+                        let inline handle (family : Family) =
+                            let u = next()
+                            createNode u false ("prod " + family.prod.ToString())
+                            createEdge i u true ""
+                            for child in family.nodes do
+                                let v =
+                                    if child >= 0 then child
+                                    else createEpsilon child
+                                createEdge u v false ""
+                        children.first |> handle
+                        if children.other <> null then 
+                            children.other |> Array.iter handle
         else createEpsilon root |> ignore
         
         out.WriteLine("}")

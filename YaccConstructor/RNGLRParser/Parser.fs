@@ -174,6 +174,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             if arr <> null then
                                 for (prod, pos) in arr do
                                     reductions.Enqueue (newVertex, prod, pos, Some (final, edge))
+
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
                     else
@@ -239,12 +240,17 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let mutable j = i+1
                     while j < edges.Count && trd edges.[j] = a do
                         j <- j + 1
-                    let res = Array.zeroCreate (j - i)
-                    for k = i to j-1 do
-                        res.[k-i] <- snd edges.[k]
+                    let other = 
+                        if j <> i + 1 then
+                            let res = Array.zeroCreate (j - i - 1)
+                            for k = i + 1 to j-1 do
+                                res.[k-i-1] <- snd edges.[k]
+                            res
+                        else
+                            null
                     vEdges.[count] <- new Edge(v, a)
                     count <- count + 1
-                    nodes.Set a (NonTerm res)
+                    nodes.Set a (NonTerm (new UsualOne<_>(snd edges.[i], other)))
                     i <- j
 
                 for i = 0 to simpleEdges.[vertex].Count - 1 do
@@ -296,8 +302,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             //printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
             //                        if parserSource.AccStates.[i] then yield i]
             let addTreeTop res =
-                let children = [| new Family(parserSource.StartRule,  [|res|]) |]
-                NonTerm children
+                let children = new Family(parserSource.StartRule,  [|res|])
+                NonTerm <| new UsualOne<_>(children, null)
             for i = 0 to !curLevelCount-1 do
                 //printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then

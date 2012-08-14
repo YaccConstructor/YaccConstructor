@@ -113,7 +113,9 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         order.Add w
                                     pos.[w])
                         children.Add <| new Family(rule, nodes)
-                res.Add (NonTerm <| children.ToArray())
+                let first = children.[0]
+                children.RemoveAt 0
+                res.Add (NonTerm <| new UsualOne<_>(first, children.ToArray()))
             result.[u] <- new Tree<_>(res.ToArray(), null, 0)
     result
 

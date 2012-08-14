@@ -77,14 +77,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             args.[nonTerm] <- srcGrammar.[i].args
 
     let printArr (arr : 'a[]) (printer: 'a -> string) =
-        let res = new System.Text.StringBuilder()
-        let append (s : string) = res.Append s |> ignore
-        append "[|"
-        for i = 0 to arr.Length-1 do
-            if i <> 0 then append "; "
-            append (printer arr.[i])
-        append "|]"
-        res.ToString()
+        if arr = null then "null"
+        else
+            let res = new System.Text.StringBuilder()
+            let append (s : string) = res.Append s |> ignore
+            append "[|"
+            for i = 0 to arr.Length-1 do
+                if i <> 0 then append "; "
+                append (printer arr.[i])
+            append "|]"
+            res.ToString()
 
     let printList (list : list<'a>) (printer: 'a -> string) =
         let res = new System.Text.StringBuilder()
@@ -111,7 +113,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"
             | NonTerm arr ->
-                "NonTerm (" + printArr arr printChild + ")"
+                "NonTerm (new UsualOne<_>(" + printChild arr.first + ", " + printArr arr.other printChild + "))"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function

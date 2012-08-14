@@ -123,7 +123,8 @@ type ``RNGLR parser tests with simple lexer`` () =
             //mAst.PrintAst
             printf "OK\n"
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
-            mAst.EliminateCycles()
+            //mAst.EliminateCycles()
+            mAst.ChooseSingleAst()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
             let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res

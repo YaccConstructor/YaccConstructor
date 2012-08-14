@@ -31,13 +31,12 @@ type ParseResult<'TokenType> =
 
 [<AllowNullLiteral>]
 type private Vertex (state : int, level : int) =
-    let mutable out : Edge[] = null
+    let mutable out : UsualOne<Edge> = Unchecked.defaultof<_>
     member this.Level = level
     member this.OutEdges
         with get() = out
         and set v = out <- v
     member this.State = state
-    member this.Edge i = out.[i]
 
 and private Edge =
     struct 
@@ -180,10 +179,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     else
                         //printfn "  m %d: %d %d" remainLength vertex.Level vertex.State
                         if vertex.Level <> num then
-                            vertex.OutEdges |> Array.iter
-                                (fun e ->
-                                    path.[remainLength - 1] <- e.Ast
-                                    walk (remainLength - 1) e.Dest path)
+                            if vertex.OutEdges.other <> null then
+                                vertex.OutEdges.other |> Array.iter
+                                    (fun e ->
+                                        path.[remainLength - 1] <- e.Ast
+                                        walk (remainLength - 1) e.Dest path)
+                            path.[remainLength - 1] <- vertex.OutEdges.first.Ast
+                            walk (remainLength - 1) vertex.OutEdges.first.Dest path
                         else
                             simpleEdges.[vertex.State] |> ResizeArray.iter(fun (v,a) ->
                                     path.[remainLength - 1] <- a
@@ -223,7 +225,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let mutable i = 0
                 let vertex = usedStates.[s]
                 let edges = edges.[vertex]
-                let mutable count = 0
+                let mutable count = -1
                 while i < edges.Count do
                     let k = trd edges.[i]
                     let mutable j = i+1
@@ -232,9 +234,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     i <- j
                     count <- count + 1
                 count <- count + simpleEdges.[vertex].Count
-                let vEdges = Array.zeroCreate count
+                let vEdges =
+                    if count > 0 then Array.zeroCreate count
+                    else null
+                let mutable first = Unchecked.defaultof<_>
                 i <- 0
-                count <- 0
+                count <- -1
                 while i < edges.Count do
                     let (v,_,a) = edges.[i]
                     let mutable j = i+1
@@ -248,17 +253,23 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             res
                         else
                             null
-                    vEdges.[count] <- new Edge(v, a)
+                    if count >= 0 then
+                        vEdges.[count] <- new Edge(v, a)
+                    else
+                        first <- new Edge(v, a)
                     count <- count + 1
                     nodes.Set a (NonTerm (new UsualOne<_>(snd edges.[i], other)))
                     i <- j
 
                 for i = 0 to simpleEdges.[vertex].Count - 1 do
                     let v, a = simpleEdges.[vertex].[i]
-                    vEdges.[count] <- new Edge(v, a)
+                    if count >= 0 then
+                        vEdges.[count] <- new Edge(v, a)
+                    else
+                        first <- new Edge(v, a)
                     count <- count + 1
 
-                stateToVertex.[vertex].OutEdges <- vEdges
+                stateToVertex.[vertex].OutEdges <- UsualOne<_>(first, vEdges)
                 edges.Clear()
                 simpleEdges.[vertex].Clear()
 
@@ -308,7 +319,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 //printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then
                     root := Some nodes.Count
-                    (stateToVertex.[usedStates.[i]].Edge 0).Ast
+                    stateToVertex.[usedStates.[i]].OutEdges.first.Ast
                     |> addTreeTop
                     |> nodes.Add
             match !root with

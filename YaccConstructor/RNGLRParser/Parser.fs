@@ -29,12 +29,6 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of int * 'TokenType * string
 
-[<Struct>]
-type Item =
-    val prod : int
-    val pos : int
-    new (_prod, _pos) = {prod = _prod; pos = _pos}
-
 [<AllowNullLiteral>]
 type private Vertex (state : int, level : int) =
     let mutable out : Edge[] = null
@@ -45,10 +39,13 @@ type private Vertex (state : int, level : int) =
     member this.State = state
     member this.Edge i = out.[i]
 
-and private Edge = {
-    Dest : Vertex
-    Ast : int
-}
+and private Edge =
+    struct 
+        val Dest : Vertex
+        val Ast : int
+        new (d,a) = {Dest = d; Ast = a}
+    end
+
 
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
 let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.State = v.State
@@ -169,7 +166,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let state = parserSource.Gotos.[final.State].[nonTerm]
                     //printfn "f: %d %d" final.Level final.State
                     let newVertex = addVertex state num None
-                    let family = {prod = prod; nodes = Array.copy path}
+                    let family = new Family(prod, Array.copy path)
                     if findIndex final family edges.[state] = -1 then
                         let edge = addEdge final family edges.[state] nodes
                         if (pos > 0 && edge = nodes.Count-1) then
@@ -245,14 +242,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let res = Array.zeroCreate (j - i)
                     for k = i to j-1 do
                         res.[k-i] <- snd edges.[k]
-                    vEdges.[count] <- {Ast = a; Dest = v}
+                    vEdges.[count] <- new Edge(v, a)
                     count <- count + 1
                     nodes.Set a (NonTerm res)
                     i <- j
 
                 for i = 0 to simpleEdges.[vertex].Count - 1 do
                     let v, a = simpleEdges.[vertex].[i]
-                    vEdges.[count] <- {Ast = a; Dest = v}
+                    vEdges.[count] <- new Edge(v, a)
                     count <- count + 1
 
                 stateToVertex.[vertex].OutEdges <- vEdges
@@ -299,7 +296,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             //printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
             //                        if parserSource.AccStates.[i] then yield i]
             let addTreeTop res =
-                let children = [| {prod = parserSource.StartRule; nodes =  [|res|]} |]
+                let children = [| new Family(parserSource.StartRule,  [|res|]) |]
                 NonTerm children
             for i = 0 to !curLevelCount-1 do
                 //printf "%d " usedStates.[i]

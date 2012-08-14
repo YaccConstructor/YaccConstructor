@@ -20,10 +20,12 @@
 module Yard.Generators.RNGLR.AST
 open System
 
-type Family = {
-    prod : int
-    nodes : int[]
-}
+[<Struct>]
+type Family =
+    val prod : int
+    val nodes : int[]
+    new (p,n) = {prod = p; nodes = n}
+
 
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
 /// int - number of token, if there is an epsilon-tree derivation, -1 otherwise.
@@ -172,7 +174,7 @@ type Tree<'TokenType> (nodes : array<AST>, tokens : array<'TokenType>, root : in
                 | Term _ -> ()
                 | NonTerm children ->
                     if children.Length > 1 then
-                        res.Add (ranges.[x], Array.map (fun family -> family.prod) children)
+                        res.Add (ranges.[x], children |> Array.map (fun family -> family.prod))
         res
 
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)

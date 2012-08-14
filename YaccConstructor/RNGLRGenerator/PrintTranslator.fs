@@ -106,7 +106,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let printChild family = "{prod = " + toStr family.prod + "; nodes = " + printArr family.nodes toStr + "}"
+        let printChild (family : Family) = "new Family(" + toStr family.prod + ", " + printArr family.nodes toStr + ")"
         let printAst =
             function
             | Term _ -> failwith "Term was not expected in epsilon tree"

@@ -90,17 +90,17 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
     let pos = Array.zeroCreate indexator.nonTermCount
     for u = 0 to indexator.nonTermCount-1 do
-        if (canInferEpsilon.[u]) then
+        if canInferEpsilon.[u] then
             let order = new ResizeArray<_>()
             let res = new ResizeArray<_>()
             for j = 0 to indexator.nonTermCount-1 do
                 pos.[j] <- -1
             pos.[u] <- 0
             order.Add u
+            res.Add (NonTerm <| new Children (new UsualOne<_>()))
             let mutable i = 0
             while i < order.Count do
                 let v = order.[i]
-                i <- i + 1
                 let children = new ResizeArray<_>()
                 for rule in rules.rulesWithLeftSide v do
                     if allEpsilon.[rule] then
@@ -111,12 +111,14 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                     if pos.[w] = -1 then
                                         pos.[w] <- order.Count
                                         order.Add w
-                                    pos.[w])
+                                        res.Add (NonTerm <| new Children (new UsualOne<_>()))
+                                    res.[pos.[w]])
                         children.Add <| new Family(rule, nodes)
                 let first = children.[0]
                 children.RemoveAt 0
-                res.Add (NonTerm <| new UsualOne<_>(first, children.ToArray()))
-            result.[u] <- new Tree<_>(res.ToArray(), null, 0)
+                (getFamily res.[i]).families <- new UsualOne<_>(first, if children.Count > 0 then children.ToArray() else null)
+                i <- i + 1
+            result.[u] <- new Tree<_>(null, res.[0])
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

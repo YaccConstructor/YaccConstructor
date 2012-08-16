@@ -101,24 +101,21 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let aboveStringListL = List.map wordL >> aboveListL
 
-    (*let declareNonTermsArrays = 
-        wordL ("let " + ruleName + " = Array.zeroCreate " + rules.rulesCount.ToString())
-        @@ wordL ("let " + concatsName + " = Array.zeroCreate " + args.Length.ToString())*)
-
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let printChild (family : Family) = "new Family(" + toStr family.prod + ", " + printArr family.nodes toStr + ")"
-        let printAst =
+        let rec printAst =
             function
-            | Term _ -> failwith "Term was not expected in epsilon tree"
+            | SingleNode _ -> failwith "SingleNode was not expected in epsilon tree"
             | NonTerm arr ->
-                "NonTerm (new UsualOne<_>(" + printChild arr.first + ", " + printArr arr.other printChild + "))"
+                "NonTerm (new Children(new UsualOne<_>(" + printChild arr.families.first
+                        + ", " + printArr arr.families.other printChild + ")))"
+        and printChild (family : Family) = "new Family(" + toStr family.prod + ", " + printArr family.nodes printAst + ")"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function
                  | null -> "null"
-                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",null,0)")
+                 | tree -> "new Tree<_>(null," + printAst tree.Root + ")")
         |> wordL
 
     // Realise rules

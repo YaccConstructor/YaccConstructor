@@ -31,11 +31,11 @@ let acceptEmptyInput = true
 let defaultAstToDot = 
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 2; 3; 4; 5; 6|]
+let private lists_gotos = [|1; 2; 3; 4; 5; 7; 8; 6; 9; 10; 11|]
 let private small_gotos =
-        [|3; 0; 196609; 262146; 196609; 65539; 262147; 4; 196609; 262146; 327683; 5; 196609; 262146|]
-let gotos = Array.zeroCreate 7
-for i = 0 to 6 do
+        [|3; 0; 196609; 262146; 196609; 65539; 262147; 4; 196613; 262150; 327683; 7; 196609; 262146; 524289; 65544; 589827; 9; 196613; 262150; 655363; 10; 196613; 262150|]
+let gotos = Array.zeroCreate 12
+for i = 0 to 11 do
         gotos.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_gotos.Length do
@@ -49,9 +49,9 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|1,1|]; [|2,1|]; [|2,2|]; [|2,3|]; [|2,4|]|]
 let private small_reduces =
-        [|131075; 196608; 262144; 327680; 196611; 196609; 262145; 327681; 262147; 196610; 262146; 327682; 327683; 196611; 262147; 327683; 393219; 196612; 262148; 327684|]
-let reduces = Array.zeroCreate 7
-for i = 0 to 6 do
+        [|131073; 327680; 196609; 327681; 262145; 327682; 327681; 327683; 393217; 327684; 458755; 196608; 262144; 327680; 524291; 196609; 262145; 327681; 589827; 196610; 262146; 327682; 655363; 196611; 262147; 327683; 720899; 196612; 262148; 327684|]
+let reduces = Array.zeroCreate 12
+for i = 0 to 11 do
         reduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_reduces.Length do
@@ -65,9 +65,9 @@ while cur < small_reduces.Length do
     cur <- cur + length
 let private lists_zeroReduces = [|[|3; 0|]; [|4|]; [|0|]|]
 let private small_zeroReduces =
-        [|1; 327680; 196611; 196609; 262145; 327681; 262147; 196610; 262146; 327682; 327683; 196610; 262146; 327682|]
-let zeroReduces = Array.zeroCreate 7
-for i = 0 to 6 do
+        [|1; 327680; 196611; 196609; 262145; 327681; 262147; 196610; 262146; 327682; 327681; 327682; 524291; 196609; 262145; 327681; 589827; 196610; 262146; 327682; 655363; 196610; 262146; 327682|]
+let zeroReduces = Array.zeroCreate 12
+for i = 0 to 11 do
         zeroReduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_zeroReduces.Length do
@@ -80,8 +80,8 @@ while cur < small_zeroReduces.Length do
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
 let private small_acc = [1]
-let private accStates = Array.zeroCreate 7
-for i = 0 to 6 do
+let private accStates = Array.zeroCreate 12
+for i = 0 to 11 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 5
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)

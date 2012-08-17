@@ -104,12 +104,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let rec printAst =
+        let rec printAst : (obj -> _) =
             function
-            | SingleNode _ -> failwith "SingleNode was not expected in epsilon tree"
-            | NonTerm arr ->
-                "NonTerm (new Children(new UsualOne<_>(" + printChild arr.families.first
-                        + ", " + printArr arr.families.other printChild + ")))"
+            | :? AST as arr ->
+                "box (new AST(" + printChild arr.first
+                        + ", " + printArr arr.other printChild + "))"
+            | _ -> failwith "SingleNode was not expected in epsilon tree"
         and printChild (family : Family) = "new Family(" + toStr family.prod + ", " + printArr family.nodes printAst + ")"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees

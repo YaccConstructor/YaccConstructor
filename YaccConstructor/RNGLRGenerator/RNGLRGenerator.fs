@@ -40,6 +40,7 @@ type RNGLR() =
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
             let mutable moduleName = ""
             let mutable tokenType = ""
+            let mutable table = LALR
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
             let mutable needTranslate = true
             for opt, value in pairs do
@@ -47,10 +48,15 @@ type RNGLR() =
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
                 | "-pos" -> positionType <- value
+                | "-table" ->
+                    match value with
+                    | "LALR" -> table <- LALR
+                    | "LR" -> table <- LR
+                    | x -> failwith "Unexpected table type %s" x
                 | "-translate" ->
                     if value = "true" then needTranslate <- true
                     elif value = "false" then needTranslate <- false
-                    else failwith "Unexpected translate value"
+                    else failwith "Unexpected translate value %s" value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
@@ -61,7 +67,7 @@ type RNGLR() =
                 |> List.iter (eprintf "%s ")
                 box ()
             else
-                let statesInterpreter = buildStates grammar
+                let statesInterpreter = buildStates table grammar
                 let tables = new Tables(grammar, statesInterpreter)
                 use out = new System.IO.StreamWriter (definition.info.fileName + ".fs")
                 fprintf out "module %s\n"

@@ -30,17 +30,15 @@ type ParseResult<'TokenType> =
     | Error of int * 'TokenType * string
 
 [<AllowNullLiteral>]
-type private Vertex (state : int, level : int) =
-    let mutable out : UsualOne<Edge> = Unchecked.defaultof<_>
-    member this.Level = level
-    member this.OutEdges
-        with get() = out
-        and set v = out <- v
-    member this.State = state
+type private Vertex  =
+    val mutable OutEdges : UsualOne<Edge>
+    val Level : int
+    val State : int
+    new (state, level) = {OutEdges = Unchecked.defaultof<_>; State = state; Level = level}
 
 and private Edge =
     struct 
-        val Ast : AST
+        val Ast : obj
         val Dest : Vertex
         new (d,a) = {Dest = d; Ast = a}
     end
@@ -49,15 +47,13 @@ and private Edge =
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
 let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.State = v.State
 
-let private addSimpleEdge (v : Vertex) (ast : AST) (out : ResizeArray<Vertex * AST>) =
+let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
-    out.Add Unchecked.defaultof<_>
     while i >= 0 && (less (fst out.[i]) v) do
-        out.[i+1] <- out.[i]
         i <- i - 1
-    out.[i+1] <- (v, ast)
+    out.Insert(i+1, (v, ast))
 
-let private findSimpleIndex (v : Vertex) (f : AST) (out : ResizeArray<Vertex * AST>) =
+let private findSimpleIndex (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
@@ -66,20 +62,24 @@ let private findSimpleIndex (v : Vertex) (f : AST) (out : ResizeArray<Vertex * A
     if i >= 0 && (let v',f' = out.[i] in eq v' v && f = f') then i
     else -1
 
-let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) addAst =
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) last =
     let mutable i = out.Count - 1
     let inline fst (x,_,_) = x
-    out.Add Unchecked.defaultof<_>
     while i >= 0 && less (fst out.[i]) v do
-        out.[i+1] <- out.[i]
         i <- i - 1
     let num = 
         if i >= 0 && eq (fst out.[i]) v then
+            last := Unchecked.defaultof<_>
             let _,_,n = out.[i] in n
         else
-            addAst <| NonTerm (new Children(Unchecked.defaultof<_>))
-    out.[i+1] <- (v, family, num)
+            let ast = new AST (Unchecked.defaultof<_>, null)
+            last := box ast
+            ast
+    out.Insert(i+1, (v, family, num))
     num
+
+let uses = ref [||]
+let mem = ref 0L
 
 let private findIndex (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
     let inline fst (x,_,_) = x
@@ -97,7 +97,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let nonTermsCountLimit = 1 + max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
     let getEpsilon =
-        let epsilons = Array.init nonTermsCountLimit (fun i -> SingleNode (-i-1))
+        let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput then
@@ -105,6 +105,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
+        uses := Array.zeroCreate parserSource.RulesStart.Length
         let curToken = ref enum.Current
         //printfn "%A" !curToken
         let curNum = ref (parserSource.TokenToNumber enum.Current)
@@ -118,7 +119,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let reductions = new Queue<_>(10)
         let statesCount = parserSource.Gotos.Length
         let edges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * Family * AST>())
-        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * AST>())
+        let simpleEdges = Array.init statesCount (fun _ -> new ResizeArray<Vertex * obj>())
 
         let pushes = Array.zeroCreate (statesCount * 2 + 10)
         let pBeg, pEnd = ref 0, ref 0
@@ -129,7 +130,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let curLevelCount = ref 0
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
 
-        let inline addVertex state num (edgeOpt : option<_>) =
+        let inline addVertex state num (edgeOpt : option<Vertex * obj>) =
             //printfn "v: %d %d" num state
             let dict = stateToVertex
             if dict.[state] = null then
@@ -156,21 +157,21 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             v
 
         ignore <| addVertex startState 0 None
-        let trd (_,_,x) = x
+        let inline trd (_,_,x) = x
         let makeReductions num =
             while reductions.Count > 0 do
                 let vertex, prod, pos, edgeOpt = reductions.Dequeue()
                 //printfn "r: %A %A: %A %A" vertex.Level vertex.State prod pos
                 let nonTerm = parserSource.LeftSide.[prod]
 
-                let handlePath (path : AST[]) (final : Vertex) =
-                    //uses.[prod] <- uses.[prod] + 1
+                let handlePath (path : obj[]) (final : Vertex) =
                     let state = parserSource.Gotos.[final.State].[nonTerm]
                     //printfn "f: %d %d" final.Level final.State
                     let newVertex = addVertex state num None
                     let family = new Family(prod, Array.copy path)
                     if findIndex final family edges.[state] = -1 then
-                        let edge = addEdge final family edges.[state] addAst
+                        uses.Value.[prod] <- uses.Value.[prod] + 1
+                        let edge = box <| addEdge final family edges.[state] last
                         if (pos > 0 && edge = !last) then
                             let arr = parserSource.Reduces.[state].[!curNum]
                             if arr <> null then
@@ -200,7 +201,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             while i < edges.Count do
                                 let (v,_,a) = edges.[i]
                                 let mutable j = i+1
-                                path.[remainLength - 1] <- a
+                                path.[remainLength - 1] <- box a
                                 walk (remainLength - 1) v path
                                 while j < edges.Count && trd edges.[j] = a do
                                     j <- j + 1
@@ -257,11 +258,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         else
                             null
                     if count >= 0 then
-                        vEdges.[count] <- new Edge(v, a)
+                        vEdges.[count] <- new Edge(v, box a)
                     else
-                        first <- new Edge(v, a)
+                        first <- new Edge(v, box a)
                     count <- count + 1
-                    (getFamily a).families <-new UsualOne<_>(snd edges.[i], other)
+                    a.first <- snd edges.[i]
+                    a.other <- other
                     i <- j
 
                 for i = 0 to simpleEdges.[vertex].Count - 1 do
@@ -279,7 +281,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let shift num =
             if !curNum = parserSource.EofIndex then isEnd := true
             else
-                let newAstNode = SingleNode tokens.Count
+                let newAstNode = box tokens.Count
                 tokens.Add enum.Current
                 if enum.MoveNext() then
                     curToken := enum.Current
@@ -293,6 +295,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let curAst = addAst newAstNode
                 while curBeg <> !pEnd do
                     let vertex, state = pushes.[!pEnd]
+                    pushes.[!pEnd] <- Unchecked.defaultof<_>
                     //printfn "p: %d %d -> %d" vertex.Level vertex.State state
                     //printf "p %A\n" (vertex.label, state)
                     let newVertex = addVertex state num (Some (vertex,curAst))
@@ -316,7 +319,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             //                        if parserSource.AccStates.[i] then yield i]
             let addTreeTop res =
                 let children = new Family(parserSource.StartRule,  [|res|])
-                NonTerm <| new Children(new UsualOne<_>(children, null))
+                new AST(children, null)
             for i = 0 to !curLevelCount-1 do
                 //printf "%d " usedStates.[i]
                 if parserSource.AccStates.[usedStates.[i]] then
@@ -324,6 +327,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         stateToVertex.[usedStates.[i]].OutEdges.first.Ast
                         |> addTreeTop
                         |> Some
+            mem := (System.GC.GetTotalMemory(true)) >>> 20
             match !root with
             | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> Success <| new Tree<_>(tokens.ToArray(), res)

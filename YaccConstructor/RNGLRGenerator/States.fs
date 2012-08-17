@@ -23,6 +23,8 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR
 
+type OutTable = LR | LALR
+
 type Kernel = int
 //type Item = Kernel * Set<int>
 
@@ -58,7 +60,7 @@ type StatesInterpreter (stateToVertex : Vertex<int,int>[], stateToKernels : Kern
     member this.kernels i = stateToKernels.[i]
     member this.lookaheads i = stateToLookahead.[i]
     
-let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
+let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator) =
     let nextIndex, vertexCount =
         let num = ref -1
         (fun () -> incr num; !num)
@@ -115,7 +117,7 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
         |> (fun ks -> ks , ks |> Array.map (fun x -> kernelToLookAhead.[x]))
 
     let incount = ref 0
-    let rec dfs initKernelsAndLookAheads =
+    let rec dfsLALR initKernelsAndLookAheads =
         incr incount
         //if !incount % 100 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
@@ -156,14 +158,52 @@ let buildStates (grammar : FinalGrammar) = //(kernelIndexator : KernelIndexator)
                             if curSymbol kernels.[j] = i then
                                 destStates.[curi] <- KernelInterpreter.incPos kernels.[j], newLookAheads.[j]
                                 curi <- curi + 1
-                        let newVertex : Vertex<_,_> = dfs destStates
+                        let newVertex : Vertex<_,_> = dfsLALR destStates
                         if not <| wasEdge.[vertex.label].Contains newVertex.label then
                             wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
                             vertex.addEdge <| new Edge<_,_>(newVertex, i)
         vertex
+
+    let rec dfsLR initKernelsAndLookAheads =
+        incr incount
+        if !incount % 5000 = 0 then eprintf "%d " !incount
+        let kernels,lookaheads = initKernelsAndLookAheads |> closure
+        let setToStr = Set.map (sprintf "%d") >> String.concat ","
+        let key = String.concat "|" (Array.map2 (fun x y -> sprintf "%d(%s)" x (setToStr y)) kernels lookaheads)
+        printfn "%s" key
+        if kernelsToVertex.ContainsKey key then
+            kernelsToVertex.[key]
+        else
+            let vertex = new Vertex<int,int>(nextIndex())
+            //wasEdge.Add Set.empty
+            vertices.Add vertex
+            kernelsToVertex.[key] <- vertex
+            stateToKernels.Add kernels
+            stateToLookahead.Add lookaheads
+            for i = 0 to grammar.indexator.fullCount - 1 do
+                if i <> grammar.indexator.eofIndex then
+                    let mutable count = 0
+                    for j = 0 to kernels.Length-1 do
+                        if curSymbol kernels.[j] = i && not lookaheads.[j].IsEmpty then
+                            count <- count + 1
+                    if count > 0 then
+                        let destStates = Array.zeroCreate count
+                        let mutable curi = 0
+                        for j = 0 to kernels.Length-1 do
+                            if curSymbol kernels.[j] = i && not lookaheads.[j].IsEmpty then
+                                destStates.[curi] <- KernelInterpreter.incPos kernels.[j], lookaheads.[j]
+                                curi <- curi + 1
+                        let newVertex : Vertex<_,_> = dfsLR destStates
+                        //wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
+                        vertex.addEdge <| new Edge<_,_>(newVertex, i)
+            vertex
     let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
-    [| initKernel, initLookAhead|] |> dfs |> ignore
+    [| initKernel, initLookAhead|]
+    |> match outTable with
+        | LALR -> dfsLALR
+        | LR -> dfsLR
+    |> ignore
     eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()

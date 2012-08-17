@@ -97,7 +97,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                 pos.[j] <- -1
             pos.[u] <- 0
             order.Add u
-            res.Add (NonTerm <| new Children (new UsualOne<_>()))
+            res.Add (new AST (Unchecked.defaultof<_>, null))
             let mutable i = 0
             while i < order.Count do
                 let v = order.[i]
@@ -111,12 +111,13 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                     if pos.[w] = -1 then
                                         pos.[w] <- order.Count
                                         order.Add w
-                                        res.Add (NonTerm <| new Children (new UsualOne<_>()))
-                                    res.[pos.[w]])
+                                        res.Add (new AST (Unchecked.defaultof<_>, null))
+                                    box res.[pos.[w]])
                         children.Add <| new Family(rule, nodes)
                 let first = children.[0]
                 children.RemoveAt 0
-                (getFamily res.[i]).families <- new UsualOne<_>(first, if children.Count > 0 then children.ToArray() else null)
+                res.[i].first <- first
+                res.[i].other <- if children.Count > 0 then children.ToArray() else null
                 i <- i + 1
             result.[u] <- new Tree<_>(null, res.[0])
     result

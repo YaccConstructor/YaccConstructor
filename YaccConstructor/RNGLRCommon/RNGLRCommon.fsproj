@@ -43,6 +43,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ParserSource.fs" />
   </ItemGroup>

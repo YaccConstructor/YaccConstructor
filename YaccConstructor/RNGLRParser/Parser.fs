@@ -81,27 +81,51 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
 let uses = ref [||]
 let mem = ref 0L
 
+
+
+let inline private eqF (f : Family) (f' : Family) =
+    if f.prod <> f'.prod then false
+    else
+        let lim = min f.nodes.Length f'.nodes.Length
+        let mutable res = true
+        let mutable i = 0
+        while i < lim && res do
+            if f.nodes.[i] <> f'.nodes.[i] then
+                res <- false
+            i <- i + 1
+        while res && i < f.nodes.Length do
+            match f.nodes.[i] with
+            | :? int as i when i < 0 -> ()
+            | _ -> res <- false
+            i <- i+1
+        while res && i < f'.nodes.Length do
+            match f'.nodes.[i] with
+            | :? int as i when i < 0 -> ()
+            | _ -> res <- false
+            i <- i+1
+        res
+
 let private findIndex (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
     let inline fst (x,_,_) = x
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
-    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && f <> f') do
+    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && not <| eqF f  f') do
         i <- i - 1
-    if i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f') then i
+    if i >= 0 && (let v',f',_ = out.[i] in eq v' v && eqF f f') then i
     else -1
 
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     let startState = 0
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
-    let nonTermsCountLimit = 1 + max (Array.max parserSource.Rules) (Array.max parserSource.LeftSide)
+    let nonTermsCountLimit = 1 + (Array.max parserSource.LeftSide)
     let getEpsilon =
         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput then
-            new Tree<_>(null, getEpsilon startNonTerm) |> Success
+            new Tree<_>(null, getEpsilon startNonTerm, null) |> Success
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
@@ -168,7 +192,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let state = parserSource.Gotos.[final.State].[nonTerm]
                     //printfn "f: %d %d" final.Level final.State
                     let newVertex = addVertex state num None
-                    let family = new Family(prod, Array.copy path)
+                    let family = new Family(prod, new Nodes(Array.copy path))
                     if findIndex final family edges.[state] = -1 then
                         uses.Value.[prod] <- uses.Value.[prod] + 1
                         let edge = box <| addEdge final family edges.[state] last
@@ -214,9 +238,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     if findSimpleIndex vertex ast simpleEdges.[state] = -1 then
                         addSimpleEdge vertex ast simpleEdges.[state]
                 else 
-                    let path = Array.zeroCreate parserSource.Length.[prod]
-                    for i = path.Length - 1 downto pos do
-                        path.[i] <- getEpsilon parserSource.Rules.[parserSource.RulesStart.[prod] + i]
+                    let path = Array.zeroCreate pos
                     path.[pos - 1] <- snd edgeOpt.Value
                     walk (pos - 1) (fst edgeOpt.Value) path
 
@@ -318,7 +340,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             //printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
             //                        if parserSource.AccStates.[i] then yield i]
             let addTreeTop res =
-                let children = new Family(parserSource.StartRule,  [|res|])
+                let children = new Family(parserSource.StartRule,  new Nodes(res, null, null))
                 new AST(children, null)
             for i = 0 to !curLevelCount-1 do
                 //printf "%d " usedStates.[i]
@@ -330,4 +352,4 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             mem := (System.GC.GetTotalMemory(true)) >>> 20
             match !root with
             | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state")
-            | Some res -> Success <| new Tree<_>(tokens.ToArray(), res)
+            | Some res -> Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)

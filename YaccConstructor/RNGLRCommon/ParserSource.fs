@@ -36,11 +36,16 @@ type ParserSource<'TokenType> (gotos : int[][]
         for i=0 to res.Length-1 do
             res.[i] <- rulesStart.[i+1] - rulesStart.[i]
         res
+    let _rules = Array.zeroCreate length.Length
+    do for i = 0 to length.Length-1 do
+        _rules.[i] <- Array.zeroCreate length.[i]
+        for j = 0 to length.[i]-1 do
+            _rules.[i].[j] <- rules.[rulesStart.[i] + j]
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
     member this.AccStates = accStates
-    member this.Rules = rules
+    member this.Rules = _rules
     member this.RulesStart = rulesStart
     member this.Length = length
     member this.LeftSide = leftSide

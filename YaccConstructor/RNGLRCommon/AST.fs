@@ -19,6 +19,7 @@
 
 module Yard.Generators.RNGLR.AST
 open System
+open Yard.Generators.RNGLR.DataStructures
 
 
 [<Struct>]
@@ -39,8 +40,77 @@ type AST =
 and Family =
     struct
         val prod : int
-        val nodes : obj[]
+        val nodes : Nodes
         new (p,n) = {prod = p; nodes = n}
+    end
+
+and Nodes =
+    struct
+        val mutable fst : obj
+        val mutable snd : obj
+        val mutable other : obj[]
+        new (f,s,o) = {fst = f; snd = s; other = o}
+
+        new (arr : array<_>) =
+            let mutable res = new Nodes()
+            if arr <> null then
+                if arr.Length > 0 then
+                    res.fst <- arr.[0]
+                    if arr.Length > 1 then
+                        res.snd <- arr.[1]
+                        if arr.Length > 2 then
+                            res.other <- arr.[2..]
+            {fst = res.fst; snd = res.snd; other = res.other}
+            //match arr with
+
+
+        member inline nodes.doForAll f =
+            if nodes.fst <> null then
+                f nodes.fst
+                if nodes.snd <> null then
+                    f nodes.snd
+                    if nodes.other <> null then
+                        for x in nodes.other do
+                            f x
+
+        member inline nodes.isForAll f =
+            if nodes.fst <> null then
+                if not <| f nodes.fst then false
+                elif nodes.snd <> null then
+                        if not <| f nodes.snd then false
+                        elif nodes.other <> null then
+                            nodes.other |> Array.forall f
+                        else true
+                else true
+            else true
+
+        member inline nodes.Length = 
+            if nodes.fst <> null then
+                if nodes.snd <> null then
+                    if nodes.other <> null then
+                        2 + nodes.other.Length
+                    else 2
+                else 1
+            else 0
+
+        member inline nodes.Item
+            with get i =
+                match i with
+                | 0 -> nodes.fst
+                | 1 -> nodes.snd
+                | i -> nodes.other.[i-2]
+
+        member inline nodes.map f =
+            let length = nodes.Length
+            let res = Array.zeroCreate length
+            if nodes.fst <> null then
+                res.[0] <- f nodes.fst
+                if nodes.snd <> null then
+                    res.[1] <- f nodes.snd
+                    if nodes.other <> null then
+                        for i = 0 to nodes.other.Length-1 do
+                            res.[i+2] <- f nodes.other.[i]
+            res
     end
 
 let inline getFamily (node : obj) =
@@ -57,7 +127,7 @@ let inline private getPos (x : obj) = match x with :? AST as n -> n.pos | _ -> f
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
 
 [<AllowNullLiteral>]
-type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
+type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
     let rootFamily, isEpsilon =
         match root with
         | :? AST as ast -> ast, false
@@ -68,25 +138,25 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
         match root with
         | :? AST as ast -> stack.Push ast
         | _ -> ()
-        let res = new ResizeArray<_>(if not <| Object.ReferenceEquals(tokens, null) then tokens.Length else 0)
+        let res = new BlockResizeArray<_>()
         if not isEpsilon then
             while stack.Count > 0 do
                 let u = stack.Pop()
                 let children = u
                 if children.pos = -2 then
                     children.pos <- res.Count 
-                    res.Add <| u
+                    res.Add u
                 elif children.pos = -1 then
                     children.pos <- -2
                     stack.Push u
                     let inline handle (family : Family) = 
-                        let family = family.nodes
-                        for j = 0 to family.Length - 1 do
-                            match family.[j] with
+                        let inline handleAst (ast : obj) =
+                            match ast with
                             | :? AST as ast ->
                                 if ast.pos = -1 then
                                     stack.Push ast
                             | _ -> ()
+                        family.nodes.doForAll handleAst
                     handle children.first
                     if children.other <> null then
                         for family in children.other do
@@ -126,7 +196,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
         if not isEpsilon then
             for children in order do
                 if children.pos <> -1 then
-                    if children.first.nodes |> Array.forall (smaller children.pos) then
+                    if children.first.nodes.isForAll (smaller children.pos) then
                         if children.other <> null then
                             children.other <- null
                     else
@@ -136,7 +206,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                             match
                                 children.other |> Array.tryFind
                                     (fun family ->
-                                        family.nodes |> Array.forall (smaller children.pos))
+                                        family.nodes.isForAll (smaller children.pos))
                                 with
                             | Some v ->
                                 children.first <- v
@@ -150,8 +220,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                 let x = order.[i]
                 if x.pos <> -1 then
                     x.pos <- i
-                    for j in x.first.nodes do
-                        match j with
+                    x.first.nodes.doForAll <| function
                         | :? AST as ch -> ch.pos <- -2
                         | _ -> ()
 
@@ -169,6 +238,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                 let family = x.first.nodes
                 let mutable j, k = 0, family.Length-1
                 let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
+                (*let left = 
+                    if isEpsilon family.fst then
+                        if isEpsilon family.snd then
+                            family.[2]
+                        else family.snd
+                    else family.fst*)
                 while isEpsilon family.[j] do
                     j <- j + 1
                 while isEpsilon family.[k] do
@@ -195,14 +270,14 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
             if x.pos <> -1 then
                 result.[i] <- 
                     let firstRes = funs.[children.first.prod]
-                                        (children.first.nodes |> Array.map (fun j -> result.[getPos j])) range
+                                        (children.first.nodes.map (fun j -> result.[getPos j])) range
                     if children.other = null then
                         firstRes
                     else
                         children.other
                         |> Array.map (
                             fun family ->
-                                funs.[family.prod] (family.nodes |> Array.map (fun j -> result.[getPos j])) range
+                                funs.[family.prod] (family.nodes.map (fun j -> result.[getPos j])) range
                             )
                         |> Array.toList
                         |> (fun x -> firstRes::x)
@@ -231,18 +306,22 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                 if x.pos <> -1 then
                     let children = x
                     result.[i] <-
-                        let firstRes = 
+                        let inline translateFamily (fam : Family) =
                             let prevRange = fst ranges.[i] |> ref
-                            funs.[children.first.prod] (children.first.nodes |> Array.map (getRes prevRange)) ranges.[i]
+                            let res = Array.zeroCreate rules.[fam.prod].Length
+                            let k = ref 0
+                            fam.nodes.doForAll <| fun x ->
+                                res.[!k] <- getRes prevRange x
+                                incr k
+                            for i = !k to rules.[fam.prod].Length-1 do
+                                res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                            funs.[fam.prod] res ranges.[i]
+                        let firstRes = translateFamily children.first
                         if children.other = null then
                             firstRes
                         else
                             children.other
-                            |> Array.map (
-                                fun family ->
-                                    let prevRange = fst ranges.[i] |> ref
-                                    funs.[family.prod] (family.nodes |> Array.map (getRes prevRange)) ranges.[i]
-                                )
+                            |> Array.map translateFamily
                             |> Array.toList
                             |> (fun x -> firstRes::x)
                             |> concat.[leftSides.[children.first.prod]]
@@ -264,8 +343,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                     if separate then
                         printInd ind "----"
                     printInd ind "prod %d" family.prod
-                    family.nodes
-                    |> Array.iter (printAst <| ind+1)
+                    family.nodes.doForAll (printAst <| ind+1)
                 children.first |> handle false
                 if needGroup then
                     children.other |> Array.iter (handle true)
@@ -323,7 +401,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj) =
                         let u = next()
                         createNode u false ("prod " + family.prod.ToString())
                         createEdge i u true ""
-                        for child in family.nodes do
+                        family.nodes.doForAll <| fun child ->
                             let v = 
                                 match child with
                                 | :? AST as v -> v.pos

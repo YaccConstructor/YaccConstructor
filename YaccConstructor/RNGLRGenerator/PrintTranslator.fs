@@ -110,12 +110,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 "box (new AST(" + printChild arr.first
                         + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
-        and printChild (family : Family) = "new Family(" + toStr family.prod + ", " + printArr family.nodes printAst + ")"
+        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes(" + printArr (family.nodes.map id) printAst + "))"
         "let " + epsilonName + " : Tree<Token>[] = " +
             printArr grammar.epsilonTrees
                 (function
                  | null -> "null"
-                 | tree -> "new Tree<_>(null," + printAst tree.Root + ")")
+                 | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
         |> wordL
 
     // Realise rules

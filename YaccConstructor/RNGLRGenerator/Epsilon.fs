@@ -113,13 +113,13 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         order.Add w
                                         res.Add (new AST (Unchecked.defaultof<_>, null))
                                     box res.[pos.[w]])
-                        children.Add <| new Family(rule, nodes)
+                        children.Add <| new Family(rule, new Nodes(nodes))
                 let first = children.[0]
                 children.RemoveAt 0
                 res.[i].first <- first
                 res.[i].other <- if children.Count > 0 then children.ToArray() else null
                 i <- i + 1
-            result.[u] <- new Tree<_>(null, res.[0])
+            result.[u] <- new Tree<_>(null, res.[0], null)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

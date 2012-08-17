@@ -40,8 +40,8 @@ type BlockResizeArray<'T> () =
     member this.ToArray() =
         let res = Array.zeroCreate count
         for i = 0 to (count >>> shift) - 1 do
-            Array.Copy(arrays.[i], 0, res, i <<< shift, blockSize)
+            Array.blit arrays.[i] 0 res (i <<< shift) blockSize
         if (count &&& smallPart) <> 0 then
             let i = count >>> shift
-            Array.Copy(arrays.[i], 0, res, i <<< shift, count &&& smallPart)
+            Array.blit arrays.[i] 0 res (i <<< shift) (count &&& smallPart)
         res

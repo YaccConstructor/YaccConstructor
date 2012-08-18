@@ -28,14 +28,14 @@ type BlockResizeArray<'T> () =
         count <- count + 1
 
     member this.Item i =
-        if i >= count then raise <| System.ArgumentOutOfRangeException()
-        else arrays.[i >>> shift].[i &&& smallPart]
+        arrays.[i >>> shift].[i &&& smallPart]
 
     member this.Set i value =
-        if i >= count then raise <| System.ArgumentOutOfRangeException()
-        else arrays.[i >>> shift].[i &&& smallPart] <- value
+        arrays.[i >>> shift].[i &&& smallPart] <- value
 
+    member this.DeleteBlock i = arrays.[i] <- null
     member this.Count = count
+    member this.Shift = shift
 
     member this.ToArray() =
         let res = Array.zeroCreate count

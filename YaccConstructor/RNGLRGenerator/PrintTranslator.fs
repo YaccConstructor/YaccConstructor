@@ -214,10 +214,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate tokenToRangeFunction zeroPosition (tree : Tree<_>) : " + typeName + " = ")
+        let funHead = wordL ("let translate tokenToRangeFunction zeroPosition clearAST (tree : Tree<_>) : " + typeName + " = ")
         let body =
             [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
-                            + " " + epsilonName + " tokenToRangeFunction zeroPosition) : " + typeName)
+                            + " " + epsilonName + " tokenToRangeFunction zeroPosition clearAST) : " + typeName)
             ] |> aboveListL
         funHead @@-- body
 

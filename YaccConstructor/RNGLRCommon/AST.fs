@@ -31,6 +31,7 @@ type UsualOne<'T> =
 /// Non-terminal expansion: production, family of children
 /// All nodes are stored in array, so there is a correspondence between integer and node.
 /// Family of children - For one nonTerminal there can be a lot of dirivation trees.
+[<AllowNullLiteral>]
 type AST =
     val mutable first : Family
     val mutable other : Family[]
@@ -224,9 +225,24 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         | :? AST as ch -> ch.pos <- -2
                         | _ -> ()
 
-    member this.SetRanges tokenToRange =
-        let ranges : ('Position * 'Position)[] = Array.zeroCreate order.Length
-        // Set Positions
+    member this.TraverseWithRanges tokenToRange dispose f =
+        let ranges = new BlockResizeArray<'Position * 'Position>()
+        let count = Array.zeroCreate <| (order.Length >>> ranges.Shift) + 1
+        for i = 0 to order.Length-1 do
+            let x = order.[i]
+            if x.pos <> -1 then
+                let inline incr (x : obj) =
+                    match x with
+                    | :? AST as ast ->
+                        let num = ast.pos >>> ranges.Shift
+                        count.[num] <- count.[num] + 1
+                    | _ -> ()
+                x.first.nodes.doForAll incr
+                if x.other <> null then
+                    for e in x.other do
+                        e.nodes.doForAll incr
+        count.[rootFamily.pos >>> ranges.Shift] <- count.[rootFamily.pos >>> ranges.Shift] + 1
+
         let inline getRanges x =
             match x : obj with
             | :? int as t -> tokenToRange tokens.[t]
@@ -248,18 +264,28 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     j <- j + 1
                 while isEpsilon family.[k] do
                     k <- k - 1
-                ranges.[i] <- fst (getRanges family.[j]), snd (getRanges family.[k])
-        ranges
+                ranges.Add (fst (getRanges family.[j]), snd (getRanges family.[k]))
+                f i ranges
+                let inline clear (x : obj) =
+                    match x with
+                    | :? AST as ast ->
+                        let num = ast.pos >>> ranges.Shift
+                        count.[num] <- count.[num] - 1
+                        if count.[num] = 0 then
+                            dispose num
+                            ranges.DeleteBlock num
+                    | _ -> ()
+                family.doForAll clear
+                if x.other <> null then
+                    for e in x.other do
+                        e.nodes.doForAll clear
 
     member this.collectWarnings tokenToRange =
-        let ranges = this.SetRanges tokenToRange
         let res = new ResizeArray<_>()
-        for i = 0 to order.Length - 1 do
-            let x = order.[i]
-            if x.pos <> -1 then
-                let children = x
-                if children.other <> null then
-                    res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
+        this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
+            let children = order.[i]
+            if children.other <> null then
+                res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
@@ -285,27 +311,32 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         result.[rootFamily.pos]
     
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
-                            (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) =
+                            (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) clearAST =
 
         if isEpsilon then epsilons.[-(getSingleNode root)-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
         else
-            let result = Array.zeroCreate order.Length
-            let ranges = this.SetRanges tokenToRange
-            let tokenRanges = tokens |> Array.map tokenToRange
-            let inline getRes prevRange : (obj -> _) = function
-                | :? int as i when i < 0 -> epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
-                | :? int as t ->
-                    prevRange := snd tokenRanges.[t]
-                    box tokens.[t]
-                | :? AST as ch ->
-                    prevRange := snd ranges.[ch.pos]
-                    result.[ch.pos]
-                | _ -> failwith ""
-            for i = 0 to order.Length - 1 do
+            let result = new BlockResizeArray<_>()
+            let inline dispose i =
+                result.DeleteBlock i
+                if clearAST then
+                    for k = i <<< result.Shift to ((i+1) <<< result.Shift) - 1 do
+                        order.[k].first <- Unchecked.defaultof<_>
+                        order.[k].other <- null
+                        order.[k] <- null
+            this.TraverseWithRanges tokenToRange dispose <| fun i ranges ->
+                let inline getRes prevRange : (obj -> _) = function
+                    | :? int as i when i < 0 -> epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                    | :? int as t ->
+                        prevRange := snd <| tokenToRange tokens.[t]
+                        box tokens.[t]
+                    | :? AST as ch ->
+                        prevRange := snd ranges.[ch.pos]
+                        result.[ch.pos]
+                    | _ -> failwith ""
                 let x = order.[i]
                 if x.pos <> -1 then
                     let children = x
-                    result.[i] <-
+                    result.Add <|
                         let inline translateFamily (fam : Family) =
                             let prevRange = fst ranges.[i] |> ref
                             let res = Array.zeroCreate rules.[fam.prod].Length
@@ -325,6 +356,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             |> Array.toList
                             |> (fun x -> firstRes::x)
                             |> concat.[leftSides.[children.first.prod]]
+            printfn "Memory: %d" ((GC.GetTotalMemory true) >>> 20)
             result.[rootFamily.pos]
             
     member this.PrintAst() =            

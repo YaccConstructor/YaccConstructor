@@ -230,5 +230,5 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
   |] 
-let translate tokenToRangeFunction zeroPosition (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
-  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons tokenToRangeFunction zeroPosition) : '_rnglr_type_yard_start_rule
+let translate tokenToRangeFunction zeroPosition clearAST (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons tokenToRangeFunction zeroPosition clearAST) : '_rnglr_type_yard_start_rule

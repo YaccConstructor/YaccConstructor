@@ -26,5 +26,5 @@ match run path parser with
     RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
     //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
     //printfn "%A" tree.Order
-    printfn "Result: %A" (RNGLR.ParseCalc.translate tokenToRange zeroPos tree)
+    printfn "Result: %A" (RNGLR.ParseCalc.translate tokenToRange zeroPos false tree)
 //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)

@@ -55,7 +55,7 @@ type CYKCore() =
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellContent:ResizeArray<CellData>) i =
         let curRuleNum,_,_,_ = getData cellContent.[cellContent.Count - 1 - i].rData
-        let curNT,_,_,_,_ = getRule rules.[(int)curRuleNum]
+        let curNT,_,_,_,_ = getRule rules.[int curRuleNum]
         curNT
 
     // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
@@ -100,7 +100,7 @@ type CYKCore() =
                 let count1 = left.Count
                 let count2 = right.Count
 
-                if (count1 > 0) && (count2 > 0)
+                if count1 > 0 && count2 > 0
                 then
                     for m in 0..(count1 - 1) do
                         for n in 0..(count2 - 1) do
@@ -111,7 +111,7 @@ type CYKCore() =
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                (recTable.[i,l]).Add (new CellData(currentElem,uint32 k))
+                                recTable.[i,l].Add (new CellData(currentElem,uint32 k))
 
         let elem i l = rules |> Array.Parallel.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
@@ -127,8 +127,8 @@ type CYKCore() =
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
-                for k in 0..(s.Length-1) do                    
-                    let a,b,c,rl,rw = getRule rule                    
+                for k in 0..(s.Length-1) do
+                    let a,b,c,rl,rw = getRule rule               
                     match c with
                     |0us -> if b = s.[k] then
                                 let lState =
@@ -136,7 +136,7 @@ type CYKCore() =
                                     | 0uy -> LblState.Undefined
                                     | _   -> LblState.Defined
                                 let currentElem = buildData ruleIndex lState rl rw
-                                (recTable.[k,0]).Add (new CellData(currentElem,0u))                                                                
+                                recTable.[k,0].Add (new CellData(currentElem,0u))                                                                
                     |_ -> ())
     
         fillTable 0 1
@@ -145,30 +145,8 @@ type CYKCore() =
 
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
-        (*
-        let rec derivation i l top = 
-            let nonterminals,bs,cs,rls,rws,lStates,cls,cws = getCellData recTable.[i,l]
-            let leftI,leftL,rightI,rightL = getCellCoordinates recTable.[i,l]
-            let suitable = ResizeArray.mapi (fun i a -> match a with
-                                                        |top -> i) nonterminals
-            //for k in 0..(suitable.Count-1) do
-            let k = 0
-            let curInd = suitable.[k]
-            let curRule = top,bs.[curInd],cs.[curInd],cls.[curInd],cws.[curInd]
-            let leftNT,rightNT = bs.[curInd],cs.[curInd]
-            match i,l with
-            |_,0 -> [curRule]
-            |_ ->  curRule::((derivation leftI leftL leftNT)@(derivation rightI rightL rightNT))
-                    
-        let startNTs,_,_,_,_,_,_,_ = getCellData recTable.[0,s.Length-1]
-        let result = if ResizeArray.exists((=) start) startNTs
-                     then derivation 0 (s.Length-1) start
-                     else []
-
-        result
-        *)
-
-        let getString state (lbl:uint8) (weight:uint8) : string = 
+        
+        let getString state lbl weight = 
             let stateString = 
                 match state with
                 |LblState.Defined -> "defined"
@@ -176,22 +154,21 @@ type CYKCore() =
                 |LblState.Conflict -> "conflict"
                 |_ -> ""
 
-            String.concat " " [stateString;(lbl.ToString());(weight.ToString())]
+            String.concat " " [stateString; string lbl; string weight]
             
         let rec out i last = 
-            if (i <= last)
+            if i <= last
             then let state,lbl,weight = getCellData (recTable.[0, s.Length-1]) i
                  match i with
                  |v when (v = last) -> getString state lbl weight
-                 |_ -> String.concat "\n" [(getString state lbl weight); out (i+1) last]
+                 |_ -> String.concat "\n" [getString state lbl weight; out (i+1) last]
             else ""
 
         let lastIndex = (recTable.[0,s.Length-1]).Count - 1
         out 0 lastIndex
 
-
     let print lblValue leftI rightL leftL =
-        let out = "label value = " + lblValue.ToString() + " left = " + leftI.ToString() + " right = " + (leftI+rightL+leftL+1).ToString()
+        let out = "label value = " + string lblValue + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
@@ -204,18 +181,13 @@ type CYKCore() =
         else 
             let left = ResizeArray.tryFind (fun (x:CellData) -> 
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            //let lblCheck = (lbl = lblValue)
                                             let top,_,_,_,_ = getRule rules.[int ind]
-                                            let topCheck = (top = b)
-                                            (*lblCheck &&*) 
-                                            topCheck) recTable.[leftI,leftL]
-            let right =                
+                                            top = b) recTable.[leftI,leftL]
+            let right = 
                     ResizeArray.tryFind (fun (x:CellData) -> 
                                                 let ind,lSt,lbl,_ = getData x.rData
-                                                //let lblCheck = (lbl = lblValue)
                                                 let top,_,_,_,_ = getRule rules.[int ind]
-                                                let topCheck = (top = c)
-                                                ((*lblCheck &&*) topCheck)) recTable.[rightI,rightL]
+                                                top = c) recTable.[rightI,rightL]
 
             
             match right with
@@ -231,13 +203,13 @@ type CYKCore() =
                         trackLabel rightI rightL right  true
                 | None -> ()
             | None ->
-                if flag && (lbl <> noLbl)
+                if flag && lbl <> noLbl
                 then print curL leftI rightL leftL
             
     let labelTracking lastInd = 
-        let i,l = 0,(lastInd)
+        let i,l = 0,lastInd
         ResizeArray.iteri (fun k x ->
-                    let out = "derivation #" + k.ToString()
+                    let out = "derivation #" + string k
                     printfn "%s" out
                     trackLabel i l x false
         ) recTable.[i, l]

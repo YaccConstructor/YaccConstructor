@@ -16,8 +16,8 @@ let decnumber = ['0'-'9']+
 rule token = parse
     | decnumber {new CYKToken<_,_> (NUM, (LexBuffer<_>.LexemeString(lexbuf)))}
 	| '+' {new CYKToken<_,_> (PLUS, "+")}
-	| '*' {new CYKToken<_,_> (MULT, "*")}
-	| '^' {new CYKToken<_,_> (BAR, "^")}
-	| "**" {new CYKToken<_,_> (STAR, "**")}
+	//| '*' {new CYKToken<_,_> (MULT, "*")}
+	//| '^' {new CYKToken<_,_> (BAR, "^")}
+	//| "**" {new CYKToken<_,_> (STAR, "**")}
     | whitespaces {token lexbuf}
 	| eof {new CYKToken<_,_> (EOF, "")}

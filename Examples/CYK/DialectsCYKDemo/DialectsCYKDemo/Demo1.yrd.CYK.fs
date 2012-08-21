@@ -4,24 +4,15 @@ open Yard.Core
 open Yard.Generators.CYKGenerator
 type cykToken = 
   | EOF
-  | NUM
-  | BAR
-  | STAR
   | PLUS
-  | MULT
+  | NUM
 let getTag token = 
   match token with 
   | EOF -> 0us
-  | NUM -> 1us
-  | BAR -> 2us
-  | STAR -> 3us
-  | PLUS -> 4us
-  | MULT -> 5us
+  | PLUS -> 1us
+  | NUM -> 2us
 let rules = 
-  [
-  281483566841856UL; 281479271677952UL; 1125908496777472UL; 1125912791745024UL;
-  1407392063422464UL; 1407396358389760UL; 1407383473488128UL; 1407387768455680UL;
-  844446405033984UL; 562954248388608UL ]
+  [ 281483566841856UL; 844429225099264UL; 562958543355904UL; 562962838454272UL ]
   |> Array.ofList
 let StartNTerm = 1
 let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = 

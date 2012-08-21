@@ -47,7 +47,7 @@ type CYKCore() =
     // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
-    let mutable recTable = null
+    let mutable recTable:_[,] = null
 
     [<Literal>]
     let noLbl = 0uy
@@ -71,9 +71,9 @@ type CYKCore() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
         
-        let r = new PA() //(null,[|s.Length;s.Length|])        
+        //let r = new PA() //(null,[|s.Length;s.Length|])        
 
-        let recTable = Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun i j -> new ResizeArray<CellData>(2))
+        recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun i j -> new ResizeArray<CellData>(2))
 
         //for i in 0..s.Length-1 do
           //  for j in 0..s.Length-1 do recTable.[i,j]<-new ResizeArray<CellData>(2)

@@ -1,0 +1,5 @@
+{
+let value x = (x:>Lexer_alt.MyLexeme).MValue
+}
++s: p = PLUS {"Detected: " + (value p)} 
+  | m = MULT {"Detected: " + (value m)};

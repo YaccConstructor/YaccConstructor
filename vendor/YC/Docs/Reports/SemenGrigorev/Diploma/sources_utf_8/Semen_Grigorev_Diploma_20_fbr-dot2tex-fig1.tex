@@ -1,0 +1,14 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,]
+%%
+\node (a1) at (8bp,8bp) [draw,ellipse] {a};
+  \node (a3) at (76bp,8bp) [draw,ellipse] {a};
+  \node (a2) at (42bp,8bp) [draw,ellipse] {a};
+  \node (S) at (59bp,62bp) [draw,ellipse] {someRule};
+  \node (c) at (110bp,8bp) [draw,ellipse] {c};
+  \draw [->] (S) ..controls (42bp,44bp) and (30bp,31bp)  .. (a1);
+  \draw [->] (S) ..controls (76bp,44bp) and (88bp,31bp)  .. (c);
+  \draw [->] (S) ..controls (54bp,44bp) and (50bp,34bp)  .. (a2);
+  \draw [->] (S) ..controls (64bp,44bp) and (68bp,34bp)  .. (a3);
+%
+\end{tikzpicture}

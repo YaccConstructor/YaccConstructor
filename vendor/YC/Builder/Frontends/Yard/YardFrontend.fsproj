@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YardFrontend</RootNamespace>
+    <AssemblyName>YardFrontend</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>YardFrontend</Name>
+    <SccProjectName>Svn</SccProjectName>
+    <SccProvider>SubversionScc</SccProvider>
+    <SccAuxPath>Svn</SccAuxPath>
+    <SccLocalPath>Svn</SccLocalPath>
+    <UsePartialTypes>false</UsePartialTypes>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Tailcalls>true</Tailcalls>
+    <WarningLevel>3</WarningLevel>
+    <GenerateDebugInfo>false</GenerateDebugInfo>
+    <GenerateTailCalls>true</GenerateTailCalls>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+
+  <ItemGroup>
+    <FsLex Include="Lexer.fsl">
+        <OtherFlags>--unicode --light-off</OtherFlags>
+    </FsLex>
+    <FsYacc Include="Parser.fsy">
+        <OtherFlags>--module Yard.Frontends.YardFrontend.GrammarParser --open Yard.Core --light-off</OtherFlags>
+    </FsYacc>
+    <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="Main.fs" />
+    <Compile Include="YardFrontend.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>\lib\Common.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

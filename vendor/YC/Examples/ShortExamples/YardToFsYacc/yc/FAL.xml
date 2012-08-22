@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>FAL</name></assembly>
+<members>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="M:Yard.Generators.GNESCCGenerator.FAL.FA.eCls``3(Yard.Generators.GNESCCGenerator.FAL.FA.FA{``0,System.Tuple`2{``1,Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Collections.FSharpList{``2}}}},``1)">
+<summary>
+ Find epsilon-closures for rules
+</summary>
+</member>
+<member name="M:Yard.Generators.GNESCCGenerator.FAL.FA.revert``2(Yard.Generators.GNESCCGenerator.FAL.FA.FA{``0,``1})">
+<summary>
+ Reverse all edges in graph.
+</summary>
+</member>
+<member name="M:Yard.Generators.GNESCCGenerator.FAL.FA.atmWolker``3(Yard.Generators.GNESCCGenerator.FAL.FA.FA{``0,System.Tuple`2{``1,Microsoft.FSharp.Collections.FSharpList{``2}}},Microsoft.FSharp.Core.FSharpFunc`2{QuickGraph.TaggedEdge{``0,System.Tuple`2{``1,Microsoft.FSharp.Collections.FSharpList{``2}}},System.Boolean},System.Collections.Generic.IEnumerable{``0})">
+<summary>
+ Traverse all edges, feasible from virtex from sequence s, filtered by edgesFilter.
+ Accumulates path of traversal in form (virtex, result for edges from it with edges&apos; tags).
+ If we have visited the virtex, we won&apos;t go by it twice.
+ Returns Pair of:
+   List of lists: for each virtex in s list of (virtex, tags on edges, visited from it);
+   list of visited vertices
+</summary>
+</member>
+<member name="T:Yard.Generators.GNESCCGenerator.FAL.FA">
+
+</member>
+</members>
+</doc>

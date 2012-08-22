@@ -1,0 +1,20 @@
+graph diriv_tree_extracted
+{
+        S -- concat -- a;
+        concat -- alternative -- closure -- c1;
+        closure -- c2;
+        closure -- c3;
+
+        subgraph cluster_STR
+        {
+                label = "string in language defined by ";
+                bgcolor = grey;
+
+                a;
+                c1;
+                c2;
+                c3
+
+        };
+
+}

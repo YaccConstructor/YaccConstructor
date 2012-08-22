@@ -1,0 +1,2 @@
++s:e=e { e };
+e: -"MULT"? NUM;

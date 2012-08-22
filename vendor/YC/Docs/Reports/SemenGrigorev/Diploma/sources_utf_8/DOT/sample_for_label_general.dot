@@ -1,0 +1,151 @@
+digraph labeles_general
+{
+        compound = true;
+
+        subgraph cluster_input_string
+        {
+                label = "Sample input string:";
+                inp_str[label = "'accc'"
+                       ,shape = plaintext];
+        }
+
+        subgraph cluster_rule
+        {
+                label = "Rule of user's specified grammar. \n Right part of tham can contains regular expression."                
+                rule[label = "Rule \n S = a(b|c*)"];
+                l_rule[label = "S"];
+                r_rule[label = "a(b|c*) \n Regular expression"];
+                rule -> r_rule;
+                rule -> l_rule;
+        }
+        
+
+        subgraph cluster_diriv_tree
+        {
+                label = "There are nodes corresponded with this rule in dirivation tree. \n Sones of this node is string in language, spetified by regular expression in right part of rule.";
+                Dirivation_tree[label = "Dirivation tree"];
+
+                Dirivation_tree -> S[style = dotted];
+                Dirivation_tree[shape = box]; 
+                S -> a;
+
+                c1[label = "c"];
+                c2[label = "c"];
+                c3[label = "c"];
+                S -> c1;
+                S -> c2;
+                S -> c3;
+                
+                subgraph cluster_STR
+                {
+                        label = "String in language defined by regular expression \n in rignt part of rule";
+                        bgcolor = grey;
+
+                        a;
+                        c1;
+                        c2;
+                        c3;
+
+                };
+
+        };
+
+        subgraph cluster_Syntax_tree
+        {        
+                label = "Syntax tree of right side regular expression.";
+                /*Syntax_tree[shape = box]; 
+                Syntax_tree -> concat[style = dotted];
+                */
+                a1[label = "a"];
+                b1[label = "b"];
+                c4[label = "c"];
+
+                concat -> a1;
+                alternative -> b1;
+                concat -> alternative -> closure -> c4;
+        };
+
+        subgraph cluster_dtree_with_labels
+        {
+                label = "Lablelled dirivation tree. "
+                /*Diriv_tree_with_labels[label = "Labelled dirivation tree";
+                                      ,shape = box];
+                Diriv_tree_with_labels -> S2 [style = dotted];
+                */
+                a2[label = "a \n label = [conc]"
+                 ,shape = box];
+
+                c5[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                c6[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                c7[label = "c \n label = [conc;alt(2);closure]"
+                  ,shape = box];
+
+                S2[label = "S"];                  
+  
+                S2 -> a2;
+                S2 -> c5;
+                S2 -> c6;
+                S2 -> c7;
+        }
+
+        subgraph cluster_diriv_tree_extracted
+        {
+                Diriv_tree_extracted[label = "Dirivation tree"
+                                    ,shape = box];
+                S3[label = "S"];
+                a3[label = "a"];
+                c8[label = "c"];
+                c9[label = "c"];
+                c10[label = "c"];
+                concat3[label = "concat"];
+                closure3[label = "closure"];
+                alternative3[label = "alternative"];
+
+                Diriv_tree_extracted -> S3[style = dotted];
+                S3 -> concat3 -> a3;
+                concat3 -> alternative3 -> closure3 -> c8;
+                closure3 -> c9;
+                closure3 -> c10;
+
+                subgraph cluster_STR_2
+                {
+                        label = "String in language defined by regular expression \n in rignt part of rule";
+                        bgcolor = grey;
+
+                        a3;
+                        c8;
+                        c9;
+                        c10
+
+                };
+
+        }
+
+        l_rule -> Dirivation_tree[lhead = cluster_diriv_tree
+                                 ,ltail = cluster_rule
+                                 ,label = ""];
+
+        inp_str -> Dirivation_tree[lhead = cluster_diriv_tree
+                                  ,ltail = cluster_input_string
+                                  ,label = ""];
+        
+        r_rule -> concat[lhead = cluster_Syntax_tree
+                        ,ltail = cluster_rule
+                        ,label = "Create sintax tree of regexp"];
+
+        c2 -> S2[lhead = cluster_dtree_with_labels
+                ,ltail = cluster_diriv_tree
+                ,label = "Add attribute to node"]; 
+
+        c6 -> Diriv_tree_extracted[lhead = cluster_diriv_tree_extracted
+                                  ,ltail = cluster_dtree_with_labels
+                                  ,label = ""];
+
+        b1 -> Diriv_tree_extracted[lhead = cluster_diriv_tree_extracted
+                                  , ltail = cluster_Syntax_tree
+                                  ,label = ""];
+}               

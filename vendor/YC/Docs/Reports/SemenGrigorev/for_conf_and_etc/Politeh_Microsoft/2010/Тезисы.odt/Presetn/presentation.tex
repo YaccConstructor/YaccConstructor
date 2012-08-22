@@ -1,0 +1,191 @@
+\documentclass{beamer}
+\usepackage{beamerthemesplit}
+\usetheme{CambridgeUS}
+% Выпишем часть возможных стилей, некоторые из них могут содержать
+% дополнительные опции
+% Darmstadt, Ilmenau, CambridgeUS, default, Bergen, Madrid, AnnArbor,Pittsburg, Rochester,
+% Antiles, Montpellier, Berkley, Berlin
+\usepackage{pdfpages}
+\usepackage{amsmath}
+\usepackage{cmap} % for serchable pdf's
+\usepackage[T2A]{fontenc} 
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+%\usepackage{dot2texi}
+%\usepackage{tikz}
+%\usetikzlibrary{shapes,arrows}
+% Если у вас есть логотип вашей кафедры, факультета или университета, то
+% его можно включить в презентацию.
+%\Logo{\includegraphics[width=1cm]{logo.eps}}
+\title[GLR-анализатор]{Генератор синтаксических анализаторов для произвольных контекстно-свободных грамматик}
+%\subtitle{Дипломная работа}
+\institute[СПбГУ]{
+Санкт-Петербургский государственный университет \\
+Математико-Механический факультет \\
+Кафедра системного программирования }
+\author[Лукичёв А.С. Григорьев С.В.]{
+	Научный руководитель: Лукичёв Александр Сергеевич \\ 
+  \and
+  Автор: Григорьев Семён }
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Область применения}
+Реинжиниринг программного обеспечения:
+	\begin{itemize}
+		\item Упрощение создания и сопровождения грамматик
+			\begin{itemize}
+				\item Нет необходимости задавать однозначную контекстно-свободную
+				\item Нет десятков конфликтов при одном изменении
+			\end{itemize}
+		\item Работа с диалектами одного языка
+			\begin{itemize}
+				\item Задание общей грамматики
+				\item Автоматическое определение диалекта
+			\end{itemize}		
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Задача}
+	Разработка генератора синтаксических анализаторов для \bfseries{\underline {среды .NET}} \normalfont со следующими свойствами:  
+	\begin{itemize}
+		\item Работа с произвольными контекстно-свободными грамматиками
+		\item Поддержка расширенных контекстно-свободных  грамматик
+		\item Поддержка s-атрибутных грамматик
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Алгоритм}
+	 GLR-анализатор предназначен для работы с произвольной (\bfseries{\underline {в том числе неоднозначной!}} \normalfont) КС  грамматикой
+	\begin{itemize}
+		\item Работает за линейное время 
+    \item {$O(n^{3})$ в худшем случае}
+	\end{itemize}
+	Рассмотренные подходы:
+	\begin{itemize}
+			\item Алгоритм Эрли				
+			\item Алгоритм Томиты				
+			\item Рекурсивно-восходящий алгоритм				
+	\end{itemize}					
+\end{frame}
+
+%\begin{frame}
+%	\transwipe[direction=90]
+%	\frametitle{Алгоритм}
+%	Рассмотренные подходы:
+%	\begin{itemize}
+%			\item Алгоритм Эрли
+%				\begin{itemize}
+%					\item Состояние
+%				\end{itemize}	
+%			\item Алгоритм Томиты
+%				\begin{itemize}
+%					\item Структурированный в виде графа стек
+ %         \item Ветвление стека
+  %      \end{itemize}	
+	%		\item Рекурсивно-восходящий алгоритм
+	%			\begin{itemize}
+	%				\item Система взаимно рекурсивных функций
+	%				\item Кэширование результатов вызова функций
+	%			\end{itemize}
+	%\end{itemize}				
+%\end{frame}
+
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Конструкции расширенных регулярных выражений в правых частях правил.
+		\begin{itemize}
+			\item удобно
+			\item иногда необходимо
+			\begin{itemize}
+				\item повторение с указанием диапазона: x[1..5]
+			  \item \bfseries{\underline {это не эквивалентно x^+}} \normalfont  		
+			\end{itemize}
+		\end{itemize}
+	\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Пример грамматики: 
+		\begin{itemize}
+			\item $S \rightarrow A(+A)*$
+			\item $A \rightarrow a$
+		\end{itemize}
+	Преобразованная грамматика:
+  \begin{itemize}
+		\item $S \rightarrow AB$
+		\item $A \rightarrow a$
+		\item $B \rightarrow +AB$		
+		\item $B \rightarrow \epsilon$
+	\end{itemize}
+	Входная цепочка: a+a
+
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Расширенные контекстно-свободные грамматики}
+	Ожидания пользователя:	
+   \begin{center}
+      \pgfimage[width=3cm,height=3cm]{tree1.pdf}
+   \end{center}
+   
+	Результат:	
+   \begin{center}
+      \pgfimage[width=3cm,height=3cm]{tree2.pdf}
+   \end{center}
+   
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Результаты}
+	Реализован прототип GLR-анализатора, обладающий следующими свойствами:
+	\begin{itemize}
+		\item по однозначной LR-грамматике строится анализатор с линейной сложностью;
+    \item по неоднозначной грамматике строится анализатор, возвращающий все возможные деревья вывода для данной входной цепочки;
+    \item показана возможность поддержки расширенных КС грамматик;
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Применённые продукты Microsoft}
+	 При разработке используются следующие продукты Microsoft:
+	\begin{itemize}
+		\item Microsoft Visual Studio 2008 - среда разработки
+		\item F\# - язык разработки и целевой язык генератора
+    \item F\# PowerPack - FsLex и FsYacc.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}
+	\transwipe[direction=90]
+	\frametitle{Заключение}	
+	\begin{itemize}
+		\item Изучен инструментарий для автоматизации разработки анализаторов	  
+		\item Изучен рекурсивно-восходящий алгоритм анализа
+		\item Изучен язык программирования F\#
+		\item Дальнейшее развитие:
+		\begin{itemize}
+			\item поддержка s-атрибутных грамматик
+	    \item изменение архитектуры. Инструмент - "`конструктор"'
+	 	\end{itemize}	 	
+	\end{itemize}
+\end{frame}
+
+\end{document}

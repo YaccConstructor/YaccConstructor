@@ -1,0 +1,23 @@
+digraph div_tree1 {
+S [label = "S"];
+A1 [label = "+"];
+A2 [label = "+"];
+E1 [label = "E"];
+E2 [label = "E"];
+E3 [label = "E"];
+E4 [label = "E"];
+E5 [label = "E"];
+L1 [label = "a"];
+L2 [label = "a"];
+L3 [label = "a"];
+S->E1;
+E1->E2;
+E1->A1;
+E1->E3;
+E2->L1;
+E3->E4;
+E3->A2;
+E3->E5;
+E4->L2;
+E5->L3;
+}

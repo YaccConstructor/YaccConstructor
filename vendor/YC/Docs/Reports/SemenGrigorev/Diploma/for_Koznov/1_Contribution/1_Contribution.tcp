@@ -1,0 +1,12 @@
+[FormatInfo]
+Type=TeXnicCenterProjectInformation
+Version=4
+
+[ProjectInfo]
+MainFile=1_Contribution.tex
+UseBibTeX=1
+UseMakeIndex=1
+ActiveProfile=LaTeX => PDF
+ProjectLanguage=ru
+ProjectDialect=RU
+

@@ -1,0 +1,57 @@
+\enlargethispage{100cm}
+% Start of code
+% \begin{tikzpicture}[anchor=mid,>=latex',join=bevel,]
+\begin{tikzpicture}[>=latex',join=bevel,]
+\pgfsetlinewidth{1bp}
+%%
+\pgfsetcolor{black}
+  % Edge: seq1 -> t1
+  \draw [->] (54bp,217bp) .. controls (50bp,208bp) and (45bp,198bp)  .. (36bp,179bp);
+  % Edge: seq1 -> cls
+  \draw [->] (72bp,217bp) .. controls (76bp,208bp) and (81bp,198bp)  .. (90bp,179bp);
+  % Edge: seq2 -> pl
+  \draw [->] (90bp,73bp) .. controls (86bp,64bp) and (81bp,54bp)  .. (72bp,35bp);
+  % Edge: seq2 -> t2
+  \draw [->] (108bp,73bp) .. controls (112bp,64bp) and (117bp,54bp)  .. (126bp,35bp);
+  % Edge: cls -> seq2
+  \draw [->] (99bp,144bp) .. controls (99bp,136bp) and (99bp,127bp)  .. (99bp,108bp);
+  % Node: t2
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (135bp,18bp) ellipse (27bp and 18bp);
+  \draw (135bp,18bp) node {t2};
+\end{scope}
+  % Node: t1
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (27bp,162bp) ellipse (27bp and 18bp);
+  \draw (27bp,162bp) node {t1};
+\end{scope}
+  % Node: seq2
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (99bp,90bp) ellipse (33bp and 18bp);
+  \draw (99bp,90bp) node {seq2};
+\end{scope}
+  % Node: seq1
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (63bp,234bp) ellipse (33bp and 18bp);
+  \draw (63bp,234bp) node {seq1};
+\end{scope}
+  % Node: pl
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (63bp,18bp) ellipse (27bp and 18bp);
+  \draw (63bp,18bp) node {pl};
+\end{scope}
+  % Node: cls
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (99bp,162bp) ellipse (27bp and 18bp);
+  \draw (99bp,162bp) node {cls};
+\end{scope}
+%
+\end{tikzpicture}
+% End of code
+

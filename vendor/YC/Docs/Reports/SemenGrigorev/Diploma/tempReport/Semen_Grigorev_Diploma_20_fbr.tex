@@ -1,0 +1,71 @@
+\documentclass{diploma}
+\usepackage{cmap} % for serchable pdf's
+%\usepackage[T2A]{fontenc} 
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage[colorlinks=true,urlcolor=black,linkcolor=black,filecolor=black,citecolor=black,unicode,pdftex]{hyperref}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{amsmath}
+\usepackage{dot2texi}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+%\usepackage[titletoc]{appendix} 
+%\usepackage{citehack}
+\renewcommand{\baselinestretch}{1.5}
+
+
+% to economize paper (for printing) uncomment next 5 lines
+%\textwidth=190mm
+%\textheight=250mm
+%\topmargin=-20mm
+%\oddsidemargin=-15mm
+%\evensidemargin=-15mm
+
+
+
+\begin{document}
+\sloppy
+
+\title{GLR-анализ}
+\author{Григорьева Семёна Вячеславовича}
+\university{Санкт-Петербургский Государственный Университет}
+\facility{Математико-механический факультет}
+\group{461}
+\position{студента}
+\chair{Кафедра системного программирования}
+\leaderPosition{к.ф.-м.н.}
+\leader{А.С. Лукичев}
+\criticPosition{???}
+\critic{???}
+\chairLeaderPosition{д.ф.-м.н., проф.}
+\chairLeader{А.Н. Терехов }
+\city{Санкт-Петербург}
+\yr{2010}
+
+\maketitle
+\setcounter{page}{2}
+\tableofcontents
+\newpage
+
+
+%\input{preheader.tex}
+\input{../sources_new/preface.tex}
+\clearpage
+\input{../sources_new/maine_defs.tex}
+\clearpage
+\input{task_definition.tex}
+\clearpage
+%\input{solution_review.tex}
+\input{../sources_new/review.tex}
+\clearpage
+\input{../sources_new/realisation.tex}
+\clearpage
+\input{experiments.tex}
+\clearpage
+\input{../sources_new/conclusion.tex}
+\clearpage
+\input{../sources_new/references.tex}
+
+\end{document}

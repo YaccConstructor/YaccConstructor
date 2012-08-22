@@ -1,0 +1,34 @@
+\begin{dot2tex}[dot]
+
+digraph createTNFAAlt
+{
+  rankdir = LR;
+
+  rankdir = LR;
+
+  doA[ texlbl = "($buildL\!N\!F\!A$ L)"
+        , shape = box
+        , label = "(buildTNFA L)"];
+
+  doB[ texlbl = "($buildL\!N\!F\!A$ R)"
+        , shape = box
+        , label = "(buildLNFA R)"];
+
+  i_2[ texlbl = "$i$"
+   ];
+
+  j_2[ texlbl = "$i+1$"
+   ]
+  
+  i_2 -> doA[ texlbl = "$\varepsilon/(Alt1S,k)$"
+            , label = "123"];
+  i_2 -> doB[ texlbl = "$\varepsilon/(Alt2S,k)$"
+            , label = "123"];
+
+  doA -> j_2[ texlbl = "$\varepsilon/(Alt1E,k)$"
+            , label = "12345"];
+  doB -> j_2[ texlbl = "$\varepsilon/(Alt2E,k)$"
+            , label = "12345"];
+}
+
+\end{dot2tex}

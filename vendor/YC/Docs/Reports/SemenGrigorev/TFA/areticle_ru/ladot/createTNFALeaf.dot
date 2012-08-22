@@ -1,0 +1,10 @@
+digraph createTNFACls
+{
+    rankdir = LR;
+    shape = plaintext;
+    j_1[ texlbl = "$i+1$"
+       , shape=plaintext];
+    i_1[ texlbl = "$i$"
+       , shape=plaintext];
+    i_1 -> j_1[label="a/e", texlbl = "$a/\omega$"];
+}

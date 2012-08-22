@@ -1,0 +1,81 @@
+\section{Приложения}
+\subsection{Внутреннее представления грамматики в инструменте YARD}
+Ниже приведено описание структуры данных, соответствующее внутренниму представлению грамматики в инструменте YARD, на языке F\# .
+
+\begin{verbatim}
+module Definition = 
+  struct
+    type ('patt,'expr) t = 
+    { 
+     head    :'expr option; 
+     grammar : Grammar.t<'patt,'expr>;
+     foot    :'expr option 
+    }
+end
+\end{verbatim}
+
+Модуль \verb Definition \ соответствует фвйлу с описанием грамматики. Элементы \verb head \ и \verb foot \ соответствуют длополнительным описаниям в начале и в конце файла соответсвенно. Например, подключение модулей, какие-либо дополнительные действия, которые должны быть включены в целевой код "`как есть"'.
+
+\begin{verbatim}
+module Grammar = 
+  struct
+    type t <'patt,'expr> = (Rule.t<'patt,'expr>) list 
+  end 
+\end{verbatim}
+
+Модуль \verb Grammar \ -- представление грамматики. Грамматика это список правил.
+
+\begin{verbatim}
+module Rule = 
+  struct
+    type t <'patt,'expr> = 
+    { 
+     name    : string;
+     args    : 'patt list;
+     body    : (Production.t <'patt,'expr>);
+     _public : bool; 
+     metaArgs: 'patt list
+    }
+  end
+\end{verbatim}
+
+Модуль \verb Rule \ -- представление правила грамматики. Правило имеет имя. Оно может применяться к аргуметтам или мета аргументам (\verb adgs \ и \verb metaArgs \ соответственно). Более подробно об этом можно прочеть в работе \cite{Diploma}. Элемент \verb _pablic \ указывает, является ли правило стартовым. В общем случае таких правил в грамматике может быть несколько. Элемент \verb body \ -- правая часть правила( продукция ).
+
+\begin{verbatim}
+module Production = 
+  struct
+    type elem <'patt,'expr> = 
+    {
+     omit:bool; 
+     rule:(t<'patt,'expr>);
+     binding:'patt option; 
+     checker:'expr option 
+    }   
+    and
+    t <'patt,'expr> =    
+    |PAlt     of (t <'patt,'expr>) * (t<'patt,'expr>)
+    |PSeq     of (elem <'patt,'expr>) list * 'expr option 
+    |PToken   of Source.t 
+    |PRef     of Source.t * 'expr option // Vanilla rule reference with an optional args list.
+    |PMany    of (t <'patt,'expr>) //expr*
+    |PMetaRef of Source.t * 'expr option * 'expr list // Metarule reference like in "a: mr<x> y z"
+    |PLiteral of Source.t 
+    |PRepet   of (t <'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
+    |PPerm    of (t <'patt,'expr>) list //permutation (A || B || C)
+    |PSome    of (t <'patt,'expr>) //expr+
+    |POpt     of (t <'patt,'expr>) //expr?
+
+  end
+\end{verbatim}
+
+Модуль \verb Production -- продукция. %% похоже за более подробным описанием - к Якову Александровичу...
+
+\begin{verbatim}
+module Source = 
+  struct
+   type t = string * (int * int) 
+   
+   let toString ((r,_):t):string = r
+
+  end
+\end{verbatim}

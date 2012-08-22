@@ -1,0 +1,21 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	x:Class="Yard.Development.Tools.UIComponents.YCOpenGrammar"
+	x:Name="UserControl"
+	d:DesignWidth="640" d:DesignHeight="480" Height="30">
+
+	<Grid x:Name="LayoutRoot">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="61.829"/>
+			<ColumnDefinition/>
+			<ColumnDefinition Width="39.72"/>
+		</Grid.ColumnDefinitions>
+		<TextBox x:Name="tb_GrammarPath" Grid.Column="1" VerticalContentAlignment="Center"/>
+		<Button Content="..." Grid.Column="2" Click="Button_Click" />
+		<Label Content="Grammar:" VerticalContentAlignment="Center"/>
+	</Grid>
+</UserControl>

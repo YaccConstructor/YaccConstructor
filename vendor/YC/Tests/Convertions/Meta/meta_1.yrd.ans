@@ -1,0 +1,5 @@
+yard_rule_do_1:  (
+      NUMBER ? *
+    | NUMBER ? * IDENT ) *;
+
++s:  yard_rule_do_1;

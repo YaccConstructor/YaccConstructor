@@ -1,0 +1,1 @@
+["Head minus;list minus" |> box]

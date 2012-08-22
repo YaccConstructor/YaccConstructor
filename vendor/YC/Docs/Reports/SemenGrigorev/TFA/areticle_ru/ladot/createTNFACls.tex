@@ -1,0 +1,54 @@
+\enlargethispage{100cm}
+% Start of code
+% \begin{tikzpicture}[anchor=mid,>=latex',join=bevel,]
+\begin{tikzpicture}[>=latex',join=bevel,]
+\pgfsetlinewidth{1bp}
+%%
+\pgfsetcolor{black}
+  % Edge: e_2 -> e_1
+  \draw [->] (321bp,28bp) .. controls (309bp,20bp) and (292bp,11bp)  .. (276bp,7bp) .. controls (253bp,0bp) and (246bp,0bp)  .. (222bp,7bp) .. controls (209bp,10bp) and (197bp,16bp)  .. (177bp,28bp);
+  \draw (249bp,15bp) node {$\epsilon/ \omega$};
+  % Edge: i -> e_1
+  \draw [->] (54bp,46bp) .. controls (72bp,46bp) and (96bp,46bp)  .. (126bp,46bp);
+  \draw (90bp,54bp) node {$\epsilon/ClsStart_k(pos)$};
+  % Edge: e_1 -> e_2
+  \draw [->] (180bp,46bp) .. controls (214bp,46bp) and (270bp,46bp)  .. (318bp,46bp);
+  \draw (249bp,54bp) node {$\epsilon/ \omega$};
+  % Edge: e_2 -> j_3
+  \draw [->] (372bp,46bp) .. controls (390bp,46bp) and (414bp,46bp)  .. (444bp,46bp);
+  \draw (408bp,54bp) node {$\epsilon/ClsEnd_k(pos)$};
+  % Edge: doA_2 -> e_2
+  \draw [->] (276bp,84bp) .. controls (286bp,79bp) and (298bp,72bp)  .. (318bp,61bp);
+  \draw (297bp,81bp) node {$\epsilon/ \omega$};
+  % Edge: e_1 -> doA_2
+  \draw [->] (180bp,61bp) .. controls (190bp,66bp) and (202bp,73bp)  .. (222bp,84bp);
+  \draw (201bp,80bp) node {$\epsilon/ \omega$};
+  % Node: i
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (27bp,46bp) node {$i$};
+\end{scope}
+  % Node: e_2
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (345bp,46bp) node {$i+2$};
+\end{scope}
+  % Node: e_1
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (153bp,46bp) node {$i+1$};
+\end{scope}
+  % Node: j_3
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (471bp,46bp) node {$i+3$};
+\end{scope}
+  % Node: doA_2
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \draw (249bp,99bp) node {(doTNFA a)};
+\end{scope}
+%
+\end{tikzpicture}
+% End of code
+

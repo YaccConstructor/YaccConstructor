@@ -1,0 +1,36 @@
+{
+open Yard.Core.IL
+open Yard.Core.IL.Production
+open Yard.Core.IL.Rule
+
+let value x = (x:>Lexer.MyLexeme).MValue
+
+let elem t =
+    {    
+        omit    = false
+        rule    = t        
+        binding = None        
+        checker = None
+    }
+
+let rule (nterm,rSeq) isStart=
+    {       
+        name    = nterm
+        args    = []
+        body    = PSeq (List.map elem rSeq,None)
+        _public = isStart
+        metaArgs= []
+    }
+    
+let grammar rLst =
+    { 
+     Definition.empty with
+       Definition.info = { fileName = "" }
+       Definition.head = None
+       Definition.grammar = List.mapi (fun i x -> rule x (i=0)) rLst
+       Definition.foot = None
+    }    
+}
+
++grammar: lst=(r = rule -DELIM {r})+ {grammar lst};
+rule: nterm=NTERM DRV lst=(nt=NTERM {PRef((value nt,(0,0)),None)}| t=TERM {PToken((value t,(0,0)))})* {value nterm,lst};

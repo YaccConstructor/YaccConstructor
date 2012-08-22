@@ -1,0 +1,72 @@
+\documentclass{diploma}
+\usepackage{cmap} % for serchable pdf's
+\usepackage[T2A]{fontenc} 
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage[colorlinks=true,urlcolor=black,linkcolor=black,filecolor=black,citecolor=black,unicode,pdftex]{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{pdfpages}
+\usepackage{amsmath}
+\usepackage{dot2texi}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{listings}
+%\usepackage[titletoc]{appendix} 
+%\usepackage{citehack}
+\renewcommand{\baselinestretch}{1.5}
+
+
+% to economize paper (for printing) uncomment next 5 lines
+%\textwidth=190mm
+%\textheight=250mm
+%\topmargin=-20mm
+%\oddsidemargin=-15mm
+%\evensidemargin=-15mm
+
+
+
+\begin{document}
+\sloppy
+
+\title{Генератор синтаксических анализаторов для неоднозначных контекстно-свободных грамматик}
+\author{Григорьева Семёна Вячеславовича}
+\university{Санкт-Петербургский Государственный Университет}
+\facility{Математико-механический факультет}
+\group{461}
+\position{студента}
+\chair{Кафедра системного программирования}
+\leaderPosition{к.ф.-м.н.}
+\leader{А.С. Лукичев}
+\criticPosition{д.ф.-м.н., проф.}
+\critic{Б.К. Мартыненко}
+\chairLeaderPosition{д.ф.-м.н., проф.}
+\chairLeader{А.Н. Терехов }
+\city{Санкт-Петербург}
+\yr{2010}
+
+\maketitle
+\includepdf{SemenDiplomaTitle_en.pdf}
+\setcounter{page}{2}
+\tableofcontents
+\newpage
+
+
+\input{preface.tex}
+\clearpage
+\input{task_definition.tex}
+\clearpage
+\input{maine_defs.tex}
+\clearpage
+\input{review.tex}
+\clearpage
+\input{realisation.tex}
+\clearpage
+\input{experiments.tex}
+\clearpage
+\input{conclusion.tex}
+\clearpage
+\input{references.tex}
+
+\end{document}

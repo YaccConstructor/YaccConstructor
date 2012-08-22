@@ -1,0 +1,5 @@
+yard_rule_a_2:  b *;
+
+yard_rule_d_1:  yard_rule_a_2;
+
++s:  yard_rule_d_1;

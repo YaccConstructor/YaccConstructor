@@ -1,0 +1,22 @@
+%{
+type AST<'token> =
+    | Node of string * AST<'token> list
+    | Leaf of string * 'token
+%}
+
+%token PLUS
+%token <string> NUMBER
+%token EOF
+
+%start s
+
+%type <'a> s
+
+%%
+
+s : e EOF {let _S0=$1 in Node("s", [Some(_S0)] |> List.choose (fun x -> x) )}
+
+e : NUMBER
+    {let _S0=$1 in Node("e_inner", [Some(Leaf("NUMBER", _S0))] |> List.choose (fun x -> x) )}
+  | NUMBER PLUS e
+    {let _S0=$1 in let _S2=$3 in Node("e_inner", [Some(Leaf("NUMBER", _S0)); Some(Leaf("PLUS", "")); Some(_S2)] |> List.choose (fun x -> x) )}

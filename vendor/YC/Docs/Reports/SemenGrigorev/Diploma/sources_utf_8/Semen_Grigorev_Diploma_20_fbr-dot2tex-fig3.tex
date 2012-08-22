@@ -1,0 +1,16 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,]
+%%
+\node (c) at (82bp,62bp) [draw,ellipse] {c};
+  \node (Seq) at (62bp,119bp) [draw,ellipse] {Seq};
+  \node (a1) at (8bp,8bp) [draw,ellipse] {a};
+  \node (a3) at (76bp,8bp) [draw,ellipse] {a};
+  \node (a2) at (42bp,8bp) [draw,ellipse] {a};
+  \node (Cls) at (42bp,62bp) [draw,ellipse] {Cls};
+  \draw [->] (Cls) ..controls (31bp,45bp) and (23bp,33bp)  .. (a1);
+  \draw [->] (Seq) ..controls (69bp,100bp) and (73bp,89bp)  .. (c);
+  \draw [->] (Seq) ..controls (55bp,101bp) and (52bp,91bp)  .. (Cls);
+  \draw [->] (Cls) ..controls (53bp,45bp) and (61bp,33bp)  .. (a3);
+  \draw [->] (Cls) ..controls (42bp,45bp) and (42bp,35bp)  .. (a2);
+%
+\end{tikzpicture}

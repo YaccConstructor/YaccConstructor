@@ -1,0 +1,17 @@
+\begin{dot2tex}[dot]
+
+digraph createTNFALeaf
+{
+    rankdir = LR;    
+    i_0[ texlbl = "$i$"];
+    i_1[ texlbl = "$i+1$"];
+    i_2[ texlbl = "$i+2$"];
+    i_3[ texlbl = "$i+3$"];
+
+    i_0 -> i_1[label="a/e", texlbl = "$\varepsilon/(LeafS,k)$"];
+    i_1 -> i_2[label="a/e", texlbl = "$a/\omega$"];
+    i_2 -> i_3[label="a/e", texlbl = "$\varepsilon/(LeafE,k)$"];
+
+}
+
+\end{dot2tex}

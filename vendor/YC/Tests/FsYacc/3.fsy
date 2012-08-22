@@ -1,0 +1,11 @@
+
+%token A
+%token <string> B
+
+%nonassoc PRIVET
+
+%start s                
+
+%type <string> s
+
+%%

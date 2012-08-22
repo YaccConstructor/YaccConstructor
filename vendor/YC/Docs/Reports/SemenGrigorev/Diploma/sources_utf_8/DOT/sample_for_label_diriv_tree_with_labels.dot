@@ -1,0 +1,20 @@
+graph diriv_tree_with_labels
+{
+        a[label = "a \n label = [conc]"
+         ,shape = box];
+
+        c1[label = "c \n label = [conc;alt(2);closure]"
+          ,shape = box];
+
+        c2[label = "c \n label = [conc;alt(2);closure]"
+          ,shape = box];
+
+        c3[label = "c \n label = [conc;alt(2);closure]"
+          ,shape = box];
+
+  
+        S -- a;
+        S -- c1;
+        S -- c2;
+        S -- c3;
+}

@@ -1,0 +1,62 @@
+  Правило грамматики:
+  \begin{verbatim}someRule : val1 = (a {action1})* val2 = c {someFunc val1 val2};
+  \end{verbatim}
+\begin{center}
+	\begin{tabular}{ll}
+     Узел дерева вывода: & Дерево разбора $Str$: 
+     \\
+		 \begin{dot2tex}[dot,autosize]
+
+      digraph string_of_child
+      {
+                S[label = "someRule"]
+
+                c[label = "c"]; 
+                a1[label = "a"];
+                a2[label = "a"];
+                a3[label = "a"];           
+                  
+                S -> c;                            
+                S -> a1;
+                S -> a2;
+                S -> a3;
+
+              subgraph cluster_STR
+              {                                                
+                      bgcolor = grey;
+                      str[label = "",texlbl = "$Str:$",shape = plaintext]
+                      c
+                      a1;
+                      a2;
+                      a3;
+                      
+              };
+      }
+      \end{dot2tex}
+    &        
+      \begin{dot2tex}[dot,autosize]
+
+      digraph string_diriv_tree
+      {
+
+                Seq[label = "Seq"]
+                Cls[label = "Cls"]
+                a1[label = "a"];
+                a2[label = "a"];
+                a3[label = "a"];
+                c[label = "c"];                        
+                                       
+                Seq -> Cls;            
+                Seq -> c; 
+                Cls -> a1;
+                Cls -> a2; 
+                Cls -> a3;                           
+
+      }
+      \end{dot2tex} 
+  \\
+	\end{tabular}
+	\label{tab:}
+\end{center}
+
+

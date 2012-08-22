@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QuickGraph.Graphviz</name>
+    </assembly>
+    <members>
+        <member name="P:QuickGraph.Graphviz.FormatEdgeEventArgs`2.EdgeFormatter">
+            <summary>
+            Edge formatter
+            </summary>
+        </member>
+        <member name="M:QuickGraph.Graphviz.SvgHtmlWrapper.WrapSvg(System.String)">
+            <summary>
+            Creates a HTML file that wraps the SVG and returns the file name
+            </summary>
+            <param name="svgFileName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QuickGraph.Graphviz.GraphvizAlgorithm`2">
+            <summary>
+            An algorithm that renders a graph to the Graphviz DOT format.
+            </summary>
+            <typeparam name="TVertex">type of the vertices</typeparam>
+            <typeparam name="TEdge">type of the edges</typeparam>
+        </member>
+        <member name="P:QuickGraph.Graphviz.GraphvizAlgorithm`2.Output">
+            <summary>
+            Dot output stream.
+            </summary>
+        </member>
+        <member name="P:QuickGraph.Graphviz.GraphvizAlgorithm`2.ImageType">
+            <summary>
+            Current image output type
+            </summary>
+        </member>
+        <member name="T:QuickGraph.Graphviz.GraphvizExtensions">
+            <summary>
+            Helper extensions to render graphs to graphviz
+            </summary>
+        </member>
+        <member name="M:QuickGraph.Graphviz.GraphvizExtensions.ToGraphviz``2(QuickGraph.IEdgeListGraph{``0,``1})">
+            <summary>
+            Renders a graph to the Graphviz DOT format.
+            </summary>
+            <typeparam name="TVertex"></typeparam>
+            <typeparam name="TEdge"></typeparam>
+            <param name="graph"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QuickGraph.Graphviz.GraphvizExtensions.ToGraphviz``2(QuickGraph.IEdgeListGraph{``0,``1},System.Action{QuickGraph.Graphviz.GraphvizAlgorithm{``0,``1}})">
+            <summary>
+            Renders a graph to the Graphviz DOT format.
+            </summary>
+            <typeparam name="TVertex"></typeparam>
+            <typeparam name="TEdge"></typeparam>
+            <param name="graph"></param>
+            <param name="initialization">delegate that initializes the algorithm</param>
+            <returns></returns>
+        </member>
+        <member name="M:QuickGraph.Graphviz.GraphvizExtensions.ToSvg``2(QuickGraph.IEdgeListGraph{``0,``1})">
+            <summary>
+            Performs a layout .dot in an SVG (Scalable Vector Graphics) file
+            by calling Agl through the http://rise4fun.com/ REST services.
+            </summary>
+            <param name="dot">the dot graph</param>
+            <returns>the svg graph</returns>
+        </member>
+        <member name="M:QuickGraph.Graphviz.GraphvizExtensions.ToSvg``2(QuickGraph.IEdgeListGraph{``0,``1},System.Action{QuickGraph.Graphviz.GraphvizAlgorithm{``0,``1}})">
+            <summary>
+            Performs a layout .dot in an SVG (Scalable Vector Graphics) file
+            by calling Agl through the http://rise4fun.com/ REST services.
+            </summary>
+            <param name="dot">the dot graph</param>
+            <returns>the svg graph</returns>
+        </member>
+        <member name="M:QuickGraph.Graphviz.GraphvizExtensions.ToSvg(System.String)">
+            <summary>
+            Performs a layout .dot in an SVG (Scalable Vector Graphics) file
+            by calling Agl through the http://rise4fun.com/ REST services.
+            </summary>
+            <param name="dot">the dot graph</param>
+            <returns>the svg graph</returns>
+        </member>
+        <member name="T:QuickGraph.Graphviz.FileDotEngine">
+            <summary>
+            Default dot engine implementation, writes dot code to disk
+            </summary>
+        </member>
+    </members>
+</doc>

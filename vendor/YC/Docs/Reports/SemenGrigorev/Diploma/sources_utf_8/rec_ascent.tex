@@ -1,0 +1,98 @@
+\subsection{Рекурсивно восходящий алгоритм}
+
+
+Существует альтернатива табличным анализаторам -- рекурсивно-восходящие  анализаторы. Идея состоит в том, чтобы не использовать стек явно, а заменить его стеком вызова рекурсивных функций и эмулировать поведения автомата вызовом функций. Для этого можно построить функцию соответствующую каждому состоянию и получить детерминированный LR анализ ~\cite{RECURSIVE-ASCENT PARSING}.  
+
+Таким образом - рекурсивно восходящий алгоритм это аналог рекурсивного спуска, но для LR грамматики.  Однако, при такой реализации возникают проблемы с быстрым ростом объёма кода целевых функций~\cite{Jade}. 
+
+Существует подход к решению этой задачи несколько с другой стороны. Показано, что кожно построить систему функций, оперирующие уже не одним состоянием, а множеством состояний, и свести ,таким образом, количество необходимых функций к двум взаимно рекурсивным~\cite{RecursiveAscentParsing}:  
+\begin{itemize}
+	\item parse  q i =$\{(A\stackrel{}{\rightarrow}a. , i) | A\stackrel{}{\rightarrow} a. \in q\}\bigcup$
+  
+  \hspace{1,9cm}       $\{(A\stackrel{}{\rightarrow}a.b , k) | i = xj ,(A\stackrel{}{\rightarrow}a.b, k) \in climb$ q x j$  \}
+  \bigcup$
+  
+  \hspace{1,9cm}       $\{(A\stackrel{}{\rightarrow}a.b , k) | B\stackrel{}{\rightarrow}e , (A\stackrel{}{\rightarrow}a.b, k) \in climb$ q B j $\}$
+  \item climb q X  i = $\{(A\stackrel{}{\rightarrow}a.Xb , k) | (A\stackrel{}{\rightarrow}aX.b, k)\in parse($goto q X$) i , a\neq e, A\stackrel{}{\rightarrow}a.Xb \in q\}\bigcup$
+  
+  \hspace{2,5cm}          $\{(A\stackrel{}{\rightarrow}a.b , l) | (C\stackrel{}{\rightarrow}X.c,j)\in parse($goto q X$) i, (A\stackrel{}{\rightarrow}a.b ,l)\in climb$ q C j$\} $
+\end{itemize}
+ 
+%Пользуясь таким определением можно построить функции из статьи ~\cite{RECURSIVE-ASCENT PARSING}, однако сейчас интереснее их реализация, согласно определению.
+
+Важно, что при решении нашей задачи нет необходимости генерации функции для каждого состояния. Так как цель - получение недетерминированного разбора, то можно реализовать всего две функции: parse и climb, определённые выше. Это позволит решить проблему объёма кода, возникшую в Jade. Объём кода резко сократится и, более того, будет получен недетерминированный вариант разбора.  
+
+Используя рекурсивно-восходящий алгоритм можно получить эквивалент  алгоритму Томиты. При  использовать описанных выше функции автоматически получается ветвление в момент возникновения неоднозначности (разделение стека в алгоритме Томиты). Это получается благодаря тому, что они принимают на вход состояние и возвращают множество всех возможных состояний. 
+
+Однако возникает проблема - сложность алгоритма, основанного на функциях parse и climb экспоненциальная. Для борьбы с этим в статье~\cite{Non-det-rec-asc} предлагается дополнить функции  механизмом запоминания результатов предыдущих вызовов, чтобы при очередном вызове, в случае, если эта функция уже вызывалась с такими параметрами, то результат возвращался без повторного вычисления. Доказывается~\cite{Non-det-rec-asc}, что в при такой реализации оценки по времени будут порядка О($n^{3}$).
+
+Запоминание результатов предыдущих вычислений и будет аналогом объединения состояний и получения структурированного в виде графа стека (graph-structured stack) в алгоритме Томиты.
+
+Технически этого можно добиться реализовав функцию memoize. На языке F\# её можно   реализовать так:
+\begin{verbatim}
+      let memoize (f: 'a ->'b) =
+           let t = new System.Collections.Generic.Dictionary<'a,'b>() 
+           in
+           fun a ->    
+                  if t.ContainsKey(a)
+                  then t.[a]
+                  else 
+                     let res = f a 
+                     in
+                     t.Add(a,res);
+                     res 
+\end{verbatim}
+
+В дальнейшем в качестве функции f будет выступать функция parse и climb.     
+
+Дополнительного ускорения можно добиться заранее вычислив функцию goto. Действительно, построение замыкания (closure), необходимое для вычисления функции goto дорогая операция, а вызов goto происходит при каждом вызове функции climb. Поэтому можно вычислить goto на этапе построения анализатора, и в целевой программе (в функции climb) свести вызов (goto q X) к поиску по ключу.
+
+%С учётом этих дополнений на F\# функции \verb| parse| \ и \verb| climb| \ могут быть реализованы следующим образом:
+%\begin{verbatim}
+%let rec climb =
+%    memoize (fun (states,(symbol,i)) -> 
+%    if states = Set.empty
+%    then Set.empty
+%    else     
+%    let gt =  goto (states,symbol)    
+%    let new_states = parse (gt,i)   
+%    if Set.exists (fun ((state,tree),i)-> 
+%                       state.prod_name="S"
+%                        &&
+%                       state.next_num=None&&i=1)
+%                       new_states      
+%    then states
+%    else    
+%    Set.union_all                            
+%    [Set.filter (fun items-> 
+%                   Set.exists (fun item  -> 
+%                                   (exists ((=)(fst items))(nextItem item))
+%                                    &&
+%                                   (item.item_num <> item.s)
+%                               )states)new_states
+%     |>(Set.map (fun items->
+%                     (map (fun itm -> 
+%                               (itm,snd items))
+%                          (prevItem (fst items)))))|>union_all
+%    ;
+%    Set.union_all(
+%    union_from_Some[for (item,i) in new_states -> 
+%                    if (exists (fun itm -> (getText itm.symb) = x) 
+%                               (prevItem item)) 
+%                        && 
+%                       (item.prod_name<>"S")
+%                        &&
+%                       (exists (fun itm -> itm.item_num=item.s)(prevItem item))
+%                    then Some(climb (states,item.prod_name,i))
+%                    else None])
+%    ])                
+%and parse = 
+%    memoize (fun (states,i) ->    
+%    union_all
+%        [map (fun state -> (state,i))
+%             (Set.filter (fun item -> (item.next_num=None))states)
+%         ;if (get_next_lex i = m_end) 
+%          then empty 
+%          else climb(states,mgetText(get_next_lex i),i-1)
+%        ])
+%\end{verbatim}

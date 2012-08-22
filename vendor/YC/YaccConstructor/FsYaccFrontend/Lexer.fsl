@@ -1,0 +1,90 @@
+﻿{
+//  Copyright 2010-2011 Konstantin Ulitin
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+module Yard.Frontends.FsYaccFrontend.Lexer
+
+open Yard.Frontends.FsYaccFrontend.Parser // using tokens type 
+open Microsoft.FSharp.Text.Lexing
+
+let comment_depth = ref 0
+let source = ref ""
+let lexeme_start = ref 0
+
+let make_lexeme (n1, n2) = source.Value.Substring(n1, n2-n1) //, (n1, n2)
+
+// checks if the given identifier is keyword
+let identifier (lexeme:string) = IDENT(lexeme)
+//  match lexeme with
+//  | s when System.Char.IsUpper s.[0]-> UIDENT(s)
+//  | s when System.Char.IsLower s.[0]-> LIDENT(s)
+}
+
+let eol = "\r\n" | '\n'
+let lowerchar = ['a'-'z']
+let upperchar = ['A'-'Z']
+let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '0'-'9']
+
+rule token = parse
+  | "{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf }
+  | "%{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; head lexbuf }
+  | "/*" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; multiline_comment lexbuf }
+// ?  | '<' [^'>'] '>' { TYPE(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
+  | '<' { lexeme_start := lexbuf.EndPos.AbsoluteOffset; typedef lexbuf }
+  | identchar* { identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
+  | '|' { BAR }
+  | ':' { COLON }
+  | "%%" { DOUBLE_PERC }
+  | "%token" { TOKEN_KW }
+  | "%type" { TYPE_KW }
+  | "%start" { START_KW }
+  | "%left" { ASSOC_KW }
+  | "%right" { ASSOC_KW }
+  | "%nonassoc" { ASSOC_KW }
+  | eof { EOF }
+  | _ { token lexbuf }
+and typedef = parse
+  | '>' { TYPE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | eof { EOF }
+  | _ { typedef lexbuf }
+and head = parse
+  // TODO breaks if "%}" is in literal for example
+  | "%}" { HEAD(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | eof { EOF }
+  | _ { head lexbuf }
+and multiline_comment = parse
+  | "/*" { incr comment_depth; multiline_comment lexbuf }
+  | "*/" { decr comment_depth;
+      if !comment_depth = 0 then token lexbuf else multiline_comment lexbuf }
+  | eof { EOF }
+  | _ { multiline_comment lexbuf }
+and action_code = parse
+  // TODO: breaks if brace is commented in code - add f# comments
+  | "{" { incr comment_depth; action_code lexbuf }
+  | "}" { decr comment_depth;
+      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf }
+  | '\'' { literal lexbuf; action_code lexbuf }
+  | '"' { literal2 lexbuf; action_code lexbuf }
+  | eof { EOF }
+  | _ { action_code lexbuf }
+and literal = parse
+  | '\'' { } // LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
+  | "\\\\" | "\\'" | _ { literal lexbuf }
+and literal2 = parse
+  | '"' { } // LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset))
+  | "\\\\" | "\\\"" | _ { literal2 lexbuf }
+

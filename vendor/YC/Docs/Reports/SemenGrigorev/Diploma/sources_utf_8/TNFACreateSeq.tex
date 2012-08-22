@@ -1,0 +1,22 @@
+\begin{dot2tex}[dot]
+
+digraph createTNFASeq
+{
+  rankdir = LR;
+
+  map[ texlbl = "$concat$ ($map$ $buildL\!N\!F\!A$ lst)"
+     , shape = box
+     , label = "concat (map buildTNFA lst)"];
+  
+
+  i[ texlbl = "$i$"];
+
+  j[ texlbl = "$i+1$"]
+  
+  i -> map[ texlbl = "$\varepsilon/(SeqS,k)$"
+          , label = "123"];
+  map -> j[ texlbl = "$\varepsilon/(SeqE,k)$"
+          , label = "123"];
+}
+
+\end{dot2tex}

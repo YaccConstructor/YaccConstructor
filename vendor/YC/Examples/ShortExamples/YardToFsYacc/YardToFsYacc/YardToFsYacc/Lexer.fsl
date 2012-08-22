@@ -1,0 +1,26 @@
+﻿{
+module Lexer
+
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Reflection
+
+open Parser
+
+}
+
+let whitespaces = [' '  '\t']+
+let ident_char  = ['A'-'Z' 'a'-'z' ] 
+let ident = ident_char+
+let decnumber = ['0'-'9']+ 
+
+rule token = parse
+	| "let" {KW_LET "let"}
+	| "fun" {KW_FUN "fun"}  
+    | ident { IDENT(LexBuffer<_>.LexemeString(lexbuf)) }
+    | decnumber {NUMBER(LexBuffer<_>.LexemeString(lexbuf))}
+    | "->" {ARROW "->"}
+    | ';' {SEMI ";"}
+	| '=' {EQ "="}
+	| '+' {PLUS "+"}
+    | whitespaces {token lexbuf}
+	| eof { EOF "" }

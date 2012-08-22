@@ -1,0 +1,43 @@
+\begin{dot2tex}[dot]
+
+digraph createTNFACls
+{
+rankdir = LR;
+
+  subgraph Cls 
+  {
+   
+    rankdir = LR;
+
+    i[ texlbl = "$i$"];
+
+    subgraph L{
+    e_1[ texlbl = "$i+1$"];
+
+    doA_2[ texlbl = "($buildL\!N\!F\!A$ T)"
+         , shape = box
+         , label = "a"];
+
+    e_2[ texlbl = "$i+2$"];
+    }
+    j_3[ texlbl = "$i+3$"];
+
+    i -> e_1[ texlbl = "$\varepsilon/(ClsS,k)$"
+            , label = "1"];
+    
+    e_1 -> doA_2[ texlbl = "$\varepsilon/ \omega$"
+                , label = " "];
+    doA_2 -> e_2[ texlbl = "$\varepsilon/ \omega$"
+                , label = " "];
+    e_2 -> e_1[ texlbl = "$\varepsilon/ \omega$"
+              , label = " "];
+    e_1 -> e_2[ texlbl = "$\varepsilon/ \omega$"
+              , label = " "];
+                    
+    e_2 -> j_3[ texlbl = "$\varepsilon/(ClsE,k)$"
+              , label = "1"];
+     
+  }
+ 
+}
+\end{dot2tex}

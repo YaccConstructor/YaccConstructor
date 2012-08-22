@@ -1,0 +1,7 @@
+{
+let value x = (x:>Lexer_arithm_glr.MyLexeme).MValue
+}
++s: res = e {res};
+e: n = NUMBER {value n |> int}
+ | l = e op = (PLUS { (+) } | MULT { ( * ) } | MINUS { (-) }) r = e {op l r} 
+ ;

@@ -1,0 +1,16 @@
+digraph G
+{
+ A1[label = "A"];
+ A2[label = "A"];
+ a1[label = "a"];
+ a2[label = "a"];
+ p[label = "+"];
+ B1[label = "B"];
+ B2[label = "B"];
+
+ S -> A1 -> a1;
+ S -> B1 -> p;
+ B1 -> A2 ->a2;
+ B1 -> B2 -> e;
+ 
+}

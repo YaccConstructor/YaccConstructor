@@ -36,8 +36,14 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Brahma">
+      <HintPath>..\..\3rd Party\Brahma\lib\Brahma.dll</HintPath>
+    </Reference>
+    <Reference Include="Brahma.OpenCL">
+      <HintPath>..\..\3rd Party\Brahma\lib\Brahma.OpenCL.dll</HintPath>
+    </Reference>
     <Reference Include="OpenCL.Net">
-      <HintPath>..\..\..\..\Libraries\OpenCL.Net\OpenCL.Net\bin\Debug\OpenCL.Net.dll</HintPath>
+      <HintPath>..\..\3rd Party\Brahma\lib\OpenCL.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,16 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Brahma.OpenCL\Brahma.OpenCL.csproj">
-      <Project>{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}</Project>
-      <Name>Brahma.OpenCL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Brahma\Brahma.csproj">
-      <Project>{0E731438-DD9E-4444-950D-EF2DE31D3E97}</Project>
-      <Name>Brahma</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

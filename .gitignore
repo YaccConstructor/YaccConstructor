@@ -17,3 +17,5 @@ ook_based_test/report/picts/*
 Tests/RNGLR/*/log_*.txt
 Tests/CYK/basic_term_noLBL.yrd.CYK.fs
 Examples/CYK/yc/*
+*.psess
+*.vsp

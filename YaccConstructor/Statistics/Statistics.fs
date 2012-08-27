@@ -51,8 +51,8 @@ let RuleLength (def:Yard.Core.IL.Definition.t<_,_>) =
         |> List.averageBy(float)
     
     let max = List.max lengths
-    
-    let distribution = 
+
+    let distribution =
         lengths
         |> Seq.groupBy id
         |> Seq.map (fun (gn,gv) -> seq [string gn;Seq.length gv |> string])
@@ -60,7 +60,7 @@ let RuleLength (def:Yard.Core.IL.Definition.t<_,_>) =
     let report = new Report("grammarReport.txt")
 
     let reportBody =
-        ["Average: " + string avg |> RStr 
+        ["Average: " + string avg |> RStr
         ; "Max: " + string avg |> RStr
         ; Table distribution |> RTable]
     report.Body <- reportBody

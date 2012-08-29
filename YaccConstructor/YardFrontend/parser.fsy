@@ -115,13 +115,13 @@ rule_nlist: rule SEMICOLON rule_nlist
     | { ([], Map.empty) }
     | rule error { missing "SEMI"; raise Parse_error  }
 
-rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON option_opt alts
+rule: plus_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
         let newRule = {Rule._public = $1
                         ; Rule.name = $2
                         ; Rule.metaArgs = getList $3
                         ; Rule.body = $7
-                        ; Rule.args = o2l $4
+                        ; Rule.args = $4
                         }
         in
         match $6 with
@@ -141,6 +141,8 @@ formal_meta_list: LIDENT {[$1]}
                 | LIDENT formal_meta_list {$1::$2}
 
 param_opt: PARAM {Some $1} | /* empty */ {None}
+
+param_list: PARAM param_list {$1::$2} | /* empty */ {[]}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 

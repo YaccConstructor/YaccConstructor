@@ -70,6 +70,7 @@ type nonTerminalId =
     | NONTERM_formal_meta_param_opt
     | NONTERM_formal_meta_list
     | NONTERM_param_opt
+    | NONTERM_param_list
     | NONTERM_alts
     | NONTERM_bar_seq_nlist
     | NONTERM_seq

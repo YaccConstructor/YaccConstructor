@@ -84,7 +84,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         if (Seq.isEmpty metaArgs) then ""
         else if (seqCount metaArgs) > 1 then l_br + (String.concat " " metaArgs) + r_br
         else l_br + (Seq.head metaArgs) + r_br
-    let printArgs args = List.map Source.toString args |> printSeqBrackets "[" "]"
+    let printArgs args = args |> List.map (fun src -> "[" + Source.toString src + "]") |> String.concat ""
     let rec priority = function 
         | PAlt(_) -> 1
         | PSeq([elem],None) -> 
@@ -135,7 +135,8 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction false opt)); yield Str("?")}
         | _ -> Seq.singleton <| Str("ERROR")
 
-    seq {yield Line(seq{yield Str(startSign + fst rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  ) + (printArgs rule.args) + ":");
+    seq {yield Line(seq{yield Str(startSign + fst rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  )
+                                        + (printArgs rule.args) + ":");
          yield Str(" "); yield! printProduction false rule.body; yield Str(";\n")})}
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =

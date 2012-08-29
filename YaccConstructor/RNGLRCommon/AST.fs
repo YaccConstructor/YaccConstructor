@@ -279,6 +279,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 if x.other <> null then
                     for e in x.other do
                         e.nodes.doForAll clear
+        //printfn "Memory: %d" ((GC.GetTotalMemory true) >>> 20)
 
     member this.collectWarnings tokenToRange =
         let res = new ResizeArray<_>()
@@ -356,7 +357,6 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             |> Array.toList
                             |> (fun x -> firstRes::x)
                             |> concat.[leftSides.[children.first.prod]]
-            printfn "Memory: %d" ((GC.GetTotalMemory true) >>> 20)
             result.[rootFamily.pos]
             
     member this.PrintAst() =            

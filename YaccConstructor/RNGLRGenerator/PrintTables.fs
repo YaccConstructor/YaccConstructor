@@ -32,6 +32,11 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     let inline printInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
         print x
+    let inline printBr (x : 'a) =
+        fprintfn out x
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
     let andNum = (1 <<< 16) - 1
 
     let statesLim = tables.gotos.GetLength 0 - 1
@@ -44,7 +49,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
         for i = 0 to arr.Length-1 do
             if i <> 0 then print "; "
             printer arr.[i]
-        print "|]\n"
+        printBr "|]"
     let pack x y = (x <<< 16) ||| y
     let printList l printer = 
         print "["
@@ -59,7 +64,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
         print "|]"
 
     let print2DArr (arr : 'a[,]) checker printer name =
-        printInd 0 "let private small_%s =\n" name
+        printBrInd 0 "let private small_%s =" name
         printInd 2 "[|"
         let mutable next = 1000
         let mutable cur = 0
@@ -80,16 +85,16 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
             if not firstJ then print "|]"
             if cur > next then
                 next <- next + 1000
-                print "\n"
+                printBr ""
                 printInd 10 ""
-        print "|]\n"
-        printInd 0 "let private %s = Array.zeroCreate %d\n" name statesCount 
-        printInd 0 "for i = 0 to %d do\n" statesLim
-        printInd 2 "%s.[i] <- Array.zeroCreate %d\n" name symbolsCount 
+        printBr "|]"
+        printBrInd 0 "let private %s = Array.zeroCreate %d" name statesCount 
+        printBrInd 0 "for i = 0 to %d do" statesLim
+        printBrInd 2 "%s.[i] <- Array.zeroCreate %d" name symbolsCount 
 
-        printInd 0 "for (i,t) in small_%s do\n" name
-        printInd 1 "for (j,x) in t do\n"
-        printInd 2 "%s.[i].[j] <- x\n" name
+        printBrInd 0 "for (i,t) in small_%s do" name
+        printBrInd 1 "for (j,x) in t do"
+        printBrInd 2 "%s.[i].[j] <- x" name
 
     let print2DArrList (arr : 'a list[,]) checker printer name =
         printInd 0 "let private lists_%s = " name
@@ -105,7 +110,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
         for v in lists do
             listsArr.[v.Value] <- v.Key
         printArr listsArr printer
-        printInd 0 "let private small_%s =\n" name
+        printBrInd 0 "let private small_%s =" name
         printInd 2 "[|"
         let mutable next = 1000
         let mutable cur = 0
@@ -128,52 +133,52 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
                     cur <- cur + 1
                     if cur > next then
                         next <- next + 1000
-                        print "\n"
+                        printBr ""
                         printInd 10 ""
-        print "|]\n"
-        printInd 0 "let %s = Array.zeroCreate %d\n" name statesCount 
-        printInd 0 "for i = 0 to %d do\n" statesLim
-        printInd 2 "%s.[i] <- Array.zeroCreate %d\n" name symbolsCount
+        printBr "|]"
+        printBrInd 0 "let %s = Array.zeroCreate %d" name statesCount 
+        printBrInd 0 "for i = 0 to %d do" statesLim
+        printBrInd 2 "%s.[i] <- Array.zeroCreate %d" name symbolsCount
 
-        printInd 0 "cur <- 0\n"
-        printInd 0 "while cur < small_%s.Length do\n" name
-        printInd 1 "let i = small_%s.[cur] >>> 16\n" name
-        printInd 1 "let length = small_%s.[cur] &&& %d\n" name andNum
-        printInd 1 "cur <- cur + 1\n"
-        printInd 1 "for k = 0 to length-1 do\n"
-        printInd 2 "let j = small_%s.[cur + k] >>> 16\n" name
-        printInd 2 "let x = small_%s.[cur + k] &&& %d\n" name andNum
-        printInd 2 "%s.[i].[j] <- lists_%s.[x]\n" name name
-        printInd 1 "cur <- cur + length\n"
+        printBrInd 0 "cur <- 0"
+        printBrInd 0 "while cur < small_%s.Length do" name
+        printBrInd 1 "let i = small_%s.[cur] >>> 16" name
+        printBrInd 1 "let length = small_%s.[cur] &&& %d" name andNum
+        printBrInd 1 "cur <- cur + 1"
+        printBrInd 1 "for k = 0 to length-1 do"
+        printBrInd 2 "let j = small_%s.[cur + k] >>> 16" name
+        printBrInd 2 "let x = small_%s.[cur + k] &&& %d" name andNum
+        printBrInd 2 "%s.[i].[j] <- lists_%s.[x]" name name
+        printBrInd 1 "cur <- cur + length"
 
-    print "type Token%s =\n"
+    printBr "type Token%s ="
     <|  match tokenType with
         | "" -> "<'a>"
         | _ -> ""
     let indexator = grammar.indexator
     for i = indexator.termsStart to indexator.termsEnd do
-        printInd 1 "| %s of %s\n" (indexator.indexToTerm i)
+        printBrInd 1 "| %s of %s" (indexator.indexToTerm i)
         <|  match tokenType with
             | "" -> "'a"
             | s -> s
 
-    print "\n"
-    print "let numToString = function \n"
+    printBr ""
+    printBr "let numToString = function"
 
     for i = 0 to indexator.nonTermCount - 1 do
-        printInd 1 "| %d -> \"%s\"\n" i (indexator.indexToNonTerm i)
+        printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToNonTerm i)
 
     for i = indexator.termsStart to indexator.termsEnd do
-        printInd 1 "| %d -> \"%s\"\n" i (indexator.indexToTerm i)
+        printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
 
-    printInd 1 "| _ -> \"\"\n"
+    printBrInd 1 "| _ -> \"\""
 
-    printInd 0 "let tokenToNumber = function\n"
+    printBrInd 0 "let tokenToNumber = function"
     for i = indexator.termsStart to indexator.termsEnd do
-        printInd 1 "| %s _ -> %d\n" (indexator.indexToTerm i) i
-    print "\n"
+        printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+    printBr ""
 
-    print "let mutable private cur = 0\n"
+    printBr "let mutable private cur = 0"
 
     print "let leftSide = "
     let leftSide = Array.zeroCreate grammar.rules.rulesCount
@@ -201,16 +206,16 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     print "let private rulesStart = "
     printArr rulesStart (print "%d")
 
-    print "let startRule = %d\n" grammar.startRule
-    print "\n"
+    printBr "let startRule = %d" grammar.startRule
+    printBr ""
 
-    print "let acceptEmptyInput = %A\n" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
-    print "\n"
+    printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+    printBr ""
 
-    print "let defaultAstToDot = \n"
-    printInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)\n"
+    printBr "let defaultAstToDot ="
+    printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
-    print "\n"
+    printBr ""
 
     print2DArrList tables.gotos
         (fun x -> not x.IsEmpty)
@@ -234,14 +239,15 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
 
     printInd 0 "let private small_acc = "
     printList tables.acc (fun x -> print "%d" x)
-    print "\n"
-    printInd 0 "let private accStates = Array.zeroCreate %d\n" <| tables.gotos.GetLength 0
-    printInd 0 "for i = 0 to %d do\n" statesLim
-    printInd 2 "accStates.[i] <- List.exists ((=) i) small_acc\n"
+    printBr ""
+    printBrInd 0 "let private accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
+    printBrInd 0 "for i = 0 to %d do" statesLim
+    printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
-    printInd 0 "let eofIndex = %d\n" grammar.indexator.eofIndex
+    printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
 
-    printInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)\n"
+    printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)"
 
-    print "let buildAst : (seq<Token> -> ParseResult<Token>) =\n"
-    printInd 1 "buildAst<Token> parserSource\n\n"
+    printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+    printBrInd 1 "buildAst<Token> parserSource"
+    printBr ""

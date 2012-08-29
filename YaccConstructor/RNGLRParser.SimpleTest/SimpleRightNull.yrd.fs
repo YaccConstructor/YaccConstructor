@@ -6,7 +6,7 @@ type Token =
     | A of int
     | EOF of int
 
-let numToString = function 
+let numToString = function
     | 0 -> "s"
     | 1 -> "t"
     | 2 -> "yard_start_rule"
@@ -25,7 +25,7 @@ let startRule = 2
 
 let acceptEmptyInput = true
 
-let defaultAstToDot = 
+let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
 let private lists_gotos = [|1; 2; 3; 4|]

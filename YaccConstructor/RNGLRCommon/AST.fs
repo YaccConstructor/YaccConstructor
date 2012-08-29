@@ -21,6 +21,13 @@ module Yard.Generators.RNGLR.AST
 open System
 open Yard.Generators.RNGLR.DataStructures
 
+/// Arguments for tanslation calling, seen by user
+type TranslateArguments<'Token, 'Position> = {
+    tokenToRange : 'Token -> 'Position * 'Position
+    zeroPosition : 'Position
+    clearAST : bool
+    filterEpsilons : bool
+}
 
 [<Struct>]
 type UsualOne<'T> =

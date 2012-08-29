@@ -42,6 +42,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let tokenCall = "_rnglr_translate_token"
     let ruleName = "_rnglr_rule_"
     let epsilonName = "_rnglr_epsilons"
+    let epsilonNameFiltered = "_rnglr_filtered_epsilons"
     let childrenName = "_rnglr_children"
     let concatsName = "_rnglr_concats"
     //let pathToModule = "Yard.Generators.RNGLR.AST."
@@ -110,13 +111,20 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 "box (new AST(" + printChild arr.first
                         + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
-        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes(" + printArr (family.nodes.map id) printAst + "))"
-        "let " + epsilonName + " : Tree<Token>[] = " +
-            printArr grammar.epsilonTrees
-                (function
-                 | null -> "null"
-                 | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
-        |> wordL
+        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
+                                            + printArr (family.nodes.map id) printAst + "))"
+        let printEps name = 
+            "let " + name + " : Tree<Token>[] = " +
+                printArr grammar.epsilonTrees
+                    (function
+                     | null -> "null"
+                     | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
+            |> wordL
+        printEps epsilonName
+        @@
+        printEps epsilonNameFiltered
+        @@
+        (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
 
     // Realise rules
     let rec getProductionLayout num = function
@@ -214,10 +222,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate tokenToRangeFunction zeroPosition clearAST (tree : Tree<_>) : " + typeName + " = ")
+        let funHead = wordL ("let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : " + typeName + " = ")
         let body =
             [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
-                            + " " + epsilonName + " tokenToRangeFunction zeroPosition clearAST) : " + typeName)
+                            + " (if args.filterEpsilons then " + epsilonNameFiltered + " else " + epsilonName + ")"
+                            + " args.tokenToRange args.zeroPosition args.clearAST) : " + typeName)
             ] |> aboveListL
         funHead @@-- body
 

@@ -96,6 +96,8 @@ let buildAst : (seq<Token> -> ParseResult<Token>) =
 
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null|]
+for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_good * '_rnglr_type_if * '_rnglr_type_if_else * '_rnglr_type_s * '_rnglr_type_stmt * '_rnglr_type_yard_start_rule>), 
   [|
@@ -230,5 +232,5 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
   |] 
-let translate tokenToRangeFunction zeroPosition clearAST (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
-  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats _rnglr_epsilons tokenToRangeFunction zeroPosition clearAST) : '_rnglr_type_yard_start_rule
+let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats (if args.filterEpsilons then _rnglr_filtered_epsilons else _rnglr_epsilons) args.tokenToRange args.zeroPosition args.clearAST) : '_rnglr_type_yard_start_rule

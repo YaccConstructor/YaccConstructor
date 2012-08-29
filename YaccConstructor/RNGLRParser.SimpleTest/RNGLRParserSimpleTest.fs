@@ -16,11 +16,15 @@ let dir = @"../../../../Tests/RNGLR/"
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail()
-let inline tokenToRange _ = 0,0
-let zeroPos = 0
 
-let inline translate (f : ('a -> int*int) -> int -> 'b -> 'c) (ast : 'b) =
-    f tokenToRange zeroPos ast
+let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
+    let args = {
+        tokenToRange = fun _ -> 0,0
+        zeroPosition = 0
+        clearAST = false
+        filterEpsilons = true
+    }
+    f args ast
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
@@ -82,7 +86,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            let res = translate RNGLR.ParseCounter.translate false mAst
+            let res = translate RNGLR.ParseCounter.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([5], res)
 
@@ -95,7 +99,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
-            let res = translate RNGLR.ParseCalc.translate false mAst
+            let res = translate RNGLR.ParseCalc.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual(List.replicate 8 105, res)
 
@@ -108,7 +112,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            let res = translate RNGLR.ParseAttrs.translate false mAst 3 : int list
+            let res = translate RNGLR.ParseAttrs.translate mAst 3 : int list
             printfn "Result: %A" res
             Assert.AreEqual([48], res)
 
@@ -126,7 +130,7 @@ type ``RNGLR parser tests with simple lexer`` () =
             //mAst.EliminateCycles()
             mAst.ChooseSingleAst()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
-            let res = translate RNGLR.ParseCycle.translate false mAst
+            let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([0], res)
 
@@ -139,7 +143,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             RNGLR.ParseEpsilon.defaultAstToDot mAst "epsilon.dot"
-            let res = translate RNGLR.ParseEpsilon.translate false mAst
+            let res = translate RNGLR.ParseEpsilon.translate mAst
             Assert.AreEqual([3], res)
 
     [<Test>]
@@ -152,6 +156,6 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Success mAst ->
             mAst.PrintAst()
             RNGLR.ParseCond.defaultAstToDot mAst "ast.dot"
-            let res = translate RNGLR.ParseCond.translate false mAst
+            let res = translate RNGLR.ParseCond.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([40; 22], res)

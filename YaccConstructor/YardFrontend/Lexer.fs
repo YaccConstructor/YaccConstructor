@@ -575,7 +575,7 @@ and _fslex_main  _fslex_state lexbuf =
                        let string_start = lexbuf.StartPos in
                        string lexbuf;
                        lexbuf.StartPos <- string_start;
-                       STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1, lexbuf.EndPos))
+                       STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1, lexbuf.EndPos.ShiftColumnBy -1))
                      
 # 580 "Lexer.fs"
           )

@@ -44,6 +44,13 @@ type AST =
     val mutable other : Family[]
     val mutable pos : int
     new (f, o) = {pos = -1; first = f; other = o}
+    member inline this.findFamily f =
+        if f this.first then this.first
+        elif this.other <> null then
+            match Array.tryFind f this.other with
+            | Some res -> res
+            | None -> Unchecked.defaultof<_>
+        else Unchecked.defaultof<_>
 
 and Family =
     struct
@@ -258,7 +265,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         for i = 0 to order.Length - 1 do
             let x = order.[i]
             if x.pos <> -1 then
-                let family = x.first.nodes
+                let inline goodNodes (family : Family) =
+                    family.nodes.isForAll (function
+                        | :? AST as ast -> ast.pos < x.pos
+                        | _ -> true)
+                let family = (x.findFamily goodNodes).nodes
                 let mutable j, k = 0, family.Length-1
                 let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
                 (*let left = 

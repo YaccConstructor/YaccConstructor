@@ -116,7 +116,7 @@ let () =
                     |> fe.ParseGrammar
                     |> ref
                 with
-                | e -> FEError e.Message |> raise
+                | e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 //            printfn "%A" <| ilTree
             // Apply convertions

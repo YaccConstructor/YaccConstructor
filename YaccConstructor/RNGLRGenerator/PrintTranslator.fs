@@ -29,7 +29,8 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter) positionType fullPath =
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
+        (out : System.IO.StreamWriter) positionType fullPath =
     let tab = 4
 
     let rules = grammar.rules
@@ -154,7 +155,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                                 else
                                     let start = ac.file.LastIndexOfAny [|'\\'; '/'|] + 1
                                     ac.file.Substring start
-                            (sprintf "# %d \"%s\"" ac.startPos.line file)::l)
+                            //(sprintf "# %d \"%s\"" ac.startPos.line file)::l)
+                            l)
                     |> List.map wordL
                     |> aboveListL
                 s

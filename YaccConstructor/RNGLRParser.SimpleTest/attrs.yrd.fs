@@ -100,7 +100,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
               _rnglr_cycle_res := (
-                # 35 "Attrs.yrd"
                 arg
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -117,7 +116,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               (match ((unbox _rnglr_children.[1]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
                |> List.iter (fun (_rnglr_var_1) -> 
                 _rnglr_cycle_res := (
-                  # 28 "Attrs.yrd"
                   r
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res

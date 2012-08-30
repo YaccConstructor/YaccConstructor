@@ -22,10 +22,10 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
  
 type Range = struct
-	val Start: Lexing.Position
-	val End: Lexing.Position
+    val Start: Lexing.Position
+    val End: Lexing.Position
 
-	new (start,end_) = {Start = start; End = end_}
+    new (start,end_) = {Start = start; End = end_}
 end
 
 exception Parse_error
@@ -42,14 +42,13 @@ let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
 let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
-    let ext = filename.Substring(filename.LastIndexOf(".") + 1) in
-    let frontend = FrontendsManager.GetByExtension ext in
+    let ext = filename.Substring(filename.LastIndexOf(".") + 1)
+    let frontend = FrontendsManager.GetByExtension ext
     let userDefs =
         let args = (!currentFilename).Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
-	in
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
 
     match FrontendsManager.GetByExtension ext with

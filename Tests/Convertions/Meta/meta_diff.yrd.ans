@@ -1,11 +1,9 @@
 b[s]:  empty;
 
-yard_rule_2:  f;
+yard_rule_2:  b[l];
 
-yard_rule_5[l]:  b[l];
+yard_rule_r1_3:  l = yard_rule_2 yard_rule_r1_3;
 
-yard_rule_r1_6[yard_arg_4]:  l = yard_rule_5[yard_arg_4] yard_rule_r1_6[l];
+yard_rule_r1_1:  l = f yard_rule_r1_3;
 
-yard_rule_r1_3:  l = yard_rule_2 yard_rule_r1_6[l];
-
-+s:  yard_rule_r1_3;
++s:  yard_rule_r1_1;

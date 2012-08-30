@@ -1,6 +1,6 @@
 @echo off
 
-for /R "../../../../Tests/Convertions/Meta/" %%i in (meta_*.yrd) do (
-	YaccConstructor.exe -f YardFrontend -g YardPrinter -c ExpandMeta -i %%i > %%i.ans
+for /R %%i in (meta_*.yrd) do (
+    ..\..\..\YaccConstructor\Main\bin\Release\YaccConstructor.exe -f YardFrontend -g YardPrinter -c ExpandMeta -i %%i > %%i.ans
 )
 

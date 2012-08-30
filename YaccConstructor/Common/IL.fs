@@ -44,6 +44,8 @@ module Source = begin
             t (text, lexbuf.StartPos, lexbuf.EndPos)
         new (text) =
             t (text, new Position(), new Position(), "")
+        override this.ToString() =
+            this.text + " #!=<>%$^* " + string this.startPos.absoluteOffset + " " + string this.endPos.absoluteOffset + " " + this.file
     // TODO: make something with toString overriding of Source.t   
     let toString (x : t) = x.text
 end

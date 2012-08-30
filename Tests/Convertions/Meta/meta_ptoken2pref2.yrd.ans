@@ -1,7 +1,5 @@
 mrArg:  NUMBER;
 
-yard_rule_1:  mrArg;
+yard_rule_metar_1:  mrArg;
 
-yard_rule_metar_2:  yard_rule_1;
-
-+s:  yard_rule_metar_2;
++s:  yard_rule_metar_1;

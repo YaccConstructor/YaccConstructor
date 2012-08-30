@@ -152,7 +152,7 @@ type ``Convertions tests`` () =
            | Some gen -> gen
            | None -> failwith "YardPrinter is not found." 
         printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
+        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","meta_*.yrd") 
         |> Seq.iter 
             (fun srcFile ->  
                 Namer.resetRuleEnumerator()

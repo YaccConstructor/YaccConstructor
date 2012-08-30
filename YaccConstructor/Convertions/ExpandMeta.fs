@@ -87,9 +87,10 @@ let expandMeta body metaRules expanded res =
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
     let rec expandBody body (metaRules: Dictionary<string,Rule.t<Source.t,Source.t> >)
-            (expanded : Dictionary<string, Production.t<'a,'b>>) res =
+            (expanded : Dictionary<_, Production.t<'a,'b>>) res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
+        /// It's better to use hash
         let getKey body = body.ToString()
             //|> (fun x -> printfn "k = %s" x; x)
 
@@ -184,7 +185,7 @@ let expandMeta body metaRules expanded res =
                 | PLiteral _ as literal -> (literal, res)
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
-                    if (metaArgs.IsEmpty) then (PRef(name, attrs), res)
+                    if metaArgs.IsEmpty then (PRef(name, attrs), res)
                     else expandMetaRef (Source.toString name) attrs metaArgs 
                 | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
                 | PRepet (_) -> failwith "Unrealised meta-expanding of permutation"
@@ -255,7 +256,7 @@ let expandMetaRules rules =
     /// hash table for metarules
     let metaRulesTbl = new Dictionary<string,Rule.t<Source.t,Source.t> >(200)
     /// hash table for references to expanded metarules
-    let refsTbl = new Dictionary<string, Production.t<_,_> >(200)
+    let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
     collectMeta rules metaRulesTbl
     replaceMeta rules (metaRulesTbl, refsTbl) [(*result*)]
     |> List.rev

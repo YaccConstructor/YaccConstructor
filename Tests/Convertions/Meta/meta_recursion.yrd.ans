@@ -1,25 +1,12 @@
-yard_rule_1:  NUMBER;
+yard_rule_yard_item_1_2: 
+      NUMBER
+    | NUMBER IDENT;
 
-yard_rule_3:  yard_rule_1;
-
-yard_rule_yard_item_1_4: 
-      yard_rule_3
-    | yard_rule_3 IDENT;
-
-yard_rule_5:  yard_rule_yard_item_1_4;
-
-yard_rule_8[yard_h]:  yard_rule_5;
-
-yard_rule_yard_list_9[yard_arg_7]: 
+yard_rule_yard_list_3: 
       empty { [] }
-    | <yard_h> = yard_rule_8[yard_arg_7] <yard_t> =
-        yard_rule_yard_list_9[yard_h] { yard_h::yard_t };
-
-yard_rule_yard_list_6: 
-      empty { [] }
-    | <yard_h> = yard_rule_5 <yard_t> = yard_rule_yard_list_9[yard_h]
+    | <yard_h> = yard_rule_yard_item_1_2 <yard_t> = yard_rule_yard_list_3
         { yard_h::yard_t };
 
-yard_rule_do_2:  yard_rule_yard_list_6;
+yard_rule_do_1:  yard_rule_yard_list_3;
 
-+s:  yard_rule_do_2;
++s:  yard_rule_do_1;

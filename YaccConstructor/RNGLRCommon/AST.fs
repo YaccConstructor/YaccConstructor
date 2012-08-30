@@ -220,8 +220,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         else
                             match
                                 children.other |> Array.tryFind
-                                    (fun family ->
-                                        family.nodes.isForAll (smaller children.pos))
+                                    (fun family -> family.nodes.isForAll (smaller children.pos))
                                 with
                             | Some v ->
                                 children.first <- v
@@ -264,7 +263,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             | _ -> failwith ""
         for i = 0 to order.Length - 1 do
             let x = order.[i]
-            if x.pos <> -1 then
+            if x.pos = -1 then
+                f i ranges
+                ranges.Add Unchecked.defaultof<_>
+            else
                 let inline goodNodes (family : Family) =
                     family.nodes.isForAll (function
                         | :? AST as ast -> ast.pos < x.pos
@@ -353,7 +355,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         result.[ch.pos]
                     | _ -> failwith ""
                 let x = order.[i]
-                if x.pos <> -1 then
+                if x.pos = -1 then result.Add Unchecked.defaultof<_>
+                else
                     let children = x
                     result.Add <|
                         let inline translateFamily (fam : Family) =

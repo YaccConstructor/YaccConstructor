@@ -134,10 +134,7 @@ namespace Test
                     let i = r.GlobalID0
                     let nT = nTerms
                     let _base = nT * size
-                    let i_s = i * nT
-                    let res_id_base = (l * _base) + i_s
-                    let l_s = (l - 1) * _base
-                    let i_s_1 = i_s + 1
+                    let res_id_base = (l * _base) + i * nT
                     let iter = provider.Loop(0, l, kIdx=>
                         from k in kIdx
                         let left_base_idx = (k * _base) + i * nTerms

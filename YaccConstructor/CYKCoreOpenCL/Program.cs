@@ -12,33 +12,6 @@ using BT = Brahma.Types;
 
 namespace Test
 {
-    struct SingleCellData
-    {
-        public BT.uint16 rId;
-        public BT.uint32 k;
-        public BT.uint8 lblNum;
-        public BT.uint8 lblWeight;
-        public BT.uint8 lblState;
-
-        public SingleCellData(BT.uint16 _rId, BT.uint32 _k, BT.uint8 _lblNum, BT.uint8 _lblWeight, BT.uint8 _lblState)
-        {
-            rId = _rId;
-            k = _k;
-            lblNum = _lblNum;
-            lblWeight = _lblWeight;
-            lblState = _lblState;
-        }
-
-        public SingleCellData(BT.uint16 _rId, Rule rule)
-        {
-            rId = _rId;
-            k = 0;
-            lblNum = rule.lblNum;
-            lblWeight = rule.lblWeight;
-            lblState = (BT.uint8)((rule.lblNum == 0) ? 1 : 0);
-        }
-    }
-
     struct Rule
     {
         public BT.uint16 a;
@@ -59,8 +32,8 @@ namespace Test
 
     class Program
     {
-        static int32 magicConst = 3;
-        static int32 magicConst_c = 1;        
+        static int32 ruleRepresentationLength = 3;
+        static int32 cellDataRepresentationLength = 1;        
         static void Main(string[] args)
         {
             var start = System.DateTime.Now;
@@ -75,7 +48,7 @@ namespace Test
                 for (int j = 0; j < size; j++)
                 {
                     System.Console.Write(arr[i * size + j]);
-                    if (j > 0 && (j + 1) % magicConst_c == 0)
+                    if (j > 0 && (j + 1) % cellDataRepresentationLength == 0)
                     {
                         System.Console.Write("|");
                     }
@@ -93,20 +66,14 @@ namespace Test
         static void Do()
         {
             var c = 4;
-            var inArr = new int32
-                             //[]
-                             [c] 
-                             //{ 2, 1, 2 }
-                             //{2, 2, 2, 2, 2, 2, 2, 1, 2 }
-                            //{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
-                            //{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2 }
-                            ;
+            var inArr = new int32 [c];
             for (int _i = 0; _i < c; _i++) { inArr[_i] = 2; }
             inArr[c-2] = 1;
             int32 size = inArr.Length;
 
-            var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,3,2,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0)
-            };
+            var rules = new Rule[] {new Rule(1,2,3,0,0),new Rule(2,3,2,0,0),new Rule(2,1,0,0,0),new Rule(3,2,0,0,0)};
+
+            var nTermRules = (from rule in rules where rule.c > 0 select rule).ToArray();
 
             int32 nTerms = 3;
 
@@ -127,8 +94,8 @@ namespace Test
 
             var commandQueue = new CommandQueue(provider, provider.Devices.First());            
 
-            var bArr = new int32[size * size * nTerms * magicConst_c];
-            var rulesArr = new int32[rules.Length * magicConst];
+            var bArr = new int32[size * size * nTerms * cellDataRepresentationLength];
+            var rulesArr = new int32[nTermRules.Length * ruleRepresentationLength];
 
             for (int i = 0; i < size; i++)
             {
@@ -136,7 +103,7 @@ namespace Test
                 {
                     if (inArr[i] == (rules[j]).b && (rules[j]).c == 0)
                     {
-                        var _base = i * nTerms * magicConst_c + (int)(rules[j].a - 1) * magicConst_c;
+                        var _base = (i * nTerms  + (int)(rules[j].a - 1)) * cellDataRepresentationLength;
                         bArr[_base] = rules[j].a;
                         //bArr[_base + 1] = 0;
                         //bArr[_base + 2] = (rules[j].lblNum == 0 ? 1 : 0);
@@ -146,20 +113,20 @@ namespace Test
                 }
             }
 
-            for (int i = 0; i < rules.Length; i++)
+            for (int i = 0; i < nTermRules.Length; i++)
             {
-                var _base =  i * magicConst;
-                rulesArr[_base] = rules[i].a;
-                rulesArr[_base + 1] = rules[i].b;
-                rulesArr[_base + 2] = rules[i].c;
+                var _base =  i * ruleRepresentationLength;
+                rulesArr[_base] = nTermRules[i].a;
+                rulesArr[_base + 1] = nTermRules[i].b;
+                rulesArr[_base + 2] = nTermRules[i].c;
                 //rulesArr[_base + 3] = rules[i].lblNum;
                 //rulesArr[_base + 4] = rules[i].lblWeight;
             }            
 
             var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
             var rulesBuffer = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
-            
-            int32 rLength = rules.Length;
+
+            int32 rLength = nTermRules.Length;
 
             var processRow = provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
                 (range, l, a, _rules) =>
@@ -177,7 +144,7 @@ namespace Test
                         let right_base_idx = ((l - k - 1) * _base) + (k + i + 1) * nTerms
                         let iter2 = provider.Loop(0, rLength, rIdxs =>
                             from rId in rIdxs
-                            let rule_base = rId * magicConst
+                            let rule_base = rId * ruleRepresentationLength
                             let rule_a = _rules[rule_base]
                             let rule_b = _rules[rule_base + 1]
                             let rule_c = _rules[rule_base + 2]
@@ -195,8 +162,8 @@ namespace Test
                 commandQueue.Add(processRow.Run(new _1D(size - l), l, buffer, rulesBuffer)).Finish();
             }
             
-            commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();
-            toMatrix(bArr, (int)(size * nTerms * magicConst_c));
+            commandQueue.Add(buffer.Read(0, size * size * nTerms * cellDataRepresentationLength, bArr)).Finish();
+            toMatrix(bArr, (int)(size * nTerms * cellDataRepresentationLength));
             buffer.Dispose();
 
             commandQueue.Dispose();

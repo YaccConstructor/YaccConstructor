@@ -39,7 +39,7 @@ let seqify = function
 
 let printSeqProduction binding = function
     | POpt(x) -> sprintf "(match %s with None -> [] | Some(ast) -> ast)" binding 
-    | PToken(s,_) | PLiteral(s,_) -> leafConstr s binding
+    | PToken s | PLiteral s -> leafConstr s.text binding
     | PSome(p) -> sprintf "List.concat %s" binding
     | PMany(p) -> sprintf "List.concat %s" binding
     | _ -> binding
@@ -48,10 +48,11 @@ let printSeqProduction binding = function
 let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) = 
     match production with
     | PSeq(elements, _) -> 
-        if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
-            PSeq(elements, Some("Node(\"empty\", [])", (0,0,"")))
-        else if elements.Length = 1 && (match elements.Head.rule with PRef(("error",_),_) -> true | _ -> false) then
-            PSeq(elements, Some("Node(\"error\", [])", (0,0,"")))
+        //if elements.Length = 1 && (match elements.Head.rule with PRef(("empty",_),_) -> true | _ -> false) then
+        //    PSeq(elements, Some <| new Source.t("Node(\"empty\", [])"))
+        //else
+        if elements.Length = 1 && (match elements.Head.rule with PRef(n,_) when n.text = "error" -> true | _ -> false) then
+            PSeq(elements, Some <| new Source.t("Node(\"error\", [])"))
         else
             PSeq(
                 elements 
@@ -60,18 +61,19 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                         if elem.omit then 
                             elem
                         else
-                            let binding = Some((sprintf "S%d" (i+1)), (0,0,""))
+                            let binding = Some <| new Source.t(sprintf "S%d" (i+1))
                             match elem.rule, elem.binding with
                             | PToken _, None | PLiteral _, None | PRef _, None -> { elem with binding=binding }
-                            | PToken _, Some((userBinding, _)) ->  { elem with binding=binding }
+                            | PToken _, Some _ ->  { elem with binding=binding }
                             | PAlt(left,right), _ -> { elem with binding=binding; rule=PAlt(_buildAstSimple "" left,_buildAstSimple "" right) }
                             | PMany(p), _ -> { elem with binding=binding; rule=PMany(_buildAstSimple "" p) }
                             | PSome(p), _ -> { elem with binding=binding; rule=PSome(_buildAstSimple "" p) }
                             | POpt(p), _  -> { elem with binding=binding; rule=POpt (_buildAstSimple "" p) }
                             | PSeq([elem_inner],None), _ -> { elem_inner with binding=binding; rule=_buildAstSimple ruleName elem_inner.rule }
-                            | x, _ -> { elem with binding=Some((sprintf "FAIL(%A)_S%d" x (i+1)), (0,0,"")); rule=_buildAstSimple ruleName elem.rule }
+                            | x, _ -> { elem with binding= Some <| new Source.t(sprintf "FAIL(%A)_S%d" x (i+1))
+                                                  rule=_buildAstSimple ruleName elem.rule }
                     )
-                ,(                    
+                ,
                     elements
                     |> List.mapi (fun i elem -> (i, elem)) 
                     |> List.choose 
@@ -85,13 +87,13 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                         )
                     |> String.concat "; "
                     |> if ruleName="" then sprintf "List.concat [%s]" else sprintf "Node(\"%s\", List.concat [%s])" ruleName
-                    , (0,0,"")
-                )|> Some)
+                    |> (fun x -> Some <| new Source.t(x)))
+
     | PAlt(left, right) -> PAlt(_buildAstSimple ruleName left, _buildAstSimple ruleName right)
     | x -> _buildAstSimple ruleName (seqify x)
 
 let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  = 
-    ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple (fst rule.name) rule.body) } )
+    ruleList |> List.map (fun rule -> {rule with body=(_buildAstSimple rule.name.text rule.body) } )
 
 type BuildAstSimple() = 
     inherit Convertion()

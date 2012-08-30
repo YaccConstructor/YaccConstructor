@@ -28,12 +28,12 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     let start =
         rules
         |> Array.findIndex (fun rule -> rule._public)
-    let left = rules |> Array.map (fun x -> x.name |> fst |> indexator.nonTermToIndex)
+    let left = rules |> Array.map (fun x -> x.name.text |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function
-            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| fst nTerm)::acc
-            | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| fst token)::acc
-            | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| fst lit)::acc
+            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| nTerm.text)::acc
+            | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| token.text)::acc
+            | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| lit.text)::acc
             | PSeq (s,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc
             | _ -> failwith "Unexpected construction in grammar"
         rules

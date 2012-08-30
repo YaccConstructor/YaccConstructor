@@ -26,7 +26,7 @@ open Production
 open Namer
 open TransformAux
 
-let dummyPos s = (s,(0,0,""))
+let dummyPos s = new Source.t(s)
 
 let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0

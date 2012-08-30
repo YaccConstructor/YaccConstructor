@@ -32,23 +32,7 @@ let curNum = ref 0
 
 let resetRuleEnumerator () = curNum := 0
 
-let private genYardName n (l, c, f) = (sprintf "%s_%d" (withPrefix n) !curNum), (l, c, f)
-
-let createName ((n:string), (l, c, f)) =     
-    let addPrefix = 
-      try
-        let yardPrefix = withPrefix ""
-        if (n.Substring (0, System.Math.Min(n.Length, yardPrefix.Length))) = yardPrefix 
-        then fun x->x 
-        else withPrefix
-      with (*Invalid_argument*) _ -> withPrefix
-    in sprintf "%s_%d" (addPrefix n) !curNum, (l, c, f)
-
-/// Create new Source.t item with name, consisting of yard prefix, specified middle
-///    and postfix, generated as regularly incrementing number
-let createNewName name = 
-    incr curNum;
-    createName name
+let private genYardName n (b, e, f) = new Source.t(sprintf "%s_%d" (withPrefix n) !curNum, b, e, f)
 
 module Names =
  begin
@@ -77,6 +61,28 @@ module Names =
    let predicate = x "predicate"
    let brackets = x "exp_brackets"
 end 
+
+let newName (n : string) =
+    let addPrefix = 
+      try
+        let yardPrefix = withPrefix ""
+        if (n.Substring (0, System.Math.Min(n.Length, yardPrefix.Length))) = yardPrefix 
+        then fun x->x 
+        else withPrefix
+      with (*Invalid_argument*) _ -> withPrefix
+    sprintf "%s_%d" (addPrefix n) !curNum
+
+let createName ((n:string), b, e, f) = newName n, b, e, f
+
+/// Create new Source.t item with name, consisting of yard prefix, specified middle
+///    and postfix, generated as regularly incrementing number
+let createNewName name = 
+    incr curNum;
+    createName name
+
+let nextName name = 
+    incr curNum;
+    newName name
 
 (** returns true if given name is metarule name for EBNF *)
 let isEBNFmeta name = 

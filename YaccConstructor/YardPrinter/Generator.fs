@@ -21,7 +21,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-let printSourceOpt = function None -> "" | Some arg -> "\n{"+(fst arg)+"}\n\n"
+let printSourceOpt = function None -> "" | Some (arg : Source.t) -> "\n{" + arg.text + "}\n\n"
 
 type TextBox =
 | Tabbed of seq<TextBox> 
@@ -135,7 +135,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction false opt)); yield Str("?")}
         | _ -> Seq.singleton <| Str("ERROR")
 
-    seq {yield Line(seq{yield Str(startSign + fst rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  )
+    seq {yield Line(seq{yield Str(startSign + rule.name.text + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  )
                                         + (printArgs rule.args) + ":");
          yield Str(" "); yield! printProduction false rule.body; yield Str(";\n")})}
 

@@ -433,7 +433,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 112 "Parser.fsy"
-                               let def = parseRules (fst _2) in
+                               let def = parseRules _2.text in
                                (def.grammar @ (fst _3), joinMaps def.options (snd _3)) 
                              
                    )

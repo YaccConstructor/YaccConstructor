@@ -41,10 +41,10 @@ let mergeAlter (ruleList: Rule.t<Source.t, Source.t> list) =
     ruleList |>
         List.choose 
             (fun rule ->
-                if findedRules.Contains(fst rule.name) then
+                if findedRules.Contains rule.name.text then
                     None
                 else
-                    findedRules.Add(fst rule.name) |> ignore
+                    findedRules.Add rule.name.text |> ignore
                     Some <| buildAlt (ruleList |> List.filter (fun ruleInner -> rule.name = ruleInner.name))
             )
     

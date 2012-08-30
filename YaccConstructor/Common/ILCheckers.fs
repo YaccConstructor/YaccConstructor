@@ -20,6 +20,7 @@
 module Yard.Core.Checkers
 
 open Yard.Core.IL.Production
+open Yard.Core.IL
 open System.Collections.Generic
 open System.Linq
 
@@ -41,11 +42,11 @@ let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
                    ;{rule = PRef(_);omit =_ ;binding =_;checker = _}],_) -> true 
             | _ -> false)
 
-let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
-    let declaredRules = def.grammar |> List.map (fun r -> fst r.name)
+let GetUndeclaredNonterminalsList (def:Yard.Core.IL.Definition.t<Source.t, Source.t>) =
+    let declaredRules = def.grammar |> List.map (fun r -> r.name.text)
     let undeclaredRules = new HashSet<_>()
-    let addUndeclaredRule (name_,_) additionRules = 
-        let name = name_.ToString()
+    let addUndeclaredRule (name : Source.t) additionRules = 
+        let name = name.text
         if not (List.exists ((=) name) declaredRules
                 || Seq.exists ((=) name) additionRules)
         then
@@ -74,7 +75,7 @@ let GetUndeclaredNonterminalsList(def:Yard.Core.IL.Definition.t<_,_>) =
     |> List.iter 
         (fun r -> 
             let additionRules = new HashSet<_>()
-            r.metaArgs |> List.iter (fun (i,_) -> additionRules.Add(i.ToString()) |> ignore)
+            r.metaArgs |> List.iter (fun i -> additionRules.Add i.text |> ignore)
             getUndeclaredRules additionRules r.body)
 
     List.ofSeq undeclaredRules
@@ -84,9 +85,9 @@ let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
     let declaredRules = rules |> List.map (fun r -> r.name)
     let reachedRules = new HashSet<_>()
     
-    let getAdditionRules (rule:Yard.Core.IL.Rule.t<_,_>) =
+    let getAdditionRules (rule:Yard.Core.IL.Rule.t<Source.t,Source.t>) =
         let newAdditionRules = new HashSet<_>()
-        rule.metaArgs |> List.iter (fun (i,_) -> newAdditionRules.Add(i.ToString()) |> ignore)
+        rule.metaArgs |> List.iter (fun i -> newAdditionRules.Add i.text |> ignore)
         newAdditionRules
 
     let rec getReachableRules additionRules body =
@@ -108,18 +109,18 @@ let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
         | PLiteral _ 
         | PToken _  -> ()
 
-    and addReachedRule (name_,_) additionRules =  
-        let name = name_.ToString()
+    and addReachedRule (name : Source.t) additionRules =  
+        let name = name.text
         if not (Seq.exists ((=) name) additionRules
            || Seq.exists ((=) name) reachedRules)
         then
             reachedRules.Add name |> ignore
-            let rule = rules |> List.find (fun r -> fst r.name = name)
+            let rule = rules |> List.find (fun r -> r.name.text = name)
             let newAdditionRules = getAdditionRules rule
             getReachableRules newAdditionRules rule.body
 
     let start_rule = rules |> List.find (fun r -> r._public)
-    fst start_rule.name |> reachedRules.Add |> ignore
+    start_rule.name.text |> reachedRules.Add |> ignore
     getReachableRules (getAdditionRules start_rule) start_rule.body
     reachedRules |> Seq.toList
 
@@ -128,4 +129,4 @@ let reachableRulesInfo (def: Yard.Core.IL.Definition.t<_,_>) =
 
 let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
   let reachedRules = reachableRulesInfo def
-  def.grammar |> List.exists (fun r -> reachedRules |> Seq.exists (fun n -> n = fst r.name) |> not)
+  def.grammar |> List.exists (fun r -> reachedRules |> Seq.forall (fun n -> n <> r.name.text))

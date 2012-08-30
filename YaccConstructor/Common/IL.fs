@@ -19,10 +19,33 @@
 
 module Yard.Core.IL
 module Source = begin
+    open Microsoft.FSharp.Text
+    [<Struct>]
+    type Position =
+        val absoluteOffset : int
+        val line : int
+        val column : int
+        new (absoluteOffset, line, column) = {absoluteOffset = absoluteOffset; line = line; column = column}
+        new (fslexPos : Lexing.Position) =
+            {absoluteOffset = fslexPos.AbsoluteOffset; line = fslexPos.Line; column = fslexPos.Column}
     /// Type of elementary part of source grammar
-    type t = string * (int * int * string) 
+    [<Struct>]
+    type t =
+        val text : string
+        val startPos : Position
+        val endPos : Position
+        val file : string
+
+        new (text, startPos, endPos, file) =
+            {text = text; startPos = startPos; endPos = endPos; file = file}
+        new (text, startPos : Lexing.Position, endPos : Lexing.Position) =
+            t (text, new Position(startPos), new Position(endPos), startPos.FileName)
+        new (text, lexbuf : Lexing.LexBuffer<_>) =
+            t (text, lexbuf.StartPos, lexbuf.EndPos)
+        new (text) =
+            t (text, new Position(), new Position(), "")
     // TODO: make something with toString overriding of Source.t   
-    let toString ((r,_):t):string = r
+    let toString (x : t) = x.text
 end
   
 module Production = begin

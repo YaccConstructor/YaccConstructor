@@ -27,20 +27,20 @@ open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
 let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> if List.exists ((fst >> (=)) rule.name) starts then { rule with _public=true } else rule)
+    grammar |> List.map (fun rule -> if List.exists ((=) rule.name.text) starts then { rule with _public=true } else rule)
 
 let rec _addBindings = function
-    | PSeq(elements, Some(ac,_)) -> 
+    | PSeq(elements, Some (ac : Source.t)) -> 
         (elements
          |> List.mapi 
             (
                 fun i elem -> 
-                    if Regex.Match(ac, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
-                        { elem with rule=(_addBindings elem.rule) ; binding=Some((sprintf "_S%d" (i+1)),(0,0,"")) } 
+                    if Regex.Match(ac.text, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
+                        { elem with rule=(_addBindings elem.rule) ; binding=Some(new Source.t(sprintf "_S%d" (i+1))) } 
                     else 
                         { elem with rule=_addBindings elem.rule} 
             ) 
-        , Some(Regex.Replace(ac, "\\$(\\d+)", "_S$1"), (0,0,"")))
+        , Some(new Source.t(Regex.Replace(ac.text, "\\$(\\d+)", "_S$1"))))
         |> PSeq
     | PSeq(elements, None) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
@@ -58,9 +58,16 @@ let ParseFile fileName =
     let lexbuf = LexBuffer<_>.FromTextReader reader
     try 
         let (res:System.Tuple<string option, string list, string list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
-        let defHead = match res.Item1 with Some(str) -> Some(str, (0,0,"")) | _ -> None
-        { new Definition.t<Source.t, Source.t> with info = {new Definition.info with fileName = ""} and head = defHead and grammar = addBindings (addStarts res.Item3 res.Item4) and foot = None and options = Map.empty}
+        let defHead = res.Item1 |> Option.map (fun str -> new Source.t(str))
+        { new Definition.t<Source.t, Source.t>
+            with info = {new Definition.info with fileName = ""}
+            and head = defHead
+            and grammar = addBindings (addStarts res.Item3 res.Item4)
+            and foot = None
+            and options = Map.empty}
     with e -> // when e.Message="parse error" -> 
         let pos = lexbuf.EndPos
-        let extendedMessage = sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
+        let extendedMessage =
+            sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum
+                (pos.pos_cnum - pos.pos_bol) (new System.String(lexbuf.Lexeme)) (e.ToString())
         failwith extendedMessage

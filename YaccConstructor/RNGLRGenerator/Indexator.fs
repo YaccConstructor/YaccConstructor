@@ -38,8 +38,8 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
             | PSeq (s, _) ->
                 s |> List.map (fun e -> e.rule)
                 |> List.fold collectTermsAndLits (accTerms, accLiterals)
-            | PLiteral lit -> (accTerms, (fst lit)::accLiterals)
-            | PToken token -> ((fst token)::accTerms, accLiterals)
+            | PLiteral lit -> accTerms, lit.text::accLiterals
+            | PToken token -> token.text::accTerms, accLiterals
             | x -> failwithf "Unexpected construction %A in grammar" x
                     
         rules
@@ -49,7 +49,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
 
     let nonTermsConnect = 
         rules
-        |> Array.map (fun x -> fst x.name)
+        |> Array.map (fun x -> x.name.text)
         //|> Array.append ([|"error"|])
         |> unique
         |> connect

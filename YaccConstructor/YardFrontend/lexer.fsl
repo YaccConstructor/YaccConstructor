@@ -18,6 +18,7 @@
 
  module Yard.Frontends.YardFrontend.GrammarLexer
  open Microsoft.FSharp.Text.Lexing
+ open Yard.Core.IL
  open Yard.Frontends.YardFrontend.GrammarParser
  open Microsoft.FSharp.Text
  
@@ -89,12 +90,12 @@ let warning (lexbuf:Lexing.LexBuffer<_>) msg =
 
 let to_srt ch_arr = (Array.map (fun x -> string x) ch_arr) |> String.concat ""
 
-let _lexeme lexbuf (n,n') =
-  let len = n' - n in
-  currentFileContent.Value.Substring(n,len)
+let _lexeme lexbuf (n : Position, n' : Position) =
+  let len = n'.AbsoluteOffset - n.AbsoluteOffset in
+  currentFileContent.Value.Substring(n.AbsoluteOffset, len)
 
-let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) = _lexeme lexbuf (lStart,lEnd), (lStart, lEnd, !currentFile)
-let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos.AbsoluteOffset,lexbuf.EndPos.AbsoluteOffset)
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) = new Source.t(_lexeme lexbuf (lStart,lEnd), lStart, lEnd)
+let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos, lexbuf.EndPos)
 
 }
 
@@ -140,36 +141,36 @@ and  main = parse
          main lexbuf
        }
      | "=>{"
-       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+       { let n1 = lexbuf.EndPos in
          let n2 = handle_lexical_error predicate lexbuf in
          PREDICATE (from_lexbuf lexbuf (n1,n2))
        }
      | '@' identstart identbody * {DLABEL(lex2source lexbuf)}
      | identstart identbody *
        {  let text = lex2source lexbuf in
-          match (fst text) with
+          match text.text with
           | "include" -> INCLUDE
           | _ -> 
-                match (fst text).[0] with
+                match text.text.[0] with
                 | c when List.contains c ['a'..'z'] -> LIDENT text
                 | c when List.contains c ['A'..'Z'] -> UIDENT text
                 |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF}
      | '{'
-       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+       { let n1 = lexbuf.EndPos in
          brace_depth := 1;
          let n2 = handle_lexical_error action lexbuf in
          ACTION (from_lexbuf lexbuf (n1,n2))
        }
     | '<'
-       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+       { let n1 = lexbuf.EndPos in
          ang_br_depth := 1;
          let n2 = handle_lexical_error pattern lexbuf in
          PATTERN (from_lexbuf lexbuf (n1,n2))
        }
     | '['
-       { let n1 = lexbuf.EndPos.AbsoluteOffset in
+       { let n1 = lexbuf.EndPos in
          sq_br_depth := 1;
          let n2 = handle_lexical_error param lexbuf in
          PARAM (from_lexbuf lexbuf (n1,n2))
@@ -179,7 +180,7 @@ and  main = parse
         let string_start = lexbuf.StartPos in
         string lexbuf;
         lexbuf.StartPos <- string_start;
-        STRING (from_lexbuf lexbuf (string_start.pos_cnum + 1, lexbuf.EndPos.AbsoluteOffset - 1))
+        STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1, lexbuf.EndPos))
       }
     | "(" {LPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
     | ")" {RPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
@@ -190,7 +191,7 @@ and  main = parse
 
 (*  ------------------------ *)
 and predicate = parse
-    "}=>"    { lexbuf.StartPos.AbsoluteOffset  }
+    "}=>"    { lexbuf.StartPos }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -209,7 +210,7 @@ and action = parse
       action lexbuf }
   | '}'
     { decr brace_depth;
-      if !brace_depth = 0 then lexbuf.StartPos.AbsoluteOffset else action lexbuf }
+      if !brace_depth = 0 then lexbuf.StartPos else action lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -229,7 +230,7 @@ and pattern = parse
       pattern lexbuf }
   | '>'
     { decr ang_br_depth;
-      if !ang_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else pattern lexbuf }
+      if !ang_br_depth = 0 then lexbuf.StartPos else pattern lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -250,7 +251,7 @@ and param = parse
       param lexbuf }
   | ']'
     { decr sq_br_depth;
-      if !sq_br_depth = 0 then lexbuf.StartPos.AbsoluteOffset else param lexbuf }
+      if !sq_br_depth = 0 then lexbuf.StartPos else param lexbuf }
   | '"' { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();

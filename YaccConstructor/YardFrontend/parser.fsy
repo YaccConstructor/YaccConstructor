@@ -109,7 +109,7 @@ action_opt: ACTION { Some $1 }
 rule_nlist: rule SEMICOLON rule_nlist 
         { ((fst $1) :: (fst $3), joinMaps (snd $1) (snd $3)) }
     | INCLUDE STRING rule_nlist 
-        { let def = parseRules (fst $2) in
+        { let def = parseRules $2.text in
           (def.grammar @ (fst $3), joinMaps def.options (snd $3)) 
         } 
     | { ([], Map.empty) }

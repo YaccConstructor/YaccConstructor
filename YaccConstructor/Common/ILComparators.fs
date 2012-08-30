@@ -26,7 +26,7 @@ open Yard.Core.IL.Definition
 
 let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
-        if (fst a = fst b) then true
+        if (a.text = b.text) then true
         else printfn "bad %A %A" a b; false
 
     let srcOptEquals a b =
@@ -73,6 +73,6 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             argsAreEqual rule1.args rule2.args &&
             ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            fst rule1.name = fst rule2.name
+            rule1.name.text = rule2.name.text
         ) g1 g2
 

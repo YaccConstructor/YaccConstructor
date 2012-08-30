@@ -28,7 +28,8 @@ open Convertions.TransformAux
 open NUnit.Framework
 
 
-let dummyPos s = (s,(0,0,""))
+let dummyPos s = new Source.t(s)
+let dummyToken s = PToken <| new Source.t(s)
 
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
@@ -41,7 +42,7 @@ type ``Convertions tests`` () =
     [<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
         Namer.resetRuleEnumerator()
-        let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0,""))}
+        let dummyRule = {omit=false; binding=None; checker=None; rule=dummyToken "DUMMY"}
         let ilTree = 
             {
                 info = { fileName = "" } 
@@ -55,12 +56,12 @@ type ``Convertions tests`` () =
                         _public = true
                         body =
                           (([
-                                {dummyRule with rule=PToken("NUMBER",(0,0,""))};
-                                {dummyRule with rule=PAlt(PToken("ALT1",(0,0,"")),PToken("ALT2",(0,0,"")))}
-                                {dummyRule with rule=PToken("CHUMBER",(0,0,""))};
+                                {dummyRule with rule=dummyToken "NUMBER"};
+                                {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
+                                {dummyRule with rule=dummyToken "CHUMBER"};
                             ], None)
                             |> PSeq
-                            , PToken("OUTER",(0,0,"")))
+                            , dummyToken "OUTER")
                             |> PAlt
                     }
                 ]
@@ -80,18 +81,18 @@ type ``Convertions tests`` () =
                     body =
                         PAlt(
                             PSeq([
-                                    {dummyRule with rule = PToken ("NUMBER", (0, 0, ""))};
-                                    {dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0, "")),None)}; 
-                                    {dummyRule with rule = PToken ("CHUMBER", (0, 0, ""))}
+                                    {dummyRule with rule = dummyToken "NUMBER"};
+                                    {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
+                                    {dummyRule with rule = dummyToken "CHUMBER"}
                             ],None)
-                            , PToken ("OUTER", (0, 0, "")))
+                            , dummyToken "OUTER")
                     _public = true
                     metaArgs = []
                  };
                  {
                     name = dummyPos"yard_exp_brackets_1"
                     args = []
-                    body = PAlt (PToken ("ALT1", (0, 0, "")),PToken ("ALT2", (0, 0, "")))
+                    body = PAlt (dummyToken "ALT1", dummyToken "ALT2")
                     _public = false
                     metaArgs = []
                  }]

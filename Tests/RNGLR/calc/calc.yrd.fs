@@ -110,7 +110,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_fact) 
              |> List.iter (fun (f) -> 
-              _rnglr_cycle_res := ( f )::!_rnglr_cycle_res )
+              _rnglr_cycle_res := (
+                # 44 "Calc.yrd"
+                f
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_expr)
       );
@@ -126,7 +129,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_rnglr_var_1) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_expr) 
                  |> List.iter (fun (b) -> 
-                  _rnglr_cycle_res := ( a + b )::!_rnglr_cycle_res ) ) )
+                  _rnglr_cycle_res := (
+                    # 27 "Calc.yrd"
+                    a + b
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_expr)
       );
@@ -145,7 +151,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_num) 
              |> List.iter (fun (n) -> 
-              _rnglr_cycle_res := ( n )::!_rnglr_cycle_res )
+              _rnglr_cycle_res := (
+                # 91 "Calc.yrd"
+                n
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_fact)
       );
@@ -161,7 +170,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_rnglr_var_1) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_fact) 
                  |> List.iter (fun (b) -> 
-                  _rnglr_cycle_res := ( a * b )::!_rnglr_cycle_res ) ) )
+                  _rnglr_cycle_res := (
+                    # 75 "Calc.yrd"
+                    a * b
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_fact)
       );
@@ -173,7 +185,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
-              _rnglr_cycle_res := ( 5 )::!_rnglr_cycle_res )
+              _rnglr_cycle_res := (
+                # 112 "Calc.yrd"
+                5
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_num)
       );
@@ -185,7 +200,10 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
-              _rnglr_cycle_res := ( 3 )::!_rnglr_cycle_res )
+              _rnglr_cycle_res := (
+                # 105 "Calc.yrd"
+                3
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           ) ) : '_rnglr_type_num)
       );

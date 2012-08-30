@@ -92,7 +92,7 @@ namespace Test
 
         static void Do()
         {
-            var c = 2002;
+            var c = 4;
             var inArr = new int32
                              //[]
                              [c] 
@@ -173,8 +173,8 @@ namespace Test
                     let i_s_1 = i_s + 1
                     let iter = provider.Loop(0, l, kIdx=>
                         from k in kIdx
-                        let right_base_idx = l_s - k * _base + k * nT + i_s_1
-                        let left_base_idx = (k * _base) + i_s
+                        let left_base_idx = (k * _base) + i * nTerms
+                        let right_base_idx = ((l - k - 1) * _base) + (k + i + 1) * nTerms
                         let iter2 = provider.Loop(0, rLength, rIdxs =>
                             from rId in rIdxs
                             let rule_base = rId * magicConst
@@ -196,7 +196,7 @@ namespace Test
             }
             
             commandQueue.Add(buffer.Read(0, size * size * nTerms * magicConst_c, bArr)).Finish();
-            //toMatrix(bArr, (int)(size * nTerms * magicConst_c));
+            toMatrix(bArr, (int)(size * nTerms * magicConst_c));
             buffer.Dispose();
 
             commandQueue.Dispose();

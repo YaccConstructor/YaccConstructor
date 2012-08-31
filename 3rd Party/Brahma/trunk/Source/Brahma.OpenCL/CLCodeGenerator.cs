@@ -59,6 +59,8 @@ namespace Brahma.OpenCL
                     return "int";
                 if ((type == typeof(uint)))
                     return "uint";
+                if ((type == typeof(uint32)))
+                    return "uint";
                 if ((type == typeof(float32)) || (type == typeof(float)))
                     return "float";
                 

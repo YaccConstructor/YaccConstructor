@@ -32,7 +32,7 @@ namespace Test
 
     class Program
     {
-        static int32 ruleRepresentationLength = 3;
+        static int32 ruleRepresentationLength = 2;
         static int32 cellDataRepresentationLength = 1;        
         static void Main(string[] args)
         {
@@ -95,7 +95,7 @@ namespace Test
             var commandQueue = new CommandQueue(provider, provider.Devices.First());            
 
             var bArr = new int32[size * size * nTerms * cellDataRepresentationLength];
-            var rulesArr = new int32[nTermRules.Length * ruleRepresentationLength];
+            var rulesArr = new uint32[nTermRules.Length * ruleRepresentationLength];
 
             for (int i = 0; i < size; i++)
             {
@@ -116,19 +116,18 @@ namespace Test
             for (int i = 0; i < nTermRules.Length; i++)
             {
                 var _base =  i * ruleRepresentationLength;
-                rulesArr[_base] = nTermRules[i].a;
-                rulesArr[_base + 1] = nTermRules[i].b;
-                rulesArr[_base + 2] = nTermRules[i].c;
+                rulesArr[_base] = (uint32)(uint)(nTermRules[i].a << 16 | nTermRules[i].b);
+                rulesArr[_base + 1] = (uint32)(uint)nTermRules[i].c;
                 //rulesArr[_base + 3] = rules[i].lblNum;
                 //rulesArr[_base + 4] = rules[i].lblWeight;
             }            
 
             var buffer = new Buffer<int32>(provider, Operations.ReadWrite, Memory.Device, bArr);
-            var rulesBuffer = new Buffer<int32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
+            var rulesBuffer = new Buffer<uint32>(provider, Operations.ReadOnly, Memory.Device, rulesArr);
 
             int32 rLength = nTermRules.Length;
 
-            var processRow = provider.Compile<_1D, int32, Buffer<int32>, Buffer<int32>>(
+            var processRow = provider.Compile<_1D, int32, Buffer<int32>, Buffer<uint32>>(
                 (range, l, a, _rules) =>
                     from r in range
                     let i = r.GlobalID0
@@ -142,10 +141,11 @@ namespace Test
                         let iter2 = provider.Loop(0, rLength, rIdxs =>
                             from rId in rIdxs
                             let rule_base = rId * ruleRepresentationLength
-                            let rule_a = _rules[rule_base]
-                            let rule_b = _rules[rule_base + 1]
-                            let rule_c = _rules[rule_base + 2]
-                            let res_id = res_id_base + (rule_a - 1)
+                            let rule_a_b = _rules[rule_base]
+                            let rule_a = (int)((rule_a_b >> 16) & 0xFFFF)
+                            let rule_b = (int)(rule_a_b & 0xFFFF)
+                            let rule_c = (int)(_rules[rule_base + 1] | 0)
+                            let res_id = res_id_base + ((int)(uint)rule_a - 1)
                             select new[]{(rule_c != 0
                                           & rule_c == a[right_base_idx + (rule_c - 1)] 
                                           & rule_b == a[left_base_idx + (rule_b - 1)])

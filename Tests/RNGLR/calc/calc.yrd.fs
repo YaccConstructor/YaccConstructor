@@ -131,7 +131,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
              |> List.iter (fun (a) -> 
               (match ((unbox _rnglr_children.[1]) : Token) with ADD _rnglr_val -> [_rnglr_val] | a -> failwith "ADD expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_1) -> 
+               |> List.iter (fun (_) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_expr) 
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
@@ -185,7 +185,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_fact) 
              |> List.iter (fun (a) -> 
               (match ((unbox _rnglr_children.[1]) : Token) with MUL _rnglr_val -> [_rnglr_val] | a -> failwith "MUL expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_1) -> 
+               |> List.iter (fun (_) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_fact) 
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
@@ -207,7 +207,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
-             |> List.iter (fun (_rnglr_var_0) -> 
+             |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 3 "Calc.yrd"
@@ -227,7 +227,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-             |> List.iter (fun (_rnglr_var_0) -> 
+             |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 3 "Calc.yrd"

@@ -20,6 +20,7 @@
 
 module Yard.Generators.RNGLR.TranslatorPrinter
 
+open System
 open Yard.Generators.RNGLR.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.RNGLR
@@ -126,16 +127,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         printEps epsilonNameFiltered
         @@
         (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
-    let getPosFromSource line (file : string) =
+    let getPosFromSource (src : Source.t) =
         let file =
-            if fullPath then file
+            if fullPath then src.file
             else
-                let start = file.LastIndexOfAny [|'\\'; '/'|] + 1
-                file.Substring start
+                let start = src.file.LastIndexOfAny [|'\\'; '/'|] + 1
+                src.file.Substring start
         if file = "" then
-            //printfn "Source without filename: %s" <| src.ToString()
+            printfn "Source without filename: %s" <| src.ToString()
             System.Environment.NewLine
-        else sprintf "%s# %d \"%s\"" System.Environment.NewLine (line + 1) file
+        else sprintf "%s# %d \"%s\"" System.Environment.NewLine (src.startPos.line + 1) file
     // Realise rules
     let rec getProductionLayout num = function
         | PRef (name, args) ->
@@ -159,19 +160,23 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     |> Array.filter ((<>) "")
                     |> List.ofArray
                     |> (fun l ->
-                            getPosFromSource ac.startPos.line ac.file ::l)
+                            getPosFromSource ac ::l)
                             //l)
                     |> List.map wordL
                     |> aboveListL
                 s
-                |> List.map
+                |> List.collect
                     (fun e ->
                         let var = 
-                            if e.binding.IsNone || e.omit then (sprintf "_rnglr_var_%d" <| !num + 1)
+                            if e.binding.IsNone || e.omit then "_"//(sprintf "_rnglr_var_%d" <| !num + 1)
                             else Source.toString e.binding.Value
                         let prod = getProductionLayout num e.rule
-                        prod
-                        -- wordL ("|> List.iter (fun (" + var + ") -> ")
+                        match e.checker with
+                        | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
+                        | Some ch ->
+                            let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource ch)
+                            let cond = wordL <| "if (" + ch.text + ") then (" 
+                            [res; cond]
                         //-- wordL (" do")
                     )
                 |> List.rev
@@ -184,16 +189,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-
+    let defaultSource = new Source.t("", new Source.Position(0,1000,0), new Source.Position(), output)
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
         let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
-                    @@-- wordL (")" + getPosFromSource rule.name.startPos.line rule.name.file)
+                    @@-- wordL (")" + getPosFromSource rule.name)
                     @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
-                    -- wordL (getPosFromSource 1000 output)
+                    -- wordL (getPosFromSource defaultSource)
                     //@@-- wordL ("")
                     )
              )

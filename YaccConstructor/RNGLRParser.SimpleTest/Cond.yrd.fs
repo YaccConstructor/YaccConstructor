@@ -158,7 +158,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with IF _rnglr_val -> [_rnglr_val] | a -> failwith "IF expected, but %A found" a )
-             |> List.iter (fun (_rnglr_var_0) -> 
+             |> List.iter (fun (_) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_stmt) 
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
@@ -180,11 +180,11 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with IF _rnglr_val -> [_rnglr_val] | a -> failwith "IF expected, but %A found" a )
-             |> List.iter (fun (_rnglr_var_0) -> 
+             |> List.iter (fun (_) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_good) 
                |> List.iter (fun (t) -> 
                 (match ((unbox _rnglr_children.[2]) : Token) with ELSE _rnglr_val -> [_rnglr_val] | a -> failwith "ELSE expected, but %A found" a )
-                 |> List.iter (fun (_rnglr_var_2) -> 
+                 |> List.iter (fun (_) -> 
                   ((unbox _rnglr_children.[3]) : '_rnglr_type_stmt) 
                    |> List.iter (fun (f) -> 
                     _rnglr_cycle_res := (
@@ -266,7 +266,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-             |> List.iter (fun (_rnglr_var_0) -> 
+             |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 5 "Cond.yrd"

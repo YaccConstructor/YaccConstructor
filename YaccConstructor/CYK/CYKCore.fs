@@ -29,7 +29,7 @@ module CellHelpers =
     let getData (rule:tblData) =
         let rNum,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
         let lState,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
-        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
+        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& 0xFFus), uint8 (lbl &&& 0xFFFFus)
         let lblState =
             match lState with
             | 0us -> LblState.Defined

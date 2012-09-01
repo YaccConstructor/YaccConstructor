@@ -94,8 +94,10 @@ let _lexeme lexbuf (n : Position, n' : Position) =
   let len = n'.AbsoluteOffset - n.AbsoluteOffset in
   currentFileContent.Value.Substring(n.AbsoluteOffset, len)
 
-let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) = new Source.t(_lexeme lexbuf (lStart,lEnd), lStart, lEnd)
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) =
+    new Source.t(_lexeme lexbuf (lStart,lEnd), new Source.Position(lStart), new Source.Position(lEnd), !currentFile)
 let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos, lexbuf.EndPos)
+let newline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
 }
 
@@ -112,15 +114,13 @@ let sharplineBody =  ['A'-'Z' 'a'-'z' ' ']*
 let sharpline = sharp ("if" | "elif" | "else" | "endif") sharplineBody
 
 
-let blank =  [' ' '\013' '\009' '\012'] *
+let blank =  [' ' '\r' '\009' '\012'] *
 
 rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
 and skipSpaces  = parse blank {lexbuf}
 and  main = parse	
        blank  { main lexbuf }
-     | '\010' { //lexbuf_set_curr_p  lexbuf {lexbuf.StartPos with pos_bol = 0; pos_lnum = lexbuf.StartPos.pos_lnum + 1 }; 
-                main lexbuf
-              }
+     | '\n' { newline lexbuf; main lexbuf }
      | '-'  {MINUS}
      | ':'  { COLON }
      | ';'  {SEMICOLON (Range (lexbuf.StartPos,lexbuf.EndPos))}
@@ -202,6 +202,7 @@ and predicate = parse
       predicate lexbuf }
   | eof
     { raise (Lexical_error("unterminated predicate", lexbuf.StartPos.AbsoluteOffset)) }
+  | '\n' { newline lexbuf; predicate lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {predicate lexbuf}
 and action = parse
@@ -221,6 +222,7 @@ and action = parse
       action lexbuf }
   | eof
     { raise (Lexical_error("unterminated action", lexbuf.StartPos.AbsoluteOffset)) }
+  | '\n' { newline lexbuf; action lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {action lexbuf}
  
@@ -241,6 +243,7 @@ and pattern = parse
       pattern lexbuf }
   | eof
     { raise (Lexical_error("unterminated pattern", lexbuf.StartPos.AbsoluteOffset)) }
+  | '\n' { newline lexbuf; pattern lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {pattern lexbuf}
 
@@ -262,6 +265,7 @@ and param = parse
       param lexbuf }
   | eof
     { raise (Lexical_error("unterminated param",  lexbuf.StartPos.AbsoluteOffset)) }
+  | '\n' { newline lexbuf; param lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {param lexbuf}
      
@@ -283,6 +287,7 @@ and string = parse
       store_string_char(lexbuf.LexemeChar 0);
       store_string_char(lexbuf.LexemeChar 1);
       string lexbuf }
+  | '\n' { newline lexbuf; store_string_char(lexbuf.LexemeChar 0); string lexbuf }
   | _
     { store_string_char(lexbuf.LexemeChar 0);
       string lexbuf }
@@ -308,6 +313,7 @@ and comment = parse
       { comment lexbuf }
   | eof
     { raise(Lexical_error("unterminated comment", lexbuf.StartPos.AbsoluteOffset)) }
+  | '\n' { newline lexbuf; comment lexbuf }
   | _
     { comment lexbuf }
 

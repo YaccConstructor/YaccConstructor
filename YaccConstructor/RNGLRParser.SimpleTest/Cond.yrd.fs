@@ -1,4 +1,5 @@
 module RNGLR.ParseCond
+#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
@@ -94,7 +95,6 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null|]
 let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
@@ -110,17 +110,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_if) 
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
+                
+# 1 "Cond.yrd"
                 r
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_s)
+          )
+            )
+# 1 "Cond.yrd"
+               : '_rnglr_type_s) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
-           ) : '_rnglr_type_yard_start_rule)
+            )
+# 1 "Cond.yrd"
+               : '_rnglr_type_yard_start_rule) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -131,10 +140,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
+                
+# 2 "Cond.yrd"
                 r
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_if)
+          )
+            )
+# 2 "Cond.yrd"
+               : '_rnglr_type_if) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -147,10 +162,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               ((unbox _rnglr_children.[1]) : '_rnglr_type_stmt) 
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
+                  
+# 2 "Cond.yrd"
                   r * 10
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_if)
+          )
+            )
+# 2 "Cond.yrd"
+               : '_rnglr_type_if) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -167,10 +188,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   ((unbox _rnglr_children.[3]) : '_rnglr_type_stmt) 
                    |> List.iter (fun (f) -> 
                     _rnglr_cycle_res := (
+                      
+# 3 "Cond.yrd"
                       t+f
                         )::!_rnglr_cycle_res ) ) ) )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_if_else)
+          )
+            )
+# 3 "Cond.yrd"
+               : '_rnglr_type_if_else) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -181,10 +208,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
+                
+# 4 "Cond.yrd"
                 r
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_good)
+          )
+            )
+# 4 "Cond.yrd"
+               : '_rnglr_type_good) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -195,10 +228,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_stmt) 
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
+                
+# 4 "Cond.yrd"
                 r
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_good)
+          )
+            )
+# 4 "Cond.yrd"
+               : '_rnglr_type_good) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -209,10 +248,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             ((unbox _rnglr_children.[0]) : '_rnglr_type_if) 
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
+                
+# 5 "Cond.yrd"
                 r
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_stmt)
+          )
+            )
+# 5 "Cond.yrd"
+               : '_rnglr_type_stmt) 
+# 1001 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -223,10 +268,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
               _rnglr_cycle_res := (
+                
+# 5 "Cond.yrd"
                 2
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_stmt)
+          )
+            )
+# 5 "Cond.yrd"
+               : '_rnglr_type_stmt) 
+# 1001 "Cond.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

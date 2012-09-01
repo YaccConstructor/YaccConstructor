@@ -50,6 +50,17 @@
     <Compile Include="Epsilon.yrd.fs" />
     <Compile Include="Cond.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
+    <None Include="Attrs.yrd" />
+    <None Include="Calc.yrd" />
+    <None Include="ComplexRightNull.yrd" />
+    <None Include="Cond.yrd" />
+    <None Include="Counter.yrd" />
+    <None Include="cycle.yrd" />
+    <None Include="Epsilon.yrd" />
+    <None Include="Expr.yrd" />
+    <None Include="First.yrd" />
+    <None Include="List.yrd" />
+    <None Include="SimpleRightNull.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />

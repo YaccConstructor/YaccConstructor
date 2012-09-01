@@ -44,11 +44,13 @@ type RNGLR() =
             let mutable fullPath = false
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
             let mutable needTranslate = true
+            let mutable output = definition.info.fileName + ".fs"
             for opt, value in pairs do
                 match opt with
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
                 | "-pos" -> positionType <- value
+                | "-o" -> output <- value
                 | "-table" ->
                     match value with
                     | "LALR" -> table <- LALR
@@ -74,15 +76,16 @@ type RNGLR() =
             else
                 let statesInterpreter = buildStates table grammar
                 let tables = new Tables(grammar, statesInterpreter)
-                use out = new System.IO.StreamWriter (definition.info.fileName + ".fs")
-                fprintf out "module %s\n"
+                use out = new System.IO.StreamWriter (output)
+                fprintfn out "module %s"
                 <|  match moduleName with
                     | "" -> "RNGLR.Parse"
                     | s -> s
+                fprintfn out "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                fprintf out "open Yard.Generators.RNGLR.Parser\n"
-                fprintf out "open Yard.Generators.RNGLR\n"
-                fprintf out "open Yard.Generators.RNGLR.AST\n"
+                fprintfn out "open Yard.Generators.RNGLR.Parser"
+                fprintfn out "open Yard.Generators.RNGLR"
+                fprintfn out "open Yard.Generators.RNGLR.AST"
 
                 match definition.head with
                 | None -> ()
@@ -92,7 +95,7 @@ type RNGLR() =
 
                 printTables grammar definition.head tables out moduleName tokenType
                 if needTranslate then
-                    printTranslator grammar newDefinition.grammar out positionType fullPath
+                    printTranslator grammar newDefinition.grammar out positionType fullPath output
 
                 match definition.foot with
                 | None -> ()

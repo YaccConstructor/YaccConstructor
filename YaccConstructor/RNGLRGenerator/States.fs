@@ -170,7 +170,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let setToStr = Set.map (sprintf "%d") >> String.concat ","
         let key = String.concat "|" (Array.map2 (fun x y -> sprintf "%d(%s)" x (setToStr y)) kernels lookaheads)
-        printfn "%s" key
+        //printfn "%s" key
         if kernelsToVertex.ContainsKey key then
             kernelsToVertex.[key]
         else

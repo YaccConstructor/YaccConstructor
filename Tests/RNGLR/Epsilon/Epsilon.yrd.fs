@@ -1,4 +1,5 @@
 module RNGLR.ParseEpsilon
+#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
@@ -93,7 +94,6 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(6, new Nodes([|box (new AST(new Family(0, new Nodes([||])), null)); box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(0, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(7, new Nodes([|box (new AST(new Family(6, new Nodes([|box (new AST(new Family(0, new Nodes([||])), null)); box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
 let _rnglr_filtered_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(6, new Nodes([|box (new AST(new Family(0, new Nodes([||])), null)); box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(0, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(7, new Nodes([|box (new AST(new Family(6, new Nodes([|box (new AST(new Family(0, new Nodes([||])), null)); box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
@@ -107,10 +107,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
+              
+# 2 "Epsilon.yrd"
               1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_1)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_1) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -121,10 +127,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
               _rnglr_cycle_res := (
+                
+# 2 "Epsilon.yrd"
                 10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_1)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_1) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,10 +145,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
+              
+# 2 "Epsilon.yrd"
               1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_2)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_2) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -147,10 +165,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
               _rnglr_cycle_res := (
+                
+# 2 "Epsilon.yrd"
                 10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_2)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_2) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -159,10 +183,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
+              
+# 2 "Epsilon.yrd"
               1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_3)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_3) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -173,10 +203,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with C _rnglr_val -> [_rnglr_val] | a -> failwith "C expected, but %A found" a )
              |> List.iter (fun (_rnglr_var_0) -> 
               _rnglr_cycle_res := (
+                
+# 2 "Epsilon.yrd"
                 10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_yard_rule_op_3)
+          )
+            )
+
+               : '_rnglr_type_yard_rule_op_3) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -191,17 +227,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_op_3) 
                  |> List.iter (fun (a3) -> 
                   _rnglr_cycle_res := (
+                    
+# 1 "Epsilon.yrd"
                     a1 + a2 + a3
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
-          ) ) : '_rnglr_type_s)
+          )
+            )
+# 1 "Epsilon.yrd"
+               : '_rnglr_type_s) 
+# 1001 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
-           ) : '_rnglr_type_yard_start_rule)
+            )
+# 1 "Epsilon.yrd"
+               : '_rnglr_type_yard_start_rule) 
+# 1001 "Epsilon.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

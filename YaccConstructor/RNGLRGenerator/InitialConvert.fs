@@ -25,8 +25,6 @@ open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Convertions.TransformAux
 
-let dummyPos s = new Source.t (s)
-
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
         let wasStart = ref false
@@ -38,7 +36,7 @@ let initialConvert (def : Definition.t<_,_>) =
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
                     let startRule : Rule.t<_,_> =
-                        {_public = true; name = dummyPos "yard_start_rule"; args = rule.args;
+                        {_public = true; name = new Source.t("yard_start_rule", rule.name); args = rule.args;
                          metaArgs = []; body = PRef(createSource rule.name.text, rule.args |> createParams |> list2opt)}
                     startRule::{rule with _public = false}::res
             )

@@ -30,7 +30,7 @@ open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        (out : System.IO.StreamWriter) positionType fullPath =
+        (out : System.IO.StreamWriter) positionType fullPath output =
     let tab = 4
 
     let rules = grammar.rules
@@ -126,7 +126,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         printEps epsilonNameFiltered
         @@
         (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
-
+    let getPosFromSource line (file : string) =
+        let file =
+            if fullPath then file
+            else
+                let start = file.LastIndexOfAny [|'\\'; '/'|] + 1
+                file.Substring start
+        if file = "" then
+            //printfn "Source without filename: %s" <| src.ToString()
+            System.Environment.NewLine
+        else sprintf "%s# %d \"%s\"" System.Environment.NewLine (line + 1) file
     // Realise rules
     let rec getProductionLayout num = function
         | PRef (name, args) ->
@@ -150,13 +159,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     |> Array.filter ((<>) "")
                     |> List.ofArray
                     |> (fun l ->
-                            let file =
-                                if fullPath then ac.file
-                                else
-                                    let start = ac.file.LastIndexOfAny [|'\\'; '/'|] + 1
-                                    ac.file.Substring start
-                            //(sprintf "# %d \"%s\"" ac.startPos.line file)::l)
-                            l)
+                            getPosFromSource ac.startPos.line ac.file ::l)
+                            //l)
                     |> List.map wordL
                     |> aboveListL
                 s
@@ -187,7 +191,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
-                    -- wordL (") : '_rnglr_type_" + nonTermName + ")" )
+                    @@-- wordL (")" + getPosFromSource rule.name.startPos.line rule.name.file)
+                    @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
+                    -- wordL (getPosFromSource 1000 output)
+                    //@@-- wordL ("")
                     )
              )
 
@@ -239,9 +246,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             ] |> aboveListL
         funHead @@-- body
 
-    let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+    //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-    [nowarn; defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
+    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
     |> out.WriteLine

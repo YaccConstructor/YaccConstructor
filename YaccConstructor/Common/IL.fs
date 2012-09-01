@@ -38,6 +38,8 @@ module Source = begin
 
         new (text, startPos, endPos, file) =
             {text = text; startPos = startPos; endPos = endPos; file = file}
+        new (text, origin : t) =
+            {text = text; startPos = origin.startPos; endPos = origin.endPos; file = origin.file}
         new (text, startPos : Lexing.Position, endPos : Lexing.Position) =
             t (text, new Position(startPos), new Position(endPos), startPos.FileName)
         new (text, lexbuf : Lexing.LexBuffer<_>) =

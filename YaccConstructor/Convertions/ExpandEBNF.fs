@@ -75,7 +75,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  |> List.rev
                  , ac)
         | PAlt(left, right) -> PAlt(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
-        | PSome(p) ->
+        | PSome p ->
             let generatedName = genSomeName()
             let expandedBody = replaceEbnf p attrs metaArgs
             let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)
@@ -104,7 +104,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  and metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-        | PMany(p) -> 
+        | PMany p -> 
             let generatedName = genManyName()
             let expandedBody = replaceEbnf p attrs metaArgs
             let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)
@@ -133,7 +133,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  and metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-        | POpt(p) -> 
+        | POpt p -> 
             let generatedName = genOptName()
             let expandedBody = replaceEbnf p attrs metaArgs
             let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)

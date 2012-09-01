@@ -83,7 +83,7 @@ type CYKTests () =
         let input = [|1us;2us;2us;2us;1us;2us;2us;2us;1us;2us;2us;2us;|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         Assert.IsTrue true
-        System.Console.ReadKey()
+        //System.Console.ReadKey()
 
     [<Test>]
     member test.labelTracking2() = 
@@ -92,7 +92,7 @@ type CYKTests () =
         let input = [|1us;2us;2us;2us;|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy)
         Assert.IsTrue true
-        System.Console.ReadKey()
+        //System.Console.ReadKey()
 
 [<EntryPoint>]
 let f _ =

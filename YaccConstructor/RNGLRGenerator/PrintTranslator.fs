@@ -256,5 +256,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
+    |> (fun s -> s.Replace("\n", Environment.NewLine) )
     |> out.WriteLine
     

@@ -100,15 +100,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
-                
+                
 # 1 "Counter.yrd"
                 1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
-            )
+            )
 # 1 "Counter.yrd"
-               : '_rnglr_type_s) 
+               : '_rnglr_type_s) 
 # 1001 "Counter.yrd.fs"
       );
   (
@@ -122,15 +122,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               ((unbox _rnglr_children.[1]) : '_rnglr_type_s) 
                |> List.iter (fun (v) -> 
                 _rnglr_cycle_res := (
-                  
+                  
 # 1 "Counter.yrd"
                   1 + v
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
-            )
+            )
 # 1 "Counter.yrd"
-               : '_rnglr_type_s) 
+               : '_rnglr_type_s) 
 # 1001 "Counter.yrd.fs"
       );
   (
@@ -138,9 +138,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box (
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
-            )
+            )
 # 1 "Counter.yrd"
-               : '_rnglr_type_yard_start_rule) 
+               : '_rnglr_type_yard_start_rule) 
 # 1001 "Counter.yrd.fs"
       );
   |] , [|

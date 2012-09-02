@@ -74,6 +74,27 @@ let newName (n : string) =
 
 let createName ((n:string), b, e, f) = newName n, b, e, f
 
+let genNewSource (name : string) (body : t<_,_>) =
+    let rec getBegin = function
+        | PSeq (s, ac) ->
+            match s with
+            | h::_ -> getBegin h.rule
+            | _ ->
+                match ac with
+                | Some (ac : Source.t) -> ac
+                | None -> failwith "Empty sequence without action code"
+        | PRef (n,_) -> n
+        | PAlt (l, r) -> getBegin l
+        | PLiteral l -> l
+        | PMany b -> getBegin b
+        | PSome b -> getBegin b
+        | POpt b -> getBegin b
+        | PToken t -> t
+        | PMetaRef (n,_,_) -> n
+        | PPerm _ | PRepet _ as x -> failwithf "Unrealized construction: %A" x
+    let oldSource = getBegin body
+    new Source.t(name, oldSource)
+
 /// Create new Source.t item with name, consisting of yard prefix, specified middle
 ///    and postfix, generated as regularly incrementing number
 let createNewName name = 

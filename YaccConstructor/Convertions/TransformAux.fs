@@ -58,9 +58,9 @@ let createSimpleRule name args body =
 let getNewSource (old : Source.t) n =
     new Source.t(n, old.startPos, old.endPos, old.file)
 
-let createSource n = new Source.t(n)
+//let createSource n = new Source.t(n)
 
-let createRef ruleName _params = PRef (createSource ruleName, _params)
+//let createRef ruleName _params = PRef (createSource ruleName, _params)
 
 let addBinding _params = function None -> _params | Some x -> x::_params
 
@@ -76,7 +76,7 @@ let createParams =
 let list2opt = function
     | []     -> None
     | [h]    -> Some h (** list contains only one element!!! *)
-    | _other -> invalidArg "list2opt" "Inpul list cannot contains more than one element." 
+    | _other -> invalidArg "list2opt" "Input list cannot contains more than one element." 
 
 let opt2list = function
     | None -> []

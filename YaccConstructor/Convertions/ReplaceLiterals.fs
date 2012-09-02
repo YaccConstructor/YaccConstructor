@@ -75,13 +75,13 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, 
         | PLiteral src -> 
             let str = src.text
             if (replacedLiterals.ContainsKey str) then
-                PToken <| new Source.t(replacedLiterals.[str])
+                PToken <| new Source.t(replacedLiterals.[str], src)
             else
                 let token = ref(tokenName str token_format)
                 while grammarTokens.Contains(!token) do
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
-                PToken <| new Source.t(!token)
+                PToken <| new Source.t(!token, src)
         | x -> x
     _replaceLiterals production
     

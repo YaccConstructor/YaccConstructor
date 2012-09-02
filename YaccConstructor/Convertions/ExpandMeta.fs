@@ -26,8 +26,6 @@ open Production
 open Yard.Core.Namer
 open TransformAux
 
-let dummyPos s = new Source.t(s)
-
 type Dictionary<'a,'b> = System.Collections.Generic.Dictionary<'a,'b>
 
 /// find metarule with given name in hash map of collected metarules
@@ -120,20 +118,20 @@ let expandMeta body metaRules expanded res =
                     | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
                     | x -> true
 
-                let expandMetaRef name attrs metaArgs =
+                let expandMetaRef (name : Source.t) attrs metaArgs =
                     let (newMetaArgs, newRes) =
                         metaArgs
                         |> List.fold
-                            (fun (accMeta, accRes) body ->
+                            (fun (accMeta, accRes) _body ->
                                 //printfn "%A" body
-                                expandBody body metaRules expanded accRes
+                                expandBody _body metaRules expanded accRes
                                 |> (fun (body, accRes) ->
                                         if not <| canUseBinding body then (body::accMeta, accRes)
                                         else
-                                            let newMetaArgName = new Source.t(nextName "rule")
+                                            let newMetaArgName = genNewSource (nextName "rule") _body
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
-                                                {name = dummyPos (Source.toString newMetaArgName);
+                                                {name = newMetaArgName;
                                                 args = [];
                                                 metaArgs = [];
                                                 _public = false;
@@ -144,11 +142,12 @@ let expandMeta body metaRules expanded res =
                             ([], res)
                         |> applyToRes (List.rev)
                     // TODO catch exception
-                    let metaRule = findMetaRule metaRules name
-                    let newRuleName = new Source.t(nextName ("rule_" + name))
+                    let metaRule = findMetaRule metaRules name.text
+                    let newRuleName = new Source.t(nextName ("rule_" + name.text), metaRule.name)
                     let formalArgs = metaRule.args
-                    let substitution = PRef(newRuleName, attrs)
-                    let newKey = getKey (PMetaRef(createSource name, attrs, newMetaArgs))
+                    let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
+                    //let newKey = getKey (PMetaRef(createSource name.text, attrs, newMetaArgs))
+                    let newKey = getKey (PMetaRef(name, attrs, newMetaArgs))
                     if not (expanded.ContainsKey key) then
                         expanded.Add(key, substitution)
                     if not (expanded.ContainsKey newKey) then
@@ -159,7 +158,7 @@ let expandMeta body metaRules expanded res =
                 
                     let metaExp = expandBody (replaceMeta newFormalToAct metaRule.body) metaRules expanded newRes
                     let (newRule: Rule.t<_,_>) =
-                        {name = dummyPos( Source.toString newRuleName);
+                        {name = newRuleName;
                         args = formalArgs;
                         metaArgs = [];
                         _public = false;
@@ -186,7 +185,7 @@ let expandMeta body metaRules expanded res =
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
                     if metaArgs.IsEmpty then (PRef(name, attrs), res)
-                    else expandMetaRef (Source.toString name) attrs metaArgs 
+                    else expandMetaRef name attrs metaArgs 
                 | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
                 | PRepet (_) -> failwith "Unrealised meta-expanding of permutation"
             if not (expanded.ContainsKey key) then

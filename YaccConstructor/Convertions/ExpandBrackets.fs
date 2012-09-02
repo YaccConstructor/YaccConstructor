@@ -25,10 +25,11 @@ module Yard.Core.Convertions.ExpandBrackets
 
 open Yard.Core
 open Yard.Core.IL
+open Namer
 open TransformAux
 open Yard.Core.IL.Production
 
-let dummyPos s = new Source.t(s)
+//let dummyPos s = new Source.t(s)
 
 let private newName () = Namer.nextName Namer.Names.brackets
     
@@ -48,12 +49,14 @@ let private expandBrackets (ruleList: Rule.t<'patt, 'expr> list) =
                                 { elem with rule = (List.head subelements).rule }
                             | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = newName()
-                                toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+                                toExpand.Enqueue({name = genNewSource newName elem.rule; args=attrs;
+                                                    body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
                             | PAlt(_,_) -> 
                                 let newName = newName()
-                                toExpand.Enqueue({name= dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+                                toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
+                                                    body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
                             | _ -> elem
                         newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
                     )

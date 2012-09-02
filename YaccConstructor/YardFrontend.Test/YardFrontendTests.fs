@@ -95,7 +95,7 @@ let optionsTest path optionsCorrect =
         
 let dummyRange = Range (Lexing.Position.Empty,Lexing.Position.Empty)
 
-let getSource name b e = new Source.t (name, new Source.Position(b, 1, b), new Source.Position(e, 1, e), "")
+let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () = 
@@ -116,9 +116,7 @@ type ``YardFrontend lexer tests`` () =
 
     [<Test>]            
     member test.``Include test`` () =
-        lexerTest @"
-include ""test_included.yrd""
-+s:PLUS;"
+        lexerTest @"  include ""test_included.yrd""  +s:PLUS;"
             [INCLUDE; STRING (getSource "test_included.yrd" 11 28); PLUS; LIDENT (getSource "s" 32 33)
             ; COLON; UIDENT (getSource "PLUS" 34 38); SEMICOLON dummyRange; EOF]
 
@@ -393,9 +391,7 @@ type ``YardFrontend options tests`` () =
     [<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
-            "+s:
-#set a = \"smth\"
-A;"
+            "+s:  #set a = \"smth\"  A;"
             [PLUS; LIDENT (getSource "s" 1 2); COLON; SET; LIDENT (getSource "a" 10 11)
             ; EQUAL; STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23); SEMICOLON dummyRange; EOF]
 
@@ -420,15 +416,8 @@ A;"
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        completeTest @"
-{
-let value x = (x:>Lexeme<string>).value
-}
-+s: <res:int> = e[1] {res};
-e[i]: n=NUMBER {(value n |> int) + i};"
-            [ACTION (getSource @"
-let value x = (x:>Lexeme<string>).value
-" 3 46); PLUS;
+        completeTest @"  {  let value x = (x:>Lexeme<string>).value  }  +s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); PLUS;
                 LIDENT (getSource "s" 50 51); COLON; PATTERN (getSource "res:int" 54 61); EQUAL;
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
                 SEMICOLON dummyRange; LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON;
@@ -436,7 +425,7 @@ let value x = (x:>Lexeme<string>).value
                 ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON dummyRange; EOF]
             {
              info = { fileName = ""; }
-             head = Some (getSource "\r\nlet value x = (x:>Lexeme<string>).value\r\n" 3 46)
+             head = Some (getSource "  let value x = (x:>Lexeme<string>).value  " 3 46)
              grammar = 
                     [{ 
                         name = dummyPos"s"

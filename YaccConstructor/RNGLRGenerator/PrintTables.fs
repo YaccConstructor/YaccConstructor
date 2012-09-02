@@ -25,15 +25,15 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTables (grammar : FinalGrammar) head (tables : Tables)
-        (out : System.IO.StreamWriter) (moduleName : string) (tokenType : string) =
+let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) =
+    let res = new System.Text.StringBuilder()
     let inline print (x : 'a) =
-        fprintf out x
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
         print x
     let inline printBr (x : 'a) =
-        fprintfn out x
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
@@ -251,3 +251,4 @@ let printTables (grammar : FinalGrammar) head (tables : Tables)
     printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
     printBrInd 1 "buildAst<Token> parserSource"
     printBr ""
+    res.ToString()

@@ -90,13 +90,33 @@ type RNGLR() =
                 match definition.head with
                 | None -> ()
                 | Some (s : Source.t) ->
-                    fprintf out "%s" (Source.toString s)
-                    fprintf out "\n"
+                    fprintfn out "%s" s.text
 
-                printTables grammar definition.head tables out moduleName tokenType
-                if needTranslate then
-                    printTranslator grammar newDefinition.grammar out positionType fullPath output
-
+                let tables = printTables grammar definition.head tables moduleName tokenType
+                let res =
+                    if not needTranslate then tables.Replace("\r\n", "\n").Replace("\n", System.Environment.NewLine)
+                    else
+                        let dummyPos = char 0
+                        let init = (tables + printTranslator grammar newDefinition.grammar
+                                                positionType fullPath output dummyPos).Replace("\r\n", "\n")
+                        let curLine =
+                            let line = ref 7
+                            match definition.head with
+                            | None -> ()
+                            | Some s ->
+                                for ch in s.text do
+                                    if ch = '\n' then
+                                        incr line
+                            line
+                        let res = new System.Text.StringBuilder(init.Length * 2)
+                        for c in init do
+                            match c with
+                            | '\n' -> incr curLine; res.Append System.Environment.NewLine
+                            | x when x = dummyPos -> res.Append (string !curLine)
+                            | x -> res.Append x
+                            |> ignore
+                        res.ToString()
+                out.WriteLine res
                 match definition.foot with
                 | None -> ()
                 | Some (s : Source.t) ->

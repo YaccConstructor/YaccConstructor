@@ -100,16 +100,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
-                
+                
 # 1 "Attrs.yrd"
                 arg
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
-            )
+            )
 # 1 "Attrs.yrd"
-               : '_rnglr_type_s) 
-# 1001 "Attrs.yrd.fs"
+               : '_rnglr_type_s) 
+# 112 "Attrs.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -122,26 +122,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               (match ((unbox _rnglr_children.[1]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
-                  
+                  
 # 1 "Attrs.yrd"
                   r
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
-            )
+            )
 # 1 "Attrs.yrd"
-               : '_rnglr_type_s) 
-# 1001 "Attrs.yrd.fs"
+               : '_rnglr_type_s) 
+# 134 "Attrs.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( fun arg ->
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) arg
-            )
+            )
 # 1 "Attrs.yrd"
-               : '_rnglr_type_yard_start_rule) 
-# 1001 "Attrs.yrd.fs"
+               : '_rnglr_type_yard_start_rule) 
+# 144 "Attrs.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

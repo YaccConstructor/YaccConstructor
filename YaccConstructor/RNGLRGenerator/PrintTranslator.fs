@@ -31,7 +31,7 @@ open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        (out : System.IO.StreamWriter) positionType fullPath output =
+        positionType fullPath output dummyPos =
     let tab = 4
 
     let rules = grammar.rules
@@ -127,6 +127,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         printEps epsilonNameFiltered
         @@
         (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
+
     let getPosFromSource (src : Source.t) =
         let file =
             if fullPath then src.file
@@ -135,8 +136,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 src.file.Substring start
         if file = "" then
             printfn "Source without filename: %s" <| src.ToString()
-            System.Environment.NewLine
-        else sprintf "%s# %d \"%s\"" System.Environment.NewLine (src.startPos.line + 1) file
+            "\n"
+        elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
+        else sprintf "\n# %d \"%s\"" (src.startPos.line + 1) file
+
     // Realise rules
     let rec getProductionLayout num = function
         | PRef (name, args) ->
@@ -189,7 +192,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-    let defaultSource = new Source.t("", new Source.Position(0,1000,0), new Source.Position(), output)
+    let defaultSource = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
         let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
@@ -256,6 +259,4 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
-    |> (fun s -> s.Replace("\n", Environment.NewLine) )
-    |> out.WriteLine
     

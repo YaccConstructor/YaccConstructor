@@ -47,8 +47,9 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
             let lexered = ReParseFileForActiveWindow(m_dte, _sourceBuffer.CurrentSnapshot.GetText()).Tokens
             let checkAndAdd (t:token) = 
                 match t with
-                | LIDENT (name, (s,e,_))  when name = w -> 
-                                                           spans:= !spans @ [new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, new Span(s, e - s ))]  //to redo line
+                | LIDENT name  when name.text = w -> 
+                    let s, e = name.startPos.absoluteOffset, name.endPos.absoluteOffset
+                    spans:= !spans @ [new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, new Span(s, e - s ))]  //to redo line
                 | _ -> ()
             List.iter checkAndAdd lexered
         with

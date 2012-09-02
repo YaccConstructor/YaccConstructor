@@ -68,10 +68,12 @@ type GoToDefKeyProcessor ( itsn : ITextStructureNavigator, view : ITextView, m_d
             let rec scroll i =                                                                                                // Скролинг до нужного места
                 match i with
                 | 0 -> ()
-                | n when n < 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
-                                  scroll (n+1)
-                | n when n > 0 -> _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
-                                  scroll (n-1)
+                | n when n < 0 ->
+                    _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Up)
+                    scroll (n+1)
+                | n (*when n > 0*) ->
+                    _view.ViewScroller.ScrollViewportVerticallyByLine(ScrollDirection.Down)
+                    scroll (n-1)
 
             scroll (lineNumberToGo - currentLineNumber) //scrolling
 

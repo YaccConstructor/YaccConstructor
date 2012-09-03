@@ -100,10 +100,11 @@ type RNGLR() =
                         let init = (tables + printTranslator grammar newDefinition.grammar
                                                 positionType fullPath output dummyPos).Replace("\r\n", "\n")
                         let curLine =
-                            let line = ref 7
+                            let line = ref 6
                             match definition.head with
                             | None -> ()
                             | Some s ->
+                                incr line
                                 for ch in s.text do
                                     if ch = '\n' then
                                         incr line

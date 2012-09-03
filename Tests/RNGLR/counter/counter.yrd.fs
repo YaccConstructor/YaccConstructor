@@ -102,7 +102,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 1 "Counter.yrd"
-                1
+                                        1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -124,7 +124,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 _rnglr_cycle_res := (
                   
 # 1 "Counter.yrd"
-                  1 + v
+                              1 + v
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )

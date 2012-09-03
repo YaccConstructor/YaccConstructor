@@ -113,7 +113,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 1 "Calc.yrd"
-                f
+                                                            f
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -137,7 +137,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   _rnglr_cycle_res := (
                     
 # 1 "Calc.yrd"
-                    a + b
+                                               a + b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
@@ -167,7 +167,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 2 "Calc.yrd"
-                n
+                                                          n
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -191,7 +191,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   _rnglr_cycle_res := (
                     
 # 2 "Calc.yrd"
-                    a * b
+                                              a * b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
@@ -211,7 +211,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 3 "Calc.yrd"
-                5
+                                5
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -231,7 +231,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 3 "Calc.yrd"
-                3
+                         3
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )

@@ -159,12 +159,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             | None -> wordL "[]"
             | Some ac ->
                 let actionCodeLayout =
-                    (Source.toString ac).Split([|'\r'; '\n'|])
-                    |> Array.filter ((<>) "")
+                    let strings = (Source.toString ac).Replace("\r\n", "\n").Split([|'\n'|])
+                    strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
+                    strings
                     |> List.ofArray
-                    |> (fun l ->
-                            getPosFromSource ac ::l)
-                            //l)
+                    |> (fun l -> getPosFromSource ac ::l)
                     |> List.map wordL
                     |> aboveListL
                 s

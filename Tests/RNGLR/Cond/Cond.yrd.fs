@@ -29,8 +29,8 @@ let tokenToNumber = function
 
 let mutable private cur = 0
 let leftSide = [|3; 5; 1; 1; 2; 0; 0; 4; 4|]
-let private rules = [|1; 3; 2; 9; 4; 9; 0; 7; 4; 2; 4; 1; 6|]
-let private rulesStart = [|0; 1; 2; 3; 5; 9; 10; 11; 12; 13|]
+let private rules = [|1; 3; 9; 4; 2; 9; 0; 7; 4; 2; 4; 1; 6|]
+let private rulesStart = [|0; 1; 2; 4; 5; 9; 10; 11; 12; 13|]
 let startRule = 1
 
 let acceptEmptyInput = false
@@ -54,7 +54,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|2,1|]; [|7,1|]; [|4,4|]; [|8,1|]; [|5,1; 2,1|]; [|6,1|]; [|3,2|]; [|6,1; 3,2|]|]
+let private lists_reduces = [|[|0,1|]; [|3,1|]; [|7,1|]; [|4,4|]; [|8,1|]; [|5,1; 3,1|]; [|6,1|]; [|2,2|]; [|6,1; 2,2|]|]
 let private small_reduces =
         [|65537; 524288; 131073; 524289; 458753; 524290; 524289; 524291; 589825; 524292; 655362; 458754; 524290; 720898; 458757; 524289; 786434; 458758; 524295; 851970; 458756; 524292; 1114114; 458753; 524289; 1179650; 458755; 524291; 1245186; 458760; 524295|]
 let reduces = Array.zeroCreate 20
@@ -137,26 +137,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
-             |> List.iter (fun (r) -> 
-              _rnglr_cycle_res := (
-                
-# 2 "Cond.yrd"
-                                                     r
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 2 "Cond.yrd"
-               : '_rnglr_type_if) 
-# 152 "Cond.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with IF _rnglr_val -> [_rnglr_val] | a -> failwith "IF expected, but %A found" a )
              |> List.iter (fun (_) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_stmt) 
@@ -164,8 +144,28 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 _rnglr_cycle_res := (
                   
 # 2 "Cond.yrd"
-                                  r * 10
+                                                  r * 10
                     )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 2 "Cond.yrd"
+               : '_rnglr_type_if) 
+# 154 "Cond.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_if_else) 
+             |> List.iter (fun (r) -> 
+              _rnglr_cycle_res := (
+                
+# 2 "Cond.yrd"
+                                r
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )

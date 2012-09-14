@@ -1,1 +1,0 @@
-"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\fslex.exe" Lexer.fsl --unicode -o Lexer.fs

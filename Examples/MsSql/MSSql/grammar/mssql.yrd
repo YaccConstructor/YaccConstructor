@@ -1,0 +1,182 @@
++start:
+    (root_rule)*       {}
+;
+
+root_rule:
+    create_proc {}
+|   GO          {}
+|   start2      {} 
+;
+
+start2: 
+    sel_expr = ((KW_SELECT ident {})  (KW_FROM ident {}) ) { }
+  | GLOBALVAR
+  | GLOBALTEMPOBJ
+  | TEMPOBJ
+;
+
+create_proc:
+        ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
+    (( schema_name = ident) DOT)? ( proc_name = ident {} ) (SEMI DEC_NUMBER)?
+    comma_list<<( 
+      (LOCALVAR (full_ident DOT)? sql_datatype)
+      (KW_VARYING)? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
+      (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
+    )>>?
+    (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
+    KW_AS ( KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END? )
+    (SEMI)?
+    {}
+;
+
+proc_body_stmnt:
+    select_stmnt
+|   set_stmnt 
+|   execute_stmnt
+|   sql_expr
+|   KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
+|   KW_RETURN sql_expr
+|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) 
+;
+(* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
+select_stmnt:
+(*  list<<(KW_WITH common_table_expression)* COMMA>> *)
+    query_expression
+    (KW_INTO full_ident (* http://msdn.microsoft.com/en-us/library/ms188029.aspx *) )?
+;
+query_expression:
+    ( query_specification | (LPAREN query_expression RPAREN) )
+    (
+        (KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT) query_specification   
+    |   LPAREN query_expression RPAREN
+    )?
+;
+query_specification:
+    (* http://msdn.microsoft.com/en-us/library/ms176104.aspx *)
+    KW_SELECT (* (KW_ALL | KW_DISTINCT)?
+    (KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? (KW_WITH KW_TIES)? )? *)
+    (* <select_list> *) 
+    list<<  (       
+            STAR
+        |   full_ident DOT STAR
+        |   (
+                (full_ident DOT)? (IDENT | (DOLLAR KW_IDENTITY) | (DOLLAR KW_ROWGUID) )
+            |   udt_column_runtime = IDENT (
+                    (DOT | DOUBLE_COLON)
+                    (IDENT | IDENT LPAREN comma_list<<sql_expr>>? RPAREN)
+                )?
+            |   sql_expr ( KW_AS? IDENT)?
+            )
+        |   IDENT OP_EQ sql_expr
+        )
+        COMMA>>
+    from_stmnt?
+    (KW_WHERE search_condition)?
+;
+(* http://msdn.microsoft.com/en-us/library/ms173545.aspx *)
+search_condition:
+   ( KW_NOT? search_condition_predicate | LPAREN search_condition RPAREN )
+   comma_list<<(
+      (KW_AND | KW_OR) KW_NOT? (search_condition_predicate | LPAREN search_condition RPAREN)
+   )>>?
+;
+search_condition_predicate:
+    sql_expr ( OP_EQ | OP_LT | OP_MT | (OP_LT OP_MT) | OP_LT_EQ | OP_MT_EQ ) sql_expr
+|   sql_expr KW_NOT? KW_LIKE sql_expr
+|   sql_expr KW_IS KW_NOT? KW_NULL   (* TODO: add many-many items *)
+;
+(*
+(* http://msdn.microsoft.com/en-us/library/ms175972.aspx *)
+common_table_expression:
+    ident                                            (* TODO: impelement it ! *)
+;
+*)
+(* http://msdn.microsoft.com/en-us/library/ms177634.aspx *) 
+from_stmnt:
+    KW_FROM comma_list<<(
+        full_ident (KW_AS? IDENT)? tablesample_clause? 
+            (KW_WITH LPAREN table_hint+ RPAREN)?        
+(*  | about rowset functions  *)
+    | user_defined_function = IDENT (KW_AS? IDENT)?    
+    )>>
+;                           
+tablesample_clause:
+    KW_TABLESAMPLE KW_SYSTEM? LPAREN DEC_NUMBER (KW_RERCENT | KW_ROWS)? RPAREN
+        (KW_REPEATABLE LPAREN DEC_NUMBER RPAREN)?
+;
+(* http://msdn.microsoft.com/en-us/library/ms187373.aspx *)
+table_hint:
+    KW_NOEXPAND? NOLOCK
+;                         
+(* http://msdn.microsoft.com/en-us/library/ms188332.aspx *)
+execute_stmnt:
+    (KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( (full_ident (SEMI DEC_NUMBER)? ) | LOCALVAR )
+    (
+        (LOCALVAR OP_EQ)? 
+        (       ( (GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
+        |   KW_DEFAULT?
+        |       sql_value   )
+    )*
+    (KW_WITH KW_RECOMPILE)?
+    SEMI?
+;
+set_stmnt:
+    SET IMPLICIT_TRANSACTIONS ( ON | OFF )
+|   SET NOCOUNT ( ON | OFF )
+|   SET ANSI_NULLS (ON | OFF)
+|   SET QUOTED_IDENTIFIER (ON | OFF)
+|   SET LOCALVAR (DOT IDENT)? OP_EQ   ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+;   
+
+sql_datatype:
+    KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |
+    KW_INT | KW_TINYINT | KW_MONEY
+|   KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+|   KW_REAL
+|   KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
+|   KW_VARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+|   KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+|   KW_NVARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+;
+execute_as:
+    (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | ( username = STRING_CONST ) ) 
+;
+binop:
+     OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
+| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
+|   OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
+;
+(* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
+sql_expr_lrecu:
+    sql_expr binop sql_expr
+;
+sql_expr:
+    sql_expr_lrecu
+|   sql_value
+|   LPAREN sql_expr RPAREN
+|   LOCALVAR 
+|   full_ident LPAREN comma_list<<sql_expr>>? RPAREN
+|   KW_SELECT sql_expr KW_FROM IDENT
+|   (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+|   GLOBALVAR
+|   full_ident                        
+
+;
+list<<item sep>> : 
+    item (sep item)* 
+;
+comma_list<<item>>:
+    list<<item COMMA>>
+;
+sql_value:
+    STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+|   DEC_NUMBER
+;
+(* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
+ident:
+    LBRACKET ident RBRACKET
+|   IDENT
+;
+full_ident:
+    ident (DOT ident)*
+;

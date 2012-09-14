@@ -1,0 +1,12 @@
++e :
+#if ora
+ N
+#if x
+ G
+#else
+ H
+#endif
+#else
+ Q
+#endif
+ ;

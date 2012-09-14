@@ -35,7 +35,7 @@
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
-    <Reference Include="nunit.framework, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -73,11 +73,6 @@
     <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">
       <Name>FsYaccPrinter</Name>
       <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
-      <Name>GNESCCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">

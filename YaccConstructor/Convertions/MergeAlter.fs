@@ -2,7 +2,7 @@
 //  - function, which merges though alternative sign all rules with same name. It can be useful
 //  for rule's merging when one file with grammar includes other.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2010, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //
@@ -41,10 +41,10 @@ let mergeAlter (ruleList: Rule.t<Source.t, Source.t> list) =
     ruleList |>
         List.choose 
             (fun rule ->
-                if findedRules.Contains(rule.name) then
+                if findedRules.Contains rule.name.text then
                     None
                 else
-                    findedRules.Add(rule.name) |> ignore
+                    findedRules.Add rule.name.text |> ignore
                     Some <| buildAlt (ruleList |> List.filter (fun ruleInner -> rule.name = ruleInner.name))
             )
     

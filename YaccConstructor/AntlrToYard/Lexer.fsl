@@ -1,5 +1,5 @@
 {
-//  Copyright 2010-2011 Konstantin Ulitin
+//  Copyright 2010, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //
@@ -22,22 +22,23 @@ module Yard.Frontends.AntlrFrontend.Lexer
 
 open Yard.Frontends.AntlrFrontend.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
+open Yard.Core.IL
 
 let comment_depth = ref 0
 let source = ref ""
-let lexeme_start = ref 0
+let lexeme_start = ref Position.Empty
 
-let make_lexeme (n1, n2) = source.Value.Substring(n1, n2-n1), (n1, n2)
+let make_lexeme (n1 : Position, n2 : Position) = new Source.t(source.Value.Substring(n1.AbsoluteOffset, n2.AbsoluteOffset - n1.AbsoluteOffset), n1, n2)
 
 // checks if the given identifier is keyword
 let identifier lexeme = 
-  match fst(lexeme) with
+  match (lexeme : Source.t).text with
   | "grammar" -> T_GRAMMAR
   | "options" -> T_OPTIONS
   | "fragment" -> T_FRAGMENT
   | "scope" -> T_SCOPE
   | s when System.Char.IsUpper s.[0]-> TERMINAL(lexeme)
-  | s when System.Char.IsLower s.[0]-> IDENTIFIER(lexeme)
+  | s (*when System.Char.IsLower s.[0]*)-> IDENTIFIER(lexeme)
 }
 
 let eol = "\r\n" | '\n'
@@ -46,14 +47,14 @@ let upperchar = ['A'-'Z']
 let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\255' '0'-'9']
 
 rule main = parse
-  | "{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf }
-  | '@' identchar* { CAT_CODE(make_lexeme(lexbuf.StartPos.AbsoluteOffset+1, lexbuf.EndPos.AbsoluteOffset)) }
-  | "::" identchar* { ACTION_NAME(make_lexeme(lexbuf.StartPos.AbsoluteOffset+2, lexbuf.EndPos.AbsoluteOffset)) }
-  | "/*" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; multiline_comment lexbuf }
-  | "//" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; singleline_comment lexbuf }
-  | '\'' { lexeme_start := lexbuf.EndPos.AbsoluteOffset; literal lexbuf }
-  | '"' { lexeme_start := lexbuf.EndPos.AbsoluteOffset; literal2 lexbuf }
-  | identchar* { identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
+  | "{" { lexeme_start := lexbuf.EndPos; comment_depth := 1; action_code lexbuf }
+  | '@' identchar* { CAT_CODE(make_lexeme(lexbuf.StartPos.ShiftColumnBy 1, lexbuf.EndPos)) }
+  | "::" identchar* { ACTION_NAME(make_lexeme(lexbuf.StartPos.ShiftColumnBy 2, lexbuf.EndPos)) }
+  | "/*" { lexeme_start := lexbuf.EndPos; comment_depth := 1; multiline_comment lexbuf }
+  | "//" { lexeme_start := lexbuf.EndPos; singleline_comment lexbuf }
+  | '\'' { lexeme_start := lexbuf.EndPos; literal lexbuf }
+  | '"' { lexeme_start := lexbuf.EndPos; literal2 lexbuf }
+  | identchar* { identifier(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
   | '(' { LPAREN }
   | ')' { RPAREN }
   | '|' { BAR }
@@ -67,7 +68,7 @@ rule main = parse
   | '!' { EXCLAMATION }
   | '~' { TILDE }
   | ".." { DOUBLE_DOT }
-  | '.' { TERMINAL(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
+  | '.' { TERMINAL(make_lexeme(lexbuf.StartPos, lexbuf.EndPos)) }
   | eof { EOF }
   | _ { main lexbuf }
 and multiline_comment = parse
@@ -88,14 +89,14 @@ and action_code = parse
     { incr comment_depth; action_code lexbuf }
   | "}"
     { decr comment_depth;
-      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf }
+      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos)) else action_code lexbuf }
   | '\'' { literal lexbuf; action_code lexbuf }
   | '"' { literal2 lexbuf; action_code lexbuf }
   | eof { EOF }
   | _ { action_code lexbuf }
 and literal = parse
-  | '\'' { LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | '\'' { LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos)) }
   | "\\\\" | "\\'" | _ { literal lexbuf }
 and literal2 = parse
-  | '"' { LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | '"' { LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos)) }
   | "\\\\" | "\\\"" | _ { literal2 lexbuf }

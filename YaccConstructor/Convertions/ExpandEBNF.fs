@@ -26,7 +26,9 @@ open Production
 open Namer
 open TransformAux
 
-let s2source s = (s, (0,0))
+//let dummyPos s = new Source.t(s)
+
+//let s2source = TransformAux.createSource
 let generatedSomesCount = ref 0
 let genSomeName () =
     generatedSomesCount := !generatedSomesCount + 1
@@ -42,7 +44,7 @@ let genOptName () =
     generatedOptsCount := !generatedOptsCount + 1
     sprintf "yard_opt_%d" !generatedOptsCount
 
-let default_elem = {omit=false; rule=PRef(s2source "empty", None); binding=None; checker=None}
+let default_elem = {omit=false; rule=PRef(new Source.t "dummy", None); binding=None; checker=None}
 
 let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) = 
     let factList list = list |> List.map fst
@@ -51,14 +53,18 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
         | PMetaRef (n,a,[]) -> PRef(n,a)
         | x -> x
     let addedBnfRules = ref []
-    let sourceIf cond s = if cond then Some(s2source s) else None
-    let genAction ac = ac |> createSource |> Some
+    //let sourceIf cond s = if cond then Some(s2source s) else None
+    let genAction ac oldBody = genNewSource ac oldBody |> Some
     let genBinding = genAction
     // if production is not binded then don't add semantic action in generated rules
     let rec replaceEbnf production attrs metaArgs = 
         let insideMetaArgs =
             metaArgs
             |> List.map (fun x -> PRef (x, None))
+        let genRule generatedName src =
+            let inner attrsHandler =
+                reduceMeta <| PMetaRef(genNewSource generatedName src, list2opt <| createParams (attrsHandler attrs), insideMetaArgs)
+            inner factList, inner formList
         match production with
         | PSeq(elem_list, ac) ->
             PSeq(elem_list
@@ -73,77 +79,74 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  |> List.rev
                  , ac)
         | PAlt(left, right) -> PAlt(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
-        | PSome(p) ->
+        | PSome p ->
             let generatedName = genSomeName()
             let expandedBody = replaceEbnf p attrs metaArgs
-            let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)
-            let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
+            let newRule, insideNewRule = genRule generatedName p
             let newBody =
                 PAlt(
-                    PSeq([{default_elem with rule = expandedBody; binding=genBinding "yard_elem"}], genAction "[yard_elem]") ,
+                    PSeq([{default_elem with rule = expandedBody; binding=genBinding "yard_elem" p}], genAction "[yard_elem]" p) ,
                     PSeq([
                             {omit=false;
                                 rule = expandedBody;
-                                binding=genBinding "yard_head";
+                                binding=genBinding "yard_head" p;
                                 checker=None};
                             {omit=false;
                                 rule = insideNewRule;
-                                binding=genBinding "yard_tail";
+                                binding=genBinding "yard_tail" p;
                                 checker=None}
                             ]
-                            , genAction "yard_head::yard_tail")
+                            , genAction "yard_head::yard_tail" p)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name = generatedName 
+                 with name = genNewSource generatedName p
                  and args = formList attrs 
                  and body = newBody
                  and _public=false
                  and metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-        | PMany(p) -> 
+        | PMany p -> 
             let generatedName = genManyName()
             let expandedBody = replaceEbnf p attrs metaArgs
-            let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)
-            let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
+            let newRule, insideNewRule = genRule generatedName p
             let newBody = 
                 PAlt(
-                    PSeq([], genAction "[]") ,
+                    PSeq([], genAction "[]" p) ,
                     PSeq([
                             {omit=false;
                                 rule=expandedBody;
-                                binding=genBinding "yard_head";
+                                binding=genBinding "yard_head" p;
                                 checker=None};
                             {omit=false;
                                 rule=insideNewRule;
-                                binding=genBinding "yard_tail";
+                                binding=genBinding "yard_tail" p;
                                 checker=None}
                             ]
-                            , genAction "yard_head::yard_tail")
+                            , genAction "yard_head::yard_tail" p)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
+                 with name= genNewSource generatedName p
                  and args = formList attrs
                  and body= newBody
                  and _public=false
                  and metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
-        | POpt(p) -> 
+        | POpt p -> 
             let generatedName = genOptName()
             let expandedBody = replaceEbnf p attrs metaArgs
-            let newRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (factList attrs), insideMetaArgs)
-            let insideNewRule = reduceMeta <| PMetaRef(s2source generatedName, list2opt <| createParams (formList attrs), insideMetaArgs)
+            let newRule, insideNewRule = genRule generatedName p
             let newBody =
                 PAlt(
-                    PSeq([], genAction "None"),
-                    PSeq([{default_elem with rule=expandedBody; binding=genBinding "yard_elem"}], genAction "Some(yard_elem)")
+                    PSeq([], genAction "None" p),
+                    PSeq([{default_elem with rule=expandedBody; binding=genBinding "yard_elem" p}], genAction "Some(yard_elem)" p)
                 ) 
             addedBnfRules := (
                 {new Rule.t<Source.t,Source.t> 
-                 with name=generatedName 
+                 with name= genNewSource generatedName p
                  and args = formList attrs
                  and body= newBody
                  and _public=false

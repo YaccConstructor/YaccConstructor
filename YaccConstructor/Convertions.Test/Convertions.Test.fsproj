@@ -49,11 +49,6 @@
       <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
-      <Name>GNESCCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
@@ -69,9 +64,10 @@
       <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
-    <Reference Include="nunit.framework" />
+    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

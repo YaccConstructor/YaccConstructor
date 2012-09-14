@@ -1,6 +1,6 @@
 ﻿//  Layouts.fs contains functions for different datatypes layout.
 //
-//  Copyright 2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2011, 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //

@@ -27,68 +27,22 @@ open Yard.Core.IL.Definition
 open Convertions.TransformAux
 open NUnit.Framework
 
+
+let dummyPos s = new Source.t(s)
+let dummyToken s = PToken <| new Source.t(s)
+
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
-let grammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
-    let srcEquals (a:Source.t) (b:Source.t) =
-        if (fst a = fst b) then true
-        else printfn "bad %A %A" a b; false
-    let srcOptEquals a b =
-        match a,b with
-        | Some(sa), Some(sb) -> srcEquals sa sb
-        | None, None -> true
-        | _ -> printfn "badOpt %A %A" a b; false
-
-    let rec ilTreeEqualsWithoutLineNumbers il1 il2 =
-        let rec reduceSeq (*il*) = function
-            | PSeq ([{omit = false; binding = None; checker = None; rule = r}], None) ->
-//                printfn "seq %s" <| r.ToString()
-                reduceSeq r
-            | x -> x
-        //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
-        match (reduceSeq il1, reduceSeq il2) with
-        | PSeq(elems1, ac1), PSeq(elems2, ac2) -> 
-            List.length elems1 = List.length elems2 &&
-                List.zip elems1 elems2 
-                |> List.forall 
-                    (fun (elem1, elem2) ->
-                        srcOptEquals elem1.binding elem2.binding && srcOptEquals elem1.checker elem2.checker &&
-                            elem1.omit = elem2.omit && ilTreeEqualsWithoutLineNumbers elem1.rule elem2.rule
-                    )
-        | PAlt(left1, right1), PAlt(left2, right2) -> 
-            ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
-        | PToken(t1), PToken(t2) -> srcEquals t1 t2
-        | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
-        | PMany(t1), PMany(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PSome(t1), PSome(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | POpt(t1), POpt(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
-            srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
-                List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
-        | PLiteral(s1), PLiteral(s2) -> srcEquals s1 s2
-        | _ -> false
-
-    List.forall2  
-        (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
-            rule1._public = rule2._public &&
-            List.forall2 srcEquals (createParams rule1.args) (createParams rule2.args) &&
-            ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
-            List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name = rule2.name
-        ) g1 g2
-
-//let printTree tree = 
-//    printfn "%s" <| (((GeneratorsManager.Generator "YardPrinter").Generate tree) :?> string)
 
 [<TestFixture>]
 type ``Convertions tests`` () =
     [<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
         Namer.resetRuleEnumerator()
-        let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
+        let dummyRule = {omit=false; binding=None; checker=None; rule=dummyToken "DUMMY"}
         let ilTree = 
             {
                 info = { fileName = "" } 
@@ -96,21 +50,22 @@ type ``Convertions tests`` () =
                 foot = None 
                 grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         metaArgs = []
                         _public = true
                         body =
                           (([
-                                {dummyRule with rule=PToken("NUMBER",(0,0))};
-                                {dummyRule with rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
-                                {dummyRule with rule=PToken("CHUMBER",(0,0))};
+                                {dummyRule with rule=dummyToken "NUMBER"};
+                                {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
+                                {dummyRule with rule=dummyToken "CHUMBER"};
                             ], None)
                             |> PSeq
-                            , PToken("OUTER",(0,0)))
+                            , dummyToken "OUTER")
                             |> PAlt
                     }
                 ]
+                options = Map.empty
             }
         let ilTreeConverted = ConvertionsManager.ApplyConvertion "ExpandBrackets" ilTree
 #if DEBUG
@@ -121,27 +76,28 @@ type ``Convertions tests`` () =
             head = None;
             grammar = 
                 [{
-                    name = "s"
+                    name = dummyPos"s"
                     args = []
                     body =
                         PAlt(
                             PSeq([
-                                    {dummyRule with rule = PToken ("NUMBER", (0, 0))};
-                                    {dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}; 
-                                    {dummyRule with rule = PToken ("CHUMBER", (0, 0))}
+                                    {dummyRule with rule = dummyToken "NUMBER"};
+                                    {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
+                                    {dummyRule with rule = dummyToken "CHUMBER"}
                             ],None)
-                            , PToken ("OUTER", (0, 0)))
+                            , dummyToken "OUTER")
                     _public = true
                     metaArgs = []
                  };
                  {
-                    name = "yard_exp_brackets_1"
+                    name = dummyPos"yard_exp_brackets_1"
                     args = []
-                    body = PAlt (PToken ("ALT1", (0, 0)),PToken ("ALT2", (0, 0)))
+                    body = PAlt (dummyToken "ALT1", dummyToken "ALT2")
                     _public = false
                     metaArgs = []
                  }]
             foot = None
+            options = Map.empty
         }
         Assert.AreEqual(ilTreeConverted, correctConverted)
 
@@ -196,7 +152,7 @@ type ``Convertions tests`` () =
            | Some gen -> gen
            | None -> failwith "YardPrinter is not found." 
         printfn "%A" generator*)
-        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","*.yrd") 
+        System.IO.Directory.EnumerateFiles(convertionTestPath+"Meta/","meta_*.yrd") 
         |> Seq.iter 
             (fun srcFile ->  
                 Namer.resetRuleEnumerator()
@@ -220,7 +176,7 @@ type ``Convertions tests`` () =
                                raise <| FEError e.Message
                 printfn "after result parsing"
                 //printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+                Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 
             )
         Assert.True(true)
@@ -267,7 +223,7 @@ type ``Convertions tests`` () =
                                raise <| FEError e.Message
                 printfn "5"
                 printf "result:%A\nexpected:\n%A\n" ilTreeConverted.grammar expected.grammar
-                Assert.IsTrue(grammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+                Assert.IsTrue(ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
 //                     with e ->
 //                        printfn "%A" e 
 

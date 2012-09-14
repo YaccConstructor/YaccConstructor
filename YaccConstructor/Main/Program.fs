@@ -1,4 +1,4 @@
-﻿//  Copyright 2010,2011 Konstantin Ulitin, Semen Grigorev
+﻿//  Copyright 2010,2011,2012 Konstantin Ulitin, Semen Grigorev
 //
 //  This file is part of YaccConctructor.
 //
@@ -31,8 +31,7 @@ exception GenError of string
 exception CheckerError of string
 
 let () =
-    let a:Source.t = "aa",(0,1)
-    let b:Source.t = "aa",(1,2)
+    
     let feName = ref None
     let generatorName = ref None
     let generatorParams = ref None
@@ -42,6 +41,9 @@ let () =
     let GeneratorsManager = GeneratorsManager.GeneratorsManager()
     let ConvertionsManager = ConvertionsManager.ConvertionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
+
+    let userDefs = ref []
+    let userDefsStr = ref ""
 
     feName := // Fill by default value
         if Seq.exists ((=) "YardFrontend") FrontendsManager.Available then
@@ -72,17 +74,19 @@ let () =
             (fun s -> 
                 match Array.toList (s.Split(' ')) with
                 | name::[] -> generatorName := Some(name); generatorParams := None
-                | name::parameters -> generatorName := Some(name); generatorParams := Some(String.concat " " parameters)
+                | name::parameters -> generatorName := Some(name); generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
+         "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
+         "-U", ArgType.String (fun s -> userDefs := List.filter (fun x -> x <> s) !userDefs), 
+                "Remove previously defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s ->
                                    testFile := System.IO.Path.GetFileName(s) |> Some
                                    testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
-    let commandLineArgs = System.Environment.GetCommandLineArgs()
     ArgParser.Parse commandLineSpecs
 
     let run () =
@@ -102,11 +106,17 @@ let () =
                 else _raise ()
 
             // Parse grammar    
-            let ilTree =                
+            let ilTree =  
                 try
-                    ref (fe.ParseGrammar grammarFilePath)
+                    let defStr = 
+                        List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
+                    if System.String.IsNullOrEmpty defStr
+                    then grammarFilePath
+                    else grammarFilePath + "%" + defStr
+                    |> fe.ParseGrammar
+                    |> ref
                 with
-                | e -> FEError e.Message |> raise
+                | e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 //            printfn "%A" <| ilTree
             // Apply convertions
@@ -138,15 +148,15 @@ let () =
 
 //                    |> CheckerError
   //                  |> raise
-                try
-                    match !generatorParams with
-                    | None -> gen.Generate (!ilTree)
-                    | Some(genParams) -> gen.Generate(!ilTree, genParams)
-                with
-                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
-                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
-                       |> raise
-                | e -> GenError e.Message |> raise
+                //try
+                match !generatorParams with
+                | None -> gen.Generate (!ilTree)
+                | Some(genParams) -> gen.Generate(!ilTree, genParams)
+                //with
+//                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
+//                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
+//                       |> raise
+                //| e -> GenError e.Message |> raise
 
 //#if DEBUG               
             printf "%s" (result :?> string)

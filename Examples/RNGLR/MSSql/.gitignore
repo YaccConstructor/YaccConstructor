@@ -1,0 +1,7 @@
+yards/*actions*
+yards/*tables*
+yards/*regexp*
+Lexer.fs
+Tables.fs
+Regexp.fs
+Actions.fs

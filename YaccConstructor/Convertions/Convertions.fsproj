@@ -33,6 +33,7 @@
     <DocumentationFile>bin\Release\Convertions.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -55,6 +56,8 @@
     <Compile Include="ExpandMeta.fs" />
     <Compile Include="EliminateLeftRecursion.fs" />
     <Compile Include="ExpandInnerAlt.fs" />
+    <Compile Include="RemoveAC.fs" />
+    <Compile Include="ReplaceInline.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

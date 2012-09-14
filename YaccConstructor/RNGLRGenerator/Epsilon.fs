@@ -20,29 +20,12 @@
 module Yard.Generators.RNGLR.Epsilon
 
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
 let emptyName = "empty"
 let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
-
-let eliminateEpsilon (ruleList : Rule.t<_,_> list) =
-    let rec eliminateProdEpsilon (*body*) = function
-        | PSeq (s,a) ->
-            s
-            |> List.fold
-                (fun acc e ->
-                    match e.rule with
-                    | PRef (x,_) when (fst x = emptyName) -> acc
-                    | PSeq _ as s1 -> {e with rule = eliminateProdEpsilon s1}::acc
-                    | _ -> e::acc
-                ) []
-            |> List.rev
-            |> (fun x -> PSeq(s,a))
-        | x -> x
-
-    ruleList
-    |> List.map (fun x -> {x with body = eliminateProdEpsilon x.body})
 
 let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
     let result : bool[] = Array.zeroCreate indexator.fullCount
@@ -63,27 +46,26 @@ let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
 
     result
 
-let getEpsilonCycles (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
+let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let was : int[] = Array.zeroCreate indexator.fullCount
     let result = ref []
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
             let rec dfs u =
                 was.[u] <- 1
-                for i in 0..rules.rulesCount-1 do
-                    if (rules.leftSide i = u) then
-                        let allEpsilon =
-                            rules.rightSide i
-                            |> Array.fold (fun res v -> res && canInferEpsilon.[v]) true
-                        if allEpsilon then
-                            rules.rightSide i
-                            |> Array.iter
-                                (fun v ->
-                                    if was.[v] = 1 then
-                                        result := (indexator.indexToNonTerm v)::!result
-                                    elif was.[v] = 0 then
-                                        dfs v
-                                )
+                for rule in rules.rulesWithLeftSide u do
+                    let allEpsilon =
+                        rules.rightSide rule
+                        |> Array.fold (fun res v -> res && canInferEpsilon.[v]) true
+                    if allEpsilon then
+                        rules.rightSide rule
+                        |> Array.iter
+                            (fun v ->
+                                if was.[v] = 1 then
+                                    result := (indexator.indexToNonTerm v)::!result
+                                elif was.[v] = 0 then
+                                    dfs v
+                            )
                 was.[u] <- 2
             dfs i
     !result
@@ -98,30 +80,46 @@ let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
 
 let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let allEpsilon = epsilonRules rules indexator canInferEpsilon
-    let result : MultiAST[] = Array.zeroCreate indexator.nonTermCount
-    let was : int[] = Array.zeroCreate indexator.nonTermCount
+    (*
+    printfn "%A" allEpsilon
     for i in 0..indexator.nonTermCount-1 do
-(*        let rec collectAsts (production : int[]) acc num =
-            if num = production.Length then acc
-            else
-                let newAcc =
-                    [for child in result.[production.[num]] do
-                        for prev in acc do
-                            yield child::prev]
-                collectAsts production newAcc (num + 1)*)
-        if (was.[i] = 0 && canInferEpsilon.[i]) then
-            let rec dfs u =
-                was.[u] <- 1
-                for i in 0..rules.rulesCount-1 do
-                    if (rules.leftSide i = u && allEpsilon.[i]) then
-                        rules.rightSide i
-                        |> Array.iter (fun v -> if was.[v] = 0 then dfs v)
-                        let asts =
-                            rules.rightSide i
-                            |> Array.map (fun num -> result.[num])
-                        result.[u] <- {ruleNumber = i; children = asts}::result.[u]
-                was.[u] <- 2
-            dfs i
+        printfn "%d %s: %A" i (indexator.indexToNonTerm i) (rules.rulesWithLeftSide i)
+    for i in 0..rules.rulesCount-1 do
+        printfn "%d: %d -> %A" i (rules.leftSide i) (rules.rightSide i)
+    *)
+    let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
+    let pos = Array.zeroCreate indexator.nonTermCount
+    for u = 0 to indexator.nonTermCount-1 do
+        if canInferEpsilon.[u] then
+            let order = new ResizeArray<_>()
+            let res = new ResizeArray<_>()
+            for j = 0 to indexator.nonTermCount-1 do
+                pos.[j] <- -1
+            pos.[u] <- 0
+            order.Add u
+            res.Add (new AST (Unchecked.defaultof<_>, null))
+            let mutable i = 0
+            while i < order.Count do
+                let v = order.[i]
+                let children = new ResizeArray<_>()
+                for rule in rules.rulesWithLeftSide v do
+                    if allEpsilon.[rule] then
+                        let nodes =
+                            rules.rightSide rule
+                            |> Array.map
+                                (fun w ->
+                                    if pos.[w] = -1 then
+                                        pos.[w] <- order.Count
+                                        order.Add w
+                                        res.Add (new AST (Unchecked.defaultof<_>, null))
+                                    box res.[pos.[w]])
+                        children.Add <| new Family(rule, new Nodes(nodes))
+                let first = children.[0]
+                children.RemoveAt 0
+                res.[i].first <- first
+                res.[i].other <- if children.Count > 0 then children.ToArray() else null
+                i <- i + 1
+            result.[u] <- new Tree<_>(null, res.[0], null)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

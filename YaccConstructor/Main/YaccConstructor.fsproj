@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend -g YardPrinter -c ExpandMeta -i "D:\YaccConstructor\Tests\Convertions\Batch\ExpandMeta_literal.yrd"</StartArguments>
+    <StartArguments>-i C:\Projects\recursive-ascent\Tests\RNGLR\calc\calc.yrd -g "RNGLRGenerator int"</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>
@@ -42,10 +42,10 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\list.yrd "</StartArguments>
+    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\first\first.yrd"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>
@@ -86,11 +86,6 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FAL\FAL.fsproj">
-      <Name>FAL</Name>
-      <Project>{87813c95-a950-43cd-a783-3b71c51b852a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
       <Name>FParsecGenerator</Name>
       <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
@@ -104,16 +99,6 @@
     <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">
       <Name>FsYaccPrinter</Name>
       <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCCommon\GNESCCCommon.fsproj">
-      <Name>GNESCCCommon</Name>
-      <Project>{eb0a41f1-11dc-4f49-bbb6-6825a0ee576f}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
-      <Name>GNESCCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">

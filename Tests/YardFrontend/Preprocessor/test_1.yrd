@@ -1,0 +1,6 @@
++ e :
+#if ora
+ N;
+#else
+ R;
+#endif

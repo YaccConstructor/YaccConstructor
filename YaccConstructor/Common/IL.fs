@@ -1,4 +1,5 @@
-﻿//  Copyright 2009-2011 Jake Kirilenko
+﻿//  Copyright 2009, 2010, 2011, 2012 Jake Kirilenko
+//                        2011, 2012 Dmitry Avdyukhin
 //
 //  This file is part of YaccConctructor.
 //
@@ -18,10 +19,37 @@
 
 module Yard.Core.IL
 module Source = begin
+    open Microsoft.FSharp.Text
+    [<Struct>]
+    type Position =
+        val absoluteOffset : int
+        val line : int
+        val column : int
+        new (absoluteOffset, line, column) = {absoluteOffset = absoluteOffset; line = line; column = column}
+        new (fslexPos : Lexing.Position) =
+            {absoluteOffset = fslexPos.AbsoluteOffset; line = fslexPos.Line; column = fslexPos.Column}
     /// Type of elementary part of source grammar
-    type t = string * (int * int) 
+    [<Struct>]
+    type t =
+        val text : string
+        val startPos : Position
+        val endPos : Position
+        val file : string
+
+        new (text, startPos, endPos, file) =
+            {text = text; startPos = startPos; endPos = endPos; file = file}
+        new (text, origin : t) =
+            {text = text; startPos = origin.startPos; endPos = origin.endPos; file = origin.file}
+        new (text, startPos : Lexing.Position, endPos : Lexing.Position) =
+            t (text, new Position(startPos), new Position(endPos), startPos.FileName)
+        new (text, lexbuf : Lexing.LexBuffer<_>) =
+            t (text, lexbuf.StartPos, lexbuf.EndPos)
+        new (text) =
+            t (text, new Position(), new Position(), "")
+        override this.ToString() =
+            this.text + " #!=<>%$^* " + string this.startPos.absoluteOffset + " " + string this.endPos.absoluteOffset + " " + this.file
     // TODO: make something with toString overriding of Source.t   
-    let toString ((r,_):t):string = r
+    let toString (x : t) = x.text
 end
   
 module Production = begin
@@ -97,7 +125,7 @@ module Production = begin
                         | None -> ""
                         | Some var -> var.ToString() + "="
                     omit + bind + x.rule.ToString()
-                String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + strAttrs
+                "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->
                 Source.toString name + argsToString args
@@ -124,7 +152,7 @@ module Rule = begin
     /// </summary>
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
-        name    : string;
+        name    : Source.t;
         /// Heritable arguments of rule
         args    : 'patt list;
         /// Rule body (production).
@@ -143,8 +171,9 @@ module Grammar =  begin
 end 
 
 module Definition = begin
+    
     type info = { fileName: string }
-    type t<'patt,'expr>  = { 
+    type t<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
      /// Contains information (e.g. origin) about this grammar description
      info    : info;
      /// Text before a grammar description ( e.g. some open-s), what will be simply copied
@@ -152,9 +181,10 @@ module Definition = begin
      /// Grammar description itself
      grammar : Grammar.t<'patt,'expr>;
      /// Text after a grammar description, what will be simply copied
-     foot    :'expr option
+     foot    :'expr option;
+     options : Map<Rule.t<'patt, 'expr>, Map<string, string>>
     }    
     
     /// Empty grammar
-    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []}
+    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty}
 end

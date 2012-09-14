@@ -27,7 +27,7 @@ open Yard.Generators.FParsecGenerator.WriteToFile
 
 open System.Text.RegularExpressions
 
-let repr = fst
+let repr x = (x : Source.t).text
 let printArgs indent = List.map repr  >> String.concat " " >> (+) indent
 let printBinding = function None -> "_" | Some patt -> repr patt
 let printArg = function None -> "" | Some arg -> repr arg
@@ -77,7 +77,7 @@ let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     
     let header = printArg input_grammar.head 
     let functions = List.map (fun e -> (if e._public then "public " else "private " ) 
-                                      + e.name + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+                                      + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
                                       + printBody "" e.body ) 
                          input_grammar.grammar
 

@@ -2,7 +2,7 @@
 //  - function, which replaces all literals in grammar by tokens and
 //  writes a comment to header about them.
 //
-//  Copyright 2009-2011 Konstantin Ulitin
+//  Copyright 2009, 2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //
@@ -72,15 +72,16 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, 
         | PMany(x) -> PMany(_replaceLiterals x)
         | PSome(x) -> PSome(_replaceLiterals x)
         | POpt(x) -> POpt(_replaceLiterals x)
-        | PLiteral(str, _) -> 
+        | PLiteral src -> 
+            let str = src.text
             if (replacedLiterals.ContainsKey str) then
-                PToken(replacedLiterals.[str], (0,0))
+                PToken <| new Source.t(replacedLiterals.[str], src)
             else
                 let token = ref(tokenName str token_format)
                 while grammarTokens.Contains(!token) do
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
-                PToken(!token, (0,0)) 
+                PToken <| new Source.t(!token, src)
         | x -> x
     _replaceLiterals production
     
@@ -90,7 +91,7 @@ let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) (token_format:st
     let grammarTokens = new HashSet<string>()
     eachProduction 
         (function
-        | PToken(name,_) -> grammarTokens.Add(name) |> ignore ; ()
+        | PToken name -> grammarTokens.Add name.text |> ignore
         | _ -> ()
         )
         (ruleList |> List.map (fun rule -> rule.body) )

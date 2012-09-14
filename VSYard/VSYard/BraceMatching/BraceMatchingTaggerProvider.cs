@@ -1,4 +1,4 @@
-﻿namespace MyCompany.VSYard.BraceMatching
+﻿namespace YC.VSYard.BraceMatching
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +10,9 @@
     using Microsoft.VisualStudio.Utilities;
     using System.Linq;
     using System.Windows.Media;
+    using EnvDTE;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;    
 
     [Export(typeof(EditorFormatDefinition))]
     [Name("green")]
@@ -25,22 +28,24 @@
         }
     }
 
-
     [Export(typeof(IViewTaggerProvider))]
-    [ContentType("text")]
+    [ContentType("yardtype")]
     [TagType(typeof(TextMarkerTag))]
     internal class BraceMatchingTaggerProvider : IViewTaggerProvider
-    {
+    {        
+
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-            if (textView == null)
-                return null;
+            //It is exampe of getting root *.yrd file of active project.
+            //Should be removed
+            //var t = YC.VSYard.Helpers.SolutionNavigatorHelper.GetRootYrd
+            //        (YC.VSYard.Helpers.SolutionNavigatorHelper.GetActiveProject());
 
-            //provide highlighting only on the top-level buffer
-            if (textView.TextBuffer != buffer)
-                return null;
-
-            return new VSYardNS.BraceMatchingTagger(textView, buffer) as ITagger<T>;
+            if (textView == null
+               || textView.TextBuffer != buffer) //provide highlighting only on the top-level buffer
+               return null;
+            DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+            return new VSYardNS.BraceMatchingTagger(textView, buffer, dte) as ITagger<T>;
         }
     }
 }

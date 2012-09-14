@@ -1,14 +1,14 @@
 s[arg]:  do[arg];
 
-yard_rule_4[c b]:  s[b];
+yard_rule_1:  s[b];
 
-yard_rule_d_5[yard_arg_3 yard_arg_2]:  yard_rule_4[yard_arg_3 yard_arg_2];
+yard_rule_d_2:  yard_rule_1;
 
-yard_rule_6[c b]:  s[c];
+yard_rule_3:  s[c];
 
-yard_rule_d_7[yard_arg_3 yard_arg_2]:  yard_rule_6[yard_arg_3 yard_arg_2];
+yard_rule_d_4:  yard_rule_3;
 
-a[b c]:  yard_rule_d_5[c b] yard_rule_d_7[c b];
+a[b c]:  yard_rule_d_2 yard_rule_d_4;
 
 +s: 
       a[b c]

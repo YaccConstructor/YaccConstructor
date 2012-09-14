@@ -1,9 +1,9 @@
-yard_rule_3:  l = a r = b {(l,r)};
+yard_rule_1:  l = a r = b {(l,r)};
 
-yard_rule_a_4:  yard_rule_3;
+yard_rule_a_2:  yard_rule_1;
 
-yard_rule_7:  r = a l = b {(l,r)};
+yard_rule_3:  r = a l = b {(l,r)};
 
-yard_rule_b_8:  yard_rule_7;
+yard_rule_b_4:  yard_rule_3;
 
-+s:  yard_rule_a_4 yard_rule_b_8;
++s:  yard_rule_a_2 yard_rule_b_4;

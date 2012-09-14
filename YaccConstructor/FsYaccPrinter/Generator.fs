@@ -29,7 +29,7 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
             (function
             | PSeq(elements, actionCode) -> _findTokens (List.map (fun elem -> elem.rule) elements)
             | PAlt(x, y) -> _findTokens [x] @ _findTokens [y]
-            | PToken(source) -> [fst source]
+            | PToken(source) -> [source.text]
             | _ -> []
             )
             productions
@@ -38,7 +38,7 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
         [] allTokens
 
 let findStartRules (grammar:Rule.t<Source.t, Source.t> list) =
-    grammar |> List.choose (fun rule -> if rule._public then Some(rule.name) else None)
+    grammar |> List.choose (fun rule -> if rule._public then Some rule.name.text else None)
    
 let indentedListL = List.reduce (---) 
 
@@ -46,35 +46,35 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
     let lineNumber = ref 0
     let actionCodeFunPrefix = 
         if yardRule.args.IsEmpty then ""
-        else  (String.concat "" (List.map (fst >> sprintf "fun %s -> ") yardRule.args))
+        else  yardRule.args |> List.map (fun x -> sprintf "fun %s -> " x.text) |> String.concat ""
     let rec layoutProduction isOnTop = function
         | PAlt(left, right) -> aboveL (layoutProduction isOnTop left) (layoutProduction isOnTop right)
         | PSeq(elements, actionCode) -> 
             let bindings =
-                List.filter
-                    (fun (_,elem) -> elem.binding.IsSome) <| List.mapi (fun i x -> (i+1,x))
-                    elements
+                elements
+                |> List.mapi (fun i x -> (i+1,x))
+                |> List.choose (fun (i,elem) -> elem.binding |> Option.map (fun x -> i, elem, x))
             let actionCodePrefix =
                 bindings
                 |> List.fold
-                    (fun state (i, elem) ->
+                    (fun state (i, elem, (bind : Source.t)) ->
                         let args =
                             match elem.rule with
-                            | PRef (_,Some args) -> fst args
+                            | PRef (_,Some (args : Source.t)) -> args.text
                             | _ -> ""
-                        sprintf "%slet %s=$%d %s in " state (fst elem.binding.Value) i args)
+                        sprintf "%slet %s=$%d %s in " state bind.text i args)
                     ""
             lineNumber := !lineNumber + 1
             indentedListL (
                 if !lineNumber = 1 then wordL "" else wordL "|"
                 ::(elements |> List.map (fun elem -> layoutProduction false elem.rule)) 
                 @ (if actionCode = None then [wordL "{ }"]
-                   else [wordL ("{ " + actionCodeFunPrefix + actionCodePrefix + fst actionCode.Value + "}")]))
+                   else [wordL ("{ " + actionCodeFunPrefix + actionCodePrefix + actionCode.Value.text + "}")]))
         //| PRef(("empty",_),_) -> leftL ""
         | PToken(src)
         | PRef(src, _) ->
-            if not isOnTop then wordL (fst src)
-            else wordL <| (fst src) + "{ " + actionCodeFunPrefix + "$1 }"
+            if not isOnTop then wordL src.text
+            else wordL <| src.text + "{ " + actionCodeFunPrefix + "$1 }"
         | PMany _ -> wordL "$UNEXPECTED MANY$"
         | PMetaRef _ -> wordL "$UNEXPECTED META_REF$"
         | PLiteral _ -> wordL "$UNEXPECTED LITERAL$"
@@ -83,19 +83,23 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
         | PSome _ -> wordL "$UNEXPECTED SOME$"
         | POpt _ -> wordL "$UNEXPECTED OPT$"
 //        | _ -> wordL "$UNEXPECTED$"
-    let layout = (^^) (wordL (yardRule.name + " :")) (layoutProduction true yardRule.body)
+    let layout = (^^) (wordL (yardRule.name.text + " :")) (layoutProduction true yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
 let generate2 (ilDef:Definition.t<Source.t, Source.t>) tokenType =
-    let headerSection = if ilDef.head.IsSome then sprintf "%%{\n%s\n%%}\n" (fst ilDef.head.Value) else ""
+    let headerSection = match ilDef.head with Some v -> sprintf "%%{\n%s\n%%}\n" v.text | None -> ""
     let tokens = findTokens ilDef.grammar
     // TODO: use String.concat instead of fold+sprintf
-    let tokensSection = sprintf "%s\n" (List.fold (fun text token -> sprintf "%s%%token <%s> %s\n" text (tokenType token) token) "" tokens)
+    let tokensSection =
+        tokens |> List.fold
+            (fun text token -> sprintf "%s%%token <%s> %s\n" text (tokenType token) token)
+            ""
+        |> sprintf "%s\n"
     let startRules = findStartRules ilDef.grammar
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)
     let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar))
-    let footerSection = if ilDef.foot.IsSome then sprintf "%%%%\n%s\n" (fst ilDef.foot.Value) else ""
+    let footerSection = match ilDef.foot with Some v -> sprintf "%%%%\n%s\n" v.text | None -> ""
     headerSection + tokensSection + startRulesSection + typesSection + rulesSection + footerSection
 
 let generate ilDef tokenType =

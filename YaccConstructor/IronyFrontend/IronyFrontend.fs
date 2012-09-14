@@ -30,7 +30,8 @@ type IronyFrontend() =
                 {info = {fileName = ""};
                 head = None;
                 grammar = Converter.Convert g;
-                foot = None;}
+                foot = None;
+                options = Map.empty}
             | _ -> IL.Definition.empty
         override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
    

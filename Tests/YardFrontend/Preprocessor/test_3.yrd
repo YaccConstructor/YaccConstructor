@@ -1,0 +1,9 @@
++s:
+#if first
+ A
+#elif second
+ B
+#else
+ C
+#endif
+;

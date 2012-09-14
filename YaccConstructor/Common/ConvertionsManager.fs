@@ -1,5 +1,5 @@
-﻿//  Copyright 2009-2011 Konstantin Ulitin <ulitin.k@gmail.com>
-//
+﻿//  Copyright 2009, 2010, 2011 Konstantin Ulitin <ulitin.k@gmail.com>
+//            2011, 2012 Deikin Alexander <eskendirrr@gmail.com>
 //  This file is part of YaccConctructor.
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify
@@ -36,6 +36,7 @@ type ConvertionsManager () as this =
                       | Some conv -> conv.ConvertList (ilTree.grammar, Array.sub parameters 1 (parameters.Length - 1))
                       | None -> failwith <| "Convertion not found: " + parameters.[0]
         and  foot = ilTree.foot
+        and options = ilTree.options
       }
     member  self.ApplyConvertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = apply_convertion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)
      

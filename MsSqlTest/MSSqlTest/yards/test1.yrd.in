@@ -1,6 +1,0 @@
-create procedure ProcName 
-as 
-begin 
-select asdf.*,d.* from b,c,d
-select MIN(a)  from b
-end

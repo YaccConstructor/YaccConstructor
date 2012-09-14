@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55E40801-E853-4AFD-806C-06969CE72CB0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GNESCC", "GNESCC", "{5B0AD554-6DB3-43CA-878A-58874B89CAE2}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TempTests", "TempTests", "{12060C25-C65C-445E-AE07-EB2780B57AE9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{C606E7BF-43A2-474B-8121-CA27405A5ED7}"
@@ -19,10 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{22
 		..\Tests\RACC\test_alt\test_alt_1.yrd.in = ..\Tests\RACC\test_alt\test_alt_1.yrd.in
 		..\Tests\RACC\test_alt\test_alt_2.yrd.in = ..\Tests\RACC\test_alt\test_alt_2.yrd.in
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls", "test_cls", "{644C6234-BBD8-4E22-AB92-6AEEC4B54895}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls_with_head", "test_cls_with_head", "{53281A66-089D-493D-9771-1445D5D7E87A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IronyFrontend", "IronyFrontend", "{B41A47C0-B919-494F-89C5-04FEA6FC5BE2}"
 EndProject

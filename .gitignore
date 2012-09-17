@@ -14,6 +14,7 @@ YaccConstructor/Development/Utils/tests.fsproj.inc
 ook_based_test/report/picts/*
 *.ompv
 *.csproj.user
+VSYard/VSYard/VSYard.csproj.user
 Tests/RNGLR/*/log_*.txt
 Tests/CYK/basic_term_noLBL.yrd.CYK.fs
 Examples/CYK/yc/*

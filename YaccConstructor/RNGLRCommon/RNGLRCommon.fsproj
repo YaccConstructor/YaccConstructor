@@ -35,6 +35,7 @@
     <DocumentationFile>bin\Release\RNGLRCommon.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -42,9 +43,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Indexator.fs" />
-    <Compile Include="Graph.fs" />
-    <Compile Include="NumberedRules.fs" />
+    <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="ParserSource.fs" />
   </ItemGroup>

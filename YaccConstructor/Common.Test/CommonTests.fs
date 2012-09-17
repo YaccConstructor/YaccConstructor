@@ -63,7 +63,7 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``Get generators name`` () =
         let GeneratorsManager = GeneratorsManager.GeneratorsManager()
-        let VerificatedGenerators  = [("FParsecGenerator",true);("FsYaccPrinter",true);("GNESCCGenerator",true);("TreeDump",true);("YardPrinter",true)]
+        let VerificatedGenerators  = [("FParsecGenerator",true);("FsYaccPrinter",true);("TreeDump",true);("YardPrinter",true)]
 
         let genfun (x,y)  = 
             match (x |> GeneratorsManager.Component  ) with

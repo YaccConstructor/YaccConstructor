@@ -79,11 +79,6 @@
       <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GNESCCGenerator\GNESCCGenerator.fsproj">
-      <Name>GNESCCGenerator</Name>
-      <Project>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>

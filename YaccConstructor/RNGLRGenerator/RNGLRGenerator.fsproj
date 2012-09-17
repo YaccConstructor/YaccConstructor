@@ -43,13 +43,14 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Graph.fs" />
+    <Compile Include="Indexator.fs" />
+    <Compile Include="NumberedRules.fs" />
     <Compile Include="InitialConvert.fs" />
     <Compile Include="Epsilon.fs" />
     <Compile Include="SymbolSets.fs" />
     <Compile Include="FinalGrammar.fs" />
     <Compile Include="States.fs" />
-    <Compile Include="GenerateActions.fs" />
-    <Compile Include="GenerateTranslator.fs" />
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
     <Compile Include="PrintTranslator.fs" />

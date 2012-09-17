@@ -8,7 +8,7 @@ for /R %%i in (meta_*.yrd) do (
 	@echo: >> %fileName%
 	@echo ------------------------------------------------ >> %fileName%
 	@echo: >> %fileName%
-	"../../../YaccConstructor/Main/bin/Release/YaccConstructor.exe" -f YardFrontend -g YardPrinter -c ExpandMeta -i %%i >> %fileName%
+	..\..\..\YaccConstructor\Main\bin\Release\YaccConstructor.exe -f YardFrontend -g YardPrinter -c ExpandMeta -i %%i >> %fileName%
 	@echo: >> %fileName%
 	@echo ================================================ >> %fileName%
 	@echo: >> %fileName%

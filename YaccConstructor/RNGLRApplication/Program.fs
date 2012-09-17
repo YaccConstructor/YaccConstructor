@@ -18,9 +18,22 @@ let path = dir + "calc/input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with
-| Parser.Error (num, message),_ -> printfn "Error in position %d: %s" num message
-| Parser.Success mAst,tokens ->
-    mAst |> printAst 0
-    RNGLR.ParseCalc.defaultAstToDot "ast.dot" mAst
-    printfn "Result: %A" (RNGLR.ParseCalc.translate mAst)
+| Parser.Error (num, tok, message),_ -> printfn "Error in position %d on Token %A: %s" num tok message
+| Parser.Success tree, tokens ->
+    tree.PrintAst()
+    RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
+    //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
+    //printfn "%A" tree.Order
+    let args = {
+        tokenToRange = fun _ -> 0,0
+        zeroPosition = 0
+        clearAST = false
+        filterEpsilons = true
+    }
+
+
+    printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
+    tree.ChooseSingleAst()
+    tree.PrintAst()
+
 //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)

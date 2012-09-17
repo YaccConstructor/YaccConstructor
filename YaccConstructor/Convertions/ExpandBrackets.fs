@@ -25,10 +25,13 @@ module Yard.Core.Convertions.ExpandBrackets
 
 open Yard.Core
 open Yard.Core.IL
+open Namer
 open TransformAux
 open Yard.Core.IL.Production
 
-let private newName () = (Namer.Names.brackets,(0,0)) |> Namer.createNewName |> fst
+//let dummyPos s = new Source.t(s)
+
+let private newName () = Namer.nextName Namer.Names.brackets
     
 let private expandBrackets (ruleList: Rule.t<_, _> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule.t<_, _>>(List.toArray ruleList)
@@ -51,12 +54,13 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
                                  { elem with rule = body }
                             | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = newName()
-                                toExpand.Enqueue({name = newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }
-                            (*| PAlt(_,_) -> 
+                                toExpand.Enqueue({name = genNewSource newName elem.rule; args=attrs;
+                                                    body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
                                 let newName = newName()
-                                toExpand.Enqueue({name=newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef((newName,(0,0)), list2opt <| createParams attrs) }*)
+                                toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
+                                                    body=elem.rule; _public=false; metaArgs=[]})
+                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
                             | _ -> elem
                         newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
                     )

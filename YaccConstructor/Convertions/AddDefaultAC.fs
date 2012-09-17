@@ -21,10 +21,13 @@
 module Yard.Core.Convertions.AddDefaultAC
 
 open Yard.Core
+open Namer
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Convertions.TransformAux
+
+//let dummyPos s = new Source.t(s)
 
 /// Adds action code to production considering it is used somewhere
 let rec addAcToProduction neededRules ruleBody = 
@@ -44,13 +47,15 @@ let rec addAcToProduction neededRules ruleBody =
         let getBinding i elem =
             if elem.omit 
             then None
-            else Some(sprintf "S%d" (i+1), (0,0))
+            else Some <| genNewSource (sprintf "S%d" (i+1)) elem.rule
         PSeq(
-            elements |> List.mapi (fun i elem ->  {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
-            , Some(elements |> List.mapi getBinding |> List.choose id |> List.map fst |> String.concat ", ", (0,0)), l       
+            elements |> List.mapi (fun i elem ->
+                {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
+            , Some(elements |> List.mapi getBinding |> List.choose id
+                |> List.map (fun x -> x.text) |> String.concat ", "|> (fun n -> genNewSource n ruleBody))       
         )
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
-    | PRef((ref,(_,_)), _) as x -> neededRules := ref::!neededRules; x
+    | PRef(ref, _) as x -> neededRules := ref.text::!neededRules; x
     | PLiteral _ as x -> x
     | PToken _ as x -> x
     | PSome p -> PSome(addAcToProduction neededRules p)
@@ -65,16 +70,16 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
     let rulesMap = new Dictionary<string, Rule.t<Source.t, Source.t>>()
     ruleList |> List.iter 
         (fun rule -> 
-            rulesMap.Add(rule.name, rule); 
+            rulesMap.Add(rule.name.text, rule); 
             //if rule._public then (rulesQueueBfs.Enqueue(rule.name) |> ignore)
-            rulesQueueBfs.Enqueue(rule.name) |> ignore
+            rulesQueueBfs.Enqueue rule.name.text
         ) 
     while rulesQueueBfs.Count > 0 do
         let bfsFor = rulesQueueBfs.Dequeue()
         if not <| updatedRules.Contains bfsFor then    
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
-            let emptyRule = {Rule.t.name=""; Rule.t.args=[]; Rule.t.body=PSeq([], None, None);
+            let emptyRule = {Rule.t.name=new Source.t ""; Rule.t.args=[]; Rule.t.body=PSeq([], None);
                                 Rule.t._public=false; Rule.t.metaArgs=[]}
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then
@@ -89,14 +94,14 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
                                 *)
                 let neededRules = ref []
                 let updatedBody =
-                    addAcToProduction neededRules ((!ruleFor).body)
+                    addAcToProduction neededRules (ruleFor.Value.body)
                     //|> bodyToSeq
                 !neededRules |> List.iter (fun r -> if not (updatedRules.Contains(r)) then rulesQueueBfs.Enqueue(r))
                 rulesMap.[bfsFor] <- { !ruleFor with body=updatedBody}
     ruleList
     |> List.map (fun rule ->
                     let ruleRef = ref rule in
-                    rulesMap.TryGetValue(rule.name ,ruleRef)
+                    rulesMap.TryGetValue(rule.name.text ,ruleRef)
                     |> ignore;
                     !ruleRef)
 

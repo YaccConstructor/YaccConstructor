@@ -27,23 +27,24 @@ open Yard.Core.IL.Definition
 open Convertions.TransformAux
 open NUnit.Framework
 
+
+let dummyPos s = new Source.t(s)
+let dummyToken s = PToken <| new Source.t(s)
+
 exception FEError of string
 let ConvertionsManager = ConvertionsManager.ConvertionsManager()
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
 let convertionTestPath = @"../../../../Tests/Convertions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
-
 let getFrontend name =
         match FrontendsManager.Component name with
         | Some fe -> fe
         | None -> failwith (name + " is not found.")
-
 let getBE name =
     match GeneratorsManager.Component name with
     | Some be -> be
     | None -> failwith (name + " is not found.")
-
 let treeDump = getBE "TreeDump"
 
 let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
@@ -60,18 +61,18 @@ type ``Convertions tests`` () =
                 foot = None 
                 grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         metaArgs = []
                         _public = true
                         body =
                           (([
-                                {dummyRule with rule=PToken("NUMBER",(0,0))};
-                                {dummyRule with rule=PAlt(PToken("ALT1",(0,0)),PToken("ALT2",(0,0)))}
-                                {dummyRule with rule=PToken("CHUMBER",(0,0))};
+                                {dummyRule with rule=dummyToken "NUMBER"};
+                                {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
+                                {dummyRule with rule=dummyToken "CHUMBER"};
                             ], None, None)
                             |> PSeq
-                            , PToken("OUTER",(0,0)))
+                            , dummyToken "OUTER")
                             |> PAlt
                     }
                 ]
@@ -86,23 +87,23 @@ type ``Convertions tests`` () =
             head = None;
             grammar = 
                 [{
-                    name = "s"
+                    name = dummyPos"s"
                     args = []
                     body =
                         PAlt(
                             PSeq([
-                                    {dummyRule with rule = PToken ("NUMBER", (0, 0))};
-                                    {dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}; 
-                                    {dummyRule with rule = PToken ("CHUMBER", (0, 0))}
+                                    {dummyRule with rule = dummyToken "NUMBER"};
+                                    {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
+                                    {dummyRule with rule = dummyToken "CHUMBER"}
                             ],None, None)
-                            , PToken ("OUTER", (0, 0)))
+                            , dummyToken "OUTER")
                     _public = true
                     metaArgs = []
                  };
                  {
-                    name = "yard_exp_brackets_1"
+                    name = dummyPos"yard_exp_brackets_1"
                     args = []
-                    body = PAlt (PToken ("ALT1", (0, 0)),PToken ("ALT2", (0, 0)))
+                    body = PAlt (dummyToken "ALT1", dummyToken "ALT2")
                     _public = false
                     metaArgs = []
                  }]

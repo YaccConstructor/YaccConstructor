@@ -29,7 +29,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
     let closure (inlines : (string * t<_,_>) list) = 
         let inlinesDict = inlines |> dict
         let getName = function
-            | PRef((n,_),_) | PToken (n,_) | PLiteral (n,_) -> n
+            | PRef(n,_) | PToken n | PLiteral n -> n.text
             | x -> ""
         [for (k,v) in inlines do
             let cur = ref v
@@ -42,7 +42,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
             (fun inlines cur ->
                 match cur.body with
                 | PRef (_, None) | PToken _ | PLiteral _ ->
-                    (cur.name, cur.body)::inlines
+                    (cur.name.text, cur.body)::inlines
                 | _ -> inlines)
             []
         |> closure
@@ -53,11 +53,11 @@ let private replaceInline (rules : Rule.t<_,_> list) =
                 elems |> List.map (fun x -> {x with rule = modifyBody x.rule})
             PSeq(newElems, ac, l)
         | PAlt (l,r) -> PAlt(modifyBody l, modifyBody r)
-        | PRef ((name,_),_) as prev ->
-            if inlines.ContainsKey name then inlines.[name]
+        | PRef (name,_) as prev ->
+            if inlines.ContainsKey name.text then inlines.[name.text]
             else prev
-        | PMetaRef ((name,_),_,_) as prev ->
-            if inlines.ContainsKey name then inlines.[name]
+        | PMetaRef (name,_,_) as prev ->
+            if inlines.ContainsKey name.text then inlines.[name.text]
             else prev
         | PMany x -> PMany <| modifyBody x
         | PSome x -> PSome <| modifyBody x

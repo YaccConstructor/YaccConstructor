@@ -39,7 +39,7 @@ let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName =
 let addBindingPair attrs (*binding*) = function
     | None -> attrs
     | Some b -> if List.exists (fun x -> snd x = b) attrs  then attrs
-                else (createNewName ("arg", (0,0)), b)::attrs
+                else (createNewName ("arg", new Source.Position(), new Source.Position(), ""), b)::attrs
 
 let getFormals, getActuals = fst, snd
 
@@ -48,12 +48,12 @@ let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
     let rec accBindings res = function
     | (h : Source.t)::t ->
         let splitted =
-            (fst h).Split([|' '; '\t'; '\r'; '\n'|])
+            h.text.Split([|' '; '\t'; '\r'; '\n'|])
             |> Array.toList
             |> List.filter (fun s -> s <> "")
         let curRes =
             List.fold
-                (fun res x -> addBindingPair res (Some (x,(0,0))))
+                (fun res x -> addBindingPair res (Some (x,(0,0,""))))
                 [] splitted
         accBindings (curRes @ res) t
     | [] -> res
@@ -85,9 +85,10 @@ let expandMeta body metaRules expanded res =
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
     let rec expandBody body (metaRules: Dictionary<string,Rule.t<Source.t,Source.t> >)
-            (expanded : Dictionary<string, Production.t<_,_>>) res =
+            (expanded : Dictionary<_, Production.t<'a,'b>>) res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
+        /// It's better to use hash
         let getKey body = body.ToString()
             //|> (fun x -> printfn "k = %s" x; x)
 
@@ -117,20 +118,20 @@ let expandMeta body metaRules expanded res =
                     | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
                     | x -> true
 
-                let expandMetaRef name attrs metaArgs =
+                let expandMetaRef (name : Source.t) attrs metaArgs =
                     let (newMetaArgs, newRes) =
                         metaArgs
                         |> List.fold
-                            (fun (accMeta, accRes) body ->
+                            (fun (accMeta, accRes) _body ->
                                 //printfn "%A" body
-                                expandBody body metaRules expanded accRes
+                                expandBody _body metaRules expanded accRes
                                 |> (fun (body, accRes) ->
                                         if not <| canUseBinding body then (body::accMeta, accRes)
                                         else
-                                            let newMetaArgName = (createNewName ("rule", (0,0)))
+                                            let newMetaArgName = genNewSource (nextName "rule") _body
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
-                                                {name = Source.toString newMetaArgName;
+                                                {name = newMetaArgName;
                                                 args = [];
                                                 metaArgs = [];
                                                 _public = false;
@@ -141,11 +142,12 @@ let expandMeta body metaRules expanded res =
                             ([], res)
                         |> applyToRes (List.rev)
                     // TODO catch exception
-                    let metaRule = findMetaRule metaRules name
-                    let newRuleName = createNewName ("rule_" + name, (0,0))
+                    let metaRule = findMetaRule metaRules name.text
+                    let newRuleName = new Source.t(nextName ("rule_" + name.text), metaRule.name)
                     let formalArgs = metaRule.args
-                    let substitution = PRef(newRuleName, attrs)
-                    let newKey = getKey (PMetaRef(createSource name, attrs, newMetaArgs))
+                    let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
+                    //let newKey = getKey (PMetaRef(createSource name.text, attrs, newMetaArgs))
+                    let newKey = getKey (PMetaRef(name, attrs, newMetaArgs))
                     if not (expanded.ContainsKey key) then
                         expanded.Add(key, substitution)
                     if not (expanded.ContainsKey newKey) then
@@ -156,7 +158,7 @@ let expandMeta body metaRules expanded res =
                 
                     let metaExp = expandBody (replaceMeta newFormalToAct metaRule.body) metaRules expanded newRes
                     let (newRule: Rule.t<_,_>) =
-                        {name = Source.toString newRuleName;
+                        {name = newRuleName;
                         args = formalArgs;
                         metaArgs = [];
                         _public = false;
@@ -182,8 +184,8 @@ let expandMeta body metaRules expanded res =
                 | PLiteral _ as literal -> (literal, res)
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
-                    if (metaArgs.IsEmpty) then (PRef(name, attrs), res)
-                    else expandMetaRef (Source.toString name) attrs metaArgs 
+                    if metaArgs.IsEmpty then (PRef(name, attrs), res)
+                    else expandMetaRef name attrs metaArgs 
                 | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
                 | PRepet _ -> failwith "Unrealised meta-expanding of permutation"
             if not (expanded.ContainsKey key) then
@@ -251,7 +253,7 @@ let expandMetaRules rules =
     /// hash table for metarules
     let metaRulesTbl = new Dictionary<string,Rule.t<Source.t,Source.t> >(200)
     /// hash table for references to expanded metarules
-    let refsTbl = new Dictionary<string, Production.t<_,_> >(200)
+    let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
     collectMeta rules metaRulesTbl
     replaceMeta rules (metaRulesTbl, refsTbl) [(*result*)]
     |> List.rev

@@ -8,6 +8,9 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
+using Microsoft.VisualStudio.Shell;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;   
 
 namespace YC.VSYard.AutoCompletion
 {
@@ -18,7 +21,8 @@ namespace YC.VSYard.AutoCompletion
     {
         public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
         {
-            return new VSYardNS.YardCompletionSource(textBuffer);
+            DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+            return new VSYardNS.YardCompletionSource(textBuffer, dte);
         }
     }
 

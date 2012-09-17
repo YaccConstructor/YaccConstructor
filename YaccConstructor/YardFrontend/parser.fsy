@@ -22,10 +22,10 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
  
 type Range = struct
-	val Start: Lexing.Position
-	val End: Lexing.Position
+    val Start: Lexing.Position
+    val End: Lexing.Position
 
-	new (start,end_) = {Start = start; End = end_}
+    new (start,end_) = {Start = start; End = end_}
 end
 
 exception Parse_error
@@ -47,14 +47,13 @@ let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
 let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
-    let ext = filename.Substring(filename.LastIndexOf(".") + 1) in
-    let frontend = FrontendsManager.GetByExtension ext in
+    let ext = filename.Substring(filename.LastIndexOf(".") + 1)
+    let frontend = FrontendsManager.GetByExtension ext
     let userDefs =
         let args = (!currentFilename).Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
-	in
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
 
     match FrontendsManager.GetByExtension ext with
@@ -114,19 +113,19 @@ action_opt: ACTION { Some $1 }
 rule_nlist: rule SEMICOLON rule_nlist 
         { ((fst $1) :: (fst $3), joinMaps (snd $1) (snd $3)) }
     | INCLUDE STRING rule_nlist 
-        { let def = parseRules (fst $2) in
+        { let def = parseRules $2.text in
           (def.grammar @ (fst $3), joinMaps def.options (snd $3)) 
         } 
     | { ([], Map.empty) }
     | rule error { missing "SEMI"; raise Parse_error  }
 
-rule: plus_opt LIDENT formal_meta_param_opt param_opt COLON option_opt alts
+rule: plus_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
         let newRule = {Rule._public = $1
-                        ; Rule.name = Source.toString $2
+                        ; Rule.name = $2
                         ; Rule.metaArgs = getList $3
                         ; Rule.body = $7
-                        ; Rule.args = o2l $4
+                        ; Rule.args = $4
                         }
         in
         match $6 with
@@ -146,6 +145,8 @@ formal_meta_list: LIDENT {[$1]}
                 | LIDENT formal_meta_list {$1::$2}
 
 param_opt: PARAM {Some $1} | /* empty */ {None}
+
+param_list: PARAM param_list {$1::$2} | /* empty */ {[]}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 

@@ -38,27 +38,34 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <None Include="First.yrd" />
     <Compile Include="First.yrd.fs" />
-    <None Include="List.yrd" />
     <Compile Include="List.yrd.fs" />
-    <None Include="SimpleRightNull.yrd" />
     <Compile Include="SimpleRightNull.yrd.fs" />
-    <None Include="Expr.yrd" />
-    <Compile Include="Expr.yrd.ast.fs" />
-    <None Include="ComplexRightNull.yrd" />
+    <Compile Include="Expr.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
-    <None Include="Counter.yrd" />
     <Compile Include="Counter.yrd.fs" />
-    <None Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
-    <None Include="Attrs.yrd" />
     <Compile Include="Attrs.yrd.fs" />
-    <None Include="Cycle.yrd" />
     <Compile Include="Cycle.yrd.fs" />
+    <Compile Include="Epsilon.yrd.fs" />
+    <Compile Include="Cond.yrd.fs" />
+    <Compile Include="Resolvers.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
+    <None Include="Attrs.yrd" />
+    <None Include="Calc.yrd" />
+    <None Include="ComplexRightNull.yrd" />
+    <None Include="Cond.yrd" />
+    <None Include="Counter.yrd" />
+    <None Include="cycle.yrd" />
+    <None Include="Epsilon.yrd" />
+    <None Include="Expr.yrd" />
+    <None Include="First.yrd" />
+    <None Include="List.yrd" />
+    <None Include="SimpleRightNull.yrd" />
+    <None Include="Resolvers.yrd" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />

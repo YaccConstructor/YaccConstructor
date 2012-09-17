@@ -1,13 +1,15 @@
 module RNGLR.ParseList
+#nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 type Token =
     | A of int
     | B of int
     | C of int
     | EOF of int
 
-let numToString = function 
+let numToString = function
     | 0 -> "elem"
     | 1 -> "list"
     | 2 -> "yard_start_rule"
@@ -22,60 +24,72 @@ let tokenToNumber = function
     | C _ -> 5
     | EOF _ -> 6
 
+let mutable private cur = 0
 let leftSide = [|1; 1; 2; 0; 0|]
-let rules = [|0; 1; 5; 0; 1; 4; 3|]
-let rulesStart = [|0; 1; 4; 5; 6; 7|]
+let private rules = [|0; 1; 5; 0; 1; 4; 3|]
+let private rulesStart = [|0; 1; 4; 5; 6; 7|]
 let startRule = 2
 
-let defaultAstToDot = 
-    let getRight prod = seq {for i = rulesStart.[prod] to rulesStart.[prod+1]-1 do yield rules.[i]}
-    let startInd = leftSide.[startRule]
-    Yard.Generators.RNGLR.AST.astToDot<Token> startInd numToString getRight
+let acceptEmptyInput = false
 
-let buildAst : (seq<Token> -> ParseResult<Token>) =
-    let inline unpack x = x >>> 16, x <<< 16 >>> 16
-    let small_gotos =
-        [|0, [|0,1; 1,2; 3,5; 4,6|]; 2, [|5,3|]; 3, [|0,4; 3,5; 4,6|]|]
-    let gotos = Array.zeroCreate 7
-    for i = 0 to 6 do
-        gotos.[i] <- Array.create 7 None
-    for (i,t) in small_gotos do
-        for (j,x) in t do
-            gotos.[i].[j] <- Some  x
-    let lists_reduces = [|[||]; [|0,1|]; [|1,3|]; [|4,1|]; [|3,1|]|]
-    let small_reduces =
-        [|65538; 327681; 393217; 262146; 327682; 393218; 327682; 327683; 393219; 393218; 327684; 393220|]
-    let reduces = Array.zeroCreate 7
-    for i = 0 to 6 do
-        reduces.[i] <- Array.create 7 [||]
-    let init_reduces =
-        let mutable cur = 0
-        while cur < small_reduces.Length do
-            let i,length = unpack small_reduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_reduces.[cur + k]
-                reduces.[i].[j] <-  lists_reduces.[x]
-            cur <- cur + length
-    let lists_zeroReduces = [|[||]|]
-    let small_zeroReduces =
+let defaultAstToDot =
+    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+
+let private lists_gotos = [|1; 2; 5; 6; 3; 4|]
+let private small_gotos =
+        [|4; 0; 65537; 196610; 262147; 131073; 327684; 196611; 5; 196610; 262147|]
+let gotos = Array.zeroCreate 7
+for i = 0 to 6 do
+        gotos.[i] <- Array.zeroCreate 7
+cur <- 0
+while cur < small_gotos.Length do
+    let i = small_gotos.[cur] >>> 16
+    let length = small_gotos.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_gotos.[cur + k] >>> 16
+        let x = small_gotos.[cur + k] &&& 65535
+        gotos.[i].[j] <- lists_gotos.[x]
+    cur <- cur + length
+let private lists_reduces = [|[|0,1|]; [|1,3|]; [|4,1|]; [|3,1|]|]
+let private small_reduces =
+        [|65538; 327680; 393216; 262146; 327681; 393217; 327682; 327682; 393218; 393218; 327683; 393219|]
+let reduces = Array.zeroCreate 7
+for i = 0 to 6 do
+        reduces.[i] <- Array.zeroCreate 7
+cur <- 0
+while cur < small_reduces.Length do
+    let i = small_reduces.[cur] >>> 16
+    let length = small_reduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_reduces.[cur + k] >>> 16
+        let x = small_reduces.[cur + k] &&& 65535
+        reduces.[i].[j] <- lists_reduces.[x]
+    cur <- cur + length
+let private lists_zeroReduces = [||]
+let private small_zeroReduces =
         [||]
-    let zeroReduces = Array.zeroCreate 7
-    for i = 0 to 6 do
-        zeroReduces.[i] <- Array.create 7 [||]
-    let init_zeroReduces =
-        let mutable cur = 0
-        while cur < small_zeroReduces.Length do
-            let i,length = unpack small_zeroReduces.[cur]
-            cur <- cur + 1
-            for k = 0 to length-1 do
-                let j,x = unpack small_zeroReduces.[cur + k]
-                zeroReduces.[i].[j] <-  lists_zeroReduces.[x]
-            cur <- cur + length
-    let small_acc = [2]
-    let accStates = Array.zeroCreate 7
-    for i = 0 to 6 do
+let zeroReduces = Array.zeroCreate 7
+for i = 0 to 6 do
+        zeroReduces.[i] <- Array.zeroCreate 7
+cur <- 0
+while cur < small_zeroReduces.Length do
+    let i = small_zeroReduces.[cur] >>> 16
+    let length = small_zeroReduces.[cur] &&& 65535
+    cur <- cur + 1
+    for k = 0 to length-1 do
+        let j = small_zeroReduces.[cur + k] >>> 16
+        let x = small_zeroReduces.[cur + k] &&& 65535
+        zeroReduces.[i].[j] <- lists_zeroReduces.[x]
+    cur <- cur + length
+let private small_acc = [2]
+let private accStates = Array.zeroCreate 7
+for i = 0 to 6 do
         accStates.[i] <- List.exists ((=) i) small_acc
-    let eofIndex = 6
-    let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber)
+let eofIndex = 6
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
+
+

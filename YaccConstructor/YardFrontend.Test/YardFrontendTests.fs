@@ -30,8 +30,11 @@ open NUnit.Framework
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
+let dummyPos s = new Source.t(s)
+
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
+    Lexer.currentFile := ""
     Lexer.currentFileContent := str
     let lexemsSeq = seq {
         while not buf.IsPastEndOfStream do
@@ -40,10 +43,21 @@ let lexerTest str lexemsListCorrect =
     let lexemsList = Seq.toList lexemsSeq
 
     printfn "%A" lexemsList
+   
+    printfn "%s" "*************************"
+
+    printfn "%A" lexemsListCorrect
 
     let areEqual lexemsListCorrect lexemsList =
         try 
-            List.map2 (fun x y -> match x,y with | LPAREN _, LPAREN _ |RPAREN _ ,RPAREN _| SEMICOLON _, SEMICOLON _ -> true | x,y -> x =y) lexemsListCorrect lexemsList
+            List.map2
+                (fun x y ->
+                    match x,y with
+                    | LPAREN _, LPAREN _
+                    | RPAREN _ ,RPAREN _
+                    | SEMICOLON _, SEMICOLON _ -> true
+                    | x,y -> x = y)
+                 lexemsListCorrect lexemsList
             |> List.reduce (&&)
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
@@ -54,7 +68,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     printfn "ilDef = %A" currentIL
     printfn "ilDefCorrect = %A" expectedIL
 
-    Assert.AreEqual(expectedIL, currentIL)
+    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let buf = LexBuffer<_>.FromString str
@@ -64,7 +78,7 @@ let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
 
-    Assert.AreEqual(ilDef, ilDefCorrect)
+    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar)
 
 let completeTest str lexemsListCorrect ilDefCorrect = 
     lexerTest str lexemsListCorrect
@@ -72,10 +86,16 @@ let completeTest str lexemsListCorrect ilDefCorrect =
 
 let optionsTest path optionsCorrect =
     let definition = {Main.ParseFile path with info = {fileName =""}}
-    let currentOptions = definition.options    
-    Assert.AreEqual(currentOptions, optionsCorrect)
+    let currentOptions = definition.options
+    let optionsAreEq (m1:Map<Rule.t<_,_>,_>) (m2:Map<Rule.t<_,_>,_>) = 
+        Assert.AreEqual (m1.Count,m2.Count)
+        Assert.IsTrue (m2 |> Seq.forall2 (fun (x1:System.Collections.Generic.KeyValuePair<Rule.t<_,_>,_>) x2 
+                                             -> x1.Key.name.text = x2.Key.name.text && x1.Value = x2.Value) m1)
+    optionsAreEq currentOptions optionsCorrect
         
 let dummyRange = Range (Lexing.Position.Empty,Lexing.Position.Empty)
+
+let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () = 
@@ -83,23 +103,22 @@ type ``YardFrontend lexer tests`` () =
     member test.``Lexer seq test`` () =
         lexerTest 
             "+s: NUMBER PLUS NUMBER;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; UIDENT ("NUMBER", (4, 10))
-            ; UIDENT ("PLUS", (11, 15)); UIDENT ("NUMBER", (16, 22)); SEMICOLON dummyRange; EOF]
+            [PLUS; LIDENT (getSource "s" 1 2); COLON; UIDENT (getSource "NUMBER" 4 10)
+            ; UIDENT (getSource "PLUS" 11 15); UIDENT (getSource "NUMBER" 16 22); SEMICOLON dummyRange; EOF]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
             "+s: (MINUS|PLUS)*;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10)); BAR
-            ; UIDENT ("PLUS", (11, 15)); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON dummyRange; EOF]
+            [PLUS; LIDENT (getSource "s" 1 2); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty))
+            ; UIDENT (getSource "MINUS" 5 10); BAR; UIDENT (getSource "PLUS" 11 15);
+            RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON dummyRange; EOF]
 
     [<Test>]            
     member test.``Include test`` () =
-        lexerTest @"
-include ""test_included.yrd""
-+s:PLUS;"
-            [INCLUDE; STRING ("test_included.yrd", (11, 28)); PLUS; LIDENT ("s", (32, 33))
-            ; COLON; UIDENT ("PLUS", (34, 38)); SEMICOLON dummyRange; EOF]
+        lexerTest @"  include ""test_included.yrd""  +s:PLUS;"
+            [INCLUDE; STRING (getSource "test_included.yrd" 11 28); PLUS; LIDENT (getSource "s" 32 33)
+            ; COLON; UIDENT (getSource "PLUS" 34 38); SEMICOLON dummyRange; EOF]
 
 [<TestFixture>]
 type ``Yard frontend preprocessor tests`` () =
@@ -111,10 +130,10 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "e"
+                grammar = [{name = dummyPos "e"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("R", (28, 29))
+                                           rule = PToken (getSource "R" 28 29)
                                            binding = None
                                            checker = None}],None,None)
                             _public = true
@@ -130,13 +149,13 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken (getSource "N" 16 17)
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("R", (28, 29))
+                                                          rule = PToken (getSource "R" 28 29)
                                                           binding = None
                                                           checker = None}],None,None)
                          _public = true
@@ -150,12 +169,13 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("R", (29, 30))
+                                        rule = PToken (getSource "R" 29 30)
                                         binding = None
-                                        checker = None}],None,None)
+                                        checker = None}]
+                                      ,None, None)
                          _public = true
                          metaArgs = []}]
              foot = None
@@ -167,10 +187,10 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (17, 18))
+                                        rule = PToken (getSource "N" 17 18)
                                         binding = None
                                         checker = None}],None,None)
                          _public = true
@@ -184,10 +204,10 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58))
+                                        rule = PToken (getSource "Q" 57 58)
                                         binding = None
                                         checker = None}],None,None)
                          _public = true
@@ -201,10 +221,10 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58))
+                                        rule = PToken (getSource "Q" 57 58)
                                         binding = None
                                         checker = None}],None,None)
                          _public = true
@@ -218,13 +238,13 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos"e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken (getSource "N" 16 17)
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("G", (27, 28))
+                                                          rule = PToken (getSource "G" 27 28)
                                                           binding = None
                                                           checker = None}],None,None)
                          _public = true
@@ -238,13 +258,13 @@ type ``Yard frontend preprocessor tests`` () =
         let expected = 
             {info = {fileName = ""}
              head = None
-             grammar = [{name = "e"
+             grammar = [{name = dummyPos "e"
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17))
+                                        rule = PToken (getSource "N" 16 17)
                                         binding = None
                                         checker = None}; {omit = false
-                                                          rule = PToken ("H", (38, 39))
+                                                          rule = PToken (getSource "H" 38 39)
                                                           binding = None
                                                           checker = None}],None,None)
                          _public = true
@@ -259,10 +279,10 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("C", (40, 41))
+                                           rule = PToken (getSource "C" 40 41)
                                            binding = None
                                            checker = None}],None,None)
                             _public = true
@@ -277,10 +297,10 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16))
+                                           rule = PToken (getSource "A" 15 16)
                                            binding = None
                                            checker = None}],None,None)
                             _public = true
@@ -295,10 +315,10 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("B", (31, 32))
+                                           rule = PToken (getSource "B" 31 32)
                                            binding = None
                                            checker = None}],None,None)
                             _public = true
@@ -313,10 +333,10 @@ type ``Yard frontend preprocessor tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16))
+                                           rule = PToken (getSource "A" 15 16)
                                            binding = None
                                            checker = None}],None,None)
                             _public = true
@@ -335,23 +355,23 @@ type ``YardFrontend Parser tests`` () =
               head = None  
               grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         body =
                             PSeq(
                                 [{ 
                                     omit = false
-                                    rule = PToken ("NUMBER", (4, 10))
+                                    rule = PToken (getSource "NUMBER" 4 10)
                                     binding = None
                                     checker = None
                                 }; { 
                                     omit = false
-                                    rule = PToken ("PLUS", (11, 15))
+                                    rule = PToken (getSource "PLUS" 11 15)
                                     binding = None
                                     checker = None
                                 }; {
                                     omit = false
-                                    rule = PToken ("NUMBER", (16, 22))
+                                    rule = PToken (getSource "NUMBER" 16 22)
                                     binding = None
                                     checker = None
                                 }],
@@ -371,20 +391,18 @@ type ``YardFrontend options tests`` () =
     [<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
-            "+s:
-#set a = \"smth\"
-A;"
-            [PLUS; LIDENT ("s", (1, 2)); COLON; SET; LIDENT ("a", (10, 11))
-            ; EQUAL; STRING ("smth", (15, 19)); UIDENT ("A", (22, 23)); SEMICOLON dummyRange; EOF]
+            "+s:  #set a = \"smth\"  A;"
+            [PLUS; LIDENT (getSource "s" 1 2); COLON; SET; LIDENT (getSource "a" 10 11)
+            ; EQUAL; STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23); SEMICOLON dummyRange; EOF]
 
     [<Test>]
     member test.``Basic options test`` () =
         let rule : Rule.t<Source.t, Source.t> = {
-            Rule.name = "s"
+            Rule.name = dummyPos"s"
             Rule._public = true
             Rule.args = []
             Rule.body = PSeq ([{omit = false
-                                rule = PToken ("A", (22, 23))
+                                rule = PToken (getSource "A" 22 23)
                                 binding = None
                                 checker = None}], None,None)
             Rule.metaArgs = []
@@ -398,51 +416,43 @@ A;"
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        completeTest @"
-{
-let value x = (x:>Lexeme<string>).value
-}
-+s: <res:int> = e[1] {res};
-e[i]: n=NUMBER {(value n |> int) + i};"
-            [ACTION (@"
-let value x = (x:>Lexeme<string>).value
-", 
-                (3, 46)); PLUS;
-                LIDENT ("s", (50, 51)); COLON; PATTERN ("res:int", (54, 61)); EQUAL;
-                LIDENT ("e", (65, 66)); PARAM ("1", (67, 68)); ACTION ("res", (71, 74));
-                SEMICOLON dummyRange; LIDENT ("e", (78, 79)); PARAM ("i", (80, 81)); COLON;
-                LIDENT ("n", (84, 85)); EQUAL; UIDENT ("NUMBER", (86, 92));
-                ACTION ("(value n |> int) + i", (94, 114)); SEMICOLON dummyRange; EOF]
+        completeTest @"  {  let value x = (x:>Lexeme<string>).value  }  +s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); PLUS;
+                LIDENT (getSource "s" 50 51); COLON; PATTERN (getSource "res:int" 54 61); EQUAL;
+                LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
+                SEMICOLON dummyRange; LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON;
+                LIDENT (getSource "n" 84 85); EQUAL; UIDENT (getSource "NUMBER" 86 92);
+                ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON dummyRange; EOF]
             {
              info = { fileName = ""; }
-             head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46))
+             head = Some (getSource "  let value x = (x:>Lexeme<string>).value  " 3 46)
              grammar = 
                     [{ 
-                        name = "s"
+                        name = dummyPos"s"
                         args = []
                         body = 
                             PSeq (
                                 [{
                                     omit = false
-                                    rule = PRef (("e", (65, 66)),Some ("1", (67, 68)))
-                                    binding = Some ("res:int", (54, 61))
+                                    rule = PRef ((getSource "e" 65 66),Some (getSource "1" 67 68))
+                                    binding = Some (getSource "res:int" 54 61)
                                     checker = None
                                 }],
-                                Some ("res", (71, 74)),None)
+                                Some (getSource "res" 71 74), None)
                         _public = true
                         metaArgs = []
                       }; { 
-                        name = "e"
-                        args = [("i", (80, 81))]
+                        name = dummyPos"e"
+                        args = [(getSource "i" 80 81)]
                         body = 
                             PSeq (
                                 [{
                                     omit = false
-                                    rule = PToken ("NUMBER", (86, 92))
-                                    binding = Some ("n", (84, 85))
+                                    rule = PToken (getSource "NUMBER" 86 92)
+                                    binding = Some (getSource "n" 84 85)
                                     checker = None
                                 }],
-                                Some ("(value n |> int) + i", (94, 114)),None)
+                                Some (getSource "(value n |> int) + i" 94 114), None)
                         _public = false
                         metaArgs = []
                     }]
@@ -461,10 +471,10 @@ type ``Yardfrontend label tests`` () =
             {
                 info = {fileName =""}
                 head = None
-                grammar = [{name = "s"
+                grammar = [{name = dummyPos"s"
                             args = []
                             body = PSeq ([{omit = false
-                                           rule = PToken ("A", (12, 13))
+                                           rule = PToken (getSource "A" 12 13)
                                            binding = None
                                            checker = None}],None,Some {label = "@label";
                                                          weight = None;});

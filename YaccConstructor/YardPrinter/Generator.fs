@@ -21,7 +21,8 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-let printSourceOpt = function None -> "" | Some arg -> "\n{"+(fst arg)+"}\n\n"
+let endl = System.Environment.NewLine
+let printSourceOpt = function None -> "" | Some (arg : Source.t) -> endl + "{" + arg.text + "}" + endl + endl
 
 type TextBox =
 | Tabbed of seq<TextBox> 
@@ -40,7 +41,7 @@ let printTextBox tabSize windowSize tbSeq =
             | Str s -> Seq.singleton (s, indent)
             | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq (indent)}
             | Tabbed tbSeq | Line tbSeq as x -> 
-             seq { yield ("\n", indent);
+             seq { yield (endl, indent);
                    yield! printIndentedSeq tbSeq (indent + (if x.IsTab then tabSize else 0) ) } 
         ) tbSeq
 
@@ -53,7 +54,7 @@ let printTextBox tabSize windowSize tbSeq =
     /// newline is true iff there was a line feed.
     let (text,_,_) = 
         Seq.fold (fun (str_acc, newline, chars_in_line) (word,indent) -> 
-            if word="\n" then 
+            if word=endl then 
                 if newline then
                     (str_acc, true, 0)
                 else
@@ -65,7 +66,7 @@ let printTextBox tabSize windowSize tbSeq =
                     (str_acc + appended, false, chars_in_line + (String.length appended))
                 else
                     let newlineStr = (write_spaces (indent + tabSize)) + word
-                    (str_acc + "\n" + newlineStr, false, String.length newlineStr)
+                    (str_acc + endl + newlineStr, false, String.length newlineStr)
             ) ("", true, 0) strSeq
     text
 
@@ -84,7 +85,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         if (Seq.isEmpty metaArgs) then ""
         else if (seqCount metaArgs) > 1 then l_br + (String.concat " " metaArgs) + r_br
         else l_br + (Seq.head metaArgs) + r_br
-    let printArgs args = List.map Source.toString args |> printSeqBrackets "[" "]"
+    let printArgs args = args |> List.map (fun src -> "[" + Source.toString src + "]") |> String.concat ""
     let rec priority = function 
         | PAlt(_) -> 1
         | PSeq([elem],None,_) -> 
@@ -143,8 +144,9 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
         | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction false opt)); yield Str("?")}
         | _ -> Seq.singleton <| Str("ERROR")
 
-    seq {yield Line(seq{yield Str(startSign + rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  ) + (printArgs rule.args) + ":");
-         yield Str(" "); yield! printProduction false rule.body; yield Str(";\n")})}
+    seq {yield Line(seq{yield Str(startSign + rule.name.text + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  )
+                                        + (printArgs rule.args) + ":");
+         yield Str(" "); yield! printProduction false rule.body; yield Str(";" + endl)})}
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     let tbSeq = Seq.collect (fun rule -> printRule rule) input_grammar.grammar

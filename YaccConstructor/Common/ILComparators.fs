@@ -26,7 +26,7 @@ open Yard.Core.IL.Definition
 
 let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
-        if (fst a = fst b) then true
+        if (a.text = b.text) then true
         else printfn "bad %A %A" a b; false
 
     let srcOptEquals a b =
@@ -45,7 +45,7 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
                 reduceSeq r
             | x -> x
         //printfn "compare\n%A\n\n%A\n=======================\n" (reduceSeq il1) (reduceSeq il2)
-        match (reduceSeq il1, reduceSeq il2) with
+        match reduceSeq il1, reduceSeq il2 with
         | PSeq(elems1, ac1, _), PSeq(elems2, ac2, _) -> 
             List.length elems1 = List.length elems2 &&
                 List.zip elems1 elems2 
@@ -56,15 +56,15 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
                     )
         | PAlt(left1, right1), PAlt(left2, right2) -> 
             ilTreeEqualsWithoutLineNumbers left1 left2 && ilTreeEqualsWithoutLineNumbers right1 right2
-        | PToken(t1), PToken(t2) -> srcEquals t1 t2
+        | PToken t1, PToken t2 -> srcEquals t1 t2
         | PRef(r1, args1), PRef(r2, args2) -> srcEquals r1 r2 && srcOptEquals args1 args2
-        | PMany(t1), PMany(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | PSome(t1), PSome(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
-        | POpt(t1), POpt(t2) -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PMany t1, PMany t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | PSome t1, PSome t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
+        | POpt t1, POpt t2 -> ilTreeEqualsWithoutLineNumbers t1 t2
         | PMetaRef(r1, arg1, marg1), PMetaRef(r2, arg2, marg2) -> 
             srcEquals r1 r2 && srcOptEquals arg1 arg2 && 
                 List.length marg1 = List.length marg2 && List.forall2 ilTreeEqualsWithoutLineNumbers marg1 marg2
-        | PLiteral(s1), PLiteral(s2) -> srcEquals s1 s2
+        | PLiteral s1, PLiteral s2 -> srcEquals s1 s2
         | _ -> false
 
     List.forall2  
@@ -73,6 +73,6 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
             argsAreEqual rule1.args rule2.args &&
             ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
             List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name = rule2.name
+            rule1.name.text = rule2.name.text
         ) g1 g2
 

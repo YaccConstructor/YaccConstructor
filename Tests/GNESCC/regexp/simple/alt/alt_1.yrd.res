@@ -1,1 +1,0 @@
-["Detected: +" |> box]

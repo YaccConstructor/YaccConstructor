@@ -52,7 +52,7 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
         //    PSeq(elements, Some <| new Source.t("Node(\"empty\", [])"))
         //else
         if elements.Length = 1 && (match elements.Head.rule with PRef(n,_) when n.text = "error" -> true | _ -> false) then
-            PSeq(elements, Some <| new Source.t("Node(\"error\", [])"))
+            PSeq(elements, Some <| new Source.t("Node(\"error\", [])"), l)
         else
             PSeq(
                 elements 
@@ -87,7 +87,8 @@ let rec _buildAstSimple ruleName (production: t<Source.t, Source.t>) =
                         )
                     |> String.concat "; "
                     |> if ruleName="" then sprintf "List.concat [%s]" else sprintf "Node(\"%s\", List.concat [%s])" ruleName
-                    |> (fun x -> Some <| new Source.t(x)))
+                    |> (fun x -> Some <| new Source.t(x))
+                , l)
 
     | PAlt(left, right) -> PAlt(_buildAstSimple ruleName left, _buildAstSimple ruleName right)
     | x -> _buildAstSimple ruleName (seqify x)

@@ -67,7 +67,7 @@ let private replaceInline (rules : Rule.t<_,_> list) =
     rules
     |> List.choose
         (fun rule -> 
-            if inlines.ContainsKey rule.name && not rule._public
+            if inlines.ContainsKey rule.name.text && not rule._public
             then None
             else Some <| {rule with body = modifyBody rule.body})
             

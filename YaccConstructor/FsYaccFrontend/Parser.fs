@@ -226,7 +226,7 @@ let _fsyacc_reductions ()  =    [|
                      				and rule=prod
                      				and binding=None
                      				and checker=None})
-                     		 , Some <| new Source.t(ac)) 
+                     		 , Some <| new Source.t(ac), None) 
                    )
 # 42 "Parser.fsy"
                  : 'alternative));

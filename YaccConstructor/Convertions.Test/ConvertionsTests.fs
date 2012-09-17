@@ -47,7 +47,7 @@ let getBE name =
     | None -> failwith (name + " is not found.")
 let treeDump = getBE "TreeDump"
 
-let dummyRule = {omit=false; binding=None; checker=None; rule=PToken("DUMMY",(0,0))}
+let dummyRule = {omit=false; binding=None; checker=None; rule=PToken(Source.t("DUMMY"))}
 
 [<TestFixture>]
 type ``Convertions tests`` () =
@@ -168,16 +168,16 @@ type ``Expand rop level alters`` () =
                 head = None
                 grammar =
                      [{
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("d", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "d", None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "d"
+                            name = Source.t("d")
                             args = []
-                            body = PSeq([{dummyRule with rule = PToken ("NUM", (0, 0))}],None, None)
+                            body = PSeq([{dummyRule with rule = PToken (Source.t "NUM")}],None, None)
                             _public = false
                             metaArgs = []
                          }]
@@ -200,16 +200,16 @@ type ``Expand rop level alters`` () =
                 head = None
                 grammar =
                      [{
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("c", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "c", None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("d", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "d", None)}],None, None)
                             _public = true
                             metaArgs = []
                          }]
@@ -233,30 +233,30 @@ type ``Expand rop level alters`` () =
                 head = None
                 grammar =
                      [{
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("x", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "x", None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("y", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "y", None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("z", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "z", None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("m", (0, 0)),None)}],None, None)                        
+                            body = PSeq([{dummyRule with rule = PRef (Source.t "m", None)}],None, None)                        
                             _public = true
                             metaArgs = []
                          }]

@@ -83,7 +83,7 @@ type CYKGeneartorImpl () =
         |> spaceListL
     
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
-        ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name]
+        ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name.text]
 
     let code il grammarInfo =
         [ header
@@ -120,18 +120,18 @@ type CYKGeneartorImpl () =
                 | None -> lblId,0
             | None -> 0,0
 
-        let ntermId name = 
-            if ntermDict.ContainsKey name 
-            then ntermDict.[name] 
+        let ntermId (name:Source.t) = 
+            if ntermDict.ContainsKey name.text
+            then ntermDict.[name.text] 
             else
                 let id = !ntermNum 
-                ntermDict.Add(name,id)
+                ntermDict.Add(name.text,id)
                 incr ntermNum
                 id
 
         let processNtermElem (elem:Production.elem<_,_>) = 
             match elem.rule with
-            | Production.PRef ((n,_),_) -> ntermId n                
+            | Production.PRef (n,_) -> ntermId n
             | _ -> failwith "CYK. Incorrect rule structure. Expected PRef."
 
         let processRule (r:Rule.t<_,_>) =
@@ -140,13 +140,13 @@ type CYKGeneartorImpl () =
             match body with
             | Production.PSeq ([elem],_,lbl) ->
                 match elem.rule with
-                | Production.PToken(n,_) -> 
+                | Production.PToken n -> 
                     let tId =
-                        if termDict.ContainsKey n
-                        then termDict.[n]
+                        if termDict.ContainsKey n.text
+                        then termDict.[n.text]
                         else
                             let id = !termNum
-                            termDict.Add(n,id)
+                            termDict.Add(n.text,id)
                             incr termNum
                             id
                     let lN,lW = processLbl lbl

@@ -44,18 +44,18 @@ type ``Inline tests`` () =
                 head = None
                 grammar =
                      [{
-                            name = "s"
+                            name = Source.t("s")
                             args = []
-                            body = PSeq([{dummyRule with rule = PRef (("yard_exp_brackets_1", (0, 0)),None)}],None, None)
+                            body = PSeq([{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}],None, None)
                             _public = true
                             metaArgs = []
                          };
                          {
-                            name = "yard_exp_brackets_1"
+                            name = Source.t("yard_exp_brackets_1")
                             args = []
                             body =
-                             (PSeq ([{dummyRule with rule = PRef (("x", (7, 8)),None)}
-                                    ;{dummyRule with rule = PRef (("y", (9, 10)),None)}],None,None))
+                             (PSeq ([{dummyRule with rule = PRef (Source.t("x"),None)}
+                                    ;{dummyRule with rule = PRef (Source.t("y"),None)}],None,None))
                             _public = false
                             metaArgs = []}]
                 foot = None

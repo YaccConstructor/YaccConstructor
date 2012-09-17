@@ -46,19 +46,19 @@ type ``CNF tests`` () =
                 info = {fileName = ""}
                 head = None
                 grammar = [{
-                                name = "e"
+                                name = Source.t("e")
                                 args = []
                                 body = 
                                     PSeq (
                                             [{
                                                 omit = false
-                                                rule = PRef (("new_A", (0, 0)),None)
+                                                rule = PRef (Source.t "new_A", None)
                                                 binding = None
                                                 checker = None
                                             }; 
                                             {
                                                 omit = false
-                                                rule = PRef (("e", (6, 7)),None)
+                                                rule = PRef (Source.t "e", None)
                                                 binding = None
                                                 checker = None
                                             }],
@@ -68,13 +68,13 @@ type ``CNF tests`` () =
                                 metaArgs = []
                           };
                           {
-                                name = "new_A"
+                                name = Source.t("new_A")
                                 args = []
                                 body = 
                                     PSeq (
                                             [{
                                                 omit = false
-                                                rule = PToken ("A", (4, 5))
+                                                rule = PToken (Source.t "A")
                                                 binding = None
                                                 checker = None
                                             }],
@@ -104,20 +104,20 @@ type ``CNF tests`` () =
              head = None
              grammar =
                 [{
-                        name = "e"
+                        name = Source.t("e")
                         args = []
                         body = PSeq ([{omit = false
-                                       rule = PToken ("STRING", (11, 17))
+                                       rule = PToken (Source.t "STRING")
                                        binding = None
                                        checker = None}],None,None)
                         _public = true
                         metaArgs = []
                 }; 
                 {
-                        name = "s"
+                        name = Source.t("s")
                         args = []
                         body = PSeq ([{ omit = false
-                                        rule = PToken ("STRING", (11, 17))
+                                        rule = PToken (Source.t "STRING")
                                         binding = None
                                         checker = None}],None,None)
                         _public = false
@@ -141,26 +141,26 @@ type ``CNF tests`` () =
              head = None
              grammar =
                  [{
-                         name = "e"
+                         name = Source.t("e")
                          args = []
                          body = PSeq ([],None,None)
                          _public = true
                          metaArgs = []
                  }; 
-                 {       name = "e"
+                 {       name = Source.t("e")
                          args = []
                          body = PSeq ([{ omit = false
-                                         rule = PRef (("s", (4, 5)),None)
+                                         rule = PRef (Source.t "s", None)
                                          binding = None
                                          checker = None}],None,None)
                          _public = true
                          metaArgs = []
                  };
                  {
-                         name = "s"
+                         name = Source.t("s")
                          args = []
                          body = PSeq ([{omit = false
-                                        rule = PToken ("STRING", (23, 29))
+                                        rule = PToken (Source.t "STRING")
                                         binding = None
                                         checker = None}],None,None)
                          _public = false

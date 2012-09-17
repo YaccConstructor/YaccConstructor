@@ -53,7 +53,7 @@ let rec addAcToProduction neededRules ruleBody =
                 {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
             , Some(elements |> List.mapi getBinding |> List.choose id
                 |> List.map (fun x -> x.text) |> String.concat ", "|> (fun n -> genNewSource n ruleBody))       
-        )
+            , l)
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
     | PRef(ref, _) as x -> neededRules := ref.text::!neededRules; x
     | PLiteral _ as x -> x
@@ -79,7 +79,7 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         if not <| updatedRules.Contains bfsFor then    
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
-            let emptyRule = {Rule.t.name=new Source.t ""; Rule.t.args=[]; Rule.t.body=PSeq([], None);
+            let emptyRule = {Rule.t.name=new Source.t ""; Rule.t.args=[]; Rule.t.body=PSeq([], None, None);
                                 Rule.t._public=false; Rule.t.metaArgs=[]}
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then

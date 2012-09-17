@@ -235,7 +235,7 @@ let expandMetaRules rules =
     let rec collectMeta rules (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) = 
         match rules with 
         | [] -> ()
-        | h::t -> if (isMetaRule h) then metaRulesTbl.Add(h.name,h)        
+        | h::t -> if isMetaRule h then metaRulesTbl.Add(h.name.text,h)        
                   collectMeta t metaRulesTbl
     
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl

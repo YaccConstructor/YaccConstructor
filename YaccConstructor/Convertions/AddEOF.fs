@@ -91,6 +91,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                                     {omit=false; rule=dummyToken "EOF"; binding=None; checker=None}
                                   ]
                                   ,Some(dummyPos <| getLastName())
+                                  , None
                         )
                     }]
                 else

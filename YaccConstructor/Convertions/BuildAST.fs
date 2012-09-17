@@ -98,7 +98,8 @@ let rec _buildAST ruleName (production: t<Source.t, Source.t>) =
                             else Some(printSeqProduction (sprintf "S%d" (i+1)) elem.rule))
                     |> String.concat "; "
                     |> sprintf "Node(\"%s\", [%s])" ruleName
-                    |> (fun x -> Some <| new Source.t(x)))
+                    |> (fun x -> Some <| new Source.t(x))
+                ,l)
     | PAlt(left,right) -> 
         PAlt(_buildAST (sprintf "%s_Alt%dL" ruleName 1) left,_buildAST (sprintf "%s_Alt%dR" ruleName 1) right)
     | x -> seqify x |> _buildAST ruleName

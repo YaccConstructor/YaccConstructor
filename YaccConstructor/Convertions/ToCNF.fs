@@ -56,7 +56,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
         ruleList |> List.collect
             (fun rule -> 
                 match rule.body with
-                |PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule.name]
+                |PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule.name.text]
                 |x -> []
             )
 
@@ -72,7 +72,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                     (fun elem ->
                         match elem.rule with
                         |PSeq(e, a, l) -> epsInRule e
-                        |PRef(t, _) -> isEps (fst t)
+                        |PRef(t, _) -> isEps t.text
                         |x -> []
                     )
                         
@@ -88,11 +88,11 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 |> List.collect
                     (fun elem ->
                         match elem.rule with
-                        |PRef(t, _) when fst t |> isEps |> List.isEmpty |> not-> 
+                        |PRef(t, _) when t.text |> isEps |> List.isEmpty |> not-> 
                             incr i
                             [{
                                 omit = elem.omit
-                                rule = PRef((string !i, (0, 0)), None)
+                                rule = PRef(Source.t(string !i), None)
                                 binding = elem.binding
                                 checker = elem.checker
                             }]
@@ -107,18 +107,18 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 let epsWithNameExists t = 
                     eps
                     |> List.map string
-                    |> List.exists ((=) (fst t))
+                    |> List.exists ((=) t)
                 let ac,lbl = match numberRule.body with PSeq(e, a, l) -> a,l | x -> None,None
                 let newBody = 
                     match numberRule.body with PSeq(e, a, l) -> e | x -> []
                     |> List.collect 
                         (fun elem ->
                             match elem.rule with
-                            |PRef(t,_) when epsWithNameExists t -> []
-                            |PRef(t,_) when not <| epsWithNameExists t -> 
+                            |PRef(t,_) when epsWithNameExists t.text -> []
+                            |PRef(t,_) when not <| epsWithNameExists t.text -> 
                                     [{
                                         omit = elem.omit
-                                        rule = PRef((epsRef.[int (fst t) - 1], (0, 0)), None)
+                                        rule = PRef(Source.t(epsRef.[int t.text - 1]), None)
                                         binding = elem.binding
                                         checker = elem.checker
                                     }]
@@ -183,8 +183,8 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                     if isOneRule rule then
                         newRule mainRule 
                             (match rule.body with
-                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> fst t | x -> "")
-                             |x -> ""
+                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> t | x -> Source.t(""))
+                             |x -> Source.t("")
                             )
                     else
                         [{
@@ -205,7 +205,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
             |PSeq(elements, actionCode, lbl) 
                 when elements.Length = 1
                 && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> 
-                newRule rule (match elements.Head.rule with PRef(t, _) -> (fst t) | x -> "")
+                newRule rule (match elements.Head.rule with PRef(t, _) -> t | x -> Source.t(""))
             |x -> [rule]
         )
 
@@ -213,7 +213,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
 
 let renameTerm ruleList = 
     
-    let isToken (elem: elem<_,_>) = match elem.rule with PToken(_,_) -> true | x -> false
+    let isToken (elem: elem<_,_>) = match elem.rule with PToken _ -> true | x -> false
     let isRef (elem: elem<_,_>) = match elem.rule with PRef(_,_) -> true | x -> false
     let isCNF (rule: Rule.t<_,_>) = 
         match rule.body with
@@ -225,8 +225,8 @@ let renameTerm ruleList =
     let renameRule (rule: Rule.t<_, _>) = 
         let rename (elem: elem<_, _>) = 
             if isToken elem then 
-                let newName = "new_" + (match elem.rule with PToken(t, _) -> t | x -> "")
-                if not (!list1 |> List.exists (fun rl -> rl.name = newName)) then
+                let newName = Source.t("new_" + (match elem.rule with PToken t -> t.text | x -> ""))
+                if not (!list1 |> List.exists (fun rl -> rl.name.text = newName.text)) then
                     list1 :=
                         [{
                             name = newName
@@ -239,7 +239,7 @@ let renameTerm ruleList =
                     omit = elem.omit
                     binding=elem.binding
                     checker=elem.checker
-                    rule=PRef((newName, (0, 0)), None)
+                    rule=PRef(newName, None)
                 }
             else elem
         let elements = match rule.body with PSeq(e, a, l) -> e | x -> []
@@ -270,7 +270,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                 incr i
                 list2 :=
                     [{
-                        name = "newCnfRule" + (!i).ToString()
+                        name = Source.t("newCnfRule" + (!i).ToString())
                         args = rule.args
                         _public = false
                         metaArgs = rule.metaArgs 
@@ -282,7 +282,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                     ((elements |> List.rev).Tail.Tail |> List.rev) @ 
                         [{
                             omit = false
-                            rule = PRef((addRule elements.[elements.Length - 2] elements.[elements.Length - 1], (0, 0)), None)
+                            rule = PRef(Source.t(addRule elements.[elements.Length - 2] elements.[elements.Length - 1]), None)
                             binding = None
                             checker = None
                         }]

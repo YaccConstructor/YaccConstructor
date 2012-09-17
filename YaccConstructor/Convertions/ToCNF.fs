@@ -111,7 +111,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 let ac,lbl = match numberRule.body with PSeq(e, a, l) -> a,l | x -> None,None
                 let newBody = 
                     match numberRule.body with PSeq(e, a, l) -> e | x -> []
-                    |> List.collect 
+                    |> List.collect
                         (fun elem ->
                             match elem.rule with
                             |PRef(t,_) when epsWithNameExists t.text -> []

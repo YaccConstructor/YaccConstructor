@@ -104,14 +104,28 @@ type ``CNF tests`` () =
              head = None
              grammar =
                 [{
-                        name = Source.t("e")
-                        args = []
-                        body = PSeq ([{omit = false
-                                       rule = PToken (Source.t "STRING")
-                                       binding = None
-                                       checker = None}],None,None)
-                        _public = true
-                        metaArgs = []
+                    name = Source.t("e")
+                    args = []
+                    body = PSeq ([{
+                                    omit = false
+                                    rule = PToken (Source.t "STRING")
+                                    binding = None
+                                    checker = None
+                                }],None,None)
+                    _public = true
+                    metaArgs = []
+                }
+                ;{
+                    name = Source.t("s")
+                    args = []
+                    body = PSeq ([{
+                                    omit = false
+                                    rule = PToken (Source.t "STRING")
+                                    binding = None
+                                    checker = None
+                                }],None,None)
+                    _public = false
+                    metaArgs = []
                 }]
              foot = None
              options = Map.empty}

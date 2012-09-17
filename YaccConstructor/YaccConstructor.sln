@@ -30,11 +30,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{C606E7BF-43A2-474B-8121-CA27405A5ED7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{229E26F1-6FBF-4045-82BF-64550AE5FF2C}"
-	ProjectSection(SolutionItems) = preProject
-		..\Tests\RACC\test_alt\test_alt.yrd = ..\Tests\RACC\test_alt\test_alt.yrd
-		..\Tests\RACC\test_alt\test_alt_1.yrd.in = ..\Tests\RACC\test_alt\test_alt_1.yrd.in
-		..\Tests\RACC\test_alt\test_alt_2.yrd.in = ..\Tests\RACC\test_alt\test_alt_2.yrd.in
-	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrToYard\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject

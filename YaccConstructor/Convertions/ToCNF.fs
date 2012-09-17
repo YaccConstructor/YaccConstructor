@@ -34,19 +34,19 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
     
     //--Генерация перестановок---------------------------------------------------------------------
         
-    let genPermutation N = 
+    let genPermutation N =
         let genList = ref [[]]
-        let addInList list = 
+        let addInList list =
             genList := list @ !genList
             list
         let startList = [for i in [1 .. N] -> [i]]
         genList := startList
-        let rec iter listList = 
+        let rec iter listList =
             if List.length listList <> 1 then
-                listList |> List.collect 
-                    (fun i -> [List.max i + 1 .. N] |> List.collect (fun j -> [ i @ [j] ])) 
-                |> addInList 
-                |> iter                  
+                listList |> List.collect
+                    (fun i -> [List.max i + 1 .. N] |> List.collect (fun j -> [ i @ [j] ]))
+                |> addInList
+                |> iter
         iter startList
         !genList
         
@@ -145,9 +145,9 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
     //--Добавляем новые правила--------------------------------------------------------------------
     
     ruleList |> List.collect
-        (fun rule -> 
+        (fun rule ->
             match rule.body with
-            |PSeq(elements, actionCode, lbl) when not elements.IsEmpty -> 
+            |PSeq(elements, actionCode, lbl) when not elements.IsEmpty ->
                 newRule rule (epsInRule elements) @ [rule]
             |x -> []
         )
@@ -156,35 +156,34 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 
 let deleteChainRule (ruleList: Rule.t<_, _> list) = 
     
-    let rec newRule (mainRule: Rule.t<_, _>) name = 
+    let rec newRule (mainRule: Rule.t<_, _>) name =
         ruleList |> List.collect
             (fun rule ->
-
-                let isOneRule rule = 
+                let isOneRule rule =
                     match rule.body with
-                    |PSeq(elements, actionCode, lbl) 
+                    |PSeq(elements, actionCode, lbl)
                         when elements.Length = 1
                         && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> true
                     |x -> false
                 let label (rl: Rule.t<_, _>) = match rl.body with PSeq(_, _, l) -> l | x -> None
-                let bodyChange (mR: Rule.t<_, _>) (r: Rule.t<_, _>) = 
+                let bodyChange (mR: Rule.t<_, _>) (r: Rule.t<_, _>) =
                     if label mR = None then r.body
                     else
                         if label r = None then PSeq(
                                                 (match r.body with PSeq(e, _, _) -> e | x -> []),
                                                 (match r.body with PSeq(_, a, _) -> a | x -> None),
                                                 label mR)
-                        else 
+                        else
                             printfn "label1 and label2 confict"
                             PSeq((match r.body with PSeq(e, _, _) -> e | x -> []),
                                  (match r.body with PSeq(_, a, _) -> a | x -> None),
                                  label mR)
-                if rule.name = name then 
+                if rule.name.text = name then
                     if isOneRule rule then
-                        newRule mainRule 
+                        newRule mainRule
                             (match rule.body with
-                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> t | x -> Source.t(""))
-                             |x -> Source.t("")
+                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> t.text | x -> "")
+                             |x -> ""
                             )
                     else
                         [{
@@ -194,10 +193,8 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                             metaArgs=mainRule.metaArgs
                             body=(bodyChange mainRule rule)
                         }] 
-                else
-                    []
+                else []
             )
-        
 
     ruleList |> List.collect
         (fun rule -> 
@@ -205,7 +202,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
             |PSeq(elements, actionCode, lbl) 
                 when elements.Length = 1
                 && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> 
-                newRule rule (match elements.Head.rule with PRef(t, _) -> t | x -> Source.t(""))
+                newRule rule (match elements.Head.rule with PRef(t, _) -> t.text | x -> "")
             |x -> [rule]
         )
 

@@ -76,7 +76,7 @@ let createName ((n:string), b, e, f) = newName n, b, e, f
 
 let genNewSource (name : string) (body : t<_,_>) =
     let rec getBegin = function
-        | PSeq (s, ac) ->
+        | PSeq (s, ac,l) ->
             match s with
             | h::_ -> getBegin h.rule
             | _ ->

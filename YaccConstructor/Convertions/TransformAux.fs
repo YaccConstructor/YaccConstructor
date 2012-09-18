@@ -35,7 +35,7 @@ let rec getTextIL = function
     | PMany(p) -> "(" + getTextIL p + ")+"
     | PAlt(l,r) -> "(" + getTextIL l + ")|(" + getTextIL r + ")"
     | PMetaRef(s,_,_) -> getText s
-    | PSeq(elements, ac) ->
+    | PSeq(elements, ac, _) ->
         "(" + (elements |> List.map (fun elem -> getTextIL elem.rule) |> String.concat " ") + "){" + 
         (match ac with Some(t) -> getText t | None -> "") + "}"
     | _ -> failwith "Unsupported meta param construct"

@@ -1,5 +1,0 @@
-{
-let value x = (x:>Lexer_cls.MyLexeme).MValue
-}
-
-+s: lst = (m = MULT {m})* {List.map value lst |> String.concat ";"};

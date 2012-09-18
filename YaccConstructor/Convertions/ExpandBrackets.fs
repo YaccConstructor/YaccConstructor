@@ -39,20 +39,20 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
     while toExpand.Count > 0 do
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
-            | PSeq(elements, actionCode) -> 
+            | PSeq(elements, actionCode, l) ->
                 (elements
                  |>List.fold
                     (fun (res, attrs) elem ->
                         let newElem =
                             match elem.rule with 
-                            | PSeq(subelements, None) when List.length subelements = 1 -> 
-                                { elem with rule = (List.head subelements).rule }
-                            | PSeq(subelements, subActionCode) when List.length subelements > 1 || subActionCode <> None ->
-                                let newName = newName()
-                                toExpand.Enqueue({name = genNewSource newName elem.rule; args=attrs;
-                                                    body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
-                            | PAlt(_,_) -> 
+                            | PSeq(subelements, None, l) as s when List.length subelements = 1  ->
+                                 let rule = (List.head subelements).rule
+                                 let body = 
+                                    match rule with
+                                    | PSeq(x,y,l1) -> PSeq(x,y,l)
+                                    | x -> s 
+                                 { elem with rule = body }
+                            | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = newName()
                                 toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
                                                     body=elem.rule; _public=false; metaArgs=[]})
@@ -62,7 +62,7 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
                     )
                     ([], attrs)
                  |> fst |> List.rev
-                 ,actionCode)
+                 ,actionCode, l)
                 |> PSeq
             | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x

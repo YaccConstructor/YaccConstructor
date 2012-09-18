@@ -139,8 +139,8 @@ let () =
             // Generate something
             
             let result =  
-                if not (IsSingleStartRule !ilTree) then
-                    raise <| CheckerError "Input grammar should contains only one start rule."
+                //if not (IsSingleStartRule !ilTree) then
+                //   raise <| CheckerError "Input grammar should contains only one start rule."
                 let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
                 if undeclaredNonterminals.Length > 0 then
                     eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"  

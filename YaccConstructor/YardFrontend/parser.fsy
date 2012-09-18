@@ -37,6 +37,11 @@ let getList = function Some x -> x | None -> []
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
 
+let makeNewSeq seq (lbl:Source.t) = 
+    match seq with 
+    | PSeq(els,ac,_) ->PSeq (els,ac,Some {label=lbl.text; weight=None})
+    | x -> x
+
 let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
@@ -145,15 +150,15 @@ param_list: PARAM param_list {$1::$2} | /* empty */ {[]}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
-bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3)}  
+bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3) }  
               | BAR seq {$2}
 
 seq: no_lbl_seq {$1} | lbl_seq {$1}
 
-no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3) }
-   | ACTION {PSeq([],Some $1)}
+no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None)}
+   | ACTION {PSeq([],Some $1, None)}
 
-lbl_seq: DLABEL LPAREN no_lbl_seq RPAREN {$3}
+lbl_seq: DLABEL LPAREN no_lbl_seq RPAREN {makeNewSeq $3 $1}
 
 seq_elem_list: seq_elem seq_elem_list {$1::$2}
              | /* empty */ {[]}
@@ -175,6 +180,7 @@ prim: prim STAR           {PMany $1}
     | prim QUESTION       {POpt $1}
     | LPAREN alts RPAREN  {$2}
     | call                {$1}
+	| lbl_seq             {$1}
     | STRING              {PLiteral $1}
 
 meta_param: prim {$1}

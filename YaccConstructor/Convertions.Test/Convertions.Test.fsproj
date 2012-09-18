@@ -42,6 +42,12 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="ConvertionsTests.fs" />
+    <Compile Include="ExpandMetaTests.fs" />
+    <Compile Include="ExpandInnerAltTests.fs" />
+    <Compile Include="ExpandSubseqTests.fs" />
+    <Compile Include="ReplaceInlineTests.fs" />
+    <Compile Include="EntryPoint.fs" />
+    <Compile Include="ToCNFTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">

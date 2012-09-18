@@ -88,7 +88,7 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
     let printArgs args = args |> List.map (fun src -> "[" + Source.toString src + "]") |> String.concat ""
     let rec priority = function 
         | PAlt(_) -> 1
-        | PSeq([elem],None) -> 
+        | PSeq([elem],None,_) -> 
             match elem.binding with
             | Some(_) -> 10
             | None -> priority elem.rule
@@ -116,7 +116,15 @@ let printRule (rule:Rule.t<Source.t, Source.t>) =
             if not wasAlt then seq {yield Tabbed(seq {yield Str (" "); yield! printProduction true production})}
             else seq {yield StrSeq(printProduction true alt1); yield Line (seq {yield Str ("|"); yield! printProduction true alt2})} 
         // Sequence * attribute.(attribute is always applied to sequence) 
-        | PSeq(elem_seq, attr_option) -> seq {yield! (Seq.collect printElem elem_seq); yield Str(printAttr attr_option)}
+        | PSeq(elem_seq, attr_option,lbl) -> 
+            let isLbl = lbl.IsSome
+            let isWght = isLbl && lbl.Value.weight.IsSome
+
+            seq {if isLbl then yield Str(lbl.Value.label + "(")
+                 if isWght then yield Str ("[" + (lbl.Value.weight.Value |> int |> string) + "]")
+                 ; yield! (Seq.collect printElem elem_seq)
+                 ; if isLbl then yield Str ")"
+                 ; yield Str(printAttr attr_option)}
         // Token
         | PToken(source) -> Seq.singleton <| Str (Source.toString source)
         // Vanilla rule reference with an optional args list.

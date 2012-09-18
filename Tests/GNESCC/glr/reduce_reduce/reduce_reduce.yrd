@@ -1,3 +1,0 @@
-+s : <res:string>=(r=a {r}| r=b {r}){res};
-a : NUMBER PLUS NUMBER { "A" };
-b : NUMBER PLUS NUMBER { "B" };

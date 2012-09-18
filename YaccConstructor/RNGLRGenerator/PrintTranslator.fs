@@ -154,7 +154,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
-        | PSeq (s, ac) ->
+        | PSeq (s, ac, _) ->
             match ac with
             | None -> wordL "[]"
             | Some ac ->

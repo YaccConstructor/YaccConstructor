@@ -29,7 +29,7 @@ open TransformAux
 type Dictionary<'a,'b> = System.Collections.Generic.Dictionary<'a,'b>
 
 /// find metarule with given name in hash map of collected metarules
-let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName = 
+let findMetaRule (tbl:Dictionary<string,Rule.t<Source.t,Source.t>>) mName =
     try tbl.Item mName with
     | :?System.Collections.Generic.KeyNotFoundException ->
         failwith <| sprintf "undeclared metarule %s" mName;
@@ -85,7 +85,7 @@ let expandMeta body metaRules expanded res =
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
     let rec expandBody body (metaRules: Dictionary<string,Rule.t<Source.t,Source.t> >)
-            (expanded : Dictionary<_, Production.t<'a,'b>>) res =
+            (expanded : Dictionary<_, Production.t<_,_>>) res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
         /// It's better to use hash
@@ -112,7 +112,7 @@ let expandMeta body metaRules expanded res =
                     | POpt r
                     | PSome r
                     | PMany r -> canUseBinding r
-                    | PSeq(s,ac) ->
+                    | PSeq(s,ac,_) ->
                         if (ac.IsSome) then true
                         else s |> List.exists (fun elem -> canUseBinding elem.rule)
                     | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
@@ -173,21 +173,21 @@ let expandMeta body metaRules expanded res =
                 | PAlt (l, r) ->
                     (expandBody l metaRules expanded [], simpleExpand r)
                     |> (fun (x, y) -> (PAlt (fst x, fst y), (snd x)@(snd y)))
-                | PSeq (ruleList, actionCode) ->
+                | PSeq (ruleList, actionCode, l) ->
                     ruleList
                     |> List.fold
                         (fun (curSeq, accRes) elem' ->
                             let bodyExp = expandBody elem'.rule metaRules expanded accRes
                             (applyToRes (fun h -> {elem' with rule = h}::curSeq) bodyExp)
                         ) ([], res)
-                    |> applyToRes (fun x -> PSeq (List.rev x, actionCode))
+                    |> applyToRes (fun x -> PSeq (List.rev x, actionCode, l))
                 | PLiteral _ as literal -> (literal, res)
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
                     if metaArgs.IsEmpty then (PRef(name, attrs), res)
                     else expandMetaRef name attrs metaArgs 
-                | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
-                | PRepet (_) -> failwith "Unrealised meta-expanding of permutation"
+                | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
+                | PRepet _ -> failwith "Unrealised meta-expanding of permutation"
             if not (expanded.ContainsKey key) then
                 expanded.Add(key, rule)
 //            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule res
@@ -205,15 +205,15 @@ let expandMeta body metaRules expanded res =
         | PRef(name, attrs) as prev ->
             (tryReplaceActual formalToAct (Source.toString name) prev)
         | PAlt (l, r) -> PAlt(replace l, replace r)
-        | PSeq (ruleList, actionCode) ->
-            PSeq (List.map (fun x ->  {x with rule = replace x.rule}) ruleList, actionCode)
+        | PSeq (ruleList, actionCode, l) ->
+            PSeq (List.map (fun x ->  {x with rule = replace x.rule}) ruleList, actionCode, l)
         | PLiteral _ as literal -> literal
         | PToken _ as token -> token
         | PMetaRef (name, attrs, metaArgs) -> 
             if (metaArgs.IsEmpty) then (tryReplaceActual formalToAct (Source.toString name) (PRef(name, attrs)) )
             else PMetaRef(name, attrs, List.map replace metaArgs)
-        | PPerm (_) -> failwith "Unrealised meta-expanding of permutation"
-        | PRepet (_) -> failwith "Unrealised meta-expanding of repetition"
+        | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
+        | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
 
     expandBody body metaRules expanded res
 
@@ -235,10 +235,8 @@ let expandMetaRules rules =
     let rec collectMeta rules (metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >) = 
         match rules with 
         | [] -> ()
-        | h::t -> 
-            if (isMetaRule h) then 
-                metaRulesTbl.Add(h.name.text,h)        
-            collectMeta t metaRulesTbl
+        | h::t -> if isMetaRule h then metaRulesTbl.Add(h.name.text,h)        
+                  collectMeta t metaRulesTbl
     
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl
     let rec replaceMeta rules ((metaRulesTbl:Dictionary<string,Rule.t<Source.t,Source.t> >), refsTbl) res = 

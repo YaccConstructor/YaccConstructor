@@ -37,14 +37,14 @@ let printArg = function None -> "" | Some arg -> repr arg
 let rec printBody indent body  =
     match body with
     |PAlt(a,b)  -> sprintf "(attempt (%s)) <|> (%s)" (printBody (indent) a) (printBody (indent) b) 
-    |PSeq (elems,Some a) ->  
+    |PSeq (elems,Some a,_) ->  
       match  List.rev elems with
         | [] -> sprintf "preturn %s" (repr a)
         | lastElem::otherElems -> 
             let lastRepr = sprintf "%s |>> fun (%s) -> (%s) " (printBody indent lastElem.rule) (printBinding lastElem.binding) (repr a)
             let list = List.fold (fun r e -> printElem indent e + ") -> (" + r + ")" ) (lastRepr  ) otherElems 
             sprintf "%s  " list 
-    |PSeq(elems,None) -> 
+    |PSeq(elems,None,_) -> 
       match List.rev elems with
         | [] -> "???" 
         | lastElem::otherElems ->

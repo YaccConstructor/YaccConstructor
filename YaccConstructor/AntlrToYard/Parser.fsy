@@ -51,7 +51,7 @@ let makeModifiedRule innerProduction modifier =
     | x -> failwithf "Unexpected modifier %s" x
 
 let makePSeq (productionList, actionCode) =
-    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode )
+    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode, None )
 
 let termCount = ref 0
 let generateNewName =

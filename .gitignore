@@ -20,3 +20,5 @@ Tests/CYK/basic_term_noLBL.yrd.CYK.fs
 Examples/CYK/yc/*
 *.psess
 *.vsp
+*/UpgradeReport*
+*/UpgradeLog*

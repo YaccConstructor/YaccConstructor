@@ -55,6 +55,10 @@ end
 module Production = begin
     //let num = ref 0
     type IRuleType = interface end
+    type DLabel = {
+        label: string;
+        weight: float option
+    }
     type elem<'patt,'expr> = {
         /// Don't include rule into AST
         omit:bool;
@@ -74,7 +78,7 @@ module Production = begin
         /// Alternative (e1 | e2)
         |PAlt     of (t<'patt,'expr>) * (t<'patt,'expr>)
         /// Sequence * attribute. (Attribute is always applied to sequence) 
-        |PSeq     of (elem<'patt,'expr>) list * 'expr option
+        |PSeq     of (elem<'patt,'expr>) list * 'expr option * DLabel option
         /// Token itself. Final element of parsing.
         |PToken   of Source.t 
         /// Reference to other rule inside production. With an optional args list.
@@ -112,7 +116,7 @@ module Production = begin
                     
             match this with
             |PAlt (x, y) -> x.ToString() + " | " + y.ToString()
-            |PSeq (ruleSeq, attrs) ->
+            |PSeq (ruleSeq, attrs, l) ->
                 let strAttrs =
                     match attrs with
                     | None -> ""

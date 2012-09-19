@@ -66,7 +66,7 @@ let initialConvert (def : Definition.t<_,_>) =
             function
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
-            | PSeq (s,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false

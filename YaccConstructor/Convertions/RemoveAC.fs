@@ -27,7 +27,7 @@ open Yard.Core.IL.Production
 let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
     let rec inner (production: t<Source.t, Source.t>) =
         match production with
-        | PSeq (x,ac) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None)
+        | PSeq (x,ac,l) -> PSeq(x |> List.map (fun b -> {b with rule = b.rule |> inner}),None,l)
         | PAlt (l,r) -> PAlt (inner l, inner r)
         | PSome p -> inner p |> PSome
         | PMany p -> inner p |> PMany

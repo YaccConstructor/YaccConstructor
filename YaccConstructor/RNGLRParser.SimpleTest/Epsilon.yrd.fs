@@ -1,3 +1,5 @@
+
+# 2 "Epsilon.yrd.fs"
 module RNGLR.ParseEpsilon
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -116,7 +118,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_1) 
-# 119 "Epsilon.yrd.fs"
+# 121 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -136,7 +138,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_1) 
-# 139 "Epsilon.yrd.fs"
+# 141 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -154,7 +156,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_2) 
-# 157 "Epsilon.yrd.fs"
+# 159 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -174,7 +176,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_2) 
-# 177 "Epsilon.yrd.fs"
+# 179 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -192,7 +194,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
-# 195 "Epsilon.yrd.fs"
+# 197 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -212,7 +214,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
-# 215 "Epsilon.yrd.fs"
+# 217 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -236,7 +238,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Epsilon.yrd"
                : '_rnglr_type_s) 
-# 239 "Epsilon.yrd.fs"
+# 241 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -246,7 +248,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Epsilon.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 249 "Epsilon.yrd.fs"
+# 251 "Epsilon.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

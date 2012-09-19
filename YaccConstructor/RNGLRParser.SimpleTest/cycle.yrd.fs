@@ -1,3 +1,5 @@
+
+# 2 "Cycle.yrd.fs"
 module RNGLR.ParseCycle
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -115,7 +117,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Cycle.yrd"
                : '_rnglr_type_start) 
-# 118 "Cycle.yrd.fs"
+# 120 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -125,7 +127,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Cycle.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 128 "Cycle.yrd.fs"
+# 130 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -145,7 +147,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cycle.yrd"
                : '_rnglr_type_s) 
-# 148 "Cycle.yrd.fs"
+# 150 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -165,7 +167,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cycle.yrd"
                : '_rnglr_type_s) 
-# 168 "Cycle.yrd.fs"
+# 170 "Cycle.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

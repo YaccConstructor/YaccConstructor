@@ -1,0 +1,89 @@
+
+rules:
+   0: yard_rule_op_1 = 
+   1: yard_rule_op_1 = A 
+   2: yard_rule_op_2 = 
+   3: yard_rule_op_2 = B 
+   4: yard_rule_op_3 = 
+   5: yard_rule_op_3 = C 
+   6: s = yard_rule_op_1 yard_rule_op_2 yard_rule_op_3 
+   7: yard_start_rule = s 
+
+rules:
+   0: s = yard_many_1 yard_many_2 
+   1: yard_start_rule = s 
+   2: yard_many_1 = A yard_many_1 
+   3: yard_many_1 = 
+   4: yard_many_2 = A yard_many_2 
+   5: yard_many_2 = 
+
+rules:
+   0: s = if 
+   1: yard_start_rule = s 
+   2: if = IF stmt 
+   3: if = if_else 
+   4: if_else = IF good ELSE stmt 
+   5: good = if_else 
+   6: good = stmt 
+   7: stmt = if 
+   8: stmt = A 
+
+rules:
+   0: s = A 
+   1: s = s A 
+   2: yard_start_rule = s 
+
+rules:
+   0: expr = fact 
+   1: expr = expr ADD expr 
+   2: yard_start_rule = expr 
+   3: fact = num 
+   4: fact = fact MUL fact 
+   5: num = B 
+   6: num = A 
+
+rules:
+   0: s = A 
+   1: s = A s 
+   2: yard_start_rule = s 
+
+rules:
+   0: start = s B 
+   1: yard_start_rule = start 
+   2: s = s 
+   3: s = A 
+
+rules:
+   0: list = A 
+   1: list = list list 
+   2: yard_start_rule = list 
+
+rules:
+   0: s = 
+   1: s = A 
+   2: s = B t s s 
+   3: yard_start_rule = s 
+   4: t = 
+
+rules:
+   0: e = e P e 
+   1: e = N 
+   2: yard_start_rule = e 
+
+rules:
+   0: a = A a 
+   1: a = B 
+   2: yard_start_rule = a 
+
+rules:
+   0: list = elem 
+   1: list = list C elem 
+   2: yard_start_rule = list 
+   3: elem = B 
+   4: elem = A 
+
+rules:
+   0: s = 
+   1: s = A s t 
+   2: yard_start_rule = s 
+   3: t = 

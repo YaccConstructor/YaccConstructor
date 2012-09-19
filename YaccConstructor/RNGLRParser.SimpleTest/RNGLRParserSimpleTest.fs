@@ -174,3 +174,17 @@ type ``RNGLR parser tests with simple lexer`` () =
             let res = translate RNGLR.ParseResolvers.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([List.replicate 5 1], res)
+
+    //[<Test>]
+    member test.``Longest match``() =
+        let parser = RNGLR.ParseLongest.buildAst
+        let path = dir + "Longest/input.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
+            RNGLR.ParseLongest.defaultAstToDot mAst "longest.dot"
+            mAst.ChooseSingleAst()
+            let res = translate RNGLR.ParseLongest.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual([5,0], res)

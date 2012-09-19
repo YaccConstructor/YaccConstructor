@@ -77,51 +77,51 @@ type RNGLR() =
                 let statesInterpreter = buildStates table grammar
                 let tables = new Tables(grammar, statesInterpreter)
                 use out = new System.IO.StreamWriter (output)
-                fprintfn out "module %s"
+                let res = new System.Text.StringBuilder()
+                let dummyPos = char 0
+                let println (x : 'a) =
+                    Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
+                let print (x : 'a) =
+                    Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+                println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+                println "module %s"
                 <|  match moduleName with
                     | "" -> "RNGLR.Parse"
                     | s -> s
-                fprintfn out "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+                println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                fprintfn out "open Yard.Generators.RNGLR.Parser"
-                fprintfn out "open Yard.Generators.RNGLR"
-                fprintfn out "open Yard.Generators.RNGLR.AST"
+                println "open Yard.Generators.RNGLR.Parser"
+                println "open Yard.Generators.RNGLR"
+                println "open Yard.Generators.RNGLR.AST"
 
                 match definition.head with
                 | None -> ()
                 | Some (s : Source.t) ->
-                    fprintfn out "%s" s.text
+                    println "%s" <| getPosFromSource fullPath dummyPos s
+                    println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
-                let tables = printTables grammar definition.head tables moduleName tokenType
+                let tables = printTables grammar definition.head tables moduleName tokenType res
+                let res = if not needTranslate then tables
+                          else tables + printTranslator grammar newDefinition.grammar
+                                            positionType fullPath output dummyPos
+                let res = 
+                    match definition.foot with
+                    | None -> res
+                    | Some (s : Source.t) ->
+                        res + (getPosFromSource fullPath dummyPos s + "\n"
+                                 + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
                 let res =
-                    if not needTranslate then tables.Replace("\r\n", "\n").Replace("\n", System.Environment.NewLine)
-                    else
-                        let dummyPos = char 0
-                        let init = (tables + printTranslator grammar newDefinition.grammar
-                                                positionType fullPath output dummyPos).Replace("\r\n", "\n")
-                        let curLine =
-                            let line = ref 6
-                            match definition.head with
-                            | None -> ()
-                            | Some s ->
-                                incr line
-                                for ch in s.text do
-                                    if ch = '\n' then
-                                        incr line
-                            line
-                        let res = new System.Text.StringBuilder(init.Length * 2)
-                        for c in init do
-                            match c with
-                            | '\n' -> incr curLine; res.Append System.Environment.NewLine
-                            | x when x = dummyPos -> res.Append (string !curLine)
-                            | x -> res.Append x
-                            |> ignore
-                        res.ToString()
+                    let init = res.Replace("\r\n", "\n")
+                    let curLine = ref 1
+                    let res = new System.Text.StringBuilder(init.Length * 2)
+                    for c in init do
+                        match c with
+                        | '\n' -> incr curLine; res.Append System.Environment.NewLine
+                        | c when c = dummyPos -> res.Append (string !curLine)
+                        | x -> res.Append x
+                        |> ignore
+                    res.ToString()
                 out.WriteLine res
-                match definition.foot with
-                | None -> ()
-                | Some (s : Source.t) ->
-                    out.WriteLine (Source.toString s)
                 out.Close()
                 eprintfn "Generation time: %A" <| System.DateTime.Now - start
                 //(new YardPrinter()).Generate newDefinition

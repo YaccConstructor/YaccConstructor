@@ -25,8 +25,7 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) =
-    let res = new System.Text.StringBuilder()
+let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) (res : System.Text.StringBuilder) =
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =

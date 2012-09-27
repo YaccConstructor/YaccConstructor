@@ -89,8 +89,53 @@ let expandMeta body metaRules expanded res =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules
         /// It's better to use hash
-        let getKey body = body.ToString()
-            //|> (fun x -> printfn "k = %s" x; x)
+        let rec getKey (this : t<Source.t, Source.t>) =
+            let argsToString = function
+                | None -> ""
+                | Some x -> "[" + x.ToString() + "]"
+                    
+            let metaArgsToString metaArgs =
+                if ((metaArgs : list<_>).IsEmpty) then ""
+                else "<<" + (metaArgs
+                             |> List.map getKey
+                             |> String.concat " ")
+                        + ">>"
+                    
+            match this with
+            |PAlt (x, y) -> getKey x + "|" + getKey y
+            |PSeq (ruleSeq, attrs, l) ->
+                let strAttrs =
+                    match attrs with
+                    | None -> ""
+                    | Some x -> "{" + x.text + "}"
+
+                let elemToString (x : elem<Source.t, Source.t>) =
+                    let check =
+                        match x.checker with
+                        | None -> ""
+                        | Some c -> "=>{" + c.ToString() + "}=>"
+                    let omit = if x.omit then "-" else ""
+                    let bind =
+                        match x.binding with
+                        | None -> ""
+                        | Some var -> var.text + "="
+                    check + omit + bind + getKey x.rule
+                "<" + String.concat " " (List.map (fun x -> "(" + elemToString x + ")") ruleSeq) + ">" + strAttrs
+            |PToken src -> src.text
+            |PRef (name, args) ->
+                name.text + argsToString args
+            |PMany x -> "(" + getKey x + ")*"
+            |PMetaRef (name, args, metaArgs) ->
+                name.text + metaArgsToString metaArgs + argsToString args
+            |PLiteral src -> src.text
+            |PRepet _ -> failwith "Repetition was not realized yet"
+            |PPerm src -> "[|" + (src
+                                  |> List.map getKey
+                                  |> String.concat ";")
+                                + "|]"
+            |PSome x -> "(" + getKey x + ")+"
+            |POpt x -> "(" + getKey x + ")?"
+
 
         let key = getKey body
         if expanded.ContainsKey(key) then 

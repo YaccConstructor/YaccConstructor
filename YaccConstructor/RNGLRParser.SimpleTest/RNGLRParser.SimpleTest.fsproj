@@ -55,6 +55,7 @@
     <Compile Include="Cond.yrd.fs" />
     <Compile Include="Resolvers.yrd.fs" />
     <Compile Include="Longest.yrd.fs" />
+    <Compile Include="Order.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
     <None Include="ComplexRightNull.yrd" />
@@ -68,6 +69,7 @@
     <None Include="SimpleRightNull.yrd" />
     <None Include="Resolvers.yrd" />
     <None Include="Longest.yrd" />
+    <None Include="Order.yrd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YCBuildTask\YCBuildTask.fsproj">

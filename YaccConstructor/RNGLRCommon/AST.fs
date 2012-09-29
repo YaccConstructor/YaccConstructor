@@ -88,6 +88,15 @@ and Nodes =
                         for x in nodes.other do
                             f x
 
+        member inline nodes.doForAllRev f =
+            if nodes.fst <> null then
+                if nodes.snd <> null then
+                    if nodes.other <> null then
+                        for i = nodes.other.Length - 1 downto 0 do
+                            f nodes.other.[i]
+                    f nodes.snd
+                f nodes.fst
+
         member inline nodes.isForAll f =
             if nodes.fst <> null then
                 if not <| f nodes.fst then false
@@ -159,7 +168,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let u = stack.Pop()
                 let children = u
                 if children.pos = -2 then
-                    children.pos <- res.Count 
+                    children.pos <- res.Count
                     res.Add u
                 elif children.pos = -1 then
                     children.pos <- -2
@@ -171,7 +180,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 if ast.pos = -1 then
                                     stack.Push ast
                             | _ -> ()
-                        family.nodes.doForAll handleAst
+                        family.nodes.doForAllRev handleAst
                     handle children.first
                     if children.other <> null then
                         for family in children.other do

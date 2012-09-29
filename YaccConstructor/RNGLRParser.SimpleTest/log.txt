@@ -18,6 +18,13 @@ rules:
    5: yard_many_2 = 
 
 rules:
+   0: s = e1 e1 
+   1: yard_start_rule = s 
+   2: e1 = e2 e2 
+   3: e2 = e3 e3 
+   4: e3 = A 
+
+rules:
    0: s = if 
    1: yard_start_rule = s 
    2: if = IF stmt 

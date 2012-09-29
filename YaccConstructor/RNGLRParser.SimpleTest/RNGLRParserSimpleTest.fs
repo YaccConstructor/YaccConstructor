@@ -175,6 +175,20 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual([List.replicate 5 1], res)
 
+    [<Test>]
+    member test.``Calculation order``() =
+        let parser = RNGLR.ParseOrder.buildAst
+        let path = dir + "Order.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
+            RNGLR.ParseOrder.res := []
+            let _ = translate RNGLR.ParseOrder.translate mAst
+            let res = List.rev !RNGLR.ParseOrder.res
+            printfn "Result: %A" res
+            Assert.AreEqual([1..8], res)
+
     //[<Test>]
     member test.``Longest match``() =
         let parser = RNGLR.ParseLongest.buildAst

@@ -76,7 +76,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
-            mAst.ChooseSingleAst()
+            mAst.ChooseLongestMatch()
             mAst.PrintAst()
 
     [<Test>]
@@ -130,7 +130,7 @@ type ``RNGLR parser tests with simple lexer`` () =
             printf "OK\n"
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
             //mAst.EliminateCycles()
-            mAst.ChooseSingleAst()
+            mAst.ChooseLongestMatch()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
             let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res
@@ -189,7 +189,7 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual([1..8], res)
 
-    //[<Test>]
+    [<Test>]
     member test.``Longest match``() =
         let parser = RNGLR.ParseLongest.buildAst
         let path = dir + "Longest.txt"
@@ -198,7 +198,7 @@ type ``RNGLR parser tests with simple lexer`` () =
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
         | Parser.Success mAst ->
             RNGLR.ParseLongest.defaultAstToDot mAst "longest.dot"
-            mAst.ChooseSingleAst()
+            mAst.ChooseLongestMatch()
             let res = translate RNGLR.ParseLongest.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([5,0], res)

@@ -79,7 +79,7 @@ and Nodes =
             //match arr with
 
 
-        member inline nodes.doForAll f =
+        member nodes.doForAll f =
             if nodes.fst <> null then
                 f nodes.fst
                 if nodes.snd <> null then
@@ -88,7 +88,7 @@ and Nodes =
                         for x in nodes.other do
                             f x
 
-        member inline nodes.doForAllRev f =
+        member nodes.doForAllRev f =
             if nodes.fst <> null then
                 if nodes.snd <> null then
                     if nodes.other <> null then
@@ -97,7 +97,7 @@ and Nodes =
                     f nodes.snd
                 f nodes.fst
 
-        member inline nodes.isForAll f =
+        member nodes.isForAll f =
             if nodes.fst <> null then
                 if not <| f nodes.fst then false
                 elif nodes.snd <> null then
@@ -212,30 +212,114 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         else nodes.[x] <- NonTerm arr
                 | _ -> ()*)
                 
-    member this.ChooseSingleAst () = 
-        let inline smaller pos : (obj -> _)= function
-            | :? int -> true
-            | :? AST as n -> n.pos < pos && n.pos <> -1
-            | _ -> failwith ""
+    static member inline private smaller pos : (obj -> _) = function
+        | :? int -> true
+        | :? AST as n -> n.pos < pos && n.pos <> -1
+        | _ -> failwith ""
+
+    member this.ChooseSingleAst () =
+        let handleChildren (children : AST) =
+            if children.first.nodes.isForAll (Tree<_>.smaller children.pos) then
+                if children.other <> null then
+                    children.other <- null
+            elif children.other = null then
+                children.pos <- -1
+            else
+                match
+                    children.other |> Array.tryFind
+                        (fun family -> family.nodes.isForAll (Tree<_>.smaller children.pos))
+                    with
+                | Some v ->
+                    children.first <- v
+                    children.other <- null
+                | None ->
+                    children.pos <- -1
+        this.ChooseSingleAst handleChildren
+
+    /// Select children, where the first subnode ends first.
+    /// In case of ambiguity look at second one.
+    /// If ranges are equal, then select one, having the smallest rule number.
+    /// Eliminate cycles.
+    member this.ChooseLongestMatch () =
+        if not isEpsilon then
+            let rangeEnds = Array.zeroCreate order.Length
+            let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
+            let inline getEnd (x : obj) =
+                match x with
+                | :? int as t -> t
+                | :? AST as ch -> rangeEnds.[ch.pos]
+                | _ -> failwith ""
+            let getRangeEnd (family : Nodes) =
+                let mutable k = family.Length-1
+                while isEpsilon family.[k] do
+                    k <- k - 1
+                getEnd family.[k]
+
+            let compareNodesArrs (a1 : _[]) (a2 : _[]) =
+                let lim = min a1.Length a2.Length
+                let rec inner i = 
+                    if i = lim then a1.Length - a2.Length
+                    else
+                        match getEnd a1.[i] - getEnd a2.[i] with
+                        | 0 -> inner (i + 1)
+                        | x -> x
+                inner 0
+            let selectChild (f1 : Family) (f2 : Family) =
+                let inline getEnd (x : obj) =
+                    match x with
+                    | null -> -1
+                    | :? int as t when t < 0 -> -1
+                    | :? int as t -> t
+                    | :? AST as ch -> rangeEnds.[ch.pos]
+                    | _ -> failwith ""
+                let inline compareNodes (n1 : Nodes) (n2 : Nodes) =
+                    match getEnd n1.fst - getEnd n2.fst with
+                    | 0 -> 
+                        match getEnd n1.snd - getEnd n2.snd with
+                        | 0 -> 
+                            match n1.other, n2.other with
+                            | null, null -> 0
+                            | null, _ -> -1
+                            | _, null -> 1
+                            | arr1, arr2 -> compareNodesArrs arr1 arr2
+                        | x -> x
+                    | x -> x
+                match compareNodes f1.nodes f2.nodes with
+                    | 0 -> if f1.prod < f2.prod then f1 else f2
+                    | x when x > 0 -> f1
+                    | _ -> f2
+            let handleChildren (children : AST) =
+                if children.other = null then
+                    if children.first.nodes.isForAll (Tree<_>.smaller children.pos) then
+                        rangeEnds.[children.pos] <- getRangeEnd children.first.nodes
+                    else children.pos <- -1
+                else
+                    match
+                        children.other |> Array.fold
+                            (fun res family ->
+                                if family.nodes.isForAll (Tree<_>.smaller children.pos) then
+                                    match res with
+                                    | None -> Some family
+                                    | Some cur -> Some <| selectChild cur family
+                                else res)
+                            (if children.first.nodes.isForAll (Tree<_>.smaller children.pos) then
+                                 Some children.first
+                             else None)
+                        with
+                    | Some v ->
+                        children.first <- v
+                    | None ->
+                        children.pos <- -1
+                children.other <- null
+
+            this.ChooseSingleAst handleChildren
+
+    /// Choose first correct subtree without cycles.
+    member private this.ChooseSingleAst childrenHandler = 
         if not isEpsilon then
             for children in order do
                 if children.pos <> -1 then
-                    if children.first.nodes.isForAll (smaller children.pos) then
-                        if children.other <> null then
-                            children.other <- null
-                    else
-                        if children.other = null then
-                            children.pos <- -1
-                        else
-                            match
-                                children.other |> Array.tryFind
-                                    (fun family -> family.nodes.isForAll (smaller children.pos))
-                                with
-                            | Some v ->
-                                children.first <- v
-                                children.other <- null
-                            | None ->
-                                children.pos <- -1
+                    childrenHandler children
             for x in order do
                 x.pos <- -1
             rootFamily.pos <- -2

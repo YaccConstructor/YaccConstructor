@@ -32,7 +32,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``First grammar test``() =
         let parser = RNGLR.ParseFirst.buildAst
-        let path = dir + "first/input.txt"
+        let path = dir + "first.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -41,7 +41,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``List test``() =
         let parser = RNGLR.ParseList.buildAst
-        let path = dir + "list/input.txt"
+        let path = dir + "list.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -50,7 +50,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Simple Right Null test``() =
         let parser = RNGLR.ParseSimpleRightNull.buildAst
-        let path = dir + "simpleRightNull/input.txt"
+        let path = dir + "simpleRightNull.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -59,7 +59,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Complex Right Null test``() =
         let parser = RNGLR.ParseComplexRightNull.buildAst
-        let path = dir + "complexRightNull/input.txt"
+        let path = dir + "complexRightNull.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -71,7 +71,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Expression test``() =
         let parser = RNGLR.ParseExpr.buildAst
-        let path = dir + "expr/input.txt"
+        let path = dir + "expr.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -82,7 +82,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Counter test - simple for translator``() =
         let parser = RNGLR.ParseCounter.buildAst
-        let path = dir + "counter/input.txt"
+        let path = dir + "counter.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -96,7 +96,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Calc test - simple for translator``() =
         let parser = RNGLR.ParseCalc.buildAst
-        let path = dir + "calc/input.txt"
+        let path = dir + "calc.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -108,7 +108,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Translate with Attributes``() =
         let parser = RNGLR.ParseAttrs.buildAst
-        let path = dir + "attrs/input.txt"
+        let path = dir + "attrs.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -121,7 +121,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``AST, containing cycles``() =
         let parser = RNGLR.ParseCycle.buildAst
-        let path = dir + "cycle/input.txt"
+        let path = dir + "cycle.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -139,7 +139,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Parse empty string``() =
         let parser = RNGLR.ParseEpsilon.buildAst
-        let path = dir + "Epsilon/input.txt"
+        let path = dir + "Epsilon.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -151,7 +151,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``If Then Else``() =
         let parser = RNGLR.ParseCond.buildAst
-        let path = dir + "Cond/input.txt"
+        let path = dir + "Cond.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -165,7 +165,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
     member test.``Resolvers``() =
         let parser = RNGLR.ParseResolvers.buildAst
-        let path = dir + "Resolvers/input.txt"
+        let path = dir + "Resolvers.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)
@@ -178,7 +178,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     //[<Test>]
     member test.``Longest match``() =
         let parser = RNGLR.ParseLongest.buildAst
-        let path = dir + "Longest/input.txt"
+        let path = dir + "Longest.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err) -> printErr (num, tok, err)

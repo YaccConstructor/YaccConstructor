@@ -10,7 +10,8 @@
     <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
     <AssemblyName>RNGLRParser.SimpleTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <Name>RNGLRParser.SimpleTest</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

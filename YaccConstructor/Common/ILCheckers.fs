@@ -72,7 +72,7 @@ let GetUndeclaredNonterminalsList (def:Yard.Core.IL.Definition.t<Source.t, Sourc
         | PToken _  -> ()
 
     def.grammar 
-    |> List.iter 
+    |> List.iter
         (fun r -> 
             let additionRules = new HashSet<_>()
             r.metaArgs |> List.iter (fun i -> additionRules.Add i.text |> ignore)
@@ -102,7 +102,7 @@ let reachableRulesInfo_of_list (rules: IL.Rule.t<_,_> list) =
         | PRepet (expr,_,_)
         | PMany expr
         | PSome expr
-        | POpt  expr -> getReachableRulesCurried expr
+        | POpt expr -> getReachableRulesCurried expr
         | PAlt (lExpr,rExpr) -> 
             getReachableRulesCurried lExpr
             getReachableRulesCurried rExpr

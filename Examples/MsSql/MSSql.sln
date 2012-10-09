@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MSSql", "MSSql\MSSql.fsproj", "{C1836F65-BDF4-4A8B-B59D-74A9676C9E5B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MSSql", "MsSql\MSSql.fsproj", "{C1836F65-BDF4-4A8B-B59D-74A9676C9E5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

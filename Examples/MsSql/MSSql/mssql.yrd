@@ -7,20 +7,21 @@ root_rule:
 ;
 
 start2: 
-    sel_expr = ((KW_SELECT ident {})  (KW_FROM ident {}) ) { }
+    sel_expr = KW_SELECT ident KW_FROM ident  { }
   | GLOBALVAR
   | GLOBALTEMPOBJ
   | TEMPOBJ
 ;
 
-create_proc:
-        ( KW_CREATE (KW_PROCEDURE | KW_PROC )) 
-    (( schema_name = ident) DOT)? ( proc_name = ident {} ) (SEMI DEC_NUMBER)?
-    comma_list<<(
+proc_formal_param:
       (LOCALVAR (full_ident DOT)? sql_datatype)
-      (KW_VARYING)? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
-      (KW_OUT | KW_OUTPUT)? (KW_READONLY)?
-    )>>?
+      KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
+      (KW_OUT | KW_OUTPUT)? KW_READONLY?
+	  ;
+create_proc:
+    KW_CREATE (KW_PROCEDURE | KW_PROC)
+    (ident DOT)? ident (SEMI DEC_NUMBER)?
+    comma_list<<proc_formal_param>>?
     (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
     KW_AS ( KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END? )
     SEMI?
@@ -32,7 +33,7 @@ proc_body_stmnt:
 |   set_stmnt 
 |   execute_stmnt
 |   sql_expr
-|   KW_DECLARE LOCALVAR KW_AS sql_datatype ( OP_EQ sql_expr)?
+|   KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
 |   KW_RETURN sql_expr
 |   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) 
 ;
@@ -103,17 +104,15 @@ tablesample_clause:
         (KW_REPEATABLE LPAREN DEC_NUMBER RPAREN)?
 ;
 (* http://msdn.microsoft.com/en-us/library/ms187373.aspx *)
-table_hint:
-    KW_NOEXPAND? NOLOCK
-;                         
+table_hint: KW_NOEXPAND? NOLOCK;                         
 (* http://msdn.microsoft.com/en-us/library/ms188332.aspx *)
 execute_stmnt:
     (KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( (full_ident (SEMI DEC_NUMBER)? ) | LOCALVAR )
-    (* (
+     (* (
         (LOCALVAR OP_EQ)? 
-        (       ( (GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
-        |   KW_DEFAULT?
-        |       sql_value   )
+        (((GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
+         |   KW_DEFAULT?
+         |   sql_value)
     )* *)
     (KW_WITH KW_RECOMPILE)?
     SEMI?
@@ -137,7 +136,7 @@ sql_datatype:
 |   KW_NVARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
 ;
 execute_as:
-    (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | ( username = STRING_CONST ) ) 
+    (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | username = STRING_CONST ) 
 ;
 binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
@@ -157,8 +156,7 @@ sql_expr:
 |   KW_SELECT sql_expr KW_FROM IDENT
 |   (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
 |   GLOBALVAR
-|   full_ident                        
-
+|   full_ident
 ;
 
 list<<item sep>> : item (sep item)*;
@@ -174,4 +172,4 @@ ident:
 |   IDENT
 ;
 
-full_ident: ident (DOT ident)*;
+full_ident: list<<ident DOT>>;

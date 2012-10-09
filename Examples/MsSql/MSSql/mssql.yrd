@@ -1,7 +1,7 @@
-+root_rule:
++ root_rule:
     create_proc 
-|   GO          
-|   start2      
+ |  GO      
+ |  start2
 ;
 
 start2: 
@@ -21,7 +21,7 @@ create_proc:
     (ident DOT)? ident (SEMI DEC_NUMBER)?
     comma_list<<proc_formal_param>>?
     (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
-    KW_AS ( KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END? )
+    KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
 ;
 

@@ -20,52 +20,6 @@
 //namespace GNESCMSSqlTest
 
 open Microsoft.FSharp.Text.Lexing
-open Yard.Generators.GNESCCGenerator
-open Tables
-open Microsoft.FSharp.Text.Lexing
 
 
-//path -- path to input file
-let run path =
-    //Create lexer
-    let content = System.IO.File.ReadAllText(path)
-    let reader = new System.IO.StringReader(content)    
-    let buf = LexBuffer<_>.FromTextReader reader
-    let l = Lexer_alt.Lexer(buf)
-    
-    //Create tables
-    let tables = tables
-    
-    //Run parser
-    // trees -- dirivation forest
-    // cache -- trace cache
-    // cc -- some additional debug info
-    let parseRes(*,cache,cc*) = 
-        let ti = new TableInterpreter(tables)
-        ti.Run l 
 
-//    let result = 
-//        match parseRes with
-//        //Parse success
-//        | PSuccess (forest) -> 
-//        //run forest interpretation (action code calculation)
-//            printf "\nForest %A\n" forest
-//            Seq.map 
-//             (fun tree -> ASTInterpretator.interp GNESCC.Actions.ruleToAction cache tree)
-//             forest
-//        //Error handling
-//        | PError (pos) -> 
-//            //Error handling
-//            //If you create lexeme with position in stream, you can not only provide error lexeme
-//            // but also navigate in error position
-//            let errLexeme = (l :> ILexer).Get(pos)
-//            "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.ToString()
-//            |> failwith
-            
-    printf "\nResult %A\n" parseRes
-    
-
-do 
-    run @"..\..\yards\test1.yrd.in"
-    |> ignore
-    System.Console.ReadLine() |> ignore

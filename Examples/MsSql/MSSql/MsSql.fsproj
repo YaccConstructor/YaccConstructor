@@ -43,14 +43,30 @@
     </FsLex>
     <None Include="mssql.yrd" />
     <Compile Include="LexerHelper.fs" />
+    <Compile Include="MSParser.fs" />
     <Compile Include="Lexer.fs" />
     <None Include="mssql.yrd" />
     <Compile Include="Driver.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>..\..\..\YaccConstructor\Main\bin\Release\Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Convertions">
+      <HintPath>..\..\..\YaccConstructor\Main\bin\Release\Convertions.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="RNGLR">
+      <HintPath>..\..\..\YaccConstructor\Main\bin\Release\RNGLR.dll</HintPath>
+    </Reference>
+    <Reference Include="RNGLRCommon">
+      <HintPath>..\..\..\YaccConstructor\Main\bin\Release\RNGLRCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="RNGLRParser">
+      <HintPath>..\..\..\YaccConstructor\RNGLRParser\bin\Release\RNGLRParser.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

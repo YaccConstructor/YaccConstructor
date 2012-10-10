@@ -24,6 +24,7 @@ module Lexer_alt
 open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
+open Yard.Examples.MSParser
 open LexerHelper
 
 exception IdentToken
@@ -75,7 +76,7 @@ let getKwToken (name: string) =
     | "RETURN"    -> KW_RETURN("")
     | _           -> raise IdentToken
   with
-    | IdentToken -> IDENT
+    | IdentToken -> IDENT ("IdentToken")
 
 (*    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
     let ucis = FSharpType.GetUnionCases(typeof<token>) 
@@ -151,7 +152,7 @@ rule tokens = parse
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
             let hasdot = l.IndexOf '.' <> -1
             match makeIdent false l with
-            | x -> x,l
+            | x -> x
          }
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }

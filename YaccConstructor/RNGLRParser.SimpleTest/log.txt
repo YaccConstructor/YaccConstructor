@@ -18,6 +18,14 @@ rules:
    5: yard_many_2 = 
 
 rules:
+   0: s = yard_many_1 
+   1: yard_start_rule = s 
+   2: yard_opt_1 = A 
+   3: yard_opt_1 = 
+   4: yard_many_1 = yard_opt_1 yard_many_1 
+   5: yard_many_1 = 
+
+rules:
    0: s = e1 e1 
    1: yard_start_rule = s 
    2: e1 = e2 e2 

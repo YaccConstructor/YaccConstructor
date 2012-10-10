@@ -93,62 +93,62 @@ type RNGLR() =
                 eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
                 grammar.EpsilonCyclicNonTerms
                 |> List.iter (eprintf "%s ")
-                box ()
-            else
-                let statesInterpreter = buildStates table grammar
-                let tables = new Tables(grammar, statesInterpreter)
-                use out = new System.IO.StreamWriter (output)
-                let res = new System.Text.StringBuilder()
-                let dummyPos = char 0
-                let println (x : 'a) =
-                    Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
-                let print (x : 'a) =
-                    Printf.kprintf (fun s -> res.Append(s) |> ignore) x
-                println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
-                println "module %s"
-                <|  match moduleName with
-                    | "" -> "RNGLR.Parse"
-                    | s -> s
-                if not light then
-                    println "#light \"off\""
-                println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+                eprintfn ""
+                grammar.epsilonTrees |> Array.iter (fun t -> t.EliminateCycles())
+            let statesInterpreter = buildStates table grammar
+            let tables = new Tables(grammar, statesInterpreter)
+            use out = new System.IO.StreamWriter (output)
+            let res = new System.Text.StringBuilder()
+            let dummyPos = char 0
+            let println (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
+            let print (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+            println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+            println "module %s"
+            <|  match moduleName with
+                | "" -> "RNGLR.Parse"
+                | s -> s
+            if not light then
+                println "#light \"off\""
+            println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                println "open Yard.Generators.RNGLR.Parser"
-                println "open Yard.Generators.RNGLR"
-                println "open Yard.Generators.RNGLR.AST"
+            println "open Yard.Generators.RNGLR.Parser"
+            println "open Yard.Generators.RNGLR"
+            println "open Yard.Generators.RNGLR.AST"
 
-                match definition.head with
-                | None -> ()
+            match definition.head with
+            | None -> ()
+            | Some (s : Source.t) ->
+                println "%s" <| getPosFromSource fullPath dummyPos s
+                println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
+
+            let tables = printTables grammar definition.head tables moduleName tokenType res
+            let res = if not needTranslate then tables
+                        else tables + printTranslator grammar newDefinition.grammar
+                                        positionType fullPath output dummyPos
+            let res = 
+                match definition.foot with
+                | None -> res
                 | Some (s : Source.t) ->
-                    println "%s" <| getPosFromSource fullPath dummyPos s
-                    println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
-
-                let tables = printTables grammar definition.head tables moduleName tokenType res
-                let res = if not needTranslate then tables
-                          else tables + printTranslator grammar newDefinition.grammar
-                                            positionType fullPath output dummyPos
-                let res = 
-                    match definition.foot with
-                    | None -> res
-                    | Some (s : Source.t) ->
-                        res + (getPosFromSource fullPath dummyPos s + "\n"
-                                 + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
-                let res =
-                    let init = res.Replace("\r\n", "\n")
-                    let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
-                    let res = new System.Text.StringBuilder(init.Length * 2)
-                    for c in init do
-                        match c with
-                        | '\n' -> incr curLine; res.Append System.Environment.NewLine
-                        | c when c = dummyPos -> res.Append (string !curLine)
-                        | x -> res.Append x
-                        |> ignore
-                    res.ToString()
-                out.WriteLine res
-                out.Close()
-                eprintfn "Generation time: %A" <| System.DateTime.Now - start
-                //(new YardPrinter()).Generate newDefinition
-                box ()
+                    res + (getPosFromSource fullPath dummyPos s + "\n"
+                                + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
+            let res =
+                let init = res.Replace("\r\n", "\n")
+                let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
+                let res = new System.Text.StringBuilder(init.Length * 2)
+                for c in init do
+                    match c with
+                    | '\n' -> incr curLine; res.Append System.Environment.NewLine
+                    | c when c = dummyPos -> res.Append (string !curLine)
+                    | x -> res.Append x
+                    |> ignore
+                res.ToString()
+            out.WriteLine res
+            out.Close()
+            eprintfn "Generation time: %A" <| System.DateTime.Now - start
+            //(new YardPrinter()).Generate newDefinition
+            box ()
         override this.Generate definition = this.Generate (definition, "")
         override this.AcceptableProductionTypes =
             List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)

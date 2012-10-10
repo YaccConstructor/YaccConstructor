@@ -1,6 +1,6 @@
-﻿// Driver.fs contains main functions for test user application.
+﻿// Driver.fs
 //
-//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -17,9 +17,35 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//namespace GNESCMSSqlTest
 
 open Microsoft.FSharp.Text.Lexing
+open Yard.Generators.RNGLR.AST
+open Yard.Examples//.MSParser
 
+let parse (path:string) =
+            
+    use reader = new System.IO.StreamReader(path)
+    let lexbuf = LexBuffer<_>.FromTextReader reader
+    let allTokens = seq{while not lexbuf.IsPastEndOfStream do yield Lexer.tokens lexbuf}
 
+    let translateArgs = {
+        tokenToRange = fun x -> 0,0
+        zeroPosition = 0
+        clearAST = false
+        filterEpsilons = true
+    }
 
+    let parseBatch srcFilePath batchTokens =        
+        match MSParser.buildAst batchTokens with
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg) ->
+            printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
+            //new Script([])            
+        | Yard.Generators.RNGLR.Parser.Success ast ->
+            ast.collectWarnings (fun x -> 0,0)
+            |> ResizeArray.iter (fun (pos, prods) -> ())
+            MSParser.defaultAstToDot ast "ast.dot"
+            //ast.ChooseLongestMatch()
+            //let translated = translate translateArgs ast : list<Script>            
+            //printfn "%A" translated
+            //translated.Head
+    parseBatch path allTokens

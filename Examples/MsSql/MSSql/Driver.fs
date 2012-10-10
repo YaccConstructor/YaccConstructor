@@ -43,9 +43,11 @@ let parse (path:string) =
         | Yard.Generators.RNGLR.Parser.Success ast ->
             ast.collectWarnings (fun x -> 0,0)
             |> ResizeArray.iter (fun (pos, prods) -> ())
-            MSParser.defaultAstToDot ast "ast.dot"
+            MSParser.defaultAstToDot ast @"..\..\ast.dot"
             //ast.ChooseLongestMatch()
             //let translated = translate translateArgs ast : list<Script>            
             //printfn "%A" translated
             //translated.Head
     parseBatch path allTokens
+
+do parse @"..\..\test.sql"

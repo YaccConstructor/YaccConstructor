@@ -44,6 +44,7 @@ type RNGLR() =
             let mutable fullPath = false
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
             let mutable needTranslate = true
+            let mutable light = true
             let mutable output = definition.info.fileName + ".fs"
             for opt, value in pairs do
                 match opt with
@@ -64,10 +65,30 @@ type RNGLR() =
                     if value = "true" then needTranslate <- true
                     elif value = "false" then needTranslate <- false
                     else failwith "Unexpected translate value %s" value
+                | "-light" ->
+                    if value = "on" then light <- true
+                    elif value = "off" then light <- false
+                    else failwith "Unexpected light value %s" value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar);
+
+            let printRules () =
+                let printSymbol (symbol : int) =
+                    if symbol < grammar.indexator.nonTermCount then
+                        grammar.indexator.indexToNonTerm symbol
+                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
+                        grammar.indexator.indexToTerm symbol
+                    else grammar.indexator.indexToLiteral symbol
+                printfn "\nrules:"
+                for i = 0 to grammar.rules.rulesCount-1 do
+                    printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
+                    for j = 0 to grammar.rules.length i - 1 do
+                        printf "%s " <| printSymbol (grammar.rules.symbol i j)
+                    printfn ""
+            printRules ()
+
             if grammar.EpsilonCyclicNonTerms.Length > 0 then
                 eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
                 grammar.EpsilonCyclicNonTerms
@@ -88,6 +109,8 @@ type RNGLR() =
                 <|  match moduleName with
                     | "" -> "RNGLR.Parse"
                     | s -> s
+                if not light then
+                    println "#light \"off\""
                 println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
                 println "open Yard.Generators.RNGLR.Parser"
@@ -112,7 +135,7 @@ type RNGLR() =
                                  + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
                 let res =
                     let init = res.Replace("\r\n", "\n")
-                    let curLine = ref 1
+                    let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
                     let res = new System.Text.StringBuilder(init.Length * 2)
                     for c in init do
                         match c with

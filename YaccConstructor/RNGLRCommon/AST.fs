@@ -150,6 +150,8 @@ let inline getSingleNode (node : obj) =
 let inline private getPos (x : obj) = match x with :? AST as n -> n.pos | _ -> failwith "Attempt to get num of single node"
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
 
+let private emptyArr = [||]
+
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
     let rootFamily, isEpsilon =
@@ -190,33 +192,53 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     member this.Order = order
     member this.Root = root
 
-    (*member this.EliminateCycles() =
-        if not isEpsilon then
-            let proper = Array.create nodes.Length true
-            for x in order do
-                match nodes.[x] with
-                | NonTerm children ->
-                    let arr =
-                        children.other |> Array.filter (fun family ->
-                            family.nodes
-                            |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]))
-                    if children.first.nodes |> Array.forall (fun j -> j < 0 || pos.[j] < pos.[x] && reachable.[j]) then
-                        if arr.Length = 0 then
-                            children.other <- null
-                        else
-                            children.other <- arr
-                    else
-                        if arr.Length = 0 then
-                            children.other <- null
-                            reachable.[x] <- false
-                        else nodes.[x] <- NonTerm arr
-                | _ -> ()*)
-                
     static member inline private smaller pos : (obj -> _) = function
         | :? int -> true
         | :? AST as n -> n.pos < pos && n.pos <> -1
         | _ -> failwith ""
 
+    member private this.FilterChildren childrenHandler = 
+        if not isEpsilon then
+            for children in order do
+                if children.pos <> -1 then
+                    childrenHandler children
+            for x in order do
+                x.pos <- -1
+            rootFamily.pos <- -2
+            for i = order.Length-1 downto 0 do
+                let x = order.[i]
+                if x.pos <> -1 then
+                    x.pos <- i
+                    x.first.nodes.doForAll <| function
+                        | :? AST as ch -> ch.pos <- -2
+                        | _ -> ()
+
+    member this.EliminateCycles() =
+        let handleChildren (children : AST) =
+            let inline isCorrectFamily (family : Family) =
+                family.nodes.isForAll (Tree<_>.smaller children.pos)
+            let arr =
+                if children.other <> null then
+                    children.other |> Array.filter isCorrectFamily
+                else emptyArr
+            if isCorrectFamily children.first then
+                if arr.Length = 0 then
+                    children.other <- null
+                else
+                    children.other <- arr
+            elif arr.Length = 0 then
+                children.other <- null
+                children.pos <- -1
+            elif arr.Length = 1 then
+                children.other <- null
+                children.first <- arr.[0]
+            else
+                children.first <- arr.[0]
+                children.other <- arr.[1..arr.Length-1]
+                    
+        this.FilterChildren handleChildren
+                
+    /// Choose first correct subtree without cycles.
     member this.ChooseSingleAst () =
         let handleChildren (children : AST) =
             if children.first.nodes.isForAll (Tree<_>.smaller children.pos) then
@@ -231,10 +253,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     with
                 | Some v ->
                     children.first <- v
-                    children.other <- null
                 | None ->
                     children.pos <- -1
-        this.ChooseSingleAst handleChildren
+                children.other <- null
+        this.FilterChildren handleChildren
 
     /// Select children, where the first subnode ends first.
     /// In case of ambiguity look at second one.
@@ -312,24 +334,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         children.pos <- -1
                 children.other <- null
 
-            this.ChooseSingleAst handleChildren
-
-    /// Choose first correct subtree without cycles.
-    member private this.ChooseSingleAst childrenHandler = 
-        if not isEpsilon then
-            for children in order do
-                if children.pos <> -1 then
-                    childrenHandler children
-            for x in order do
-                x.pos <- -1
-            rootFamily.pos <- -2
-            for i = order.Length-1 downto 0 do
-                let x = order.[i]
-                if x.pos <> -1 then
-                    x.pos <- i
-                    x.first.nodes.doForAll <| function
-                        | :? AST as ch -> ch.pos <- -2
-                        | _ -> ()
+            this.FilterChildren handleChildren
 
     member this.TraverseWithRanges tokenToRange dispose f =
         let ranges = new BlockResizeArray<'Position * 'Position>()

@@ -20,7 +20,7 @@
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
-open Yard.Examples//.MSParser
+open Yard.Examples.MSParser
 
 let parse (path:string) =
             
@@ -36,14 +36,14 @@ let parse (path:string) =
     }
 
     let parseBatch srcFilePath batchTokens =        
-        match MSParser.buildAst batchTokens with
+        match buildAst batchTokens with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg) ->
             printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
             //new Script([])            
         | Yard.Generators.RNGLR.Parser.Success ast ->
             ast.collectWarnings (fun x -> 0,0)
             |> ResizeArray.iter (fun (pos, prods) -> ())
-            MSParser.defaultAstToDot ast @"..\..\ast.dot"
+            defaultAstToDot ast @"..\..\ast.dot"
             //ast.ChooseLongestMatch()
             //let translated = translate translateArgs ast : list<Script>            
             //printfn "%A" translated

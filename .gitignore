@@ -30,3 +30,4 @@ Builder/SolutionTemplate/*/*.fsi
 Examples/RNGLR/MSSql/ast.dot
 Examples/RNGLR/MSSql/ast.dot.pdf
 Examples/RNGLR/MSSql/log.txt
+Examples/yc/*

@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Brahma">
-      <HintPath>..\..\3rd Party\Brahma\lib\Brahma.dll</HintPath>
+      <HintPath>..\..\3rdParty\Brahma\lib\Brahma.dll</HintPath>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\..\3rd Party\Brahma\lib\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\..\3rdParty\Brahma\lib\Brahma.OpenCL.dll</HintPath>
     </Reference>
     <Reference Include="OpenCL.Net">
-      <HintPath>..\..\3rd Party\Brahma\lib\OpenCL.Net.dll</HintPath>
+      <HintPath>..\..\3rdParty\Brahma\lib\OpenCL.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

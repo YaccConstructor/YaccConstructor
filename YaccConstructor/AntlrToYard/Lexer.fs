@@ -406,6 +406,4 @@ and _fslex_literal2  _fslex_state lexbuf =
           )
   | _ -> failwith "literal2"
 
-# 0 ""
-
 # 3000000 "Lexer.fs"

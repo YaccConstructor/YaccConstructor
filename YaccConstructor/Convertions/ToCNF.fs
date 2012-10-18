@@ -301,9 +301,9 @@ let toCNF (ruleList: Rule.t<_, _> list) =
         ( rules |> List.collect (fun rule -> newRule rule) ) @ !list2
 
     ruleList
+    |> cnf
     |> deleteEpsRule
     |> deleteChainRule
-    |> cnf
     |> renameTerm
 
 type ToCNF() = 

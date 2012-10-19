@@ -1,10 +1,8 @@
-﻿//  Module ReplaceInline replace nonterminals, from which only
-//    Pref, PToken or PLiteral can be infered, whit their right sides.
+﻿//  Module ToCNF transform grammar into CNF.
 //
-//  Copyright 2011, 2012 Avdyukhin Dmitry
+//  Copyright 2011, 2012 Ilnur
 //
 //  This file is part of YaccConctructor.
-//  This is war
 //
 //  YaccConstructor is free software:you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by

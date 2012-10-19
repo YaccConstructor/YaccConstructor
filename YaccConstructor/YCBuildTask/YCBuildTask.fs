@@ -34,14 +34,15 @@ type YC() =
     let mutable toolPath : string = null
 
     override this.ToolName = "YaccConstructor.exe"
-    override this.Execute() = 
+    (*override this.Execute() = 
+        this.Log.LogMessage("aaa!!!!!!!!", [||])
         printfn "!!!!!!!!!!!!!!!!!!!!!!!!!"
-        true
+        true*)
 
     [<Required>]
     member this.InputFile
         with get ()  = inputFile
-        and  set (x) = inputFile <- x
+        and  set x = inputFile <- x
     
     (*[<Output>]
     member this.OutputFile
@@ -51,25 +52,25 @@ type YC() =
     
     member this.Frontend
         with get ()  = fe
-        and  set (x) = fe <- x
+        and  set x = fe <- x
     
     
     member this.Generator
         with get ()  = be
-        and  set (x) = be <- x
+        and  set x = be <- x
 
     member this.Conversions
         with get ()  = conversions
-        and  set (x) = conversions <- x
+        and  set x = conversions <- x
 
     member this.OtherFlags
         with get() = otherFlags
-        and set(s) = otherFlags <- s
+        and set s = otherFlags <- s
 
     // For targeting other versions of fslex.exe, such as "\LKG\" or "\Prototype\"
     member this.ToolPath
         with get ()  = toolPath
-        and  set (s) = toolPath <- s
+        and  set s = toolPath <- s
         
     override this.ToolExe = "YaccConstructor.exe"
 
@@ -85,7 +86,7 @@ type YC() =
         let builder = new CommandLineBuilder()
                 
         builder.AppendSwitchIfNotNull("-f ", fe)
-        builder.AppendSwitchIfNotNull("-b ", be)
+        builder.AppendSwitchIfNotNull("-g ", "\"" + be + "\"")
         let conversionsList = if conversions <> null then conversions.Replace(";"," -c ") else null
         builder.AppendSwitchIfNotNull(" ", conversionsList)
 
@@ -96,7 +97,7 @@ type YC() =
         
         let args = builder.ToString()
 
-        printfn "AAAAA!!! %s" args
+        this.Log.LogMessage("AAAAA!!! " + args, [||])
 
         // when doing simple unit tests using API, no BuildEnginer/Logger is attached
         if this.BuildEngine <> null then

@@ -46,8 +46,7 @@ module Source = begin
             t (text, lexbuf.StartPos, lexbuf.EndPos)
         new (text) =
             t (text, new Position(), new Position(), "")
-        override this.ToString() =
-            this.text + " #!=<>%$^* " + string this.startPos.absoluteOffset + " " + string this.endPos.absoluteOffset + " " + this.file
+        override this.ToString() = this.text
     // TODO: make something with toString overriding of Source.t   
     let toString (x : t) = x.text
 end
@@ -122,13 +121,16 @@ module Production = begin
                     | None -> ""
                     | Some x -> "{" + x.ToString() + "}"
                 let elemToString (x:elem<_,_>) =
-                    if x.checker.IsSome then failwith "unrealized checker ToString()"
+                    let check =
+                        match x.checker with
+                        | None -> ""
+                        | Some c -> "=>{" + c.ToString() + "}=>"
                     let omit = if (x.omit) then "-" else ""
                     let bind =
                         match x.binding with
                         | None -> ""
                         | Some var -> var.ToString() + "="
-                    omit + bind + x.rule.ToString()
+                    check + omit + bind + x.rule.ToString()
                 "<" + String.concat " " (List.map (fun x -> (*printfn "%A" x;*) "(" + (elemToString x) + ")") ruleSeq) + ">" + strAttrs
             |PToken src -> Source.toString src
             |PRef (name, args) ->

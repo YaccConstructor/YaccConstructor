@@ -82,7 +82,7 @@ module SolutionData =
                     for i in s .. e do
                         Array.set positionToNotTerm i name
                     exprList |> List.iter addNotTermToPosition
-                |  PSeq (exprList,_) -> exprList |> List.iter (fun r -> addNotTermToPosition r.rule)
+                |  PSeq (exprList,_,l) -> exprList |> List.iter (fun r -> addNotTermToPosition r.rule)
                 |  PPerm exprList    -> exprList |> List.iter (fun r -> addNotTermToPosition r)
                 |  PRepet (expr,_,_)
                 |  PMany expr

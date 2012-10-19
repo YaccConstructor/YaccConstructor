@@ -25,8 +25,7 @@ open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) =
-    let res = new System.Text.StringBuilder()
+let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) (res : System.Text.StringBuilder) =
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =
@@ -150,17 +149,17 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
         printBrInd 2 "let x = small_%s.[cur + k] &&& %d" name andNum
         printBrInd 2 "%s.[i].[j] <- lists_%s.[x]" name name
         printBrInd 1 "cur <- cur + length"
-
-    printBr "type Token%s ="
-    <|  match tokenType with
+    let genArg = 
+        match tokenType with
         | "" -> "<'a>"
         | _ -> ""
+    printBr "type Token ="
     let indexator = grammar.indexator
     for i = indexator.termsStart to indexator.termsEnd do
-        printBrInd 1 "| %s of %s" (indexator.indexToTerm i)
+        printBrInd 1 "| %s%s" (indexator.indexToTerm i)
         <|  match tokenType with
-            | "" -> "'a"
-            | s -> s
+            | "" -> ""
+            | s -> " of " + s
 
     printBr ""
     printBr "let numToString = function"

@@ -1,3 +1,5 @@
+
+# 2 "ComplexRightNull.yrd.fs"
 module RNGLR.ParseComplexRightNull
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -80,7 +82,7 @@ while cur < small_zeroReduces.Length do
         let x = small_zeroReduces.[cur + k] &&& 65535
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
-let private small_acc = [1]
+let private small_acc = [1; 0]
 let private accStates = Array.zeroCreate 12
 for i = 0 to 11 do
         accStates.[i] <- List.exists ((=) i) small_acc

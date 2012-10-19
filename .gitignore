@@ -20,3 +20,14 @@ Tests/CYK/basic_term_noLBL.yrd.CYK.fs
 Examples/CYK/yc/*
 *.psess
 *.vsp
+Builder/SolutionTemplate/*.fsl
+Builder/SolutionTemplate/*/*.fs
+Builder/SolutionTemplate/*/*.fsl
+Builder/SolutionTemplate/*/*.fsy
+Builder/SolutionTemplate/*/*.cs
+Builder/SolutionTemplate/*/*.yrd
+Builder/SolutionTemplate/*/*.fsi
+Examples/RNGLR/MSSql/ast.dot
+Examples/RNGLR/MSSql/ast.dot.pdf
+Examples/RNGLR/MSSql/log.txt
+Examples/yc/*

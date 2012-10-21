@@ -5,6 +5,4 @@ RNGLR*\(Debug\Release)
 CYK\bin\(Debug\Release).
 
 
-
-
 You can use copy_binaries.cmd for it.

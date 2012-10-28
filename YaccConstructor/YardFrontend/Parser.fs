@@ -367,7 +367,7 @@ let _fsyacc_immediateActions = [|65535us; 49152us; 65535us; 65535us; 65535us; 16
 let _fsyacc_reductions ()  =    [| 
 # 368 "Parser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
-            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : (IL.Source.t, IL.Source.t)IL.Definition.t)) in
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : IL.Definition.t<IL.Source.t, IL.Source.t>)) in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -394,7 +394,7 @@ let _fsyacc_reductions ()  =    [|
                            
                    )
 # 100 "Parser.fsy"
-                 : (IL.Source.t, IL.Source.t)IL.Definition.t));
+                 : IL.Definition.t<IL.Source.t, IL.Source.t>));
 # 398 "Parser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
             let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : IL.Source.t)) in
@@ -1067,5 +1067,5 @@ let tables () : Microsoft.FSharp.Text.Parsing.Tables<_> =
     numTerminals = 30;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = (tables ()).Interpret(lexer, lexbuf, startState)
-let file lexer lexbuf : (IL.Source.t, IL.Source.t)IL.Definition.t =
+let file lexer lexbuf : IL.Definition.t<IL.Source.t, IL.Source.t> =
     Microsoft.FSharp.Core.Operators.unbox ((tables ()).Interpret(lexer, lexbuf, 0))

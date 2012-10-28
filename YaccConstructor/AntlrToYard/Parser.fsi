@@ -91,4 +91,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val ParseAntlr : (Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> ((Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary) 
+val ParseAntlr : (Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> Microsoft.FSharp.Text.Lexing.LexBuffer<'cty> -> (Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>) 

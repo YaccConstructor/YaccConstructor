@@ -89,7 +89,7 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 
 
 %start file
-%type <(IL.Source.t, IL.Source.t)IL.Definition.t> file
+%type <IL.Definition.t<IL.Source.t, IL.Source.t>> file
 
 %%
 

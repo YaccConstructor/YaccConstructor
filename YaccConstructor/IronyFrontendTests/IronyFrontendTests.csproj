@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Irony">
-      <HintPath>..\..\3rd Party\lib\Irony.dll</HintPath>
+      <HintPath>..\..\3rdParty\lib\Irony.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

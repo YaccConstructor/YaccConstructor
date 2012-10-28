@@ -1,3 +1,5 @@
+
+# 2 "Counter.yrd.fs"
 module RNGLR.ParseCounter
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -109,7 +111,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Counter.yrd"
                : '_rnglr_type_s) 
-# 112 "Counter.yrd.fs"
+# 114 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -131,7 +133,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Counter.yrd"
                : '_rnglr_type_s) 
-# 134 "Counter.yrd.fs"
+# 136 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -141,7 +143,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Counter.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 144 "Counter.yrd.fs"
+# 146 "Counter.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

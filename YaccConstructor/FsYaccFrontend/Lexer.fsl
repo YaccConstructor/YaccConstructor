@@ -20,32 +20,33 @@ module Yard.Frontends.FsYaccFrontend.Lexer
 
 open Yard.Frontends.FsYaccFrontend.Parser // using tokens type 
 open Microsoft.FSharp.Text.Lexing
+open Yard.Core.IL
 
 let comment_depth = ref 0
 let source = ref ""
-let lexeme_start = ref 0
+let lexeme_start = ref Position.Empty
 
-let make_lexeme (n1, n2) = source.Value.Substring(n1, n2-n1) //, (n1, n2)
+let offset (pos : Lexing.Position) = pos.AbsoluteOffset
 
-// checks if the given identifier is keyword
-let identifier (lexeme:string) = IDENT(lexeme)
-//  match lexeme with
-//  | s when System.Char.IsUpper s.[0]-> UIDENT(s)
-//  | s when System.Char.IsLower s.[0]-> LIDENT(s)
+let currentFile = ref ""
+
+let make_lexeme n1 n2 =
+    source.Value.Substring(offset n1, offset n2 - offset n1)
+    |> fun s -> new Source.t(s, new Source.Position(n1), new Source.Position(n2), !currentFile)
 }
 
 let eol = "\r\n" | '\n'
 let lowerchar = ['a'-'z']
 let upperchar = ['A'-'Z']
-let identchar =  ['A'-'Z' 'a'-'z' '_' '-' '0'-'9']
+let identchar = ['A'-'Z' 'a'-'z' '_' '-' '0'-'9']
 
 rule token = parse
-  | "{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; action_code lexbuf }
-  | "%{" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; head lexbuf }
-  | "/*" { lexeme_start := lexbuf.EndPos.AbsoluteOffset; comment_depth := 1; multiline_comment lexbuf }
-// ?  | '<' [^'>'] '>' { TYPE(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
-  | '<' { lexeme_start := lexbuf.EndPos.AbsoluteOffset; typedef lexbuf }
-  | identchar* { identifier(make_lexeme(lexbuf.StartPos.AbsoluteOffset, lexbuf.EndPos.AbsoluteOffset)) }
+  | "{" { lexeme_start := lexbuf.EndPos; comment_depth := 1; action_code lexbuf }
+  | "%{" { lexeme_start := lexbuf.EndPos; head lexbuf }
+  | "/*" { lexeme_start := lexbuf.EndPos; comment_depth := 1; multiline_comment lexbuf }
+// ?  | '<' [^'>'] '>' { TYPE(make_lexeme lexbuf.StartPos lexbuf.EndPos.AbsoluteOffset) }
+  | '<' { lexeme_start := lexbuf.EndPos; typedef lexbuf }
+  | identchar* { IDENT(make_lexeme lexbuf.StartPos lexbuf.EndPos) }
   | '|' { BAR }
   | ':' { COLON }
   | "%%" { DOUBLE_PERC }
@@ -58,12 +59,12 @@ rule token = parse
   | eof { EOF }
   | _ { token lexbuf }
 and typedef = parse
-  | '>' { TYPE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | '>' { TYPE(make_lexeme !lexeme_start lexbuf.StartPos) }
   | eof { EOF }
   | _ { typedef lexbuf }
 and head = parse
   // TODO breaks if "%}" is in literal for example
-  | "%}" { HEAD(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) }
+  | "%}" { HEAD(make_lexeme !lexeme_start lexbuf.StartPos) }
   | eof { EOF }
   | _ { head lexbuf }
 and multiline_comment = parse
@@ -76,15 +77,17 @@ and action_code = parse
   // TODO: breaks if brace is commented in code - add f# comments
   | "{" { incr comment_depth; action_code lexbuf }
   | "}" { decr comment_depth;
-      if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) else action_code lexbuf }
+      if !comment_depth = 0 then
+        ACTION_CODE(make_lexeme !lexeme_start lexbuf.StartPos)
+      else action_code lexbuf }
   | '\'' { literal lexbuf; action_code lexbuf }
   | '"' { literal2 lexbuf; action_code lexbuf }
   | eof { EOF }
   | _ { action_code lexbuf }
 and literal = parse
-  | '\'' { } // LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset)) 
+  | '\'' { } // LITERAL(make_lexeme !lexeme_start lexbuf.StartPos)
   | "\\\\" | "\\'" | _ { literal lexbuf }
 and literal2 = parse
-  | '"' { } // LITERAL(make_lexeme(!lexeme_start, lexbuf.StartPos.AbsoluteOffset))
+  | '"' { } // LITERAL(make_lexeme !lexeme_start lexbuf.StartPos)
   | "\\\\" | "\\\"" | _ { literal2 lexbuf }
 

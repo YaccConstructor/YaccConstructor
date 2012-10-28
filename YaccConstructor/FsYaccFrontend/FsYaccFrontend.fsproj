@@ -42,7 +42,7 @@
     </FsLex>
     <CompileYard Include="fsyacc.yrd" />
     <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core --light-off</OtherFlags>
+      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core</OtherFlags>
     </FsYacc>
     <None Include="fsyacc.yrd" />
     <Compile Include="Main.fs" />

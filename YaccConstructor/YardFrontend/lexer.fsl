@@ -16,11 +16,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- module Yard.Frontends.YardFrontend.GrammarLexer
- open Microsoft.FSharp.Text.Lexing
- open Yard.Core.IL
- open Yard.Frontends.YardFrontend.GrammarParser
- open Microsoft.FSharp.Text
+module Yard.Frontends.YardFrontend.GrammarLexer
+open Microsoft.FSharp.Text.Lexing
+open Yard.Core.IL
+open Yard.Frontends.YardFrontend.GrammarParser
+open Microsoft.FSharp.Text
  
 (* Auxiliaries for the lexical analyzer *)
 
@@ -90,13 +90,13 @@ let warning (lexbuf:Lexing.LexBuffer<_>) msg =
 
 let to_srt ch_arr = (Array.map (fun x -> string x) ch_arr) |> String.concat ""
 
-let _lexeme lexbuf (n : Position, n' : Position) =
+let _lexeme lexbuf (n : Position) (n' : Position) =
   let len = n'.AbsoluteOffset - n.AbsoluteOffset in
   currentFileContent.Value.Substring(n.AbsoluteOffset, len)
 
-let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) (lStart,lEnd) =
-    new Source.t(_lexeme lexbuf (lStart,lEnd), new Source.Position(lStart), new Source.Position(lEnd), !currentFile)
-let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf (lexbuf.StartPos, lexbuf.EndPos)
+let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) lStart lEnd =
+    new Source.t(_lexeme lexbuf lStart lEnd, new Source.Position(lStart), new Source.Position(lEnd), !currentFile)
+let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf lexbuf.StartPos lexbuf.EndPos
 let newline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
 }
@@ -109,9 +109,8 @@ let identbody =
 let backslash_escapes =
   ['\\' '"' '\'' 'n' 't' 'b' 'r']
 
-let sharp = '#'
 let sharplineBody =  ['A'-'Z' 'a'-'z' ' ']*
-let sharpline = sharp ("if" | "elif" | "else" | "endif") sharplineBody
+let sharpline = '#' ("if" | "elif" | "else" | "endif") sharplineBody
 
 
 let blank =  [' ' '\r' '\009' '\012'] *
@@ -121,20 +120,19 @@ and skipSpaces  = parse blank {lexbuf}
 and  main = parse	
        blank  { main lexbuf }
      | '\n' { newline lexbuf; main lexbuf }
-     | '-'  {MINUS}
-     | ':'  { COLON }
-     | ';'  {SEMICOLON (Range (lexbuf.StartPos,lexbuf.EndPos))}
-     | ','  { COMMA }     
-     | '|'  { BAR }
-     | '='  {EQUAL}
-     | "<<" {DLESS}
-     | ">>" {DGREAT}
-     | '*'  {STAR}
-     | '+'  {PLUS}
-     | '?'  {QUESTION}
-     | "#set" 
-        { SET }
-     | sharpline {SHARPLINE (LexBuffer<_>.LexemeString lexbuf) }   
+     | '-'  {MINUS <| lex2source lexbuf}
+     | ':'  {COLON <| lex2source lexbuf}
+     | ';'  {SEMICOLON <| lex2source lexbuf}
+     | ','  {COMMA <| lex2source lexbuf}     
+     | '|'  {BAR <| lex2source lexbuf}
+     | '='  {EQUAL <| lex2source lexbuf}
+     | "<<" {DLESS <| lex2source lexbuf}
+     | ">>" {DGREAT <| lex2source lexbuf}
+     | '*'  {STAR <| lex2source lexbuf}
+     | '+'  {(if lexbuf.EndPos.Column = 1 then START_RULE_SIGN else PLUS) <| lex2source lexbuf}
+     | '?'  {QUESTION <| lex2source lexbuf}
+     | "#set" {SET <| lex2source lexbuf}
+     | sharpline {SHARPLINE <| lex2source lexbuf }   
      | "(*"
        { comment_depth := 1;
          handle_lexical_error comment lexbuf;
@@ -143,47 +141,47 @@ and  main = parse
      | "=>{"
        { let n1 = lexbuf.EndPos in
          let n2 = handle_lexical_error predicate lexbuf in
-         PREDICATE (from_lexbuf lexbuf (n1,n2))
+         PREDICATE (from_lexbuf lexbuf n1 n2)
        }
-     | '@' identstart identbody * {DLABEL(lex2source lexbuf)}
+     | '@' identstart identbody * {DLABEL <| lex2source lexbuf}
      | identstart identbody *
        {  let text = lex2source lexbuf in
           match text.text with
-          | "include" -> INCLUDE
+          | "include" -> INCLUDE text
           | _ -> 
                 match text.text.[0] with
                 | c when List.contains c ['a'..'z'] -> LIDENT text
                 | c when List.contains c ['A'..'Z'] -> UIDENT text
                 |_       -> failwith "Incorrect indentStart" 
        }
-     | eof {EOF}
+     | eof {EOF <| lex2source lexbuf}
      | '{'
        { let n1 = lexbuf.EndPos in
          brace_depth := 1;
          let n2 = handle_lexical_error action lexbuf in
-         ACTION (from_lexbuf lexbuf (n1,n2))
+         ACTION (from_lexbuf lexbuf n1 n2)
        }
     | '<'
        { let n1 = lexbuf.EndPos in
          ang_br_depth := 1;
          let n2 = handle_lexical_error pattern lexbuf in
-         PATTERN (from_lexbuf lexbuf (n1,n2))
+         PATTERN (from_lexbuf lexbuf n1 n2)
        }
     | '['
        { let n1 = lexbuf.EndPos in
          sq_br_depth := 1;
          let n2 = handle_lexical_error param lexbuf in
-         PARAM (from_lexbuf lexbuf (n1,n2))
+         PARAM (from_lexbuf lexbuf n1 n2)
        }
     | '"'
       { reset_string_buffer();
         let string_start = lexbuf.StartPos in
         string lexbuf;
         lexbuf.StartPos <- string_start;
-        STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1, lexbuf.EndPos.ShiftColumnBy -1))
+        STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1) (lexbuf.EndPos.ShiftColumnBy -1))
       }
-    | "(" {LPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
-    | ")" {RPAREN (Range (lexbuf.StartPos,lexbuf.EndPos))}
+    | "(" {LPAREN <| lex2source lexbuf}
+    | ")" {RPAREN <| lex2source lexbuf}
     | _
        { raise(Lexical_error
                 ("illegal character " + (*String.escaped*)LexBuffer<_>.LexemeString(lexbuf),
@@ -192,7 +190,8 @@ and  main = parse
 (*  ------------------------ *)
 and predicate = parse
     "}=>"    { lexbuf.StartPos }
-  | '"' { reset_string_buffer();
+  | '"'
+    { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
       predicate lexbuf }
@@ -212,7 +211,8 @@ and action = parse
   | '}'
     { decr brace_depth;
       if !brace_depth = 0 then lexbuf.StartPos else action lexbuf }
-  | '"' { reset_string_buffer();
+  | '"'
+    { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
       action lexbuf }
@@ -233,7 +233,8 @@ and pattern = parse
   | '>'
     { decr ang_br_depth;
       if !ang_br_depth = 0 then lexbuf.StartPos else pattern lexbuf }
-  | '"' { reset_string_buffer();
+  | '"'
+    { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
       pattern lexbuf }
@@ -255,7 +256,8 @@ and param = parse
   | ']'
     { decr sq_br_depth;
       if !sq_br_depth = 0 then lexbuf.StartPos else param lexbuf }
-  | '"' { reset_string_buffer();
+  | '"'
+    { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
       param lexbuf }

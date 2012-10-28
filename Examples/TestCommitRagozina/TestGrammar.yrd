@@ -1,0 +1,9 @@
++start:
+    (root_rule)*       {}
+;
+
+root_rule:
+    create_proc {}
+|   GO          {}
+|   start2      {} 
+;

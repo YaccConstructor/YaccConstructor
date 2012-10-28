@@ -339,7 +339,7 @@ and _fslex_multiline_comment  _fslex_state lexbuf =
   | 1 -> ( 
 # 72 "Lexer.fsl"
                           decr comment_depth;
-                     if !comment_depth = 0 then token lexbuf else multiline_comment lexbuf 
+                          if !comment_depth = 0 then token lexbuf else multiline_comment lexbuf 
 # 343 "Lexer.fs"
           )
   | 2 -> ( 
@@ -364,9 +364,9 @@ and _fslex_action_code  _fslex_state lexbuf =
   | 1 -> ( 
 # 79 "Lexer.fsl"
                          decr comment_depth;
-                     if !comment_depth = 0 then
-                       ACTION_CODE(make_lexeme !lexeme_start lexbuf.StartPos)
-                     else action_code lexbuf 
+                       if !comment_depth = 0 then
+                           ACTION_CODE(make_lexeme !lexeme_start lexbuf.StartPos)
+                       else action_code lexbuf 
 # 370 "Lexer.fs"
           )
   | 2 -> ( 
@@ -419,5 +419,4 @@ and _fslex_literal2  _fslex_state lexbuf =
           )
   | _ -> failwith "literal2"
 
-# 91 "Lexer.fsl"
 # 3000000 "Lexer.fs"

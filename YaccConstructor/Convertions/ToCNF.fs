@@ -76,7 +76,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                         
     //--Функция для добавления нового правила------------------------------------------------------
 
-    let newRule (rule: Rule.t<_, _>) (epsRef: list<string>) =         
+    let newRule (rule: Rule.t<_, _>) (epsRef: list<_>) =         
         if not epsRef.IsEmpty then
             let numberEpsRef = genPermutation epsRef.Length
             let ac,lbl = match rule.body with PSeq(e, a, l) -> a,l | x -> None,None
@@ -96,7 +96,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                             }]
                         |x -> [elem]
                     )
-            let numberBody =                
+            let numberBody =
                 match rule.body with
                 |PSeq(elements, _, _) -> 
                     PSeq(newBody elements, ac, lbl)
@@ -113,7 +113,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                         (fun elem ->
                             match elem.rule with
                             |PRef(t,_) when epsWithNameExists t.text -> []
-                            |PRef(t,_) when not <| epsWithNameExists t.text -> 
+                            |PRef(t,_) when System.Int32.TryParse t.text |> fst && not <| epsWithNameExists t.text -> 
                                     [{
                                         omit = elem.omit
                                         rule = PRef(Source.t(epsRef.[int t.text - 1]), None)
@@ -149,6 +149,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 newRule rule (epsInRule elements) @ [rule]
             |x -> []
         )
+    |> List.filter (fun r -> not <| match r.body with PSeq([],_,_) -> true | _ -> false)
 
 //--Функция для удаления цепных правил-------------------------------------------------------------
                 
@@ -254,55 +255,61 @@ let renameTerm ruleList =
 
 //--Преобразование в КНФ---------------------------------------------------------------------------
 
-let toCNF (ruleList: Rule.t<_, _> list) = 
-
-    let cnf rules =    
-        let i = ref 0
-        let list2 = ref []
-        let rec newRule (rule: Rule.t<_, _>) =  
-            let elements = match rule.body with PSeq(e, a, l) -> e | x -> [] 
-            let addRule elem1 elem2 =
-                incr i
-                list2 :=
-                    [{
-                        name = Source.t("newCnfRule" + (!i).ToString())
-                        args = rule.args
-                        _public = false
-                        metaArgs = rule.metaArgs 
-                        body = PSeq([elem1; elem2], None, None)
-                    }] @ !list2
-                "newCnfRule" + (!i).ToString()
-            let cutRule = 
-                if elements.Length > 2 then
-                    ((elements |> List.rev).Tail.Tail |> List.rev) @ 
-                        [{
-                            omit = false
-                            rule = PRef(Source.t(addRule elements.[elements.Length - 2] elements.[elements.Length - 1]), None)
-                            binding = None
-                            checker = None
-                        }]
-                else []       
+let cnf rules =    
+    let i = ref 0
+    let list2 = ref []
+    let rec newRule (rule: Rule.t<_, _>) =  
+        let elements = match rule.body with PSeq(e, a, l) -> e | x -> [] 
+        let addRule elem1 elem2 =
+            incr i
+            list2 :=
+                [{
+                    name = Source.t("newCnfRule" + (!i).ToString())
+                    args = rule.args
+                    _public = false
+                    metaArgs = rule.metaArgs 
+                    body = PSeq([elem1; elem2], None, None)
+                }] @ !list2
+            "newCnfRule" + (!i).ToString()
+        let cutRule = 
             if elements.Length > 2 then
-                newRule 
-                    {
-                        name = rule.name
-                        args = rule.args
-                        _public = rule._public
-                        metaArgs = rule.metaArgs
-                        body = PSeq(cutRule, 
-                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
-                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
-                    }
-            else 
-                [rule]
+                ((elements |> List.rev).Tail.Tail |> List.rev) @ 
+                    [{
+                        omit = false
+                        rule = PRef(Source.t(addRule elements.[elements.Length - 2] elements.[elements.Length - 1]), None)
+                        binding = None
+                        checker = None
+                    }]
+            else []       
+        if elements.Length > 2 then
+            newRule 
+                {
+                    name = rule.name
+                    args = rule.args
+                    _public = rule._public
+                    metaArgs = rule.metaArgs
+                    body = PSeq(cutRule, 
+                            (match rule.body with PSeq(e, a, l) -> a | x -> None),
+                            (match rule.body with PSeq(e, a, l) -> l | x -> None))
+                }
+        else 
+            [rule]
 
-        ( rules |> List.collect (fun rule -> newRule rule) ) @ !list2
+    ( rules |> List.collect (fun rule -> newRule rule) ) @ !list2
 
+
+let toCNF (ruleList: Rule.t<_, _> list) = 
     ruleList
     |> cnf
     |> deleteEpsRule
     |> deleteChainRule
     |> renameTerm
+
+type CNF() = 
+    inherit Convertion()
+        override this.Name = "CNF"
+        override this.ConvertList (ruleList,_) = cnf ruleList
+        override this.EliminatedProductionTypes = [""]
 
 type ToCNF() = 
     inherit Convertion()

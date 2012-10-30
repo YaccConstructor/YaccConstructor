@@ -23,6 +23,7 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Debug\SQLSelectDemo.XML</DocumentationFile>
+    <StartArguments>-i "../../test input_2.sql"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -32,12 +33,19 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Release\SQLSelectDemo.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\SQLSelectDemo.XML</DocumentationFile>   
+  </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="..\..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <None Include="SelectDemo.fsl" />
+    <FsLex Include="SelectDemo.fsl">
+      <OtherFlags>--unicode</OtherFlags>
+    </FsLex>
     <Compile Include="SelectDemo.yrd.CYK.fs" />
     <Compile Include="SelectDemo.fs" />
     <Compile Include="Program.fs" />
@@ -53,7 +61,7 @@
     <Reference Include="CYKCommon">
       <HintPath>..\..\..\yc\CYKCommon.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

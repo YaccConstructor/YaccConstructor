@@ -90,6 +90,7 @@ type CYKGeneartorImpl () =
         ("let getLblName lbl = " |> wordL)
         @@-- (("match lbl with" |> wordL)
             @@ ([for lblInfo in lblDict -> ["|"; string lblInfo.Value + "uy"; "->"; "\"" + lblInfo.Key + "\""]|> List.map wordL |> spaceListL] |> aboveListL))
+            @@ ("| _ -> \"\"" |> wordL)
 
     let code il grammarInfo =
         [ header

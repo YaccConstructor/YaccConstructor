@@ -46,6 +46,8 @@ type CYKCore() =
 
     let mutable recTable:_[,] = null
 
+    let mutable lblString = (fun args -> "")
+
     [<Literal>]
     let noLbl = 0uy
 
@@ -160,7 +162,7 @@ type CYKCore() =
         out 0 lastIndex
 
     let print lblValue leftI rightL leftL =
-        let out = "label value = " + string lblValue + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
+        let out = "label = " + lblString lblValue + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
@@ -201,14 +203,15 @@ type CYKCore() =
     let labelTracking lastInd = 
         let i,l = 0,lastInd
         ResizeArray.iteri (fun k x ->
-                    let out = "derivation #" + string k
+                    let out = "derivation #" + string (k + 1)
                     printfn "%s" out
                     trackLabel i l x false
         ) recTable.[i, l]
             
     
-    member this.Recognize ((grules, start) as g) s weightCalcFun = 
+    member this.Recognize ((grules, start) as g) s weightCalcFun getLblNameFunc = 
         rules <- grules
+        lblString <- getLblNameFunc
         let out = recognize g s weightCalcFun
         match out with
         | "" -> "Строка не выводима в заданной грамматике."

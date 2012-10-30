@@ -61,6 +61,11 @@ let rules =
   6192505322209280UL; 5629503829180416UL; 4503659756912640UL; 3659239121747968UL;
   2533343509872640UL; 1688922874707968UL; 844502239543296UL ]
   |> Array.ofList
+let getLblName lbl = 
+  match lbl with
+  | 1uy -> "@bad"
+  | 2uy -> "@good"
+  | _ -> ""
 let StartNTerm = 1
 let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = 
   stream

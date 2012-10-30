@@ -1,1 +1,12 @@
-SELECT a AS b FROM tableName
+CREATE PROCEDURE P AS
+	BEGIN
+		SELECT a,b FROM tblName;
+	END
+GO
+
+CREATE PROC P AS
+	BEGIN
+		SELECT a,b FROM tblName;
+	END
+GO
+	

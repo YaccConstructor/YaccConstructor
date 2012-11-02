@@ -86,18 +86,18 @@ type CYKGeneartorImpl () =
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
         ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name.text]
     
-    let genlblDict (lblDict:Dictionary<string,int>)= 
-        ("let getLblName lbl = " |> wordL)
-        @@-- (("match lbl with" |> wordL)
-            @@ ([for lblInfo in lblDict -> ["|"; string lblInfo.Value + "uy"; "->"; "\"" + lblInfo.Key + "\""]|> List.map wordL |> spaceListL] |> aboveListL))
-            @@ ("| _ -> \"\"" |> wordL)
+    let genlblArr (lblDict:Dictionary<string,int>)= 
+        ("let lblName = " |> wordL)
+        @@-- (("[|" |> wordL)
+            @@ ([for lblInfo in lblDict -> ["\"" + string lblInfo.Key + "\";"]|> List.map wordL |> spaceListL] |> aboveListL))
+            @@ ("|]" |> wordL)
 
     let code il grammarInfo =
         [ header
          ; tokenTypes grammarInfo.termDict
          ; getTokenTypeTag grammarInfo.termDict
          ; rulesArray grammarInfo.rules
-         ; genlblDict grammarInfo.lblDict
+         ; genlblArr grammarInfo.lblDict
          ; startNTerm il grammarInfo.nTermDict |> genStartNTermID
          ; tokenStreamEncoder]
         |> aboveListL

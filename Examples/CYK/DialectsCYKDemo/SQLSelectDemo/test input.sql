@@ -120,4 +120,4 @@ AS
 BEGIN
  SELECT a , b AS x FROM tableName;
 END
-GO
+GO 

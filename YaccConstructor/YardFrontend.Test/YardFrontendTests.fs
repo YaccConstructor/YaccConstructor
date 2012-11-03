@@ -32,6 +32,11 @@ module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
 let dummyPos s = new Source.t(s)
 
+let equalTokens x y =
+    let getCtor arg = fst <| Microsoft.FSharp.Reflection.FSharpValue.GetUnionFields(arg, typeof<Token>)
+    getCtor x = getCtor y
+
+
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFile := ""
@@ -51,13 +56,8 @@ let lexerTest str lexemsListCorrect =
     let areEqual lexemsListCorrect lexemsList =
         try 
             List.map2
-                (fun x y ->
-                    match x,y with
-                    | LPAREN _, LPAREN _
-                    | RPAREN _ ,RPAREN _
-                    | SEMICOLON _, SEMICOLON _ -> true
-                    | x,y -> x = y)
-                 lexemsListCorrect lexemsList
+                (fun x y -> equalTokens x y)
+                lexemsListCorrect lexemsList
             |> List.reduce (&&)
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
@@ -101,14 +101,14 @@ type ``YardFrontend lexer tests`` () =
     member test.``Lexer seq test`` () =
         lexerTest 
             "+s: NUMBER PLUS NUMBER;"
-            [PLUS (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); UIDENT (getSource "NUMBER" 4 10)
+            [START_RULE_SIGN (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); UIDENT (getSource "NUMBER" 4 10)
             ; UIDENT (getSource "PLUS" 11 15); UIDENT (getSource "NUMBER" 16 22); SEMICOLON (getSource ";" 22 23); EOF (getSource "" 23 23)]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
             "+s: (MINUS|PLUS)*;"
-            [PLUS (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); LPAREN (getSource "(" 4 5)
+            [START_RULE_SIGN (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); LPAREN (getSource "(" 4 5)
             ; UIDENT (getSource "MINUS" 5 10); BAR (getSource "|" 10 11); UIDENT (getSource "PLUS" 11 15);
             RPAREN (getSource ")" 15 16); STAR (getSource "*" 16 17); SEMICOLON (getSource ";" 17 18); EOF (getSource "" 18 18)]
 
@@ -415,8 +415,9 @@ type ``YardFrontend options tests`` () =
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        completeTest @"  {  let value x = (x:>Lexeme<string>).value  }  +s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
-            [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); PLUS (getSource ":" 2 9);
+        completeTest
+            "  {  let value x = (x:>Lexeme<string>).value  } \n+s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
                 LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); PATTERN (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
                 SEMICOLON (getSource ":" 2 9); LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON(getSource ":" 2 9);

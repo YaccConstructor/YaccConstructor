@@ -52,7 +52,9 @@ type CYKCore() =
     let noLbl = 0uy
 
     let lblString lbl = 
-        lblNameArr.[lbl]
+        match lblNameArr with
+        | [||] -> "0" 
+        | _ -> lblNameArr.[lbl]
 
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellContent:ResizeArray<CellData>) i =
@@ -212,9 +214,12 @@ type CYKCore() =
         ) recTable.[i, l]
             
     
-    member this.Recognize ((grules, start) as g) s weightCalcFun lblName = 
+    member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 
         rules <- grules
-        lblNameArr <- lblName
+        lblNameArr <- lblNames
+        // Info about dialects of derivation
+        // in format: "<lblState> <lblName> <weight>"
+        // If dialect undefined or was conflict lblName = "0"
         let out = recognize g s weightCalcFun
         match out with
         | "" -> "Строка не выводима в заданной грамматике."

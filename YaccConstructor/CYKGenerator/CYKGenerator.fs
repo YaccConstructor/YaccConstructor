@@ -127,8 +127,6 @@ type CYKGeneartorImpl () =
                 | Some i -> lblId, int i
                 | None -> lblId,0
             | None -> 0,0
-        let lblDictToArr = 
-            Array.ofSeq (Dictionary.KeyCollection lblDict)
 
         let ntermId (name:Source.t) = 
             if ntermDict.ContainsKey name.text
@@ -174,7 +172,7 @@ type CYKGeneartorImpl () =
             rules = il.grammar |> List.map processRule |> Array.ofList
             termDict = termDict
             nTermDict = ntermDict
-            lblNames = lblDictToArr 
+            lblNames = Array.ofSeq (Dictionary.KeyCollection lblDict) 
         }
         
     let print rule = 

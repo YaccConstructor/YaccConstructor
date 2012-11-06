@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\first\first.yrd"</StartArguments>
+    <StartArguments>-c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%%s" -c ExpandInnerAlt -c ExpandBrackets -c LeaveLast -c AddDefaultAC -g "RNGLRGenerator -token string -module Yard.Examples.MSParser -o MSParser.fs" -i "C:\Projects\recursive-ascent\Examples\MsSql\MSSql\mssql.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>

@@ -107,7 +107,7 @@ let () =
 
             // Parse grammar    
             let ilTree =  
-                try
+                //try
                     let defStr = 
                         List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
                     if System.String.IsNullOrEmpty defStr
@@ -115,8 +115,8 @@ let () =
                     else grammarFilePath + "%" + defStr
                     |> fe.ParseGrammar
                     |> ref
-                with
-                | e -> FEError (e.Message + " " + e.StackTrace) |> raise
+                //with
+                //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 //            printfn "%A" <| ilTree
             // Apply convertions
@@ -165,10 +165,10 @@ let () =
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise
         | None , _, _         -> EmptyArg "file name (-i)" |> raise 
-    try
-        if !generateSomething = true then 
-            run ()
-    with
+    //try
+    if !generateSomething = true then 
+        run ()
+(*    with
     | InvalidFEName (feName)   -> 
         "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
         |> System.Console.WriteLine
@@ -189,7 +189,7 @@ List of available frontends, generators and convertions can be obtained by -af -
         error + "\n"
         |> System.Console.WriteLine
     | :? System.IO.IOException as e -> printf "%s" <| (e.Message + ". Could not read input file.\n")
-    | x -> printf "%A\n" x
+    | x -> printf "%A\n" x*)
 
 
 

@@ -15,7 +15,7 @@ let run path astBuilder =
 let dir = @"../../../../Tests/RNGLR/"
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
-    Assert.Fail()
+    Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
 let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
     let args = {

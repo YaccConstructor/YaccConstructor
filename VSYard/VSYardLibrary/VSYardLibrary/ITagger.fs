@@ -45,7 +45,7 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
             //finding all ocurrences
             //let lexered = LexString fileText |> List.ofSeq
             let lexered = ReParseFileForActiveWindow(m_dte, _sourceBuffer.CurrentSnapshot.GetText()).Tokens
-            let checkAndAdd (t:token) = 
+            let checkAndAdd (t : Token) = 
                 match t with
                 | LIDENT name  when name.text = w -> 
                     let s, e = name.startPos.absoluteOffset, name.endPos.absoluteOffset

@@ -149,10 +149,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
         printBrInd 2 "let x = small_%s.[cur + k] &&& %d" name andNum
         printBrInd 2 "%s.[i].[j] <- lists_%s.[x]" name name
         printBrInd 1 "cur <- cur + length"
-    let genArg = 
-        match tokenType with
-        | "" -> "<'a>"
-        | _ -> ""
+
     printBr "type Token ="
     let indexator = grammar.indexator
     for i = indexator.termsStart to indexator.termsEnd do

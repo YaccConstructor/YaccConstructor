@@ -335,7 +335,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     shift !curInd
 
         if errorIndex <> -1 then
-            Error (errorIndex - 1, !curToken, "Parse error")
+            Error (errorIndex, !curToken, "Parse error")
         else
             let root = ref None
             //printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do

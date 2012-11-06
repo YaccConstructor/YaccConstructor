@@ -14,7 +14,7 @@ let run path astBuilder =
 let dir = @"../../../../Tests/RNGLR/"
 
 let parser = RNGLR.ParseCalc.buildAst
-let path = dir + "calc/input.txt"
+let path = dir + "Calc.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with

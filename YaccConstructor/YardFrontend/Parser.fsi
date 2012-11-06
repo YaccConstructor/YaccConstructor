@@ -22,6 +22,7 @@ type token =
   | QUESTION
   | MINUS
   | PLUS
+  | START_RULE_SIGN
   | STAR
   | BAR
   | EQUAL
@@ -50,6 +51,7 @@ type tokenId =
     | TOKEN_QUESTION
     | TOKEN_MINUS
     | TOKEN_PLUS
+    | TOKEN_START_RULE_SIGN
     | TOKEN_STAR
     | TOKEN_BAR
     | TOKEN_EQUAL
@@ -65,7 +67,7 @@ type nonTerminalId =
     | NONTERM_action_opt
     | NONTERM_rule_nlist
     | NONTERM_rule
-    | NONTERM_plus_opt
+    | NONTERM_start_rule_sign_opt
     | NONTERM_formal_meta_param_opt
     | NONTERM_formal_meta_list
     | NONTERM_param_opt

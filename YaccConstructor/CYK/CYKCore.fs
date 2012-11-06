@@ -46,10 +46,15 @@ type CYKCore() =
 
     let mutable recTable:_[,] = null
 
-    let mutable lblString = (fun args -> "")
+    let mutable lblNameArr = [||]
 
     [<Literal>]
     let noLbl = 0uy
+
+    let lblString lbl = 
+        match lblNameArr with
+        | [||] -> "0" 
+        | _ -> lblNameArr.[lbl]
 
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellContent:ResizeArray<CellData>) i =
@@ -162,7 +167,7 @@ type CYKCore() =
         out 0 lastIndex
 
     let print lblValue leftI rightL leftL =
-        let out = "label = " + lblString lblValue + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
+        let out = "label = " + lblString ((int lblValue) - 1) + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
@@ -209,9 +214,12 @@ type CYKCore() =
         ) recTable.[i, l]
             
     
-    member this.Recognize ((grules, start) as g) s weightCalcFun getLblNameFunc = 
+    member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 
         rules <- grules
-        lblString <- getLblNameFunc
+        lblNameArr <- lblNames
+        // Info about dialects of derivation
+        // in format: "<lblState> <lblName> <weight>"
+        // If dialect undefined or was conflict lblName = "0"
         let out = recognize g s weightCalcFun
         match out with
         | "" -> "Строка не выводима в заданной грамматике."

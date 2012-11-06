@@ -31,7 +31,7 @@ type GrammarInfo =
         rules: uint64 array
         termDict : Dictionary<string,int>
         nTermDict : Dictionary<string,int>
-        lblDict : Dictionary<string,int>
+        lblNames : string[]
     }
 
 type CYKGeneartorImpl () =
@@ -86,18 +86,18 @@ type CYKGeneartorImpl () =
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
         ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name.text]
     
-    let genlblDict (lblDict:Dictionary<string,int>)= 
-        ("let getLblName lbl = " |> wordL)
-        @@-- (("match lbl with" |> wordL)
-            @@ ([for lblInfo in lblDict -> ["|"; string lblInfo.Value + "uy"; "->"; "\"" + lblInfo.Key + "\""]|> List.map wordL |> spaceListL] |> aboveListL))
-            @@ ("| _ -> \"\"" |> wordL)
+    let genlblArr (lblNames:string[])= 
+        ("let lblName = " |> wordL)
+        @@-- (("[|" |> wordL)
+            @@ ([for lblInfo in lblNames -> ["\"" + lblInfo + "\";"]|> List.map wordL |> spaceListL] |> aboveListL))
+            @@ ("|]" |> wordL)
 
     let code il grammarInfo =
         [ header
          ; tokenTypes grammarInfo.termDict
          ; getTokenTypeTag grammarInfo.termDict
          ; rulesArray grammarInfo.rules
-         ; genlblDict grammarInfo.lblDict
+         ; genlblArr grammarInfo.lblNames
          ; startNTerm il grammarInfo.nTermDict |> genStartNTermID
          ; tokenStreamEncoder]
         |> aboveListL
@@ -128,7 +128,6 @@ type CYKGeneartorImpl () =
                 | None -> lblId,0
             | None -> 0,0
 
-        
         let ntermId (name:Source.t) = 
             if ntermDict.ContainsKey name.text
             then ntermDict.[name.text] 
@@ -173,7 +172,7 @@ type CYKGeneartorImpl () =
             rules = il.grammar |> List.map processRule |> Array.ofList
             termDict = termDict
             nTermDict = ntermDict
-            lblDict = lblDict
+            lblNames = Array.ofSeq (Dictionary.KeyCollection lblDict) 
         }
         
     let print rule = 
@@ -185,7 +184,7 @@ type CYKGeneartorImpl () =
         code grammar grammarInfo
     member x.GenRulesList grammar = 
         let grammarInfo = grammarFromIL grammar
-        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict
+        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict, grammarInfo.lblNames
 
 type CYKGenerator() =    
     inherit Generator()

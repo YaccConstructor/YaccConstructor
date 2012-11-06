@@ -15,7 +15,7 @@ let run input =
         |> Yard.Generators.CYK.CodeTokenStream
         
     let cyk = new Yard.Generators.CYKGenerator.CYKCore()
-    cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy) Yard.Generators.CYK.getLblName
+    cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy) Yard.Generators.CYK.lblName
 
 let time () =    
     let start = System.DateTime.Now

@@ -3,7 +3,7 @@
 create_proc: KW_CREATE (@bad(KW_PROC)|@good(KW_PROCEDURE)) IDENT  AS body;
 
 body: KW_BEGIN (sql_stmt SEMI)+ KW_END ;
-fld: expr | expr IDENT | expr AS IDENT; 
+fld: expr | @bad_as(expr IDENT) | expr AS IDENT; 
 sql_stmt: SELECT (fld COMMA)+ fld FROM tbl;
 tbl: IDENT;
 expr: 

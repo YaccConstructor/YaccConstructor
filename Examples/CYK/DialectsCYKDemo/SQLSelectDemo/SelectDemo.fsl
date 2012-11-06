@@ -18,23 +18,23 @@ let asKW = "AS"
 let fromKW = "FROM"
 
 rule token = parse
-    | "CREATE" {new CYKToken<_,_> (KW_CREATE, "CREATE")}	
+        | "CREATE" {new CYKToken<_,_> (KW_CREATE, "CREATE")}	
 	| "PROCEDURE" {new CYKToken<_,_> (KW_PROCEDURE, "PROCEDURE")}
 	| "PROC" {new CYKToken<_,_> (KW_PROC, "PROC")}
 	| "GO" {new CYKToken<_,_> (KW_GO, "GO")}
 	| "BEGIN" {new CYKToken<_,_> (KW_BEGIN, "BEGIN")}
 	| "END"  {new CYKToken<_,_> (KW_END, "END")}
-	//| '(' {new CYKToken<_,_> (LBR, "(")} 
-	//| ')' {new CYKToken<_,_> (RBR, ")")} 
-	//| '+' {new CYKToken<_,_> (PLUS, "+")} 
+	| '(' {new CYKToken<_,_> (LBR, "(")} 
+	| ')' {new CYKToken<_,_> (RBR, ")")} 
+	| '+' {new CYKToken<_,_> (PLUS, "+")} 
 	| ';' {new CYKToken<_,_> (SEMI, ";")} 
 	| ',' {new CYKToken<_,_> (COMMA, ",")} 
-	//| decnumber {new CYKToken<_,_> (NUM, "NUM")}
-	//| localvar {new CYKToken<_,_> (LOCALVAR, "LV")}
-    | asKW {new CYKToken<_,_> (AS, "AS")}
+	| decnumber {new CYKToken<_,_> (NUM, "NUM")}
+	| localvar {new CYKToken<_,_> (LOCALVAR, "LV")}
+        | asKW {new CYKToken<_,_> (AS, "AS")}
 	| selectKW {new CYKToken<_,_> (SELECT, "SELECT")}
 	| fromKW {new CYKToken<_,_> (FROM, "FROM")}
-	//| '*' {new CYKToken<_,_> (STAR, "*")}
+	| '*' {new CYKToken<_,_> (STAR, "*")}
 	| ident {new CYKToken<_,_> (IDENT, (LexBuffer<_>.LexemeString(lexbuf)))}
 	| whitespaces {token lexbuf}
 	| eof {new CYKToken<_,_> (EOF, "")}

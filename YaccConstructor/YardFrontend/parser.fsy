@@ -41,8 +41,7 @@ let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) =
     match seq,w with 
      | PSeq(els,ac,_),_ -> match w with
                            | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> let weightValue = w.Value.text.Substring(1, w.Value.text.Length-2)
-                                  PSeq (els,ac,Some {label=lbl.text; weight = Some (float (weightValue))})
+                           | _ -> PSeq (els,ac,Some {label=lbl.text; weight = Some (float w.Value.text)})
      | x,_ -> x
 
 let missing name = System.Console.WriteLine("Missing " + name)
@@ -149,7 +148,7 @@ param_opt: { None } | PARAM {Some $1}
 
 param_list: { [] } | PARAM param_list {$1::$2}
 
-weight_opt: { None } | WEIGHT { Some $1}
+weight_opt: { None } | PARAM { Some $1}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 

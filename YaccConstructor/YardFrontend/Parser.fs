@@ -50,8 +50,7 @@ let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) =
     match seq,w with 
      | PSeq(els,ac,_),_ -> match w with
                            | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> let weightValue = w.Value.text.Substring(1, w.Value.text.Length-2)
-                                  PSeq (els,ac,Some {label=lbl.text; weight = Some (float (weightValue))})
+                           | _ -> PSeq (els,ac,Some {label=lbl.text; weight = Some (float w.Value.text)})
      | x,_ -> x
 
 let missing name = System.Console.WriteLine("Missing " + name)
@@ -74,7 +73,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     | None -> 
         failwith (sprintf "Not supported extension %s in file %s" ext filename )
 
-# 77 "Parser.fs"
+# 76 "Parser.fs"
 type Token =
     | ACTION of Source.t
     | BAR of Source.t
@@ -102,7 +101,6 @@ type Token =
     | START_RULE_SIGN of Source.t
     | STRING of Source.t
     | UIDENT of Source.t
-    | WEIGHT of Source.t
 
 let numToString = function
     | 0 -> "action_opt"
@@ -164,7 +162,6 @@ let numToString = function
     | 56 -> "START_RULE_SIGN"
     | 57 -> "STRING"
     | 58 -> "UIDENT"
-    | 59 -> "WEIGHT"
     | _ -> ""
 let tokenToNumber = function
     | ACTION _ -> 33
@@ -193,11 +190,10 @@ let tokenToNumber = function
     | START_RULE_SIGN _ -> 56
     | STRING _ -> 57
     | UIDENT _ -> 58
-    | WEIGHT _ -> 59
 
 let mutable private cur = 0
 let leftSide = [|5; 32; 0; 0; 6; 6; 24; 24; 24; 23; 29; 29; 8; 8; 7; 7; 19; 19; 18; 18; 31; 31; 1; 1; 2; 2; 26; 26; 13; 13; 9; 28; 28; 27; 14; 14; 25; 25; 21; 21; 3; 3; 20; 20; 22; 22; 22; 22; 22; 22; 22; 10; 12; 12; 11; 11; 4; 4; 15; 15; 17; 17; 16; 30; 30|]
-let private rules = [|0; 24; 6; 5; 33; 52; 33; 42; 57; 24; 23; 25; 24; 29; 43; 8; 18; 35; 15; 1; 56; 39; 7; 37; 43; 7; 43; 46; 46; 18; 59; 26; 2; 26; 34; 26; 34; 26; 2; 9; 13; 33; 27; 28; 0; 38; 31; 44; 13; 51; 27; 28; 14; 3; 21; 45; 52; 49; 22; 20; 41; 22; 47; 43; 57; 9; 4; 44; 1; 51; 22; 50; 22; 48; 22; 55; 22; 10; 12; 10; 39; 12; 37; 43; 11; 19; 58; 53; 17; 16; 36; 17; 16; 43; 41; 57; 40; 54|]
+let private rules = [|0; 24; 6; 5; 33; 52; 33; 42; 57; 24; 23; 25; 24; 29; 43; 8; 18; 35; 15; 1; 56; 39; 7; 37; 43; 7; 43; 46; 46; 18; 46; 26; 2; 26; 34; 26; 34; 26; 2; 9; 13; 33; 27; 28; 0; 38; 31; 44; 13; 51; 27; 28; 14; 3; 21; 45; 52; 49; 22; 20; 41; 22; 47; 43; 57; 9; 4; 44; 1; 51; 22; 50; 22; 48; 22; 55; 22; 10; 12; 10; 39; 12; 37; 43; 11; 19; 58; 53; 17; 16; 36; 17; 16; 43; 41; 57; 40; 54|]
 let private rulesStart = [|0; 3; 4; 5; 5; 7; 7; 7; 10; 13; 20; 21; 21; 24; 24; 26; 27; 28; 28; 30; 30; 31; 31; 33; 34; 36; 39; 40; 41; 42; 45; 50; 52; 52; 55; 56; 56; 57; 57; 58; 58; 59; 62; 63; 64; 65; 66; 67; 70; 72; 74; 76; 77; 79; 80; 83; 83; 86; 87; 89; 89; 92; 93; 96; 97; 98|]
 let startRule = 1
 
@@ -208,10 +204,10 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 87; 55; 2; 83; 5; 78; 81; 3; 82; 4; 6; 7; 73; 8; 71; 9; 10; 63; 11; 12; 13; 14; 44; 49; 56; 26; 52; 15; 18; 19; 20; 59; 60; 41; 62; 57; 58; 16; 17; 21; 22; 31; 23; 24; 25; 27; 61; 28; 29; 30; 32; 35; 33; 34; 36; 39; 38; 37; 40; 42; 43; 45; 46; 47; 48; 50; 53; 51; 54; 64; 70; 67; 65; 66; 68; 69; 72; 74; 76; 75; 77; 79; 80; 84; 85; 86|]
 let private small_gotos =
-        [|3; 0; 327681; 2162690; 65541; 1507331; 1572868; 1900549; 2752518; 3670023; 131074; 1638408; 3407881; 196613; 1507331; 1572874; 1900549; 2752518; 3670023; 327681; 2818059; 393218; 524300; 2555917; 458754; 1179662; 3014671; 524289; 2293776; 589826; 983057; 3473426; 655369; 65555; 589844; 851989; 917526; 1703959; 1769496; 2162713; 2490394; 2949147; 917515; 196636; 262173; 589854; 1310751; 1441824; 2490394; 2818081; 2883618; 3080227; 3735588; 3801125; 983042; 1376294; 3211303; 1310721; 2687016; 1376264; 262173; 589854; 1441833; 2490394; 2818090; 2883618; 3735588; 3801125; 1441795; 3145771; 3276844; 3604525; 1703938; 2031662; 3866671; 1769473; 2883632; 1835013; 852017; 917526; 1769496; 2162713; 2949147; 1900545; 3342386; 2031618; 720947; 2555956; 2097154; 1245237; 3014710; 2293770; 262173; 589854; 655415; 786488; 1441849; 2490394; 2818090; 2883618; 3735588; 3801125; 2359306; 262173; 589854; 655415; 786490; 1441849; 2490394; 2818090; 2883618; 3735588; 3801125; 2490371; 3145771; 3276844; 3604525; 2555905; 2424891; 2686985; 65596; 589844; 851989; 917526; 1703959; 1769496; 2162713; 2490394; 2949147; 2752513; 3342397; 2883586; 131134; 2228287; 3014664; 589844; 851989; 917526; 1704000; 1769496; 2162713; 2490394; 2949147; 3080194; 131137; 2228287; 3211268; 917526; 1769538; 1835075; 2949147; 3276804; 917526; 1769538; 1835076; 2949147; 3473410; 69; 2162690; 3866627; 3145771; 3276844; 3604525; 3932162; 720947; 2555956; 4128771; 1048646; 1114183; 2818120; 4194305; 2359369; 4259843; 1048646; 1114186; 2818120; 4390913; 2687051; 4456449; 3735628; 4653058; 1179725; 3014671; 4784130; 458830; 2818127; 4849665; 2424912; 4980738; 458833; 2818127; 5111809; 3735634; 5177349; 1507331; 1572947; 1900549; 2752518; 3670023; 5439490; 393300; 3407957; 5570561; 2162774|]
+        [|3; 0; 327681; 2162690; 65541; 1507331; 1572868; 1900549; 2752518; 3670023; 131074; 1638408; 3407881; 196613; 1507331; 1572874; 1900549; 2752518; 3670023; 327681; 2818059; 393218; 524300; 2555917; 458754; 1179662; 3014671; 524289; 2293776; 589826; 983057; 3473426; 655369; 65555; 589844; 851989; 917526; 1703959; 1769496; 2162713; 2490394; 2949147; 917515; 196636; 262173; 589854; 1310751; 1441824; 2490394; 2818081; 2883618; 3080227; 3735588; 3801125; 983042; 1376294; 3211303; 1310721; 2687016; 1376264; 262173; 589854; 1441833; 2490394; 2818090; 2883618; 3735588; 3801125; 1441795; 3145771; 3276844; 3604525; 1703938; 2031662; 3014703; 1769473; 2883632; 1835013; 852017; 917526; 1769496; 2162713; 2949147; 1900545; 3342386; 2031618; 720947; 2555956; 2097154; 1245237; 3014710; 2293770; 262173; 589854; 655415; 786488; 1441849; 2490394; 2818090; 2883618; 3735588; 3801125; 2359306; 262173; 589854; 655415; 786490; 1441849; 2490394; 2818090; 2883618; 3735588; 3801125; 2490371; 3145771; 3276844; 3604525; 2555905; 2424891; 2686985; 65596; 589844; 851989; 917526; 1703959; 1769496; 2162713; 2490394; 2949147; 2752513; 3342397; 2883586; 131134; 2228287; 3014664; 589844; 851989; 917526; 1704000; 1769496; 2162713; 2490394; 2949147; 3080194; 131137; 2228287; 3211268; 917526; 1769538; 1835075; 2949147; 3276804; 917526; 1769538; 1835076; 2949147; 3473410; 69; 2162690; 3866627; 3145771; 3276844; 3604525; 3932162; 720947; 2555956; 4128771; 1048646; 1114183; 2818120; 4194305; 2359369; 4259843; 1048646; 1114186; 2818120; 4390913; 2687051; 4456449; 3735628; 4653058; 1179725; 3014671; 4784130; 458830; 2818127; 4849665; 2424912; 4980738; 458833; 2818127; 5111809; 3735634; 5177349; 1507331; 1572947; 1900549; 2752518; 3670023; 5439490; 393300; 3407957; 5570561; 2162774|]
 let gotos = Array.zeroCreate 88
 for i = 0 to 87 do
-        gotos.[i] <- Array.zeroCreate 60
+        gotos.[i] <- Array.zeroCreate 59
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -227,7 +223,7 @@ let private small_reduces =
         [|65537; 2621440; 131074; 2621441; 3407873; 196610; 2621442; 3407874; 262146; 2621443; 3407875; 720901; 2621444; 2752516; 2818052; 3407876; 3670020; 786439; 2228229; 2621445; 2752517; 2818053; 3342341; 3407877; 3670021; 851975; 2228230; 2621446; 2752518; 2818054; 3342342; 3407878; 3670022; 983054; 2162695; 2228231; 2490375; 2621447; 2752519; 2818055; 2883591; 2949127; 3080199; 3342343; 3407879; 3670023; 3735559; 3801095; 1048590; 2162696; 2228232; 2490376; 2621448; 2752520; 2818056; 2883592; 2949128; 3080200; 3342344; 3407880; 3670024; 3735560; 3801096; 1114126; 2162697; 2228233; 2490377; 2621449; 2752521; 2818057; 2883593; 2949129; 3080201; 3342345; 3407881; 3670025; 3735561; 3801097; 1179667; 2162698; 2228234; 2424842; 2490378; 2621450; 2752522; 2818058; 2883594; 2949130; 3080202; 3145738; 3211274; 3276810; 3342346; 3407882; 3604490; 3670026; 3735562; 3801098; 1245203; 2162699; 2228235; 2424843; 2490379; 2621451; 2752523; 2818059; 2883595; 2949131; 3080203; 3145739; 3211275; 3276811; 3342347; 3407883; 3604491; 3670027; 3735563; 3801099; 1441807; 2162700; 2228236; 2490380; 2621452; 2752524; 2818060; 2883596; 2949132; 3080204; 3211276; 3342348; 3407884; 3670028; 3735564; 3801100; 1507347; 2162701; 2228237; 2424845; 2490381; 2621453; 2752525; 2818061; 2883597; 2949133; 3080205; 3145741; 3211277; 3276813; 3342349; 3407885; 3604493; 3670029; 3735565; 3801101; 1572883; 2162702; 2228238; 2424846; 2490382; 2621454; 2752526; 2818062; 2883598; 2949134; 3080206; 3145742; 3211278; 3276814; 3342350; 3407886; 3604494; 3670030; 3735566; 3801102; 1638419; 2162703; 2228239; 2424847; 2490383; 2621455; 2752527; 2818063; 2883599; 2949135; 3080207; 3145743; 3211279; 3276815; 3342351; 3407887; 3604495; 3670031; 3735567; 3801103; 1966099; 2162704; 2228240; 2424848; 2490384; 2621456; 2752528; 2818064; 2883600; 2949136; 3080208; 3145744; 3211280; 3276816; 3342352; 3407888; 3604496; 3670032; 3735568; 3801104; 2031635; 2162705; 2228241; 2424849; 2490385; 2621457; 2752529; 2818065; 2883601; 2949137; 3080209; 3145745; 3211281; 3276817; 3342353; 3407889; 3604497; 3670033; 3735569; 3801105; 2097171; 2162706; 2228242; 2424850; 2490386; 2621458; 2752530; 2818066; 2883602; 2949138; 3080210; 3145746; 3211282; 3276818; 3342354; 3407890; 3604498; 3670034; 3735570; 3801106; 2162707; 2162707; 2228243; 2424851; 2490387; 2621459; 2752531; 2818067; 2883603; 2949139; 3080211; 3145747; 3211283; 3276819; 3342355; 3407891; 3604499; 3670035; 3735571; 3801107; 2228243; 2162708; 2228244; 2424852; 2490388; 2621460; 2752532; 2818068; 2883604; 2949140; 3080212; 3145748; 3211284; 3276820; 3342356; 3407892; 3604500; 3670036; 3735572; 3801108; 2359297; 2424853; 2424833; 2424854; 2490374; 2424855; 2490391; 2818071; 2883607; 3735575; 3801111; 2621460; 2162712; 2228248; 2424856; 2490392; 2621464; 2752536; 2818072; 2883608; 2949144; 3014680; 3080216; 3145752; 3211288; 3276824; 3342360; 3407896; 3604504; 3670040; 3735576; 3801112; 2818067; 2162713; 2228249; 2424857; 2490393; 2621465; 2752537; 2818073; 2883609; 2949145; 3080217; 3145753; 3211289; 3276825; 3342361; 3407897; 3604505; 3670041; 3735577; 3801113; 2883590; 2621466; 2752538; 2818074; 3342362; 3407898; 3670042; 2949126; 2621467; 2752539; 2818075; 3342363; 3407899; 3670043; 3080198; 2621468; 2752540; 2818076; 3342364; 3407900; 3670044; 3145734; 2621469; 2752541; 2818077; 3342365; 3407901; 3670045; 3211271; 2228254; 2621470; 2752542; 2818078; 3342366; 3407902; 3670046; 3276808; 2162719; 2228255; 2621471; 2752543; 2818079; 3342367; 3407903; 3670047; 3342344; 2162720; 2228256; 2621472; 2752544; 2818080; 3342368; 3407904; 3670048; 3407878; 2490401; 2818081; 2883617; 3080225; 3735585; 3801121; 3473415; 2228258; 2621474; 2752546; 2818082; 3342370; 3407906; 3670050; 3538951; 2228259; 2621475; 2752547; 2818083; 3342371; 3407907; 3670051; 3604487; 2228260; 2621476; 2752548; 2818084; 3342372; 3407908; 3670052; 3670023; 2228261; 2621477; 2752549; 2818085; 3342373; 3407909; 3670053; 3735571; 2162726; 2228262; 2424870; 2490406; 2621478; 2752550; 2818086; 2883622; 2949158; 3080230; 3145766; 3211302; 3276838; 3342374; 3407910; 3604518; 3670054; 3735590; 3801126; 3801107; 2162727; 2228263; 2424871; 2490407; 2621479; 2752551; 2818087; 2883623; 2949159; 3080231; 3145767; 3211303; 3276839; 3342375; 3407911; 3604519; 3670055; 3735591; 3801127; 3866639; 2162728; 2228264; 2490408; 2621480; 2752552; 2818088; 2883624; 2949160; 3080232; 3211304; 3342376; 3407912; 3670056; 3735592; 3801128; 3932179; 2162705; 2228241; 2490385; 2621457; 2687017; 2752529; 2818065; 2883601; 2949137; 3080209; 3145745; 3211281; 3276817; 3342353; 3407889; 3604497; 3670033; 3735569; 3801105; 3997697; 2883626; 4063233; 2687019; 4194312; 2162732; 2490412; 2818092; 2883628; 2949164; 3080236; 3735596; 3801132; 4325384; 2162733; 2490413; 2818093; 2883629; 2949165; 3080237; 3735597; 3801133; 4521993; 2162734; 2359342; 2490414; 2818094; 2883630; 2949166; 3080238; 3735598; 3801134; 4587528; 2162735; 2490415; 2818095; 2883631; 2949167; 3080239; 3735599; 3801135; 4653057; 2293808; 4718593; 2293809; 4915202; 2293810; 3014706; 4980737; 2424883; 5046273; 2424884; 5177346; 2621493; 3407925; 5242882; 2621494; 3407926; 5308417; 2818103; 5373957; 2621496; 2752568; 2818104; 3407928; 3670072; 5439489; 2621497; 5505025; 2621498; 5636097; 2621499|]
 let reduces = Array.zeroCreate 88
 for i = 0 to 87 do
-        reduces.[i] <- Array.zeroCreate 60
+        reduces.[i] <- Array.zeroCreate 59
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -243,7 +239,7 @@ let private small_zeroReduces =
         [|5; 2621440; 2752513; 2818049; 3407873; 3670017; 65539; 2621442; 2818051; 3407874; 131077; 2621444; 2752516; 2818052; 3407876; 3670020; 196611; 2621442; 2818051; 3407874; 393218; 2293765; 3014661; 458753; 2293766; 589832; 2162695; 2490375; 2818055; 2883591; 2949127; 3080199; 3735559; 3801095; 655366; 2490376; 2818056; 2883592; 3080200; 3735560; 3801096; 983054; 2162697; 2228233; 2490377; 2621449; 2752521; 2818057; 2883593; 2949129; 3080201; 3342345; 3407881; 3670025; 3735561; 3801097; 1703937; 2883594; 1835014; 2490376; 2818056; 2883592; 3080200; 3735560; 3801096; 2031636; 2162699; 2228235; 2424843; 2490379; 2621451; 2752523; 2818059; 2883595; 2949131; 3014667; 3080203; 3145739; 3211275; 3276811; 3342347; 3407883; 3604491; 3670027; 3735563; 3801099; 2097171; 2162700; 2228236; 2424844; 2490380; 2621452; 2752524; 2818060; 2883596; 2949132; 3080204; 3145740; 3211276; 3276812; 3342348; 3407884; 3604492; 3670028; 3735564; 3801100; 2686982; 2490376; 2818056; 2883592; 3080200; 3735560; 3801096; 3014662; 2490376; 2818056; 2883592; 3080200; 3735560; 3801096; 3211277; 2162701; 2228237; 2490376; 2621453; 2752525; 2818062; 2883592; 3080200; 3342349; 3407885; 3670029; 3735560; 3801096; 3276813; 2162701; 2228237; 2490376; 2621453; 2752525; 2818062; 2883592; 3080200; 3342349; 3407885; 3670029; 3735560; 3801096; 3473415; 2228225; 2621441; 2752513; 2818049; 3342337; 3407873; 3670017; 3932179; 2162699; 2228235; 2490379; 2621451; 2752523; 2818059; 2883595; 2949131; 3014667; 3080203; 3145739; 3211275; 3276811; 3342347; 3407883; 3604491; 3670027; 3735563; 3801099; 4653057; 2293766; 5177347; 2621442; 2818051; 3407874; 5439489; 2621455|]
 let zeroReduces = Array.zeroCreate 88
 for i = 0 to 87 do
-        zeroReduces.[i] <- Array.zeroCreate 60
+        zeroReduces.[i] <- Array.zeroCreate 59
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -299,7 +295,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_file) 
-# 302 "Parser.fs"
+# 298 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -309,7 +305,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_yard_start_rule) 
-# 312 "Parser.fs"
+# 308 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -329,7 +325,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_action_opt) 
-# 332 "Parser.fs"
+# 328 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -347,7 +343,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_action_opt) 
-# 350 "Parser.fs"
+# 346 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -369,7 +365,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
-# 372 "Parser.fs"
+# 368 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -387,7 +383,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
-# 390 "Parser.fs"
+# 386 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -405,7 +401,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
-# 408 "Parser.fs"
+# 404 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -431,7 +427,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
-# 434 "Parser.fs"
+# 430 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -455,7 +451,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
-# 458 "Parser.fs"
+# 454 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -498,7 +494,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_rule) 
-# 501 "Parser.fs"
+# 497 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -518,7 +514,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
-# 521 "Parser.fs"
+# 517 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -536,7 +532,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
-# 539 "Parser.fs"
+# 535 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -560,7 +556,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
-# 563 "Parser.fs"
+# 559 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -578,7 +574,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
-# 581 "Parser.fs"
+# 577 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -600,7 +596,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
-# 603 "Parser.fs"
+# 599 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -620,7 +616,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
-# 623 "Parser.fs"
+# 619 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -640,7 +636,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_param_opt) 
-# 643 "Parser.fs"
+# 639 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -658,7 +654,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_param_opt) 
-# 661 "Parser.fs"
+# 657 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -680,7 +676,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_param_list) 
-# 683 "Parser.fs"
+# 679 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -698,7 +694,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_param_list) 
-# 701 "Parser.fs"
+# 697 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -706,7 +702,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with WEIGHT _rnglr_val -> [_rnglr_val] | a -> failwith "WEIGHT expected, but %A found" a )
+            (match ((unbox _rnglr_children.[0]) : Token) with PARAM _rnglr_val -> [_rnglr_val] | a -> failwith "PARAM expected, but %A found" a )
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
@@ -718,7 +714,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_weight_opt) 
-# 721 "Parser.fs"
+# 717 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -736,7 +732,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_weight_opt) 
-# 739 "Parser.fs"
+# 735 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -758,7 +754,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_alts) 
-# 761 "Parser.fs"
+# 757 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -778,7 +774,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_alts) 
-# 781 "Parser.fs"
+# 777 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -800,7 +796,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
-# 803 "Parser.fs"
+# 799 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -824,7 +820,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
-# 827 "Parser.fs"
+# 823 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -844,7 +840,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_seq) 
-# 847 "Parser.fs"
+# 843 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -864,7 +860,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_seq) 
-# 867 "Parser.fs"
+# 863 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -884,7 +880,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
-# 887 "Parser.fs"
+# 883 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -908,7 +904,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
-# 911 "Parser.fs"
+# 907 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -936,7 +932,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_lbl_seq) 
-# 939 "Parser.fs"
+# 935 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -958,7 +954,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
-# 961 "Parser.fs"
+# 957 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -976,7 +972,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
-# 979 "Parser.fs"
+# 975 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1000,7 +996,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_seq_elem) 
-# 1003 "Parser.fs"
+# 999 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1020,7 +1016,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
-# 1023 "Parser.fs"
+# 1019 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1038,7 +1034,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
-# 1041 "Parser.fs"
+# 1037 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1058,7 +1054,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
-# 1061 "Parser.fs"
+# 1057 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1076,7 +1072,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
-# 1079 "Parser.fs"
+# 1075 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1096,7 +1092,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
-# 1099 "Parser.fs"
+# 1095 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1114,7 +1110,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
-# 1117 "Parser.fs"
+# 1113 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1134,7 +1130,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_bound) 
-# 1137 "Parser.fs"
+# 1133 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1158,7 +1154,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_bound) 
-# 1161 "Parser.fs"
+# 1157 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1178,7 +1174,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_patt) 
-# 1181 "Parser.fs"
+# 1177 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1198,7 +1194,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_patt) 
-# 1201 "Parser.fs"
+# 1197 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1218,7 +1214,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1221 "Parser.fs"
+# 1217 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1238,7 +1234,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1241 "Parser.fs"
+# 1237 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1258,7 +1254,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1261 "Parser.fs"
+# 1257 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1282,7 +1278,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1285 "Parser.fs"
+# 1281 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1304,7 +1300,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1307 "Parser.fs"
+# 1303 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1326,7 +1322,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1329 "Parser.fs"
+# 1325 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1348,7 +1344,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1351 "Parser.fs"
+# 1347 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1368,7 +1364,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_meta_param) 
-# 1371 "Parser.fs"
+# 1367 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1390,7 +1386,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_meta_params) 
-# 1393 "Parser.fs"
+# 1389 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1410,7 +1406,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_meta_params) 
-# 1413 "Parser.fs"
+# 1409 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1434,7 +1430,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
-# 1437 "Parser.fs"
+# 1433 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1452,7 +1448,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
-# 1455 "Parser.fs"
+# 1451 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1479,7 +1475,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_call) 
-# 1482 "Parser.fs"
+# 1478 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1499,7 +1495,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_call) 
-# 1502 "Parser.fs"
+# 1498 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1521,7 +1517,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_option_opt) 
-# 1524 "Parser.fs"
+# 1520 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1539,7 +1535,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_option_opt) 
-# 1542 "Parser.fs"
+# 1538 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1563,7 +1559,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_option_params) 
-# 1566 "Parser.fs"
+# 1562 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1583,7 +1579,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_option_params) 
-# 1586 "Parser.fs"
+# 1582 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1607,7 +1603,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_option_param) 
-# 1610 "Parser.fs"
+# 1606 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1627,7 +1623,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
-# 1630 "Parser.fs"
+# 1626 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1647,7 +1643,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
-# 1650 "Parser.fs"
+# 1646 "Parser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

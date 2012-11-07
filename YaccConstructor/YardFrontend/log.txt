@@ -20,7 +20,7 @@ rules:
   17: param_opt = 
   18: param_list = PARAM param_list 
   19: param_list = 
-  20: weight_opt = WEIGHT 
+  20: weight_opt = PARAM 
   21: weight_opt = 
   22: alts = seq bar_seq_nlist 
   23: alts = seq 

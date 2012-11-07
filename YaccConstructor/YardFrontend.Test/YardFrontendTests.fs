@@ -17,7 +17,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 module YardFrontendTester
 
 open Microsoft.FSharp.Text.Lexing
@@ -35,7 +34,6 @@ let dummyPos s = new Source.t(s)
 let equalTokens x y =
     let getCtor arg = fst <| Microsoft.FSharp.Reflection.FSharpValue.GetUnionFields(arg, typeof<Token>)
     getCtor x = getCtor y
-
 
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
@@ -139,8 +137,6 @@ type ``Yard frontend preprocessor tests`` () =
                 foot = None
                 options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
-
-
 
     [<Test>]
     member test.if_endif () =
@@ -379,7 +375,8 @@ type ``YardFrontend Parser tests`` () =
                     }] 
               foot = None
               options = Map.empty
-            } 
+            }
+               
 
 [<TestFixture>]
 type ``YardFrontend options tests`` () =  
@@ -483,3 +480,51 @@ type ``Yardfrontend label tests`` () =
                 foot = None
                 options = Map.empty}
         preprocessorTest (cp "test_0.yrd") expected
+
+    [<Test>]
+    member test.``weight test correct input`` () =
+        parserTest
+            "+s: @lbl[12.3](T);"
+            {info = {fileName = "";};
+            head = None;
+            grammar = [{name = dummyPos"s";
+                        args = [];
+                        body = PSeq ([{omit = false;
+                                       rule = PToken (getSource "T" 16 16);
+                                       binding = None;
+                                       checker = None;}],None,Some {label = "@lbl";
+                                                                    weight = Some 12.3;});
+                        _public = true;
+                        metaArgs = [];
+                      }];
+            foot = None;
+            options = Map.empty;
+            }
+    
+    [<Test>]
+    member test.``weight test incorrect input`` () =
+        // must fail
+        try
+            let smth = parserTest
+                        "+s: @lbl[q](T);"
+                        {info = {fileName = "";};
+                        head = None;
+                        grammar = [{name = dummyPos"s";
+                                    args = [];
+                                    body = PSeq ([{omit = false;
+                                                   rule = PToken (getSource "T" 16 16);
+                                                   binding = None;
+                                                   checker = None;}],None,Some {label = "@lbl";
+                                                                                weight = None;});
+                                    _public = true;
+                                    metaArgs = [];
+                                  }];
+                        foot = None;
+                        options = Map.empty;
+                        }
+            Assert.IsTrue(false)
+        with 
+        | :? System.Exception as ex ->
+            let expected = "Parse error on position (0,9) on token q: illegal weight. Number expected."
+            let actual = ex.Message
+            Assert.AreEqual(expected, actual)

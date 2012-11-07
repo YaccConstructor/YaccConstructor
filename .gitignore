@@ -34,3 +34,6 @@ Examples/yc/*
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.fs
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.yrd.CYK.fs
 Examples/copy_binaries_debug.cmd
+YaccConstructor/YardFrontend/Lexer.fs
+YaccConstructor/YardFrontend/log.txt
+YaccConstructor/YardFrontend/Parser.fs

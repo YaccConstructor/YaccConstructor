@@ -41,7 +41,12 @@ let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) =
     match seq,w with 
      | PSeq(els,ac,_),_ -> match w with
                            | None -> PSeq (els,ac,Some {label=lbl.text; weight=None})
-                           | _ -> PSeq (els,ac,Some {label=lbl.text; weight = Some (float w.Value.text)})
+                           | _ -> let wVal = w.Value
+                                  try
+                                      PSeq (els,ac,Some {label=lbl.text; weight = Some (float wVal.text)})
+                                  with 
+                                  | :? System.FormatException as ex ->
+                                      failwithf "Parse error on position (%i,%i) on token %s: %s" wVal.startPos.line wVal.startPos.column wVal.text "illegal weight. Number expected."
      | x,_ -> x
 
 let missing name = System.Console.WriteLine("Missing " + name)
@@ -89,8 +94,6 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token <IL.Source.t> PATTERN PARAM
 %token <string> SHARPLINE
 %token <IL.Source.t> DLABEL
-%token <IL.Source.t> WEIGHT
-
 
 %start file
 %type <IL.Definition.t<IL.Source.t, IL.Source.t>> file

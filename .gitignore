@@ -33,3 +33,4 @@ Examples/RNGLR/MSSql/log.txt
 Examples/yc/*
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.fs
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.yrd.CYK.fs
+Examples/copy_binaries_debug.cmd

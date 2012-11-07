@@ -108,6 +108,8 @@ let identbody =
   ['A'-'Z' 'a'-'z' '_' '-' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
 let backslash_escapes =
   ['\\' '"' '\'' 'n' 't' 'b' 'r']
+let digit = 
+  ['0'-'9']
 
 let sharplineBody =  ['A'-'Z' 'a'-'z' ' ']*
 let sharpline = '#' ("if" | "elif" | "else" | "endif") sharplineBody
@@ -144,6 +146,7 @@ and  main = parse
          PREDICATE (from_lexbuf lexbuf n1 n2)
        }
      | '@' identstart identbody * {DLABEL <| lex2source lexbuf}
+	 | '[' digit * ']' {WEIGHT <| lex2source lexbuf}
      | identstart identbody *
        {  let text = lex2source lexbuf in
           match text.text with
@@ -270,7 +273,7 @@ and param = parse
   | '\n' { newline lexbuf; param lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {param lexbuf}
-     
+
 and string = parse
     '"'
     { () } //lexbuf.StartPos.AbsoluteOffset }

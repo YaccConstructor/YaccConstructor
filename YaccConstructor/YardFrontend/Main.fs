@@ -53,6 +53,7 @@ let private tokenToRange = function
     | STAR st
     | START_RULE_SIGN st
     | STRING st
+    | WEIGHT st
     | UIDENT st ->
         st.startPos, st.endPos
 

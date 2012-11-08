@@ -36,8 +36,8 @@
     <Reference Include="RACCFiniteAutomata">
       <HintPath>\lib\RACCFiniteAutomata.dll</HintPath>
     </Reference>
-    <Reference Include="Convertions">
-      <HintPath>\lib\Convertions.dll</HintPath>
+    <Reference Include="Conversions">
+      <HintPath>\lib\Conversions.dll</HintPath>
     </Reference>
     <Reference Include="RACCCommon">
       <HintPath>\lib\RACCCommon.dll</HintPath>

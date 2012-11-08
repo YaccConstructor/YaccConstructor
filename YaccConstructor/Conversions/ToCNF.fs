@@ -306,7 +306,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
     |> renameTerm
 
 type CNF() = 
-    inherit Convertion()
+    inherit Conversion()
         override this.Name = "CNF"
         override this.ConvertList (ruleList,_) = cnf ruleList
         override this.EliminatedProductionTypes = [""]

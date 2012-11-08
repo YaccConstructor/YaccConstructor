@@ -176,7 +176,7 @@ type ``CNF tests`` () =
     member test.``delete Eps rule test 2`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_1.yrd"))
-        let result = loadIL |> ConvertionsManager.ApplyConvertion conversionExpandTLAlt |> ConvertionsManager.ApplyConvertion conversionCNF
+        let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected = 
             {info = {fileName = " ";};
             head = None;
@@ -250,7 +250,7 @@ type ``CNF tests`` () =
     member test.``delete Eps rule test 3`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_2.yrd"))
-        let result = loadIL |> ConvertionsManager.ApplyConvertion conversionExpandTLAlt |> ConvertionsManager.ApplyConvertion conversionCNF
+        let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected = 
             {info = {fileName = ""}
              head = None

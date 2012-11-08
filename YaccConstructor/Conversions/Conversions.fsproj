@@ -5,20 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</ProjectGuid>
+    <ProjectGuid>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
+    <RootNamespace>Conversions</RootNamespace>
+    <AssemblyName>Conversions</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Common</Name>
-    <SccProjectName>
-    </SccProjectName>
-    <SccProvider>
-    </SccProvider>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccLocalPath>
-    </SccLocalPath>
+    <Name>Conversions</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Conversions.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,10 +30,10 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Conversions.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -49,27 +41,39 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IL.fs" />
-    <Compile Include="ComponentsLoader.fs" />
-    <Compile Include="Manager.fs" />
-    <Compile Include="Generator.fs" />
-    <Compile Include="GeneratorsManager.fs" />
-    <Compile Include="Frontend.fs" />
-    <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Conversion.fs" />
-    <Compile Include="ConversionsManager.fs" />
-    <Compile Include="ITester.fs" />
-    <Compile Include="Layouts.fs" />
-    <Compile Include="ILCheckers.fs" />
-    <Compile Include="ILComparators.fs" />
+    <Compile Include="Namer.fs" />
+    <Compile Include="TransformAux.fs" />
+    <Compile Include="ExpandAlter.fs" />
+    <Compile Include="ExpandBrackets.fs" />
+    <Compile Include="AddEOF.fs" />
+    <Compile Include="ReplaceLiterals.fs" />
+    <Compile Include="LeaveLast.fs" />
+    <Compile Include="BuildAST.fs" />
+    <Compile Include="ExpandEbnf.fs" />
+    <Compile Include="MergeAlter.fs" />
+    <Compile Include="BuildAstSimple.fs" />
+    <Compile Include="AddDefaultAC.fs" />
+    <Compile Include="ExpandMeta.fs" />
+    <Compile Include="EliminateLeftRecursion.fs" />
+    <Compile Include="ExpandInnerAlt.fs" />
+    <Compile Include="RemoveAC.fs" />
+    <Compile Include="ReplaceInline.fs" />
+    <Compile Include="ToCNF.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+             Other similar extension points exist, see Microsoft.Common.targets.
+        <Target Name="BeforeBuild">
+        </Target>
+        <Target Name="AfterBuild">
+        </Target>
+        -->
 </Project>

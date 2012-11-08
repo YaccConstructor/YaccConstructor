@@ -45,9 +45,9 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+        let ConversionsManager = ConversionsManager.ConversionsManager()
         let allConversions = 
-            List.ofSeq ConvertionsManager.Available
+            List.ofSeq ConversionsManager.Available
             |> List.sort
         let expetedResult =
              ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "CNF"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";

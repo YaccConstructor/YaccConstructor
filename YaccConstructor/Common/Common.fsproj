@@ -56,8 +56,8 @@
     <Compile Include="GeneratorsManager.fs" />
     <Compile Include="Frontend.fs" />
     <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Convertion.fs" />
-    <Compile Include="ConvertionsManager.fs" />
+    <Compile Include="Conversion.fs" />
+    <Compile Include="ConversionsManager.fs" />
     <Compile Include="ITester.fs" />
     <Compile Include="Layouts.fs" />
     <Compile Include="ILCheckers.fs" />

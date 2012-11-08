@@ -11,7 +11,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "Main\Yac
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Convertions", "Convertions\Convertions.fsproj", "{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions", "Conversions\Conversions.fsproj", "{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend.Test", "YardFrontend.Test\YardFrontend.Test.fsproj", "{5936D84D-A842-43B3-97FD-E2C6990E77DB}"
 EndProject
@@ -41,7 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IronyFrontend", "IronyFront
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronyFrontendTests", "IronyFrontendTests\IronyFrontendTests.csproj", "{61B73DE1-F585-488D-B842-923CBFCD092C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Convertions.Test", "Convertions.Test\Convertions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Test", "Conversions.Test\Conversions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccPrinter", "FsYaccPrinter\FsYaccPrinter.fsproj", "{2238E587-6FAA-4A07-A665-AA7FCC9B5602}"
 EndProject

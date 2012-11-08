@@ -5,14 +5,14 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</ProjectGuid>
+    <ProjectGuid>{8eaac2a1-d03a-4f42-9182-d294a3db9fdf}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RNGLR</RootNamespace>
-    <AssemblyName>RNGLR</AssemblyName>
+    <RootNamespace>Conversions.Test</RootNamespace>
+    <AssemblyName>Conversions.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <Name>RNGLRGenerator</Name>
+    <Name>Conversions.Test</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,10 +20,11 @@
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\RNGLR.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,31 +34,47 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\RNGLR.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Conversions.Test.XML</DocumentationFile>
   </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
+    <Compile Include="ConversionsTests.fs" />
+    <Compile Include="ExpandMetaTests.fs" />
+    <Compile Include="ExpandInnerAltTests.fs" />
+    <Compile Include="ExpandSubseqTests.fs" />
+    <Compile Include="ReplaceInlineTests.fs" />
+    <Compile Include="EntryPoint.fs" />
+    <Compile Include="ToCNFTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">
+      <Name>FsYaccPrinter</Name>
+      <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
+      <Name>TreeDump</Name>
+      <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
+      <Name>YardPrinter</Name>
+      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Graph.fs" />
-    <Compile Include="Indexator.fs" />
-    <Compile Include="NumberedRules.fs" />
-    <Compile Include="InitialConvert.fs" />
-    <Compile Include="Epsilon.fs" />
-    <Compile Include="SymbolSets.fs" />
-    <Compile Include="FinalGrammar.fs" />
-    <Compile Include="States.fs" />
-    <Compile Include="Tables.fs" />
-    <Compile Include="PrintTables.fs" />
-    <Compile Include="PrintTranslator.fs" />
-    <Compile Include="RNGLRGenerator.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -68,19 +85,7 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">

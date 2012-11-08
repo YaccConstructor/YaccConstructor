@@ -5,44 +5,42 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{d497f18a-2c35-4d21-a0ca-01e20ed9a537}</ProjectGuid>
+    <ProjectGuid>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RACCGenerator</RootNamespace>
-    <AssemblyName>RACCGenerator</AssemblyName>
+    <RootNamespace>Conversions</RootNamespace>
+    <AssemblyName>Conversions</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RACCGenerator</Name>
+    <Name>Conversions</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <Tailcalls>true</Tailcalls>
     <WarningLevel>3</WarningLevel>
+    <GenerateDebugInfo>false</GenerateDebugInfo>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
-    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TextWriter.fs" />
-    <Compile Include="CodeGenerator.fs" />
-    <Compile Include="TableGenerator.fs" />
-    <Compile Include="Driver.fs" />
+    <Compile Include="Namer.fs" />
+    <Compile Include="TransformAux.fs" />
+    <Compile Include="ExpandAlter.fs" />
+    <Compile Include="ExpandEbnfStrict.fs" />
+    <Compile Include="ExpandMeta.fs" />
+    <Compile Include="ExpandBrackets.fs" />
+    <Compile Include="AddEOF.fs" />
+    <Compile Include="ReplaceLiterals.fs" />
+    <Compile Include="LeaveLast.fs" />
+    <Compile Include="BuildAST.fs" />
+    <Compile Include="ExpandEbnf.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
+   <Reference Include="Common">
       <HintPath>\lib\Common.dll</HintPath>
-    </Reference>
-    <Reference Include="RACCFiniteAutomata">
-      <HintPath>\lib\RACCFiniteAutomata.dll</HintPath>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>\lib\Conversions.dll</HintPath>
-    </Reference>
-    <Reference Include="RACCCommon">
-      <HintPath>\lib\RACCCommon.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" /> 
 </Project>

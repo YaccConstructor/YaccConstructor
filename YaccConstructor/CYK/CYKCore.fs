@@ -166,17 +166,18 @@ type CYKCore() =
         let lastIndex = (recTable.[0,s.Length-1]).Count - 1
         out 0 lastIndex
 
-    let print lblValue leftI rightL leftL =
-        let out = "label = " + lblString ((int lblValue) - 1) + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
+    let print lblValue weight leftI rightL leftL =
+        let out = "label = " + lblString ((int lblValue) - 1) + " weight = " + string weight 
+                    + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
-        let ruleInd,_,curL,_ = getData cell.rData
+        let ruleInd,_,curL,curW = getData cell.rData
         let _,b,c,lbl,_ = getRule rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
         if l = 0
         then if curL <> noLbl
-             then print curL leftI rightL leftL
+             then print curL curW leftI rightL leftL
         else 
             let left = ResizeArray.tryFind (fun (x:CellData) -> 
                                             let ind,lSt,lbl,_ = getData x.rData
@@ -196,14 +197,14 @@ type CYKCore() =
                     let _,_,lLbl,_ = getData left.rData
                     let _,_,rLbl,_ = getData right.rData
                     if curL <> noLbl && lLbl = noLbl && rLbl = noLbl
-                    then print curL leftI rightL leftL
+                    then print curL curW leftI rightL leftL
                     else
                         trackLabel leftI leftL left  true
                         trackLabel rightI rightL right  true
                 | None -> ()
             | None ->
                 if flag && lbl <> noLbl
-                then print curL leftI rightL leftL
+                then print curL curW leftI rightL leftL
             
     let labelTracking lastInd = 
         let i,l = 0,lastInd

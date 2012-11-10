@@ -54,7 +54,10 @@ type CYKCore() =
     let lblString lbl = 
         match lblNameArr with
         | [||] -> "0" 
-        | _ -> lblNameArr.[lbl]
+        | _ -> 
+                match lbl with 
+                | 0uy -> "0"
+                | _ -> lblNameArr.[(int lbl) - 1]
 
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellContent:ResizeArray<CellData>) i =
@@ -153,7 +156,7 @@ type CYKCore() =
                 |LblState.Conflict -> "conflict"
                 |_ -> ""
 
-            String.concat " " [stateString; string lbl; string weight]
+            String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last = 
             if i <= last
@@ -167,8 +170,8 @@ type CYKCore() =
         out 0 lastIndex
 
     let print lblValue weight leftI rightL leftL =
-        let out = "label = " + lblString ((int lblValue) - 1) + " weight = " + string weight 
-                    + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
+        let out = String.concat " " ["label ="; lblString lblValue; "weight ="; string weight; 
+                    "left ="; string leftI; "right ="; string (leftI+rightL+leftL+1)]
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =

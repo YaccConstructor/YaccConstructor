@@ -115,7 +115,7 @@ type CYKCore() =
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
                                 recTable.[i,l].Add (new CellData(currentElem,uint32 k))
 
-        let elem i l = rules |> Array.Parallel.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
+        let elem i l = rules |> Array(*.Parallel*).iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
         let rec fillTable i l =
                 if l = s.Length-1

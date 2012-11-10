@@ -28,7 +28,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|1us;1us|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "undefined 0 0" 
+        let expected = "undefined : label = 0 weight = 0" 
         Assert.AreEqual(expected,res)
 
     [<Test>]
@@ -37,7 +37,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|1us;2us|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "defined 1 0"
+        let expected = "defined : label = @l weight = 0"
         Assert.AreEqual(expected,res)
 
     [<Test>]
@@ -46,7 +46,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|2us;2us|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "undefined 0 0"
+        let expected = "undefined : label = 0 weight = 0"
         Assert.AreEqual(expected,res)
         
     [<Test>]
@@ -55,7 +55,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|1us;2us|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "defined 1 0"
+        let expected = "defined : label = @l1 weight = 0"
         Assert.AreEqual(expected,res)
 
     [<Test>]
@@ -64,7 +64,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|1us;1us;|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "defined 1 0"
+        let expected = "defined : label = @l1 weight = 0"
         Assert.AreEqual(expected,res)
 
     [<Test>]
@@ -73,7 +73,7 @@ type CYKTests () =
         let rules,start,lbls = generator.GenRulesList il
         let input = [|1us;2us;2us|]
         let res = (new CYKCore()).Recognize (rules,1us) input (fun l1 l2 l3 -> 0uy) lbls
-        let expected = "conflict 0 0"
+        let expected = "conflict : label = 0 weight = 0"
         Assert.AreEqual(expected,res)
 
     [<Test>]

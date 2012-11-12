@@ -41,7 +41,7 @@
     <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -56,8 +56,8 @@
     <Compile Include="GeneratorsManager.fs" />
     <Compile Include="Frontend.fs" />
     <Compile Include="FrontendsManager.fs" />
-    <Compile Include="Convertion.fs" />
-    <Compile Include="ConvertionsManager.fs" />
+    <Compile Include="Conversion.fs" />
+    <Compile Include="ConversionsManager.fs" />
     <Compile Include="ITester.fs" />
     <Compile Include="Layouts.fs" />
     <Compile Include="ILCheckers.fs" />

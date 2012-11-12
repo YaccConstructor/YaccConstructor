@@ -1,1 +1,1 @@
-+e : e P e | N;
++e : N | e P e

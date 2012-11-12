@@ -31,9 +31,13 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\FsYaccFrontend.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\3rdParty\FsPowerPack\</FsLexToolPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+  <Import Project="..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
@@ -42,7 +46,7 @@
     </FsLex>
     <CompileYard Include="fsyacc.yrd" />
     <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core --light-off</OtherFlags>
+      <OtherFlags>--module Yard.Frontends.FsYaccFrontend.Parser --open Yard.Core</OtherFlags>
     </FsYacc>
     <None Include="fsyacc.yrd" />
     <Compile Include="Main.fs" />
@@ -50,7 +54,7 @@
     <None Include="Parser.fsy" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

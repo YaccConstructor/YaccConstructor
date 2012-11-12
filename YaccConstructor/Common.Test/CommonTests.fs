@@ -18,7 +18,7 @@ type ``Components loader tests`` () =
             List.ofSeq GeneratorsManager.Available
             |> List.sort
         let expetedResult = 
-            ["FParsecGenerator"; "FsYaccPrinter"; "TreeDump"; "YardPrinter"]            
+            ["CYKGenerator";"FParsecGenerator";"FsYaccPrinter";"TreeDump";"YardPrinter"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
@@ -45,14 +45,14 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+        let ConversionsManager = ConversionsManager.ConversionsManager()
         let allConversions = 
-            List.ofSeq ConvertionsManager.Available
+            List.ofSeq ConversionsManager.Available
             |> List.sort
         let expetedResult =
-             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "EliminateLeftRecursion";
-             "ExpandAlter"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
-             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals";]
+             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";
+             "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
+             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "ToCNF";]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"

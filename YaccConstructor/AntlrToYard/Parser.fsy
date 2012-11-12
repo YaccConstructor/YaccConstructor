@@ -51,7 +51,7 @@ let makeModifiedRule innerProduction modifier =
     | x -> failwithf "Unexpected modifier %s" x
 
 let makePSeq (productionList, actionCode) =
-    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode )
+    PSeq( List.map (fun prod -> {omit = false; rule = prod; binding = None; checker = None;}) productionList , actionCode, None )
 
 let termCount = ref 0
 let generateNewName =
@@ -94,7 +94,7 @@ let makeToken (src : Source.t) descr =
 %token HENCE
 
 %start ParseAntlr
-%type <(Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary> ParseAntlr
+%type <Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>> ParseAntlr
 
 
 %%

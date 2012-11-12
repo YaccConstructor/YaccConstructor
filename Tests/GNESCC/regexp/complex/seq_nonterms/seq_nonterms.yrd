@@ -1,8 +1,0 @@
-{
-let value x = (x:>Lexer_seq_nonterms.MyLexeme).MValue
-}
-+s: l=n PLUS r=n {r+l};
-n: x=NUMBER{(value x |> float)};
-{
-//test footer
-}

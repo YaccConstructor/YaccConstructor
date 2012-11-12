@@ -19,14 +19,48 @@ module Yard.Frontends.YardFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
 open System.Linq
+open Yard.Core.IL
+open Yard.Frontends.YardFrontend
+open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
+open GrammarParser
+
+let private tokenToRange = function
+    | ACTION st
+    | BAR st
+    | COLON st
+    | COMMA st
+    | DGREAT st
+    | DLABEL st
+    | DLESS st
+    | EOF st
+    | EQUAL st
+    | INCLUDE st
+    | LIDENT st
+    | LPAREN st
+    | MINUS st
+    | PARAM st
+    | PATTERN st
+    | PLUS st
+    | PREDICATE st
+    | QUESTION st
+    | RPAREN st
+    | SEMICOLON st
+    | SET st
+    | SHARPLINE st
+    | STAR st
+    | START_RULE_SIGN st
+    | STRING st
+    | UIDENT st ->
+        st.startPos, st.endPos
 
 let private bufFromFile path = 
     let content = System.IO.File.ReadAllText(path)
     Lexer.currentFileContent := content;
     Lexer.currentFile := path
-    let reader = new System.IO.StringReader(content) in
+    let reader = new System.IO.StringReader(content)
     LexBuffer<_>.FromTextReader reader
 
 let private bufFromString string =
@@ -67,7 +101,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
             for token in tokens do
                 match token with
                 | GrammarParser.SHARPLINE str ->
-                    match str with
+                    match str.text with
                     | IF d -> 
                         let x = Array.contains d userDefined
                         currentDefined := (x, x, !currentState)::!currentDefined
@@ -93,12 +127,34 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                         | _ -> failwith "Unexpected #ENDIF"
                 | t -> if !currentState then yield t
             }
+    filtered
+    (*
     let tokensEnumerator = filtered.GetEnumerator()
     let getNextToken (lexbuf:Lexing.LexBuffer<_>) =
         tokensEnumerator.MoveNext() |> ignore
         let res = tokensEnumerator.Current
         res
-    getNextToken
+    getNextToken*)
+
+let parse buf userDefs =
+    let rangeToString (b : Source.Position, e : Source.Position) =
+        sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
+    match GrammarParser.buildAst (filterByDefs buf userDefs) with
+    | Parser.Success ast ->
+        ast.collectWarnings tokenToRange
+        |> ResizeArray.iter (fun (x,y) -> fprintfn stderr "Ambiguity: %s %A" (rangeToString x) y)
+        let args = {
+                tokenToRange = tokenToRange
+                zeroPosition = new Source.Position()
+                clearAST = false
+                filterEpsilons = true
+            }
+        ast.ChooseLongestMatch()
+        (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+    | Parser.Error (_, token, msg) ->
+        failwithf "Parse error on position %s on token %A: %s" (token |> tokenToRange |> rangeToString) token msg
+    //GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
+
 let ParseText (s:string) path =
     let buf = bufFromString s    
     let userDefs = [||]//
@@ -115,7 +171,7 @@ let ParseText (s:string) path =
             )
             (1,0)
     try
-        GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
+        parse buf userDefs
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos
@@ -143,7 +199,7 @@ let ParseFile (args:string) =
             )
             (1,0)
     try
-        GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
+        parse buf userDefs
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos

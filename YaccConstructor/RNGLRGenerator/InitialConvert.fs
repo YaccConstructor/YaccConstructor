@@ -23,7 +23,7 @@ module Yard.Generators.RNGLR.InitialConvert
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.Core.Convertions.TransformAux
+open Yard.Core.Conversions.TransformAux
 
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
@@ -66,7 +66,7 @@ let initialConvert (def : Definition.t<_,_>) =
             function
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
-            | PSeq (s,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false

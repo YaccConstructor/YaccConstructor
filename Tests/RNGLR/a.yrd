@@ -1,4 +1,0 @@
-+a : a a | a b | a c | d;
-b : b B | b b BB | BBB;
-c : c C | c c CC | CCC;
-d : d D | D;

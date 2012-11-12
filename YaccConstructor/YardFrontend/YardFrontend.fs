@@ -26,7 +26,9 @@ type YardFrontend() =
             match t with
             | (:? System.String as s) -> Main.ParseFile s
             | _ -> IL.Definition.empty
-        override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+        override this.ProductionTypes =
+            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
+            |> List.map (fun unionCase -> unionCase.Name)
     
 
 // For testing switch to Console App and then switch back to Class Library

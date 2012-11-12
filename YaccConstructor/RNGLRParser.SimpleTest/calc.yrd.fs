@@ -1,3 +1,5 @@
+
+# 2 "Calc.yrd.fs"
 module RNGLR.ParseCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -120,7 +122,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 123 "Calc.yrd.fs"
+# 125 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -144,7 +146,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 147 "Calc.yrd.fs"
+# 149 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -154,7 +156,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 157 "Calc.yrd.fs"
+# 159 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -174,7 +176,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 177 "Calc.yrd.fs"
+# 179 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -198,7 +200,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 201 "Calc.yrd.fs"
+# 203 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -218,7 +220,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Calc.yrd"
                : '_rnglr_type_num) 
-# 221 "Calc.yrd.fs"
+# 223 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -238,7 +240,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Calc.yrd"
                : '_rnglr_type_num) 
-# 241 "Calc.yrd.fs"
+# 243 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

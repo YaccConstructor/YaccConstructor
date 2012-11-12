@@ -83,7 +83,7 @@ module Converter =
                                                 binding=None; 
                                                 checker=None})) 
                                             (bnfTermList)), 
-                                        None)
+                                        None,None)
                                 match prOpt with
                                 | Some(pr)  -> Some(PAlt(pr, pseq))
                                 | None      -> Some(pseq) )

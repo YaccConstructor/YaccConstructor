@@ -34,7 +34,7 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                    rule = strToToken "PLUS";
                    binding = None;
                    checker = None;}]
-                  ,None);
+                  ,None, None);
     _public = true;
     metaArgs = [];}];
  foot = None;
@@ -54,15 +54,15 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
               (PSeq ([{omit = false;
                        rule = strToToken "GREATER";
                        binding = None;
-                       checker = None;}],None),
+                       checker = None;}],None, None),
                PSeq ([{omit = false;
                        rule = strToToken "LESS";
                        binding = None;
-                       checker = None;}],None)),
+                       checker = None;}],None, None)),
             PSeq ([{omit = false;
                     rule = strToToken "EQUAL";
                     binding = None;
-                    checker = None;}],None));
+                    checker = None;}],None,None));
         _public = true;
         metaArgs = [];}];
      foot = None;
@@ -76,7 +76,7 @@ let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                  body = PSeq ([{omit = false;
                                 rule = strToToken "LESS";
                                 binding = None;
-                                checker = None;}],None);
+                                checker = None;}],None, None);
                  _public = true;
                  metaArgs = [];}];
      foot = None;

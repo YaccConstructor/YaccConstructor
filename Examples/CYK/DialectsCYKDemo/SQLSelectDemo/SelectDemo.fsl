@@ -1,0 +1,26 @@
+{
+module Lexer
+
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Reflection
+open Yard.Generators.CYK
+open Yard.Generators.CYKGenerator
+
+}
+
+let whitespaces = [' '  '\t']+
+let ident_char  = ['A'-'Z' 'a'-'z' ] 
+let ident = ident_char+
+let decnumber = ['0'-'9']+ 
+let selectKW = "SELECT"
+let asKW = "AS"
+let fromKW = "FROM"
+
+rule token = parse
+    | asKW {new CYKToken<_,_> (AS, "AS")}
+	| selectKW {new CYKToken<_,_> (SELECT, "SELECT")}
+	| fromKW {new CYKToken<_,_> (FROM, "FROM")}
+	| '*' {new CYKToken<_,_> (STAR, "*")}
+	| ident {new CYKToken<_,_> (IDENT, (LexBuffer<_>.LexemeString(lexbuf)))}
+	| whitespaces {token lexbuf}
+	| eof {new CYKToken<_,_> (EOF, "")}

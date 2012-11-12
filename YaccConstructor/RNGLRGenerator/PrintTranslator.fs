@@ -30,6 +30,20 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
+let getPosFromSource fullPath dummyPos (src : Source.t) =
+    let file =
+        if fullPath then src.file
+        else
+            let start = src.file.LastIndexOfAny [|'\\'; '/'|] + 1
+            src.file.Substring start
+    if file = "" then
+        printfn "Source without filename: %s" <| src.ToString()
+        "\n"
+    elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
+    else sprintf "\n# %d \"%s\"" (src.startPos.line + 1) file
+
+let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
+
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
         positionType fullPath output dummyPos =
     let tab = 4
@@ -128,18 +142,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         @@
         (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
 
-    let getPosFromSource (src : Source.t) =
-        let file =
-            if fullPath then src.file
-            else
-                let start = src.file.LastIndexOfAny [|'\\'; '/'|] + 1
-                src.file.Substring start
-        if file = "" then
-            printfn "Source without filename: %s" <| src.ToString()
-            "\n"
-        elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
-        else sprintf "\n# %d \"%s\"" (src.startPos.line + 1) file
-
     // Realise rules
     let rec getProductionLayout num = function
         | PRef (name, args) ->
@@ -154,7 +156,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
-        | PSeq (s, ac) ->
+        | PSeq (s, ac, _) ->
             match ac with
             | None -> wordL "[]"
             | Some ac ->
@@ -163,7 +165,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
                     strings
                     |> List.ofArray
-                    |> (fun l -> getPosFromSource ac ::l)
+                    |> (fun l -> getPosFromSource fullPath dummyPos ac ::l)
                     |> List.map wordL
                     |> aboveListL
                 s
@@ -176,7 +178,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                         match e.checker with
                         | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
                         | Some ch ->
-                            let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource ch)
+                            let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource fullPath dummyPos ch)
                             let cond = wordL <| "if (" + ch.text + ") then (" 
                             [res; cond]
                         //-- wordL (" do")
@@ -191,16 +193,15 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-    let defaultSource = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
         let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
-                    @@-- wordL (")" + getPosFromSource rule.name)
+                    @@-- wordL (")" + getPosFromSource fullPath dummyPos rule.name)
                     @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
-                    -- wordL (getPosFromSource defaultSource)
+                    -- wordL (getPosFromSource fullPath dummyPos (defaultSource output))
                     //@@-- wordL ("")
                     )
              )

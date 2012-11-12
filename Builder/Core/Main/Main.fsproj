@@ -40,8 +40,8 @@
     <Reference Include="Common">
       <HintPath>\lib\Common.dll</HintPath>
     </Reference>
-    <Reference Include="Convertions">
-      <HintPath>\lib\Convertions.dll</HintPath>
+    <Reference Include="Conversions">
+      <HintPath>\lib\Conversions.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

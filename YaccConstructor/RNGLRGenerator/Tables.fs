@@ -27,7 +27,7 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
         let reduces : list<int * int>[,] = Array2D.create states.count symbolCount []
         let gotos : int list[,] = Array2D.create states.count symbolCount []
         let mutable acc = []
-        if grammar.canInferEpsilon.[grammar.startRule] then acc <- (*startState*)0::acc
+        if grammar.canInferEpsilon.[grammar.rules.leftSide grammar.startRule] then acc <- (*startState*)0::acc
         let endRule = KernelInterpreter.toKernel (grammar.startRule, grammar.rules.length grammar.startRule)
         for i = 0 to states.count-1 do
             let vertex = states.vertex i

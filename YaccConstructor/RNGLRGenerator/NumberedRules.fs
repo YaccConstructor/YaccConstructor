@@ -34,7 +34,7 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
             | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| nTerm.text)::acc
             | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| token.text)::acc
             | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| lit.text)::acc
-            | PSeq (s,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc
+            | PSeq (s,_,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc
             | _ -> failwith "Unexpected construction in grammar"
         rules
         |> Array.map

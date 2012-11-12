@@ -27,7 +27,7 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
     let rec _findTokens productions = 
         List.collect 
             (function
-            | PSeq(elements, actionCode) -> _findTokens (List.map (fun elem -> elem.rule) elements)
+            | PSeq(elements, actionCode, _) -> _findTokens (List.map (fun elem -> elem.rule) elements)
             | PAlt(x, y) -> _findTokens [x] @ _findTokens [y]
             | PToken(source) -> [source.text]
             | _ -> []
@@ -48,8 +48,10 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
         if yardRule.args.IsEmpty then ""
         else  yardRule.args |> List.map (fun x -> sprintf "fun %s -> " x.text) |> String.concat ""
     let rec layoutProduction isOnTop = function
-        | PAlt(left, right) -> aboveL (layoutProduction isOnTop left) (layoutProduction isOnTop right)
-        | PSeq(elements, actionCode) -> 
+        | PAlt(left, right) ->
+            let leftL = layoutProduction isOnTop left
+            aboveL leftL (layoutProduction isOnTop right)
+        | PSeq(elements, actionCode, _) -> 
             let bindings =
                 elements
                 |> List.mapi (fun i x -> (i+1,x))

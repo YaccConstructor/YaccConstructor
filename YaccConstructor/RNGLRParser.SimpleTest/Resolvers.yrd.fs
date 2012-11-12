@@ -1,3 +1,5 @@
+
+# 2 "Resolvers.yrd.fs"
 module RNGLR.ParseResolvers
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -109,7 +111,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Resolvers.yrd"
                : '_rnglr_type_list) 
-# 112 "Resolvers.yrd.fs"
+# 114 "Resolvers.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,7 +135,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Resolvers.yrd"
                : '_rnglr_type_list) 
-# 136 "Resolvers.yrd.fs"
+# 138 "Resolvers.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -143,7 +145,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 1 "Resolvers.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 146 "Resolvers.yrd.fs"
+# 148 "Resolvers.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

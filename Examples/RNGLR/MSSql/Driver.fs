@@ -1,6 +1,6 @@
-﻿// Driver.fs contains main functions for test user application.
+﻿// Driver.fs
 //
-//  Copyright 2009, 2010, 2011 Semen Grigorev <rsdpisuy@gmail.com>
+//  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
 //  This file is part of YaccConctructor.
 //
@@ -17,55 +17,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//namespace GNESCMSSqlTest
 
 open Microsoft.FSharp.Text.Lexing
-open Yard.Generators.GNESCCGenerator
-open Tables
-open Microsoft.FSharp.Text.Lexing
+open Yard.Generators.RNGLR.AST
+open Yard.Examples.MSParser
 
-
-//path -- path to input file
-let run path =
-    //Create lexer
-    let content = System.IO.File.ReadAllText(path)
-    let reader = new System.IO.StringReader(content)    
-    let buf = LexBuffer<_>.FromTextReader reader
-    let l = Lexer_alt.Lexer(buf)
-    
-    //Create tables
-    let tables = tables
-    
-    //Run parser
-    // trees -- dirivation forest
-    // cache -- trace cache
-    // cc -- some additional debug info
-    let parseRes(*,cache,cc*) = 
-        let ti = new TableInterpreter(tables)
-        ti.Run l 
-
-//    let result = 
-//        match parseRes with
-//        //Parse success
-//        | PSuccess (forest) -> 
-//        //run forest interpretation (action code calculation)
-//            printf "\nForest %A\n" forest
-//            Seq.map 
-//             (fun tree -> ASTInterpretator.interp GNESCC.Actions.ruleToAction cache tree)
-//             forest
-//        //Error handling
-//        | PError (pos) -> 
-//            //Error handling
-//            //If you create lexeme with position in stream, you can not only provide error lexeme
-//            // but also navigate in error position
-//            let errLexeme = (l :> ILexer).Get(pos)
-//            "Incorrect input. Unexpected lexeme: " + string errLexeme.tag + " with value = " + errLexeme.ToString()
-//            |> failwith
+let parse (path:string) =
             
-    printf "\nResult %A\n" parseRes
-    
+    use reader = new System.IO.StreamReader(path)
+    let lexbuf = LexBuffer<_>.FromTextReader reader
+    let allTokens = seq{while not lexbuf.IsPastEndOfStream do yield Lexer.tokens lexbuf}
 
-do 
-    run @"..\..\yards\test1.yrd.in"
-    |> ignore
-    System.Console.ReadLine() |> ignore
+    let translateArgs = {
+        tokenToRange = fun x -> 0,0
+        zeroPosition = 0
+        clearAST = false
+        filterEpsilons = true
+    }
+
+    let parseBatch srcFilePath batchTokens =        
+        match buildAst batchTokens with
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg) ->
+            printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
+            //new Script([])            
+        | Yard.Generators.RNGLR.Parser.Success ast ->
+            ast.collectWarnings (fun x -> 0,0)
+            |> ResizeArray.iter (fun (pos, prods) -> ())
+            defaultAstToDot ast @"..\..\ast.dot"
+            //ast.ChooseLongestMatch()
+            //let translated = translate translateArgs ast : list<Script>            
+            //printfn "%A" translated
+            //translated.Head
+    parseBatch path allTokens
+
+do parse @"..\..\test.sql"

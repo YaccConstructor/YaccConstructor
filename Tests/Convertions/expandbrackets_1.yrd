@@ -1,8 +1,0 @@
-list<<item sep>> : item (sep item)* ;
-
-func_param :
-	LOCALVAR
-	| GLOBALVAR
-	;
-
-function_stmt: IDENT LBRACE (list<<func_param COMMA>>)? RBRACE;

@@ -2,6 +2,7 @@
     create_proc 
  |  GO      
  |  start2
+ | set_stmnt
 ;
 
 start2: 
@@ -11,19 +12,40 @@ start2:
   | TEMPOBJ
 ;
 
+set_stmnt:
+	SET (ANSI_NULLS | ANSI_DEFAULTS | ANSI_NULL_DFLT 
+	| ANSI_PADDING | ANSI_WARNINGS | CONCAT_NULL_YIELDS_NULL
+	| CURSOR_CLOSE_ON_COMMIT | QUOTED_IDENTIFIER 
+	| FMTONLY | FORCEPLAN | IMPLICIT_TRANSACTIONS
+	| NOCOUNT | NOEXEC | NUMERIC_ROUNDABORT | PARSEONLY
+	| REMOTE_PROC_TRANSACTIONS | SHOWPLAN_ALL | SHOWPLAN_TEXT
+	| SHOWPLAN_XML | STATISTICS (IO | PROFILE | TIME | XML)
+	| XACT_ABORT )(ON | OFF)
+	| SET LOCALVAR (DOT IDENT)? OP_EQ   ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+	
+;
+
 proc_formal_param:
       (LOCALVAR (full_ident DOT)? sql_datatype)
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
       (KW_OUT | KW_OUTPUT)? KW_READONLY?
 	  ;
+	  
 create_proc:
     KW_CREATE (KW_PROCEDURE | KW_PROC)
-    (ident DOT)? ident (SEMI DEC_NUMBER)?
-    comma_list<<proc_formal_param>>?
+    (ident DOT)? ident (; SEMI DEC_NUMBER)?  
+    comma_list<<proc_formal_param>>? 
     (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
 ;
+(*Куда вставить procedure_option> ::= [ ENCRYPTION ] [ RECOMPILE ] [ EXECUTE_AS_Clause ]??в правиле create_proc*)
+(*CREATE { PROC | PROCEDURE } [schema_name.] procedure_name [ ; number ] 
+[ { @parameter [ type_schema_name. ] data_type } [ VARYING ] [ = default ] 
+[ OUT | OUTPUT ] ] [ ,...n ] [ WITH <procedure_option> [ ,...n ] ] [ FOR REPLICATION ] 
+AS { <sql_statement> [;][ ...n ] | <method_specifier> } [;] <procedure_option> ::= [ ENCRYPTION ] [ RECOMPILE ] [ EXECUTE_AS_Clause ] 
+<sql_statement> ::= { [ BEGIN ] statements [ END ] } <method_specifier> ::= EXTERNAL NAME assembly_name.class_name.method_name*)
+
 
 proc_body_stmnt:
     select_stmnt
@@ -32,7 +54,7 @@ proc_body_stmnt:
 |   sql_expr
 |   KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
 |   KW_RETURN sql_expr
-|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) 
+|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
 ;
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
@@ -114,14 +136,7 @@ execute_stmnt:
     )* *)
     (KW_WITH KW_RECOMPILE)?
     SEMI?
-;
-set_stmnt:
-    SET IMPLICIT_TRANSACTIONS ( ON | OFF )
-|   SET NOCOUNT ( ON | OFF )
-|   SET ANSI_NULLS (ON | OFF)
-|   SET QUOTED_IDENTIFIER (ON | OFF)
-|   SET LOCALVAR (DOT IDENT)? OP_EQ   ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
-;   
+; 
 
 sql_datatype:
     KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  |

@@ -62,6 +62,65 @@ select_stmnt:
     query_expression
     (KW_INTO full_ident (* http://msdn.microsoft.com/en-us/library/ms188029.aspx *) )?
 ;
+(*
+select_stmnt: 
+    list<<(WITH common_table_expression)* COMMA>>
+    (query_expression)?
+    (ORDER BY list<<(order_by_expression | column_position (KW_ASC | KW_DESC))* COMA>>)?
+    (compute)? 
+    (for_clause)? 
+    (select_stmnt_option)? 
+
+compute:
+	(KW_COMPUTE (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_STDEV | KW_STDEVP | KW_VAR | KW_VARP | KW_SUM) (sql_expr))? (*n times*)
+    (KW_BY sql_expr)?   (*n times*)
+;
+
+for_clause:
+	(KW_FOR (BROWSE | xml))?
+
+xml:
+	KW_XML 
+	((KW_RAW (('ElementName'))? | KW_AUTO) (*??*)
+		( 
+			commonDirectives 
+			( , (KW_XMLDATA | KW_XMLSCHEMA ( ( 'TargetNameSpaceURI' ) )? ) )?   (*??*)
+			( , KW_ELEMENTS ( KW_XSINIL | KW_ABSENT )? )?
+		)?
+	| KW_EXPLICIT 
+		( 
+			comonDirictives 
+			( , KW_XMLDATA )? 
+		)?
+	| KW_PATH ( ( 'ElementName' ) )?        (*??*)
+		(
+			commonDirectives 
+			( , KW_ELEMENTS ( KW_XSINIL | KW_ABSENT )? )?
+		)?
+	) 	
+;	
+ 
+ commonDirectives:
+( , KW_BINARY_BASE64 )?
+( , KW_TYPE )?
+( , KW_ROOT ( ( 'RootName' ) )? )?             (*??*)
+
+select_stmnt_option:
+	( OPTION ( <query_hint> [ ,...n ] ) )?              (*????????*)
+
+	
+<query_specification> ::= 
+SELECT [ ALL | DISTINCT ] 
+    [TOP expression [PERCENT] [ WITH TIES ] ] 
+    < select_list > 
+    [ INTO new_table ] 
+    [ FROM { <table_source> } [ ,...n ] ] 
+    [ WHERE <search_condition> ] 
+    [ GROUP BY [ ALL ] group_by_expression [ ,...n ] 
+                [ WITH { CUBE | ROLLUP } ]
+    ]
+    [ HAVING < search_condition > ]  *)
+(*что-то повторяется*)
 query_expression:
     ( query_specification | (LPAREN query_expression RPAREN) )
     (
@@ -91,6 +150,8 @@ query_specification:
     from_stmnt?
     (KW_WHERE search_condition)?
 ;
+
+
 (* http://msdn.microsoft.com/en-us/library/ms173545.aspx *)
 search_condition:
    ( KW_NOT? search_condition_predicate | LPAREN search_condition RPAREN )

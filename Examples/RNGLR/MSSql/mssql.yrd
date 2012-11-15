@@ -1,3 +1,5 @@
+include "../../../GrammarTemplates/Common.yrd"
+
 + root_rule: (batch_body "GO")+
 
 batch_body: 
@@ -34,7 +36,7 @@ proc_formal_param:
 create_proc:
     KW_CREATE ("PROCEDURE" | "PROC")
     (ident DOT)? ident (SEMI DEC_NUMBER)?  
-    comma_list<<proc_formal_param>>? 
+    comma_list<<proc_formal_param>> 
     (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
@@ -141,7 +143,7 @@ query_specification:
                 (full_ident DOT)? (IDENT | (DOLLAR KW_IDENTITY) | (DOLLAR KW_ROWGUID) )
             |   udt_column_runtime = IDENT (
                     (DOT | DOUBLE_COLON)
-                    (IDENT | IDENT LPAREN comma_list<<sql_expr>>? RPAREN)
+                    (IDENT | IDENT LPAREN comma_list<<sql_expr>> RPAREN)
                 )?
             |   sql_expr ( KW_AS? IDENT)?
             )
@@ -158,7 +160,7 @@ search_condition:
    ( KW_NOT? search_condition_predicate | LPAREN search_condition RPAREN )
    comma_list<<(
       (KW_AND | KW_OR) KW_NOT? (search_condition_predicate | LPAREN search_condition RPAREN)
-   )>>?
+   )>>
 ;
 search_condition_predicate:
     sql_expr ( OP_EQ | OP_LT | OP_MT | (OP_LT OP_MT) | OP_LT_EQ | OP_MT_EQ ) sql_expr
@@ -228,14 +230,13 @@ sql_expr:
 |   sql_value
 |   LPAREN sql_expr RPAREN
 |   LOCALVAR 
-|   full_ident LPAREN comma_list<<sql_expr>>? RPAREN
+|   full_ident LPAREN comma_list<<sql_expr>> RPAREN
 |   KW_SELECT sql_expr KW_FROM IDENT
 |   (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
 |   GLOBALVAR
 |   full_ident
 ;
 
-list<<item sep>> : item (sep item)*
 comma_list<<item>>: list<<item COMMA>>
 
 sql_value:
@@ -248,4 +249,4 @@ ident:
 |   IDENT
 ;
 
-full_ident: list<<ident DOT>>;
+full_ident: not_empty_list<<ident DOT>>;

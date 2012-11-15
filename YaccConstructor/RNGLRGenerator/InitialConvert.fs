@@ -23,7 +23,7 @@ module Yard.Generators.RNGLR.InitialConvert
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.Core.Convertions.TransformAux
+open Yard.Core.Conversions.TransformAux
 
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =

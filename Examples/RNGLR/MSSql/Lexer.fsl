@@ -26,69 +26,25 @@ open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
 open Yard.Examples.MSParser
 open LexerHelper
+open System
+
+type Collections.Generic.IDictionary<'k,'v> with
+    member d.TryGetValue' k = 
+        let mutable res = Unchecked.defaultof<'v> 
+        let exist = d.TryGetValue(k, &res)
+        if exist then Some res else None
+    member d.Add'(k,v) =
+        if not (d.ContainsKey k) then d.Add(k,v);true else false
+
 
 exception IdentToken
-let getKwToken (name: string) = 
-  try
-    match name.ToUpper() with
-    | "SELECT"    -> KW_SELECT("")
-    | "FROM"      -> KW_FROM("")
-    | "CREATE"    -> KW_CREATE("")
-    | "PROC"
-    | "PROCEDURE" -> KW_PROCEDURE("")
-    | "VARYING"   -> KW_VARYING("")
-    | "OUT" 
-    | "OUTPUT"    -> KW_OUTPUT("")
-    | "WITH"      -> KW_WITH("")
-    | "FOR"       -> KW_FOR("")
-    | "REPLICATION" -> KW_REPLICATION("")
-    | "AS"        -> KW_AS("")
-    | "BEGIN"     -> KW_BEGIN("")
-    | "END"       -> KW_END("")
-    | "BIGINT"    -> KW_BIGINT("")
-    | "INT"       -> KW_INT("")
-    | "TINYINT"   -> KW_TINYINT("")
-    | "NUMERIC"   -> KW_NUMERIC("")
-    | "BIT"       -> KW_BIT("")
-    | "SMALLINT"  -> KW_SMALLINT("")
-    | "DECIMAL"   -> KW_DECIMAL("") 
-    | "MONEY"     -> KW_MONEY("")
-    | "SMALLMONEY"-> KW_SMALLMONEY("")
-    | "FLOAT"     -> KW_FLOAT("")
-    | "REAL"      -> KW_REAL("")
-    | "CHAR"      -> KW_CHAR("")
-    | "VARCHAR"   -> KW_VARCHAR("")
-    | "NCHAR"     -> KW_NCHAR("")
-    | "NVARCHAR"  -> KW_NVARCHAR("")
-    | "MAX"       -> KW_MAX("")
-    | "NULL"      -> KW_NULL("")
-    | "EXEC" 
-    | "EXECUTE"   -> KW_EXECUTE("")
-    | "CALLER"    -> KW_CALLER("")
-    | "SELF"      -> KW_SELF("")
-    | "OWNER"     -> KW_OWNER("")
-    | "DECLARE"   -> KW_DECLARE("")
-    | "NOCOUNT"   -> NOCOUNT("")
-    | "SET"       -> SET("")
-    | "ON"        -> ON("")
-    | "OFF"       -> OFF("")
-    | "RECOMPILE" -> KW_RECOMPILE("")
-    | "RETURN"    -> KW_RETURN("")
-    | _           -> raise IdentToken
-  with
-    | IdentToken -> IDENT ("IdentToken")
-
-(*    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
-    let ucis = FSharpType.GetUnionCases(typeof<token>) 
-                    |> Array.map nameToUnionCtor                       
-                    |> dict
-    fun (name:string) startPos endPos ->
-    let upperName = "KW_" + name.ToUpper()
-    let (present, ctor) = ucis.TryGetValue(upperName) 
-    if present then
-        Some(ctor [| SourceText.ofTuple(name, (startPos, endPos)) |] :?>token)
-    else
-        None *)
+let getKwToken = 
+    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
+    let ucis = FSharpType.GetUnionCases (typeof<Token>) |> Array.map nameToUnionCtor  |> dict 
+    fun (name:string) ->
+    let upperName = "KW_" + name.ToUpperInvariant()
+    ucis.TryGetValue' upperName
+    |> Option.map (fun ctor ->  ctor [| name |] :?>Token)
 
 let commendepth = ref 0
 let startPos = ref Position.Empty
@@ -107,7 +63,9 @@ let makeIdent notKeyWord (name:string) =
   else if name.[0] = '@' then LOCALVAR(name)
   else if name.[0] = '#' then TEMPOBJ(name)
   else if notKeyWord then IDENT(name)
-  else getKwToken name
+  else  match getKwToken name with
+        | Some(kwToken) -> kwToken
+        | None -> IDENT(name)
 
 }
 

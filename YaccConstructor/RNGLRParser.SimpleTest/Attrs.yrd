@@ -1,1 +1,1 @@
-+s[arg] : r=s[(arg * 2)] A {r}| A {arg};
++s[arg] : r=s[(arg * 2)] A {r}| A {arg}

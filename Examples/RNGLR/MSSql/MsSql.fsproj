@@ -51,8 +51,8 @@
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <None Include="mssql.yrd" />
-    <Compile Include="LexerHelper.fs" />
     <Compile Include="MSParser.fs" />
+    <Compile Include="LexerHelper.fs" />
     <Compile Include="Lexer.fs" />
     <None Include="mssql.yrd" />
     <Compile Include="Driver.fs" />
@@ -61,7 +61,9 @@
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="RNGLR">

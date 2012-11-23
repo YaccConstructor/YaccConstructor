@@ -49,8 +49,8 @@ type AST =
         elif this.other <> null then
             match Array.tryFind f this.other with
             | Some res -> res
-            | None -> Unchecked.defaultof<_>
-        else Unchecked.defaultof<_>
+            | None -> failwith "Can't find family"
+        else failwith "Can't find family"
 
 and Family =
     struct

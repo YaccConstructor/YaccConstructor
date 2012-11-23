@@ -94,7 +94,7 @@ type RNGLR() =
                 grammar.EpsilonCyclicNonTerms
                 |> List.iter (eprintf "%s ")
                 eprintfn ""
-                grammar.epsilonTrees |> Array.iter (fun t -> t.EliminateCycles())
+                grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             let statesInterpreter = buildStates table grammar
             let tables = new Tables(grammar, statesInterpreter)
             use out = new System.IO.StreamWriter (output)

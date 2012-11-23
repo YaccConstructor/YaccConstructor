@@ -48,7 +48,9 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
         if yardRule.args.IsEmpty then ""
         else  yardRule.args |> List.map (fun x -> sprintf "fun %s -> " x.text) |> String.concat ""
     let rec layoutProduction isOnTop = function
-        | PAlt(left, right) -> aboveL (layoutProduction isOnTop left) (layoutProduction isOnTop right)
+        | PAlt(left, right) ->
+            let leftL = layoutProduction isOnTop left
+            aboveL leftL (layoutProduction isOnTop right)
         | PSeq(elements, actionCode, _) -> 
             let bindings =
                 elements

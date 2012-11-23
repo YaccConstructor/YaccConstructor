@@ -35,3 +35,4 @@ Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.fs
 Examples/CYK/DialectsCYKDemo/SQLSelectDemo/SelectDemo.yrd.CYK.fs
 YaccConstructor/YardFrontend/Lexer.fs
 YaccConstructor/YardFrontend/log.txt
+Examples/RNGLR/MSSql/out

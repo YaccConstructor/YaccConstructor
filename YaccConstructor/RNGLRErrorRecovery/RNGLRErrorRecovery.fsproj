@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{472adc53-355c-4f8d-beb2-4b13dda3fe73}</ProjectGuid>
+    <ProjectGuid>1ce709cd-2011-490e-a37b-6d8119eef7dc</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DialectsCYKDemo</RootNamespace>
-    <AssemblyName>DialectsCYKDemo</AssemblyName>
+    <RootNamespace>RNGLRErrorRecovery</RootNamespace>
+    <AssemblyName>RNGLRErrorRecovery</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <Name>DialectsCYKDemo</Name>
+    <Name>RNGLRErrorRecovery</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Debug\DialectsCYKDemo.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\RNGLRErrorRecovery.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -32,42 +32,20 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <DocumentationFile>bin\Release\DialectsCYKDemo.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\RNGLRErrorRecovery.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <FsYaccToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
-    <FsLexToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
-  </PropertyGroup>
-
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="..\..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <FsLex Include="Demo1.fsl">
-      <OtherFlags>--unicode</OtherFlags>
-    </FsLex>
-    <Compile Include="Demo1.yrd.CYK.fs" />
-    <Compile Include="Demo1.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="Demo1.yrd" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\..\..\yc\Common.dll</HintPath>
-    </Reference>
-    <Reference Include="CYK">
-      <HintPath>..\..\..\yc\CYK.dll</HintPath>
-    </Reference>
-    <Reference Include="CYKCommon">
-      <HintPath>..\..\..\yc\CYKCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">

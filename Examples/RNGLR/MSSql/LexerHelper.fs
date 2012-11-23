@@ -1,4 +1,48 @@
 ﻿module LexerHelper
+
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Microsoft.FSharp.Reflection
+open Yard.Examples.MSParser
+open System
+
+type Collections.Generic.IDictionary<'k,'v> with
+    member d.TryGetValue' k = 
+        let mutable res = Unchecked.defaultof<'v> 
+        let exist = d.TryGetValue(k, &res)
+        if exist then Some res else None
+    member d.Add'(k,v) =
+        if not (d.ContainsKey k) then d.Add(k,v);true else false
+
+exception IdentToken
+let getKwToken = 
+    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
+    let ucis = FSharpType.GetUnionCases (typeof<Token>) |> Array.map nameToUnionCtor  |> dict 
+    fun (name:string) ->
+    let upperName = "KW_" + name.ToUpperInvariant()
+    ucis.TryGetValue' upperName
+    |> Option.map (fun ctor ->  ctor [| name |] :?>Token)
+
+let commendepth = ref 0
+let startPos = ref Position.Empty
+let str_buf = new System.Text.StringBuilder()
+
+let appendBuf (str:string) = str_buf.Append(str) |> ignore
+let clearBuf () = str_buf.Clear() |> ignore
+  
+let makeIdent notKeyWord (name:string) =
+  let prefix = 
+    if String.length name >=2 
+    then name.[0..1] 
+    else ""
+  if prefix = "@@" then GLOBALVAR(name)
+  else if prefix = "##" then GLOBALTEMPOBJ(name)
+  else if name.[0] = '@' then LOCALVAR(name)
+  else if name.[0] = '#' then TEMPOBJ(name)
+  else if notKeyWord then IDENT(name)
+  else  match getKwToken name with
+        | Some(kwToken) -> kwToken
+        | None -> IDENT(name)
           
 type FsLexPosition = Microsoft.FSharp.Text.Lexing.Position
 

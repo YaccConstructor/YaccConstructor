@@ -1,5 +1,5 @@
-﻿+s :  x y;
+﻿+s :  x y
 
-y: PLUS;
-x: NUM;
-x: y x;
+y: PLUS
+x: NUM
+x: y x

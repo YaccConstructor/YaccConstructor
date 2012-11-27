@@ -19,7 +19,7 @@ set_stmnt:
 	| "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
 	| "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
 	| "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
-	| NOCOUNT | NOEXEC | NUMERIC_ROUNDABORT | PARSEONLY
+	| "NOCOUNT" | "NOEXEC" | NUMERIC_ROUNDABORT | PARSEONLY
 	| REMOTE_PROC_TRANSACTIONS | SHOWPLAN_ALL | SHOWPLAN_TEXT
 	| SHOWPLAN_XML | STATISTICS (IO | PROFILE | TIME | XML)
 	| XACT_ABORT ) ("ON" | "OFF")
@@ -196,7 +196,8 @@ execute_stmnt:
     )* *)
     (KW_WITH KW_RECOMPILE)?
     SEMI?
- 
+
+type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 
 sql_datatype:
       KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | "SMALLMONEY"  | "sysname"
@@ -204,9 +205,10 @@ sql_datatype:
     | KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
     | KW_REAL
     | KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
-    | KW_VARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+    | KW_VARCHAR type_size?
+    | "varbinary" type_size?
     | KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
-    | KW_NVARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+    | KW_NVARCHAR type_size?
 
 
 execute_as:

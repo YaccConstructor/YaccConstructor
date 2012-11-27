@@ -50,4 +50,4 @@ let parse (path:string) =
             //translated.Head
     parseBatch path allTokens
 
-do parse @"..\..\test.sql"
+do parse @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"

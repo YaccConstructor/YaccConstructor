@@ -12,18 +12,19 @@ start2:
   | GLOBALVAR
   | GLOBALTEMPOBJ
   | TEMPOBJ
-;
 
 set_stmnt:
-	"SET" ("ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
-	| "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
-	| "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
-	| "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
-	| "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
-	| "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
-	| "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
-	| "XACT_ABORT" ) (KW_ON | KW_OFF)
-	| SET LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+	"SET" (
+		"ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
+        	 | "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
+	         | "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
+                 | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
+                 | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
+                 | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
+                 | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
+                 | "XACT_ABORT" ) 
+              (KW_ON | KW_OFF)
+	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
 
 proc_formal_param:
       LOCALVAR (full_ident DOT)? sql_datatype
@@ -38,16 +39,15 @@ create_proc:
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
 
-
 proc_body_stmnt:
-    select_stmnt
-|   set_stmnt 
-|   execute_stmnt
-|   sql_expr
-|   KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
-|   KW_RETURN sql_expr
-|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
-;
+     select_stmnt
+   | set_stmnt 
+   | execute_stmnt
+   | sql_expr
+   | KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
+   | KW_RETURN sql_expr
+   | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
+
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
 (*  list<<(KW_WITH common_table_expression)* COMMA>> *)

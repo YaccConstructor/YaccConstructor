@@ -23,20 +23,45 @@ set_stmnt:
 	| "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
 	| "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
 	| "XACT_ABORT" ) (KW_ON | KW_OFF)
-	| SET LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+
+
+	
 
 proc_formal_param:
       LOCALVAR (full_ident DOT)? sql_datatype
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
       (KW_OUT | KW_OUTPUT)? KW_READONLY?	  	  
+(*
+begin_transaction:
+KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
+    ( ( ident | @tran_name_variable )     (*????????/*)
+      ( KW_WITH KW_MARK ( STRING_CONST ) )?
+    )?
+( SEMI )?      (* proc_body_stmt?*)
 
+rollback:
+KW_ROLLBACK ( KW_TRAN | KW_TRANSACTION ) 
+     ( ident)? 
+( SEMI )?
+commit:
+KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
+( SEMI )?
+	*)  
 create_proc:
     KW_CREATE ("PROCEDURE" | "PROC")
     (ident DOT)? ident (SEMI DEC_NUMBER)?  
-    comma_list<<proc_formal_param>> 
-    (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
+    (comma_list<<proc_formal_param>>)? 
+    (KW_WITH (execute_as)+ )? 
+	(*(KW_WITH list<<procedure_option COMMA>>)?*)
+	( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
+
+procedure_option: 
+    ( "ENCRYPTION" )?
+    ( "RECOMPILE" )?
+    ( "EXECUTE_AS_Clause" )?
 
 
 proc_body_stmnt:
@@ -124,7 +149,7 @@ KW_SELECT ( KW_ALL | KW_DISTINCT )?
         )
         COMMA>>                                                 (*?????????*)
     ( KW_INTO new_table )? 
-    ( KW_FROM list<<{ table_source COMMA>> )? (*?????????*)
+    ( KW_FROM list<< table_source COMMA>> )? (*?????????*)
     ( KW_WHERE search_condition )?                             (*?????????*)
     ( KW_GROUP KW_BY ( KW_ALL )? group_by_expression [ ,...n ] (*?????????*)
                 ( KW_WITH ( "CUBE" | "ROLLUP" ) )?

@@ -1,3 +1,4 @@
-+expr : a=expr ADD b=expr {a + b} | f=fact {f}
+[<Start>]
+expr : a=expr ADD b=expr {a + b} | f=fact {f}
 fact : a=fact MUL b=fact {a * b} | n=num {n}
 num : A {3} | B{5}

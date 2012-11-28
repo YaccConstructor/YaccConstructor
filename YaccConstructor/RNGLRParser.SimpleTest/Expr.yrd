@@ -1,1 +1,2 @@
-+e : N | e P e
+[<Start>]
+e : N | e P e

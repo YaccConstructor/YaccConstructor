@@ -25,14 +25,10 @@ open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
 
-type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType>
-    | Error of int * 'TokenType * string
-
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
-type private Vertex  =
+type Vertex  =
     val mutable OutEdges : UsualOne<Edge>
     /// Number of token, processed when the vertex was created
     val Level : int
@@ -40,7 +36,7 @@ type private Vertex  =
     val State : int
     new (state, level) = {OutEdges = Unchecked.defaultof<_>; State = state; Level = level}
 
-and private Edge =
+and Edge =
     struct
         /// AST on the edge
         val Ast : obj
@@ -48,6 +44,14 @@ and private Edge =
         val Dest : Vertex
         new (d,a) = {Dest = d; Ast = a}
     end
+
+type ParserDebugFuns = {
+    drawGSSDot : string -> unit
+}
+
+type ParseResult<'TokenType> =
+    | Success of Tree<'TokenType>
+    | Error of int * 'TokenType * string * ParserDebugFuns
 
 
 /// Compare vertex like a pair: (level, state)
@@ -98,6 +102,44 @@ let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * F
         i <- i - 1
     i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
 
+let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (path : string) =
+    use out = new System.IO.StreamWriter (path)
+    let was = new Dictionary<_,_>()
+    out.WriteLine "digraph GSS {"
+    let print s = out.WriteLine ("    " + s)
+    let curNum = ref 0
+    print "rankdir=RL"
+    let getAstString (ast : obj) =
+        match ast with
+        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"
+        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
+        | :? AST as ast -> numToString leftSide.[ast.first.prod]
+        | _ -> failwith "Unexpected ast"
+
+    let rec dfs (u : Vertex) =
+        was.Add (u, !curNum)
+        print <| sprintf "%d [label=\"%d\"]" !curNum u.State
+        incr curNum
+        if u.OutEdges.first <> Unchecked.defaultof<_> then
+            handleEdge u u.OutEdges.first
+            if u.OutEdges.other <> null then
+                u.OutEdges.other |> Array.iter (handleEdge u)
+
+    and handleEdge u (e : Edge) =
+        let v = e.Dest
+        if not <| was.ContainsKey v then
+            dfs v
+        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+
+    for v in initNodes do
+        if not <| was.ContainsKey v then
+            dfs v
+
+    out.WriteLine "}"
+    out.Close()
+
+
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
@@ -107,12 +149,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let getEpsilon =
         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
+
     // If input stream is empty or consists only of EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput then
             Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
         else
-            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
+            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string", {drawGSSDot = fun _ -> ()})
     else
         // Currently processed token
         let curToken = ref enum.Current
@@ -297,9 +340,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 else
                     incr curInd
                     shift !curInd
-
+        let debugFuns () =
+            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
+            {drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString}
         if errorIndex <> -1 then
-            Error (errorIndex, !curToken, "Parse error")
+            Error (errorIndex, !curToken, "Parse error", debugFuns ())
         else
             let root = ref None
             let addTreeTop res =
@@ -312,5 +357,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state. Check this: grammar can't contain EOF token.")
+            | None -> Error (!curInd, Unchecked.defaultof<'TokenType>,
+                             "There is no accepting state. Check this: grammar can't contain EOF token.", debugFuns ())
             | Some res -> Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)

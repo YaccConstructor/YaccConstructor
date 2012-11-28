@@ -1,6 +1,7 @@
 include "../../../GrammarTemplates/Common.yrd"
 
-+ root_rule: (batch_body "GO")+
+[<Start>]
+root_rule: (batch_body "GO")+
 
 batch_body: 
     create_proc 

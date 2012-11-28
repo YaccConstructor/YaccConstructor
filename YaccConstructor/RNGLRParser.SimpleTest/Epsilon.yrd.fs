@@ -92,7 +92,7 @@ let private accStates = Array.zeroCreate 8
 for i = 0 to 7 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 8
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -110,13 +110,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                                   1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_1) 
 # 121 "Epsilon.yrd.fs"
       );
@@ -130,13 +130,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                              10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_1) 
 # 141 "Epsilon.yrd.fs"
       );
@@ -148,13 +148,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                                   1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_2) 
 # 159 "Epsilon.yrd.fs"
       );
@@ -168,13 +168,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                              10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_2) 
 # 179 "Epsilon.yrd.fs"
       );
@@ -186,13 +186,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                                   1
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
 # 197 "Epsilon.yrd.fs"
       );
@@ -206,13 +206,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                              10
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
+# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
 # 217 "Epsilon.yrd.fs"
       );
@@ -230,13 +230,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (a3) -> 
                   _rnglr_cycle_res := (
                     
-# 1 "Epsilon.yrd"
-                                                           a1 + a2 + a3
+# 2 "Epsilon.yrd"
+                                                          a1 + a2 + a3
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Epsilon.yrd"
+# 2 "Epsilon.yrd"
                : '_rnglr_type_s) 
 # 241 "Epsilon.yrd.fs"
       );
@@ -246,7 +246,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
-# 1 "Epsilon.yrd"
+# 2 "Epsilon.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 251 "Epsilon.yrd.fs"
       );

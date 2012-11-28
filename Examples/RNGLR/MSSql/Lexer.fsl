@@ -57,10 +57,12 @@ rule tokens = parse
  | "."          { DOT(".") }
  | ","          { COMMA(",") }
  | "="          { OP_EQ("=") }
+ | ">"          { OP_MT(">") }
+ | "<"          { OP_LT("<") }
  | ";"          { SEMI(";") }
  | "("      { LPAREN("(") }
  | ")"      { RPAREN(")") }
- | "["      { LBRACKET("(") }
+ | "["      { LBRACKET("[") }
  | "]"      { RBRACKET("]") }
  | "+"      { OP_PLUS("+") }
  | "-"      { OP_MINUS("-") }

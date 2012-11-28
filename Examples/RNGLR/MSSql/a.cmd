@@ -1,2 +1,0 @@
-C:\Projects\recursive-ascent\YaccConstructor\Main\bin\Release\YaccConstructor.exe ^
-    -f YardFrontend -c ExpandEbnf -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets -g YardPrinter -i mssql.yrd > out

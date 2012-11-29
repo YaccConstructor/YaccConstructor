@@ -12,7 +12,7 @@ start2:
   | GLOBALVAR
   | GLOBALTEMPOBJ
   | TEMPOBJ
-
+(*****************************************SET****************************************************)
 set_stmnt:
 	"SET" (
 		"ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
@@ -27,28 +27,13 @@ set_stmnt:
 	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
 
 
-	
+(*********************************PROCEDURE************************************************************)	
 
 proc_formal_param:
       LOCALVAR (full_ident DOT)? sql_datatype
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
       (KW_OUT | KW_OUTPUT)? KW_READONLY?	  	  
-(*
-begin_transaction:
-KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
-    ( ( ident | @tran_name_variable )     (*????????/*)
-      ( KW_WITH KW_MARK ( STRING_CONST ) )?
-    )?
-( SEMI )?      (* proc_body_stmt?*)
-
-rollback:
-KW_ROLLBACK ( KW_TRAN | KW_TRANSACTION ) 
-     ( ident)? 
-( SEMI )?
-commit:
-KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
-( SEMI )?
-	*)  
+  
 create_proc:
     KW_CREATE ("PROCEDURE" | "PROC")
     (ident DOT)? ident (SEMI DEC_NUMBER)?  
@@ -69,10 +54,40 @@ proc_body_stmnt:
    | set_stmnt 
    | execute_stmnt
    | sql_expr
-   | KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
+   | (*KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?*) declare
    | KW_RETURN sql_expr
    | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
+   
+(***********************************DECLARE**********************************************************)
+declare:  
+KW_DECLARE 
+	list<<
+     (( LOCALVAR (KW_AS)? sql_datatype ) 
+    | ( ident CURSOR ) 
+    | ( ident (KW_AS)? table_type_definition ) 
+     ) COMMA>>
 
+table_type_definition: 
+     KW_TABLE LPAREN ((column_definition) | (table_constraint) )* RPAREN 
+
+column_definition:
+          ident ( ("scalar_data_type") | (KW_AS sql_expr) )
+     ( KW_COLLATE IDENT )? 
+     ( ( KW_DEFAULT sql_expr )? | KW_IDENTITY ( ( DEC_NUMBER,DEC_NUMBER ) )? )? 
+     ( KW_ROWGUIDCOL )? 
+     (column_constraint)? 
+
+column_constraint: 
+     ( ( KW_NULL | KW_NOT KW_NULL )? 
+     | ( KW_PRIMARY KW_KEY | KW_UNIQUE )?
+     | KW_CHECK ( sql_expr ) 
+     ) 
+
+table_constraint: 
+     ( ( KW_PRIMARY KW_KEY | KW_UNIQUE ) LPAREN list<<IDENT COMMA>> RPAREN) 
+     | (CHECK LPAREN search_condition RPAREN) 
+       
+(*****************************************SELECT****************************************************)
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
 (*  list<<(KW_WITH common_table_expression)* COMMA>> *)
@@ -84,7 +99,7 @@ select_stmnt:
 select_stmnt: 
     list<<(KW_WITH common_table_expression)* COMMA>>
     query_expression
-    (KW_ORDER KW_BY list<<(sql_expr | column_position (KW_ASC | KW_DESC))* COMA>>)?       (*???*)
+    (KW_ORDER KW_BY list<<(sql_expr | DEC_NUMBER (KW_ASC | KW_DESC))* COMA>>)?       (*???*)
     (compute)? 
     (for_clause)? 
     (select_stmnt_option)? 
@@ -148,10 +163,10 @@ KW_SELECT ( KW_ALL | KW_DISTINCT )?
         |   IDENT OP_EQ sql_expr
         )
         COMMA>>                                                 (*?????????*)
-    ( KW_INTO new_table )? 
+    ( KW_INTO ident )? 
     ( KW_FROM list<< table_source COMMA>> )? (*?????????*)
     ( KW_WHERE search_condition )?                             (*?????????*)
-    ( KW_GROUP KW_BY ( KW_ALL )? group_by_expression [ ,...n ] (*?????????*)
+    ( KW_GROUP KW_BY ( KW_ALL )? list<<sql_expr COMMA>> (*?????????*)
                 ( KW_WITH ( "CUBE" | "ROLLUP" ) )?
     )?
     ( KW_HAVING search_condition )?                            (*?????????*)
@@ -159,30 +174,19 @@ KW_SELECT ( KW_ALL | KW_DISTINCT )?
 	
 search_condition: 
     ( KW_NOT? predicate | LPAREN search_condition RPAREN ) 
-    list<<( ( KW_AND | KW_OR ) KW_NOT? ( predicate | LPAREN search_condition RPAREN ) )? COMMA>>
+   ( list<< ( KW_AND | KW_OR ) KW_NOT? ( predicate | LPAREN search_condition RPAREN )  COMMA>>)?
 
 predicate: 
-    ( sql_expr ( OP_EQ | OP_LT | OP_MT | (OP_LT OP_MT) | OP_LT_EQ | OP_MT_EQ ) sql_expr
-    | string_expression KW_NOT? KW_LIKE string_expression                     (*????????????????????????*)
-  ( KW_ESCAPE 'escape_character' )?                                                (*????????????????????????*)
+    ( sql_expr ( OP_EQ | (OP_LT OP_MT) | OP_MT | OP_LT_EQ | OP_MT_EQ ) sql_expr 
+    | STRING_CONST KW_NOT? KW_LIKE STRING_CONST                     
+  ( KW_ESCAPE STRING_CONST )?                                                
     | sql_expr KW_NOT? KW_BETWEEN sql_expr KW_AND sql_expr 
-    | sql_expr KW_IS KW_NOT? KW_NULL 
-    | KW_CONTAINS 
-    ( { column | * } , '< contains_search_condition >' )                           (*????????????????????????*)
-    | KW_FREETEXT ( { column | * } , 'freetext_string' ) 
-    | sql_expr KW_NOT? KW_IN ( subquery | expression [ ,...n ] ) 
-    | sql_expr ( = | < > | ! = | > | > = | ! > | < | < = | ! < )                     (*????????????????????????*)
-  ( KW_ALL | KW_SOME | KW_ANY) ( subquery )            (*????????????????????????*)
-    | KW_EXISTS ( subquery )     )                         (*????????????????????????*)
+    | sql_expr KW_IS KW_NOT? KW_NULL  
+    | sql_expr ( OP_EQ | (OP_LT OP_MT) | OP_MT | OP_LT_EQ | OP_MT_EQ )                     
+  ( KW_ALL | KW_SOME | KW_ANY) LPAREN query_expresssion RPAREN            
+    | KW_EXISTS LPAREN query_expresssion RPAREN     )                         
 	
-	
-	
-	
-	http://msdn.microsoft.com/ru-ru/library/ms190273(v=sql.90).aspx
-	Если таблица table является секционированной, то необходимо указать аргумент source_partition_number_expression. 
-	Если таблица target_table секционирована, то должен быть указан аргумент target_partition_number_expression. 
-	Если происходит переназначение данных таблицы как секции в уже существующую секционированную 
-	таблицу или переключение секции с одной секционированной таблицы на другую, то конечная секция уже должна существовать и быть пустой.
+(*****************************************ALTER TABLE****************************************************)
 ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
 ( 
     KW_ALTER KW_COLUMN ident 
@@ -222,6 +226,23 @@ drop_clustered_constraint_option:
       | KW_MOVE KW_TO ( ident LPAREN ident RPAREN | filegroup    (*??*)
           | "default")
     )
+
+(*
+begin_transaction:
+KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
+    ( ( ident | @tran_name_variable )     (*????????/*)
+      ( KW_WITH KW_MARK ( STRING_CONST ) )?
+    )?
+( SEMI )?      (* proc_body_stmt?*)
+
+rollback:
+KW_ROLLBACK ( KW_TRAN | KW_TRANSACTION ) 
+     ( ident)? 
+( SEMI )?
+commit:
+KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
+( SEMI )?
+	*)
 	*)
 
 query_expression:

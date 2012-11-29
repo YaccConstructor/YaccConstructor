@@ -37,8 +37,9 @@ let parse (path:string) =
 
     let parseBatch srcFilePath batchTokens =        
         match buildAst batchTokens with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,debug) ->
             printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
+            debug.drawGSSDot "error.dot"
             //new Script([])            
         | Yard.Generators.RNGLR.Parser.Success ast ->
             ast.collectWarnings (fun x -> 0,0)

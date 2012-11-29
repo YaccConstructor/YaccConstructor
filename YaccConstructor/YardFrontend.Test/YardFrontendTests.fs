@@ -484,7 +484,7 @@ type ``Yardfrontend label tests`` () =
     [<Test>]
     member test.``weight test correct input`` () =
         parserTest
-            "+s: @lbl[12.3](T);"
+            "[<Start>]s: @lbl[12.3](T);"
             {info = {fileName = "";};
             head = None;
             grammar = [{name = dummyPos"s";
@@ -506,7 +506,7 @@ type ``Yardfrontend label tests`` () =
         // must fail
         try
             let smth = parserTest
-                        "+s: @lbl[q](T);"
+                        "[<Start>]s: @lbl[q](T);"
                         {info = {fileName = "";};
                         head = None;
                         grammar = [{name = dummyPos"s";
@@ -525,6 +525,6 @@ type ``Yardfrontend label tests`` () =
             Assert.IsTrue(false)
         with 
         | :? System.Exception as ex ->
-            let expected = "Parse error on position (0,9) on token q: illegal weight. Number expected."
+            let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
             let actual = ex.Message
             Assert.AreEqual(expected, actual)

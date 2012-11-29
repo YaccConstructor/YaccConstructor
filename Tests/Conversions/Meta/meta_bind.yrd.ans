@@ -6,4 +6,5 @@ yard_rule_3:  r = a l = b {(l,r)};
 
 yard_rule_b_4:  yard_rule_3;
 
-+s:  yard_rule_a_2 yard_rule_b_4;
+[<Start>]
+s:  yard_rule_a_2 yard_rule_b_4;

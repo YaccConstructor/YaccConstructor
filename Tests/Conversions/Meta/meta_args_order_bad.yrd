@@ -4,4 +4,5 @@ d<<r>> : r;
 
 a[b c]: d<<s[b]>> d<<s[c]>>;
 
-+s: a[b c] | a[c b];
+[<Start>]
+s: a[b c] | a[c b];

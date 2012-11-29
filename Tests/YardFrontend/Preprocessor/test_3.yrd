@@ -1,4 +1,5 @@
-+s:
+[<Start>]
+s:
 #if first
  A
 #elif second

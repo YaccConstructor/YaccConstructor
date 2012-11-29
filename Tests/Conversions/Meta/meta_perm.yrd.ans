@@ -15,4 +15,5 @@ yard_rule_perm3_1:
     | <v1> = b <(v0,v2)> = yard_rule_perm2_3 {(v0, v1, v2)}
     | <v2> = c <(v0,v1)> = yard_rule_perm2_4 {(v0, v1, v2)};
 
-+s:  yard_rule_perm3_1;
+[<Start>]
+s:  yard_rule_perm3_1;

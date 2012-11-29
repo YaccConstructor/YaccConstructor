@@ -1,1 +1,2 @@
-+s: (NUMBER | IDENT)? (NUMBER | IDENT)? ;
+[<Start>]
+s: (NUMBER | IDENT)? (NUMBER | IDENT)? ;

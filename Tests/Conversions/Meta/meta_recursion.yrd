@@ -8,4 +8,5 @@ yard_item_1<<op>>:
 
 do<<op>>:  yard_list<<yard_item_1<<op>>>>;
 
-+s:  do<<NUMBER>>;
+[<Start>]
+s:  do<<NUMBER>>;

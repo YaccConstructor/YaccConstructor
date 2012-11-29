@@ -1,3 +1,4 @@
-+s: x y;
+[<Start>]
+s: x y;
 x: NUM;
 y: PLUS;

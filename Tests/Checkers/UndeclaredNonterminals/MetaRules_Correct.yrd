@@ -1,5 +1,6 @@
 e<<f>> : d f;
-+s : b;
+[<Start>]
+s : b;
 b : NUMBER;
 d : s;
 z : e<<(x|y)>> w<<s>>;

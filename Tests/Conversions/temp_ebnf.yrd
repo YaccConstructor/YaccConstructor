@@ -14,4 +14,5 @@ yard_item_1<<a>>:  NUMBER;
 
 t<<a>>:  yard_list<<yard_item_1<<a>>>>;
 
-+s: t<<b>>;
+[<Start>]
+s: t<<b>>;

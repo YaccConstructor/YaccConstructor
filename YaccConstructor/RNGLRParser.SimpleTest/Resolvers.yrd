@@ -1,1 +1,2 @@
-+list : a=list =>{a.Length = 1}=> b=list {a @ b} | A {[1]}
+[<Start>]
+list : a=list =>{a.Length = 1}=> b=list {a @ b} | A {[1]}

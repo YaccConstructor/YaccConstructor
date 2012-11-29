@@ -72,7 +72,7 @@ let printTextBox tabSize windowSize tbSeq =
 
 let printRule (rule:Rule.t<Source.t, Source.t>) = 
     let bracketsIf cond s = if cond then seq { yield Str "("; yield! s; yield Str ")"} else s
-    let startSign = if rule._public then "+" else ""
+    let startSign = if rule._public then "[<Start>]" + endl else ""
     let printAttr = function
         | Some(attr) -> "{"+(Source.toString attr)+"}"
         | None -> ""

@@ -83,7 +83,7 @@ let private accStates = Array.zeroCreate 4
 for i = 0 to 3 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 3
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -103,13 +103,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 1 "Resolvers.yrd"
-                                                                      [1]
+# 2 "Resolvers.yrd"
+                                                                     [1]
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 1 "Resolvers.yrd"
+# 2 "Resolvers.yrd"
                : '_rnglr_type_list) 
 # 114 "Resolvers.yrd.fs"
       );
@@ -121,19 +121,19 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_list) 
              |> List.iter (fun (a) -> 
-# 1 "Resolvers.yrd"
+# 2 "Resolvers.yrd"
               if (a.Length = 1) then (
                 ((unbox _rnglr_children.[1]) : '_rnglr_type_list) 
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 1 "Resolvers.yrd"
-                                                              a @ b
+# 2 "Resolvers.yrd"
+                                                             a @ b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Resolvers.yrd"
+# 2 "Resolvers.yrd"
                : '_rnglr_type_list) 
 # 138 "Resolvers.yrd.fs"
       );
@@ -143,7 +143,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_list) 
             )
-# 1 "Resolvers.yrd"
+# 2 "Resolvers.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 148 "Resolvers.yrd.fs"
       );

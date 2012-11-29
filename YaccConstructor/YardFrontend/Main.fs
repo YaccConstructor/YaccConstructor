@@ -151,7 +151,7 @@ let parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
-    | Parser.Error (_, token, msg) ->
+    | Parser.Error (_, token, msg, _) ->
         failwithf "Parse error on position %s on token %A: %s" (token |> tokenToRange |> rangeToString) token msg
     //GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
 

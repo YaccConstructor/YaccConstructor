@@ -1,3 +1,5 @@
 a:(b PLUS a|b);
-+s: (a|b);
-+b: NUMBER;
+[<Start>]
+s: (a|b);
+[<Start>]
+b: NUMBER;

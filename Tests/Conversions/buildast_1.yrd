@@ -1,4 +1,5 @@
-+s: MUMBER;
+[<Start>]
+s: MUMBER;
 
 s2: NUMBER | empty ;
 

@@ -85,7 +85,7 @@ let private accStates = Array.zeroCreate 8
 for i = 0 to 7 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 5
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -107,13 +107,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 1 "Longest.yrd"
-                                   (l : list<_>).Length, (r : list<_>).Length 
+# 2 "Longest.yrd"
+                                  (l : list<_>).Length, (r : list<_>).Length 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_s) 
 # 118 "Longest.yrd.fs"
       );
@@ -123,7 +123,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 128 "Longest.yrd.fs"
       );
@@ -139,13 +139,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (yard_tail) -> 
                 _rnglr_cycle_res := (
                   
-# 1 "Longest.yrd"
-                         yard_head::yard_tail
+# 2 "Longest.yrd"
+                        yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_yard_many_1) 
 # 150 "Longest.yrd.fs"
       );
@@ -157,13 +157,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 1 "Longest.yrd"
-                     []
+# 2 "Longest.yrd"
+                    []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_yard_many_1) 
 # 168 "Longest.yrd.fs"
       );
@@ -179,13 +179,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (yard_tail) -> 
                 _rnglr_cycle_res := (
                   
-# 1 "Longest.yrd"
-                              yard_head::yard_tail
+# 2 "Longest.yrd"
+                             yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_yard_many_2) 
 # 190 "Longest.yrd.fs"
       );
@@ -197,13 +197,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 1 "Longest.yrd"
-                     []
+# 2 "Longest.yrd"
+                    []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 1 "Longest.yrd"
+# 2 "Longest.yrd"
                : '_rnglr_type_yard_many_2) 
 # 208 "Longest.yrd.fs"
       );

@@ -1,2 +1,3 @@
-+s : A s t | {}
+[<Start>]
+s : A s t | {}
 t : {}

@@ -1,1 +1,2 @@
-+s<<a>> : (NUMBER)*;
+[<Start>]
+s<<a>> : (NUMBER)*;

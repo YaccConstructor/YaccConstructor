@@ -1,4 +1,5 @@
-+a[v] : h=b r<<c[h]>>[v];
+[<Start>]
+a[v] : h=b r<<c[h]>>[v];
 
 r<<r1>>[s] : r1[s];
 

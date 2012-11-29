@@ -242,7 +242,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
 
     printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
 
-    printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)"
+    printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
     printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
     printBrInd 1 "buildAst<Token> parserSource"

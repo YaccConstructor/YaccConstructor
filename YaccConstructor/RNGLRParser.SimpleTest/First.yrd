@@ -1,1 +1,2 @@
-+a : B | A a
+[<Start>]
+a : B | A a

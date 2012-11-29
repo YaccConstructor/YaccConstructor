@@ -1,4 +1,5 @@
-+a : h=b (c[h])*;
+[<Start>]
+a : h=b (c[h])*;
 
 {
 
@@ -15,6 +16,7 @@ yard_list<<item>>:
       { [] }
     | <yard_h> = item <yard_t> = yard_list<<item>> { yard_h::yard_t };
 
-+a:  h = b yard_list<< c[h] >>;
+[<Start>]
+a:  h = b yard_list<< c[h] >>;
 }
 

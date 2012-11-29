@@ -2,4 +2,5 @@ mrArg : NUMBER ;
 
 metar<<mfArg>>: mfArg ;
 
-+s: metar<<mrArg>> ;
+[<Start>]
+s: metar<<mrArg>> ;

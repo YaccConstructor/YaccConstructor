@@ -87,7 +87,7 @@ let private accStates = Array.zeroCreate 5
 for i = 0 to 4 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 5
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -109,13 +109,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 1 "Cycle.yrd"
-                                  f
+# 2 "Cycle.yrd"
+                                 f
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Cycle.yrd"
+# 2 "Cycle.yrd"
                : '_rnglr_type_start) 
 # 120 "Cycle.yrd.fs"
       );
@@ -125,7 +125,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_start) 
             )
-# 1 "Cycle.yrd"
+# 2 "Cycle.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 130 "Cycle.yrd.fs"
       );
@@ -139,13 +139,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (v) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Cycle.yrd"
+# 3 "Cycle.yrd"
                                   v+1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Cycle.yrd"
+# 3 "Cycle.yrd"
                : '_rnglr_type_s) 
 # 150 "Cycle.yrd.fs"
       );
@@ -159,13 +159,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Cycle.yrd"
+# 3 "Cycle.yrd"
                         0
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Cycle.yrd"
+# 3 "Cycle.yrd"
                : '_rnglr_type_s) 
 # 170 "Cycle.yrd.fs"
       );

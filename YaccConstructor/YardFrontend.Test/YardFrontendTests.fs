@@ -98,22 +98,22 @@ type ``YardFrontend lexer tests`` () =
     [<Test>]
     member test.``Lexer seq test`` () =
         lexerTest 
-            "+s: NUMBER PLUS NUMBER;"
-            [START_RULE_SIGN (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); UIDENT (getSource "NUMBER" 4 10)
+            "[<Start>]s: NUMBER PLUS NUMBER;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); UIDENT (getSource "NUMBER" 4 10)
             ; UIDENT (getSource "PLUS" 11 15); UIDENT (getSource "NUMBER" 16 22); SEMICOLON (getSource ";" 22 23); EOF (getSource "" 23 23)]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
-            "+s: (MINUS|PLUS)*;"
-            [START_RULE_SIGN (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); LPAREN (getSource "(" 4 5)
+            "[<Start>]s: (MINUS|PLUS)*;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); LPAREN (getSource "(" 4 5)
             ; UIDENT (getSource "MINUS" 5 10); BAR (getSource "|" 10 11); UIDENT (getSource "PLUS" 11 15);
             RPAREN (getSource ")" 15 16); STAR (getSource "*" 16 17); SEMICOLON (getSource ";" 17 18); EOF (getSource "" 18 18)]
 
     [<Test>]            
     member test.``Include test`` () =
-        lexerTest @"  include ""test_included.yrd""  +s:PLUS;"
-            [INCLUDE (getSource "include" 2 9); STRING (getSource "test_included.yrd" 11 28); PLUS (getSource "s" 2 3); LIDENT (getSource "s" 32 33)
+        lexerTest @"  include ""test_included.yrd""  [<Start>]s:PLUS;"
+            [INCLUDE (getSource "include" 2 9); STRING (getSource "test_included.yrd" 11 28); START_RULE_SIGN (getSource "[<Start>]" 2 3); LIDENT (getSource "s" 32 33)
             ; COLON (getSource ":" 33 34); UIDENT (getSource "PLUS" 34 38); SEMICOLON (getSource ":" 38 39); EOF (getSource ":" 39 39)]
 
 [<TestFixture>]
@@ -344,7 +344,7 @@ type ``YardFrontend Parser tests`` () =
     [<Test>]
     member test.``Seq test`` () =
         parserTest
-            "+s: NUMBER PLUS NUMBER;" 
+            "[<Start>]s: NUMBER PLUS NUMBER;" 
             { info = {fileName = ""} 
               head = None  
               grammar = 
@@ -386,8 +386,8 @@ type ``YardFrontend options tests`` () =
     [<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
-            "+s:  #set a = \"smth\"  A;"
-            [START_RULE_SIGN (getSource "+" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); SET (getSource "#set" 5 9);
+            "[<Start>]s:  #set a = \"smth\"  A;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); SET (getSource "#set" 5 9);
              LIDENT (getSource "a" 10 11) ; EQUAL (getSource "=" 12 13); STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23);
              SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]
 
@@ -413,7 +413,7 @@ type ``YardFrontend Complete tests`` () =
     [<Test>]
     member test.``L_attr test`` () =
         completeTest
-            "  {  let value x = (x:>Lexeme<string>).value  } \n+s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
             [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
                 LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); PATTERN (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);

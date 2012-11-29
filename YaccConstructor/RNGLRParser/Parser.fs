@@ -25,14 +25,10 @@ open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
 
-type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType>
-    | Error of int * 'TokenType * string
-
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
-type private Vertex  =
+type Vertex  =
     val mutable OutEdges : UsualOne<Edge>
     /// Number of token, processed when the vertex was created
     val Level : int
@@ -40,7 +36,7 @@ type private Vertex  =
     val State : int
     new (state, level) = {OutEdges = Unchecked.defaultof<_>; State = state; Level = level}
 
-and private Edge =
+and Edge =
     struct
         /// AST on the edge
         val Ast : obj
@@ -48,6 +44,14 @@ and private Edge =
         val Dest : Vertex
         new (d,a) = {Dest = d; Ast = a}
     end
+
+type ParserDebugFuns = {
+    drawGSSDot : string -> unit
+}
+
+type ParseResult<'TokenType> =
+    | Success of Tree<'TokenType>
+    | Error of int * 'TokenType * string * ParserDebugFuns
 
 
 /// Compare vertex like a pair: (level, state)
@@ -58,9 +62,9 @@ let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.Stat
 /// All edges are sorted by destination ascending.
 let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
-    while i >= 0 && (less (fst out.[i]) v) do
+    while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
-    out.Insert(i+1, (v, ast))
+    out.Insert (i+1, (v, ast))
 
 /// Check if edge with specified destination and AST already exists
 let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
@@ -73,80 +77,91 @@ let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex 
 
 /// Add or extend edge with specified destination and family.
 /// All edges are sorted by destination ascending.
-let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) last =
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
     while i >= 0 && less (fst3 out.[i]) v do
         i <- i - 1
-    let ast = 
-        if i >= 0 && eq (fst3 out.[i]) v then
-            last := Unchecked.defaultof<_>
-            let _,_,n = out.[i] in n
-        else
-            let ast = new AST (Unchecked.defaultof<_>, null)
-            last := box ast
-            ast
-    out.Insert(i+1, (v, family, ast))
-    ast
 
-/// Check if families are equal (check whether corresponding elements are equal
-///       and, if families have different lengths, the largest one ends with epsilons)
-let inline private eqF (f : Family) (f' : Family) =
-    if f.prod <> f'.prod then false
-    else
-        let lim = min f.nodes.Length f'.nodes.Length
-        let mutable res = true
-        let mutable i = 0
-        while i < lim && res do
-            if f.nodes.[i] <> f'.nodes.[i] then
-                res <- false
-            i <- i + 1
-        while res && i < f.nodes.Length do
-            match f.nodes.[i] with
-            | :? int as i when i < 0 -> ()
-            | _ -> res <- false
-            i <- i+1
-        while res && i < f'.nodes.Length do
-            match f'.nodes.[i] with
-            | :? int as i when i < 0 -> ()
-            | _ -> res <- false
-            i <- i+1
-        res
+    let isCreated = not (i >= 0 && eq (fst3 out.[i]) v)
+
+    let ast = if not isCreated 
+              then let _,_,n = out.[i] in n
+              else new AST (Unchecked.defaultof<_>, null)
+
+    out.Insert (i+1, (v, family, ast))
+    isCreated, ast
 
 /// Check if edge with specified destination and family already exists
 let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
-    let inline fst (x,_,_) = x
+    let inline fst3 (x,_,_) = x
     let mutable i = out.Count - 1
-    while i >= 0 && less (fst out.[i]) v do
+    while i >= 0 && less (fst3 out.[i]) v do
         i <- i - 1
-    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && not <| eqF f  f') do
+    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && f <> f') do
         i <- i - 1
-    i >= 0 && (let v',f',_ = out.[i] in eq v' v && eqF f f')
+    i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
+
+let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (path : string) =
+    use out = new System.IO.StreamWriter (path)
+    let was = new Dictionary<_,_>()
+    out.WriteLine "digraph GSS {"
+    let print s = out.WriteLine ("    " + s)
+    let curNum = ref 0
+    print "rankdir=RL"
+    let getAstString (ast : obj) =
+        match ast with
+        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"
+        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
+        | :? AST as ast -> numToString leftSide.[ast.first.prod]
+        | _ -> failwith "Unexpected ast"
+
+    let rec dfs (u : Vertex) =
+        was.Add (u, !curNum)
+        print <| sprintf "%d [label=\"%d\"]" !curNum u.State
+        incr curNum
+        if u.OutEdges.first <> Unchecked.defaultof<_> then
+            handleEdge u u.OutEdges.first
+            if u.OutEdges.other <> null then
+                u.OutEdges.other |> Array.iter (handleEdge u)
+
+    and handleEdge u (e : Edge) =
+        let v = e.Dest
+        if not <| was.ContainsKey v then
+            dfs v
+        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+
+    for v in initNodes do
+        if not <| was.ContainsKey v then
+            dfs v
+
+    out.WriteLine "}"
+    out.Close()
+
 
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
+    // Change if it doesn't equal to zero. Now it's true according to states building algorithm
     let startState = 0
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let nonTermsCountLimit = 1 + (Array.max parserSource.LeftSide)
     let getEpsilon =
         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
+
     // If input stream is empty or consists only of EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput then
             Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
         else
-            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
+            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string", {drawGSSDot = fun _ -> ()})
     else
         // Currently processed token
         let curToken = ref enum.Current
         let curNum = ref (parserSource.TokenToNumber enum.Current)
         /// Here all tokens from the input will be collected
         let tokens = new BlockResizeArray<_>()
-        let last = ref Unchecked.defaultof<_>
-        let inline addAst ast =
-            last := ast
-            ast
         let reductions = new Stack<_>(10)
         let statesCount = parserSource.Gotos.Length
         // New edges can be created only from last level.
@@ -159,12 +174,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
 
-        let addVertex state num (edgeOpt : option<Vertex * obj>) =
+        let addVertex state level (edgeOpt : option<Vertex * obj>) =
             let dict = stateToVertex
             if dict.[state] = null then
-                let v = new Vertex(state, num)
+                let v = new Vertex(state, level)
                 dict.[state] <- v
                 let push = parserSource.Gotos.[state].[!curNum]
+                // Push to init state is impossible
                 if push <> 0 then
                     pushes.Push (v, push)
                 let arr = parserSource.ZeroReduces.[state].[!curNum]
@@ -192,12 +208,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let newVertex = addVertex state num None
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
-                        let edge = box <| addEdge final family edges.[state] last
-                        if (pos > 0 && edge = !last) then
+                        let isCreated, edgeLabel = addEdge final family edges.[state]
+                        if (pos > 0 && isCreated) then
                             let arr = parserSource.Reduces.[state].[!curNum]
                             if arr <> null then
                                 for (prod, pos) in arr do
-                                    reductions.Push (newVertex, prod, pos, Some (final, edge))
+                                    reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
@@ -308,10 +324,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             usedStates.Clear()
             let oldPushes = pushes.ToArray()
             pushes.Clear()
-            let curAst = addAst newAstNode
             for (vertex, state) in oldPushes do
-                let newVertex = addVertex state num (Some (vertex,curAst))
-                addSimpleEdge vertex curAst simpleEdges.[state]
+                let newVertex = addVertex state num <| Some (vertex, newAstNode)
+                addSimpleEdge vertex newAstNode simpleEdges.[state]
+
         let mutable errorIndex = -1
         while errorIndex = -1 && not !isEnd do
             if usedStates.Count = 0 then
@@ -324,9 +340,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 else
                     incr curInd
                     shift !curInd
-
+        let debugFuns () =
+            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
+            {drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString}
         if errorIndex <> -1 then
-            Error (errorIndex, !curToken, "Parse error")
+            Error (errorIndex, !curToken, "Parse error", debugFuns ())
         else
             let root = ref None
             let addTreeTop res =
@@ -339,5 +357,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, Unchecked.defaultof<'TokenType>, "There is no accepting state. Check this: grammar can't contain EOF token.")
+            | None -> Error (!curInd, Unchecked.defaultof<'TokenType>,
+                             "There is no accepting state. Check this: grammar can't contain EOF token.", debugFuns ())
             | Some res -> Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)

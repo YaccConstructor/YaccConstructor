@@ -1,4 +1,5 @@
 e<<f>> : d f;
-+s : b;
+[<Start>]
+s : b;
 z : e<<(x|y)>> w<<s>>;
 a<<b c d>> : c;

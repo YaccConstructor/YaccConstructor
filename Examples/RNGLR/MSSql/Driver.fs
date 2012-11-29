@@ -37,7 +37,7 @@ let parse (path:string) =
 
     let parseBatch srcFilePath batchTokens =        
         match buildAst batchTokens with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg) ->
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
             printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
             //new Script([])            
         | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -50,4 +50,4 @@ let parse (path:string) =
             //translated.Head
     parseBatch path allTokens
 
-do parse @"..\..\test.sql"
+do parse @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"

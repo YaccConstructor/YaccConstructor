@@ -1,3 +1,4 @@
 do<<op>> : val=a val=a (op[val] | op[val] IDENT)*;
 
-+s : do<<NUMBER?*>> ;
+[<Start>]
+s : do<<NUMBER?*>> ;

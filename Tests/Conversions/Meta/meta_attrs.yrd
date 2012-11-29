@@ -2,4 +2,5 @@ go: NUMBER;
 
 do<<b>>[c] : res=(go)* {res};
 
-+s: a=do<<b>>[c] {a};
+[<Start>]
+s: a=do<<b>>[c] {a};

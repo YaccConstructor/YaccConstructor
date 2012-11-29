@@ -2,4 +2,5 @@ yardOption<<item>>:  <yard_item> = item { Some yard_item };
 
 o<<item>>:  <yard_item> = yardOption<<item>> { Some yard_item };
 
-+s:  yardOption<<NUM>> yardOption<<STRING>> o<<SEMI>>;
+[<Start>]
+s:  yardOption<<NUM>> yardOption<<STRING>> o<<SEMI>>;

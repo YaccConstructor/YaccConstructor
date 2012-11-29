@@ -92,7 +92,7 @@ let private accStates = Array.zeroCreate 14
 for i = 0 to 13 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 6
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -114,13 +114,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 4 "Order.yrd"
-                              ()
+# 5 "Order.yrd"
+                             ()
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 4 "Order.yrd"
+# 5 "Order.yrd"
                : '_rnglr_type_s) 
 # 125 "Order.yrd.fs"
       );
@@ -130,7 +130,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
-# 4 "Order.yrd"
+# 5 "Order.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 135 "Order.yrd.fs"
       );
@@ -146,13 +146,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 5 "Order.yrd"
+# 6 "Order.yrd"
                               ()
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 5 "Order.yrd"
+# 6 "Order.yrd"
                : '_rnglr_type_e1) 
 # 157 "Order.yrd.fs"
       );
@@ -168,13 +168,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 6 "Order.yrd"
+# 7 "Order.yrd"
                               ()
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 6 "Order.yrd"
+# 7 "Order.yrd"
                : '_rnglr_type_e2) 
 # 179 "Order.yrd.fs"
       );
@@ -188,13 +188,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (a) -> 
               _rnglr_cycle_res := (
                 
-# 7 "Order.yrd"
+# 8 "Order.yrd"
                            res := a :: !res 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 7 "Order.yrd"
+# 8 "Order.yrd"
                : '_rnglr_type_e3) 
 # 199 "Order.yrd.fs"
       );

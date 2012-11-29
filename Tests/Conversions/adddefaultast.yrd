@@ -1,5 +1,6 @@
 
-+sqlcmds: batches=(stmts=stmt* go="go" {new MsBatch(stmts,makeEnd(go))} )* {new MsScript(batches)};
+[<Start>]
+sqlcmds: batches=(stmts=stmt* go="go" {new MsBatch(stmts,makeEnd(go))} )* {new MsScript(batches)};
 
 stmt: s=use_stmt {s :> IStatement}
     | create_proc {new MsUseStmt(new MsIdent("hello", emptyRange), emptyRange) :> IStatement}
@@ -26,4 +27,5 @@ hack_rule : COMMENT
           | COLON 
           | UNRECOGNIZED ;
 
-+yo: -(LBRACE blabla)? "hello"+ -RBRACE hr=hack_rule;
+[<Start>]
+yo: -(LBRACE blabla)? "hello"+ -RBRACE hr=hack_rule;

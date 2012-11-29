@@ -2,4 +2,5 @@ b[s] : empty;
 
 r1<<a>> : l=a r1<<b[l]>>;
 
-+s : r1<<f>>;
+[<Start>]
+s : r1<<f>>;

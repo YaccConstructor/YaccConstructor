@@ -1,4 +1,5 @@
-+ file                      : (moduleDef)*;
+[<Start>]
+file                      : (moduleDef)*;
 moduleDef                   : name EQ module;
 name                        : STRING_LITERAL;
 module                      : moduleHeader (attribute DELIMITER)* (moduleBody)? DOT;

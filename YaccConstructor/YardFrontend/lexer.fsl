@@ -131,7 +131,8 @@ and  main = parse
      | "<<" {DLESS <| lex2source lexbuf}
      | ">>" {DGREAT <| lex2source lexbuf}
      | '*'  {STAR <| lex2source lexbuf}
-     | '+'  {(if lexbuf.EndPos.Column = 1 then START_RULE_SIGN else PLUS) <| lex2source lexbuf}
+	 | "[<Start>]" { START_RULE_SIGN <| lex2source lexbuf}
+     | '+'  {PLUS <| lex2source lexbuf}
      | '?'  {QUESTION <| lex2source lexbuf}
      | "#set" {SET <| lex2source lexbuf}
      | sharpline {SHARPLINE <| lex2source lexbuf }   

@@ -6,4 +6,5 @@ yard_rule_3:  yard_rule_a_2[a2];
 
 yard_rule_a_4[v]:  yard_rule_3 yard_rule_3;
 
-+s[a1 a2 arg]:  yard_rule_a_4[a1];
+[<Start>]
+s[a1 a2 arg]:  yard_rule_a_4[a1];

@@ -1,1 +1,2 @@
-+s : (NUMBER)*;
+[<Start>]
+s : (NUMBER)*;

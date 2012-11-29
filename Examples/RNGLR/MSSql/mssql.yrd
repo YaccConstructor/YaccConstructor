@@ -1,6 +1,7 @@
 include "../../../GrammarTemplates/Common.yrd"
 
-+ root_rule: (batch_body "GO")+
+[<Start>]
+root_rule: (batch_body "GO")+
 
 batch_body: 
     create_proc 
@@ -12,71 +13,86 @@ start2:
   | GLOBALVAR
   | GLOBALTEMPOBJ
   | TEMPOBJ
-;
 
 set_stmnt:
-	"SET" ("ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
-	| "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
-	| "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
-	| "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
-	| NOCOUNT | NOEXEC | NUMERIC_ROUNDABORT | PARSEONLY
-	| REMOTE_PROC_TRANSACTIONS | SHOWPLAN_ALL | SHOWPLAN_TEXT
-	| SHOWPLAN_XML | STATISTICS (IO | PROFILE | TIME | XML)
-	| XACT_ABORT ) ("ON" | "OFF")
-	| SET LOCALVAR (DOT IDENT)? OP_EQ   ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+	"SET" (
+		"ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
+        	 | "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
+	         | "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
+                 | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
+                 | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
+                 | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
+                 | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
+                 | "XACT_ABORT" ) 
+              (KW_ON | KW_OFF)
+	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+
+
 	
-;
 
 proc_formal_param:
       LOCALVAR (full_ident DOT)? sql_datatype
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
-      (KW_OUT | KW_OUTPUT)? KW_READONLY?
-	  ;
-	  
+      (KW_OUT | KW_OUTPUT)? KW_READONLY?	  	  
+(*
+begin_transaction:
+KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
+    ( ( ident | @tran_name_variable )     (*????????/*)
+      ( KW_WITH KW_MARK ( STRING_CONST ) )?
+    )?
+( SEMI )?      (* proc_body_stmt?*)
+
+rollback:
+KW_ROLLBACK ( KW_TRAN | KW_TRANSACTION ) 
+     ( ident)? 
+( SEMI )?
+commit:
+KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
+( SEMI )?
+	*)  
 create_proc:
     KW_CREATE ("PROCEDURE" | "PROC")
     (ident DOT)? ident (SEMI DEC_NUMBER)?  
-    comma_list<<proc_formal_param>> 
-    (KW_WITH (execute_as)+ )? ( KW_FOR KW_REPLICATION )?
+    (comma_list<<proc_formal_param>>)? 
+    (KW_WITH (execute_as)+ )? 
+	(*(KW_WITH list<<procedure_option COMMA>>)?*)
+	( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
-;
 
-(*Куда вставить procedure_option> ::= [ ENCRYPTION ] [ RECOMPILE ] [ EXECUTE_AS_Clause ]??в правиле create_proc*)
-(*CREATE { PROC | PROCEDURE } [schema_name.] procedure_name [ ; number ] 
-[ { @parameter [ type_schema_name. ] data_type } [ VARYING ] [ = default ] 
-[ OUT | OUTPUT ] ] [ ,...n ] [ WITH list<<procedure_option COMMA>> ] [ FOR REPLICATION ] 
-AS { <sql_statement> [;][ ...n ] | <method_specifier> } [;] <procedure_option> ::= [ ENCRYPTION ] [ RECOMPILE ] [ EXECUTE_AS_Clause ] 
-<sql_statement> ::= { [ BEGIN ] statements [ END ] } <method_specifier> ::= EXTERNAL NAME assembly_name.class_name.method_name*)
-
+procedure_option: 
+    ( "ENCRYPTION" )?
+    ( "RECOMPILE" )?
+    ( "EXECUTE_AS_Clause" )?
 
 proc_body_stmnt:
-    select_stmnt
-|   set_stmnt 
-|   execute_stmnt
-|   sql_expr
-|   KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
-|   KW_RETURN sql_expr
-|   KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
-;
+     select_stmnt
+   | set_stmnt 
+   | execute_stmnt
+   | sql_expr
+   | KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?
+   | KW_RETURN sql_expr
+   | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
+
 (* http://msdn.microsoft.com/en-us/library/ms189499.aspx *)
 select_stmnt:
 (*  list<<(KW_WITH common_table_expression)* COMMA>> *)
     query_expression
     (KW_INTO full_ident (* http://msdn.microsoft.com/en-us/library/ms188029.aspx *) )?
 ;
+
 (*
 select_stmnt: 
-    list<<(WITH common_table_expression)* COMMA>>
-    (query_expression)?
-    ("ORDER" BY list<<(order_by_expression | column_position (KW_ASC | KW_DESC))* COMA>>)?
+    list<<(KW_WITH common_table_expression)* COMMA>>
+    query_expression
+    (KW_ORDER KW_BY list<<(sql_expr | column_position (KW_ASC | KW_DESC))* COMA>>)?       (*???*)
     (compute)? 
     (for_clause)? 
     (select_stmnt_option)? 
-
+	
 compute:
-	(KW_COMPUTE (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_STDEV | KW_STDEVP | KW_VAR | KW_VARP | KW_SUM) (sql_expr))? (*n times*)
-    (KW_BY sql_expr)?   (*n times*)
+	"COMPUTE" list<<("AVG" | "COUNT" | KW_MAX | KW_MIN | "STDEV" | "STDEVP" | KW_VAR | KW_VARP | KW_SUM) (sql_expr) COMMA>> 
+    (list<<KW_BY sql_expr COMMA>>)?  
 ;
 
 for_clause:
@@ -84,18 +100,18 @@ for_clause:
 
 xml:
 	KW_XML 
-	((KW_RAW (('ElementName'))? | KW_AUTO) (*??*)
+	(("RAW" ((STRING_CONST))? | "AUTO") (*??*)
 		( 
 			commonDirectives 
-			( , (KW_XMLDATA | KW_XMLSCHEMA ( ( 'TargetNameSpaceURI' ) )? ) )?   (*??*)
-			( , KW_ELEMENTS ( KW_XSINIL | KW_ABSENT )? )?
+			( , ("XMLDATA" | "XMLSCHEMA" ( ( STRING_CONST ) )? ) )?  
+			( , "ELEMENTS" ( "XSINIL" | "ABSENT" )? )?
 		)?
-	| KW_EXPLICIT 
+	| "EXPLICIT" 
 		( 
 			comonDirictives 
-			( , KW_XMLDATA )? 
+			( , "XMLDATA" )? 
 		)?
-	| KW_PATH ( ( 'ElementName' ) )?        (*??*)
+	| "PATH" ( ( STRING_CONST ) )?        
 		(
 			commonDirectives 
 			( , KW_ELEMENTS ( KW_XSINIL | KW_ABSENT )? )?
@@ -106,24 +122,109 @@ xml:
  commonDirectives:
 ( , KW_BINARY_BASE64 )?
 ( , KW_TYPE )?
-( , KW_ROOT ( ( 'RootName' ) )? )?             (*??*)
+( , KW_ROOT ( ( STRING_CONST ) )? )?             
 
 select_stmnt_option:
-	( OPTION ( <query_hint> [ ,...n ] ) )?              (*????????*)
+	( "OPTION" ( <query_hint> [ ,...n ] ) )?              (*?????????????????*)
+
+query_expression: 
+    (query_specification | ( LPAREN query_expression RPAREN )) 
+    (  ( KW_UNION KW_ALL?| KW_EXCEPT | KW_INTERSECT )
+        query_specification | (list<<(query_expression) COMMA>> ) )? 
+		
+query_specification: 
+KW_SELECT ( KW_ALL | KW_DISTINCT )? 
+    (KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? ( KW_WITH KW_TIES )? )?                  (*??????*)
+       list<<  (       
+            STAR
+        |   full_ident DOT STAR
+        |   (
+                (full_ident DOT)? (IDENT | (DOLLAR KW_IDENTITY) | (DOLLAR KW_ROWGUID) )
+            |   udt_column_runtime = IDENT (
+                    (DOT | DOUBLE_COLON)
+                    (IDENT | IDENT LPAREN comma_list<<sql_expr>> RPAREN)
+                )?
+            |   sql_expr ( KW_AS? IDENT)?
+            )
+        |   IDENT OP_EQ sql_expr
+        )
+        COMMA>>                                                 (*?????????*)
+    ( KW_INTO new_table )? 
+    ( KW_FROM list<< table_source COMMA>> )? (*?????????*)
+    ( KW_WHERE search_condition )?                             (*?????????*)
+    ( KW_GROUP KW_BY ( KW_ALL )? group_by_expression [ ,...n ] (*?????????*)
+                ( KW_WITH ( "CUBE" | "ROLLUP" ) )?
+    )?
+    ( KW_HAVING search_condition )?                            (*?????????*)
 
 	
-<query_specification> ::= 
-SELECT [ ALL | DISTINCT ] 
-    [TOP expression [PERCENT] [ WITH TIES ] ] 
-    < select_list > 
-    [ INTO new_table ] 
-    [ FROM { <table_source> } [ ,...n ] ] 
-    [ WHERE <search_condition> ] 
-    [ GROUP BY [ ALL ] group_by_expression [ ,...n ] 
-                [ WITH { CUBE | ROLLUP } ]
-    ]
-    [ HAVING < search_condition > ]  *)
-(*что-то повторяется*)
+search_condition: 
+    ( KW_NOT? predicate | LPAREN search_condition RPAREN ) 
+    list<<( ( KW_AND | KW_OR ) KW_NOT? ( predicate | LPAREN search_condition RPAREN ) )? COMMA>>
+
+predicate: 
+    ( sql_expr ( OP_EQ | OP_LT | OP_MT | (OP_LT OP_MT) | OP_LT_EQ | OP_MT_EQ ) sql_expr
+    | string_expression KW_NOT? KW_LIKE string_expression                     (*????????????????????????*)
+  ( KW_ESCAPE 'escape_character' )?                                                (*????????????????????????*)
+    | sql_expr KW_NOT? KW_BETWEEN sql_expr KW_AND sql_expr 
+    | sql_expr KW_IS KW_NOT? KW_NULL 
+    | KW_CONTAINS 
+    ( { column | * } , '< contains_search_condition >' )                           (*????????????????????????*)
+    | KW_FREETEXT ( { column | * } , 'freetext_string' ) 
+    | sql_expr KW_NOT? KW_IN ( subquery | expression [ ,...n ] ) 
+    | sql_expr ( = | < > | ! = | > | > = | ! > | < | < = | ! < )                     (*????????????????????????*)
+  ( KW_ALL | KW_SOME | KW_ANY) ( subquery )            (*????????????????????????*)
+    | KW_EXISTS ( subquery )     )                         (*????????????????????????*)
+	
+	
+	
+	
+	http://msdn.microsoft.com/ru-ru/library/ms190273(v=sql.90).aspx
+	Если таблица table является секционированной, то необходимо указать аргумент source_partition_number_expression. 
+	Если таблица target_table секционирована, то должен быть указан аргумент target_partition_number_expression. 
+	Если происходит переназначение данных таблицы как секции в уже существующую секционированную 
+	таблицу или переключение секции с одной секционированной таблицы на другую, то конечная секция уже должна существовать и быть пустой.
+ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
+( 
+    KW_ALTER KW_COLUMN ident 
+    ( 
+        ( ident DOT )? type_name ( ( { precision [ , scale ]       (*???????????????*)
+            | max | xml_schema_collection } ) )? 
+        ( KW_COLLATE ident )?
+        ( KW_NULL | KW_NOT KW_NULL ) 
+    | (KW_ADD | KW_DROP ) ( "ROWGUIDCOL" | "PERSISTED" | "NOT FOR REPLICATION" )
+    )
+    | ( KW_WITH ( KW_CHECK | KW_NOCHECK ) )? KW_ADD 
+    { 
+        <column_definition>
+      | <computed_column_definition>                 (*??????????????????*)
+      | <table_constraint> 
+    } [ ,...n ]
+    | KW_DROP 
+    (list<<( 
+        ( KW_CONSTRAINT )? ident 
+        ( KW_WITH (list<<drop_clustered_constraint_option COMMA>>) )?          (*???????????*)
+        | KW_COLUMN ident)
+    COMMA>> )
+    | ( KW_WITH ( KW_CHECK | KW_NOCHECK ) )? ( KW_CHECK | KW_NOCHECK ) KW_CONSTRAINT 
+        ( KW_ALL | (list<<ident COMMA>>)) 
+    | ( KW_ENABLE | KW_DISABLE ) KW_TRIGGER 
+        ( KW_ALL | list<<ident COMMA>>)
+    | KW_SWITCH ( KW_PARTITION source_partition_number_expression )?         (*????*)
+        KW_TO ident 
+        ( kw_PARTITION target_partition_number_expression )?          
+)
+SEMI?
+
+drop_clustered_constraint_option:  
+    ( 
+        KW_MAXDOP = max_degree_of_parallelism (*DEC_NUMBER*)
+      | KW_ONLINE = (KW_ON | KW_OFF)
+      | KW_MOVE KW_TO ( ident LPAREN ident RPAREN | filegroup    (*??*)
+          | "default")
+    )
+	*)
+
 query_expression:
     ( query_specification | (LPAREN query_expression RPAREN) )
     (
@@ -200,53 +301,49 @@ execute_stmnt:
     )* *)
     (KW_WITH KW_RECOMPILE)?
     SEMI?
- 
+
+type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 
 sql_datatype:
-    KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_SMALLMONEY  | KW_SYSNAME
-    KW_INT | KW_TINYINT | KW_MONEY
-|   KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
-|   KW_REAL
-|   KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
-|   KW_VARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
-|   KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
-|   KW_NVARCHAR (LPAREN (DEC_NUMBER | KW_MAX) RPAREN)?
+      KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | "SMALLMONEY"  | "sysname"
+    | "INT" | KW_TINYINT | KW_MONEY
+    | KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+    | KW_REAL
+    | KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
+    | KW_VARCHAR type_size?
+    | "varbinary" type_size?
+    | KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+    | KW_NVARCHAR type_size?
 
-
-execute_as:
-    (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | username = STRING_CONST ) 
+execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | username = STRING_CONST) 
 
 binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
 	| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
-	|   OP_LT | OP_MT | OP_LT_EQ | OP_MT_EQ
+	| OP_LT | OP_MT | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
 
 
 (* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
-sql_expr_lrecu: sql_expr binop sql_expr;
-
 sql_expr:
-    sql_expr_lrecu
-|   sql_value
-|   LPAREN sql_expr RPAREN
-|   LOCALVAR 
-|   full_ident LPAREN comma_list<<sql_expr>> RPAREN
-|   KW_SELECT sql_expr KW_FROM IDENT
-|   (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
-|   GLOBALVAR
-|   full_ident
-;
+    sql_value
+  | LPAREN sql_expr RPAREN
+  | LOCALVAR 
+  | full_ident LPAREN comma_list<<sql_expr>> RPAREN
+  | KW_SELECT sql_expr KW_FROM IDENT
+  | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+  | GLOBALVAR
+  | full_ident
+  | sql_expr binop sql_expr
+  | sql_value
 
 comma_list<<item>>: list<<item COMMA>>
 
 sql_value:
-    STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
-|   DEC_NUMBER
-;
-(* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
-ident:
-    LBRACKET ident RBRACKET
-|   IDENT
-;
+     STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+   | DEC_NUMBER
+   | KW_NULL
 
-full_ident: not_empty_list<<ident DOT>>;
+(* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
+ident: brace_opt<<LBRACKET IDENT RBRACKET>>
+
+full_ident: not_empty_list<<ident DOT>>

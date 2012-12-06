@@ -29,7 +29,6 @@ set_stmnt:
 
 
 (*********************************PROCEDURE************************************************************)	
-
 proc_formal_param:
       LOCALVAR (full_ident DOT)? sql_datatype
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?

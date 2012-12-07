@@ -1,0 +1,202 @@
+digraph RACCStructure
+{        
+        subgraph cluster_Help
+        {
+                x1 [shape = none, label = "A"];
+                x2 [shape = none, label = "B"];
+                x1 -> x2 [style = dotted, label = " A used in B"];
+
+                x3 [shape = none, label = "A"];
+                x4 [shape = none, label = "B"];
+                x3 -> x4 [label = " A call B"];                
+        }
+        
+
+        InputSources [shape = note];
+        InputGrammar [shape = note];
+        f_ActionCode [shape = note, label = "ActionCode.fs"];
+        f_Tables [shape = note, label = "Tables.fs"];
+
+        subgraph cluster_UserApplication
+        {
+                label="UserApplication";
+                Tables;
+                ActionCode;
+
+                subgraph cluster_ua_Driver
+                {
+                        label = "module Driver";
+                        Driver;
+                }
+
+                Lexer;
+                Tables -> Driver;                      
+                ActionCode -> Driver;
+                Lexer -> Driver;
+        }
+
+        ILexer -> Lexer;
+        Driver -> Parser;
+        Driver -> ASTInterpretator;
+        InputSources -> Driver;
+        
+        subgraph cluster_Generator
+        {
+                label="Generator";                
+                TablesGenerator;
+
+                subgraph cluster_g_Driver
+                {
+                        label = "module Driver";
+
+                        Generate [label = "Generate:(IL.Definition:unit)"];                        
+                        generateCode [shape = box, label = "generateCode grammar = \n   let codeGen = CodeGenerator(outPath) \n   codeGen.Genearte(grammar)"];
+                        generateTables;
+
+                        Generate -> generateCode;
+                        Generate -> generateTables;                        
+                }
+
+                subgraph cluster_CodeGenerator
+                {
+                        label = "CodeGenerator(outPath:string)";
+                        GenerateCode [shape=box, label = "Generate (grammar:IL.Definition):unit) = \n geherateHeader grammar.head\n generateFooter grammar.foot\n closeOutSream"];                        
+                        generateAlt [shape=box, label = "generateAlt alt = \n code = \"\" \n write code"];
+                        generateSeq;
+                        generateLeaf;
+                        generateSome;
+                        write [shape=box, label = "write str:string = outStream.WriteLine(str)"];
+                        generateHeader [shape=box, label = "generateHeader header:Option('expr) = write str"];
+                        generateFooter [shape=box, label = "generateFooter footer:Option('expr) = write str"];
+                        outStream [shape=box, label = "outStream = IO.text_writer outPath"];
+                        closeOutStream [ shape= box, label = "closeOutStream = outStrieam.Close()"];
+
+                        generateAlt -> GenerateCode [style = dotted];
+                        generateSeq -> GenerateCode [style = dotted];
+                        generateLeaf -> GenerateCode [style = dotted];
+                        generateSome -> GenerateCode [style = dotted];
+                        GenerateCode -> generateHeader;
+                        GenerateCode -> generateFooter;        
+                        outStream -> write [style = dotted];
+                        generateAlt -> write;
+                        generateSeq -> write;
+                        generateLeaf -> write;
+                        generateSome -> write;
+                        generateHeader -> write;
+                        generateFooter -> write;
+                        outStream -> closeOutStream [style = dotted];
+                        GenerateCode -> closeOutStream;                                                
+                }                                          
+                
+                RuleToLDFA;
+
+                generateCode -> GenerateCode;
+                generateTables -> TablesGenerator;
+                TablesGenerator -> RuleToLDFA;
+        }
+        
+        TablesGenerator -> f_Tables
+        InputGrammar -> Generate;
+        RuleToLDFA -> NLFAToDLFA;        
+        GenerateCode -> f_ActionCode;
+        f_ActionCode -> ActionCode;
+        f_Tables -> Tables
+
+        subgraph cluster_Core
+        {
+                label="Core";
+                Parser;
+                ASTInterpretator; 
+                RegExp;
+
+                RegExp -> ASTInterpretator [style = dotted];
+
+                subgraph cluster_TableInterpretator
+                {
+                        label = "TableInterpretator";
+                        memoize;
+                        parse;
+                        climb;
+                        TableInterpretator [label = "Run"];
+                        
+                        TableInterpretator -> parse;
+                        parse -> climb;
+                        climb -> parse;
+                        memoize -> climb [style = dotted];
+                        memoize -> parse [style = dotted];
+
+                }
+
+                subgraph cluster_AST
+                {
+                        label = "module AST"
+                        AST;
+                }
+                
+                
+                AST -> ASTInterpretator [style = dotted];
+                Parser -> TableInterpretator
+        }
+
+        ILexer -> Parser;
+        
+        subgraph cluster_Common
+        {
+                label="Common";
+
+                subgraph cluster_ILexer
+                {
+                        label = "module ILexer";
+                        ILexer [  shape = record
+                                , label = "{<title> type ILexer | <next> Next:(unit:Lexeme(_))}"];
+                        Lexeme [  shape = record
+                                , label = "{<title> type Lexeme('a) | <l_name>  name:string | <value>  value:'a}"];
+                        Lexeme:title -> ILexer:next [style = dotted];
+                }                
+        }
+        
+        subgraph cluster_FALib
+        {
+                label="Finite Automate Lib";
+
+
+/*subgraph cluster_FA
+{
+label = "module FA";
+}*/
+                subgraph cluster_Rule
+                {
+                        label = "Rule"
+                        Rule[  shape = record
+                             , label = "{<title> type Rule('symbol, 'label) | <from>  FromStateID:int | <symbol>  Symbol('symbol) | <label>  Label('label) | <to> ToStateID:int}"];
+                }
+
+                subgraph cluster_NLFA
+                {
+                        label = "module NLFA";
+                        NLFA [  shape = record
+                              , label = "{ <title> type NLFA('state, 'symbol, 'label) | <IDToStateMap>  IDToStateMap:dict(int,'state) | <startStatesSet>  StartStatesSet:set(int) | <finaleStatesSet>  FinaleStatesSet:set(int) | <rulesList>  RulesList:List(Rule('symbol, 'label))}"];
+                }
+                
+                Rule -> NLFA:rulesList [style = dotted];
+
+                subgraph cluster_DLFA
+                {
+                        label = "module DLFA";
+                        DLFA [  shape = record
+                              , label = "{ <title> type DLFA('a) | <IDToStateMap>  IDToStateMap:dict(int,'a) | <startState>  StartState:int | <finaleStatesSet>  FinaleStatesSet:set(int) | <rulesList>  RulesList:List(Rule)}"];
+                }
+
+                Rule -> DLFA:rulesList [style = dotted];
+
+                subgraph cluster_NLFAToDLFA
+                {
+                        label = "module NLFAToDLFA";
+                        NLFAToDLFA [label = "NLFAToDLFA:(NLFA:DLFA)"];
+                }
+
+                NLFA -> NLFAToDLFA [style = dotted];
+                DLFA -> NLFAToDLFA [style = dotted];
+        }
+
+}

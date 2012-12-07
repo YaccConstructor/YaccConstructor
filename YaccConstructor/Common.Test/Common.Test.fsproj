@@ -44,7 +44,7 @@
     <Compile Include="Manager.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AntlrToYard\AntlrFrontend.fsproj">
+    <ProjectReference Include="..\AntlrFrontend\AntlrFrontend.fsproj">
       <Name>AntlrFrontend</Name>
       <Project>{b75aec02-64bd-4b31-8115-6708c64ee5dc}</Project>
       <Private>True</Private>

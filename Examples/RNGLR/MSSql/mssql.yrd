@@ -54,9 +54,16 @@ proc_body_stmnt:
    | set_stmnt 
    | execute_stmnt
    | sql_expr
-   | (*KW_DECLARE LOCALVAR KW_AS sql_datatype (OP_EQ sql_expr)?*) declare
+   |  declare
    | KW_RETURN sql_expr
    | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
+   | raiserror_stmnt
+
+raiserror_stmnt:
+    KW_RAISERROR LPAREN ( DEC_NUMBER | STRING_CONST | LOCALVAR )
+    ( COMMA DEC_NUMBER COMMA DEC_NUMBER )
+    ( COMMA comma_list<<LOCALVAR>> )? RPAREN
+    ( KW_WITH comma_list<< "LOG" | "NOWAIT" | "SETERROR">> )?
    
 (***********************************DECLARE**********************************************************)
 declare:  
@@ -97,7 +104,7 @@ select_stmnt:
 
 (*
 select_stmnt: 
-    list<<(KW_WITH common_table_expression)* COMMA>>
+    lаist<<(KW_WITH common_table_expression)* COMMA>>
     query_expression
     (KW_ORDER KW_BY list<<(sql_expr | DEC_NUMBER (KW_ASC | KW_DESC))* COMA>>)?       (*???*)
     (compute)? 
@@ -321,7 +328,38 @@ execute_stmnt:
     )* *)
     (KW_WITH KW_RECOMPILE)?
     SEMI?
+(*
+execute_stmnt:
+	( ( KW_EXEC | KW_EXECUTE ) )?
+    ( 
+      ( LOCALVAR OP_EQ )?
+      ( full_ident ( SEMI DEC_NUMBER )? | LOCALVAR )  
+      ( ( LOCALVAR OP_EQ )?                                           (*имя процедуры с @ +&&&*)
+			( 
+				((GLOBALVAR | LOCALVAR) ( KW_OUTPUT? )? 
+				|( DEFAULT )? 
+            )
+        )?
+     (* [ ,...n ]*)
+      ( WITH RECOMPILE )?
+    ))
+SEMI;
 
+execute_char_string:
+( KW_EXEC | KW_EXECUTE ) 
+        LPAREN ( LOCALVAR |  DEC_NUMBER? STRING_CONST )+ RPAREN
+    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ STRING_CONST )?
+SEMI?
+
+execute_pass-through_command:
+( KW_EXEC | KW_EXECUTE )
+        LPAREN ( LOCAL_VAR | DEC_NUMBER? STRING_CONST ("?")?  )+  (*&&*)
+        ( ( COMMA (  LOCALVAR KW_OUTPUT? ) )+)?            (*&&*)
+        RPAREN
+    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ STRING_CONST )?
+    ( KW_AT ident )?
+SEMI?
+	*)
 type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 
 sql_datatype:

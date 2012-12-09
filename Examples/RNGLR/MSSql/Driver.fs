@@ -1,4 +1,4 @@
-﻿// Driver.fs
+﻿// Driver.fs contains entry point of MS-SQL parser.
 //
 //  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //

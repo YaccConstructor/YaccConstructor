@@ -64,16 +64,16 @@ create_proc:
     SEMI?
 
 procedure_option: 
-    ( "ENCRYPTION" )?
-    ( "RECOMPILE" )?
-    ( "EXECUTE_AS_Clause" )?
+    "ENCRYPTION"?
+    | "RECOMPILE"?
+    | "EXECUTE_AS_Clause"?
 
 proc_body_stmnt:
      select_stmnt
    | set_stmnt 
    | execute_stmnt
    | sql_expr
-   |  declare
+   | declare
    | KW_RETURN sql_expr
    | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
    | raiserror_stmnt
@@ -88,18 +88,18 @@ raiserror_stmnt:
 declare:  
 KW_DECLARE 
     (
-		LOCALVAR (KW_AS)? sql_datatype  
-		|  ident KW_CURSOR  
-		| ( ident (KW_AS)? table_type_definition ) 
+		LOCALVAR KW_AS? sql_datatype
+		| ident KW_CURSOR
+		| ident KW_AS? table_type_definition
      )+
 
 table_type_definition: 
-     KW_TABLE LPAREN ((column_definition) | (table_constraint) )* RPAREN 
+     KW_TABLE LPAREN (column_definition | table_constraint)* RPAREN 
 
 column_definition:
           ident ( ("scalar_data_type") | (KW_AS sql_expr) )
      ( KW_COLLATE IDENT )? 
-     ( ( KW_DEFAULT sql_expr )? | KW_IDENTITY ( ( DEC_NUMBER COMMA DEC_NUMBER ) )? )? 
+     ( ( KW_DEFAULT sql_expr )? | KW_IDENTITY (DEC_NUMBER COMMA DEC_NUMBER)? )? 
      ( KW_ROWGUIDCOL )? 
      (column_constraint)? 
 

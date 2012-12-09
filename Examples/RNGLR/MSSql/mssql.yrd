@@ -27,6 +27,25 @@ set_stmnt:
               (KW_ON | KW_OFF)
 	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
 
+set_localvar:
+KW_SET 
+	( 
+		LOCALVAR 
+		(DOUBLE_COLON property_name | ident )? = sql_expr | udt_name ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
+	)
+	|
+	( LOCALVAR = 
+		( LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
+		( KW_STATIC | KW_KEYSET | KW_DYNAMIC | KW_FAST_FORWARD )? 
+		( KW_READ_ONLY | KW_SCROLL_LOCKS | KW_OPTIMISTIC )? 
+		( KW_TYPE_WARNING )? 
+		KW_FOR select_stmnt 
+		( KW_FOR ( KW_EAD ONLY | KW_UPDATE ( KW_OF comma_list<<ident>> )? ) )? 
+		) 
+		)
+	) 	
+	
+
 
 (*********************************PROCEDURE************************************************************)	
 proc_formal_param:

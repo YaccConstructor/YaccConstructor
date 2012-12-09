@@ -4,16 +4,11 @@ include "../../../GrammarTemplates/Common.yrd"
 root_rule: (batch_body "GO")+
 
 batch_body: 
-    create_proc 
- |  start2
- |  set_stmnt
-
-start2: 
-    sel_expr = KW_SELECT ident KW_FROM ident
-  | GLOBALVAR
-  | GLOBALTEMPOBJ
-  | TEMPOBJ
+   create_proc
+ | set_stmnt
+  
 (*****************************************SET****************************************************)
+
 set_stmnt:
 	"SET" (
 		"ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
@@ -28,7 +23,7 @@ set_stmnt:
 	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
 
 set_localvar:
-KW_SET 
+    KW_SET 
 	( 
 		LOCALVAR 
 		(DOUBLE_COLON property_name | ident )? = sql_expr | udt_name ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
@@ -64,13 +59,13 @@ create_proc:
     SEMI?
 
 procedure_option: 
-    "ENCRYPTION"?
+      "ENCRYPTION"?
     | "RECOMPILE"?
     | "EXECUTE_AS_Clause"?
 
 proc_body_stmnt:
      select_stmnt
-   | set_stmnt 
+   | set_stmnt
    | execute_stmnt
    | sql_expr
    | declare
@@ -85,13 +80,14 @@ raiserror_stmnt:
     ( KW_WITH comma_list<< "LOG" | "NOWAIT" | "SETERROR">> )?
    
 (***********************************DECLARE**********************************************************)
+
 declare:  
-KW_DECLARE 
+    KW_DECLARE 
     (
 		LOCALVAR KW_AS? sql_datatype
 		| ident KW_CURSOR
 		| ident KW_AS? table_type_definition
-     )+
+    )+
 
 table_type_definition: 
      KW_TABLE LPAREN (column_definition | table_constraint)* RPAREN 

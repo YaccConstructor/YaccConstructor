@@ -68,11 +68,11 @@ raiserror_stmnt:
 (***********************************DECLARE**********************************************************)
 declare:  
 KW_DECLARE 
-	list<<
-     (( LOCALVAR (KW_AS)? sql_datatype ) 
-    | ( ident CURSOR ) 
-    | ( ident (KW_AS)? table_type_definition ) 
-     ) COMMA>>
+    (
+		LOCALVAR (KW_AS)? sql_datatype  
+		|  ident KW_CURSOR  
+		| ( ident (KW_AS)? table_type_definition ) 
+     )+
 
 table_type_definition: 
      KW_TABLE LPAREN ((column_definition) | (table_constraint) )* RPAREN 

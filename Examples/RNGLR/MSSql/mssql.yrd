@@ -99,7 +99,7 @@ table_type_definition:
 column_definition:
           ident ( ("scalar_data_type") | (KW_AS sql_expr) )
      ( KW_COLLATE IDENT )? 
-     ( ( KW_DEFAULT sql_expr )? | KW_IDENTITY ( ( DEC_NUMBER,DEC_NUMBER ) )? )? 
+     ( ( KW_DEFAULT sql_expr )? | KW_IDENTITY ( ( DEC_NUMBER COMMA DEC_NUMBER ) )? )? 
      ( KW_ROWGUIDCOL )? 
      (column_constraint)? 
 

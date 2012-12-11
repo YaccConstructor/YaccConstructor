@@ -1,0 +1,4 @@
+a<<b>> : (b | b a<<b>>) ;
+
+[<Start>]
+s : a<<NUMBER>> ;

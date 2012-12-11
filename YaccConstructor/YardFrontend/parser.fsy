@@ -46,7 +46,7 @@ let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
-let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
+let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)
     let frontend = FrontendsManager.GetByExtension ext
     let userDefs =
@@ -70,6 +70,7 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 %token EQUAL
 %token BAR
 %token STAR
+%token START_RULE_SIGN
 %token PLUS
 %token MINUS
 %token QUESTION
@@ -89,64 +90,60 @@ let parseRules (filename:string) : (IL.Source.t, IL.Source.t)IL.Definition.t =
 
 
 %start file
-%type <(IL.Source.t, IL.Source.t)IL.Definition.t> file
+%type <IL.Definition.t<IL.Source.t, IL.Source.t>> file
 
 %%
 
 file: action_opt
       rule_nlist
-      action_opt
-      EOF
+      foot_opt
       { 
         { Definition.empty with
             Definition.info = { fileName = !currentFilename }
-            ; Definition.head = $1
-            ; Definition.grammar = (fst $2)
-            ; Definition.foot = $3
-            ; Definition.options = (snd $2)
+            Definition.head = $1
+            Definition.grammar = (fst $2)
+            Definition.foot = $3
+            Definition.options = (snd $2)
         }
       }
 
-action_opt: ACTION { Some $1 }
-          | /* empty */ { None }
+action_opt: { None } | ACTION { Some $1 }
 
-rule_nlist: rule SEMICOLON rule_nlist 
-        { ((fst $1) :: (fst $3), joinMaps (snd $1) (snd $3)) }
+foot_opt: { None } | SEMICOLON ACTION { Some $2 }
+
+rule_nlist: rule semi_opt rule_nlist 
+        { (fst $1) :: (fst $3), joinMaps (snd $1) (snd $3) }
     | INCLUDE STRING rule_nlist 
         { let def = parseRules $2.text in
           (def.grammar @ (fst $3), joinMaps def.options (snd $3)) 
         } 
-    | { ([], Map.empty) }
+    | { [], Map.empty }
     | rule error { missing "SEMI"; raise Parse_error  }
 
-rule: plus_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
+rule: start_rule_sign_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
-        let newRule = {Rule._public = $1
-                        ; Rule.name = $2
-                        ; Rule.metaArgs = getList $3
-                        ; Rule.body = $7
-                        ; Rule.args = $4
-                        }
+        let newRule = { Rule._public = $1
+                        Rule.name = $2
+                        Rule.metaArgs = getList $3
+                        Rule.body = $7
+                        Rule.args = $4
+                      }
         in
         match $6 with
-        | Some m ->
-            (newRule, Map.empty.Add (newRule, m))
-        | None ->
-            (newRule, Map.empty)
+        | Some m -> newRule, Map.empty.Add (newRule, m)
+        | None -> newRule, Map.empty
        }
 
-plus_opt: PLUS      {true}
-        | /*empty*/ {false}
+start_rule_sign_opt: {false} | START_RULE_SIGN {true}
 
-formal_meta_param_opt: DLESS formal_meta_list DGREAT {Some $2}
-                     | /* empty */ {None}
+formal_meta_param_opt: { None } | DLESS formal_meta_list DGREAT {Some $2}
 
 formal_meta_list: LIDENT {[$1]}
                 | LIDENT formal_meta_list {$1::$2}
 
-param_opt: PARAM {Some $1} | /* empty */ {None}
+param_opt: { None } | PARAM {Some $1}
 
-param_list: PARAM param_list {$1::$2} | /* empty */ {[]}
+param_list: { [] } | PARAM param_list {$1::$2}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
@@ -156,19 +153,19 @@ bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3) }
 seq: no_lbl_seq {$1} | lbl_seq {$1}
 
 no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None)}
-   | ACTION {PSeq([],Some $1, None)}
+          | ACTION { PSeq([], Some $1, None) }
 
 lbl_seq: DLABEL LPAREN no_lbl_seq RPAREN {makeNewSeq $3 $1}
 
-seq_elem_list: seq_elem seq_elem_list {$1::$2}
-             | /* empty */ {[]}
+seq_elem_list: { [] } | seq_elem seq_elem_list {$1::$2}
 
 seq_elem: omit_opt bound predicate_opt {{$2 with checker = $3; omit = $1 }}
 
-omit_opt: MINUS { true } | /*empty*/ { false }
+omit_opt: { false } | MINUS { true }
 
-predicate_opt: PREDICATE   { Some $1 }
-             | /* empty */ { None    }
+semi_opt : { false } | SEMICOLON {true}
+
+predicate_opt: { None } | PREDICATE { Some $1 }
 
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
      | prim            { createSeqElem None false $1 None      }
@@ -180,7 +177,7 @@ prim: prim STAR           {PMany $1}
     | prim QUESTION       {POpt $1}
     | LPAREN alts RPAREN  {$2}
     | call                {$1}
-	| lbl_seq             {$1}
+    | lbl_seq             {$1}
     | STRING              {PLiteral $1}
 
 meta_param: prim {$1}
@@ -188,20 +185,20 @@ meta_param: prim {$1}
 meta_params: meta_param {[$1]}
            | meta_param meta_params {$1 :: $2}
 
-meta_param_opt: /* empty */ {None}
-              | DLESS meta_params DGREAT {Some $2}
+meta_param_opt: { None } | DLESS meta_params DGREAT {Some $2}
 
-call: UIDENT             {PToken $1}
+call: UIDENT {PToken $1}
     | LIDENT meta_param_opt param_opt  
       { match $2 with
-        None -> PRef  ($1, $3)
+        | None -> PRef  ($1, $3)
         | Some x -> PMetaRef ($1,$3,x)
       }
 
-option_opt: SET option_params { Some $2 }
-    | /* empty */ { None }
-
+option_opt: { None } | SET option_params { Some $2 }
+    
 option_params: option_param { Map.empty.Add $1}
-    | option_param COMMA option_params {($3).Add $1}
+             | option_param COMMA option_params {($3).Add $1}
 
 option_param: LIDENT EQUAL STRING { (Source.toString $1, Source.toString $3) }
+
+tada_rule : SHARPLINE {} | EOF {};

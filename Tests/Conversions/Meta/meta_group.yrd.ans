@@ -1,0 +1,4 @@
+yard_rule_do_1:  ( a b ) ( a b ) c;
+
+[<Start>]
+s:  yard_rule_do_1;

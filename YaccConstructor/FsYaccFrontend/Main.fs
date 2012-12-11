@@ -27,7 +27,9 @@ open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
 let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> if List.exists ((=) rule.name.text) starts then { rule with _public=true } else rule)
+    grammar |> List.map (fun rule -> if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
+                                     then { rule with _public=true }
+                                     else rule)
 
 let rec _addBindings = function
     | PSeq(elements, Some (ac : Source.t), l) -> 
@@ -53,12 +55,13 @@ let addBindings (grammar: Grammar.t<Source.t, Source.t>) =
 
 let ParseFile fileName =
     let content = System.IO.File.ReadAllText(fileName)
+    Lexer.currentFile := fileName
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader
     try 
-        let (res:System.Tuple<string option, string list, string list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
-        let defHead = res.Item1 |> Option.map (fun str -> new Source.t(str))
+        let (res:System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let defHead = res.Item1
         { new Definition.t<Source.t, Source.t>
             with info = {new Definition.info with fileName = ""}
             and head = defHead
@@ -66,6 +69,7 @@ let ParseFile fileName =
             and foot = None
             and options = Map.empty}
     with e -> // when e.Message="parse error" -> 
+        fprintfn stderr "%A" e
         let pos = lexbuf.EndPos
         let extendedMessage =
             sprintf "error near line %d, character %d\nlast token: %s\n\n%s" pos.pos_lnum

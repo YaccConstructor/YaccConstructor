@@ -1,0 +1,6 @@
+yard_rule_do_1:  b;
+
+yard_rule_do_2:  c;
+
+[<Start>]
+s:  yard_rule_do_1 yard_rule_do_2;

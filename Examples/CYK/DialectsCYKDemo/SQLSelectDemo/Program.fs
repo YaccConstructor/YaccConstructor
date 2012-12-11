@@ -30,5 +30,4 @@ let time () =
         printfn "%s" "Не задано имя входного файла."
     
 do 
-    time ()
-    System.Console.ReadKey()
+    time ()    

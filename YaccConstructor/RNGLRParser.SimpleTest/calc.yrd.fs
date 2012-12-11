@@ -1,3 +1,5 @@
+
+# 2 "Calc.yrd.fs"
 module RNGLR.ParseCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -92,7 +94,7 @@ let private accStates = Array.zeroCreate 10
 for i = 0 to 9 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 7
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -112,15 +114,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (f) -> 
               _rnglr_cycle_res := (
                 
-# 1 "Calc.yrd"
-                                                            f
+# 2 "Calc.yrd"
+                                                           f
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 123 "Calc.yrd.fs"
+# 125 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -136,15 +138,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 1 "Calc.yrd"
-                                               a + b
+# 2 "Calc.yrd"
+                                              a + b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 147 "Calc.yrd.fs"
+# 149 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -152,9 +154,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 157 "Calc.yrd.fs"
+# 159 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -166,15 +168,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (n) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                                                           n
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 177 "Calc.yrd.fs"
+# 179 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -190,15 +192,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                                               a * b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 201 "Calc.yrd.fs"
+# 203 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -210,15 +212,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                                 5
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 221 "Calc.yrd.fs"
+# 223 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -230,15 +232,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                          3
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 241 "Calc.yrd.fs"
+# 243 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

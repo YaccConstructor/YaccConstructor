@@ -1,3 +1,5 @@
+
+# 2 "Counter.yrd.fs"
 module RNGLR.ParseCounter
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -81,7 +83,7 @@ let private accStates = Array.zeroCreate 4
 for i = 0 to 3 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 3
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
@@ -101,15 +103,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 1 "Counter.yrd"
-                                        1
+# 2 "Counter.yrd"
+                                       1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 1 "Counter.yrd"
+# 2 "Counter.yrd"
                : '_rnglr_type_s) 
-# 112 "Counter.yrd.fs"
+# 114 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -123,15 +125,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (v) -> 
                 _rnglr_cycle_res := (
                   
-# 1 "Counter.yrd"
-                              1 + v
+# 2 "Counter.yrd"
+                             1 + v
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Counter.yrd"
+# 2 "Counter.yrd"
                : '_rnglr_type_s) 
-# 134 "Counter.yrd.fs"
+# 136 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -139,9 +141,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
-# 1 "Counter.yrd"
+# 2 "Counter.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 144 "Counter.yrd.fs"
+# 146 "Counter.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

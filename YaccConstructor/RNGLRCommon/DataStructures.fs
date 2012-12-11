@@ -18,8 +18,6 @@ type BlockResizeArray<'T> () =
                 arrays <- Array.zeroCreate (arrays.Length * 2)
                 for i = 0 to oldArrays.Length-1 do
                     arrays.[i] <- oldArrays.[i]
-                for i = oldArrays.Length to oldArrays.Length-1 do
-                    arrays.[i] <- Array.zeroCreate blockSize
                 cap <- blockSize * arrays.Length
                 //printfn "%A %A" count cap
             arrays.[count >>> shift] <- Array.zeroCreate blockSize

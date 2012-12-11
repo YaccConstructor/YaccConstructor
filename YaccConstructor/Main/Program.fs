@@ -37,9 +37,9 @@ let () =
     let generatorParams = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
-    let convertions = new ResizeArray<string>()
+    let conversions = new ResizeArray<string>()
     let GeneratorsManager = GeneratorsManager.GeneratorsManager()
-    let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+    let ConversionsManager = ConversionsManager.ConversionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
     let userDefs = ref []
@@ -78,8 +78,8 @@ let () =
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
-         "-c", ArgType.String (fun s -> convertions.Add(s)), "Convertion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "convertions" ConvertionsManager.Available None), "Available convertions"
+         "-c", ArgType.String (fun s -> conversions.Add(s)), "Conversion applied in order. Use -ac to list available."
+         "-ac", ArgType.Unit (printItems "conversions" ConversionsManager.Available None), "Available conversions"
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
          "-U", ArgType.String (fun s -> userDefs := List.filter (fun x -> x <> s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
@@ -107,7 +107,7 @@ let () =
 
             // Parse grammar    
             let ilTree =  
-                try
+                //try
                     let defStr = 
                         List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
                     if System.String.IsNullOrEmpty defStr
@@ -115,12 +115,12 @@ let () =
                     else grammarFilePath + "%" + defStr
                     |> fe.ParseGrammar
                     |> ref
-                with
-                | e -> FEError (e.Message + " " + e.StackTrace) |> raise
+                //with
+                //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 //            printfn "%A" <| ilTree
-            // Apply convertions
-            Seq.iter (fun conv -> ilTree := (ConvertionsManager.ApplyConvertion conv !ilTree)) convertions
+            // Apply Conversions
+            Seq.iter (fun conv -> ilTree := (ConversionsManager.ApplyConversion conv !ilTree)) conversions
 
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
@@ -165,10 +165,10 @@ let () =
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise
         | None , _, _         -> EmptyArg "file name (-i)" |> raise 
-    try
-        if !generateSomething = true then 
-            run ()
-    with
+    //try
+    if !generateSomething = true then 
+        run ()
+(*    with
     | InvalidFEName (feName)   -> 
         "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
         |> System.Console.WriteLine
@@ -177,8 +177,8 @@ let () =
         |> System.Console.WriteLine
     | EmptyArg (argName)       ->
          printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
-YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd \n
-List of available frontends, generators and convertions can be obtained by -af -ag -ac keys" argName
+YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Conversions/buildast_1.yrd \n
+List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
     | FEError error          ->
         "Frontend error: " + error + "\n"
         |> System.Console.WriteLine
@@ -189,7 +189,7 @@ List of available frontends, generators and convertions can be obtained by -af -
         error + "\n"
         |> System.Console.WriteLine
     | :? System.IO.IOException as e -> printf "%s" <| (e.Message + ". Could not read input file.\n")
-    | x -> printf "%A\n" x
+    | x -> printf "%A\n" x*)
 
 
 
@@ -208,10 +208,10 @@ List of available frontends, generators and convertions can be obtained by -af -
 //YaccConstructor.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
 //YaccConstructor.exe -c "ReplaceLiterals KW_%s" -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
 //YaccConstructor.exe -c ReplaceLiterals -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
-//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Convertions/buildast_1.yrd
-//YaccConstructor.exe -g YardPrinter -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Convertions/buildast_1.yrd
-//YaccConstructor.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Convertions/expandebnfstrict_1.yrd
-//YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Convertions/buildast_1.yrd
-//YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Convertions/mergealter_1.yrd
-//YaccConstructor.exe -g FsYaccPrinter -c ExpandMeta -c ExpandEbnfStrict -c ExpandBrackets -c AddEOF -i ../../../../Tests/Convertions/expandbrackets_1.yrd
+//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Conversions/expandebnfstrict_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Conversions/mergealter_1.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandMeta -c ExpandEbnfStrict -c ExpandBrackets -c AddEOF -i ../../../../Tests/Conversions/expandbrackets_1.yrd
 

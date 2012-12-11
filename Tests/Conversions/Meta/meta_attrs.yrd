@@ -1,0 +1,6 @@
+go: NUMBER;
+
+do<<b>>[c] : res=(go)* {res};
+
+[<Start>]
+s: a=do<<b>>[c] {a};

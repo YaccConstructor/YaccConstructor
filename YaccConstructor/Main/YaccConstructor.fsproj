@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g RNGLRGenerator -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c AddDefaultAC -c LeaveLast -i "C:\Projects\recursive-ascent\Tests\RNGLR\first\first.yrd"</StartArguments>
+    <StartArguments>-c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%%s" -c ExpandInnerAlt -c ExpandBrackets -c LeaveLast -c AddDefaultAC -g "RNGLRGenerator -token string -module Yard.Examples.MSParser -o MSParser.fs" -i "C:\Projects\recursive-ascent\Examples\MsSql\MSSql\mssql.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>
@@ -58,20 +58,24 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Compatibility">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Compatibility.dll</HintPath>
+    </Reference>
     <Reference Include="Irony">
-      <HintPath>..\..\3rd Party\lib\Irony.dll</HintPath>
+      <HintPath>..\..\3rdParty\lib\Irony.dll</HintPath>
     </Reference>
     <Reference Include="Irony.Samples">
-      <HintPath>..\..\3rd Party\lib\Irony.Samples.dll</HintPath>
+      <HintPath>..\..\3rdParty\lib\Irony.Samples.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AntlrToYard\AntlrFrontend.fsproj">
+    <ProjectReference Include="..\AntlrFrontend\AntlrFrontend.fsproj">
       <Name>AntlrFrontend</Name>
       <Project>{b75aec02-64bd-4b31-8115-6708c64ee5dc}</Project>
       <Private>True</Private>
@@ -81,8 +85,8 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Convertions\Convertions.fsproj">
-      <Name>Convertions</Name>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>

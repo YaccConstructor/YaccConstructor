@@ -14,11 +14,13 @@ let run path astBuilder =
 let dir = @"../../../../Tests/RNGLR/"
 
 let parser = RNGLR.ParseCalc.buildAst
-let path = dir + "calc/input.txt"
+let path = dir + "Calc.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with
-| Parser.Error (num, tok, message),_ -> printfn "Error in position %d on Token %A: %s" num tok message
+| Parser.Error (num, tok, message, debug),_ ->
+    printfn "Error in position %d on Token %A: %s" num tok message
+    debug.drawGSSDot "out.dot"
 | Parser.Success tree, tokens ->
     tree.PrintAst()
     RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"

@@ -3,7 +3,7 @@
 open Microsoft.FSharp.Text
 open Yard.Generators.RNGLR.Parser
 open Microsoft.FSharp.Reflection
-
+ 
 let tokens<'lexType>(path) = 
     let toLexerTag = 
         let targetUCIs = 

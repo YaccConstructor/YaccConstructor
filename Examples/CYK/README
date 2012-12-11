@@ -1,2 +1,0 @@
-For build and run this demo, YC folder must be created in this directory.
-After that you should compile YaccConstructor.sln and copy into YC folder all binaries from Main\bin\(Debug\Release) and CYK\bin\(Debug\Release). 

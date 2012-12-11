@@ -207,34 +207,26 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
     eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()
-    let print () =
-        let printSymbol (symbol : int) =
-            if symbol < grammar.indexator.nonTermCount then
-                grammar.indexator.indexToNonTerm symbol
-            elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
-                grammar.indexator.indexToTerm symbol
-            else grammar.indexator.indexToLiteral symbol
-        printfn "\nrules:"
-        for i = 0 to grammar.rules.rulesCount-1 do
-            printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
-            for j = 0 to grammar.rules.length i - 1 do
-                printf "%s " <| printSymbol (grammar.rules.symbol i j)
-            printfn ""
         (*
-        printfn "\nstates:"
-        for i = 0 to vertexCount()-1 do
-            printfn "==============================\n%d:" i
-            let kernels = stateToKernels.[i]
-            let lookaheads = stateToLookahead.[i]
-            for k = 0 to kernels.Length-1 do
-                printfn "(%d,%d) [%s]" (KernelInterpreter.getProd kernels.[k]) (KernelInterpreter.getPos kernels.[k])
-                    <| (lookaheads.[k] |> List.ofSeq
-                        |> List.map (fun x -> printSymbol x)
-                        |> String.concat "," )
-            printfn "------------------------------"
-            let vertex = vertices.[i]
-            for edge in vertex.outEdges do
-                printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
-            printfn ""*)
-    print ()
+    let printSymbol (symbol : int) =
+        if symbol < grammar.indexator.nonTermCount then
+            grammar.indexator.indexToNonTerm symbol
+        elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
+            grammar.indexator.indexToTerm symbol
+        else grammar.indexator.indexToLiteral symbol
+    printfn "\nstates:"
+    for i = 0 to vertexCount()-1 do
+        printfn "==============================\n%d:" i
+        let kernels = stateToKernels.[i]
+        let lookaheads = stateToLookahead.[i]
+        for k = 0 to kernels.Length-1 do
+            printfn "(%d,%d) [%s]" (KernelInterpreter.getProd kernels.[k]) (KernelInterpreter.getPos kernels.[k])
+                <| (lookaheads.[k] |> List.ofSeq
+                    |> List.map (fun x -> printSymbol x)
+                    |> String.concat "," )
+        printfn "------------------------------"
+        let vertex = vertices.[i]
+        for edge in vertex.outEdges do
+            printf "(%s,%d) " (printSymbol edge.label) edge.dest.label
+        printfn ""*)
     new StatesInterpreter(vertices.ToArray(), stateToKernels.ToArray(), stateToLookahead.ToArray())

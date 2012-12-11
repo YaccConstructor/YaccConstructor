@@ -1,0 +1,4 @@
+a<<b>>[v] : b b;
+
+[<Start>]
+s[a1 a2 arg] : a<< r[arg] >>[a1];

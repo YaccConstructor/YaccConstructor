@@ -1,2 +1,3 @@
-+s: x x;
+[<Start>]
+s: x x;
 x: NUM;

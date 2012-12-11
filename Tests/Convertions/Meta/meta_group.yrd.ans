@@ -1,3 +1,0 @@
-yard_rule_do_1:  ( a b ) ( a b ) c;
-
-+s:  yard_rule_do_1;

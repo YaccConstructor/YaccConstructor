@@ -10,7 +10,8 @@
     <RootNamespace>CYK.Test</RootNamespace>
     <AssemblyName>CYK.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <Name>CYK.Test</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -34,19 +35,18 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\CYK.Test.XML</DocumentationFile>
   </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Compile Include="CYKTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CYKTests.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

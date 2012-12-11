@@ -4,12 +4,12 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE procedure [sys].[sp_addlogin]
-    @loginame           sysname
+    @loginame       sysname
    ,@passwd         sysname = Null
    ,@defdb          sysname = 'master'      -- UNDONE: DEFAULT CONFIGURABLE???
    ,@deflanguage    sysname = Null
-   ,@sid                        varbinary(16) = Null
-   ,@encryptopt         varchar(20) = Null
+   ,@sid            varbinary(16) = Null
+   ,@encryptopt     varchar(20) = Null
 AS
     -- SETUP RUNTIME OPTIONS / DECLARE VARIABLES --
         set nocount on

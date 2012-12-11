@@ -40,8 +40,15 @@ rule: name=IDENT COLON BAR? alt=alternative opt_alts=(BAR alt=alternative {alt})
             and _public=false
             and metaArgs=[] } } ;
 
-alternative: lst=(s=IDENT { PRef((s,(0,0,"")), None) })*  ac=ACTION_CODE {
-	PSeq(lst |> List.map (fun prod ->
+alternative:
+  lst=(s=IDENT {
+        (s,(0,0,"")) |> fun st ->
+            if Char.IsUpper s.[0] then PToken st
+            else PRef(st, None) }
+      )*
+  ac=ACTION_CODE
+  {
+    PSeq(lst |> List.map (fun prod ->
 			{new Production.elem<Source.t, Source.t>
 				with omit=false
 				and rule=prod

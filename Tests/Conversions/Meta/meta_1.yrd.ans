@@ -1,0 +1,6 @@
+yard_rule_do_1:  (
+      NUMBER ? *
+    | NUMBER ? * IDENT ) *;
+
+[<Start>]
+s:  yard_rule_do_1;

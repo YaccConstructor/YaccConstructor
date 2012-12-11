@@ -14,11 +14,11 @@ module Solution
         addPrj p
         p
 
-    let Convertions = 
+    let Conversions = 
         let p = new Projects.Project()
-        p.Name <- "Convertions.fsproj"
-        p.Folder <- @"./Core/Convertions/"
-        p.SvnSrcFolder <- @"../YaccConstructor/Convertions/"
+        p.Name <- "Conversions.fsproj"
+        p.Folder <- @"./Core/Conversions/"
+        p.SvnSrcFolder <- @"../YaccConstructor/Conversions/"
         addPrj p
         p
 

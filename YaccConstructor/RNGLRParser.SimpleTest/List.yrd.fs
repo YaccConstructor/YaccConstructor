@@ -1,3 +1,5 @@
+
+# 2 "List.yrd.fs"
 module RNGLR.ParseList
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -88,7 +90,7 @@ let private accStates = Array.zeroCreate 7
 for i = 0 to 6 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 6
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput)
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

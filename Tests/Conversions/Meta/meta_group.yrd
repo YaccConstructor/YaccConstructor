@@ -1,0 +1,4 @@
+do<<a b>> : a a b;
+
+[<Start>]
+s : do<<(a b) c>>;

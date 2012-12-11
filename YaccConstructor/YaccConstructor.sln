@@ -28,7 +28,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "Main\Yac
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Convertions", "Convertions\Convertions.fsproj", "{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions", "Conversions\Conversions.fsproj", "{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend.Test", "YardFrontend.Test\YardFrontend.Test.fsproj", "{5936D84D-A842-43B3-97FD-E2C6990E77DB}"
 EndProject
@@ -36,17 +36,15 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend", "IronyFront
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FParsecGenerator", "FParsecGenerator\FParsecGenerator.fsproj", "{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tester", "Tester\Tester.fsproj", "{574E1121-922C-4132-920C-98B5E4ADD5A3}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardPrinter", "YardPrinter\YardPrinter.fsproj", "{3148144C-1649-440E-A9B4-1D5C41677262}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrToYard\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrFrontend\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IronyFrontend.Test", "IronyFrontend.Test\IronyFrontend.Test.fsproj", "{DFF3E1AE-8919-42A9-8320-A6CC5E4E154F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronyFrontendTests", "IronyFrontendTests\IronyFrontendTests.csproj", "{61B73DE1-F585-488D-B842-923CBFCD092C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Convertions.Test", "Convertions.Test\Convertions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Test", "Conversions.Test\Conversions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYaccPrinter", "FsYaccPrinter\FsYaccPrinter.fsproj", "{2238E587-6FAA-4A07-A665-AA7FCC9B5602}"
 EndProject
@@ -85,6 +83,10 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYK.Test", "CYK.Test\CYK.Test.fsproj", "{1DF25ECB-5CBD-4BA5-9C20-0E7FEFCC4C99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CYKOpenCL", "CYKCoreOpenCL\CYKOpenCL.csproj", "{A06BAA31-94BA-4339-BF5C-A35BD46AF671}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Test", "Utils.SourceText.Test\Utils.SourceText.Test.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -180,18 +182,6 @@ Global
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.ActiveCfg = Release|Any CPU
 		{EC8D87C9-3910-4E6A-9C30-1E5C9BA8E73C}.Release|x86.Build.0 = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Debug|x86.Build.0 = Debug|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|x86.ActiveCfg = Release|Any CPU
-		{574E1121-922C-4132-920C-98B5E4ADD5A3}.Release|x86.Build.0 = Release|Any CPU
 		{3148144C-1649-440E-A9B4-1D5C41677262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3148144C-1649-440E-A9B4-1D5C41677262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3148144C-1649-440E-A9B4-1D5C41677262}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -463,6 +453,28 @@ Global
 		{A06BAA31-94BA-4339-BF5C-A35BD46AF671}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A06BAA31-94BA-4339-BF5C-A35BD46AF671}.Release|x86.ActiveCfg = Release|Any CPU
 		{A06BAA31-94BA-4339-BF5C-A35BD46AF671}.Release|x86.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|x86.ActiveCfg = Release|Any CPU
+		{24AC8FF8-638D-437E-A806-859C0A0C701D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

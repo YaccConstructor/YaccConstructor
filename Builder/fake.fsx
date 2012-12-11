@@ -39,7 +39,7 @@ Target "CommonSendLib"
     ( fun _ ->
         [@"./bin/Common.dll"] 
         |> fun x -> 
-            CopyTo Solution.Convertions.LibPath x
+            CopyTo Solution.Conversions.LibPath x
             x        
         |> fun x -> 
             CopyTo Solution.Main.LibPath x
@@ -53,21 +53,21 @@ Target "CommonSendLib"
 Target "CreateLibFolder" 
     (fun _ -> List.iter (fun (p:Projects.Project) -> CreateDir p.LibPath) (!Solution.projects))
 
-Target "GetConvertionsSrc"
+Target "GetConversionsSrc"
     (fun _ ->
-        Directory.GetFiles(Solution.Convertions.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.Convertions.Folder
+        Directory.GetFiles(Solution.Conversions.SvnSrcFolder,"*.fs")
+        |> CopyTo Solution.Conversions.Folder
     )
 
-Target "BuildConvertions"
+Target "BuildConversions"
     (fun _ ->
-       MSBuild buildDir "Build" Solution.Convertions.BuildProperties [Solution.Convertions.Path]
+       MSBuild buildDir "Build" Solution.Conversions.BuildProperties [Solution.Conversions.Path]
        |> Log "AppBuild-Output: "    
     )               
 
-Target "ConvertionsSendLib"
+Target "ConversionsSendLib"
     ( fun _ ->        
-        [@"./bin/Convertions.dll"] 
+        [@"./bin/Conversions.dll"] 
         |> fun x -> 
             CopyTo Solution.RACCGenerator.LibPath x
             x
@@ -213,13 +213,13 @@ Target "BuildRACC" (fun _ -> ())
 // Dependencies
 "BuildCommon"        <== ["GetCommonSrc"; "CreateLibFolder"]
 "CommonSendLib"      <== ["BuildCommon"]
-"BuildConvertions"   <== ["GetConvertionsSrc"; "CommonSendLib"]
-"ConvertionsSendLib" <== ["BuildConvertions"]
-"BuildMain"          <== ["GetMainSrc"; "ConvertionsSendLib"; "CommonSendLib"]
+"BuildConversions"   <== ["GetConversionsSrc"; "CommonSendLib"]
+"ConversionsSendLib" <== ["BuildConversions"]
+"BuildMain"          <== ["GetMainSrc"; "ConversionsSendLib"; "CommonSendLib"]
 
 "RACCFASendLib"      <== ["BuildRACCFA"]
 "RACCCommonSendLib"  <== ["BuildRACCCommon"]
-"BuildRACCGenerator" <== ["CommonSendLib";"RACCFASendLib";"RACCCommonSendLib"; "ConvertionsSendLib"]
+"BuildRACCGenerator" <== ["CommonSendLib";"RACCFASendLib";"RACCCommonSendLib"; "ConversionsSendLib"]
 "BuildRACCFA"        <== ["RACCCommonSendLib"]
 "BuildRACCCore"      <== ["RACCFASendLib";"RACCCommonSendLib"]
 "BuildRACCCommon"    <== ["GetRACCSrc"; "CreateLibFolder"]

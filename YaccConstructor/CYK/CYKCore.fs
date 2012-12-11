@@ -4,6 +4,7 @@ open System.Collections.Generic
 
 //(32        |16       |8       |8        )
 //(ruleIndex |lblState |lblName |lblWeght )
+//..
 type tblData = uint64
 
 [<Struct>]

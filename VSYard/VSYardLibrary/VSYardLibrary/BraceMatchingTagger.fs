@@ -42,8 +42,8 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
     let FindMatchForOpen (parentheses, openParenthesisPosition) = 
         let isFurtherThanCurrent x =
             match x with
-            |LPAREN r when r.Start.AbsoluteOffset > openParenthesisPosition -> true
-            |RPAREN r when r.Start.AbsoluteOffset > openParenthesisPosition -> true
+            |LPAREN r when r.startPos.absoluteOffset > openParenthesisPosition -> true
+            |RPAREN r when r.startPos.absoluteOffset > openParenthesisPosition -> true
             | _ -> false
 
         let furtherParentheses = List.filter isFurtherThanCurrent parentheses
@@ -54,7 +54,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
             match x with
             |LPAREN _ -> count := !count + 1
             |RPAREN _ when not (!count = 0 ) -> count:= !count - 1
-            |RPAREN r when (!count = 0) && not !got -> closeParenthesisPosition := r.Start.AbsoluteOffset
+            |RPAREN r when (!count = 0) && not !got -> closeParenthesisPosition := r.startPos.absoluteOffset
             | _ -> ()
             if not (!closeParenthesisPosition = -1) then got := true
         List.iter counter furtherParentheses
@@ -65,8 +65,8 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
     let FindMatchForClose (parentheses, closeParenthesisPosition) = 
         let isFurtherThanCurrent x =
             match x with
-            |LPAREN r when r.Start.AbsoluteOffset < closeParenthesisPosition -> true
-            |RPAREN r when r.Start.AbsoluteOffset < closeParenthesisPosition -> true
+            |LPAREN r when r.startPos.absoluteOffset < closeParenthesisPosition -> true
+            |RPAREN r when r.startPos.absoluteOffset < closeParenthesisPosition -> true
             | _ -> false
         let furtherParentheses = List.rev <| List.filter isFurtherThanCurrent parentheses
         let openParenthesisPosition = ref -1
@@ -76,7 +76,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
             match x with
             |RPAREN _ -> count := !count + 1
             |LPAREN _ when not (!count = 0) -> count := !count - 1
-            |LPAREN r when (!count = 0) && not !got -> openParenthesisPosition := r.Start.AbsoluteOffset
+            |LPAREN r when (!count = 0) && not !got -> openParenthesisPosition := r.startPos.absoluteOffset
             | _ -> ()
             if not (!openParenthesisPosition = -1) then got := true
         List.iter counter furtherParentheses
@@ -114,7 +114,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
                     parentheses 
                     |> List.exists (function
                                     |LPAREN r
-                                    |RPAREN r when r.Start.AbsoluteOffset = currentPosition -> true
+                                    |RPAREN r when r.startPos.absoluteOffset = currentPosition -> true
                                     | _                                                     -> false)
 
                 if shouldBeProcessed
@@ -123,7 +123,7 @@ type BraceMatchingTagger (view : ITextView, sourceBuffer : ITextBuffer, m_dte : 
                         let f x =
                             match x with
                             |LPAREN r
-                            |RPAREN r when r.Start.AbsoluteOffset = currentPosition -> currentToken := x 
+                            |RPAREN r when r.startPos.absoluteOffset = currentPosition -> currentToken := x 
                             | _ -> ()
                         List.iter f parentheses
                         let pairSpan = 

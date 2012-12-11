@@ -36,9 +36,9 @@ let makeIdent notKeyWord (name:string) =
     then name.[0..1] 
     else ""
   if prefix = "@@" then GLOBALVAR(name)
-  else if prefix = "##" then GLOBALTEMPOBJ(name)
+  //else if prefix = "##" then GLOBALTEMPOBJ(name)
   else if name.[0] = '@' then LOCALVAR(name)
-  else if name.[0] = '#' then TEMPOBJ(name)
+  //else if name.[0] = '#' then TEMPOBJ(name)
   else if notKeyWord then IDENT(name)
   else  match getKwToken name with
         | Some(kwToken) -> kwToken

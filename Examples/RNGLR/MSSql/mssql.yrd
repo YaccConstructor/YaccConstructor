@@ -44,7 +44,7 @@ set_stmnt:
 	| "SET" LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
 
 set_localvar:
-    KW_SET 
+    "SET"
 	( 
 		LOCALVAR 
 		(DOUBLE_COLON property_name | ident )? OP_EQ sql_expr | udt_name ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)

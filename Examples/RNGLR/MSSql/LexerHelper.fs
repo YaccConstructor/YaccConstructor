@@ -32,7 +32,7 @@ let clearBuf () = str_buf.Clear() |> ignore
   
 let makeIdent notKeyWord (name:string) =
   let prefix = 
-    if String.length name >=2 
+    if String.length name >= 2 
     then name.[0..1] 
     else ""
   if prefix = "@@" then GLOBALVAR(name)
@@ -90,4 +90,3 @@ type SourceText =
     static member inline ofText(text) = new SourceText(text, SourceRange.Empty)
     member inline x.Text = x.text
     member inline x.Range = x.range
-

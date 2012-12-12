@@ -10,7 +10,8 @@
     <RootNamespace>MsSqll</RootNamespace>
     <AssemblyName>MsSql</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <Name>MsSqll</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -21,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\MsSqll.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
@@ -31,14 +32,13 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\MsSqll.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <FsYaccToolPath>..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
     <FsLexToolPath>..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
   </PropertyGroup>
-
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
@@ -46,6 +46,9 @@
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="mssql.yrd" />
     <Compile Include="MSParser.fs" />
     <Compile Include="LexerHelper.fs" />
@@ -57,11 +60,11 @@
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
+    <Reference Include="FSharp.Core" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
     <Reference Include="RNGLR">
       <HintPath>..\..\yc\RNGLR.dll</HintPath>
     </Reference>

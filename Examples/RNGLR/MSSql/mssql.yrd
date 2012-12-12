@@ -103,11 +103,11 @@ raiserror_stmnt:
 
 declare:  
     KW_DECLARE 
-    (
+    comma_list<<(
 		LOCALVAR KW_AS? sql_datatype
 		| ident KW_CURSOR
 		| ident KW_AS? table_type_definition
-    )+
+    )>>
 
 table_type_definition: 
      KW_TABLE LPAREN (column_definition | table_constraint)* RPAREN 

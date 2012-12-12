@@ -37,12 +37,12 @@ let tokenName literal token_format=
             | ';' -> "SEMICOLON"
             | ':' -> "COLON"
             | '_' | ' ' -> "_"
-            | c when System.Char.IsLetterOrDigit c   -> string (System.Char.ToUpper c) 
+            | c when System.Char.IsLetterOrDigit c -> string (System.Char.ToUpper c) 
             | _ -> ""
             )
             literal
-    if upper.Length=0 then 
-        "EMPTY" 
+    if upper.Length=0
+    then "EMPTY" 
     else 
         let format = Printf.StringFormat<string->string>(token_format)
         sprintf format upper
@@ -50,46 +50,55 @@ let tokenName literal token_format=
 let rec eachProduction f productionList =
     List.iter 
         (function    
-        | PSeq(elements, actionCode, l) -> f(PSeq(elements, actionCode, l)); eachProduction f (List.map (fun elem -> elem.rule) elements)
-        | PAlt(left, right) -> f(PAlt(left, right)); eachProduction f [left; right]
-        | PMany(x) -> f(PMany(x)); eachProduction f [x]
-        | PSome(x) -> f(PSome(x)); eachProduction f [x]
-        | POpt(x) -> f(POpt(x)); eachProduction f [x]
-        | x -> f(x)
+        | PSeq(elements, actionCode, l) -> 
+            PSeq(elements, actionCode, l) |> f
+            List.map (fun elem -> elem.rule) elements |> eachProduction f
+        | PAlt(left, right) -> 
+            PAlt(left, right) |> f
+            eachProduction f [left; right]
+        | PMany x ->
+            PMany x |> f
+            eachProduction f [x]
+        | PSome x ->
+            PSome x |> f
+            eachProduction f [x]
+        | POpt x  ->
+            POpt x |> f
+            eachProduction f [x]
+        | x -> f x
         )
         productionList 
 
-let replaceLiteralsInProduction production (replacedLiterals:Dictionary<string, string>) (grammarTokens:HashSet<string>) token_format= 
+let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (grammarTokens:HashSet<_>) token_format= 
     let rec _replaceLiterals = function
         | PSeq(elements, actionCode, l) -> 
             (
                 elements 
-                |> List.map (fun elem -> {elem with rule=(_replaceLiterals elem.rule)})
+                |> List.map (fun elem -> { elem with rule = _replaceLiterals elem.rule })
                 ,actionCode, l
             )
             |> PSeq
         | PAlt(left, right) -> PAlt(_replaceLiterals left, _replaceLiterals right)
-        | PMany(x) -> PMany(_replaceLiterals x)
-        | PSome(x) -> PSome(_replaceLiterals x)
-        | POpt(x) -> POpt(_replaceLiterals x)
+        | PMany x -> PMany(_replaceLiterals x)
+        | PSome x -> PSome(_replaceLiterals x)
+        | POpt x  -> POpt(_replaceLiterals x)
         | PLiteral src -> 
             let str = src.text
-            if (replacedLiterals.ContainsKey str) then
-                PToken <| new Source.t(replacedLiterals.[str], src)
+            if replacedLiterals.ContainsKey str
+            then PToken <| new Source.t(replacedLiterals.[str], src)
             else
                 let token = ref(tokenName str token_format)
-                while grammarTokens.Contains(!token) do
+                while grammarTokens.Contains !token do
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
-                PToken <| new Source.t(!token, src)
+                PToken <| new Source.t(!token, src) 
         | x -> x
     _replaceLiterals production
-    
 
-let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) (token_format:string) = 
+let replaceLiterals (ruleList: Rule.t<Source.t, Source.t> list) token_format = 
     
-    let grammarTokens = new HashSet<string>()
-    eachProduction 
+    let grammarTokens = new HashSet<_>()
+    eachProduction
         (function
         | PToken name -> grammarTokens.Add name.text |> ignore
         | _ -> ()

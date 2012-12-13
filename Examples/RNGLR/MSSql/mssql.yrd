@@ -361,7 +361,7 @@ execute_stmnt:
          |   KW_DEFAULT?
          |   sql_value)
     )* *)
-    (KW_WITH KW_RECOMPILE)?
+    (KW_WITH "RECOMPILE")?
     SEMI?
 (*
 execute_stmnt:

@@ -27,7 +27,7 @@ open Yard.Core.IL.Production
 
 open System.Collections.Generic
 
-let tokenName literal token_format=
+let tokenName literal token_format =
     let upper = 
         String.collect 
             (function
@@ -89,6 +89,9 @@ let replaceLiteralsInProduction production (replacedLiterals:Dictionary<_,_>) (g
             else
                 let token = ref(tokenName str token_format)
                 while grammarTokens.Contains !token do
+                    eprintfn 
+                        "WARNING. ReplaceLiterals. Token with name %s is already exists. Seems, that you use token %s and literal %s. Please, resolve this ambiguity."
+                        !token !token str
                     token := "YARD_" + !token
                 replacedLiterals.Add(str, !token) 
                 PToken <| new Source.t(!token, src) 

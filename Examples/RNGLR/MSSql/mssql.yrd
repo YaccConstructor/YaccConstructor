@@ -41,7 +41,7 @@ set_stmnt:
                  | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
                  | "XACT_ABORT" ) 
               (KW_ON | KW_OFF)
-	| KW_SET LOCALVAR (DOT IDENT)? OP_EQ ( sql_expr | IDENT (DOT | DOUBLE_COLON) IDENT )
+	| set_localvar
 
 set_localvar:
     KW_SET
@@ -208,10 +208,31 @@ KW_SELECT ( KW_ALL | KW_DISTINCT )?
     (KW_INTO full_ident )? 
     ( from )? 
     ( KW_WHERE search_condition )? 
-    ( KW_GROUP KW_BY ( KW_ALL )? group_by_expression [ ,...n ] 
+    ( KW_GROUP KW_BY ( KW_ALL )? comma_list<<group_by_expression>>
                 ( KW_WITH ( KW_CUBE | KW_ROLLUP ) )?
     )?
     ( KW_HAVING search_condition )? 
+	
+group_by_expression:
+( STRING_CONST (*| scalar_function*) | (full_ident DOT)? full_ident | LOCALVAR  (*&&&&&&*)
+        | LPAREN sql_expr RPAREN | LPAREN select_stmnt RPAREN 
+    | ( OP_PLUS | OP_MINUS | OP_TILDA ) sql_expr 
+    | sql_expr binop sql_expr 
+    | ranking_windowed_function | aggregate_windowed_function
+)
+
+aggregate_windowed_function:
+	KW_OVER LPAREN ( ( KW_PARTITION KW_BY ( LOCALVAR | select_stmnt ) )* )? RPAREN
+
+ranking_windowed_function:
+		( KW_RANK | KW_DENSE_RANK | KW_ROW_NUMBER | KW_NTILE ) LPAREN (sql_expr)? RPAREN KW_OVER LPAREN 
+		( (KW_PARTITION KW_BY (LOCALVAR|select_stmnt|full_ident))*)?
+           order_by_clause RPAREN
+	
+order_by_clause:
+	( KW_ORDER KW_BY 
+		comma_list<<(ident|DEC_NUMBER) ( KW_COLLATE ident )? ( KW_ASC | KW_DESC )? >>
+	)? 
 	
 search_condition: 
     ( KW_NOT? predicate | LPAREN search_condition RPAREN ) 
@@ -419,7 +440,7 @@ drop_clustered_constraint_option:
 (*
 begin_transaction:
 KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
-    ( ( ident | @tran_name_variable )     (*????????/*)
+    ( ( ident | LOCALVAR )     (*????????/*)
       ( KW_WITH KW_MARK ( STRING_CONST ) )?
     )?
 ( SEMI )?      (* proc_body_stmt?*)
@@ -432,116 +453,40 @@ commit:
 KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
 ( SEMI )?
 	*)
-	*)
-
-query_expression:
-    ( query_specification | (LPAREN query_expression RPAREN) )
-    (
-        (KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT) query_specification   
-    |   LPAREN query_expression RPAREN
-    )?
-;
-query_specification:
-    (* http://msdn.microsoft.com/en-us/library/ms176104.aspx *)
-    KW_SELECT (* (KW_ALL | KW_DISTINCT)?
-    (KW_TOP LPAREN sql_expr RPAREN KW_PRESENT? (KW_WITH KW_TIES)? )? *)
-    (* <select_list> *) 
-    list<<  (       
-            STAR
-        |   full_ident DOT STAR
-        |   (
-                (full_ident DOT)? (IDENT | (DOLLAR KW_IDENTITY) | (DOLLAR KW_ROWGUID) )
-            |   udt_column_runtime = IDENT (
-                    (DOT | DOUBLE_COLON)
-                    (IDENT | IDENT LPAREN comma_list<<sql_expr>> RPAREN)
-                )?
-            |   sql_expr ( KW_AS? IDENT)?
-            )
-        |   IDENT OP_EQ sql_expr
-        )
-        COMMA>>
-    from_stmnt?
-    (KW_WHERE search_condition)?
-;
 
 
-(* http://msdn.microsoft.com/en-us/library/ms173545.aspx *)
-search_condition:
-   ( KW_NOT? search_condition_predicate | LPAREN search_condition RPAREN )
-   comma_list<<(
-      (KW_AND | KW_OR) KW_NOT? (search_condition_predicate | LPAREN search_condition RPAREN)
-   )>>
-;
-search_condition_predicate:
-    sql_expr ( OP_EQ | OP_LT | OP_MT | (OP_LT OP_MT) | OP_LT_EQ | OP_MT_EQ ) sql_expr
-|   sql_expr KW_NOT? KW_LIKE sql_expr
-|   sql_expr KW_IS KW_NOT? KW_NULL   (* TODO: add many-many items *)
-;
-(*
-(* http://msdn.microsoft.com/en-us/library/ms175972.aspx *)
-common_table_expression:
-    ident                                            (* TODO: impelement it ! *)
-;
-*)
-(* http://msdn.microsoft.com/en-us/library/ms177634.aspx *) 
-from_stmnt:
-    KW_FROM comma_list<<(
-        full_ident (KW_AS? IDENT)? tablesample_clause? 
-            (KW_WITH LPAREN table_hint+ RPAREN)?        
-(*  | about rowset functions  *)
-    | user_defined_function = IDENT (KW_AS? IDENT)?    
-    )>>
-                           
-tablesample_clause:
-    KW_TABLESAMPLE KW_SYSTEM? LPAREN DEC_NUMBER (KW_RERCENT | KW_ROWS)? RPAREN
-        (KW_REPEATABLE LPAREN DEC_NUMBER RPAREN)?
-;
-(* http://msdn.microsoft.com/en-us/library/ms187373.aspx *)
-table_hint: KW_NOEXPAND? NOLOCK;
-
-(* http://msdn.microsoft.com/en-us/library/ms188332.aspx *)
 execute_stmnt:
-    (KW_EXEC | KW_EXECUTE) ( LOCALVAR OP_EQ )?  ( (full_ident (SEMI DEC_NUMBER)? ) | LOCALVAR )
-     (* (
-        (LOCALVAR OP_EQ)? 
-        (((GLOBALVAR | LOCALVAR) KW_OUTPUT? )? 
-         |   KW_DEFAULT?
-         |   sql_value)
-    )* *)
-    (KW_WITH "RECOMPILE")?
-    SEMI?
-(*
-execute_stmnt:
-	( ( KW_EXEC | KW_EXECUTE ) )?
+	execute_proc|execute_character_string|execute_command
+	
+execute_proc:
+( KW_EXEC | KW_EXECUTE  )?
     ( 
       ( LOCALVAR OP_EQ )?
-      ( full_ident ( SEMI DEC_NUMBER )? | LOCALVAR )  
-      ( ( LOCALVAR OP_EQ )?                                           (*имя процедуры с @ +&&&*)
-			( 
-				((GLOBALVAR | LOCALVAR) ( KW_OUTPUT? )? 
-				|( DEFAULT )? 
-            )
-        )?
-     (* [ ,...n ]*)
-      ( WITH RECOMPILE )?
-    ))
-SEMI;
+      ( full_ident ( SEMI DEC_NUMBER )? | LOCALVAR )? 
+        comma_list<<( ( LOCALVAR OP_EQ )? ( VALUE                         (*?????*)
+                           | LOCALVAR KW_OUTPUT? 
+                           | KW_DEFAULT? 
+                           )
+        )?>>
+       (KW_WITH KW_RECOMPILE)?
+    )
+SEMI?
 
-execute_char_string:
+execute_character_string:
 ( KW_EXEC | KW_EXECUTE ) 
-        LPAREN ( LOCALVAR |  DEC_NUMBER? STRING_CONST )+ RPAREN
-    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ STRING_CONST )?
+        LPAREN { @string_variable | [ N ]'tsql_string' } [ + ...n ] RPAREN    (***&&&&&&&&&&&&&&&&&&&&)
+    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ ' name ' )?
 SEMI?
 
-execute_pass-through_command:
+execute_command:
 ( KW_EXEC | KW_EXECUTE )
-        LPAREN ( LOCAL_VAR | DEC_NUMBER? STRING_CONST ("?")?  )+  (*&&*)
-        ( ( COMMA (  LOCALVAR KW_OUTPUT? ) )+)?            (*&&*)
-        RPAREN
-    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ STRING_CONST )?
-    ( KW_AT ident )?
-SEMI?
-	*)
+        LPAREN ( LOCALVAR | [ N ] 'command_string [ ? ] ' ) [ + ...n ]
+        [ { , { value | @variable [ OUTPUT ] } } [ ...n ] ]
+        RPAREN 
+    [ AS { LOGIN | USER } = ' name ' ]
+    [ AT linked_server_name ]
+[;]
+
 type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 
 sql_datatype:

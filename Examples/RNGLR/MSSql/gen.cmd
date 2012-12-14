@@ -1,4 +1,3 @@
-echo off
 echo "##teamcity[testStarted name='Generate MS-SQL grammar.' captureStandardOutput='true']"
 
 ..\..\yc\YaccConstructor.exe -c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%%s" -c ExpandInnerAlt -c ExpandBrackets -c LeaveLast  ^

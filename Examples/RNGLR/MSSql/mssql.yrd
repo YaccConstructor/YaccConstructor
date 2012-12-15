@@ -33,21 +33,20 @@ batch_body:
 set_stmnt:
 	KW_SET (
 		"ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
-        	 | "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
-	         | "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
-                 | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
-                 | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
-                 | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
-                 | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
-                 | "XACT_ABORT" ) 
-              (KW_ON | KW_OFF)
-	| set_localvar
+        	| "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
+	        | "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
+            | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
+            | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
+            | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
+            | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
+            | "XACT_ABORT" ) (KW_ON | KW_OFF)
+			| set_localvar
 
 set_localvar:
     KW_SET
 	( 
 		LOCALVAR 
-		(DOUBLE_COLON property_name | ident )? OP_EQ sql_expr | udt_name ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
+		(DOUBLE_COLON (*property_name |*) ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
 	)
 	|
 	( LOCALVAR OP_EQ 
@@ -245,8 +244,8 @@ predicate:
     | sql_expr KW_NOT? KW_BETWEEN sql_expr KW_AND sql_expr 
     | sql_expr KW_IS KW_NOT? KW_NULL  
     | sql_expr binop                     
-		(KW_ALL | KW_SOME | KW_ANY) LPAREN query_expresssion RPAREN            
-    | KW_EXISTS LPAREN query_expresssion RPAREN  
+		(KW_ALL | KW_SOME | KW_ANY) LPAREN query_expression RPAREN            
+    | KW_EXISTS LPAREN query_expression RPAREN  
 
 from:
 ( KW_FROM comma_list<<table_source>> )? 
@@ -257,14 +256,14 @@ table_source:
 		(KW_WITH LPAREN table_hint COMMA* RPAREN)? 
     | rowset_function (KW_AS? full_ident)? 
         (LPAREN comma_list<<ident>> RPAREN)?  
-    | user_defined_function (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)? 
+    | sql_expr (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)? 
     (*| openxml_clause*)
     | full_ident  KW_AS? full_ident (LPAREN comma_list<<full_ident>> RPAREN)? 
     | joined_table 
     | pivoted_table 
     (*| <unpivoted_table>*)                                                      (*&&&&&&&&*)
     | LOCALVAR (KW_AS full_ident)?
-    | LOCALVAR DOT ident LPAREN comma_list<<sql_expression>> RPAREN (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)?
+    | LOCALVAR DOT ident LPAREN comma_list<<sql_expr>> RPAREN (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)?
 
 (*
 (*O_O*)
@@ -278,8 +277,40 @@ rowset_function:
 	| opendatasource
 	| openquery
 	| openrowset
-	| openxml
+	(*| openxml*)
 
+openrowset:
+	KW_OPENROWSET 
+	LPAREN (STRING_CONST COMMA (STRING_CONST SEMI STRING_CONST SEMI STRING_CONST 
+		| STRING_CONST) 
+		COMMA ((full_ident DOT)? (full_ident DOT)? full_ident 
+		| STRING_CONST 
+		) 
+		| KW_BULK STRING_CONST COMMA 
+       (KW_FORMATFILE OP_EQ STRING_CONST bulk_options?
+       | KW_SINGLE_BLOB | KW_SINGLE_CLOB | KW_SINGLE_NCLOB)
+	) RPAREN 
+
+bulk_options:
+   (COMMA KW_CODEPAGE OP_EQ STRING_CONST)? 
+   (COMMA KW_ERRORFILE OP_EQ STRING_CONST)?
+   (COMMA KW_FIRSTROW OP_EQ DEC_NUMBER)?
+   (COMMA KW_LASTROW OP_EQ DEC_NUMBER)? 
+   (COMMA KW_MAXERRORS OP_EQ DEC_NUMBER)? 
+   (COMMA KW_ROWS_PER_BATCH OP_EQ DEC_NUMBER)? 	
+	
+openquery:
+	KW_OPENQUERY LPAREN full_ident COMMA STRING_CONST RPAREN	
+	
+opendatasource:	
+	KW_OPENDATASOURCE LPAREN ident COMMA STRING_CONST RPAREN	
+
+freetexttable:
+	KW_FREETEXTTABLE LPAREN full_ident COMMA (full_ident | LPAREN comma_list<<full_ident>> RPAREN | STAR) 
+    COMMA STRING_CONST 
+    (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
+    (COMMA DEC_NUMBER)? RPAREN	
+	
 containstable:
 	KW_CONTAINSTABLE LPAREN full_ident COMMA (ident | LPAREN comma_list<<ident>> RPAREN | STAR) COMMA "'" contains_search_condition "'" 
     (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
@@ -299,7 +330,7 @@ contains_search_condition:
 simple_term: 
     STRING_CONST
 		  
-prefix term:
+prefix_term:
     STRING_CONST 
 	
 generation_term: 
@@ -396,7 +427,7 @@ unpivoted_table:
         table_source KW_UNPIVOT unpivot_clause full_ident
 
 unpivot_clause:
-        LPAREN value_column KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN (*&&&&&&&&&&*)
+        LPAREN ident KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN (*&&&&&&&&&&*)
  
 	
 (*****************************************ALTER TABLE****************************************************)

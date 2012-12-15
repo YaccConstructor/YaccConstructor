@@ -204,7 +204,7 @@ query_expression:
 query_specification: 
 	KW_SELECT (KW_ALL | KW_DISTINCT)? 
 	(KW_TOP sql_expr KW_PERCENT? (KW_WITH KW_TIES)?)? 
-	select_list                                           (**********************) 
+	comma_list<<sql_expr>>                                           
 	(KW_INTO full_ident)? 
 	from? 
 	(KW_WHERE search_condition)? 
@@ -279,42 +279,46 @@ rowset_function:
 	| openquery
 	| openrowset
 	| openxml
-(*
-CONTAINSTABLE ( table , { column_name | (column_list ) | * } , ' < contains_search_condition > ' 
-     [ , LANGUAGE language_term] 
-  [ ,top_n_by_rank ] 
-          ) 
-< contains_search_condition > ::= 
-    { < simple_term > 
-    | < prefix_term > 
-    | < generation_term > 
-    | < proximity_term > 
-     |  < weighted_term > 
-    } 
-    | { ( < contains_search_condition > ) 
-    { { AND | & } | { AND NOT | &! } | { OR | | } } 
-     < contains_search_condition > [ ...n ] 
-    }
-< simple_term > ::= 
-          word | " phrase "
-< prefix term > ::= 
-     { "word * " | "phrase *" } 
-< generation_term > ::= 
-     FORMSOF ( { INFLECTIONAL | THESAURUS } , < simple_term > [ ,...n ] ) 
-< proximity_term > ::= 
-     { < simple_term > | < prefix_term > } 
-     { { NEAR | ~ } { < simple_term > | < prefix_term > } } [ ...n ] 
-< weighted_term > ::= 
-     ISABOUT
-        ( { { 
-  < simple_term > 
-  | < prefix_term > 
-  | < generation_term > 
-  | < proximity_term > 
-  } 
-   [ WEIGHT ( weight_value ) ] 
-   } [ ,...n ] 
-        )*)
+
+containstable:
+	KW_CONTAINSTABLE LPAREN full_ident COMMA (ident | LPAREN comma_list<<ident>> RPAREN | STAR) COMMA "'" contains_search_condition "'" 
+    (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
+	(*??*) 
+    RPAREN 
+	
+contains_search_condition: 
+	(simple_term 
+    | prefix_term 
+    | generation_term 
+    | proximity_term 
+    | weighted_term ) 
+    | (LPAREN contains_search_condition RPAREN 
+		( ( KW_AND | "&" ) | ( KW_AND KW_NOT | "&!" ) | ( KW_OR | "|" ) ) 
+		contains_search_condition+ )
+		
+simple_term: 
+    STRING_CONST
+		  
+prefix term:
+    STRING_CONST 
+	
+generation_term: 
+    KW_FORMSOF LPAREN (KW_INFLECTIONAL | KW_THESAURUS) COMMA comma_list<<simple_term>> RPAREN
+	
+proximity_term: 
+     (simple_term | prefix_term) 
+     ((KW_NEAR | OP_TILDA) (simple_term | prefix_term))+
+	 
+weighted_term: 
+	KW_ISABOUT
+		LPAREN comma_list<<(( 
+		simple_term 
+		| prefix_term 
+		| generation_term 
+		| proximity_term ) 
+		(WEIGHT LPAREN DEC_NUMBER RPAREN)? )>>
+		RPAREN
+		
 table_hint: 
 	(KW_NOEXPAND )? 
 	(KW_INDEX LPAREN comma_list<<ident>> RPAREN  	
@@ -363,12 +367,11 @@ tablesample_clause:
         ( KW_REPEATABLE LPAREN sql_expr RPAREN )?                            
 
 joined_table: 
-	(
-		table_source join_type table_source KW_ON search_condition 
-		| table_source KW_CROSS KW_JOIN table_source 
-		| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)
-		| LPAREN? joined_table RPAREN? 
-	)
+	table_source join_type table_source KW_ON search_condition 
+	| table_source KW_CROSS KW_JOIN table_source 
+	(*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
+	| LPAREN? joined_table RPAREN? 
+	
 
 join_type: 
     (KW_INNER | ((KW_LEFT | KW_RIGHT | KW_FULL) KW_OUTER?) (join_hint)?)?
@@ -384,20 +387,20 @@ pivoted_table:
         table_source KW_PIVOT pivot_clause full_ident
 
 pivot_clause:
-        LPAREN aggregate_function ( value_column )  (*vt*)
-        KW_FOR pivot_column 
-        KW_IN LPAREN <column_list> RPAREN      (*&&&&&&&&&&*) 
+        LPAREN sql_expr LPAREN sql_expr RPAREN  (*vt*)
+        KW_FOR sql_expr 
+        KW_IN LPAREN comma_list<<ident>> RPAREN      (*&&&&&&&&&&*) 
 		RPAREN 
 
 unpivoted_table:
         table_source KW_UNPIVOT unpivot_clause full_ident
 
 unpivot_clause:
-        LPAREN value_column KW_FOR pivot_column KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN (*&&&&&&&&&&*)
+        LPAREN value_column KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN (*&&&&&&&&&&*)
  
 	
 (*****************************************ALTER TABLE****************************************************)
-ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
+(*ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
 ( 
     KW_ALTER KW_COLUMN ident 
     ( 
@@ -436,7 +439,7 @@ drop_clustered_constraint_option:
       | KW_MOVE KW_TO ( ident LPAREN ident RPAREN | filegroup    (*??*)
           | "default")
     )
-
+*)
 (*
 begin_transaction:
 KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
@@ -456,36 +459,39 @@ KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable 
 
 
 execute_stmnt:
-	execute_proc|execute_character_string|execute_command
+	execute_proc
+	|execute_character_string
+	|execute_command
 	
 execute_proc:
-( KW_EXEC | KW_EXECUTE  )?
+	(KW_EXEC | KW_EXECUTE)?
     ( 
-      ( LOCALVAR OP_EQ )?
-      ( full_ident ( SEMI DEC_NUMBER )? | LOCALVAR )? 
-        comma_list<<( ( LOCALVAR OP_EQ )? ( VALUE                         (*?????*)
-                           | LOCALVAR KW_OUTPUT? 
-                           | KW_DEFAULT? 
-                           )
+		(LOCALVAR OP_EQ)?
+		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR )? 
+        comma_list<<((LOCALVAR OP_EQ)? 
+			(sql_expr		(*?????*)
+			| LOCALVAR KW_OUTPUT? 
+            | KW_DEFAULT? 
+            )
         )?>>
-       (KW_WITH KW_RECOMPILE)?
+   (KW_WITH KW_RECOMPILE)?
     )
 SEMI?
 
 execute_character_string:
-( KW_EXEC | KW_EXECUTE ) 
-        LPAREN { @string_variable | [ N ]'tsql_string' } [ + ...n ] RPAREN    (***&&&&&&&&&&&&&&&&&&&&)
-    ( KW_AS ( KW_LOGIN | KW_USER ) OP_EQ ' name ' )?
+	(KW_EXEC | KW_EXECUTE) 
+    LPAREN (( LOCALVAR | STRING_CONST ) PLUS?)+ RPAREN    
+    (KW_AS (KW_LOGIN | KW_USER) OP_EQ STRING_CONST)?
 SEMI?
 
 execute_command:
-( KW_EXEC | KW_EXECUTE )
-        LPAREN ( LOCALVAR | [ N ] 'command_string [ ? ] ' ) [ + ...n ]
-        [ { , { value | @variable [ OUTPUT ] } } [ ...n ] ]
-        RPAREN 
-    [ AS { LOGIN | USER } = ' name ' ]
-    [ AT linked_server_name ]
-[;]
+	(KW_EXEC | KW_EXECUTE)
+    LPAREN ( LOCALVAR | STRING_CONST "?"? PLUS?)+
+    (( COMMA (sql_expr | LOCALVAR KW_OUTPUT?))+)?
+    RPAREN 
+    (KW_AS (KW_LOGIN | KW_USER) OP_EQ STRING_CONST)?
+    (KW_AT full_ident)?
+SEMI?
 
 type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 

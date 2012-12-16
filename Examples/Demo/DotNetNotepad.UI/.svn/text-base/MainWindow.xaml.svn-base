@@ -1,0 +1,50 @@
+﻿<Window x:Class="DotNetNotepad.UI.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+		Title=".NET Notepad" Height="650" Width="625" 
+		Icon="Images/icon.png"
+		WindowStartupLocation="CenterScreen" Drop="WindowDrop">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<!-- Toolbar -->
+		<Menu>
+			<MenuItem Header="File">
+				<MenuItem Header="New"  Click="NewClick">
+				</MenuItem>
+				<MenuItem Header="Open"  Click="OpenFileClick">
+				</MenuItem>
+				<Separator/>
+				<MenuItem Header="Exit"  Click="ExitClick">
+				</MenuItem>
+			</MenuItem>
+
+
+			<MenuItem Header="Options">
+			<MenuItem Header="Themes">
+				<MenuItem Header="Aero.NormalColor" Tag="aero.normalcolor" Click="ChangeStandardTheme"/>
+				<MenuItem Header="Classic" Tag="classic" Click="ChangeStandardTheme"/>
+				<MenuItem Header="Luna.Normalcolor" Tag="luna.normalcolor" Click="ChangeStandardTheme"/>
+				<MenuItem Header="Generic" Tag="generic" Click="ChangeStandardTheme"/>
+				<Separator/>
+				<MenuItem Header="Dev 2010" Tag="/AvalonDock.Themes;component/themes/dev2010.xaml" Click="ChangeCustomTheme"/>
+				<MenuItem Header="Expression Dark" Tag="/AvalonDock.Themes;component/themes/ExpressionDark.xaml" Click="ChangeCustomTheme"/>
+
+				<Separator/>
+				<MenuItem Header="Default" Click="SetDefaultTheme"/>				
+			</MenuItem>
+			</MenuItem>
+
+
+		</Menu>
+		<ad:DockingManager x:Name="DockManager" IsAnimationEnabled="True" Grid.Row="1" Margin="0,0,0,0" 
+					 ActiveContent="{Binding ElementName=Content1}" DocumentClosing="DockManagerDocumentClosing" >
+			<ad:ResizingPanel Orientation="Horizontal">
+				<ad:DocumentPane x:Name="DocumentHost">
+				</ad:DocumentPane>
+			</ad:ResizingPanel>
+		</ad:DockingManager>
+	</Grid>
+</Window>

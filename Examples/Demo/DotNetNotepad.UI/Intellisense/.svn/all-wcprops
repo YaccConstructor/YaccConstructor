@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/12925/DotNetNotepad.UI/Intellisense
+END
+ICompletionWindowResolver.cs
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/12770/DotNetNotepad.UI/Intellisense/ICompletionWindowResolver.cs
+END
+FileCompletionDataProvider.cs
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/12925/DotNetNotepad.UI/Intellisense/FileCompletionDataProvider.cs
+END
+CompletionWindowResolver.cs
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/12811/DotNetNotepad.UI/Intellisense/CompletionWindowResolver.cs
+END
+ICompletionDataProvider.cs
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/12811/DotNetNotepad.UI/Intellisense/ICompletionDataProvider.cs
+END
+TextCompletionData.cs
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/12770/DotNetNotepad.UI/Intellisense/TextCompletionData.cs
+END

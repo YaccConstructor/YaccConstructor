@@ -1,4 +1,4 @@
-﻿// Driver.fs contains entry point of MS-SQL parser.
+﻿//  Driver.fs contains entry point of MS-SQL parser.
 //
 //  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -17,13 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module MSSqlParser
 
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
 
-let parse (path:string) =
-            
+let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
     let lexbuf = LexBuffer<_>.FromTextReader reader
     let allTokens = seq{while not lexbuf.IsPastEndOfStream do yield Lexer.tokens lexbuf}
@@ -35,19 +35,19 @@ let parse (path:string) =
         filterEpsilons = true
     }
 
-    let parseBatch srcFilePath batchTokens =        
-        match buildAst batchTokens with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
-            //new Script([])            
-        | Yard.Generators.RNGLR.Parser.Success ast ->
-            ast.collectWarnings (fun x -> 0,0)
-            |> ResizeArray.iter (fun (pos, prods) -> ())
-            defaultAstToDot ast @"..\..\ast.dot"
-            //ast.ChooseLongestMatch()
-            //let translated = translate translateArgs ast : list<Script>            
-            //printfn "%A" translated
-            //translated.Head
-    parseBatch path allTokens
+    buildAst allTokens
 
-do parse @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"
+let Parse (srcFilePath:string) =    
+    match justParse srcFilePath with
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
+        printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg            
+    | Yard.Generators.RNGLR.Parser.Success ast ->
+        ast.collectWarnings (fun x -> 0,0)
+        |> ResizeArray.iter (fun (pos, prods) -> ())
+        defaultAstToDot ast @"..\..\ast.dot"
+        //ast.ChooseLongestMatch()
+        //let translated = translate translateArgs ast : list<Script>            
+        //printfn "%A" translated
+        //translated.Head    
+
+do Parse @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"

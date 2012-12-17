@@ -23,7 +23,7 @@ include "../../../GrammarTemplates/Common.yrd"
 
 [<Start>]
 root_rule: 
-     list<<batch_body "GO">> "GO"?
+     list<<batch_body "GO">> "GO"? ;;
 
 batch_body: 
    create_proc

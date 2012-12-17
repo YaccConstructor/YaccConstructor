@@ -16,18 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{80EC70FE-A
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs29
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = DotNetNotepad.Core\\DotNetNotepad.Core.csproj
-		SccProjectName1 = DotNetNotepad.Core
-		SccLocalPath1 = DotNetNotepad.Core
-		SccProjectUniqueName2 = DotNetNotepad.UI\\DotNetNotepad.UI.csproj
-		SccProjectName2 = DotNetNotepad.UI
-		SccLocalPath2 = DotNetNotepad.UI
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

@@ -39,8 +39,9 @@ let justParse (path:string) =
 
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-        printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg            
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+        printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
+        dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
         ast.collectWarnings (fun x -> 0,0)
         |> ResizeArray.iter (fun (pos, prods) -> ())

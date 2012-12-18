@@ -9,7 +9,8 @@ using Microsoft.Win32;
 namespace DotNetNotepad.UI
 {
 	public partial class MainWindow
-	{
+	{        
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -24,9 +25,23 @@ namespace DotNetNotepad.UI
 					created = true;
 				}
 			}
-			if (!created)
-			NewDocument();
+			if (!created) NewDocument();            
+            NewErrorList().Show(DockManager);
+
 		}
+
+        private ErrorList.ErrorListControl NewErrorList()
+        {
+            var el = new ErrorList.ErrorListControl();
+            ErrorList.IErrorList errLstCtrl = el as ErrorList.IErrorList;
+
+            errLstCtrl.AddError("Error unable to do something \"Name: Write PHP\"");
+            errLstCtrl.AddError("Error unable to do something \"Name: Write Flash\"");
+            errLstCtrl.AddWarning("Error unable to do something \"Name: Program in F#, yet\"");
+            errLstCtrl.AddInformation("Note: I need a better hobby than wasting my lunch coding..");
+            el.Title = "Error List";
+            return el;
+        }
 
 		private void DockManagerDocumentClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{

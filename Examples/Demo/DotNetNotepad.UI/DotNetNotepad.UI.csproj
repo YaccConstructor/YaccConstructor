@@ -157,6 +157,10 @@
       <Project>{DD7FBCC6-2A48-418B-A025-CE26C5D9F199}</Project>
       <Name>DotNetNotepad.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ErrorList\ErrorList.csproj">
+      <Project>{FEC4A696-1C08-4780-AF6A-A7F6A5D5AB46}</Project>
+      <Name>ErrorList</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">

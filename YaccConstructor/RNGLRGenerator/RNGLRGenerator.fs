@@ -45,6 +45,7 @@ type RNGLR() =
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
             let mutable needTranslate = true
             let mutable light = true
+            let mutable printInfiniteEpsilonPath = ""
             let mutable output = definition.info.fileName + ".fs"
             for opt, value in pairs do
                 match opt with
@@ -69,6 +70,7 @@ type RNGLR() =
                     if value = "on" then light <- true
                     elif value = "off" then light <- false
                     else failwith "Unexpected light value %s" value
+                | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
@@ -92,8 +94,16 @@ type RNGLR() =
             if grammar.EpsilonCyclicNonTerms.Length > 0 then
                 eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
                 grammar.EpsilonCyclicNonTerms
-                |> List.iter (eprintf "%s ")
+                |> List.map (String.concat " <- ")
+                |> List.iter (eprintfn "%s")
                 eprintfn ""
+                if printInfiniteEpsilonPath <> "" then
+                    System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
+                    for cycle in grammar.EpsilonCyclicNonTerms do
+                        let nonTerm = List.head cycle
+                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
+                            grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
+                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             let statesInterpreter = buildStates table grammar
             let tables = new Tables(grammar, statesInterpreter)

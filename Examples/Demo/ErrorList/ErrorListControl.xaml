@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="ErrorList.ErrorListControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolKit="http://schemas.microsoft.com/wpf/2008/toolkit"
+    Height="250" Width="700" >
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CodeJockStylesResourceDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Border BorderThickness="0, 1, 0, 0" BorderBrush="Black">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" MinHeight="20" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFEEEEFF" Offset="0.004"/>
+                        <GradientStop Color="#C1D8F9" Offset="0.728"/>
+                    </LinearGradientBrush>
+                </StackPanel.Background>
+
+                <ToggleButton x:Name="tglBtnErrors" Unchecked="Errors_Unchecked" Checked="Errors_Checked" IsChecked="True" ToolBar.OverflowMode="Never" Style="{DynamicResource ToggleButtonStyleOrange}" Width="75" HorizontalAlignment="Left" Margin="0, 0, 2, 0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="3">
+                        <Image Source="./Images/delete.png" Width="12" Height="12" Margin="0,0,5,0" HorizontalAlignment="Left" />
+                        <TextBlock HorizontalAlignment="Left" Name="txtErrors" Text="{Binding Path=ErrorsText}" />
+                    </StackPanel>
+                </ToggleButton>
+                <Border BorderBrush="Gray" Width="2" Height="15" BorderThickness="2" Margin="0, 0, 2, 0" />
+                <ToggleButton x:Name="tglBtnWarnings" Unchecked="Warnings_Unchecked" Checked="Warnings_Checked" ToolBar.OverflowMode="Never" Style="{DynamicResource ToggleButtonStyleOrange}" Margin="0, 0, 2, 0">
+                    <StackPanel Orientation="Horizontal" Margin="3">
+                        <Image Source="./Images/warning.png" Width="12" Height="12" Margin="0,0,5,0"/>
+                        <TextBlock HorizontalAlignment="Left" Name="txtWarnings" Text="{Binding Path=WarningsText}" />
+                    </StackPanel>
+                </ToggleButton>
+                <Border BorderBrush="Gray" Width="2" Height="15" BorderThickness="2" Margin="0, 0, 2, 0" />
+                <ToggleButton x:Name="tglBtnMessages" Unchecked="Informations_Unchecked" Checked="Informations_Checked" ToolBar.OverflowMode="Never" Style="{DynamicResource ToggleButtonStyleOrange}">
+                    <StackPanel Orientation="Horizontal" Margin="3">
+                        <Image Source="./Images/information.png" Width="12" Height="12" Margin="0,0,5,0"/>
+                        <TextBlock HorizontalAlignment="Left" Name="txtMessages" Text="{Binding Path=InformationsText}" />
+                    </StackPanel>
+                </ToggleButton>
+            </StackPanel>
+            <toolKit:DataGrid AutoGenerateColumns="False" Grid.Row="1"  Name="dataGrid1"
+                              ItemsSource="{Binding Path=ErrorListData}"
+                              HorizontalScrollBarVisibility="Hidden" SelectionMode="Extended"
+                              CanUserAddRows="False" CanUserDeleteRows="False"
+                              CanUserResizeRows="False" CanUserSortColumns="False" 
+                              BorderThickness="0" CanUserReorderColumns="False" 
+                              CanUserResizeColumns="False" 
+                              HorizontalGridLinesBrush="Transparent" 
+                              VerticalGridLinesBrush="Transparent"
+                              HeadersVisibility="Column" >
+                <toolKit:DataGrid.Columns>
+                    <toolKit:DataGridTemplateColumn Width="20" MinWidth="20" >
+                        <toolKit:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Width="16" Height="16" Source="{Binding Path=ErrorIconSrc}"></Image>
+                            </DataTemplate>
+                        </toolKit:DataGridTemplateColumn.CellTemplate>
+                    </toolKit:DataGridTemplateColumn>
+                    <toolKit:DataGridTextColumn Header="Description" Width="*" Binding="{Binding Path=Description}" />
+                </toolKit:DataGrid.Columns>
+            </toolKit:DataGrid>
+        </Grid>
+    </Border>
+</UserControl>

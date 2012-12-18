@@ -506,7 +506,7 @@ execute_proc:
 	(KW_EXEC | KW_EXECUTE)?
         ( 
 		(LOCALVAR OP_EQ)?
-		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR )? 
+		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR ) 
         comma_list<<((LOCALVAR OP_EQ)? 
 			(sql_expr		(*?????*)
 			| LOCALVAR KW_OUT? 

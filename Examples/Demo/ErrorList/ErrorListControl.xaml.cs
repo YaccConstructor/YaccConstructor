@@ -19,7 +19,7 @@ namespace ErrorList
     /// <summary>
     /// Interaction logic for Page1.xaml
     /// </summary>
-    public partial class ErrorListControl : UserControl, IErrorList
+    public partial class ErrorListControl : AvalonDock.DocumentContent, IErrorList
     {
         public ErrorListControl()
         {

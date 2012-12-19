@@ -60,10 +60,8 @@
                 <ad:DockablePane ad:ResizingPanel.ResizeHeight="150" >
                     <ad:DockableContent Title="Output" x:Name="output">
                         <TextBox IsReadOnly="True" AcceptsReturn="True"/>
-                    </ad:DockableContent>
-                    <ad:DockableContent Title="Error List">
-                        <el:ErrorListControl Height="Auto" Width="Auto" x:Name="errorLog"></el:ErrorListControl>
                     </ad:DockableContent>                    
+                <el:ErrorListControl Title="Error List" Height="Auto" Width="Auto" x:Name="errorLog"></el:ErrorListControl>                    
                 </ad:DockablePane>
             </ad:ResizingPanel>
             

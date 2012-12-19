@@ -21,9 +21,9 @@ namespace SQRT.UI
 			foreach (var s in args.Skip(1))
 			{
 				if (File.Exists(s))	NewDocument(s);				
-			}
+			}            
             ErrorLog = NewErrorList();
-            ErrorLog.Show(DockManager);
+            ErrorLog.Show(DockManager);            
 		}
 
         private ErrorList.ErrorListControl NewErrorList()
@@ -66,22 +66,28 @@ namespace SQRT.UI
 		private void VerifyClick(object sender, RoutedEventArgs e)
 		{
             var activeDock = DockManager.ActiveDocument;
+            var storedStatus = GlobalStatus.Text;
+            GlobalStatus.Text = "Verification...";
+            ErrorLog.ClearAll();
             if (activeDock is Document)
             {
-                ErrorLog.ClearAll();
                 var curFileName = (activeDock as Document).FileName;
                 var errors = SQRT.Core.Verify.Verify(curFileName);
-                var errLstCtrl = ErrorLog as ErrorList.IErrorList;
+                var errLstCtrl = ErrorLog as ErrorList.IErrorList;                
                 foreach (var msg in errors) { errLstCtrl.AddError(msg); }
             }
-		}
+            GlobalStatus.Text = storedStatus;
+        }
 
         private void BuildCallGraphClick(object sender, RoutedEventArgs e)
         {
-            
+            //Build and draw call graph
         }
 
-
+        private void CheckSyntaxRulesClick(object sender, RoutedEventArgs e)
+        {
+            //Call CYK
+        }
 
 		private void NewDocument(string filename)
 		{

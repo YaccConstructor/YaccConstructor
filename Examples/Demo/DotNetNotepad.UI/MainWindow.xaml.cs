@@ -15,17 +15,11 @@ namespace DotNetNotepad.UI
 		{
 			InitializeComponent();
 
-			var args = Environment.GetCommandLineArgs();
-			var created = false;
+			var args = Environment.GetCommandLineArgs();			
 			foreach (var s in args.Skip(1))
 			{
-				if (File.Exists(s))
-				{
-					NewDocument(s);
-					created = true;
-				}
-			}
-			if (!created) NewDocument();            
+				if (File.Exists(s))	NewDocument(s);				
+			}			
             NewErrorList().Show(DockManager);
 
 		}
@@ -33,7 +27,7 @@ namespace DotNetNotepad.UI
         private ErrorList.ErrorListControl NewErrorList()
         {
             var el = new ErrorList.ErrorListControl();
-            ErrorList.IErrorList errLstCtrl = el as ErrorList.IErrorList;
+            var errLstCtrl = el as ErrorList.IErrorList;
 
             errLstCtrl.AddError("Error unable to do something \"Name: Write PHP\"");
             errLstCtrl.AddError("Error unable to do something \"Name: Write Flash\"");
@@ -67,10 +61,21 @@ namespace DotNetNotepad.UI
 			}
 		}
 
-		private void NewClick(object sender, RoutedEventArgs e)
+        private void NewClick(object sender, RoutedEventArgs e)
+        {
+            NewDocument();
+        }
+
+		private void VerifyClick(object sender, RoutedEventArgs e)
 		{
-			NewDocument();
-		} 
+			
+		}
+
+        private void BuildCallGraphClick(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
 
 
 		private void NewDocument(string filename)

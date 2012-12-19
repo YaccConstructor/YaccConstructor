@@ -21,8 +21,14 @@
 				</MenuItem>
 			</MenuItem>
 
+            <MenuItem Header="Analize">
+                <MenuItem Header="Verify"  Click="VerifyClick">
+                </MenuItem>
+                <MenuItem Header="Call graph"  Click="BuildCallGraphClick">
+                </MenuItem>                
+            </MenuItem>
 
-			<MenuItem Header="Options">
+            <MenuItem Header="Options">
 			<MenuItem Header="Themes">
 				<MenuItem Header="Aero.NormalColor" Tag="aero.normalcolor" Click="ChangeStandardTheme"/>
 				<MenuItem Header="Classic" Tag="classic" Click="ChangeStandardTheme"/>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQRT.UI", "DotNetNotepad.UI\SQRT.UI.csproj", "{CB947EF5-F896-4883-8519-0FBE789E1AD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQRT.UI", "SQRT.UI\SQRT.UI.csproj", "{CB947EF5-F896-4883-8519-0FBE789E1AD4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{80EC70FE-A8B2-4D8E-9D57-B02196CC639E}"
 	ProjectSection(SolutionItems) = preProject

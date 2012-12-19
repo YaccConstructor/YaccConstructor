@@ -21,15 +21,13 @@ namespace SQRT.UI
 			foreach (var s in args.Skip(1))
 			{
 				if (File.Exists(s))	NewDocument(s);				
-			}            
-            ErrorLog = NewErrorList();
-            ErrorLog.Show(DockManager);            
+			}
+            ErrorLog = errorLog;
 		}
 
         private ErrorList.ErrorListControl NewErrorList()
         {
-            var el = new ErrorList.ErrorListControl();
-            var errLstCtrl = el as ErrorList.IErrorList;
+            var el = new ErrorList.ErrorListControl();            
             el.Title = "Error List";
             return el;
         }

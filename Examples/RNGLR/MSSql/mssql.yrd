@@ -551,12 +551,12 @@ sql_expr:
   | LPAREN sql_expr RPAREN
   | LOCALVAR 
   | full_ident LPAREN comma_list<<sql_expr>> RPAREN
-  | KW_SELECT sql_expr KW_FROM IDENT
+  | KW_SELECT sql_expr KW_FROM full_ident
   | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
   | GLOBALVAR
   | full_ident
   | sql_expr binop sql_expr
-  | sql_value
+ 
 
 comma_list<<item>>: list<<item COMMA>>
 

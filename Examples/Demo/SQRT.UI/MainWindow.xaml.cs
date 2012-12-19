@@ -30,18 +30,13 @@ namespace SQRT.UI
         {
             var el = new ErrorList.ErrorListControl();
             var errLstCtrl = el as ErrorList.IErrorList;
-
-            /*errLstCtrl.AddError("Error unable to do something \"Name: Write PHP\"");
-            errLstCtrl.AddError("Error unable to do something \"Name: Write Flash\"");
-            errLstCtrl.AddWarning("Error unable to do something \"Name: Program in F#, yet\"");
-            errLstCtrl.AddInformation("Note: I need a better hobby than wasting my lunch coding..");*/
             el.Title = "Error List";
             return el;
         }
 
 		private void DockManagerDocumentClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			if (MessageBox.Show("Close this tab?", ".Net Notepad", MessageBoxButton.YesNo) == MessageBoxResult.No)
+			if (MessageBox.Show("Close this tab?", "SQRT", MessageBoxButton.YesNo) == MessageBoxResult.No)
 			{
 				e.Cancel = true;
 			}

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 
-namespace DotNetNotepad.UI.Intellisense
+namespace SQRT.UI.Intellisense
 {
 	public class FileCompletionDataProvider : ICompletionDataProvider
 	{

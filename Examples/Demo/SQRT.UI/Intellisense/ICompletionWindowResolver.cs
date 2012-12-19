@@ -1,6 +1,6 @@
 ﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 
-namespace DotNetNotepad.UI.Intellisense
+namespace SQRT.UI.Intellisense
 {
 	public interface ICompletionWindowResolver
 	{

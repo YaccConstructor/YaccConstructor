@@ -63,7 +63,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>DotNetNotepad.UI.App</StartupObject>
+    <StartupObject>SQRT.UI.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Images\App.ico</ApplicationIcon>

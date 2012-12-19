@@ -6,12 +6,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
-using DotNetNotepad.UI.Intellisense;
+using SQRT.UI.Intellisense;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 
-namespace DotNetNotepad.UI
+namespace SQRT.UI
 {
 	/// <summary>
 	/// Interaction logic for Document.xaml

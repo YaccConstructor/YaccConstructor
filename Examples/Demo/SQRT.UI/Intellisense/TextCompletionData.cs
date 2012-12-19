@@ -4,7 +4,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 
-namespace DotNetNotepad.UI.Intellisense
+namespace SQRT.UI.Intellisense
 {
 	public class TextCompletionData : ICompletionData
 	{

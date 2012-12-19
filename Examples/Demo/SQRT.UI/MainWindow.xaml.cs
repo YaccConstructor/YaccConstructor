@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using AvalonDock;
 using Microsoft.Win32;
 
-namespace DotNetNotepad.UI
+namespace SQRT.UI
 {
 	public partial class MainWindow
 	{

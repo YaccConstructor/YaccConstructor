@@ -3,7 +3,7 @@ using System.Linq;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 
-namespace DotNetNotepad.UI.Intellisense
+namespace SQRT.UI.Intellisense
 {
 	public class CompletionWindowResolver : ICompletionWindowResolver
 	{

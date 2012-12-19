@@ -8,7 +8,7 @@ using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Application = System.Windows.Forms.Application;
 using MessageBox = System.Windows.Forms.MessageBox;
 
-namespace DotNetNotepad.UI
+namespace SQRT.UI
 {
 	/// <summary>
 	/// Interaction logic for App.xaml

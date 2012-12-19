@@ -81,7 +81,7 @@ namespace ErrorList
 
         public void ClearAll()
         {
-            _dataContext.ErrorListData.Clear();
+            _dataContext.ClearErrorsData();          
         }
 
         public void AddError(string description)

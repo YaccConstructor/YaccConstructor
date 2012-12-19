@@ -68,7 +68,9 @@ namespace SQRT.UI
             var activeDock = DockManager.ActiveDocument;
             var storedStatus = GlobalStatus.Text;
             GlobalStatus.Text = "Verification...";
-            ErrorLog.ClearAll();
+            ErrorLog.ClearAll();            
+            ErrorLog.UpdateLayout();
+            GlobalStatus.UpdateLayout();
             if (activeDock is Document)
             {
                 var curFileName = (activeDock as Document).FileName;

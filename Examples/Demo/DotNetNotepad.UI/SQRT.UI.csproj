@@ -8,8 +8,8 @@
     <ProjectGuid>{CB947EF5-F896-4883-8519-0FBE789E1AD4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DotNetNotepad.UI</RootNamespace>
-    <AssemblyName>DotNetNotepad.UI</AssemblyName>
+    <RootNamespace>SQRT.UI</RootNamespace>
+    <AssemblyName>SQRT.UI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

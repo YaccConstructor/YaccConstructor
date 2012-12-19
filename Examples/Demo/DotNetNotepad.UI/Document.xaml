@@ -55,11 +55,6 @@
 			<CheckBox IsChecked="{Binding ElementName=textEditor,Path=Options.ShowEndOfLine}">
 				<TextBlock Width="16" TextAlignment="Center">¶</TextBlock>
 			</CheckBox>
-			<!--Тут происходит биндинг вариантов подсветки синтаксиса, которые загружены в редактор-->
-			<ComboBox Name="highlightingComboBox"
-				SelectedItem="{Binding SyntaxHighlighting, ElementName=textEditor}"
-				ItemsSource="{Binding Source={x:Static avalonedit:HighlightingManager.Instance}, Path=HighlightingDefinitions}"
-				SelectionChanged="HighlightingComboBoxSelectionChanged"/>
 		</ToolBar>
 		<!--По умолчанию редактор настроен на подсветку XML-->
 		<avalonedit:TextEditor	

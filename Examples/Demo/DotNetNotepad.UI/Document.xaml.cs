@@ -18,9 +18,18 @@ namespace DotNetNotepad.UI
 	/// </summary>
 	public partial class Document
 	{
+
+        public string FileName
+        {
+            get;
+            set;
+        }
+
 		public Document(string fileName)
 		{
 			InitializeComponent();
+
+            FileName = fileName;
 			
 			Title = Path.GetFileName(fileName);
 			

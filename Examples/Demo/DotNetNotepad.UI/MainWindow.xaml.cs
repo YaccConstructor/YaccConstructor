@@ -9,8 +9,10 @@ using Microsoft.Win32;
 namespace DotNetNotepad.UI
 {
 	public partial class MainWindow
-	{        
+	{
 
+        private ErrorList.ErrorListControl ErrorLog;
+            
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -19,9 +21,9 @@ namespace DotNetNotepad.UI
 			foreach (var s in args.Skip(1))
 			{
 				if (File.Exists(s))	NewDocument(s);				
-			}			
-            NewErrorList().Show(DockManager);
-
+			}
+            ErrorLog = NewErrorList();
+            ErrorLog.Show(DockManager);
 		}
 
         private ErrorList.ErrorListControl NewErrorList()
@@ -29,10 +31,10 @@ namespace DotNetNotepad.UI
             var el = new ErrorList.ErrorListControl();
             var errLstCtrl = el as ErrorList.IErrorList;
 
-            errLstCtrl.AddError("Error unable to do something \"Name: Write PHP\"");
+            /*errLstCtrl.AddError("Error unable to do something \"Name: Write PHP\"");
             errLstCtrl.AddError("Error unable to do something \"Name: Write Flash\"");
             errLstCtrl.AddWarning("Error unable to do something \"Name: Program in F#, yet\"");
-            errLstCtrl.AddInformation("Note: I need a better hobby than wasting my lunch coding..");
+            errLstCtrl.AddInformation("Note: I need a better hobby than wasting my lunch coding..");*/
             el.Title = "Error List";
             return el;
         }
@@ -64,11 +66,19 @@ namespace DotNetNotepad.UI
         private void NewClick(object sender, RoutedEventArgs e)
         {
             NewDocument();
-        }
+        }        
 
 		private void VerifyClick(object sender, RoutedEventArgs e)
 		{
-			
+            var activeDock = DockManager.ActiveDocument;
+            if (activeDock is Document)
+            {
+                ErrorLog.ClearAll();
+                var curFileName = (activeDock as Document).FileName;
+                var errors = SQRT.Core.Verify.Verify(curFileName);
+                var errLstCtrl = ErrorLog as ErrorList.IErrorList;
+                foreach (var msg in errors) { errLstCtrl.AddError(msg); }
+            }
 		}
 
         private void BuildCallGraphClick(object sender, RoutedEventArgs e)

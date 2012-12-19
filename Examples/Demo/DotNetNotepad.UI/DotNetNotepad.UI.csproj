@@ -153,13 +153,13 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotNetNotepad.Core\DotNetNotepad.Core.csproj">
-      <Project>{DD7FBCC6-2A48-418B-A025-CE26C5D9F199}</Project>
-      <Name>DotNetNotepad.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ErrorList\ErrorList.csproj">
       <Project>{FEC4A696-1C08-4780-AF6A-A7F6A5D5AB46}</Project>
       <Name>ErrorList</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SQRT.Core\SQRT.Core.fsproj">
+      <Project>{9BC26A02-8847-46BB-899D-0AB6DF21F88E}</Project>
+      <Name>SQRT.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,12 @@
 		Title="SQRT" Height="650" Width="625"
 		Icon="Images/icon.png"
 		WindowStartupLocation="CenterScreen" Drop="WindowDrop">
-    <Grid>                
+    <Window.InputBindings>
+        <KeyBinding Key="O"
+              Modifiers="Control" 
+              Command="ApplicationCommands.Open"/>
+    </Window.InputBindings>
+    <Grid>
         <Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition/>
@@ -71,7 +76,7 @@
                 </ad:ResizingPanel>
                 <ad:DockablePane ad:ResizingPanel.ResizeHeight="150" >
                     <ad:DockableContent Title="Output" x:Name="output">
-                        <TextBox IsReadOnly="True" AcceptsReturn="True"/>
+                        <TextBox x:Name="OutputText" IsReadOnly="True" AcceptsReturn="True"/>
                     </ad:DockableContent>
                     <el:ErrorListControl Title="Error List" Height="Auto" Width="Auto" x:Name="errorLog"></el:ErrorListControl>                    
                 </ad:DockablePane>

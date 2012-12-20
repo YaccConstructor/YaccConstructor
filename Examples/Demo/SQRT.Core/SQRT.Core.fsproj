@@ -45,6 +45,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Context.fs" />
     <Compile Include="Verify.fs" />
   </ItemGroup>
   <ItemGroup>

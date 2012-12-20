@@ -5,12 +5,13 @@ using System.Windows;
 using System.Windows.Controls;
 using AvalonDock;
 using Microsoft.Win32;
-using System.Windows.Controls;
 
 namespace SQRT.UI
 {
 	public partial class MainWindow
 	{
+
+        private SQRT.Core.Context.DataContext dataContext;
 
         private ErrorList.ErrorListControl ErrorLog;
             
@@ -68,16 +69,19 @@ namespace SQRT.UI
             activeDock.Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri("images/Delete.png", UriKind.Relative));
             var storedStatus = GlobalStatus.Text;
             GlobalStatus.Text = "Verification...";
-            ErrorLog.ClearAll();            
+            ErrorLog.ClearAll();
             ErrorLog.UpdateLayout();
-            GlobalStatus.UpdateLayout();
+            GlobalStatus.UpdateLayout();            
             if (activeDock is Document)
             {
                 var curFileName = (activeDock as Document).FileName;
-                var errors = SQRT.Core.Verify.Verify(curFileName);
-                var errLstCtrl = ErrorLog as ErrorList.IErrorList;                
+                OutputText.AppendText("Verification.\n");
+                OutputText.AppendText("   File:" + curFileName + "\n");
+                var errors = SQRT.Core.Verify.Verify(curFileName,dataContext);
+                var errLstCtrl = ErrorLog as ErrorList.IErrorList;
                 foreach (var msg in errors) { errLstCtrl.AddError(msg); }
-            }
+                OutputText.AppendText("Done.\n");
+            }            
             GlobalStatus.Text = storedStatus;
         }
 

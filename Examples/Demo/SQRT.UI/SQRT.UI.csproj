@@ -99,6 +99,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\SQRTAboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Document.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -110,6 +114,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controls\SQRTAboutBox.xaml.cs">
+      <DependentUpon>SQRTAboutBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Document.xaml.cs">
       <DependentUpon>Document.xaml</DependentUpon>
@@ -184,9 +191,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\Copy.png" />
     <Resource Include="Images\Cut.png" />
@@ -206,6 +211,9 @@
   <ItemGroup>
     <Resource Include="Images\icon.png" />
     <Resource Include="Images\App.ico" />
+    <Resource Include="Controls\AboutLogo.png">
+      <SubType>Image</SubType>
+    </Resource>
     <Content Include="Intellisense\Keywords\keywords_sql.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -50,7 +50,11 @@
 				    <MenuItem Header="Default" Click="SetDefaultTheme"/>				
 			    </MenuItem>
 			</MenuItem>
-		</Menu>        
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About"  Click="AboutClick">
+                </MenuItem>                
+            </MenuItem>
+        </Menu>        
         
         <ad:DockingManager x:Name="DockManager" IsAnimationEnabled="True" Grid.Row="1" 
 					 ActiveContent="{Binding ElementName=Content1}" DocumentClosing="DockManagerDocumentClosing" >

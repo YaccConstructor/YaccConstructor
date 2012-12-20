@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using AvalonDock;
 using Microsoft.Win32;
+using System.Windows.Controls;
 
 namespace SQRT.UI
 {
@@ -64,6 +65,7 @@ namespace SQRT.UI
 		private void VerifyClick(object sender, RoutedEventArgs e)
 		{
             var activeDock = DockManager.ActiveDocument;
+            activeDock.Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri("images/Delete.png", UriKind.Relative));
             var storedStatus = GlobalStatus.Text;
             GlobalStatus.Text = "Verification...";
             ErrorLog.ClearAll();            
@@ -82,11 +84,17 @@ namespace SQRT.UI
         private void BuildCallGraphClick(object sender, RoutedEventArgs e)
         {
             //Build and draw call graph
-        }
+        }        
 
         private void CheckSyntaxRulesClick(object sender, RoutedEventArgs e)
         {
             //Call CYK
+        }
+
+        private void AboutClick(object sender, RoutedEventArgs e)
+        {
+            var aboutBox = new SQRT.UI.Controls.SQRTAboutBox(this);
+            aboutBox.ShowDialog();
         }
 
 		private void NewDocument(string filename)

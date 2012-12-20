@@ -57,16 +57,19 @@
                               CanUserResizeColumns="False" 
                               HorizontalGridLinesBrush="Transparent" 
                               VerticalGridLinesBrush="Transparent"
-                              HeadersVisibility="Column" >
+                              HeadersVisibility="Column">
                 <toolKit:DataGrid.Columns>
-                    <toolKit:DataGridTemplateColumn Width="20" MinWidth="20" >
+                    <toolKit:DataGridTemplateColumn Width="20" MinWidth="20">
                         <toolKit:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Image Width="16" Height="16" Source="{Binding Path=ErrorIconSrc}"></Image>
                             </DataTemplate>
                         </toolKit:DataGridTemplateColumn.CellTemplate>
                     </toolKit:DataGridTemplateColumn>
-                    <toolKit:DataGridTextColumn Header="Description" Width="*" Binding="{Binding Path=Description}" />
+                    <toolKit:DataGridTextColumn Header="Description" Width="*" Binding="{Binding Path=Description}"/>
+                    <toolKit:DataGridTextColumn Header="File" Width="30" Binding="{Binding Path=File}"/>
+                    <toolKit:DataGridTextColumn Header="Line" Width="35" Binding="{Binding Path=Line}"/>
+                    <toolKit:DataGridTextColumn Header="Column" Width="55" Binding="{Binding Path=Column}"/>
                 </toolKit:DataGrid.Columns>
             </toolKit:DataGrid>
         </Grid>

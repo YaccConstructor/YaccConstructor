@@ -23,15 +23,15 @@
 				</MenuItem>
 			</MenuItem>
 
-            <MenuItem Header="Analize">
+            <MenuItem Header="_Analize">
                 
-                <MenuItem Header="Verify"  Click="VerifyClick">
+                <MenuItem Header="_Verify"  Click="VerifyClick">
                 </MenuItem>
 
-                <MenuItem Header="Check syntax rules" Click="CheckSyntaxRulesClick">
+                <MenuItem Header="_Check syntax rules" Click="CheckSyntaxRulesClick">
                 </MenuItem>
                                 
-                <MenuItem Header="Call graph"  Click="BuildCallGraphClick">
+                <MenuItem Header="Call _graph"  Click="BuildCallGraphClick">
                 </MenuItem>
                 
             </MenuItem>
@@ -51,7 +51,7 @@
 			    </MenuItem>
 			</MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_About"  Click="AboutClick">
+                <MenuItem Header="A_bout SQRT"  Click="AboutClick">
                 </MenuItem>                
             </MenuItem>
         </Menu>        

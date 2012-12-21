@@ -124,15 +124,11 @@ type CYKCore() =
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
-        let rec fillTable i l =
-                if l = s.Length-1
-                then elem i l
-                elif i+l <= s.Length-1
-                then
-                     elem i l
-                     fillTable (i+1) l
-                else
-                     fillTable 0 (l+1)
+        let fillTable () =
+          [|1..s.Length-1|]
+          |> Array.iter (fun l ->
+                [|0..s.Length-1-l|]
+                |> Array.Parallel.iter (fun i -> elem i l))
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -148,8 +144,7 @@ type CYKCore() =
                                 recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some
                     |_ -> ())
     
-        fillTable 0 1
-
+        fillTable ()
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =

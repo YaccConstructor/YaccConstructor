@@ -1,4 +1,5 @@
-+start: (create_proc KW_GO)+;
+[<Start>]
+start: (create_proc KW_GO)+;
    
 create_proc: KW_CREATE (@bad[1](KW_PROC)|@good[2](KW_PROCEDURE)) IDENT  AS body;
 

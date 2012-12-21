@@ -36,10 +36,24 @@
     <DocumentationFile>bin\Release\CYK.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="Brahma">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.dll</HintPath>
+    </Reference>
+    <Reference Include="Brahma.FSharp.OpenCL.Wrapper">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.FSharp.OpenCL.Wrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Brahma.OpenCL">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.OpenCL.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.PowerPack.Parallel.Seq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\OpenCL.Net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

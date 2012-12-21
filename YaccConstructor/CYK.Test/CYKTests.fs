@@ -96,13 +96,13 @@ type CYKTests () =
 
 [<EntryPoint>]
 let f _ =
-//    let tests = new CYKTests()
+    let tests = new CYKTests()
 //    let x1 = tests.noLbl()
 //    let x2 = tests.oneLbl()
 //    let x3 = tests.oneLblNoInputLbl()
 //    let x4 = tests.twoLbls()
 //    let x5 = tests.twoLblsOneInputDial()
-//    let x6 = tests.twoLblsTwoDials()
+    let x6 = tests.twoLblsTwoDials()
 //    let x7 = tests.labelTracking();
     //let x8 = tests.labelTracking2();
     0

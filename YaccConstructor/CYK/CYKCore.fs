@@ -108,17 +108,19 @@ type CYKCore() =
                 let left = recTable.[i, k]
                 let right = recTable.[k+i+1, l-k-1]
                 for m in 0..(nTermsCount - 1) do
-                    for n in 0..(nTermsCount - 1) do
-                        let lf = left.[m]
-                        let r = right.[n]
-                        if r.IsSome && lf.IsSome && (getCellRuleTop lf.Value = b) && (getCellRuleTop r.Value = c)
-                        then
-                            let lState1,lbl1,weight1 = getCellData lf.Value
-                            let lState2,lbl2,weight2 = getCellData r.Value
-                            let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
-                            let newWeight = weightCalcFun rw weight1 weight2
-                            let currentElem = buildData ruleIndex newlState newLabel newWeight
-                            recTable.[i,l].[int a - 1] <- new CellData(currentElem,uint32 k) |> Some
+                    let lf = left.[m]
+                    if lf.IsSome
+                    then
+                        for n in 0..(nTermsCount - 1) do
+                            let r = right.[n]
+                            if r.IsSome && (getCellRuleTop lf.Value = b) && (getCellRuleTop r.Value = c)
+                            then
+                                let lState1,lbl1,weight1 = getCellData lf.Value
+                                let lState2,lbl2,weight2 = getCellData r.Value
+                                let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
+                                let newWeight = weightCalcFun rw weight1 weight2
+                                let currentElem = buildData ruleIndex newlState newLabel newWeight
+                                recTable.[i,l].[int a - 1] <- new CellData(currentElem,uint32 k) |> Some
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 

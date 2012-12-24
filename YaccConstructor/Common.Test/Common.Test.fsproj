@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Common.Test</RootNamespace>
     <AssemblyName>Common.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Common.Test</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

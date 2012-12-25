@@ -22,7 +22,8 @@
 include "../../../GrammarTemplates/Common.yrd"
 
 [<Start>]
-root_rule: (batch_body "GO")+
+root_rule: 
+     list<<batch_body "GO">> "GO"?
 
 batch_body: 
    create_proc
@@ -89,13 +90,20 @@ proc_body_stmnt:
    | sql_expr
    | declare
    | KW_RETURN sql_expr
-   | KW_IF sql_expr KW_THEN ( (KW_BEGIN sql_expr* KW_END) | sql_expr) (KW_ELSE (KW_BEGIN sql_expr* KW_END) | sql_expr)?
+   | if_stmt
    | raiserror_stmnt
+   | stmt_block
+
+(***********************************STATEMENTS******************************************************)
+
+stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
+
+if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
 
 raiserror_stmnt:
-    KW_RAISERROR LPAREN ( DEC_NUMBER | STRING_CONST | LOCALVAR )
-    ( COMMA DEC_NUMBER COMMA DEC_NUMBER )
-    ( COMMA comma_list<<LOCALVAR>> )? RPAREN
+    KW_RAISERROR LPAREN ( dec_num | STRING_CONST | LOCALVAR )
+    ( COMMA dec_num COMMA dec_num )
+    ( COMMA comma_list<<sql_expr>> )? RPAREN
     ( KW_WITH comma_list<< ("LOG" | "NOWAIT" | "SETERROR")>> )?
    
 (***********************************DECLARE**********************************************************)
@@ -496,18 +504,17 @@ execute_stmnt:
 	
 execute_proc:
 	(KW_EXEC | KW_EXECUTE)?
-    ( 
+        ( 
 		(LOCALVAR OP_EQ)?
-		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR )? 
+		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR ) 
         comma_list<<((LOCALVAR OP_EQ)? 
 			(sql_expr		(*?????*)
-			| LOCALVAR KW_OUTPUT? 
+			| LOCALVAR KW_OUT? 
             | KW_DEFAULT? 
             )
-        )?>>
-   (KW_WITH KW_RECOMPILE)?
-    )
-SEMI?
+                    )?>>
+        (KW_WITH KW_RECOMPILE)?
+        )
 
 execute_character_string:
 	(KW_EXEC | KW_EXECUTE) 
@@ -533,7 +540,7 @@ sql_datatype:
     | KW_REAL
     | KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
     | KW_VARCHAR type_size?
-    | "varbinary" type_size?
+    | KW_VARBINARY type_size?
     | KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
     | KW_NVARCHAR type_size?
 
@@ -542,7 +549,7 @@ execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | usern
 binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
 	| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
-	| OP_LT | OP_MT | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+	| OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
 
 
 (* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
@@ -550,19 +557,24 @@ sql_expr:
     sql_value
   | LPAREN sql_expr RPAREN
   | LOCALVAR 
-  | full_ident LPAREN comma_list<<sql_expr>> RPAREN
+  | call_expr
   | KW_SELECT sql_expr KW_FROM full_ident
   | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
   | GLOBALVAR
   | full_ident
   | sql_expr binop sql_expr
  
+  | sql_expr KW_IS KW_NOT? KW_NULL
+
+call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
 
 comma_list<<item>>: list<<item COMMA>>
 
+dec_num: OP_MINUS? DEC_NUMBER
+
 sql_value:
      STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
-   | DEC_NUMBER
+   | dec_num
    | KW_NULL
 
 (* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)

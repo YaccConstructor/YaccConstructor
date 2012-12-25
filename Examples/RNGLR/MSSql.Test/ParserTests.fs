@@ -33,7 +33,10 @@ type ``MS-SQL parser tests`` () =
             Assert.Pass()
 
     let basePath = "../../../../../Tests/MSSqlParser"
+    let bigFilesPath = "../../../../../Tests/Materials/ms-sql"
+    let spFolder = "sysprocs"
     let file name = System.IO.Path.Combine(basePath,name)
+    let complexSpFile name = System.IO.Path.Combine(System.IO.Path.Combine(bigFilesPath,spFolder),name)
 
     [<Test>]
     member test.``Top level set.`` () =
@@ -54,3 +57,7 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
+
+    [<Test>]
+    member test.``sp_addlogint complex test.`` () =
+        complexSpFile "sp_addlogin.sql" |> runParserTest

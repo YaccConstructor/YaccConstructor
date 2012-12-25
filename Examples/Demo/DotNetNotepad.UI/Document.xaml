@@ -1,0 +1,84 @@
+﻿<ad:DocumentContent x:Class="DotNetNotepad.UI.Document"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+                    xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                     mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
+	<Grid>
+
+		<Grid.RowDefinitions>
+			<RowDefinition Height="32"/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<ToolBar DockPanel.Dock="Top">
+			<ToolBar.Resources>
+				<Style TargetType="{x:Type Image}">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ButtonBase}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+							<Setter Property="Opacity" Value="0.30" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</ToolBar.Resources>
+			<Button Click="SaveFile" >
+				<Image Source="Images/Save.png" Height="16"/>
+			</Button>
+			<Separator/>
+			<Button Command="Cut">
+				<Image Source="Images/Cut.png" Height="16"/>
+			</Button>
+			<Button Command="Copy">
+				<Image Source="Images/Copy.png" Height="16"/>
+			</Button>
+			<Button Command="Paste">
+				<Image Source="Images/Paste.png" Height="16"/>
+			</Button>
+			<Button Command="Delete">
+				<Image Source="Images/Delete.png" Height="16"/>
+			</Button>
+			<Separator/>
+			<Button Command="Undo">
+				<Image Source="Images/Undo.png" Height="16"/>
+			</Button>
+			<Button Command="Redo">
+				<Image Source="Images/Redo.png" Height="16"/>
+			</Button>
+			<Separator/>
+			<CheckBox IsChecked="{Binding ElementName=textEditor,Path=WordWrap}">
+				<Image Source="Images/WordWrap.png" Height="16"/>
+			</CheckBox>
+			<CheckBox IsChecked="{Binding ElementName=textEditor,Path=ShowLineNumbers}">
+				<TextBlock Width="16" TextAlignment="Center">#</TextBlock>
+			</CheckBox>
+			<CheckBox IsChecked="{Binding ElementName=textEditor,Path=Options.ShowEndOfLine}">
+				<TextBlock Width="16" TextAlignment="Center">¶</TextBlock>
+			</CheckBox>
+			<!--Тут происходит биндинг вариантов подсветки синтаксиса, которые загружены в редактор-->
+			<ComboBox Name="highlightingComboBox"
+				SelectedItem="{Binding SyntaxHighlighting, ElementName=textEditor}"
+				ItemsSource="{Binding Source={x:Static avalonedit:HighlightingManager.Instance}, Path=HighlightingDefinitions}"
+				SelectionChanged="HighlightingComboBoxSelectionChanged"/>
+		</ToolBar>
+		<!--По умолчанию редактор настроен на подсветку XML-->
+		<avalonedit:TextEditor	
+			 x:Name="textEditor"
+			 FontFamily="Consolas"
+			 FontSize="10pt"
+			 ShowLineNumbers="True"			
+			 SyntaxHighlighting="XML"
+			Grid.Row="1">
+			<avalonedit:TextEditor.ContextMenu>
+				<ContextMenu>
+					<MenuItem Command="Cut" Header="Cut" />
+					<MenuItem Command="Copy" Header="Copy" />
+					<MenuItem Command="Paste" Header="Paste" />
+					<MenuItem Command="Delete" Header="Delete" />
+					<MenuItem Command="Undo" Header="Undo" />
+					<MenuItem Command="Redo" Header="Redo" />
+				</ContextMenu>
+			</avalonedit:TextEditor.ContextMenu>
+		</avalonedit:TextEditor>
+	</Grid>
+</ad:DocumentContent>

@@ -39,7 +39,7 @@ set_stmnt:
             | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
             | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
             | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
-            | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | "XML")
+            | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | KW_XML)
             | "XACT_ABORT" ) (KW_ON | KW_OFF)
 			| set_localvar
 
@@ -79,9 +79,9 @@ create_proc:
     SEMI?
 
 procedure_option: 
-      "ENCRYPTION"?
-    | "RECOMPILE"?
-    | "EXECUTE_AS_Clause"?
+      KW_ENCRYPTION?
+    | KW_RECOMPILE?
+    | KW_EXECUTE_AS_Clause?
 
 proc_body_stmnt:
      select_stmnt
@@ -104,7 +104,7 @@ raiserror_stmnt:
     KW_RAISERROR LPAREN ( dec_num | STRING_CONST | LOCALVAR )
     ( COMMA dec_num COMMA dec_num )
     ( COMMA comma_list<<sql_expr>> )? RPAREN
-    ( KW_WITH comma_list<< ("LOG" | "NOWAIT" | "SETERROR")>> )?
+    ( KW_WITH comma_list<< ("LOG" | KW_NOWAIT | "SETERROR")>> )?
    
 (***********************************DECLARE**********************************************************)
 

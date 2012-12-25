@@ -61,6 +61,12 @@ namespace ErrorList
             SetView();
         }
 
+        public void ClearErrorsData()
+        {
+            _errorListData.Clear();
+            _errorListDataView.Clear();
+        }
+
         public ObservableCollection<ErrorListDataEntry> ErrorListData 
         {
             get
@@ -118,7 +124,7 @@ namespace ErrorList
             if (_showInformations)
                 selectedLevels.Add(ErrorListLevel.Information);
 
-            _errorListDataView.Clear();            
+            _errorListDataView.Clear();
             var selectedErrors = _errorListData.Where(ed => selectedLevels.Contains(ed.Level));
             foreach (var selectedError in selectedErrors)
                 _errorListDataView.Add(selectedError);

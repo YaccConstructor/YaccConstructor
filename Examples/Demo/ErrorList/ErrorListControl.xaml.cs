@@ -19,7 +19,7 @@ namespace ErrorList
     /// <summary>
     /// Interaction logic for Page1.xaml
     /// </summary>
-    public partial class ErrorListControl : AvalonDock.DocumentContent, IErrorList
+    public partial class ErrorListControl : AvalonDock.DockableContent, IErrorList
     {
         public ErrorListControl()
         {
@@ -81,7 +81,7 @@ namespace ErrorList
 
         public void ClearAll()
         {
-            _dataContext.ErrorListData.Clear();
+            _dataContext.ClearErrorsData();          
         }
 
         public void AddError(string description)

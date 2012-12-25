@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
     <AssemblyName>RNGLRParser.SimpleTest</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>RNGLRParser.SimpleTest</Name>
@@ -74,18 +74,17 @@
     <None Include="Order.yrd" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YCBuildTask\YCBuildTask.fsproj">
-      <Name>YCBuildTask</Name>
-      <Project>{01980ac2-861e-4ba3-9efd-fd79aa88f7f5}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

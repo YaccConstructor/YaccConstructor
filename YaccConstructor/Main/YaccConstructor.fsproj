@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Main</RootNamespace>
     <AssemblyName>YaccConstructor</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>YaccConstructor</Name>

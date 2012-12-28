@@ -51,4 +51,4 @@ let Parse (srcFilePath:string) =
         //printfn "%A" translated
         //translated.Head    
 
-do Parse @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"
+do Parse @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"

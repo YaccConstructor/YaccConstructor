@@ -402,10 +402,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
     member this.collectWarnings tokenToRange =
         let res = new ResizeArray<_>()
-        this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
-            let children = order.[i]
-            if children.other <> null then
-                res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
+        if not isEpsilon then
+            this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
+                let children = order.[i]
+                if children.other <> null then
+                    res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =

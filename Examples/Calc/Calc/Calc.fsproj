@@ -46,15 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
-      <HintPath>C:\Projects\recursive-ascent\Examples\Calc\yc\FSharp.PowerPack.dll</HintPath>
+      <HintPath>..\yc\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="RNGLRCommon">
-      <HintPath>C:\Projects\recursive-ascent\Examples\Calc\yc\RNGLRCommon.dll</HintPath>
+      <HintPath>..\yc\RNGLRCommon.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>C:\Projects\recursive-ascent\Examples\Calc\yc\RNGLRParser.dll</HintPath>
+      <HintPath>..\yc\RNGLRParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -34,3 +34,4 @@ Examples/yc/*
 YaccConstructor/YardFrontend/Lexer.fs
 YaccConstructor/YardFrontend/log.txt
 Examples/RNGLR/MSSql/out
+Examples/RNGLR/MSSql/epsilons/*

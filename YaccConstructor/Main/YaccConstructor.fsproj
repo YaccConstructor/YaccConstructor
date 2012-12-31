@@ -59,9 +59,6 @@
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack.Compatibility">
-      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Compatibility.dll</HintPath>
-    </Reference>
     <Reference Include="Irony">
       <HintPath>..\..\3rdParty\lib\Irony.dll</HintPath>
     </Reference>

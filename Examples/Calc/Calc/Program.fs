@@ -22,5 +22,5 @@ match buildAst tokens with
         clearAST = false
         filterEpsilons = false
     }
-    let result : double list = translate args ast
+    let result:List<double> = translate args ast
     printfn "%A" result

@@ -30,6 +30,15 @@ exception FEError of string
 exception GenError of string
 exception CheckerError of string
 
+let log (e:System.Exception) msg =
+    printfn "ERROR!"
+    "Stack trace: " + e.StackTrace
+    |> printfn "%s"
+    "Internal message: " + e.Message
+    |> printfn "%s"
+    "Message: " + msg
+    |> printfn "%s"
+
 let () =
     
     let feName = ref None
@@ -165,31 +174,34 @@ let () =
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise
         | None , _, _         -> EmptyArg "file name (-i)" |> raise 
-    //try
-    if !generateSomething = true then 
-        run ()
-(*    with
-    | InvalidFEName (feName)   -> 
+    try
+        if !generateSomething = true then 
+            run ()
+    with
+    | InvalidFEName feName as e  -> 
         "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
-        |> System.Console.WriteLine
-    | InvalidGenName (genName) ->
+        |> log e
+    | InvalidGenName genName as e->
         "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
-        |> System.Console.WriteLine
-    | EmptyArg (argName)       ->
-         printfn "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+        |> log e
+    | EmptyArg argName as e ->
+        sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
 YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Conversions/buildast_1.yrd \n
 List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
-    | FEError error          ->
+        |> log e
+    | FEError error as e ->
         "Frontend error: " + error + "\n"
-        |> System.Console.WriteLine
-    | GenError error         ->
+        |> log e
+    | GenError error as e  ->
         "Generator error: " + error + "\n"
-        |> System.Console.WriteLine
-    | CheckerError error         ->
+        |> log e
+    | CheckerError error as e  ->
         error + "\n"
-        |> System.Console.WriteLine
-    | :? System.IO.IOException as e -> printf "%s" <| (e.Message + ". Could not read input file.\n")
-    | x -> printf "%A\n" x*)
+        |> log e
+    | :? System.IO.IOException as e -> 
+        "Could not read input file.\n"
+        |> log e
+    | x -> "Unrecognized error." |> log x
 
 
 

@@ -1,256 +1,41 @@
-#I "e:/fake/FAKE/"
+#I "fake"
 #r "FakeLib.dll"
 
 open Fake
 
-open System.Diagnostics
 open System.IO
 
-let shellExecute program args =
-    let startInfo = new ProcessStartInfo()
-    startInfo.FileName <- program
-    startInfo.Arguments <- args    
-
-    let proc = Process.Start(startInfo)
-    proc.WaitForExit()
-    ()
-
-
-let buildDir = @".\bin\"
-let distrDir = @".\distr\"
+let workDir = @".\workdir\"
+let srcDir = Path.Combine(workDir, "src")
+let distrDir = Path.Combine(workDir, "distr")
+let zipDir = Path.Combine(workDir, "zip")
+let distrYCDir = Path.Combine(distrDir, "YC")
+let solutionRootDir = Path.Combine(srcDir, "YaccConstructor")
 let productName = "YaccConstructor"
-let version = "0.0.1.548"
+let version = ref "0.0.0.0"
 let prdNameSuffix = ref ""
 
-#load "solution.fsx"
+// Targets
+Target "Clean" (fun _ -> 
+    CleanDirs [distrDir;distrYCDir;zipDir]
+)
 
-Target "GetCommonSrc"
-    (fun _ ->
-        Directory.GetFiles(Solution.Common.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.Common.Folder
-    )
+Target "CollectAllBinaries" (fun _ ->
+    !+ (solutionRootDir + "/**/bin/Release/*.exe")
+        ++ (solutionRootDir + "/**/bin/Release/*.dll")
+        |> Scan
+        |> CopyTo distrYCDir
+)
 
-Target "BuildCommon" 
-   (fun _ -> 
-       MSBuild buildDir "Build" Solution.Common.BuildProperties [Solution.Common.Path]
-       |> Log "AppBuild-Output: ")
-
-Target "CommonSendLib"
-    ( fun _ ->
-        [@"./bin/Common.dll"] 
-        |> fun x -> 
-            CopyTo Solution.Conversions.LibPath x
-            x        
-        |> fun x -> 
-            CopyTo Solution.Main.LibPath x
-            x
-        |> fun x -> 
-            CopyTo Solution.RACCGenerator.LibPath x
-            x
-        |> CopyTo Solution.Yard.LibPath
-    )
-
-Target "CreateLibFolder" 
-    (fun _ -> List.iter (fun (p:Projects.Project) -> CreateDir p.LibPath) (!Solution.projects))
-
-Target "GetConversionsSrc"
-    (fun _ ->
-        Directory.GetFiles(Solution.Conversions.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.Conversions.Folder
-    )
-
-Target "BuildConversions"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.Conversions.BuildProperties [Solution.Conversions.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "ConversionsSendLib"
-    ( fun _ ->        
-        [@"./bin/Conversions.dll"] 
-        |> fun x -> 
-            CopyTo Solution.RACCGenerator.LibPath x
-            x
-        |> CopyTo Solution.Main.LibPath
-    )
-
-Target "CopyIrony"
-    ( fun _ ->        
-        [@"./3rdParty/Irony.dll"] 
-        |> CopyTo Solution.Main.LibPath
-    )
-
-Target "GetMainSrc"
-    (fun _ ->
-        Directory.GetFiles(Solution.Main.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.Main.Folder
-    )
-
-Target "BuildMain"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.Main.BuildProperties [Solution.Main.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "GetYardSrc"
-    (fun _ ->
-        Directory.GetFiles(Solution.Yard.SvnSrcFolder,"*.fs")
-        |> List.ofSeq
-        |> fun x -> 
-               Directory.GetFiles(Solution.Yard.SvnSrcFolder,"*.fsl")
-               |> List.ofSeq
-               |> fun y -> y @ x
-        |> fun x -> 
-               Directory.GetFiles(Solution.Yard.SvnSrcFolder,"*.fsy")
-               |> List.ofSeq
-               |> fun y -> y @ x
-        |> fun x -> 
-               Directory.GetFiles(Solution.Yard.SvnSrcFolder,"*.fsi")
-               |> List.ofSeq
-               |> fun y -> y @ x
-        |> CopyTo Solution.Yard.Folder
-    )
-
-Target "BuildYard"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.Yard.BuildProperties [Solution.Yard.Path]
-       |> Log "AppBuild-Output: "    
-    )               
+Target "ZipAll" (fun _ ->
+    !! (distrDir + "/**/*")
+    |> Zip distrDir (Path.Combine(zipDir, productName + "_" + !version + ".zip"))
+)
 
 
-Target "GetRACCSrc"
-    (fun _ ->
-        Directory.GetFiles(Solution.RACCCommon.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.RACCCommon.Folder
+"Clean" ==> "CollectAllBinaries" ==> "ZipAll"
 
-        Directory.GetFiles(Solution.RACCFA.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.RACCFA.Folder
-
-        Directory.GetFiles(Solution.RACCCore.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.RACCCore.Folder
-
-        Directory.GetFiles(Solution.RACCGenerator.SvnSrcFolder,"*.fs")
-        |> CopyTo Solution.RACCGenerator.Folder
-    )
-
-Target "BuildRACCCommon"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.RACCCommon.BuildProperties [Solution.RACCCommon.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "BuildRACCCore"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.RACCCore.BuildProperties [Solution.RACCCore.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "BuildRACCFA"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.RACCFA.BuildProperties [Solution.RACCFA.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "BuildRACCGenerator"
-    (fun _ ->
-       MSBuild buildDir "Build" Solution.RACCGenerator.BuildProperties [Solution.RACCGenerator.Path]
-       |> Log "AppBuild-Output: "    
-    )               
-
-Target "RACCCommonSendLib"
-    ( fun _ ->        
-        [@"./bin/RACCCommon.dll"] 
-        |> fun x -> 
-            CopyTo Solution.RACCGenerator.LibPath x
-            x
-        |> fun x -> 
-            CopyTo Solution.RACCCore.LibPath x
-            x
-        |> CopyTo Solution.RACCFA.LibPath
-    )
-
-Target "RACCFASendLib"
-    ( fun _ ->        
-        [@"./bin/RACCFiniteAutomata.dll"] 
-        |> fun x -> 
-            CopyTo Solution.RACCGenerator.LibPath x
-            x
-        |> CopyTo Solution.RACCCore.LibPath
-    )
-
-
-Target "Clean" 
-    (fun _ -> 
-        buildDir :: List.map (fun (p:Projects.Project) -> p.LibPath) !(Solution.projects)
-        |> CleanDirs
-        Directory.GetFiles("./","*.fs",SearchOption.AllDirectories)
-        |> Seq.iter (fun x -> File.Delete(x))
-        Directory.GetFiles("./","*.dll",SearchOption.AllDirectories)
-        |> Seq.iter (fun x -> File.Delete(x))
-        Directory.GetFiles("./","*.exe",SearchOption.AllDirectories)
-        |> Seq.iter (fun x -> File.Delete(x))
-
-    )
-
-Target "Distribute"
-    (fun _ ->
-         ["../COPYING";"../README"]
-         |> CopyTo  buildDir
-         CreateDir distrDir 
-         !+ (buildDir + "/*.dll") 
-         ++ (buildDir + "/*.exe") 
-         ++ (buildDir + "/COPYING") 
-         ++ (buildDir + "/README")
-         |> Scan
-         |> Zip buildDir (distrDir + productName + !prdNameSuffix + version + ".zip")
-
-    )
-
-Target "BuildAll" (fun _ -> ())
-
-Target "BuildRACC" (fun _ -> ())
-
-// Dependencies
-"BuildCommon"        <== ["GetCommonSrc"; "CreateLibFolder"]
-"CommonSendLib"      <== ["BuildCommon"]
-"BuildConversions"   <== ["GetConversionsSrc"; "CommonSendLib"]
-"ConversionsSendLib" <== ["BuildConversions"]
-"BuildMain"          <== ["GetMainSrc"; "ConversionsSendLib"; "CommonSendLib"]
-
-"RACCFASendLib"      <== ["BuildRACCFA"]
-"RACCCommonSendLib"  <== ["BuildRACCCommon"]
-"BuildRACCGenerator" <== ["CommonSendLib";"RACCFASendLib";"RACCCommonSendLib"; "ConversionsSendLib"]
-"BuildRACCFA"        <== ["RACCCommonSendLib"]
-"BuildRACCCore"      <== ["RACCFASendLib";"RACCCommonSendLib"]
-"BuildRACCCommon"    <== ["GetRACCSrc"; "CreateLibFolder"]
-"BuildRACC"          <== ["BuildRACCFA";"BuildRACCCommon";"BuildRACCCore";"BuildRACCGenerator"]
-
-"BuildYard" <== ["BuildCommon"; "GetYardSrc"]
-
-"BuildAll"  <== ["BuildMain"; "BuildYard"; "BuildRACC"]
-
-//Set build params
-Solution.SetNetVer (if getBuildParam "net" = "" then "4.0" else getBuildParam "net")
-//Solution.SetMode 
-  //  (let mode =  getBuildParam "mode"
-    // if mode = "" 
-   //  then Projects.Mode.Release 
-    // else 
-     //   if mode.ToLower() = "debug"
-     //   then Projects.Mode.Debug
-     //   else Projects.Mode.Release
-     //)
-
+version := getBuildParam "ver"
 
 // Run
-(getBuildParam "targets")
-|> fun x -> x.Split(';') 
-|> fun x ->
-   Seq.iter 
-       (fun (x:string) -> 
-           x.Replace("Clean","").Replace("Distribute","").Replace("Build","")
-           |> fun y -> prdNameSuffix := ((!prdNameSuffix) + "_" + y)
-       )
-       x
-   x
-|> Seq.iter (fun x -> printfn"%A\n" x;Run x)
+Run "ZipAll"

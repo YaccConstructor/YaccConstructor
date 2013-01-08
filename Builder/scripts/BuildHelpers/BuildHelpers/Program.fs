@@ -4,19 +4,22 @@ open System.Xml
 open System.Xml.Linq
 open System.Linq
 
-let private nmspc = XNamespace.Get "http://schemas.microsoft.com/developer/msbuild/2003"
-
 let LoadProjFile (file:string) =
     XDocument.Load file    
 
 let RemoveDependevces dependences (projFile:XDocument) =
+    let nmspc = XNamespace.Get "http://schemas.microsoft.com/developer/msbuild/2003"
+    let findIncudes name =
+        projFile.Root.Descendants(nmspc + name)
+         .Where(fun (t:XElement) -> List.exists (fun d -> t.Attribute(XName.Get "Include").Value = d) dependences)
     let refs = 
-        projFile.Root.Descendants(nmspc + "Reference")
-            .Where(fun (t:XElement) -> List.exists (fun d -> t.Attribute(XName.Get "Include").Value = d) dependences)
+        seq { 
+            yield! findIncudes "ProjectReference"
+            yield! findIncudes "Reference"
+            }
     refs.Remove()
 
-do 
-    let path =  @"D:\projects\YC\recursive-ascent\Builder\scripts\BuildHelpers\BuildHelpers\BuildHelpers1.fsproj"
-    let proj = LoadProjFile path
-    RemoveDependevces ["mscorlib"] proj
+let JustRmDependences dependences path =
+    let proj = LoadProjFile path    
+    RemoveDependevces dependences proj
     proj.Save path

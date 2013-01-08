@@ -47,3 +47,4 @@ Examples/Calc/yc/Irony.dll
 Examples/Calc/yc/Irony.Samples.dll
 Examples/Calc/yc/TreeDump.dll
 Examples/Calc/yc/YardPrinter.dll
+Builder/workdir/*

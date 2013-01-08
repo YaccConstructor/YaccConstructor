@@ -14,7 +14,6 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
-using Microsoft.VisualStudio.Shell.Interop;   
 
 namespace YC.VSYard.GoToDef
 {

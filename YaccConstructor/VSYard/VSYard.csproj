@@ -34,9 +34,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="FSharp.ProjectSystem.FSharp, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="FSharp.ProjectSystem.FSharp, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\FSharp\FSPackages\FSharp.ProjectSystem.FSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\FSharp\FSPackages\FSharp.ProjectSystem.FSharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -178,11 +178,7 @@
       <Project>{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\YaccConstructor\YardFrontend\YardFrontend.fsproj">
-      <Project>{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}</Project>
-      <Name>YardFrontend</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VSYardLibrary\VSYardLibrary\VSYardLibrary.fsproj">
+    <ProjectReference Include="..\VSYardLibrary\VSYardLibrary.fsproj">
       <Project>{465D7B80-550A-40BF-B108-86418AD5E565}</Project>
       <Name>VSYardLibrary</Name>
     </ProjectReference>

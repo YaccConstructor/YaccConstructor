@@ -15,13 +15,14 @@ open Yard.Frontends.YardFrontend.GrammarParser
 open System.Threading
 open System.Windows.Media
 open DataHelper
+open Yard.Core.IL.Source
+open Yard.Core.IL
 
 
 type HighlightWordTag () = 
     inherit TextMarkerTag ("MarkerFormatDefinition/HighlightWordFormatDefinition")
     //new () = { inherit TextMarkerTag ("MarkerFormatDefinition/HighlightWordFormatDefinition") }
     //do ()
-
 
 type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSearchService : ITextSearchService, textStructureNavigator : ITextStructureNavigator, m_dte: EnvDTE.DTE) =
     let TagsChanged = new Event<_>()
@@ -33,21 +34,21 @@ type HighlightWordTagger (view : ITextView, sourceBuffer : ITextBuffer, textSear
     let mutable _currentWord = new Nullable<SnapshotSpan> () //was nullable
     let mutable _requestedPoint = new SnapshotPoint ()
     let mutable _updateLock = new obj() 
-
+    
     let FindNewSpans (w : string) = 
         let (spans : SnapshotSpan list ref) = ref List.empty 
         let fileText = _view.TextBuffer.CurrentSnapshot.GetText()//u//buffer.CurrentSnapshot.GetText()
 
         let getNonterminals (tree: Yard.Core.IL.Definition.t<_,_> ) = 
             tree.grammar |> List.map (fun node -> node.name)
-
+        
         try
             //finding all ocurrences
             //let lexered = LexString fileText |> List.ofSeq
             let lexered = ReParseFileForActiveWindow(m_dte, _sourceBuffer.CurrentSnapshot.GetText()).Tokens
-            let checkAndAdd (t : Token) = 
+            let checkAndAdd t =
                 match t with
-                | LIDENT name  when name.text = w -> 
+                | LIDENT name when name.text = w -> 
                     let s, e = name.startPos.absoluteOffset, name.endPos.absoluteOffset
                     spans:= !spans @ [new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, new Span(s, e - s ))]  //to redo line
                 | _ -> ()

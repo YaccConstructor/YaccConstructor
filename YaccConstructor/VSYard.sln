@@ -6,14 +6,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSYard", "VSYard\VSYard.csp
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {A090E3B0-0516-44F3-9FBA-6EF8CB21926E}
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VSYardLibrary", "VSYardLibrary\VSYardLibrary\VSYardLibrary.fsproj", "{465D7B80-550A-40BF-B108-86418AD5E565}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VSYardLibrary", "VSYardLibrary\VSYardLibrary.fsproj", "{465D7B80-550A-40BF-B108-86418AD5E565}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {A090E3B0-0516-44F3-9FBA-6EF8CB21926E}
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "..\YaccConstructor\Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "..\YaccConstructor\YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParser", "RNGLRParser\RNGLRParser.fsproj", "{1B09EACC-608A-4965-8B46-2746FAC220FC}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRCommon", "RNGLRCommon\RNGLRCommon.fsproj", "{1C719CD3-0559-4A12-8B57-F58053947DC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +41,14 @@ Global
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B09EACC-608A-4965-8B46-2746FAC220FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B09EACC-608A-4965-8B46-2746FAC220FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B09EACC-608A-4965-8B46-2746FAC220FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B09EACC-608A-4965-8B46-2746FAC220FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C719CD3-0559-4A12-8B57-F58053947DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C719CD3-0559-4A12-8B57-F58053947DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C719CD3-0559-4A12-8B57-F58053947DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C719CD3-0559-4A12-8B57-F58053947DC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

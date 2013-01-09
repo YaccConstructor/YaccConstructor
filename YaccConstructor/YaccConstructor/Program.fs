@@ -39,8 +39,7 @@ let log (e:System.Exception) msg =
     "Message: " + msg
     |> printfn "%s"
 
-let () =
-    
+let () =    
     let feName = ref None
     let generatorName = ref None
     let generatorParams = ref None
@@ -55,16 +54,14 @@ let () =
     let userDefsStr = ref ""
 
     feName := // Fill by default value
-        if Seq.exists ((=) "YardFrontend") FrontendsManager.Available then
-            Some("YardFrontend")
-        else
-            Seq.tryFind (fun _ -> true) FrontendsManager.Available
+        if Seq.exists ((=) "YardFrontend") FrontendsManager.Available
+        then Some "YardFrontend"
+        else Seq.tryFind (fun _ -> true) FrontendsManager.Available
             
     generatorName :=
-        if Seq.exists ((=) "GNESCCGenerator") GeneratorsManager.Available then
-            Some("GNESCCGenerator")
-        else
-            Seq.tryFind (fun _ -> true) GeneratorsManager.Available
+        if Seq.exists ((=) "RNGLRGenerator") GeneratorsManager.Available
+        then Some "RNGLRGenerator"
+        else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
 
     let generateSomething = ref true
 
@@ -72,7 +69,7 @@ let () =
         fun _ ->
             generateSomething := false
             printfn "\nAvailable %s: " iName
-            Seq.map (fun x -> x + (if Some(x)=deft then " (default)" else "")) items
+            Seq.map (fun x -> x + (if Some x = deft then " (default)" else "")) items
             |> String.concat "\n    "
             |> fun x -> printf "    %s\n" x
 

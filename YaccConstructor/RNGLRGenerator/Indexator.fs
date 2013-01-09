@@ -71,6 +71,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     member this.nonTermToIndex nt = Indexator.add nonTermsShift (Indexator.fst nonTermsConnect) nt
     member this.indexToNonTerm i = Indexator.sub nonTermsShift (Indexator.snd nonTermsConnect) i
     member this.nonTermCount = Indexator.trd nonTermsConnect
+    member this.isNonTerm index = index >= 0 && index < this.nonTermCount
 
     member this.termToIndex t = Indexator.add termsShift (Indexator.fst termsConnect) t
     member this.indexToTerm i = Indexator.sub termsShift (Indexator.snd termsConnect) i

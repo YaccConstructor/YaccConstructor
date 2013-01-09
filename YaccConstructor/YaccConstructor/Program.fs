@@ -1,4 +1,5 @@
-﻿//  Copyright 2010,2011,2012 Konstantin Ulitin, Semen Grigorev
+﻿//  Copyright 
+//    2010, 2011, 2012, 2013 Konstantin Ulitin, Semen Grigorev
 //
 //  This file is part of YaccConctructor.
 //
@@ -78,26 +79,26 @@ let () =
          "-af", ArgType.Unit (printItems "frontends" FrontendsManager.Available !feName), "Available frontends"
          "-g", ArgType.String 
             (fun s -> 
-                match Array.toList (s.Split(' ')) with
-                | name::[] -> generatorName := Some(name); generatorParams := None
-                | name::parameters -> generatorName := Some(name); generatorParams := Some (String.concat " " parameters)
+                match Array.toList (s.Split ' ') with
+                | name::[] -> generatorName := Some name; generatorParams := None
+                | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
          "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
-         "-c", ArgType.String (fun s -> conversions.Add(s)), "Conversion applied in order. Use -ac to list available."
+         "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
          "-ac", ArgType.Unit (printItems "conversions" ConversionsManager.Available None), "Available conversions"
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
-         "-U", ArgType.String (fun s -> userDefs := List.filter (fun x -> x <> s) !userDefs), 
+         "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s ->
-                                   testFile := System.IO.Path.GetFileName(s) |> Some
-                                   testsPath := System.IO.Path.GetDirectoryName(s) |> Some), "Input grammar"         
+                                   testFile := System.IO.Path.GetFileName s |> Some
+                                   testsPath := System.IO.Path.GetDirectoryName s |> Some), "Input grammar"         
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
 
     let run () =
         match !testFile, !feName , !generatorName with
-        | Some(fName), Some(feName), Some(generatorName) ->
+        | Some fName, Some feName, Some generatorName ->
             let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
@@ -105,8 +106,8 @@ let () =
                 then
                     try
                         match FrontendsManager.Component feName with
-                           | Some fron -> fron
-                           | None -> failwith "Frontend is not found."
+                        | Some fe -> fe
+                        | None -> failwith "Frontend is not found."
                     with
                     | _ -> _raise ()
                 else _raise ()
@@ -114,8 +115,7 @@ let () =
             // Parse grammar    
             let ilTree =  
                 //try
-                    let defStr = 
-                        List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
+                    let defStr = List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
                     if System.String.IsNullOrEmpty defStr
                     then grammarFilePath
                     else grammarFilePath + "%" + defStr
@@ -149,14 +149,14 @@ let () =
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
                 let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
                 if undeclaredNonterminals.Length > 0 then
-                    eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"  
-                    <| String.concat "\n" undeclaredNonterminals
+                    String.concat "\n" undeclaredNonterminals
+                    |> eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"                      
 
 //                    |> CheckerError
   //                  |> raise
                 //try
                 match !generatorParams with
-                | None -> gen.Generate (!ilTree)
+                | None -> gen.Generate !ilTree
                 | Some(genParams) -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
@@ -165,7 +165,7 @@ let () =
                 //| e -> GenError e.Message |> raise
 
 //#if DEBUG               
-            printf "%s" (result :?> string)
+            printf "%A" result
 //#endif
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise

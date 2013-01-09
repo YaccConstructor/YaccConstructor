@@ -20,6 +20,7 @@ module Yard.Frontends.FsYaccFrontend.Main
 open Yard.Frontends.FsYaccFrontend.Lexer
 open Yard.Frontends.FsYaccFrontend.Parser
 open Yard.Core.IL
+open Yard.Core
 open Yard.Core.IL.Production
 
 open Microsoft.FSharp.Text.Lexing
@@ -27,9 +28,13 @@ open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
 let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
-                                     then { rule with _public=true }
-                                     else rule)
+    grammar |> List.map (fun m ->
+        {m with rules = m.rules |> List.map (fun rule ->
+            if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
+            then { rule with isStart=true }
+            else rule)
+        }
+    )
 
 let rec _addBindings = function
     | PSeq(elements, Some (ac : Source.t), l) -> 
@@ -50,8 +55,9 @@ let rec _addBindings = function
     | POpt(x) -> POpt(_addBindings x)
     | PMany(x) -> PMany(_addBindings x)
     | x -> x
+
 let addBindings (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> { rule with body=_addBindings rule.body } )
+    grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
 let ParseFile fileName =
     let content = System.IO.File.ReadAllText(fileName)
@@ -60,7 +66,7 @@ let ParseFile fileName =
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader
     try 
-        let (res:System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { new Definition.t<Source.t, Source.t>
             with info = {new Definition.info with fileName = ""}

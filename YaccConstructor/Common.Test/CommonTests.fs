@@ -130,6 +130,8 @@ type ``Checker test`` () =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
             |> frontend.ParseGrammar
             |> GetUndeclaredNonterminalsList
+            |> (fun (u,_,_) -> u)
+            |> List.map snd
             |> List.sort
         let expetedResult = []
         Seq.iter (printfn "%A;") result
@@ -143,6 +145,8 @@ type ``Checker test`` () =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Uncorrect.yrd")
             |> frontend.ParseGrammar
             |> GetUndeclaredNonterminalsList
+            |> (fun (u,_,_) -> u)
+            |> List.map snd
             |> List.sort
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
         Seq.iter (printfn "%A;") result

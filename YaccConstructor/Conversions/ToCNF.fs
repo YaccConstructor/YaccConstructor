@@ -32,32 +32,22 @@ open Yard.Core.IL.Rule
 
 let deleteEpsRule (ruleList: Rule.t<_,_> list) = 
     
-    //--Генерация перестановок---------------------------------------------------------------------
+    /// Generate all subsets of [1..N]
+    let genSubsets N =
+        [1 .. (1 <<< N) - 1]
+        |> List.map (fun num ->
+            [1..N] |> List.filter (fun i ->
+                (num &&& (1 <<< (i-1))) <> 0
+            )
+        )
         
-    let genPermutation N =
-        let genList = ref [[]]
-        let addInList list =
-            genList := list @ !genList
-            list
-        let startList = [for i in [1 .. N] -> [i]]
-        genList := startList
-        let rec iter listList =
-            if List.length listList <> 1 then
-                listList |> List.collect
-                    (fun i -> [List.max i + 1 .. N] |> List.collect (fun j -> [ i @ [j] ]))
-                |> addInList
-                |> iter
-        iter startList
-        !genList
-        
-    //--Находим все эпсилон-правила----------------------------------------------------------------
-
+    // Find all epsilon-rules
     let epsList = 
         ruleList |> List.collect
             (fun rule -> 
                 match rule.body with
-                |PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule.name.text]
-                |x -> []
+                | PSeq(elements, actionCode, lbl) when elements.IsEmpty -> [rule.name.text]
+                | x -> []
             )
 
     //--Функция для проверки вхождения эпсилон-правила---------------------------------------------
@@ -80,7 +70,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
 
     let newRule (rule: Rule.t<_, _>) (epsRef: list<string>) =         
         if not epsRef.IsEmpty then
-            let numberEpsRef = genPermutation epsRef.Length
+            let numberEpsRef = genSubsets epsRef.Length
             let ac,lbl = match rule.body with PSeq(e, a, l) -> a,l | x -> None,None
             let i = ref 0
             let newBody elements =
@@ -123,21 +113,8 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                                         checker = elem.checker
                                     }]
                             |x -> [elem])
-                [{
-                    name=numberRule.name
-                    args=numberRule.args
-                    _public=numberRule._public
-                    metaArgs=numberRule.metaArgs
-                    body=PSeq(newBody, ac, lbl)
-                }]
-            let numberRule = 
-                {
-                    name=rule.name
-                    args=rule.args
-                    _public=rule._public
-                    metaArgs=rule.metaArgs
-                    body=numberBody
-                }
+                [{numberRule with body=PSeq(newBody, ac, lbl)}]
+            let numberRule = {rule with body=numberBody}
             numberEpsRef |> List.collect (addRule numberRule)
         else []
             
@@ -186,13 +163,7 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
                              |x -> ""
                             )
                     else
-                        [{
-                            name=mainRule.name
-                            args=mainRule.args
-                            _public=mainRule._public
-                            metaArgs=mainRule.metaArgs
-                            body=(bodyChange mainRule rule)
-                        }] 
+                        [{mainRule with body = bodyChange mainRule rule}] 
                 else []
             )
 
@@ -228,7 +199,8 @@ let renameTerm ruleList =
                         [{
                             name = newName
                             args = rule.args
-                            _public = false
+                            isStart = false
+                            isPublic = false
                             metaArgs = rule.metaArgs 
                             body = PSeq([elem], None, None)
                         }] @ !list1
@@ -240,21 +212,16 @@ let renameTerm ruleList =
                 }
             else elem
         let elements = match rule.body with PSeq(e, a, l) -> e | x -> []
-        [{
-            name = rule.name
-            args = rule.args
-            _public = rule._public
-            metaArgs = rule.metaArgs 
+        [{rule with
             body = PSeq([rename elements.[0]; rename elements.[1]], 
                                 (match rule.body with PSeq(e, a, l) -> a | x -> None),
-                                (match rule.body with PSeq(e, a, l) -> l | x -> None))
-            
+                                (match rule.body with PSeq(e, a, l) -> l | x -> None))            
         }]
     
     (ruleList |> List.collect 
         (fun rule -> if isCNF rule then [rule] else renameRule rule)) @ !list1
 
-//--Преобразование в КНФ---------------------------------------------------------------------------
+//--Transform grammar into CNF---------------------------------------------------------------------------
 
 let toCNF (ruleList: Rule.t<_, _> list) = 
 
@@ -269,7 +236,8 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                     [{
                         name = Source.t("newCnfRule" + (!i).ToString())
                         args = rule.args
-                        _public = false
+                        isStart = false
+                        isPublic = false
                         metaArgs = rule.metaArgs 
                         body = PSeq([elem1; elem2], None, None)
                     }] @ !list2
@@ -286,11 +254,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                 else []       
             if elements.Length > 2 then
                 newRule 
-                    {
-                        name = rule.name
-                        args = rule.args
-                        _public = rule._public
-                        metaArgs = rule.metaArgs
+                    {rule with
                         body = PSeq(cutRule, 
                                 (match rule.body with PSeq(e, a, l) -> a | x -> None),
                                 (match rule.body with PSeq(e, a, l) -> l | x -> None))
@@ -309,18 +273,18 @@ let toCNF (ruleList: Rule.t<_, _> list) =
 type ToCNF() = 
     inherit Conversion()
         override this.Name = "ToCNF"
-        override this.ConvertList (ruleList,_) = toCNF ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar toCNF grammar
         override this.EliminatedProductionTypes = [""]
 
 type DeleteEpsRule() = 
     inherit Conversion()
         override this.Name = "DeleteEpsRule"
-        override this.ConvertList (ruleList,_) = deleteEpsRule ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar deleteEpsRule grammar
         override this.EliminatedProductionTypes = [""]
 
 type DeleteChainRule() = 
     inherit Conversion()
         override this.Name = "DeleteChainRule"
-        override this.ConvertList (ruleList,_) = deleteChainRule ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar deleteChainRule grammar
         override this.EliminatedProductionTypes = [""]
 

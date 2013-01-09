@@ -43,8 +43,8 @@ let eliminateLeftRecursion (ruleList : Rule.t<_,_> list) =
 type EliminateLeftRecursion() = 
     inherit Conversion()
         override this.Name = "EliminateLeftRecursion"
-        override this.ConvertList (ruleList,_) =
+        override this.ConvertGrammar (grammar,_) =
             let prevConversions = ["ExpandEbnf"; "ExpandMeta"; "ExpandAlter"]
-            eliminateLeftRecursion ruleList
+            mapGrammar eliminateLeftRecursion grammar
         override this.EliminatedProductionTypes = [""]
 

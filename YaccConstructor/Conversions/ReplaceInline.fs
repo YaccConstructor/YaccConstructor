@@ -67,12 +67,12 @@ let private replaceInline (rules : Rule.t<_,_> list) =
     rules
     |> List.choose
         (fun rule -> 
-            if inlines.ContainsKey rule.name.text && not rule._public
+            if inlines.ContainsKey rule.name.text && not rule.isStart
             then None
             else Some <| {rule with body = modifyBody rule.body})
             
 type ReplaceInline() = 
     inherit Conversion()
         override this.Name = "ReplaceInline"
-        override this.ConvertList (ruleList,_) = replaceInline ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar replaceInline grammar
         override this.EliminatedProductionTypes = [""]

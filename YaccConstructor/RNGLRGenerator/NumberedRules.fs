@@ -27,7 +27,7 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     let rules = ruleList |> Array.ofList
     let start =
         rules
-        |> Array.findIndex (fun rule -> rule._public)
+        |> Array.findIndex (fun rule -> rule.isStart)
     let left = rules |> Array.map (fun x -> x.name.text |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function

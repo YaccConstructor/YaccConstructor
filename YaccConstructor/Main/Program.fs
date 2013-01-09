@@ -19,6 +19,7 @@ module YaccConstructor.Program
 
 open Yard.Core
 open Yard.Core.IL
+open Yard.Core.Helpers
 open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
@@ -141,11 +142,28 @@ let () =
             let result =  
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
-                let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
-                if undeclaredNonterminals.Length > 0 then
-                    eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"  
-                    <| String.concat "\n" undeclaredNonterminals
-
+                let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
+                if undeclaredRules.Length > 0 then
+                    eprintfn  "Input grammar contains some undeclared nonterminals:"
+                    undeclaredRules |> List.iter (fun (m, rules) ->
+                        eprintfn "Module %s: %s" (getModuleName m)
+                            (rules
+                             |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                             |> String.concat "; ")
+                    )
+                if repeatedInnerRules.Length > 0 then
+                    eprintfn  "There are more then one rule in one module for some nonterminals:"
+                    repeatedInnerRules |> List.iter (fun (m, rules) ->
+                        eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
+                    )
+                if repeatedExportRules.Length > 0 then
+                    eprintfn  "There are rules, exported from different modules:"
+                    repeatedExportRules |> List.iter (fun (m, rules) ->
+                        eprintfn "Module %s: %s" (getModuleName m)
+                           (rules
+                            |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                            |> String.concat "; ")
+                    )
 //                    |> CheckerError
   //                  |> raise
                 //try

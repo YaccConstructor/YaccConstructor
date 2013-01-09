@@ -176,11 +176,14 @@ let expandMeta body metaRules expanded res =
                                             let newMetaArgName = genNewSource (nextName "rule") _body
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
-                                                {name = newMetaArgName;
-                                                args = [];
-                                                metaArgs = [];
-                                                _public = false;
-                                                body = body}
+                                                {
+                                                    name = newMetaArgName;
+                                                    args = [];
+                                                    metaArgs = [];
+                                                    isPublic = false;
+                                                    isStart = false;
+                                                    body = body
+                                                }
                                             (newMetaArg::accMeta, newRule::accRes)
                                        )
                             )
@@ -206,7 +209,8 @@ let expandMeta body metaRules expanded res =
                         {name = newRuleName;
                         args = formalArgs;
                         metaArgs = [];
-                        _public = false;
+                        isPublic = false;
+                        isStart = false;
                         body = fst metaExp}
                     (substitution, newRule::(snd metaExp))
 
@@ -306,6 +310,6 @@ let expandMetaRules rules =
 type ExpandMeta() = 
     inherit Conversion()
         override this.Name = "ExpandMeta"
-        override this.ConvertList (ruleList,_) = expandMetaRules ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar expandMetaRules grammar
         override this.EliminatedProductionTypes = ["PMetaRef"]
 

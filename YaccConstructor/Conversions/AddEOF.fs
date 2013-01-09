@@ -66,7 +66,7 @@ let addEOFToProduction = function
 let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
     let startRules = new HashSet<string>()
     ruleList |> List.iter
-        (fun rule -> if rule._public then startRules.Add rule.name.text |>ignore )
+        (fun rule -> if rule.isStart then startRules.Add rule.name.text |>ignore )
     let usedRules = new HashSet<string>()
     eachProduction 
         (function
@@ -78,13 +78,14 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
     usedStartRules.IntersectWith(usedRules)
     ruleList |> List.collect 
         (fun rule -> 
-            if rule._public then
+            if rule.isStart then
                 if usedStartRules.Contains rule.name.text then
-                    [{rule with _public=false}; 
-                    {
+                    [{rule with isStart=false
+                    }; {
                         name= dummyPos (createName())
                         args=[]
-                        _public=true
+                        isStart=true
+                        isPublic=false
                         metaArgs=[] 
                         body=PSeq([
                                     {omit=false; rule=PRef(dummyPos rule.name.text, None); binding=Some(dummyPos <| getLastName()); checker=None}; 
@@ -103,5 +104,5 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
 type AddEOF() = 
     inherit Conversion()
         override this.Name = "AddEOF"
-        override this.ConvertList (ruleList,_) = addEOF ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar addEOF grammar
         override this.EliminatedProductionTypes = [""]

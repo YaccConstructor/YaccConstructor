@@ -41,7 +41,9 @@
     <DocumentationFile>bin\Release\Common.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -60,6 +62,7 @@
     <Compile Include="ConversionsManager.fs" />
     <Compile Include="ITester.fs" />
     <Compile Include="Layouts.fs" />
+    <Compile Include="Helpers.fs" />
     <Compile Include="ILCheckers.fs" />
     <Compile Include="ILComparators.fs" />
   </ItemGroup>

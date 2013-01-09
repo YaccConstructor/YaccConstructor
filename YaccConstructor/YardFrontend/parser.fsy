@@ -19,6 +19,7 @@
 #nowarn "62";; 
 open Microsoft.FSharp.Text
 open Yard.Core.IL
+open Yard.Core
 open Yard.Core.IL.Production
  
 type Range = struct
@@ -101,7 +102,7 @@ file: action_opt
         { Definition.empty with
             Definition.info = { fileName = !currentFilename }
             Definition.head = $1
-            Definition.grammar = (fst $2)
+            Definition.grammar = defaultModules (fst $2)
             Definition.foot = $3
             Definition.options = (snd $2)
         }
@@ -115,19 +116,22 @@ rule_nlist: rule semi_opt rule_nlist
         { (fst $1) :: (fst $3), joinMaps (snd $1) (snd $3) }
     | INCLUDE STRING rule_nlist 
         { let def = parseRules $2.text in
-          (def.grammar @ (fst $3), joinMaps def.options (snd $3)) 
+          (def.grammar.Head.rules @ (fst $3), joinMaps def.options (snd $3)) 
         } 
     | { [], Map.empty }
     | rule error { missing "SEMI"; raise Parse_error  }
 
 rule: start_rule_sign_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
-        let newRule = { Rule._public = $1
-                        Rule.name = $2
-                        Rule.metaArgs = getList $3
-                        Rule.body = $7
-                        Rule.args = $4
-                      }
+        let newRule =
+            {
+                Rule.isStart = $1
+                Rule.isPublic = false
+                Rule.name = $2
+                Rule.metaArgs = getList $3
+                Rule.body = $7
+                Rule.args = $4
+            }
         in
         match $6 with
         | Some m -> newRule, Map.empty.Add (newRule, m)

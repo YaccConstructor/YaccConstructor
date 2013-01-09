@@ -76,10 +76,12 @@ let grammarName filename =
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 
     
     let header = printArg input_grammar.head 
-    let functions = List.map (fun e -> (if e._public then "public " else "private " ) 
-                                      + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
-                                      + printBody "" e.body ) 
-                         input_grammar.grammar
+    let functions =
+        input_grammar.grammar.Head.rules |> List.map (fun e ->
+            (if e.isStart then "public " else "private " ) 
+                + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+                + printBody "" e.body ) 
+                         
 
     let res = "module " + (grammarName input_grammar.info.fileName) + "\n" + "\nopen FParsec.Primitives\n" + header + "let rec " + String.concat ( "\n\n and ") functions
   

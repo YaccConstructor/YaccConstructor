@@ -3,6 +3,7 @@
 open IronyFrontendTests
 open Yard.Frontends.IronyFrontend
 open Yard.Core
+open Yard.Core.Helpers
 open NUnit.Framework
 open Yard.Core.IL.Definition
 open Yard.Core.IL
@@ -21,66 +22,48 @@ let pos419 = new Source.Position (-419, 0, 0)
 let strToToken s = PToken <| new Source.t(s, pos419, pos419, "")
 
 let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
- {info = {fileName = "";};
- head = None;
- grammar =
-  [{name = dummyPos"s";
-    args = [];
-    body = PSeq ([{omit = false;
-                   rule = strToToken "MULT";
-                   binding = None;
-                   checker = None;};
-                  {omit = false;
-                   rule = strToToken "PLUS";
-                   binding = None;
-                   checker = None;}]
-                  ,None, None);
-    _public = true;
-    metaArgs = [];}];
- foot = None;
- options = Map.empty}
-
+    verySimpleRules "s"
+        [{
+            omit = false;
+            rule = strToToken "MULT";
+            binding = None;
+            checker = None;
+        }; {
+            omit = false;
+            rule = strToToken "PLUS";
+            binding = None;
+            checker = None;
+        }]
+    |> defaultGrammar
 
 
 let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
-    {info = {fileName = "";};
-     head = None;
-     grammar =
-      [{name = dummyPos"start";
-        args = [];
-        body =
-         PAlt
-           (PAlt
-              (PSeq ([{omit = false;
-                       rule = strToToken "GREATER";
-                       binding = None;
-                       checker = None;}],None, None),
-               PSeq ([{omit = false;
-                       rule = strToToken "LESS";
-                       binding = None;
-                       checker = None;}],None, None)),
-            PSeq ([{omit = false;
-                    rule = strToToken "EQUAL";
+    PAlt
+        (PAlt
+            (PSeq ([{omit = false;
+                    rule = strToToken "GREATER";
                     binding = None;
-                    checker = None;}],None,None));
-        _public = true;
-        metaArgs = [];}];
-     foot = None;
-     options = Map.empty}
+                    checker = None;}],None, None),
+            PSeq ([{omit = false;
+                    rule = strToToken "LESS";
+                    binding = None;
+                    checker = None;}],None, None)),
+        PSeq ([{omit = false;
+                rule = strToToken "EQUAL";
+                binding = None;
+                checker = None;}],None,None))
+    |> simpleRules "start"
+    |> defaultGrammar
 
 let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
-    {info = {fileName = "";};
-     head = None;
-     grammar = [{name = dummyPos"myNonTerm";
-                 args = [];
-                 body = PSeq ([{omit = false;
-                                rule = strToToken "LESS";
-                                binding = None;
-                                checker = None;}],None, None);
-                 _public = true;
-                 metaArgs = [];}];
-     foot = None;
-     options = Map.empty}
+    verySimpleRules "myNonTerm"
+        [{
+            omit = false
+            rule = strToToken "LESS"
+            binding = None
+            checker = None
+        }]
+    |> defaultGrammar
 
 [<TestFixture>]
 type ``Irony frontend tests`` () =

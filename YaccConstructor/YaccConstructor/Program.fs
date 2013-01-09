@@ -97,7 +97,7 @@ let () =
     ArgParser.Parse commandLineSpecs
 
     let run () =
-        match !testFile, !feName , !generatorName with
+        match !testFile, !feName, !generatorName with
         | Some fName, Some feName, Some generatorName ->
             let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
             let fe =
@@ -112,8 +112,8 @@ let () =
                     | _ -> _raise ()
                 else _raise ()
 
-            // Parse grammar    
-            let ilTree =  
+            // Parse grammar
+            let ilTree =
                 //try
                     let defStr = List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
                     if System.String.IsNullOrEmpty defStr
@@ -157,7 +157,7 @@ let () =
                 //try
                 match !generatorParams with
                 | None -> gen.Generate !ilTree
-                | Some(genParams) -> gen.Generate(!ilTree, genParams)
+                | Some genParams -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
 //                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."

@@ -36,7 +36,8 @@ let init tokens parseFunctions =
 
 // L_0 function, it has tag 0
 let continueExecution () =
-    if not parseStates.IsEmpty then
+    if not parseStates.IsEmpty
+    then
         let tag, newStack, newPos = parseStates.Head
         parseStates <- parseStates.Tail
         if tag = 0 && newStack.IsEmpty && newPos = _tokens.Length - 1
@@ -50,8 +51,8 @@ let continueExecution () =
 // adds new elementary descriptor to set R, if it is not present
 let addDescriptor functionTag =
     let descriptor = (functionTag, stack, pos)
-    if not <| List.exists  ((=) descriptor) parseStates then
-        parseStates <- (descriptor::parseStates)
+    if not <| List.exists  ((=) descriptor) parseStates
+    then parseStates <- (descriptor::parseStates)
 
 // pushes function descriptor to stack
 let push functionDescr = stack <- functionDescr::stack

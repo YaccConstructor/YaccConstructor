@@ -1,64 +1,50 @@
-﻿// Parser.fs contains logic for maintaining parse states set
+﻿// Parser.fs contains base logic for table-based GLL parsing
 
 module Yard.Generators.GLL.Parser
 
-type ParseFunction = unit -> bool
-
-/// <summary>
-/// Function representation for descriptor:
-/// tag: function tag (index of this parse function in array)
-/// ind: input buffer index at the moment of creating this descriptor
-/// </summary>
-type ParseFunctionDescr = int * int
+type ParseStackItem = Terminal of int | Nonterminal of int
+type ParseStack = ParseStackItem list
 
 /// <summary>
 /// Elementary descriptor consists of the following:
-/// L: continuation function tag (we implement goto as continuation tail call)
 /// s: parse stack
 /// j: position in the input array
 /// </summary>
-type ElementaryDescriptor = int * ParseFunctionDescr list * int
+type ElementaryDescriptor = ParseStack * int
 
-// states set R
-let mutable parseStates : ElementaryDescriptor list = []
-let mutable pos = 0
-let mutable stack : ParseFunctionDescr list = []
+type ParserBase (startNonTerm, eofToken, actions, productions, tokens) =
+    // states set R
+    let mutable _parseStates : ElementaryDescriptor list = []
+    // right sides of grammar rules
+    let _productions : ParseStack[] = productions
+    // represents actions table: (lookahead terminal, nonterminal on parse stack top) -> production(s) to use
+    let _actions : int * int -> int list option = (Map.ofArray actions).TryFind
+    // input stream of grammar terminals
+    let _tokens : int[] = tokens
 
-let mutable _parseFunctions : ParseFunction[] = [||]
-let mutable _tokens : int[] = [||]
-
-let init tokens parseFunctions = 
-    _tokens <- tokens
-    _parseFunctions <- parseFunctions
-    parseStates <- []
-    pos <- 0
-    stack <- [(0,0)]
-
-// L_0 function, it has tag 0
-let continueExecution () =
-    if not parseStates.IsEmpty
-    then
-        let tag, newStack, newPos = parseStates.Head
-        parseStates <- parseStates.Tail
-        if tag = 0 && newStack.IsEmpty && newPos = _tokens.Length - 1
-        then true
-        else
-            stack <- newStack
-            pos <- newPos
-            _parseFunctions.[tag] ()            
-    else false
-
-// adds new elementary descriptor to set R, if it is not present
-let addDescriptor functionTag =
-    let descriptor = (functionTag, stack, pos)
-    if not <| List.exists  ((=) descriptor) parseStates
-    then parseStates <- (descriptor::parseStates)
-
-// pushes function descriptor to stack
-let push functionDescr = stack <- functionDescr::stack
-
-// pops top function descriptor from stack and adds resulting parse state to R
-let pop () =
-    let (stackTopTag, _) = stack.Head
-    stack <- stack.Tail
-    addDescriptor stackTopTag
+    member this.parse () =
+        // jumps to next available nondeterministic execution branch
+        let rec continueExecution () =
+            match _parseStates with
+            | [] -> false
+            | state::states ->
+                _parseStates <- states
+                parse state
+        // matches buffer input and stack top against parse table and takes actions
+        and parse (stack, pos) =
+            match stack with
+            | (Nonterminal nonterm)::stackRest ->
+                match _actions (_tokens.[pos], nonterm) with
+                | Some productionIndices -> 
+                    let addProduction productionIndex =
+                        let newStack = List.append _productions.[productionIndex] stackRest
+                        _parseStates <- (newStack, pos) :: _parseStates
+                    List.iter addProduction productionIndices                    
+                | None -> ()
+                continueExecution ()
+            | (Terminal term)::stackRest ->
+                if _tokens.[pos] = term
+                then parse (stackRest, pos + 1)
+                else continueExecution()
+            | [] -> pos = _tokens.Length || continueExecution ()
+        parse ([Nonterminal startNonTerm; Terminal eofToken], 0)

@@ -7,7 +7,7 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.FinalGrammar
 
 // Calculate set of terminals that can be at a start of specific production.
-// Set is calculate as FIRST for a sequence of tokens on rignt side of the production
+// Set is calculated as FIRST of the sequence of tokens on rignt side of the production
 // plus FOLLOW of the left side, if the production can infer epsilon
 let private getStart (grammar:FinalGrammar) (followSets:Set<int>[]) ruleIndex =
     let rec _getStart acc = function
@@ -30,8 +30,7 @@ let private getFollowSets (grammar:FinalGrammar) =
         let oldSet = followSets.[setIndex]
         let newSet = oldSet + newElements
         followSets.[setIndex] <- newSet
-        if oldSet <> newSet
-        then wasChange := true
+        wasChange := !wasChange || oldSet <> newSet
     while !wasChange do
         wasChange := false
         for ruleIndex in 0..grammar.rules.rulesCount-1 do            
@@ -57,7 +56,9 @@ let private emitLine shift text (out:StringBuilder) =
 let private emitEmptyLine (out:StringBuilder) = out.AppendLine() |> ignore
 
 let private getArrayRepresentation (arr : string seq) =
-    "[| " + System.String.Join("; ", arr) + " |]"
+    "[|" + System.String.Join(";", arr) + "|]"
+let private getListRepresentation (arr : string seq) =
+    "[" + System.String.Join(";", arr) + "]"
 
 let emitNameAndUsages moduleName (out:StringBuilder) =
     out |> emitLine 0 (sprintf "module %s" moduleName)
@@ -72,95 +73,51 @@ let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
     |> Seq.iter (fun i -> out |> emitLine 1 (sprintf "%d -> %s" i (grammar.indexator.indexToNonTerm i)))
     seq { grammar.indexator.termsStart .. grammar.indexator.termsEnd }
     |> Seq.iter (fun i -> out |> emitLine 1 (sprintf "%d -> %s" i (grammar.indexator.indexToTerm i)))
-    seq { 0 .. (grammar.indexator.nonTermCount-1) }
-    |> Seq.iter (fun i -> let followArray =  Seq.map grammar.indexator.indexToTerm followSets.[i] |> getArrayRepresentation
-                          out |> emitLine 1 (sprintf "FOLLOW(%s) = %s" (grammar.indexator.indexToNonTerm i) followArray))
+    let emitSets setName getSet =
+        seq { 0 .. (grammar.indexator.nonTermCount-1) }
+        |> Seq.iter (fun i -> let set = getSet i
+                              let array = Seq.map grammar.indexator.indexToTerm set |> getArrayRepresentation
+                              out |> emitLine 1 (sprintf "%s(%s) = %s" setName (grammar.indexator.indexToNonTerm i) array))
+    emitSets "FIRST" (fun i -> grammar.firstSet.[i])
+    emitSets "FOLLOW" (fun i -> followSets.[i])    
     out |> emitLine 0 "*)"
-
-    let functionNames = ref ["continueExecution"]
-    let registerFunctionName name = functionNames := name :: !functionNames
-
-    let inline getFunctionName nonTermIndex = 
-        let nonTerm = grammar.indexator.indexToNonTerm nonTermIndex
-        sprintf "parse_%s" nonTerm
-    let getParseFunctionName emitRuleNum ruleIndex =
-        let nonTerm = grammar.rules.leftSide ruleIndex |> grammar.indexator.indexToNonTerm
-        if emitRuleNum
-        then sprintf "parse_yard_rule%d_%s" ruleIndex nonTerm
-        else sprintf "parse_%s" nonTerm
-    let getParseContinuationName ruleIndex nonTermOccurence =
-        let nonTerm = grammar.rules.leftSide ruleIndex |> grammar.indexator.indexToNonTerm
-        sprintf "parse_yard_nonterm%d_rule%d_%s" nonTermOccurence ruleIndex nonTerm
-
-    // first pass: register all function names 
-    let preEmitSimpleParseFunction emitRuleNum ruleIndex =
-        getParseFunctionName emitRuleNum ruleIndex |> registerFunctionName
-        grammar.rules.rightSide ruleIndex
-        |> Seq.filter grammar.indexator.isNonTerm
-        |> Seq.mapi (fun i _ -> getParseContinuationName ruleIndex i)
-        |> Seq.iter registerFunctionName
-
-    let preEmitParseFunction nonTermIndex =
-        let rules = grammar.rules.rulesWithLeftSide nonTermIndex
-        if rules.Length = 0
-        then ()
-        elif rules.Length = 1
-        then preEmitSimpleParseFunction false rules.[0]
-        else
-            getParseFunctionName false rules.[0] |> registerFunctionName
-            Array.iter (preEmitSimpleParseFunction true) rules        
-
-    Seq.iter preEmitParseFunction {0..grammar.indexator.nonTermCount-1}
-    let functionNames = !functionNames |> List.toArray |> Array.rev
-
-    // second pass: emit function bodies and all
-    let inline getFunctionIndex name =
-        Array.findIndex ((=) name) functionNames
-    let inline getFunctionReference name =
-        sprintf "_parseFunctions.[%d]" <| getFunctionIndex name
-
-    let emitSimpleParseFunction emitRuleNum ruleIndex =        
-        out |> emitEmptyLine
-        out |> emitLine 0 (sprintf "let private %s () =" <| getParseFunctionName emitRuleNum ruleIndex)
-        let mutable lastNonTermOccurence = -1        
-        for symbol in grammar.rules.rightSide ruleIndex do
-            if grammar.indexator.isNonTerm symbol
-            then
-                lastNonTermOccurence <- lastNonTermOccurence + 1
-                let functionName = getFunctionName symbol
-                let continuationName = getParseContinuationName ruleIndex lastNonTermOccurence                
-                out |> emitLine 1 (sprintf "push (%d,pos) // %s" (getFunctionIndex continuationName) continuationName)
-                out |> emitLine 1 (sprintf "%s () // %s" (getFunctionReference functionName) functionName)
-                out |> emitLine 0 (sprintf "let private %s () =" continuationName)                
-            else
-                out |> emitLine 1 (sprintf "if _tokens.[pos] <> %d then continueExecution () else" symbol)
-                out |> emitLine 1 "pos <- pos + 1"
-        out |> emitLine 1 "pop(); continueExecution()"
     
-    let emitParseFunction nonTermIndex =
-        let rules = grammar.rules.rulesWithLeftSide nonTermIndex
-        if rules.Length = 0
-        then ()
-        elif rules.Length = 1
-        then emitSimpleParseFunction false rules.[0]
-        else            
-            let emitAltCheck ruleIndex =
-                let startSet = getStart grammar followSets ruleIndex                
-                if startSet.Count = 1
-                then out |> emitLine 1 (sprintf "if _tokens.[pos] = %s" <| startSet.MinimumElement.ToString())
-                else
-                    let arrayString = Set.toSeq startSet |> Seq.map (fun x -> x.ToString()) |> getArrayRepresentation
-                    out |> emitLine 1 (sprintf "if Array.exists ((=) _tokens.[pos]) %s" arrayString)
-                let functionName = getParseFunctionName true ruleIndex                
-                out |> emitLine 2 (sprintf "then addDescriptor %d // %s" (getFunctionIndex functionName) functionName)
-            out |> emitEmptyLine            
-            out |> emitLine 0 (sprintf "let private %s () =" <| getParseFunctionName false rules.[0])
-            Array.iter emitAltCheck rules
-            out |> emitLine 1 "continueExecution ()"
-            Array.iter (emitSimpleParseFunction true) rules            
+    let productionsArr =
+        seq { 0 .. (grammar.rules.rulesCount-1) }
+        |> Seq.map (grammar.rules.rightSide
+                    >> Array.map (fun idx -> 
+                                      if grammar.indexator.isNonTerm idx
+                                      then sprintf "Nonterminal %d" idx
+                                      else sprintf "Terminal %d" idx)
+                    >> getListRepresentation)
+        |> getArrayRepresentation
     
-    Seq.iter emitParseFunction {0..grammar.indexator.nonTermCount-1}    
-    out |> emitEmptyLine    
-    out |> emitLine 0 "let parse tokens ="
-    out |> emitLine 1 (sprintf "init tokens %s" <| getArrayRepresentation functionNames)
-    out |> emitLine 1 (sprintf "%s ()" <| getParseFunctionName false grammar.startRule) 
+    let addAction ruleIndex actions terminalIndex =
+        let ruleLeft = grammar.rules.leftSide ruleIndex
+        let mapKey = (terminalIndex, ruleLeft)
+        let existingRules = 
+            match Map.tryFind mapKey actions with
+            | None -> Set.empty
+            | Some x -> x
+        Map.add mapKey (Set.add ruleIndex existingRules) actions
+    let addActionsForRule actions ruleIndex =
+        let startSet = getStart grammar followSets ruleIndex
+        Seq.fold (addAction ruleIndex) actions startSet
+    let actions = seq { 0 .. (grammar.rules.rulesCount-1) }
+                  |> Seq.fold addActionsForRule Map.empty
+    let actionsArr =
+        Map.toSeq actions
+        |> Seq.map (fun ((x,y),lst) -> let listRepresentation =
+                                           Set.toArray lst
+                                           |> Array.map (fun x -> x.ToString())
+                                           |> getListRepresentation
+                                       sprintf "(%d,%d),%s" x y  listRepresentation)
+        |> getArrayRepresentation
+
+    out
+      .AppendLine(sprintf "let private productions = %s" productionsArr)
+      .AppendLine(sprintf "let private actions = %s " actionsArr)
+      .AppendLine(sprintf "let parse tokens = ParserBase(%d, %d, actions, productions, tokens).parse()"
+                          grammar.rules.startSymbol
+                          grammar.indexator.eofIndex)
+    |> ignore

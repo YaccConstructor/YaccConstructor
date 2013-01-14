@@ -65,6 +65,7 @@ let ParseFile fileName =
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader
+    lexbuf.EndPos <- lexbuf.EndPos.NextLine
     try 
         let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1

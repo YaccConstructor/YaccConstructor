@@ -6,7 +6,7 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 
-# 1 "Parser.fsy"
+# 2 "Parser.fsy"
 
 //  Copyright 2009 Jake Kirilenko
 //
@@ -291,7 +291,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 99 "Parser.fsy"
                : '_rnglr_type_file) 
 # 296 "Parser.fs"
       );
@@ -301,7 +301,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_file) 
             )
-# 1 "Parser.fsy"
+# 99 "Parser.fsy"
                : '_rnglr_type_yard_start_rule) 
 # 306 "Parser.fs"
       );
@@ -321,7 +321,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 112 "Parser.fsy"
                : '_rnglr_type_action_opt) 
 # 326 "Parser.fs"
       );
@@ -339,7 +339,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 112 "Parser.fsy"
                : '_rnglr_type_action_opt) 
 # 344 "Parser.fs"
       );
@@ -361,7 +361,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 114 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
 # 366 "Parser.fs"
       );
@@ -379,7 +379,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 114 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
 # 384 "Parser.fs"
       );
@@ -397,7 +397,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 116 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
 # 402 "Parser.fs"
       );
@@ -423,7 +423,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 116 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
 # 428 "Parser.fs"
       );
@@ -447,7 +447,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 116 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
 # 452 "Parser.fs"
       );
@@ -493,7 +493,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 125 "Parser.fsy"
                : '_rnglr_type_rule) 
 # 498 "Parser.fs"
       );
@@ -513,7 +513,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 142 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
 # 518 "Parser.fs"
       );
@@ -531,7 +531,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 142 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
 # 536 "Parser.fs"
       );
@@ -555,7 +555,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 144 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
 # 560 "Parser.fs"
       );
@@ -573,7 +573,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 144 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
 # 578 "Parser.fs"
       );
@@ -595,7 +595,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 146 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
 # 600 "Parser.fs"
       );
@@ -615,7 +615,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 146 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
 # 620 "Parser.fs"
       );
@@ -635,7 +635,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 149 "Parser.fsy"
                : '_rnglr_type_param_opt) 
 # 640 "Parser.fs"
       );
@@ -653,7 +653,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 149 "Parser.fsy"
                : '_rnglr_type_param_opt) 
 # 658 "Parser.fs"
       );
@@ -675,7 +675,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 151 "Parser.fsy"
                : '_rnglr_type_param_list) 
 # 680 "Parser.fs"
       );
@@ -693,7 +693,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 151 "Parser.fsy"
                : '_rnglr_type_param_list) 
 # 698 "Parser.fs"
       );
@@ -715,7 +715,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 153 "Parser.fsy"
                : '_rnglr_type_alts) 
 # 720 "Parser.fs"
       );
@@ -735,7 +735,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 153 "Parser.fsy"
                : '_rnglr_type_alts) 
 # 740 "Parser.fs"
       );
@@ -757,7 +757,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 155 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
 # 762 "Parser.fs"
       );
@@ -781,7 +781,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 155 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
 # 786 "Parser.fs"
       );
@@ -801,7 +801,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 158 "Parser.fsy"
                : '_rnglr_type_seq) 
 # 806 "Parser.fs"
       );
@@ -821,7 +821,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 158 "Parser.fsy"
                : '_rnglr_type_seq) 
 # 826 "Parser.fs"
       );
@@ -841,7 +841,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 160 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
 # 846 "Parser.fs"
       );
@@ -865,7 +865,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 160 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
 # 870 "Parser.fs"
       );
@@ -891,7 +891,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 163 "Parser.fsy"
                : '_rnglr_type_lbl_seq) 
 # 896 "Parser.fs"
       );
@@ -913,7 +913,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 165 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
 # 918 "Parser.fs"
       );
@@ -931,7 +931,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 165 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
 # 936 "Parser.fs"
       );
@@ -955,7 +955,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 167 "Parser.fsy"
                : '_rnglr_type_seq_elem) 
 # 960 "Parser.fs"
       );
@@ -975,7 +975,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 169 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
 # 980 "Parser.fs"
       );
@@ -993,7 +993,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 169 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
 # 998 "Parser.fs"
       );
@@ -1013,7 +1013,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 171 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
 # 1018 "Parser.fs"
       );
@@ -1031,7 +1031,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 171 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
 # 1036 "Parser.fs"
       );
@@ -1051,7 +1051,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 173 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
 # 1056 "Parser.fs"
       );
@@ -1069,7 +1069,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 173 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
 # 1074 "Parser.fs"
       );
@@ -1089,7 +1089,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 175 "Parser.fsy"
                : '_rnglr_type_bound) 
 # 1094 "Parser.fs"
       );
@@ -1113,7 +1113,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 175 "Parser.fsy"
                : '_rnglr_type_bound) 
 # 1118 "Parser.fs"
       );
@@ -1133,7 +1133,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 178 "Parser.fsy"
                : '_rnglr_type_patt) 
 # 1138 "Parser.fs"
       );
@@ -1153,7 +1153,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 178 "Parser.fsy"
                : '_rnglr_type_patt) 
 # 1158 "Parser.fs"
       );
@@ -1173,7 +1173,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1178 "Parser.fs"
       );
@@ -1193,7 +1193,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1198 "Parser.fs"
       );
@@ -1213,7 +1213,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1218 "Parser.fs"
       );
@@ -1237,7 +1237,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1242 "Parser.fs"
       );
@@ -1259,7 +1259,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1264 "Parser.fs"
       );
@@ -1281,7 +1281,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1286 "Parser.fs"
       );
@@ -1303,7 +1303,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 180 "Parser.fsy"
                : '_rnglr_type_prim) 
 # 1308 "Parser.fs"
       );
@@ -1323,7 +1323,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 188 "Parser.fsy"
                : '_rnglr_type_meta_param) 
 # 1328 "Parser.fs"
       );
@@ -1345,7 +1345,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 190 "Parser.fsy"
                : '_rnglr_type_meta_params) 
 # 1350 "Parser.fs"
       );
@@ -1365,7 +1365,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 190 "Parser.fsy"
                : '_rnglr_type_meta_params) 
 # 1370 "Parser.fs"
       );
@@ -1389,7 +1389,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 193 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
 # 1394 "Parser.fs"
       );
@@ -1407,7 +1407,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 193 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
 # 1412 "Parser.fs"
       );
@@ -1434,7 +1434,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 195 "Parser.fsy"
                : '_rnglr_type_call) 
 # 1439 "Parser.fs"
       );
@@ -1454,7 +1454,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 195 "Parser.fsy"
                : '_rnglr_type_call) 
 # 1459 "Parser.fs"
       );
@@ -1476,7 +1476,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 202 "Parser.fsy"
                : '_rnglr_type_option_opt) 
 # 1481 "Parser.fs"
       );
@@ -1494,7 +1494,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 202 "Parser.fsy"
                : '_rnglr_type_option_opt) 
 # 1499 "Parser.fs"
       );
@@ -1518,7 +1518,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 204 "Parser.fsy"
                : '_rnglr_type_option_params) 
 # 1523 "Parser.fs"
       );
@@ -1538,7 +1538,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 204 "Parser.fsy"
                : '_rnglr_type_option_params) 
 # 1543 "Parser.fs"
       );
@@ -1562,7 +1562,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 207 "Parser.fsy"
                : '_rnglr_type_option_param) 
 # 1567 "Parser.fs"
       );
@@ -1582,7 +1582,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 209 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
 # 1587 "Parser.fs"
       );
@@ -1602,7 +1602,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 1 "Parser.fsy"
+# 209 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
 # 1607 "Parser.fs"
       );

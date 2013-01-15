@@ -21,6 +21,8 @@ open Microsoft.FSharp.Text
 open Yard.Core.IL
 open Yard.Core
 open Yard.Core.IL.Production
+open Yard.Core.IL.Grammar
+open Yard.Core.IL.Definition
  
 type Range = struct
     val Start: Lexing.Position
@@ -104,33 +106,40 @@ file: action_opt
       foot_opt
       { 
         {
-            Definition.info = { fileName = !currentFilename }
-            Definition.head = $1
-            Definition.grammar = $3
-            Definition.foot = $3
-            Definition.options = (snd $2)
+            info = { fileName = !currentFilename }
+            head = $1
+            grammar = fst $3 @ fst $4
+            foot = $5
+            options = joinMaps (snd $3) (snd $4)
         }
       }
 
-unnamed_module_opt : rule_nlist { defaultModules (fst $1) }
+unnamed_module_opt : rule_nlist
+    {
+        match fst $1 with
+        | [] -> [], Map.empty
+        | x ->  defaultModules x, snd $1
+    }
 
-modules : module_ modules { $1::$2 } | { [] }
+modules : module_ modules { fst $1 :: fst $2, joinMaps (snd $1) (snd $2) }
+        | { [], Map.empty }
 
 module_ : allpublic_opt MODULE LIDENT openings rule_nlist
     {
         {
             allPublic = $1
-            name = $3
+            name = Some $3
             openings = $4
-            rules = $5
-        }        
+            rules = fst $5
+        }
+        , snd $5
     }
 
 allpublic_opt : ALL_PUBLIC { true } | { false }
 
-openings :  { [] } | OPEN open_list { $2 }
+openings :  { [] } | OPEN LIDENT open_list { $2::$3 }
 
-open_list : LIDENT open_list { $1::$2 } | { [] }
+open_list : COMMA LIDENT open_list { $2::$3 } | { [] }
 
 action_opt: { None } | ACTION { Some $1 }
 
@@ -139,12 +148,12 @@ foot_opt: { None } | SEMICOLON ACTION { Some $2 }
 includes : include_ includes { $1::$2 } | { [] }
 
 include_:
-    INCLUDE STRING rule_nlist 
+    INCLUDE STRING 
     {
         let def = parseRules $2.text in
         if def.grammar |> List.exists (fun m -> m.name.IsNone) then
             eprintf "Error %s: Grammar in included files must be inside modules" $2.text
-        def.grammar @ (fst $3), joinMaps def.options (snd $3)
+        def.grammar, def.options
     } 
 
 
@@ -237,6 +246,6 @@ option_opt: { None } | SET option_params { Some $2 }
 option_params: option_param { Map.empty.Add $1}
              | option_param COMMA option_params {($3).Add $1}
 
-option_param: LIDENT EQUAL STRING { (Source.toString $1, Source.toString $3) }
+option_param: LIDENT EQUAL STRING { Source.toString $1, Source.toString $3 }
 
 tada_rule : SHARPLINE {} | EOF {};

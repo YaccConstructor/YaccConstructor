@@ -221,3 +221,31 @@ let IsUnusedRulesExists(def:Yard.Core.IL.Definition.t<_,_>) =
   def.grammar |> List.exists (fun m ->
         m.rules |> List.exists (fun r -> let v = (getModuleName m, r.name.text) in not <| reachedRules.Contains v)
   )
+
+/// Usage example: check after conversion, that we didn't lose any binding to source (e.g. position)
+let sourcesWithoutFileNames (def:Yard.Core.IL.Definition.t<Source.t,Source.t>) =
+    let inline check (src : Source.t) = src.file = ""
+    let collectName (src : Source.t) = if check src then [src] else []
+    let collectOpt (src : Source.t option) =
+        match src with
+        | Some src when check src -> [src]
+        | _ -> []
+    let rec processBody = function
+        | PRef (name,args) -> collectName name @ collectOpt args
+        | PMetaRef (name,args,metas) -> collectName name @ collectOpt args @ List.collect processBody metas
+        | PSeq (s,ac,lab) -> collectOpt ac @ (s |> List.collect (fun e -> processBody e.rule))
+        | PToken tok | PLiteral tok -> collectName tok
+        | PAlt (l,r) -> processBody l @ processBody r
+        | PMany e | PSome e | POpt e -> processBody e
+        | PPerm p -> List.collect processBody p
+        | PRepet (p,_,_) -> processBody p
+        
+
+    def.grammar |> List.collect (fun m ->
+        m.rules |> List.collect (fun r ->
+            List.filter check r.args
+            @ collectName r.name
+            @ List.filter check r.metaArgs
+            @ processBody r.body
+        )
+    )

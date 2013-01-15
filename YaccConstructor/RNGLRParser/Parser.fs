@@ -106,6 +106,7 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
         (initNodes : seq<Vertex>) (numToString : int -> string) (path : string) =
     use out = new System.IO.StreamWriter (path)
     let was = new Dictionary<_,_>()
+    let levels = new Dictionary<_,_>()
     out.WriteLine "digraph GSS {"
     let print s = out.WriteLine ("    " + s)
     let curNum = ref 0
@@ -119,6 +120,10 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
 
     let rec dfs (u : Vertex) =
         was.Add (u, !curNum)
+        if not <| levels.ContainsKey u.Level then
+            levels.[u.Level] <- [!curNum]
+        else
+            levels.[u.Level] <- !curNum :: levels.[u.Level]
         print <| sprintf "%d [label=\"%d\"]" !curNum u.State
         incr curNum
         if u.OutEdges.first <> Unchecked.defaultof<_> then
@@ -135,6 +140,9 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     for v in initNodes do
         if not <| was.ContainsKey v then
             dfs v
+    
+    for level in levels do
+        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
 
     out.WriteLine "}"
     out.Close()

@@ -34,3 +34,17 @@ Examples/yc/*
 YaccConstructor/YardFrontend/Lexer.fs
 YaccConstructor/YardFrontend/log.txt
 Examples/RNGLR/MSSql/out
+Examples/RNGLR/MSSql/epsilons/*
+Examples/Calc/yc/AntlrFrontend.dll
+Examples/Calc/yc/CYK.dll
+Examples/Calc/yc/CYKCommon.dll
+Examples/Calc/yc/CYKGenerator.dll
+Examples/Calc/yc/FParsecGenerator.dll
+Examples/Calc/yc/FSharp.PowerPack.Parallel.Seq.dll
+Examples/Calc/yc/FsYaccFrontend.dll
+Examples/Calc/yc/FsYaccPrinter.dll
+Examples/Calc/yc/Irony.dll
+Examples/Calc/yc/Irony.Samples.dll
+Examples/Calc/yc/TreeDump.dll
+Examples/Calc/yc/YardPrinter.dll
+Builder/workdir/*

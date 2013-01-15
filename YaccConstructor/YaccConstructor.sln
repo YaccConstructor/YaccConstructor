@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "Main\YaccConstructor.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "YaccConstructor\YaccConstructor.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YardFrontend", "YardFrontend\YardFrontend.fsproj", "{A090E3B0-0516-44F3-9FBA-6EF8CB21926E}"
 EndProject
@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RACC", "RACC", "{C606E7BF-4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_alt", "test_alt", "{229E26F1-6FBF-4045-82BF-64550AE5FF2C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrToYard\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrFrontend\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_cls", "test_cls", "{644C6234-BBD8-4E22-AB92-6AEEC4B54895}"
 EndProject

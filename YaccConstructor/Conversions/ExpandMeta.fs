@@ -191,13 +191,21 @@ let expandMeta body metaRules expanded res =
                     let newRuleName = new Source.t(nextName ("rule_" + name.text), metaRule.name)
                     let formalArgs = metaRule.args
                     let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
-                    //let newKey = getKey (PMetaRef(createSource name.text, attrs, newMetaArgs))
                     let newKey = getKey (PMetaRef(name, attrs, newMetaArgs))
                     if not (expanded.ContainsKey key) then
                         expanded.Add(key, substitution)
                     if not (expanded.ContainsKey newKey) then
                         expanded.Add(newKey, substitution)
-                    let newFormalToAct = List.zip (metaRule.metaArgs |> List.map Source.toString) newMetaArgs
+                    let newFormalToAct =
+                        let expected = metaRule.metaArgs.Length
+                        let actual = newMetaArgs.Length
+                        if expected = actual
+                        then List.zip (metaRule.metaArgs |> List.map Source.toString) newMetaArgs
+                        else 
+                            let pos (p:Source.Position) = string p.line + ":"  + string p.column
+                            sprintf "%s - %s. Incorrect number of args. Metarule \"%s\" expected %i parameter(s) but get %i." 
+                                    (pos name.startPos) (pos name.endPos) metaRule.name.text expected actual
+                            |> failwith 
                     // TODO There can be a bug
                     //let newGlobalAttrs = getRuleBindings metaRule globalAttrs
                 

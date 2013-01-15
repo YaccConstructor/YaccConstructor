@@ -51,7 +51,7 @@ let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (ca
     let result = ref []
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
-            let rec dfs u =
+            let rec dfs path u =
                 was.[u] <- 1
                 for rule in rules.rulesWithLeftSide u do
                     let allEpsilon =
@@ -62,12 +62,17 @@ let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (ca
                         |> Array.iter
                             (fun v ->
                                 if was.[v] = 1 then
-                                    result := (indexator.indexToNonTerm v)::!result
+                                    let cycle =
+                                        path |> Seq.takeWhile (fun v' -> v' <> v)
+                                        |> List.ofSeq
+                                        |> (fun l -> v::l@[v])
+                                        |> List.map indexator.indexToNonTerm
+                                    result := cycle::!result
                                 elif was.[v] = 0 then
-                                    dfs v
+                                    dfs (v::path) v
                             )
                 was.[u] <- 2
-            dfs i
+            dfs [i] i
     !result
 
 let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =

@@ -120,9 +120,21 @@ let () =
                 //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
 //            printfn "%A" <| ilTree
+            let lostSources = ref false
+            // Let possible to know, after what conversion we lost reference to original code
+            let checkSources name il = 
+                if not !lostSources then
+                    match sourcesWithoutFileNames il with
+                    | [] -> ()
+                    | x ->
+                        lostSources := true
+                        x |> List.map(fun s -> s.text) |> String.concat "\n"
+                        |> printfn "Lost sources after frontend or conversion %s:\n %s" name
+            checkSources fe.Name !ilTree
             // Apply Conversions
-            Seq.iter (fun conv -> ilTree := (ConversionsManager.ApplyConversion conv !ilTree)) conversions
-
+            for conv in conversions do
+                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
             let gen =

@@ -47,6 +47,8 @@ let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
+let commonPublicModifier = ref false
+
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)
     let frontend = FrontendsManager.GetByExtension ext
@@ -96,49 +98,81 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %%
 
 file: action_opt
-      rule_nlist
+      includes
+      unnamed_module_opt
+      modules
       foot_opt
       { 
-        { Definition.empty with
+        {
             Definition.info = { fileName = !currentFilename }
             Definition.head = $1
-            Definition.grammar = defaultModules (fst $2)
+            Definition.grammar = $3
             Definition.foot = $3
             Definition.options = (snd $2)
         }
       }
 
+unnamed_module_opt : rule_nlist { defaultModules (fst $1) }
+
+modules : module_ modules { $1::$2 } | { [] }
+
+module_ : allpublic_opt MODULE LIDENT openings rule_nlist
+    {
+        {
+            allPublic = $1
+            name = $3
+            openings = $4
+            rules = $5
+        }        
+    }
+
+allpublic_opt : ALL_PUBLIC { true } | { false }
+
+openings :  { [] } | OPEN open_list { $2 }
+
+open_list : LIDENT open_list { $1::$2 } | { [] }
+
 action_opt: { None } | ACTION { Some $1 }
 
 foot_opt: { None } | SEMICOLON ACTION { Some $2 }
 
+includes : include_ includes { $1::$2 } | { [] }
+
+include_:
+    INCLUDE STRING rule_nlist 
+    {
+        let def = parseRules $2.text in
+        if def.grammar |> List.exists (fun m -> m.name.IsNone) then
+            eprintf "Error %s: Grammar in included files must be inside modules" $2.text
+        def.grammar @ (fst $3), joinMaps def.options (snd $3)
+    } 
+
+
 rule_nlist: rule semi_opt rule_nlist 
         { (fst $1) :: (fst $3), joinMaps (snd $1) (snd $3) }
-    | INCLUDE STRING rule_nlist 
-        { let def = parseRules $2.text in
-          (def.grammar.Head.rules @ (fst $3), joinMaps def.options (snd $3)) 
-        } 
     | { [], Map.empty }
     | rule error { missing "SEMI"; raise Parse_error  }
 
-rule: start_rule_sign_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
+rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
         let newRule =
             {
                 Rule.isStart = $1
-                Rule.isPublic = false
-                Rule.name = $2
-                Rule.metaArgs = getList $3
-                Rule.body = $7
-                Rule.args = $4
+                Rule.isPublic = $2
+                Rule.name = $3
+                Rule.metaArgs = getList $4
+                Rule.body = $8
+                Rule.args = $5
             }
         in
-        match $6 with
+        match $7 with
         | Some m -> newRule, Map.empty.Add (newRule, m)
         | None -> newRule, Map.empty
        }
 
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
+
+access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !commonPublicModifier }
 
 formal_meta_param_opt: { None } | DLESS formal_meta_list DGREAT {Some $2}
 

@@ -82,7 +82,11 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
     let declaredExportRules =
         module'.openings
         |> List.map (fun op ->
-            let rules : Rule.t<_,_> list = publicRules.[op.text]
+            let rules : Rule.t<_,_> list =
+                if publicRules.ContainsKey op.text then publicRules.[op.text]
+                else
+                    eprintf "Undeclared module %s (%s:%d) " op.text op.file op.startPos.line
+                    []
             op.text, rules
         )
     declaredExportRules

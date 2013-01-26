@@ -117,7 +117,7 @@ let blank =  [' ' '\r' '\009' '\012'] *
 
 rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
 and skipSpaces  = parse blank {lexbuf}
-and  main = parse	
+and  main = parse
        blank  { main lexbuf }
      | '\n' { newline lexbuf; main lexbuf }
      | '-'  {MINUS <| lex2source lexbuf}
@@ -129,7 +129,12 @@ and  main = parse
      | "<<" {DLESS <| lex2source lexbuf}
      | ">>" {DGREAT <| lex2source lexbuf}
      | '*'  {STAR <| lex2source lexbuf}
-	 | "[<Start>]" { START_RULE_SIGN <| lex2source lexbuf}
+     | "[<Start>]" { START_RULE_SIGN <| lex2source lexbuf}
+     | "[<AllPublic>]" { ALL_PUBLIC <| lex2source lexbuf}
+     | "open" { OPEN <| lex2source lexbuf}
+     | "module" { MODULE <| lex2source lexbuf}
+     | "private" { PRIVATE <| lex2source lexbuf}
+     | "public" { PUBLIC <| lex2source lexbuf}
      | '+'  {PLUS <| lex2source lexbuf}
      | '?'  {QUESTION <| lex2source lexbuf}
      | "#set" {SET <| lex2source lexbuf}

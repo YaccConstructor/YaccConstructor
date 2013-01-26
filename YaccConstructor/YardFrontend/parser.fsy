@@ -34,6 +34,7 @@ end
 exception Parse_error
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
+let allPublic = ref false
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
 
@@ -49,21 +50,25 @@ let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
-let commonPublicModifier = ref false
+let concatModOpt a b = fst a :: fst b, joinMaps (snd a) (snd b)
 
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
+    let oldFileName = !currentFilename
+    currentFilename := filename
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)
     let frontend = FrontendsManager.GetByExtension ext
     let userDefs =
-        let args = (!currentFilename).Trim().Split('%') in
+        let args = oldFileName.Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
-    let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
+    let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName oldFileName, filename) in
 
     match FrontendsManager.GetByExtension ext with
-    | Some(frontend) -> 
-        frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
+    | Some frontend -> 
+        let res = frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
+        currentFilename := oldFileName
+        res
     | None -> 
         failwith (sprintf "Not supported extension %s in file %s" ext filename )
 %}
@@ -108,9 +113,9 @@ file: action_opt
         {
             info = { fileName = !currentFilename }
             head = $1
-            grammar = fst $3 @ fst $4
+            grammar = fst $2 @ fst $3 @ fst $4
             foot = $5
-            options = joinMaps (snd $3) (snd $4)
+            options = (snd $4) |> joinMaps (snd $3) |> joinMaps (snd $2)
         }
       }
 
@@ -121,44 +126,51 @@ unnamed_module_opt : rule_nlist
         | x ->  defaultModules x, snd $1
     }
 
-modules : module_ modules { fst $1 :: fst $2, joinMaps (snd $1) (snd $2) }
+modules : module_ modules { concatModOpt $1 $2 }
         | { [], Map.empty }
 
-module_ : allpublic_opt MODULE LIDENT openings rule_nlist
+module_ : module_header ident openings rule_nlist
     {
         {
             allPublic = $1
-            name = Some $3
-            openings = $4
-            rules = fst $5
+            name = Some $2
+            openings = $3
+            rules = fst $4
         }
-        , snd $5
+        , snd $4
     }
 
-allpublic_opt : ALL_PUBLIC { true } | { false }
+ident : UIDENT { $1 } | LIDENT { $1 }
 
-openings :  { [] } | OPEN LIDENT open_list { $2::$3 }
 
-open_list : COMMA LIDENT open_list { $2::$3 } | { [] }
+module_header : ALL_PUBLIC MODULE {
+                  (* It's important the word "module" is here. It guaranties, that it won't be an epsilon-tree, so allPublic will be evaluated before rules *)
+                  allPublic := true; true
+                }
+              | MODULE { allPublic := false; false }
+
+openings :  { [] } | OPEN ident open_list { $2::$3 }
+
+open_list : COMMA ident open_list { $2::$3 } | { [] }
 
 action_opt: { None } | ACTION { Some $1 }
 
 foot_opt: { None } | SEMICOLON ACTION { Some $2 }
 
-includes : include_ includes { $1::$2 } | { [] }
+includes : include_ includes { fst $1 @ fst $2, joinMaps (snd $1) (snd $2) } | { [], Map.empty }
 
 include_:
     INCLUDE STRING 
     {
         let def = parseRules $2.text in
         if def.grammar |> List.exists (fun m -> m.name.IsNone) then
-            eprintf "Error %s: Grammar in included files must be inside modules" $2.text
+            eprintfn "Error %s: Grammar in included files must be inside modules" $2.text
         def.grammar, def.options
     } 
 
 
 rule_nlist: rule semi_opt rule_nlist 
-        { (fst $1) :: (fst $3), joinMaps (snd $1) (snd $3) }
+      { concatModOpt $1 $3 }
     | { [], Map.empty }
     | rule error { missing "SEMI"; raise Parse_error  }
 
@@ -181,7 +193,7 @@ rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param
 
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
 
-access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !commonPublicModifier }
+access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !allPublic }
 
 formal_meta_param_opt: { None } | DLESS formal_meta_list DGREAT {Some $2}
 

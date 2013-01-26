@@ -119,6 +119,28 @@ let () =
                 //with
                 //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
+            let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
+            if undeclaredRules.Length > 0 then
+                eprintfn  "Input grammar contains some undeclared nonterminals:"
+                undeclaredRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                            |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                            |> String.concat "; ")
+                )
+            if repeatedInnerRules.Length > 0 then
+                eprintfn  "There are more then one rule in one module for some nonterminals:"
+                repeatedInnerRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
+                )
+            if repeatedExportRules.Length > 0 then
+                eprintfn  "There are rules, exported from different modules:"
+                repeatedExportRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                        |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                        |> String.concat "; ")
+                )
 //            printfn "%A" <| ilTree
             let lostSources = ref false
             // Let possible to know, after what conversion we lost reference to original code
@@ -154,28 +176,6 @@ let () =
             let result =  
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
-                let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
-                if undeclaredRules.Length > 0 then
-                    eprintfn  "Input grammar contains some undeclared nonterminals:"
-                    undeclaredRules |> List.iter (fun (m, rules) ->
-                        eprintfn "Module %s: %s" (getModuleName m)
-                            (rules
-                             |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
-                             |> String.concat "; ")
-                    )
-                if repeatedInnerRules.Length > 0 then
-                    eprintfn  "There are more then one rule in one module for some nonterminals:"
-                    repeatedInnerRules |> List.iter (fun (m, rules) ->
-                        eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
-                    )
-                if repeatedExportRules.Length > 0 then
-                    eprintfn  "There are rules, exported from different modules:"
-                    repeatedExportRules |> List.iter (fun (m, rules) ->
-                        eprintfn "Module %s: %s" (getModuleName m)
-                           (rules
-                            |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
-                            |> String.concat "; ")
-                    )
 //                    |> CheckerError
   //                  |> raise
                 //try

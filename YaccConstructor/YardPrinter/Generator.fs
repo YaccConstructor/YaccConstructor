@@ -32,6 +32,8 @@ type TextBox =
 with 
   member x.IsTab with get() = match x with Tabbed _ -> true | _ -> false
   
+let str2line s = s |> Str |> Seq.singleton |> Line
+
 let printTextBox tabSize windowSize tbSeq =
 
     /// Return new sequence, what has the same elements, what tbSeq has,
@@ -39,9 +41,9 @@ let printTextBox tabSize windowSize tbSeq =
     let rec printIndentedSeq tbSeq indent =
         Seq.collect (function
             | Str s -> Seq.singleton (s, indent)
-            | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq (indent)}
+            | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq indent}
             | Tabbed tbSeq | Line tbSeq as x -> 
-             seq { yield (endl, indent);
+             seq { yield endl, indent
                    yield! printIndentedSeq tbSeq (indent + (if x.IsTab then tabSize else 0) ) } 
         ) tbSeq
 
@@ -82,11 +84,17 @@ let printSeqBrackets l_br r_br metaArgs =
 
 let printProduction =
     let rec unboxText textBoxSeq =
-        Seq.collect (function   Tabbed(s) | Line(s) | StrSeq(s) -> unboxText s
-                              | Str(s) -> Seq.singleton s) textBoxSeq
+        Seq.collect (function | Tabbed s | Line s | StrSeq s -> unboxText s
+                              | Str s -> Seq.singleton s) textBoxSeq
 
     let rec printMetaArgs metaArgs = 
-        List.map (printProduction true >> unboxText) metaArgs |> Seq.concat |> printSeqBrackets "<<" ">>"
+        List.map (printProduction true >> unboxText) metaArgs
+        |> List.map2 (fun init s ->
+                match init with | PSeq _ | PAlt _ -> seq {yield "("; yield! s; yield ")"}
+                                | _ -> s
+             ) metaArgs
+        |> Seq.concat
+        |> printSeqBrackets "<<" ">>"
 
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
     and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
@@ -94,7 +102,7 @@ let printProduction =
             | PAlt _ -> 1
             | PSeq ([elem],None,_) -> 
                 match elem.binding with
-                | Some(_) -> 10
+                | Some _ -> 10
                 | None -> priority elem.rule
             | PSeq _ -> 1
             | PToken _ | PRef _ | PMetaRef _ | PLiteral _ -> 100
@@ -119,6 +127,9 @@ let printProduction =
             let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1
             seq { yield Str <| omit + binding elem.binding
                   yield! bracketsIf needBrackets (printProduction false elem.rule) }
+        let printEbnf sign expr =
+            seq { yield! bracketsIf (priority expr < 50) (printProduction false expr);
+                  yield Str sign}
 
         match production with
         // Alternatives
@@ -149,18 +160,20 @@ let printProduction =
         // Vanilla rule reference with an optional args list.
         | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
         // expr*
-        | PMany(many) -> seq { yield! bracketsIf (priority many < 50) (printProduction false many) ; yield Str "*"}
+        | PMany many -> printEbnf "*" many
         // Metarule reference like in "a: mr<x> y z"
-        | PMetaRef(rule_name, opt_arg, metaArgs) -> Seq.singleton <| Str((Source.toString rule_name)+(printMetaArgs metaArgs)+(printArg opt_arg))
+        | PMetaRef(rule_name, opt_arg, metaArgs) ->
+            Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
+            |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
         | PLiteral(source) -> Seq.singleton <| Str ("\"" + Source.toString source + "\"") 
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
     //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
     ///// The following are obsolete and reduction to PRepet should be discussed.
         // expr+
-        | PSome(some) -> seq {yield! bracketsIf (priority some<50) (printProduction false some); yield Str "+"}
+        | PSome some -> printEbnf "+" some
         // expr?
-        | POpt(opt) -> seq {yield! bracketsIf (priority opt<50) (printProduction false opt); yield Str "?"}
+        | POpt opt -> printEbnf "?" opt
         | _ -> Seq.singleton <| Str "ERROR"
     printProduction
 
@@ -170,7 +183,11 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
         |> List.map (fun src -> "[" + Source.toString src + "]")
         |> String.concat ""
     let startSign = if rule.isStart then "[<Start>]" + endl else ""
-    seq {yield Line(seq{yield Str(startSign + rule.name.text
+    let accessModifier =
+        if isPublicModule = rule.isPublic then ""
+        elif rule.isPublic then "public "
+        else "private "
+    seq {yield Line(seq{yield Str(startSign + accessModifier + rule.name.text
                                     + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>")
                                     + (printArgs rule.args) + ":");
                         yield Str " ";
@@ -186,7 +203,15 @@ let generate (input_grammar:Definition.t<Source.t,Source.t>) =
         |> Seq.collect (fun m ->
             seq {
                 match m.name with
-                | Some name -> yield Str ("module " +  name.text)
+                | Some name ->
+                    if m.allPublic then yield Line <| Seq.singleton (Str "[<AllPublic>]")
+                    yield str2line <| "module " +  name.text
+                    if not m.openings.IsEmpty then
+                        yield
+                            m.openings |> List.map (fun op -> op.text)
+                            |> String.concat ", "
+                            |> (fun ops -> str2line <| "open " + ops)
+                        
                 | None -> ()
                 yield! Seq.collect (fun rule -> printRule m.allPublic rule) m.rules
             }

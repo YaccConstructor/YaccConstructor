@@ -61,3 +61,49 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``sp_addlogint complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
+
+    [<Test>]
+    member test.``sp_addextendedproperty complex test.`` () =
+        complexSpFile "sp_addextendedproperty.sql" |> runParserTest
+
+    [<Test>]
+    member test.``sp_addserver complex test.`` () =
+        complexSpFile "sp_addserver.sql" |> runParserTest
+
+    [<Test>]
+    member test.``sp_adduser complex test.`` () =
+        complexSpFile "sp_adduser.sql" |> runParserTest
+
+    [<Test>]
+    member test.``sp_autostats complex test.`` () =
+        complexSpFile "sp_autostats.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_droplogin complex test.`` () =
+        complexSpFile "sp_droplogin.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_help complex test.`` () =
+        complexSpFile "sp_help.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_helpindex complex test.`` () =
+        complexSpFile "sp_helpindex.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_password complex test.`` () =
+        complexSpFile "sp_password.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_revokedbaccess complex test.`` () =
+        complexSpFile "sp_revokedbaccess.sql" |> runParserTest
+
+    
+    [<Test>]
+    member test.``sp_tables_ex complex test.`` () =
+        complexSpFile "sp_tables_ex.sql" |> runParserTest

@@ -49,6 +49,13 @@ let Parse (srcFilePath:string) =
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated
-        //translated.Head    
+        //translated.Head  
+        
+  //let ParseAllDirectory (directoryName:string) =
+  //let files : string array = System.IO.Dyrectory.GetFiles(directoryName)  
+  //for i in 0 .. files.Length - 1 do
+  //Parse Array.get files i 
+  
+  //do ParseAllDirecrory @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs
 
 do Parse @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"

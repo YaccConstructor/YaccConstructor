@@ -51,7 +51,7 @@ let private linearize (grammar: Grammar.t<_,_>) =
                 m.rules |> List.iter (fun rule ->
                     let newName = 
                         let old = rule.name.text
-                        if decls.[old].Count = 1 then name
+                        if decls.[old].Count = 1 || name = "" then old
                         else name + "_" + old
                     let result = 
                         let cur, curName = ref 2, ref newName
@@ -70,8 +70,18 @@ let private linearize (grammar: Grammar.t<_,_>) =
         fun module' metaArgs (name : Source.t) ->
             if List.exists (fun (arg : Source.t) -> arg.text = name.text) metaArgs then name
             else
-                let ruleModule = rulesMap.[module'].[name.text]
-                new Source.t (namesDict.[ruleModule].[name.text], name)
+                try
+                    let ruleModule = rulesMap.[module'].[name.text]
+                    new Source.t (namesDict.[ruleModule].[name.text], name)
+                with
+                | :? KeyNotFoundException ->
+                    if not <| rulesMap.ContainsKey module' then
+                        failwithf "There is no module %s" module'
+                    elif not <| rulesMap.[module'].ContainsKey name.text then
+                        failwithf "Rule %s is not accessable from module %s" name.text module'
+                    else failwith "Something was not found"
+                
+
     let renamebody module' metaArgs body =
         let inline rename name = rename module' metaArgs name
         let rec renamebody' = function

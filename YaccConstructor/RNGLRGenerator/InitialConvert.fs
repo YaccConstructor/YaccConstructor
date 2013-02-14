@@ -83,5 +83,7 @@ let initialConvert (def : Definition.t<_,_>) =
             if not !iter then res
             else inner res
         inner ruleList
+    if def.grammar.Length > 1 then
+        failwith "More than one module. Use 'Linearize' conversion"
     let rules = def.grammar.Head.rules |> addStartRule |> splitAlters |> filterNonReachable
     {def with grammar = [{def.grammar.Head with rules=rules}]}

@@ -35,7 +35,8 @@ let private replaceInline (rules : Rule.t<_,_> list) =
             let cur = ref v
             while getName !cur |> inlinesDict.ContainsKey do
                 cur := inlinesDict.[getName !cur]
-            yield (k,!cur)] |> dict
+            yield k,!cur
+        ] |> dict
     let inlines = 
         rules
         |> List.fold

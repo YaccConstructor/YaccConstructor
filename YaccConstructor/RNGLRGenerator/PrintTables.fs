@@ -267,7 +267,7 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
                 | s -> " of " + s
 
         printBr ""
-        printBr "let numToString = function"
+        printBr "def numToString = function"
 
         for i = 0 to indexator.nonTermCount - 1 do
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToNonTerm i)
@@ -277,26 +277,26 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
 
         printBrInd 1 "| _ -> \"\""
 
-        printBrInd 0 "let tokenToNumber = function"
+        printBrInd 0 "def tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         printBr ""
 
-        printBr "let mutable private cur = 0"
+        printBr "var cur = 0"
 
-        print "let leftSide = "
+        print "val leftSide = "
         printArr leftSide (print "%d")
 
-        print "let private rules = "
+        print "val rules = "
         printArr rules (print "%d")
 
-        print "let private rulesStart = "
+        print "val rulesStart = "
         printArr rulesStart (print "%d")
 
-        printBr "let startRule = %d" grammar.startRule
+        printBr "val startRule = %d" grammar.startRule
         printBr ""
 
-        printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+        printBr "val acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
         printBr ""
 
         print2DArrList tables.gotos
@@ -313,18 +313,18 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
             (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
             "zeroReduces"
 
-        printInd 0 "let private small_acc = "
+        printInd 0 "val small_acc = "
         printList tables.acc (fun x -> print "%d" x)
         printBr ""
-        printBrInd 0 "let private accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
+        printBrInd 0 "val accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
         printBrInd 0 "for i = 0 to %d do" statesLim
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
-        printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
+        printBrInd 0 "val eofIndex = %d" grammar.indexator.eofIndex
 
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+        printBrInd 0 "val parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
-        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+        printBr "def buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()

@@ -133,7 +133,7 @@ type RNGLR() =
                 println "%s" <| getPosFromSource fullPath dummyPos s
                 println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
-            let tables = printTables grammar definition.head tables moduleName tokenType res
+            let tables = printTables grammar definition.head tables moduleName tokenType res FSharp
             let res = if not needTranslate then tables
                         else tables + printTranslator grammar newDefinition.grammar
                                         positionType fullPath output dummyPos

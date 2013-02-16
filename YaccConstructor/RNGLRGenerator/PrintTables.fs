@@ -238,7 +238,96 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
         let printArr (arr : 'a[]) printer = printArr "Array" "(" ")" ", " (arr : 'a[]) printer
         let printListAsArray l printer = printList "Array" "(" ")" ", " l printer
         let printList l printer = printList "List" "(" ")" ", " l printer
-        "2"
+        
+        let resultArrayCreationCodePrinter name = 
+            printBrInd 0 "val %s = new Array( %d )" name statesCount 
+            printBrInd 0 "for i = 0 to %d do" statesLim
+            printBrInd 2 "%s.[i] <- new Array( %d )" name symbolsCount
+
+            printBrInd 0 "cur <- 0"
+            printBrInd 0 "while cur < small_%s.Length do" name
+            printBrInd 1 "val i = small_%s.[cur] >>> 16" name
+            printBrInd 1 "val length = small_%s.[cur] &&& %d" name andNum
+            printBrInd 1 "cur <- cur + 1"
+            printBrInd 1 "for k = 0 to length-1 do"
+            printBrInd 2 "val j = small_%s.[cur + k] >>> 16" name
+            printBrInd 2 "val x = small_%s.[cur + k] &&& %d" name andNum
+            printBrInd 2 "%s.[i].[j] <- lists_%s.[x]" name name
+            printBrInd 1 "cur <- cur + length"
+
+        let print2DArrList (arr : 'a list[,]) checker printer name =
+            print2DArrList "Array" "(" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
+
+        printBr "type Token ="
+        let indexator = grammar.indexator
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s%s" (indexator.indexToTerm i)
+            <|  match tokenType with
+                | "" -> ""
+                | s -> " of " + s
+
+        printBr ""
+        printBr "let numToString = function"
+
+        for i = 0 to indexator.nonTermCount - 1 do
+            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToNonTerm i)
+
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
+
+        printBrInd 1 "| _ -> \"\""
+
+        printBrInd 0 "let tokenToNumber = function"
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+        printBr ""
+
+        printBr "let mutable private cur = 0"
+
+        print "let leftSide = "
+        printArr leftSide (print "%d")
+
+        print "let private rules = "
+        printArr rules (print "%d")
+
+        print "let private rulesStart = "
+        printArr rulesStart (print "%d")
+
+        printBr "let startRule = %d" grammar.startRule
+        printBr ""
+
+        printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+        printBr ""
+
+        print2DArrList tables.gotos
+            (fun x -> not x.IsEmpty)
+            (fun x -> print "%d" x.[0])
+            "gotos"
+        print2DArrList reduces
+            (fun l -> not l.IsEmpty)
+            (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
+            "reduces"
+
+        print2DArrList zeroReduces
+            (fun l -> not l.IsEmpty)
+            (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
+            "zeroReduces"
+
+        printInd 0 "let private small_acc = "
+        printList tables.acc (fun x -> print "%d" x)
+        printBr ""
+        printBrInd 0 "let private accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
+        printBrInd 0 "for i = 0 to %d do" statesLim
+        printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
+
+        printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
+
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+
+        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAst<Token> parserSource"
+        printBr ""
+        res.ToString()
 
     match targetLanguage with
     | FSharp -> printTablesToFSharp ()

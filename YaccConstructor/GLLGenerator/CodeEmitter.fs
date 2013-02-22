@@ -87,8 +87,8 @@ let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
         |> Seq.map (grammar.rules.rightSide
                     >> Array.map (fun idx -> 
                                       if grammar.indexator.isNonTerm idx
-                                      then sprintf "Nonterminal %d" idx
-                                      else sprintf "Terminal %d" idx)
+                                      then sprintf "Ntrm %d" idx
+                                      else sprintf "Trm %d" idx)
                     >> getListRepresentation)
         |> getArrayRepresentation
     

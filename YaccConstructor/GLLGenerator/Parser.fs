@@ -2,7 +2,7 @@
 
 module Yard.Generators.GLL.Parser
 
-type ParseStackItem = Terminal of int | Nonterminal of int
+type ParseStackItem = Trm of int | Ntrm of int
 type ParseStack = ParseStackItem list
 
 /// <summary>
@@ -33,7 +33,7 @@ type ParserBase (startNonTerm, eofToken, actions, productions, tokens) =
         // matches buffer input and stack top against parse table and takes actions
         and parse (stack, pos) =
             match stack with
-            | (Nonterminal nonterm)::stackRest ->
+            | (Ntrm nonterm)::stackRest ->
                 match _actions (_tokens.[pos], nonterm) with
                 | Some productionIndices -> 
                     let addProduction productionIndex =
@@ -42,9 +42,9 @@ type ParserBase (startNonTerm, eofToken, actions, productions, tokens) =
                     List.iter addProduction productionIndices                    
                 | None -> ()
                 continueExecution ()
-            | (Terminal term)::stackRest ->
+            | (Trm term)::stackRest ->
                 if _tokens.[pos] = term
                 then parse (stackRest, pos + 1)
                 else continueExecution()
             | [] -> pos = _tokens.Length || continueExecution ()
-        parse ([Nonterminal startNonTerm; Terminal eofToken], 0)
+        parse ([Ntrm startNonTerm; Trm eofToken], 0)

@@ -240,20 +240,22 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
         let printList l printer = printList "List" "(" ")" ", " l printer
         
         let resultArrayCreationCodePrinter name = 
-            printBrInd 0 "val %s = new Array( %d )" name statesCount 
-            printBrInd 0 "for i = 0 to %d do" statesLim
-            printBrInd 2 "%s.[i] <- new Array( %d )" name symbolsCount
+            printBrInd 0 "val %s = new Array[Array[Int]]( %d )" name statesCount 
+            printBrInd 0 "for (i <- 0 to %d) " statesLim
+            printBrInd 2 "%s(i) = new Array[Int]( %d )" name symbolsCount
 
-            printBrInd 0 "cur <- 0"
-            printBrInd 0 "while cur < small_%s.Length do" name
-            printBrInd 1 "val i = small_%s.[cur] >>> 16" name
-            printBrInd 1 "val length = small_%s.[cur] &&& %d" name andNum
-            printBrInd 1 "cur <- cur + 1"
-            printBrInd 1 "for k = 0 to length-1 do"
-            printBrInd 2 "val j = small_%s.[cur + k] >>> 16" name
-            printBrInd 2 "val x = small_%s.[cur + k] &&& %d" name andNum
-            printBrInd 2 "%s.[i].[j] <- lists_%s.[x]" name name
-            printBrInd 1 "cur <- cur + length"
+            printBrInd 0 "cur = 0"
+            printBrInd 0 "while (cur < small_%s.length) {" name
+            printBrInd 1 "val i = small_%s(cur) >>> 16" name
+            printBrInd 1 "val length = small_%s(cur) &&& %d" name andNum
+            printBrInd 1 "cur = cur + 1"
+            printBrInd 1 "for (k <- 0 to length-1){"
+            printBrInd 2 "val j = small_%s(cur + k) >>> 16" name
+            printBrInd 2 "val x = small_%s(cur + k) &&& %d" name andNum
+            printBrInd 2 "%s(i)(j) <- lists_%s(x)" name name
+            printBrInd 2 "}"
+            printBrInd 1 "cur = cur + length"
+            printBrInd 1 "}"
 
         let print2DArrList (arr : 'a list[,]) checker printer name =
             print2DArrList "Array" "(" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
@@ -282,21 +284,21 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         printBr ""
 
-        printBr "var cur = 0"
+        printBr "private var cur = 0"
 
         print "val leftSide = "
         printArr leftSide (print "%d")
 
-        print "val rules = "
+        print "private val rules = "
         printArr rules (print "%d")
 
-        print "val rulesStart = "
+        print "private val rulesStart = "
         printArr rulesStart (print "%d")
 
-        printBr "val startRule = %d" grammar.startRule
+        printBr "private val startRule = %d" grammar.startRule
         printBr ""
 
-        printBr "val acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+        printBr "private val acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
         printBr ""
 
         print2DArrList tables.gotos
@@ -313,19 +315,19 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
             (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
             "zeroReduces"
 
-        printInd 0 "val small_acc = "
+        printInd 0 "private val small_acc = "
         printList tables.acc (fun x -> print "%d" x)
         printBr ""
-        printBrInd 0 "val accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
+        printBrInd 0 "private val accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
         printBrInd 0 "for i = 0 to %d do" statesLim
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
         printBrInd 0 "val eofIndex = %d" grammar.indexator.eofIndex
 
-        printBrInd 0 "val parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+        printBrInd 0 "val parserSource = new ParserSource[Token] (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
-        printBr "def buildAst : (seq<Token> -> ParseResult<Token>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
+        printBr "def buildAst : (Seq[_<:Token] -> ParseResult[Token]) ="
+        printBrInd 1 "buildAst[Token] parserSource"
         printBr ""
         res.ToString()
 

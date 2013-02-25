@@ -29,7 +29,10 @@ type TargetLanguage =
     | FSharp
     | Scala
 
-let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) (tokenType : string) (res : System.Text.StringBuilder) targetLanguage =
+let printTables 
+    (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
+    (tokenType : string) (res : System.Text.StringBuilder) targetLanguage 
+    _class =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -278,6 +281,8 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
                 | "" -> ""
                 | s -> " ( v:" + s + ")"
 
+        printBr ""
+        printBr "class %s {" _class
         printBr ""
         printBr "def numToString (sNum:Int) = "
         printBrInd 1 "sNum match {"

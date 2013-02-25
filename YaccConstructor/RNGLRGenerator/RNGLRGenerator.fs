@@ -184,7 +184,7 @@ type RNGLR() =
                         | x -> res.Append x
                         |> ignore
                     res.ToString()
-                | Scala -> "\n}"
+                | Scala -> res + "\n}"
             out.WriteLine res
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start

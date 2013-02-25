@@ -239,49 +239,63 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
         let printListAsArray l printer = printList "Array" "(" ")" ", " l printer
         let printList l printer = printList "List" "(" ")" ", " l printer
         
-        let resultArrayCreationCodePrinter name = 
-            printBrInd 0 "val %s = new Array[Array[Int]]( %d )" name statesCount 
+        let resultArrayCreationCodePrinter (name:string) =
+            let _type =
+                match name.ToLowerInvariant() with
+                | "gotos" -> "Array[Int]"
+                | "reduces" -> "Array[Array[(Int,Int)]]"
+                | "zeroreduces" -> "Array[Array[Int]]"
+                | _ -> failwith "Unsupported array."
+            let header = Printf.StringFormat<_,_>("val %s = new Array[" + _type + "]( %d )")
+            printBrInd 0 header name statesCount 
             printBrInd 0 "for (i <- 0 to %d) " statesLim
-            printBrInd 2 "%s(i) = new Array[Int]( %d )" name symbolsCount
+            printBrInd 2 (Printf.StringFormat<_,_>("%s(i) = new " + _type + "( %d )")) name symbolsCount
 
             printBrInd 0 "cur = 0"
             printBrInd 0 "while (cur < small_%s.length) {" name
             printBrInd 1 "val i = small_%s(cur) >>> 16" name
-            printBrInd 1 "val length = small_%s(cur) &&& %d" name andNum
+            printBrInd 1 "val length = small_%s(cur) & %d" name andNum
             printBrInd 1 "cur = cur + 1"
             printBrInd 1 "for (k <- 0 to length-1){"
             printBrInd 2 "val j = small_%s(cur + k) >>> 16" name
-            printBrInd 2 "val x = small_%s(cur + k) &&& %d" name andNum
-            printBrInd 2 "%s(i)(j) <- lists_%s(x)" name name
+            printBrInd 2 "val x = small_%s(cur + k) & %d" name andNum
+            printBrInd 2 "%s(i)(j) = lists_%s(x)" name name
             printBrInd 2 "}"
             printBrInd 1 "cur = cur + length"
             printBrInd 1 "}"
 
-        let print2DArrList (arr : 'a list[,]) checker printer name =
-            print2DArrList "Array" "(" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
+        let print2DArrList (arr : 'a list[,]) checker printer name = 
+            let mutable c = 1
+            c <- c + 1            
+            let r = print2DArrList "Array" "(" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
+            r
 
-        printBr "type Token ="
+        printBr "abstract class Token"        
         let indexator = grammar.indexator
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s%s" (indexator.indexToTerm i)
+            printBrInd 0 "case class %s%s extends Token" (indexator.indexToTerm i)
             <|  match tokenType with
                 | "" -> ""
-                | s -> " of " + s
+                | s -> " ( v:" + s + ")"
 
         printBr ""
-        printBr "def numToString = function"
-
+        printBr "def numToString (sNum:Int) = "
+        printBrInd 1 "sNum match {"
         for i = 0 to indexator.nonTermCount - 1 do
-            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToNonTerm i)
+            printBrInd 1 "case %d => \"%s\"" i (indexator.indexToNonTerm i)        
 
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
+            printBrInd 1 "case %d => \"%s\"" i (indexator.indexToTerm i)        
 
-        printBrInd 1 "| _ -> \"\""
+        printBrInd 1 "case _ => \"\""
+        printBrInd 1 "}"
 
-        printBrInd 0 "def tokenToNumber = function"
+
+        printBrInd 0 "def tokenToNumber (token:Token) = "
+        printBrInd 1 "token match {"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+            printBrInd 1 "case %s (_) => %d" (indexator.indexToTerm i) i
+        printBrInd 1 "}"
         printBr ""
 
         printBr "private var cur = 0"
@@ -307,26 +321,24 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
             "gotos"
         print2DArrList reduces
             (fun l -> not l.IsEmpty)
-            (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
+            (fun l -> printListAsArray l (fun (x,y) -> print "(%d,%d)" x y))
             "reduces"
-
         print2DArrList zeroReduces
             (fun l -> not l.IsEmpty)
             (fun l -> printListAsArray l (fun (x,y) -> print "%d" x))
             "zeroReduces"
-
         printInd 0 "private val small_acc = "
         printList tables.acc (fun x -> print "%d" x)
         printBr ""
-        printBrInd 0 "private val accStates = Array.zeroCreate %d" <| tables.gotos.GetLength 0
-        printBrInd 0 "for i = 0 to %d do" statesLim
-        printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
+        printBrInd 0 "private val accStates = new Array[Boolean](%d)" <| tables.gotos.GetLength 0
+        printBrInd 0 "for (i <- 0 to %d)" statesLim
+        printBrInd 2 "accStates(i) = small_acc.exists(_==i)"
 
         printBrInd 0 "val eofIndex = %d" grammar.indexator.eofIndex
 
         printBrInd 0 "val parserSource = new ParserSource[Token] (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
-        printBr "def buildAst : (Seq[_<:Token] -> ParseResult[Token]) ="
+        printBr "def buildAst : (Seq[_<:Token] => ParseResult[Token]) ="
         printBrInd 1 "buildAst[Token] parserSource"
         printBr ""
         res.ToString()

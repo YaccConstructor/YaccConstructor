@@ -121,6 +121,11 @@ type RNGLR() =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
             let print (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+            let package, _class  =
+                        match moduleName with
+                        | "" -> "RNGLR","Parse"
+                        | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
+                        | s -> "RNGLR",s
             let printHeaders moduleName fullPath light output targetLanguage =
                 let fsHeaders() = 
                     println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
@@ -142,26 +147,20 @@ type RNGLR() =
                         println "%s" <| getPosFromSource fullPath dummyPos s
                         println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
-                let scalaHeaders () =
-                    let package, _class  =
-                        match moduleName with
-                        | "" -> "RNGLR","Parse"
-                        | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
-                        | s -> "RNGLR",s
+                let scalaHeaders () =                    
 
                     println "package %s" package                    
 
                     println "//import Yard.Generators.RNGLR.Parser"
                     println "//import Yard.Generators.RNGLR"
-                    println "//import Yard.Generators.RNGLR.AST"
-                    println "class %s {" _class
+                    println "//import Yard.Generators.RNGLR.AST"                    
 
                 match targetLanguage with
                 | FSharp -> fsHeaders()
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
                         else tables + printTranslator grammar newDefinition.grammar
                                         positionType fullPath output dummyPos

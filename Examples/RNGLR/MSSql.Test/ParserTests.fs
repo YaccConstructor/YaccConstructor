@@ -54,56 +54,56 @@ type ``MS-SQL parser tests`` () =
     member test.``Create procedure.`` () =
         file "CreateProc.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``sp_addlogint complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 
-    [<Test>]
+//    [<Test>]
     member test.``sp_autostats complex test.`` () =
         complexSpFile "sp_autostats.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_droplogin complex test.`` () =
         complexSpFile "sp_droplogin.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_help complex test.`` () =
         complexSpFile "sp_help.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_password complex test.`` () =
         complexSpFile "sp_password.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_revokedbaccess complex test.`` () =
         complexSpFile "sp_revokedbaccess.sql" |> runParserTest
 
     
-    [<Test>]
+//    [<Test>]
     member test.``sp_tables_ex complex test.`` () =
         complexSpFile "sp_tables_ex.sql" |> runParserTest

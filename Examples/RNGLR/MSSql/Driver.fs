@@ -54,8 +54,7 @@ let Parse (srcFilePath:string) =
 
 let ParseAllDirectory (directoryName:string) =
   let files : string array = System.IO.Directory.GetFiles(directoryName)  
-  for i in 0 .. files.Length - 1 do
-  Parse Array.get files i 
+  Array.iter Parse files 
   
   //do ParseAllDirecrory @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs
 

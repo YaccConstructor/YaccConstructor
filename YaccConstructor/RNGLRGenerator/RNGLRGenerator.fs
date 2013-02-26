@@ -147,13 +147,12 @@ type RNGLR() =
                         println "%s" <| getPosFromSource fullPath dummyPos s
                         println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
-                let scalaHeaders () =                    
+                let scalaHeaders () =
 
-                    println "package %s" package                    
-
+                    println "package %s" package
                     println "//import Yard.Generators.RNGLR.Parser"
                     println "//import Yard.Generators.RNGLR"
-                    println "//import Yard.Generators.RNGLR.AST"                    
+                    println "//import Yard.Generators.RNGLR.AST"
 
                 match targetLanguage with
                 | FSharp -> fsHeaders()

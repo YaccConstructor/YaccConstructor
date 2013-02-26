@@ -53,7 +53,7 @@ let Parse (srcFilePath:string) =
         
 
 let ParseAllDirectory (directoryName:string) =
-  let files : string array = System.IO.Dyrectory.GetFiles(directoryName)  
+  let files : string array = System.IO.Directory.GetFiles(directoryName)  
   for i in 0 .. files.Length - 1 do
   Parse Array.get files i 
   

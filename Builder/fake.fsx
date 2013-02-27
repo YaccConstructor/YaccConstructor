@@ -86,7 +86,7 @@ Target "ZipAll" (fun _ ->
     !+ (distrDir + "/**/*")
     ++ (distrDir + "/*")
     |> Scan
-    |> Zip distrDir (Path.Combine(zipDir, getDistrName + ".zip"))
+    |> Zip distrDir (Path.Combine(zipDir, (getDistrName()) + ".zip"))
 )
 
 

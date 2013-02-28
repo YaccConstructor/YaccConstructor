@@ -31,7 +31,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                     match actions (currentInputTerm, ntrm) with
                     // found nonterminal; expand all its available productions
                     | Some productionIndices ->
-                        let nextNode = node.NextNodes.Head
+                        let nextNode = Seq.nth 0 node.NextNodes // nonterms always have 1 next node
                         let expandProduction productionIndex =
                             let production = productions.[productionIndex]
                             List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
@@ -42,7 +42,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                         List.fold (expandFromNode previousNode) currentSet newNextNodes
                     // found nonterminal but no productions
                     | None -> currentSet
-            List.fold (expandFromNode startNode) currentSet startNode.NextNodes
+            Seq.fold (expandFromNode startNode) currentSet startNode.NextNodes
         
         // prepare initial structure
         let fakeEndNode = Node (Trm eofToken)
@@ -63,4 +63,4 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
             List.iter (fun (node:Node) -> node.ItemPos <- posLocal) currentTreeTerminals
             pos <- pos + 1
 
-        pos = tokens.Length && List.exists (fun x -> x = fakeEndNode) currentTreeTerminals
+        pos = tokens.Length && List.exists ((=) fakeEndNode) currentTreeTerminals

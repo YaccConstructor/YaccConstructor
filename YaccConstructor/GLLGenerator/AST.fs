@@ -7,29 +7,29 @@ type GrammarItem = Trm of int | Ntrm of int
 type Node (item) =    
     // parents of this node in the SPPF
     // each parent is associated with the production number and item index in the production; see (*1*)
-    let mutable _parents : (int * int * Node) list = []    
+    let mutable parents : ResizeArray<int * int * Node> = ResizeArray<int * int * Node> ()
     // terminal nodes that are the next node for this in a left-to-right traversal
-    let mutable _nextTerminals : Node list = []
+    let mutable nextTerminals : ResizeArray<Node> = ResizeArray<Node> ()
     // nonterminal nodes that are the next node for this in a left-to-right traversal
-    let mutable _nextNonterminals : Node list = []
+    let mutable nextNonterminals : ResizeArray<Node> = ResizeArray<Node> ()
     
     // terminal/nonterminal represented by this node
     member this.Item with get() = item
     // input buffer position of the matched input terminal
     member val ItemPos = -1 with get, set
     // nodes that are the next node for this in a left-to-right traversal
-    member this.NextNodes with get() = List.append _nextTerminals _nextNonterminals
+    member this.NextNodes with get() = Seq.append nextTerminals nextNonterminals |> Seq.toArray
     
     // add a new parent node
-    member this.addParent parentLink = _parents <- parentLink :: _parents
+    member this.addParent = parents.Add
     // add a node that is next in a left-to-right traversal    
     member this.addNext (node:Node) =
         match node.Item with
-        | Trm _ -> _nextTerminals <- node :: _nextTerminals
-        | Ntrm _ -> _nextNonterminals <- node :: _nextNonterminals
+        | Trm _ -> nextTerminals.Add(node)
+        | Ntrm _ -> nextNonterminals.Add(node)
     // changes a link to next nonterminal to a set of links to its children
     member this.reassignNext oldNode newNodes =
-        _nextNonterminals <- List.filter (fun x -> x <> oldNode) _nextNonterminals
+        nextNonterminals.Remove(oldNode) |> ignore        
         Seq.iter this.addNext newNodes
 
     new (item, next, parentLink) as this =

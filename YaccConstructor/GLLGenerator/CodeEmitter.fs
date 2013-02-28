@@ -62,7 +62,8 @@ let private getListRepresentation (arr : string seq) =
 
 let emitNameAndUsages moduleName (out:StringBuilder) =
     out |> emitLine 0 (sprintf "module %s" moduleName)
-    out |> emitLine 0 "open Yard.Generators.GLL.Parser"    
+    out |> emitLine 0 "open Yard.Generators.GLL.AST"
+    out |> emitLine 0 "open Yard.Generators.GLL.Parser"
 
 let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
     let followSets = getFollowSets grammar

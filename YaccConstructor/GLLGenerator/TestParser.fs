@@ -1,4 +1,5 @@
 ﻿module Parser
+open Yard.Generators.GLL.AST
 open Yard.Generators.GLL.Parser
 (*
     0 -> A

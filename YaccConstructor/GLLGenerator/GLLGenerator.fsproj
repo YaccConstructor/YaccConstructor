@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="CodeEmitter.fs" />
     <Compile Include="GLLGenerator.fs" />
+    <Compile Include="AST.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="TestParser.fs" />
   </ItemGroup>

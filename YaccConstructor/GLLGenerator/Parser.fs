@@ -1,9 +1,9 @@
 ﻿// Parser.fs contains base logic for table-based GLL parsing
 
 module Yard.Generators.GLL.Parser
+open Yard.Generators.GLL.AST
 
-type ParseStackItem = Trm of int | Ntrm of int
-type ParseStack = ParseStackItem list
+type ParseStack = GrammarItem list
 
 /// <summary>
 /// Elementary descriptor consists of the following:
@@ -12,39 +12,40 @@ type ParseStack = ParseStackItem list
 /// </summary>
 type ElementaryDescriptor = ParseStack * int
 
-type ParserBase (startNonTerm, eofToken, actions, productions, tokens) =
+// startNonTerm: int that represents start Ntrm
+// eofToken: what to expect as the last token of input
+// actionsTable: (lookahead terminal, nonterminal on parse stack topm, production(s) to use)
+// productions: right sides of grammar rules
+// tokens: input stream of grammar terminals (their int codes)
+type ParserBase (startNonTerm, eofToken, actionsTable, productions : ParseStack[], tokens : int[]) =
     // states set R
-    let mutable _parseStates : ElementaryDescriptor list = []
-    // right sides of grammar rules
-    let _productions : ParseStack[] = productions
+    let mutable parseStates : ElementaryDescriptor list = []
     // represents actions table: (lookahead terminal, nonterminal on parse stack top) -> production(s) to use
-    let _actions : int * int -> int list option = (Map.ofArray actions).TryFind
-    // input stream of grammar terminals
-    let _tokens : int[] = tokens
+    let actions : int * int -> int list option = (Map.ofArray actionsTable).TryFind
 
     member this.parse () =
         // jumps to next available nondeterministic execution branch
         let rec continueExecution () =
-            match _parseStates with
+            match parseStates with
             | [] -> false
             | state::states ->
-                _parseStates <- states
+                parseStates <- states
                 parse state
         // matches buffer input and stack top against parse table and takes actions
         and parse (stack, pos) =
             match stack with
             | (Ntrm nonterm)::stackRest ->
-                match _actions (_tokens.[pos], nonterm) with
+                match actions (tokens.[pos], nonterm) with
                 | Some productionIndices -> 
                     let addProduction productionIndex =
-                        let newStack = List.append _productions.[productionIndex] stackRest
-                        _parseStates <- (newStack, pos) :: _parseStates
+                        let newStack = List.append productions.[productionIndex] stackRest
+                        parseStates <- (newStack, pos) :: parseStates
                     List.iter addProduction productionIndices                    
                 | None -> ()
                 continueExecution ()
             | (Trm term)::stackRest ->
-                if _tokens.[pos] = term
+                if tokens.[pos] = term
                 then parse (stackRest, pos + 1)
-                else continueExecution()
-            | [] -> pos = _tokens.Length || continueExecution ()
+                else continueExecution ()
+            | [] -> pos = tokens.Length || continueExecution ()
         parse ([Ntrm startNonTerm; Trm eofToken], 0)

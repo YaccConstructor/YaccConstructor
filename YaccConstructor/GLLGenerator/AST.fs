@@ -1,22 +1,25 @@
-﻿module Yard.Generators.GLL.AST
+﻿// AST.fs contains a data structure to represent SPPF during parsing
+
+module Yard.Generators.GLL.AST
 
 type GrammarItem = Trm of int | Ntrm of int
 // item : terminal/nonterminal represented by this node
 type Node (item) =    
-    // input buffer position of the matched input terminal
-    let mutable _itemPos : int = -1
     // parents of this node in the SPPF
     // each parent is associated with the production number and item index in the production; see (*1*)
-    let mutable _parents : (int * int * Node) list = []
+    let mutable _parents : (int * int * Node) list = []    
     // terminal nodes that are the next node for this in a left-to-right traversal
     let mutable _nextTerminals : Node list = []
     // nonterminal nodes that are the next node for this in a left-to-right traversal
     let mutable _nextNonterminals : Node list = []
-
+    
     // terminal/nonterminal represented by this node
     member this.Item with get() = item
-    // matches this node with an input terminal (identified by its input buffer position)
-    member this.setItemPos pos = _itemPos <- pos
+    // input buffer position of the matched input terminal
+    member val ItemPos = -1 with get, set
+    // nodes that are the next node for this in a left-to-right traversal
+    member this.NextNodes with get() = List.append _nextTerminals _nextNonterminals
+    
     // add a new parent node
     member this.addParent parentLink = _parents <- parentLink :: _parents
     // add a node that is next in a left-to-right traversal    
@@ -27,7 +30,12 @@ type Node (item) =
     // changes a link to next nonterminal to a set of links to its children
     member this.reassignNext oldNode newNodes =
         _nextNonterminals <- List.filter (fun x -> x <> oldNode) _nextNonterminals
-        Seq.iter this.addNext newNodes        
+        Seq.iter this.addNext newNodes
+
+    new (item, next, parentLink) as this =
+        Node(item) then
+        this.addNext(next)
+        this.addParent(parentLink)
 
 (*1: condider the following ambiguous grammar:
        S -> AxxA

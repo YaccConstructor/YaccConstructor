@@ -3,49 +3,64 @@
 module Yard.Generators.GLL.Parser
 open Yard.Generators.GLL.AST
 
-type ParseStack = GrammarItem list
-
-/// <summary>
-/// Elementary descriptor consists of the following:
-/// s: parse stack
-/// j: position in the input array
-/// </summary>
-type ElementaryDescriptor = ParseStack * int
+type Production = GrammarItem list
 
 // startNonTerm: int that represents start Ntrm
 // eofToken: what to expect as the last token of input
 // actionsTable: (lookahead terminal, nonterminal on parse stack topm, production(s) to use)
 // productions: right sides of grammar rules
 // tokens: input stream of grammar terminals (their int codes)
-type ParserBase (startNonTerm, eofToken, actionsTable, productions : ParseStack[], tokens : int[]) =
-    // states set R
-    let mutable parseStates : ElementaryDescriptor list = []
+type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[], tokens : int[]) =
     // represents actions table: (lookahead terminal, nonterminal on parse stack top) -> production(s) to use
     let actions : int * int -> int list option = (Map.ofArray actionsTable).TryFind
 
     member this.parse () =
-        // jumps to next available nondeterministic execution branch
-        let rec continueExecution () =
-            match parseStates with
-            | [] -> false
-            | state::states ->
-                parseStates <- states
-                parse state
-        // matches buffer input and stack top against parse table and takes actions
-        and parse (stack, pos) =
-            match stack with
-            | (Ntrm nonterm)::stackRest ->
-                match actions (tokens.[pos], nonterm) with
-                | Some productionIndices -> 
-                    let addProduction productionIndex =
-                        let newStack = List.append productions.[productionIndex] stackRest
-                        parseStates <- (newStack, pos) :: parseStates
-                    List.iter addProduction productionIndices                    
-                | None -> ()
-                continueExecution ()
-            | (Trm term)::stackRest ->
-                if tokens.[pos] = term
-                then parse (stackRest, pos + 1)
-                else continueExecution ()
-            | [] -> pos = tokens.Length || continueExecution ()
-        parse ([Ntrm startNonTerm; Trm eofToken], 0)
+        // expands the nonterminals following specified node in right-to-left traversals
+        // until a terminal matching current input terminal is found in every traversal
+        let expandToCurrentInput currentInputTerm currentSet (startNode : Node) =
+            let rec expandFromNode (previousNode : Node) (currentSet : Node list) (node : Node) =
+                match node.Item with
+                | Trm trm when trm = currentInputTerm ->
+                    // found tree node matching current input terminal: add it to found set                    
+                    node :: currentSet
+                | Trm _ ->
+                    // found tree node not matching current input terminal
+                    // TODO: go right-to-left and clean 
+                    currentSet
+                | Ntrm ntrm ->
+                    match actions (currentInputTerm, ntrm) with
+                    // found nonterminal; expand all its available productions
+                    | Some productionIndices ->
+                        let nextNode = node.NextNodes.Head
+                        let expandProduction productionIndex =
+                            let production = productions.[productionIndex]
+                            List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
+                                          (List.zip production [0..production.Length-1])
+                                          nextNode
+                        let newNextNodes = List.map expandProduction productionIndices
+                        previousNode.reassignNext node newNextNodes
+                        List.fold (expandFromNode previousNode) currentSet newNextNodes
+                    // found nonterminal but no productions
+                    | None -> currentSet
+            List.fold (expandFromNode startNode) currentSet startNode.NextNodes
+        
+        // prepare initial structure
+        let fakeEndNode = Node (Trm eofToken)
+        let rootNode = Node (Ntrm startNonTerm)
+        rootNode.addNext fakeEndNode
+        let fakeStartNode = Node (Trm eofToken)
+        fakeStartNode.addNext rootNode        
+
+        // tree leafs to match with current terminal in the input buffer
+        let mutable currentTreeTerminals : Node list = [fakeStartNode]
+        let mutable pos = 0
+
+        while currentTreeTerminals.Length > 0 && pos < tokens.Length do            
+            currentTreeTerminals <-
+                List.fold (expandToCurrentInput tokens.[pos]) [] currentTreeTerminals
+                |> Seq.distinct |> List.ofSeq
+            let posLocal = pos
+            List.iter (fun (node:Node) -> node.ItemPos <- posLocal) currentTreeTerminals
+            pos <- pos + 1
+
+        pos = tokens.Length && List.exists (fun x -> x = fakeEndNode) currentTreeTerminals

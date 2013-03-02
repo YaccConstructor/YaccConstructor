@@ -89,7 +89,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Test", "Ut
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRAbstractParser", "RNGLRAbstractParser\RNGLRAbstractParser.fsproj", "{1873EA19-FAB7-4D5F-B452-67C0B93C8B9B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRAbstractParser.Test", "RNGLRAbstractParser.Tests\RNGLRAbstractParser.Test.fsproj", "{B1D8C4FB-23E7-46FF-81B0-4EA3CD6E716E}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRAbstractParser.Test", "RNGLRAbstractParser.Test\RNGLRAbstractParser.Test.fsproj", "{B1D8C4FB-23E7-46FF-81B0-4EA3CD6E716E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

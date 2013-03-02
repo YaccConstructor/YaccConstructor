@@ -8,7 +8,7 @@
     <ProjectGuid>{3ed00a74-0699-4341-b684-593e51df6fe4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>CYKGenerator.Tests</RootNamespace>
-    <AssemblyName>CYKGenerator.Tests</AssemblyName>
+    <AssemblyName>CYKGenerator.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>CYKGenerator.Tests</Name>
   </PropertyGroup>

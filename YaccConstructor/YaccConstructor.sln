@@ -77,7 +77,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKGenerator", "CYKGenerato
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKCommon", "CYKCommon\CYKCommon.fsproj", "{95FB7038-C27D-4C27-A149-D9C9B747C222}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKGenerator.Test", "CYKGenerator.Tests\CYKGenerator.Test.fsproj", "{3ED00A74-0699-4341-B684-593E51DF6FE4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKGenerator.Test", "CYKGenerator.Test\CYKGenerator.Test.fsproj", "{3ED00A74-0699-4341-B684-593E51DF6FE4}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYK.Test", "CYK.Test\CYK.Test.fsproj", "{1DF25ECB-5CBD-4BA5-9C20-0E7FEFCC4C99}"
 EndProject

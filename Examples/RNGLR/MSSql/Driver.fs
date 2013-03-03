@@ -51,10 +51,10 @@ let Parse (srcFilePath:string) =
         //printfn "%A" translated
         //translated.Head  
         
-  //let ParseAllDirectory (directoryName:string) =
-  //let files : string array = System.IO.Dyrectory.GetFiles(directoryName)  
-  //for i in 0 .. files.Length - 1 do
-  //Parse Array.get files i 
+
+let ParseAllDirectory (directoryName:string) =
+  let files : string array = System.IO.Directory.GetFiles(directoryName)  
+  Array.iter Parse files 
   
   //do ParseAllDirecrory @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs
 

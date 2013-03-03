@@ -138,6 +138,7 @@ table_constraint:
      | (KW_CHECK LPAREN search_condition RPAREN) 
        
 (*****************************************SELECT****************************************************)
+(*****************************************SELECT****************************************************)
 
 
 select_stmnt:  
@@ -145,7 +146,7 @@ select_stmnt:
 	query_expression 
     (KW_ORDER KW_BY comma_list<<(full_ident|DEC_NUMBER (KW_ASC | KW_DESC)?)>>)? 
     (KW_COMPUTE 
-		comma_list<<(KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM LPAREN sql_expr RPAREN)>> 
+		comma_list<<( (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) LPAREN sql_expr RPAREN)>> 
 		(KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
@@ -154,7 +155,7 @@ select_stmnt:
 	
 for:
 	(KW_FOR (KW_BROWSE | xml))?
-	(*questions*)
+	
 xml:
 	KW_XML 
 	( 
@@ -200,21 +201,21 @@ query_hint:
 	) 
 	
 common_table_expression:
-    full_ident (LPAREN comma_list<<ident>> RPAREN)?
+    (full_ident | ident) (LPAREN comma_list<<ident>> RPAREN)?
     KW_AS
         LPAREN select_stmnt RPAREN
 SEMI?
 	
 query_expression: 
-    query_specification | LPAREN query_expression RPAREN 
-    ((KW_UNION (KW_ALL)? | KW_EXCEPT | KW_INTERSECT)
+    ( query_specification | LPAREN query_expression RPAREN )
+    ( ( KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT )
     query_specification | comma_list<<(LPAREN query_expression RPAREN)>>)? 
 		
 query_specification: 
 	KW_SELECT (KW_ALL | KW_DISTINCT)? 
 	(KW_TOP sql_expr KW_PERCENT? (KW_WITH KW_TIES)?)? 
-	comma_list<<sql_expr>>                                           
-	(KW_INTO full_ident)? 
+	select_list                                          
+	(KW_INTO name)? 
 	from? 
 	(KW_WHERE search_condition)? 
 	(KW_GROUP KW_BY KW_ALL? comma_list<<sql_expr>>
@@ -222,7 +223,20 @@ query_specification:
 	)?
     (KW_HAVING search_condition)? 
 	
-
+select_list:
+	comma_list<<(
+		STAR 
+		| name DOT STAR 
+		| ( ( name DOT )? 
+			( name | "$IDENTITY" | "$ROWGUID" )  
+			( ( DOT | DOUBLE_COLON ) 
+			( ( STRING_CONST | ident ) 
+			| name LPAREN comma_list<<sql_expr>> RPAREN ) )? 
+			| sql_expr (KW_AS? name)? ) 
+		| name = sql_expr)>>
+	
+name:
+	 ident | full_ident | STRING_CONST
 	
 scalar_function:
 	KW_LOWER LPAREN sqql_expr RPAREN
@@ -238,7 +252,7 @@ ranking_windowed_function:
 	
 order_by_clause:
 	(KW_ORDER KW_BY 
-		comma_list<<(ident|DEC_NUMBER| sql_expr (KW_COLLATE STRING_CONST)? (KW_ASC | KW_DESC)?)>>
+		comma_list<<(ident|DEC_NUMBER| sql_expr (KW_COLLATE name)? (KW_ASC | KW_DESC)?)>>
 	)? 
 
 	
@@ -257,24 +271,22 @@ predicate:
     | KW_EXISTS LPAREN query_expression RPAREN  
 
 from:
-( KW_FROM comma_list<<table_source>> )? 
+	( KW_FROM comma_list<<table_source>> )? 
 
 table_source: 
-	
-	full_ident KW_AS?  full_ident tablesample_clause? 
+	name KW_AS?  full_ident tablesample_clause? 
 		(KW_WITH LPAREN table_hint COMMA* RPAREN)? 
-    | rowset_function (KW_AS? full_ident)? 
-        (LPAREN comma_list<<ident>> RPAREN)?  
-    | sql_expr (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)? 
+    | ((rowset_function (KW_AS? name)? 
+        (LPAREN comma_list<<name>> RPAREN)?) 
+		| sql_expr (KW_AS? name)? (LPAREN comma_list<<name>> RPAREN)?)
     (*| openxml_clause*)
-    | full_ident  KW_AS? full_ident (LPAREN comma_list<<full_ident>> RPAREN)? 
+    | name  KW_AS? name (LPAREN comma_list<<name>> RPAREN)? 
     | joined_table 
     | pivoted_table 
-    (*| <unpivoted_table>*)                                                      (*&&&&&&&&*)
-    | LOCALVAR (KW_AS full_ident)?
-    | LOCALVAR DOT ident LPAREN comma_list<<sql_expr>> RPAREN (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)?
+    | (unpivoted_table                                                     
+		| LOCALVAR (KW_AS? full_ident)?
+			| LOCALVAR DOT name LPAREN comma_list<<sql_expr>> RPAREN (KW_AS name)? (LPAREN comma_list<<name>> RPAREN)?)
 
-(*openxmlclause*)
 
 rowset_function:
 	containstable
@@ -319,7 +331,7 @@ freetexttable:
 containstable:
 	KW_CONTAINSTABLE LPAREN full_ident COMMA (ident | LPAREN comma_list<<ident>> RPAREN | STAR) COMMA "'" contains_search_condition "'" 
     (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
-	(*??*) 
+	(COMMA DEC_NUMBER)? 
     RPAREN 
 	
 contains_search_condition: 
@@ -423,16 +435,16 @@ pivoted_table:
         table_source KW_PIVOT pivot_clause full_ident
 
 pivot_clause:
-        LPAREN sql_expr LPAREN sql_expr RPAREN  (*vt*)
+        LPAREN sql_expr LPAREN ( sql_expr | name ) RPAREN  
         KW_FOR sql_expr 
-        KW_IN LPAREN comma_list<<ident>> RPAREN      (*&&&&&&&&&&*) 
+        KW_IN LPAREN comma_list<<name>> RPAREN      
 		RPAREN 
 
 unpivoted_table:
         table_source KW_UNPIVOT unpivot_clause full_ident
 
 unpivot_clause:
-        LPAREN ident KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN (*&&&&&&&&&&*)
+        LPAREN name KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN
  
 	
 (*****************************************ALTER TABLE****************************************************)

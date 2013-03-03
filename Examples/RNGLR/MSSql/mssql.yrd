@@ -28,6 +28,7 @@ root_rule:
 batch_body: 
    create_proc
  | set_stmnt
+ | KW_USE LBRACKET "mdw_control" RBRACKET
   
 (*****************************************SET****************************************************)
 
@@ -64,7 +65,7 @@ set_localvar:
 (*********************************PROCEDURE************************************************************)	
 
 proc_formal_param:
-      LOCALVAR (full_ident DOT)? sql_datatype
+      LOCALVAR (full_ident DOT)? sql_datatype?
       KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
       (KW_OUT | KW_OUTPUT)? KW_READONLY?	  	  
   
@@ -140,7 +141,7 @@ table_constraint:
 
 
 select_stmnt:  
-	(KW_WITH comma_list<<common_table_expression>>)?
+	((KW_WITH comma_list<<common_table_expression>>)?
 	query_expression 
     (KW_ORDER KW_BY comma_list<<(full_ident|DEC_NUMBER (KW_ASC | KW_DESC)?)>>)? 
     (KW_COMPUTE 
@@ -148,7 +149,8 @@ select_stmnt:
 		(KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? 
+    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
+	|KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
 	
 for:
 	(KW_FOR (KW_BROWSE | xml))?
@@ -215,21 +217,19 @@ query_specification:
 	(KW_INTO full_ident)? 
 	from? 
 	(KW_WHERE search_condition)? 
-	(KW_GROUP KW_BY KW_ALL? comma_list<<group_by_expression>>
+	(KW_GROUP KW_BY KW_ALL? comma_list<<sql_expr>>
         (KW_WITH (KW_CUBE | KW_ROLLUP))?
 	)?
     (KW_HAVING search_condition)? 
 	
-group_by_expression:
-	( STRING_CONST (*| scalar_function*) | (full_ident DOT)? full_ident | LOCALVAR  (*&&&&&&*)
-	| LPAREN sql_expr RPAREN | LPAREN select_stmnt RPAREN 
-    | binop sql_expr 
-    | sql_expr binop sql_expr 
-    | ranking_windowed_function | aggregate_windowed_function
-	)
 
+	
+scalar_function:
+	KW_LOWER LPAREN sqql_expr RPAREN
+	| KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr )
+	
 aggregate_windowed_function:
-	KW_OVER LPAREN ((KW_PARTITION KW_BY LOCALVAR | select_stmnt)*)? RPAREN
+	KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
 
 ranking_windowed_function:
 		(KW_RANK | KW_DENSE_RANK | KW_ROW_NUMBER | KW_NTILE) LPAREN (sql_expr)? RPAREN KW_OVER LPAREN 
@@ -238,8 +238,9 @@ ranking_windowed_function:
 	
 order_by_clause:
 	(KW_ORDER KW_BY 
-		comma_list<<(ident|DEC_NUMBER (KW_COLLATE ident)? (KW_ASC | KW_DESC)?)>>
+		comma_list<<(ident|DEC_NUMBER| sql_expr (KW_COLLATE STRING_CONST)? (KW_ASC | KW_DESC)?)>>
 	)? 
+
 	
 search_condition: 
     KW_NOT? predicate | LPAREN search_condition RPAREN 
@@ -273,11 +274,7 @@ table_source:
     | LOCALVAR (KW_AS full_ident)?
     | LOCALVAR DOT ident LPAREN comma_list<<sql_expr>> RPAREN (KW_AS full_ident)? (LPAREN comma_list<<full_ident>> RPAREN)?
 
-(*
-(*O_O*)
-openxml_clause:
-OPENXML LPAREN idoc int [ in] , rowpattern nvarchar [ in ] , [ flags byte [ in ] ] RPAREN 
-( WITH LPAREN SchemaDeclaration | TableName RPAREN )?           (*&&&&&&&&&&&&&&&&&&&&&&&&&&&&*)*)
+(*openxmlclause*)
 
 rowset_function:
 	containstable
@@ -536,13 +533,14 @@ type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 sql_datatype:
       KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | "SMALLMONEY"  | "sysname"
     | "INT" | KW_TINYINT | KW_MONEY
-    | KW_FLOAT (LPAREN DEC_NUMBER RPAREN)?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+    | KW_FLOAT type_size?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
     | KW_REAL
-    | KW_CHAR (LPAREN DEC_NUMBER RPAREN)?
+    | KW_CHAR type_size?
     | KW_VARCHAR type_size?
     | KW_VARBINARY type_size?
-    | KW_NCHAR (LPAREN DEC_NUMBER RPAREN)?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+    | KW_NCHAR type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
     | KW_NVARCHAR type_size?
+	| KW_SQL_VARIANT
 
 execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | username = STRING_CONST) 
 

@@ -1,0 +1,15 @@
+digraph GSS {
+    rankdir=RL
+    0 [label="4"]
+    1 [label="1"]
+    2 [label="0"]
+    1 -> 2 [label="batch_body"]
+    0 -> 1 [label="KW_GO"]
+    3 [label="1424"]
+    4 [label="1422"]
+    4 -> 2 [label="yard_rule_list_1"]
+    3 -> 4 [label="KW_GO"]
+    {rank=same; 3 0}
+    {rank=same; 4 1}
+    {rank=same; 2}
+}

@@ -54,19 +54,19 @@ type ``MS-SQL parser tests`` () =
     member test.``Create procedure.`` () =
         file "CreateProc.sql" |> runParserTest
 
-//    [<Test>]
+    [<Test>]
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-//    [<Test>]
-    member test.``sp_addlogint complex test.`` () =
+    [<Test>]
+    member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-//    [<Test>]
+   // [<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-//    [<Test>]
+    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 

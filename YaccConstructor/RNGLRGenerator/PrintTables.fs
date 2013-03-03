@@ -343,8 +343,8 @@ let printTables
 
         printBrInd 0 "val parserSource = new ParserSource[Token] (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
-        printBr "def buildAst : (Seq[_<:Token] => ParseResult[Token]) ="
-        printBrInd 1 "buildAst[Token] parserSource"
+        //printBr "def buildAst : (Seq[_<:Token] => ParseResult[Token]) ="
+        //printBrInd 1 "buildAst[Token] parserSource"
         printBr ""
         res.ToString()
 

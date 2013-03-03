@@ -79,14 +79,14 @@ Target "CollectRedistGrammars" (fun _ ->
 )
 
 Target "GenVersionFile" (fun _ ->
-	System.IO.File.WriteAllText(distrDir+"version", getDistrName())
+    System.IO.File.WriteAllText(System.IO.Path.Combine(distrDir,"version"), getDistrName())
 )
 
 Target "ZipAll" (fun _ ->
     !+ (distrDir + "/**/*")
     ++ (distrDir + "/*")
     |> Scan
-    |> Zip distrDir (Path.Combine(zipDir, getDistrName + ".zip"))
+    |> Zip distrDir (Path.Combine(zipDir, (getDistrName()) + ".zip"))
 )
 
 

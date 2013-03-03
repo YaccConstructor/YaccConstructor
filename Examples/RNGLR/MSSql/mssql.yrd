@@ -99,7 +99,7 @@ proc_body_stmnt:
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF KW_NOT? KW_EXIST? sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
 
 raiserror_stmnt:
     KW_RAISERROR LPAREN ( dec_num | STRING_CONST | LOCALVAR )
@@ -138,8 +138,6 @@ table_constraint:
      | (KW_CHECK LPAREN search_condition RPAREN) 
        
 (*****************************************SELECT****************************************************)
-(*****************************************SELECT****************************************************)
-
 
 select_stmnt:  
 	((KW_WITH comma_list<<common_table_expression>>)?
@@ -204,7 +202,7 @@ common_table_expression:
     (full_ident | ident) (LPAREN comma_list<<ident>> RPAREN)?
     KW_AS
         LPAREN select_stmnt RPAREN
-SEMI?
+	SEMI?
 	
 query_expression: 
     ( query_specification | LPAREN query_expression RPAREN )
@@ -252,7 +250,7 @@ ranking_windowed_function:
 	
 order_by_clause:
 	(KW_ORDER KW_BY 
-		comma_list<<(ident|DEC_NUMBER| sql_expr (KW_COLLATE name)? (KW_ASC | KW_DESC)?)>>
+		comma_list<<( name | sql_expr (KW_COLLATE name)? (KW_ASC | KW_DESC)?)>>
 	)? 
 
 	
@@ -560,21 +558,24 @@ binop:
 	 OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
 	| OP_EQ | OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_MOD | OP_TILDA
 	| OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+    
 
-
-(* http://msdn.microsoft.com/en-us/library/ms190286.aspx *)
 sql_expr:
     sql_value
-  | LPAREN sql_expr RPAREN
-  | LOCALVAR 
-  | call_expr
-  | KW_SELECT sql_expr KW_FROM full_ident
-  | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
-  | GLOBALVAR
-  | full_ident
-  | sql_expr binop sql_expr
- 
-  | sql_expr KW_IS KW_NOT? KW_NULL
+	| scalar_function
+	| (name DOT) name
+	| LPAREN sql_expr RPAREN
+	| LOCALVAR 
+	| call_expr
+	| select_stmnt
+	| (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+	| GLOBALVAR
+	| name
+	| sql_expr binop sql_expr
+	| sql_expr KW_IS KW_NOT? KW_NULL
+	| ranking_windowed_function 
+	| aggregate_windowed_function
+	
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
 
@@ -586,6 +587,9 @@ sql_value:
      STRING_CONST   (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
    | dec_num
    | KW_NULL
+
+	
+   
 
 (* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
 ident: brace_opt<<LBRACKET IDENT RBRACKET>>

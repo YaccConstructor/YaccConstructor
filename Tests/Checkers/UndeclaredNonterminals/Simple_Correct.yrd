@@ -1,3 +1,4 @@
 a : NUMBER;
-+s : a|b;
+[<Start>]
+s : a|b;
 b : a;

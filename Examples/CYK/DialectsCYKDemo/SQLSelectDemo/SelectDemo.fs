@@ -95,6 +95,4 @@ and _fslex_token  _fslex_state lexbuf =
           )
   | _ -> failwith "token"
 
-# 27 "SelectDemo.fsl"
-
 # 3000000 "SelectDemo.fs"

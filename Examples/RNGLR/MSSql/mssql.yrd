@@ -237,8 +237,8 @@ name:
 	 ident | full_ident | STRING_CONST
 	
 scalar_function:
-	KW_LOWER LPAREN sqql_expr RPAREN
-	| KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr )
+	KW_LOWER LPAREN sql_expr RPAREN
+	| KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr 
 	
 aggregate_windowed_function:
 	KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
@@ -250,7 +250,7 @@ ranking_windowed_function:
 	
 order_by_clause:
 	(KW_ORDER KW_BY 
-		comma_list<<( name | sql_expr (KW_COLLATE name)? (KW_ASC | KW_DESC)?)>>
+		comma_list<< (sql_expr (KW_ASC | KW_DESC)?) >>
 	)? 
 
 	
@@ -445,6 +445,12 @@ unpivot_clause:
         LPAREN name KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN
  
 	
+case:
+	KW_CASE sql_expr? 
+		KW_WHEN sql_expr KW_THEN list<< sql_expr >>
+		( KW_ELSE sql_expr )? 
+		KW_END 
+
 (*****************************************ALTER TABLE****************************************************)
 (*ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
 ( 
@@ -575,6 +581,8 @@ sql_expr:
 	| sql_expr KW_IS KW_NOT? KW_NULL
 	| ranking_windowed_function 
 	| aggregate_windowed_function
+	| sql_expr KW_COLLATE ident
+	| case
 	
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN

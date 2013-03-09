@@ -4,36 +4,36 @@ module Yard.Generators.GLL.AST
 
 type GrammarItem = Trm of int | Ntrm of int
 // item : terminal/nonterminal represented by this node
-type Node (item) =    
+[<AllowNullLiteral>]
+type Node (item:GrammarItem)=
     // parents of this node in the SPPF
     // each parent is associated with the production number and item index in the production; see (*1*)
     let mutable parents : ResizeArray<int * int * Node> = ResizeArray<int * int * Node> ()
-    // terminal nodes that are the next node for this in a left-to-right traversal
-    let mutable nextTerminals : ResizeArray<Node> = ResizeArray<Node> ()
-    // nonterminal nodes that are the next node for this in a left-to-right traversal
-    let mutable nextNonterminals : ResizeArray<Node> = ResizeArray<Node> ()
-    
+
     // terminal/nonterminal represented by this node
-    member this.Item with get() = item
+    member val Item = item with get
     // input buffer position of the matched input terminal
     member val ItemPos = -1 with get, set
+    // node that is previous for this in all left-to-right traversals
+    member val PrevNode = null with get, set
     // nodes that are the next node for this in a left-to-right traversal
-    member this.NextNodes with get() = Seq.append nextTerminals nextNonterminals |> Seq.toArray
+    member val NextNodes = ResizeArray<Node> () with get, set    
     
     // add a new parent node
     member this.addParent = parents.Add
     // add a node that is next in a left-to-right traversal    
-    member this.addNext (node:Node) =
-        match node.Item with
-        | Trm _ -> nextTerminals.Add(node)
-        | Ntrm _ -> nextNonterminals.Add(node)
+    member this.addNext node =
+        this.NextNodes.Add node
+        node.PrevNode <- this
     // changes a link to next nonterminal to a set of links to its children
-    member this.reassignNext oldNode newNodes =
-        nextNonterminals.Remove(oldNode) |> ignore        
+    member this.reassignNext oldNode newNodes =        
+        this.NextNodes.Remove(oldNode) |> ignore
         Seq.iter this.addNext newNodes
+        oldNode.NextNodes <- null
+        oldNode.PrevNode <- null
 
     new (item, next, parentLink) as this =
-        Node(item) then
+        Node(item) then        
         this.addNext(next)
         this.addParent(parentLink)
 

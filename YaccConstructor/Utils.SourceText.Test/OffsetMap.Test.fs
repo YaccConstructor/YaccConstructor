@@ -1,6 +1,5 @@
 ﻿module Yard.Utils.OffsetMap.Test
 
-open System
 open System.IO
 open NUnit.Framework
 
@@ -77,7 +76,7 @@ type UtilsTest () =
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
-    member test.``Test for line and column in received map`` () =
+    member test.``Test for line and column in received Map`` () =
         let basePass = @"../../../../Tests/SourceText/Map.txt"
         let map : int[] = Yard.Utils.OffsetMap.getMap basePass
         let line = 6
@@ -88,7 +87,7 @@ type UtilsTest () =
         Assert.AreEqual(column, actual.Column) 
 
     [<Test>]
-    member test.``Test for get map with empty line`` () =
+    member test.``Test for get Map with empty line`` () =
         try
             let basePass = @"../../../../Tests/SourceText/Map.txt"
             let map : int[] = Yard.Utils.OffsetMap.getMap basePass
@@ -98,13 +97,33 @@ type UtilsTest () =
             let actual = Yard.Utils.OffsetMap.getCoordinates map offset
             Assert.AreEqual(line, actual.Line)
             Assert.AreEqual(column, actual.Column)
-        with
+        with 
         | :? _ as ex -> ()
 
     [<Test>]
-    member test.``Test for get right map`` () =
+    member test.``Test for get right Map`` () =
         let basePass = @"../../../../Tests/SourceText/LittleMap.txt"
         let map : int[] = Yard.Utils.OffsetMap.getMap basePass
         let actual = [| 0; 10; 11; 28; 29; 43; 48 |]
         Assert.AreEqual(map, actual)
 
+    [<Test>]
+    member test.``Test for get right empty Map`` () =
+        let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
+        let map : int[] = Yard.Utils.OffsetMap.getMap basePass
+        let actual = [| 0 |]
+        Assert.AreEqual(map, actual)
+
+    [<Test>]
+    member test.``Test for empty Map`` () =
+        try
+            let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
+            let map : int[] = Yard.Utils.OffsetMap.getMap basePass
+            let line = 4
+            let column = 5
+            let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
+            let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+            Assert.AreEqual(line, actual.Line)
+            Assert.AreEqual(column, actual.Column)
+        with 
+        | :? _ as ex -> ()

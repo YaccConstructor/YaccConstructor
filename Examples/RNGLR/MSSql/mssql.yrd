@@ -94,6 +94,7 @@ proc_body_stmnt:
    | if_stmt
    | raiserror_stmnt
    | stmt_block
+   | KW_BEGIN proc_body_stmnt KW_END
 
 (***********************************STATEMENTS******************************************************)
 
@@ -226,7 +227,7 @@ select_list:
 		STAR 
 		| name DOT STAR 
 		| ( ( name DOT )? 
-			( name | "$IDENTITY" | "$ROWGUID" )  
+			( name | KW_IDENTITY | KW_ROWGUID )  
 			( ( DOT | DOUBLE_COLON ) 
 			( ( STRING_CONST | ident ) 
 			| name LPAREN comma_list<<sql_expr>> RPAREN ) )? 
@@ -447,7 +448,7 @@ unpivot_clause:
 	
 case:
 	KW_CASE sql_expr? 
-		KW_WHEN sql_expr KW_THEN list<< sql_expr >>
+		KW_WHEN sql_expr KW_THEN sql_expr*
 		( KW_ELSE sql_expr )? 
 		KW_END 
 
@@ -516,18 +517,18 @@ execute_stmnt:
 	|execute_command
 	
 execute_proc:
-	(KW_EXEC | KW_EXECUTE)?
-        ( 
-		(LOCALVAR OP_EQ)?
-		(full_ident (SEMI DEC_NUMBER)? | LOCALVAR ) 
-        comma_list<<((LOCALVAR OP_EQ)? 
-			(sql_expr		(*?????*)
-			| LOCALVAR KW_OUT? 
+	((KW_EXEC | KW_EXECUTE)?
+    ((LOCALVAR OP_EQ)?
+      (name (SEMI DEC_NUMBER)? | LOCALVAR) 
+        comma_list<<((ident OP_EQ)? 
+			(sql_expr 
+            | LOCALVAR KW_OUTPUT? 
             | KW_DEFAULT? 
             )
-                    )?>>
-        (KW_WITH KW_RECOMPILE)?
-        )
+        )?>>
+      (KW_WITH KW_RECOMPILE)
+    )SEMI?)
+	| (KW_EXEC | KW_EXECUTE)? STOREDPROCEDURE DOT IDENT LPAREN (comma_list<<((ident OP_EQ)? LOCALVAR)>>)? RPAREN
 
 execute_character_string:
 	(KW_EXEC | KW_EXECUTE) 

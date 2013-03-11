@@ -39,6 +39,7 @@ let makeIdent notKeyWord (name:string) =
   //else if prefix = "##" then GLOBALTEMPOBJ(name)
   else if name.[0] = '@' then LOCALVAR(name)
   //else if name.[0] = '#' then TEMPOBJ(name)
+  else if prefix = "%%" then STOREDPROCEDURE(name)
   else if notKeyWord then IDENT(name)
   else  match getKwToken name with
         | Some(kwToken) -> kwToken

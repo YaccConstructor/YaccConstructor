@@ -49,3 +49,4 @@ Examples/Calc/yc/TreeDump.dll
 Examples/Calc/yc/YardPrinter.dll
 Builder/workdir/*
 Examples/RNGLR/MSSql/stack.dot
+Examples/RNGLR/MSSql/*.dot.*

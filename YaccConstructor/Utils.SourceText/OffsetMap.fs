@@ -28,7 +28,6 @@ let getMap path =
         -> printfn "Unhandled Exception: %s" ex.Message
            [||]
 
-
 let getAbsoluteOffset (map : array<_>) line column =
     if line > map.Length - 1  || line < 1 then
         failwith ("Value of Line is out of Map's range")

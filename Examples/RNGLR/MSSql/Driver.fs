@@ -54,8 +54,20 @@ let Parse (srcFilePath:string) =
 let ParseAllDirectory (directoryName:string) =
     System.IO.Directory.GetFiles directoryName
     |> Array.iter Parse
-  
-  //do ParseAllDirecrory @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs
 
-do Parse @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"
+do 
+    let inPath = ref @"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"    
+    let parseDir = ref false
+    let commandLineSpecs =
+        ["-f", ArgType.String (fun s -> inPath := s), "Input file."
+         "-d", ArgType.String (fun s -> parseDir := true; inPath := s), "Input dir. Use for parse all files in specified directory."
+         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+    ArgParser.Parse commandLineSpecs
+
+    !inPath
+    |> if !parseDir
+       then ParseAllDirectory
+       else Parse
+    
+//@"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"
 //@"C:\Users\Anastasiya\Desktop\Projects\Reengineering\recursive-ascent\Tests\materials\ms-sql\sysprocs\sp_addserver.sql"

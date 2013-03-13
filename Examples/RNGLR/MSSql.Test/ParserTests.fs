@@ -58,11 +58,19 @@ type ``MS-SQL parser tests`` () =
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-    //  [<Test>]
+    [<Test>]
+    member test.``Begin transaction.`` () =
+        file "BeginTransaction.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Begin mark transaction.`` () =
+        file "MarkBeginTransaction.sql" |> runParserTest
+
+    [<Test>]
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-  //  [<Test>]
+    [<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 

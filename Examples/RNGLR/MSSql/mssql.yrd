@@ -23,12 +23,14 @@ include "../../../GrammarTemplates/Common.yrd"
 
 [<Start>]
 root_rule: 
-     list<<batch_body "GO">> "GO"?
+     list<<batch_body KW_GO?>> KW_GO?
 
 batch_body: 
    create_proc
  | set_stmnt
  | KW_USE LBRACKET "mdw_control" RBRACKET
+ | begin_transaction
+ | declare
   
 (*****************************************SET****************************************************)
 
@@ -95,6 +97,8 @@ proc_body_stmnt:
    | raiserror_stmnt
    | stmt_block
    | KW_BEGIN proc_body_stmnt KW_END
+   | begin_transaction
+   
 
 (***********************************STATEMENTS******************************************************)
 
@@ -117,6 +121,7 @@ declare:
 		| ident KW_CURSOR
 		| ident KW_AS? table_type_definition
     )>>
+	SEMI?
 
 table_type_definition: 
      KW_TABLE LPAREN (column_definition | table_constraint)* RPAREN 
@@ -150,7 +155,8 @@ select_stmnt:
     )? 
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
-	|KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
+	| KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
+	| KW_SELECT LOCALVAR OP_EQ STRING_CONST SEMI?
 	
 for:
 	(KW_FOR (KW_BROWSE | xml))?
@@ -493,24 +499,17 @@ drop_clustered_constraint_option:
           | "default")
     )
 *)
-(*
 begin_transaction:
-KW_BEGIN ( KW_TRAN | KW_TRANSACTION ) 
-    ( ( ident | LOCALVAR )     (*????????/*)
-      ( KW_WITH KW_MARK ( STRING_CONST ) )?
-    )?
-( SEMI )?      (* proc_body_stmt?*)
+	KW_BEGIN (TRAN | TRANSACTION) 
+		((IDENT | LOCALVAR)
+		  (KW_WITH KW_MARK STRING_CONST?)?
+		)?
+	SEMI?
 
-rollback:
-KW_ROLLBACK ( KW_TRAN | KW_TRANSACTION ) 
-     ( ident)? 
-( SEMI )?
-commit:
-KW_COMMIT ( KW_TRAN | KW_TRANSACTION ) ( transaction_name | @tran_name_variable )?  (*????????/*)
-( SEMI )?
-	*)
-
-
+commit_transaction:
+	KW_COMMIT (KW_TRAN | KW_TRANSACTION) ( IDENT | LOCALVAR )? 
+	SEMI?
+	
 execute_stmnt:
 	execute_proc
 	|execute_character_string
@@ -522,11 +521,11 @@ execute_proc:
       (name (SEMI DEC_NUMBER)? | LOCALVAR) 
         comma_list<<((ident OP_EQ)? 
 			(sql_expr 
-            | LOCALVAR KW_OUTPUT? 
+            | LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT? 
             )
         )?>>
-      (KW_WITH KW_RECOMPILE)
+      (KW_WITH KW_RECOMPILE)?
     )SEMI?)
 	| (KW_EXEC | KW_EXECUTE)? STOREDPROCEDURE DOT IDENT LPAREN (comma_list<<((ident OP_EQ)? LOCALVAR)>>)? RPAREN
 
@@ -584,6 +583,7 @@ sql_expr:
 	| aggregate_windowed_function
 	| sql_expr KW_COLLATE ident
 	| case
+	| begin_transaction
 	
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN

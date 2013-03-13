@@ -10,7 +10,8 @@
     <RootNamespace>Calc</RootNamespace>
     <AssemblyName>Calc</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <Name>Calc</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -31,12 +32,16 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\Calc.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+  <Import Project="..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <FsLex Include="Lexer.fsl">
@@ -47,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
-      <HintPath>..\yc\FSharp.PowerPack.dll</HintPath>
+      <HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />

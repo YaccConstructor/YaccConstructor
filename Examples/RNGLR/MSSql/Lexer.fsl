@@ -48,35 +48,35 @@ let label = ident ':'
 
 
 rule tokens = parse
- | eol          { tokens lexbuf }
+ | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | string_const { Printf.printf "string_const: %s\n" (LexBuffer<_>.LexemeString(lexbuf))
-                  STRING_CONST(LexBuffer<_>.LexemeString(lexbuf)) }
+                  STRING_CONST(defaultSourceText lexbuf (LexBuffer<_>.LexemeString(lexbuf))) }
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
-                  DEC_NUMBER(LexBuffer<_>.LexemeString(lexbuf) ) }
+                  DEC_NUMBER(defaultSourceText lexbuf  (LexBuffer<_>.LexemeString(lexbuf))) }
  | whitespaces  { tokens lexbuf }
- | "."          { DOT(".") }
- | ","          { COMMA(",") }
- | "="          { OP_EQ("=") }
- | ">"          { OP_MT(">") }
- | "<"          { OP_LT("<") }
- | ";"          { SEMI(";") }
- | "("      { LPAREN("(") }
- | ")"      { RPAREN(")") }
- | "["      { LBRACKET("[") }
- | "]"      { RBRACKET("]") }
- | "+"      { OP_PLUS("+") }
- | "-"      { OP_MINUS("-") }
- | "~"      { OP_TILDA("~") }
- | "*"      { STAR("*") }
- //| "$"      { DOLLAR("$") } 
+ | "."          { DOT(defaultSourceText lexbuf ".") }
+ | ","          { COMMA(defaultSourceText lexbuf ",") }
+ | "="          { OP_EQ(defaultSourceText lexbuf "=") }
+ | ">"          { OP_MT(defaultSourceText lexbuf ">") }
+ | "<"          { OP_LT(defaultSourceText lexbuf "<") }
+ | ";"          { SEMI(defaultSourceText lexbuf ";") }
+ | "("      { LPAREN(defaultSourceText lexbuf "(") }
+ | ")"      { RPAREN(defaultSourceText lexbuf ")") }
+ | "["      { LBRACKET(defaultSourceText lexbuf "[") }
+ | "]"      { RBRACKET(defaultSourceText lexbuf "]") }
+ | "+"      { OP_PLUS(defaultSourceText lexbuf "+") }
+ | "-"      { OP_MINUS(defaultSourceText lexbuf "-") }
+ | "~"      { OP_TILDA(defaultSourceText lexbuf "~") }
+ | "*"      { STAR(defaultSourceText lexbuf "*") }
+ //| "$"      { DOLLAR(defaultSourceText lexbuf "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
             let hasdot = l.IndexOf '.' <> -1
-            match makeIdent false l with
+            match makeIdent false l (lexbuf.StartPos, lexbuf.EndPos) with
             | x -> x
          }
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }
- | eof  {EOF("")}
+ | eof  {EOF(defaultSourceText lexbuf  "")}
  | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
 and multiline_comment = parse
   | "/*" 

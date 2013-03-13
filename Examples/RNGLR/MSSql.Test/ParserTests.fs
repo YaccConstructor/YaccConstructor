@@ -20,13 +20,15 @@
 module ParserTests
 
 open NUnit.Framework
+open LexerHelper
+
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let msg = sprintf "Error in file %s on position %d on Token %A: %s" file num tok msg
+            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (tokenPos tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
         | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -59,6 +61,7 @@ type ``MS-SQL parser tests`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
     [<Test>]
+<<<<<<< HEAD
     member test.``Begin transaction.`` () =
         file "BeginTransaction.sql" |> runParserTest
 
@@ -67,6 +70,8 @@ type ``MS-SQL parser tests`` () =
         file "MarkBeginTransaction.sql" |> runParserTest
 
     [<Test>]
+=======
+>>>>>>> fbfbd5c6e01eb5f834265f5849446514ce56d22e
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
@@ -74,15 +79,15 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-  //  [<Test>]
+    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
-   // [<Test>]
+    [<Test>]
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 
-   // [<Test>]
+    [<Test>]
     member test.``sp_autostats complex test.`` () =
         complexSpFile "sp_autostats.sql" |> runParserTest
 

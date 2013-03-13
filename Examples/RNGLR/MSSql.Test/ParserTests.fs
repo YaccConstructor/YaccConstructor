@@ -61,7 +61,6 @@ type ``MS-SQL parser tests`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
     [<Test>]
-<<<<<<< HEAD
     member test.``Begin transaction.`` () =
         file "BeginTransaction.sql" |> runParserTest
 
@@ -70,8 +69,6 @@ type ``MS-SQL parser tests`` () =
         file "MarkBeginTransaction.sql" |> runParserTest
 
     [<Test>]
-=======
->>>>>>> fbfbd5c6e01eb5f834265f5849446514ce56d22e
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 

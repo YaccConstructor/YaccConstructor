@@ -523,11 +523,7 @@ execute_proc:
       (name (SEMI DEC_NUMBER)? | LOCALVAR) 
         comma_list<<((ident OP_EQ)? 
 			(sql_expr 
-<<<<<<< HEAD
             | LOCALVAR (KW_OUTPUT | KW_OUT)? 
-=======
-            | LOCALVAR (KW_OUTPUT|KW_OUT)? 
->>>>>>> fbfbd5c6e01eb5f834265f5849446514ce56d22e
             | KW_DEFAULT? 
             )
         )?>>

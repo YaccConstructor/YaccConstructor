@@ -48,7 +48,13 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
         | None -> IDENT(defaultSourceText)
 
 let tokenPos token =
-    match token with    
+    match token with
+    | KW_COMMIT (_,(x,y))
+    | KW_MARK (_,(x,y))
+    | KW_TRAN (_,(x,y))
+    | TRAN (_,(x,y))
+    | KW_TRANSACTION (_,(x,y))
+    | TRANSACTION (_,(x,y))
     | COMMA (_,(x,y))
     | DEC_NUMBER (_,(x,y))
     | DOT (_,(x,y))

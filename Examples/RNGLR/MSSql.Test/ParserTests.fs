@@ -60,8 +60,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-    [<Test>]
-<<<<<<< HEAD
+    //[<Test>]
     member test.``Begin transaction.`` () =
         file "BeginTransaction.sql" |> runParserTest
 
@@ -70,24 +69,22 @@ type ``MS-SQL parser tests`` () =
         file "MarkBeginTransaction.sql" |> runParserTest
 
     [<Test>]
-=======
->>>>>>> fbfbd5c6e01eb5f834265f5849446514ce56d22e
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
-    [<Test>]
+   //[<Test>]
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``sp_autostats complex test.`` () =
         complexSpFile "sp_autostats.sql" |> runParserTest
 

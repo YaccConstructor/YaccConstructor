@@ -36,9 +36,9 @@ let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
 let string_const = '\'' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' '_' '.' '=' ',' '\'']* '\'' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'а'-'я' 'А'-'Я' ] 
-let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '#' '$' 'а'-'я' 'А'-'Я' ] 
+let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'а'-'я' 'А'-'Я' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
-let with_dot = '.' | idenbody_char
+//let with_dot = '.' | idenbody_char
 let ident = idenstarchar idenbody_char*
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+

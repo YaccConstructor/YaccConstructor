@@ -52,7 +52,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Create procedure without parameters.`` () =
         file "CreateProcWithoutParams.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``Select local var.`` () =
         file "SelectLocalVar.sql" |> runParserTest
 
@@ -76,11 +76,11 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 

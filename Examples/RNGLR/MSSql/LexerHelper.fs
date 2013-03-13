@@ -118,7 +118,6 @@ let tokenPos token =
     | KW_EXEC (_,(x,y))
     | KW_EXECUTE (_,(x,y))
     | KW_EXECUTE_AS_Clause (_,(x,y))
-    | KW_EXIST (_,(x,y))
     | KW_EXISTS (_,(x,y))
     | KW_EXPAND (_,(x,y))
     | KW_EXPLICIT (_,(x,y))

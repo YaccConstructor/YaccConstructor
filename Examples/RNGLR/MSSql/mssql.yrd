@@ -32,6 +32,7 @@ batch_body:
  | set_stmnt
  | KW_USE LBRACKET "mdw_control" RBRACKET
  | begin_transaction
+ | commit_transaction
  | declare
   
 (*****************************************SET****************************************************)
@@ -502,8 +503,8 @@ drop_clustered_constraint_option:
     )
 *)
 begin_transaction:
-	KW_BEGIN (TRAN | TRANSACTION) 
-		((IDENT | LOCALVAR)
+	KW_BEGIN (KW_TRAN | KW_TRANSACTION) 
+		((ident | LOCALVAR)
 		  (KW_WITH KW_MARK STRING_CONST?)?
 		)?
 	SEMI?

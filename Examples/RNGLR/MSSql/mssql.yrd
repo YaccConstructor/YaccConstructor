@@ -34,6 +34,7 @@ batch_body:
  | begin_transaction
  | commit_transaction
  | declare
+ | case (**&&&***)
   
 (*****************************************SET****************************************************)
 
@@ -108,7 +109,15 @@ proc_body_stmnt:
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF KW_NOT? KW_EXIST? sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF KW_IS? KW_NOT? KW_EXISTS? sql_expr ((KW_OR | KW_AND) sql_expr)? proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+
+(*if @grpname is not null and
+           not exists (select * from sysusers where name = @grpname and issqlrole = 1)
+    begin
+            raiserror(15014,-1,-1,@grpname)
+            return (1)
+    end*)
+
 
 raiserror_stmnt:
     KW_RAISERROR LPAREN ( dec_num | STRING_CONST | LOCALVAR )
@@ -160,7 +169,8 @@ select_stmnt:
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
 	| KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-	| KW_SELECT LOCALVAR OP_EQ STRING_CONST SEMI?
+	|KW_SELECT (STAR | IDENT) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
+     
 	
 for:
 	(KW_FOR (KW_BROWSE | xml))?
@@ -457,8 +467,8 @@ unpivot_clause:
  
 	
 case:
-	KW_CASE sql_expr? 
-		KW_WHEN sql_expr KW_THEN sql_expr*
+	KW_CASE sql_expr?
+		(KW_WHEN sql_expr KW_THEN sql_expr)*
 		( KW_ELSE sql_expr )? 
 		KW_END 
 
@@ -592,6 +602,8 @@ sql_expr:
 	| sql_expr KW_COLLATE ident
 	| case
 	| begin_transaction
+	| KW_NOT? KW_EXISTS sql_expr
+	| KW_NOT? KW_IS_MEMBER LPAREN STRING_CONST RPAREN
 	
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN

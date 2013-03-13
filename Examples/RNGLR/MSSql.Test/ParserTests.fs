@@ -52,6 +52,10 @@ type ``MS-SQL parser tests`` () =
     member test.``Create procedure without parameters.`` () =
         file "CreateProcWithoutParams.sql" |> runParserTest
 
+    //[<Test>]
+    member test.``Select local var.`` () =
+        file "SelectLocalVar.sql" |> runParserTest
+
     [<Test>]
     member test.``Create procedure.`` () =
         file "CreateProc.sql" |> runParserTest
@@ -60,7 +64,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-    //[<Test>]
+    [<Test>]
     member test.``Begin transaction.`` () =
         file "BeginTransaction.sql" |> runParserTest
 
@@ -80,7 +84,7 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
-   //[<Test>]
+    [<Test>]
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 

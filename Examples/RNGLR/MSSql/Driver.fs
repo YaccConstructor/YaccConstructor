@@ -57,7 +57,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"    
+    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"
     let parseDir = ref false
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> inPath := s), "Input file."
@@ -70,5 +70,6 @@ do
        then ParseAllDirectory
        else Parse
     
+//@"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql" 
 //@"..\..\..\..\..\Tests\Materials\ms-sql\sqlsrvanalysissrvcs\MonitoringSSAS\config_data_server\get_query_text.sql"
 //@"C:\Users\Anastasiya\Desktop\Projects\Reengineering\recursive-ascent\Tests\materials\ms-sql\sysprocs\sp_addserver.sql"

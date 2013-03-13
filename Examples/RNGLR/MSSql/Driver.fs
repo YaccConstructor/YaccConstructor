@@ -22,6 +22,7 @@ module MSSqlParser
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
+open LexerHelper
 
 let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
@@ -40,7 +41,7 @@ let justParse (path:string) =
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
-        printfn "Error in file %s on position %d on Token %A: %s" srcFilePath num tok msg
+        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (tokenPos tok) (tok.GetType()) msg
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
         ast.collectWarnings (fun x -> 0,0)
@@ -56,7 +57,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addlogin.sql"    
+    let inPath = ref @"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"    
     let parseDir = ref false
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> inPath := s), "Input file."

@@ -20,13 +20,15 @@
 module ParserTests
 
 open NUnit.Framework
+open LexerHelper
+
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let msg = sprintf "Error in file %s on position %d on Token %A: %s" file num tok msg
+            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (tokenPos tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
         | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -58,23 +60,23 @@ type ``MS-SQL parser tests`` () =
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
-    //  [<Test>]
+    [<Test>]
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
 
-  //  [<Test>]
+    [<Test>]
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-  //  [<Test>]
+    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
-   // [<Test>]
+    [<Test>]
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 
-   // [<Test>]
+    [<Test>]
     member test.``sp_autostats complex test.`` () =
         complexSpFile "sp_autostats.sql" |> runParserTest
 

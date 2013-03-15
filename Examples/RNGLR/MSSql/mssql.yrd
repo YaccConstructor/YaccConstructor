@@ -36,7 +36,12 @@ batch_body:
  | commit_transaction
  | declare
  | case (**&&&***)
+ | rollback_transaction
   
+rollback_transaction:
+	KW_ROLLBACK (KW_TRAN | KW_TRANSACTION) 
+		 (IDENT | LOCALVAR)? 
+	SEMI?
 (*****************************************SET****************************************************)
 
 set_stmnt:
@@ -612,6 +617,7 @@ sql_expr:
 	| KW_TYPE KW_FROM full_ident
 	| IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA 
     | fetch_stmnt
+	| IDENT LPAREN? RPAREN KW_IN LPAREN dec_num COMMA dec_num RPAREN
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
 

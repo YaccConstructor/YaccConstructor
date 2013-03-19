@@ -81,16 +81,15 @@ set_localvar:
 drop_procedure: KW_DROP ( KW_PROC | KW_PROCEDURE ) ( (ident DOT)? ident)+
 
 proc_formal_param:
-      LOCALVAR (full_ident DOT)? sql_datatype?
-      KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
-      (KW_OUT | KW_OUTPUT)? KW_READONLY?          
+	LOCALVAR (full_ident DOT)? sql_datatype?
+	KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
+	(KW_OUT | KW_OUTPUT)? KW_READONLY? 	
   
 create_proc:
     KW_CREATE (KW_PROCEDURE | KW_PROC)
-    (ident DOT)? ident (SEMI DEC_NUMBER)?  
-    (brace_opt<<LPAREN (comma_list<<proc_formal_param>>) RPAREN>>)? 
+    (ident DOT)? ident (SEMI DEC_NUMBER)? LPAREN?
+    (comma_list<<proc_formal_param>>)? RPAREN?
     (KW_WITH (execute_as)+ )? 
-    (*(KW_WITH list<<procedure_option COMMA>>)?*)
     ( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
     SEMI?
@@ -120,7 +119,8 @@ proc_body_stmnt:
 (***********************************STATEMENTS******************************************************)
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
-if_stmt: KW_IF LPAREN? sql_expr ((KW_OR | KW_AND) sql_expr)? RPAREN? proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+
+if_stmt: KW_IF LPAREN? sql_expr ((KW_OR | KW_AND) sql_expr)* RPAREN? proc_body_stmnt (KW_ELSE proc_body_stmnt)?
                 
 
 raiserror_stmnt:
@@ -165,7 +165,7 @@ table_constraint:
 select_stmnt:  
     ((KW_WITH comma_list<<common_table_expression>>)?
     query_expression 
-    (KW_ORDER KW_BY comma_list<<(full_ident|DEC_NUMBER (KW_ASC | KW_DESC)?)>>)? 
+    (KW_ORDER KW_BY comma_list<<( (ident| IDENT | DEC_NUMBER) (KW_ASC | KW_DESC)?)>>)? 
     (KW_COMPUTE 
         comma_list<<( (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) LPAREN sql_expr RPAREN)>> 
         (KW_BY comma_list<<sql_expr>>)? 
@@ -280,9 +280,9 @@ order_by_clause:
 
     
 search_condition: 
-    KW_NOT? predicate | LPAREN search_condition RPAREN 
-    (comma_list<<((KW_AND | KW_OR) KW_NOT? (predicate | LPAREN search_condition RPAREN))>>)?
-    (*where object_id = object_id(@tblname, 'local') and (type = 'U' or type = 'V' or type = 'IT')*)
+    ( KW_NOT? predicate | LPAREN search_condition RPAREN )
+    ((KW_AND | KW_OR) KW_NOT? (predicate | LPAREN search_condition RPAREN))*
+	
 predicate: 
     sql_expr binop sql_expr 
     | STRING_CONST KW_NOT? KW_LIKE STRING_CONST                     
@@ -292,6 +292,7 @@ predicate:
     | sql_expr binop                     
         (KW_ALL | KW_SOME | KW_ANY) LPAREN query_expression RPAREN            
     | KW_EXISTS LPAREN query_expression RPAREN  
+	| IDENT (DOT IDENT)? (LPAREN RPAREN)? KW_IN LPAREN ((dec_num | STRING_CONST) COMMA (dec_num | STRING_CONST)) RPAREN
 
 from:
     ( KW_FROM comma_list<<table_source>> )? 
@@ -475,7 +476,105 @@ case:
         (KW_WHEN sql_expr KW_THEN sql_expr)*
         ( KW_ELSE sql_expr )? 
     KW_END 
+(*****************************************CREATE TABLE****************************************************)
+(*
+create_table:
+	KW_CREATE KW_TABLE 
+		( IDENT DOT IDENT? DOT? )? IDENT 
+			LPAREN ( column_definition | computed_column_definition )
+			comma_list<<table_constraint>>? RPAREN 
+		( KW_ON ( IDENT LPAREN IDENT RPAREN | IDENT 
+			| KW_DEFAULT ) )? 
+		( KW_TEXTIMAGE_ON (IDENT | KW_DEFAULT) )?
+	SEMI?
 
+column_definition:
+	IDENT data_type
+		(KW_COLLATE IDENT)? 
+		( KW_NULL | KW_NOT KW_NULL )?
+		( 
+			( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
+		  | ( KW_IDENTITY ( LPAREN sql_expr COMMA sql_expr RPAREN )? ( KW_NOT KW_FOR KW_REPLICATION )?  (*????????*)
+		)?
+		( KW_ROWGUIDCOL )? column_constraint* 
+
+data type: 
+	( IDENT DOT ) IDENT 
+		( LPAREN precision ( , scale )? | max | 
+			[ { CONTENT | DOCUMENT } ] xml_schema_collection RPAREN )? 
+
+	<column_constraint> ::= 
+	[ CONSTRAINT constraint_name ] 
+	{     { PRIMARY KEY | UNIQUE } 
+			[ CLUSTERED | NONCLUSTERED ] 
+			[ 
+				WITH FILLFACTOR = fillfactor  
+			  | WITH LPAREN < index_option > [ , ...n ] RPAREN 
+
+			]
+			[ ON { partition_scheme_name LPAREN partition_column_name RPAREN 
+				| filegroup | "default" } ]
+	  | [ FOREIGN KEY ] 
+			REFERENCES [ schema_name . ] referenced_table_name [ LPAREN ref_column RPAREN ] 
+			[ ON DELETE { NO ACTION | CASCADE | SET NULL | SET DEFAULT } ] 
+			[ ON UPDATE { NO ACTION | CASCADE | SET NULL | SET DEFAULT } ] 
+			[ NOT FOR REPLICATION ] 
+	  | CHECK [ NOT FOR REPLICATION ] LPAREN logical_expression RPAREN 
+	} 
+
+	<computed_column_definition> ::=
+	column_name AS computed_column_expression 
+	[ PERSISTED [ NOT NULL ] ]
+	[ 
+		[ CONSTRAINT constraint_name ]
+		{ PRIMARY KEY | UNIQUE }
+			[ CLUSTERED | NONCLUSTERED ]
+			[ 
+				WITH FILLFACTOR = fillfactor 
+			  | WITH LPAREN <index_option> [ , ...n ] RPAREN
+			]
+			[ ON { partition_scheme_name LPAREN partition_column_name RPAREN 
+				| filegroup | "default" } ]
+		| [ FOREIGN KEY ] 
+			REFERENCES referenced_table_name [ LPAREN ref_column RPAREN ] 
+			[ ON DELETE { NO ACTION | CASCADE } ] 
+			[ ON UPDATE { NO ACTION } ] 
+			[ NOT FOR REPLICATION ] 
+		| CHECK [ NOT FOR REPLICATION ] LPAREN logical_expression RPAREN 
+	] 
+
+	< table_constraint > ::=
+	[ CONSTRAINT constraint_name ] 
+	{ 
+		{ PRIMARY KEY | UNIQUE } 
+			[ CLUSTERED | NONCLUSTERED ] 
+
+					LPAREN column [ ASC | DESC ] [ ,...n ] RPAREN 
+			[ 
+				WITH FILLFACTOR = fillfactor 
+			   |WITH LPAREN <index_option> [ , ...n ] RPAREN 
+			]
+			[ ON { partition_scheme_name LPAREN partition_column_name RPAREN
+				| filegroup | "default" } ] 
+		| FOREIGN KEY 
+					LPAREN column [ ,...n ] RPAREN 
+			REFERENCES referenced_table_name [ LPAREN ref_column [ ,...n ] RPAREN ] 
+			[ ON DELETE { NO ACTION | CASCADE | SET NULL | SET DEFAULT } ] 
+			[ ON UPDATE { NO ACTION | CASCADE | SET NULL | SET DEFAULT } ] 
+			[ NOT FOR REPLICATION ] 
+		| CHECK [ NOT FOR REPLICATION ] LPAREN logical_expression RPAREN 
+	} 
+
+	<index_option> ::=
+	{ 
+		PAD_INDEX = { ON | OFF } 
+	  | FILLFACTOR = fillfactor 
+	  | IGNORE_DUP_KEY = { ON | OFF } 
+	  | STATISTICS_NORECOMPUTE = { ON | OFF } 
+	  | ALLOW_ROW_LOCKS = { ON | OFF} 
+	  | ALLOW_PAGE_LOCKS ={ ON | OFF} 
+	}*)
+		
 (*****************************************ALTER TABLE****************************************************)
 (*ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
 ( 
@@ -624,6 +723,7 @@ sql_expr:
 (*    | IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA *)
     | fetch_stmnt
     | sql_expr KW_IN LPAREN comma_list<<sql_expr>> RPAREN
+	
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>>? RPAREN
 
@@ -640,6 +740,6 @@ sql_value:
    
 
 (* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
-ident: brace_opt<<LBRACKET (IDENT|KW_TYPE) RBRACKET>>
+ident: brace_opt<<LBRACKET (IDENT | KW_TYPE | KW_CLASS | KW_STATE | KW_OWNER) RBRACKET>>
 
 full_ident: not_empty_list<<ident DOT>>

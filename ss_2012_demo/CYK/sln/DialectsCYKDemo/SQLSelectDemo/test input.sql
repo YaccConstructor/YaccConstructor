@@ -1,1 +1,0 @@
-SELECT a AS b FROM tableName

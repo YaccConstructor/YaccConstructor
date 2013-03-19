@@ -84,7 +84,7 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-    //[<Test>]
+    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
@@ -117,7 +117,7 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_password.sql" |> runParserTest
 
     
-    //[<Test>]
+    [<Test>]
     member test.``sp_revokedbaccess complex test.`` () =
         complexSpFile "sp_revokedbaccess.sql" |> runParserTest
 

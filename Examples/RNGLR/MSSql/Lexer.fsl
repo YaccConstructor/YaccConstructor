@@ -33,7 +33,7 @@ let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] +
 let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
-let string_const = '\'' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' ' ' '_' '.' '=' ',' '[' ']' ':' '\'']* '\'' (* TODO: support line like 'aaa''aa' *)
+let string_const = ('N''\''|'\'') ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' '>' '<' ' ' '_' '.' '=' ',' '[' ']' '(' ')' ':' '\'']* '\'' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'à'-'ÿ' 'À'-'ß' ] 
 let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'à'-'ÿ' 'À'-'ß' ] 

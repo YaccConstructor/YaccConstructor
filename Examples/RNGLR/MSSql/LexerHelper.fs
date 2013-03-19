@@ -49,6 +49,19 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
 
 let tokenPos token =
     match token with
+    | KW_DROP(_,(x,y))
+    | KW_ABSOLUTE(_,(x,y))
+    | KW_FETCH(_,(x,y))
+    | KW_FETCH(_,(x,y))
+    | KW_FIRST(_,(x,y))
+    | KW_GLOBAL(_,(x,y))
+    | KW_IS_MEMBER(_,(x,y))
+    | KW_LAST(_,(x,y))
+    | KW_LOCAL(_,(x,y))
+    | KW_NEXT(_,(x,y))
+    | KW_PRIOR(_,(x,y))
+    | KW_RELATIVE(_,(x,y))
+    | KW_ROLLBACK(_,(x,y))
     | KW_COMMIT (_,(x,y))
     | KW_MARK (_,(x,y))
     | KW_TRAN (_,(x,y))    
@@ -323,7 +336,6 @@ let tokenPos token =
     | OP_MOD (_,(x,y))
     | OP_MOD_EQ (_,(x,y))
     | OP_MT (_,(x,y))
-    | OP_MUL (_,(x,y))
     | OP_MUL_EQ (_,(x,y))
     | OP_OR_EQ (_,(x,y))
     | OP_PLUS (_,(x,y))

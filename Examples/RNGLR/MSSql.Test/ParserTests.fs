@@ -117,7 +117,7 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_password.sql" |> runParserTest
 
     
-    //[<Test>]
+    [<Test>]
     member test.``sp_revokedbaccess complex test.`` () =
         complexSpFile "sp_revokedbaccess.sql" |> runParserTest
 

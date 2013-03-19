@@ -618,7 +618,7 @@ sql_expr:
 	| KW_TYPE KW_FROM full_ident
 	| IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA 
     | fetch_stmnt
-	| IDENT LPAREN? RPAREN KW_IN LPAREN dec_num COMMA dec_num RPAREN
+	| IDENT LPAREN? RPAREN KW_IN LPAREN (dec_num | STRING_CONST) COMMA (dec_num | STRING_CONST) RPAREN
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
 

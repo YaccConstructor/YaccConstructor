@@ -45,6 +45,11 @@ type ``MS-SQL parser tests`` () =
         file "TopLevelSet.sql" |> runParserTest
 
     [<Test>]
+    member test.``Case statement.`` () =
+        file "CaseStmt.sql" |> runParserTest
+
+
+    [<Test>]
     member test.``Top level sets.`` () =
         file "TopLevelSets.sql" |> runParserTest
 

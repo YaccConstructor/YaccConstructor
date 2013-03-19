@@ -33,7 +33,7 @@ let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] +
 let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
-let string_const = ('N''\''|'\'') ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' '>' '<' ' ' '_' '.' '=' ',' '[' ']' '(' ')' ':' '\'']* '\'' (* TODO: support line like 'aaa''aa' *)
+// let string_const = '\'' ['a'-'z' 'A'-'Z' '0'-'9' '-' '+' '*' '/' '%' '>' '<' ' ' '_' '.' '=' ',' '[' ']' '(' ')' ':' ]* '\'' (* TODO: support line like 'aaa''aa' *)
 let whitespaces = [' '  '\t']+
 let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'à'-'ÿ' 'À'-'ß' ] 
 let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'à'-'ÿ' 'À'-'ß' ] 
@@ -49,8 +49,9 @@ let label = ident ':'
 
 rule tokens = parse
  | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
- | string_const { Printf.printf "string_const: %s\n" (LexBuffer<_>.LexemeString(lexbuf))
-                  STRING_CONST(defaultSourceText lexbuf (LexBuffer<_>.LexemeString(lexbuf))) }
+ | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf }
+ // | string_const { Printf.printf "string_const: %s\n" (LexBuffer<_>.LexemeString(lexbuf))
+ //                  STRING_CONST(defaultSourceText lexbuf (LexBuffer<_>.LexemeString(lexbuf))) }
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
                   DEC_NUMBER(defaultSourceText lexbuf  (LexBuffer<_>.LexemeString(lexbuf))) }
  | whitespaces  { tokens lexbuf }
@@ -78,6 +79,12 @@ rule tokens = parse
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }
  | eof  {EOF(defaultSourceText lexbuf  "")}
  | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
+and literal = parse
+  | "''" { appendBuf("'"); literal lexbuf }
+  | '\'' { STRING_CONST(defaultSourceText lexbuf (string str_buf)) }
+  | eol { appendBuf(lexeme lexbuf); lexbuf.EndPos <- lexbuf.EndPos.NextLine; literal lexbuf }
+  | eof { failwith "unclosed literal at the end of file" }
+  | _ { appendBuf(lexeme lexbuf); literal lexbuf }
 and multiline_comment = parse
   | "/*" 
     { incr commendepth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}

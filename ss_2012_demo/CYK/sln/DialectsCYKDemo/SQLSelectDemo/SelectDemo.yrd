@@ -1,0 +1,4 @@
++s : select;
+
+select : SELECT (STAR|ident) FROM ident;
+ident : IDENT | @l1(IDENT AS IDENT);

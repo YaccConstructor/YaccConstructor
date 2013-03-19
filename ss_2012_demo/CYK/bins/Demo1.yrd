@@ -1,0 +1,4 @@
+﻿+s :  NUM (PLUS|MULT|pow )s
+   | NUM;
+
+pow : @l1(BAR) | @l2(STAR);

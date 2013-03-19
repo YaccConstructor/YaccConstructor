@@ -241,6 +241,7 @@ let tokenPos token =
     | KW_RETURN (_,(x,y))
     | KW_RIGHT (_,(x,y))
     | KW_ROBUST (_,(x,y))
+    | KW_ROLLBACK (_,(x,y))
     | KW_ROLLUP (_,(x,y))
     | KW_ROOT (_,(x,y))
     | KW_ROWGUID (_,(x,y))

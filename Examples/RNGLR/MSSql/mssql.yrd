@@ -39,7 +39,7 @@ batch_body:
  | rollback_transaction
   
 rollback_transaction:
-	KW_ROLLBACK (KW_TRAN | KW_TRANSACTION) 
+	KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 
 		 (IDENT | LOCALVAR)? 
 	SEMI?
 (*****************************************SET****************************************************)
@@ -109,6 +109,7 @@ proc_body_stmnt:
    | KW_BEGIN proc_body_stmnt KW_END
    | begin_transaction
    | commit_transaction
+   | rollback_transaction
    
 
 (***********************************STATEMENTS******************************************************)

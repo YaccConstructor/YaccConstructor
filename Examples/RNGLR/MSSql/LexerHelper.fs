@@ -24,6 +24,8 @@ let getKwToken =
         ucis.TryGetValue' upperName
         |> Option.map (fun ctor ->  ctor [| fst defaultSourceText; snd defaultSourceText |] :?>Token)
 
+let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+
 let commendepth = ref 0
 let startPos = ref Position.Empty
 let str_buf = new System.Text.StringBuilder()
@@ -49,6 +51,7 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
 
 let tokenPos token =
     match token with
+    | KW_DATETIME(_,(x,y))
     | KW_DROP(_,(x,y))
     | KW_ABSOLUTE(_,(x,y))
     | KW_FETCH(_,(x,y))

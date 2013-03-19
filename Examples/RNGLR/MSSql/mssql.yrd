@@ -37,7 +37,7 @@ batch_body:
  | declare
  | case (**&&&***)
  | rollback_transaction
- | if_stmt
+ (* | if_stmt *)
  | drop_procedure 
   
 rollback_transaction:
@@ -474,7 +474,7 @@ case:
     KW_CASE sql_expr?
         (KW_WHEN sql_expr KW_THEN sql_expr)*
         ( KW_ELSE sql_expr )? 
-        KW_END 
+    KW_END 
 
 (*****************************************ALTER TABLE****************************************************)
 (*ALTER TABLE ( ident DOT ( ident )? DOT | ident DOT )? ident 
@@ -621,11 +621,11 @@ sql_expr:
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident
-    | IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA 
+(*    | IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA *)
     | fetch_stmnt
-    | IDENT LPAREN? RPAREN KW_IN LPAREN (dec_num | STRING_CONST) COMMA (dec_num | STRING_CONST) RPAREN
+    | sql_expr KW_IN LPAREN comma_list<<sql_expr>> RPAREN
 
-call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
+call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>>? RPAREN
 
 comma_list<<item>>: list<<item COMMA>>
 

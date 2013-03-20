@@ -182,13 +182,6 @@ let () =
             let result =  
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
-                let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
-                if undeclaredNonterminals.Length > 0 then
-                    String.concat "\n" undeclaredNonterminals
-                    |> eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"                      
-
-//                    |> CheckerError
-  //                  |> raise
                 //try
                 match !generatorParams with
                 | None -> gen.Generate !ilTree

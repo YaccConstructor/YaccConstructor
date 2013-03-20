@@ -720,7 +720,6 @@ sql_expr:
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident
-(*    | IDENT LPAREN RPAREN KW_IN LPAREN DEC_NUMBER COMMA *)
     | fetch_stmnt
     | sql_expr KW_IN LPAREN comma_list<<sql_expr>> RPAREN
 	

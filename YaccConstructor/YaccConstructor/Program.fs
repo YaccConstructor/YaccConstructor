@@ -20,6 +20,7 @@ module YaccConstructor.Program
 
 open Yard.Core
 open Yard.Core.IL
+open Yard.Core.Helpers
 open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
@@ -124,10 +125,44 @@ let () =
                 //with
                 //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
 
+            let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
+            if undeclaredRules.Length > 0 then
+                eprintfn  "Input grammar contains some undeclared nonterminals:"
+                undeclaredRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                            |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                            |> String.concat "; ")
+                )
+            if repeatedInnerRules.Length > 0 then
+                eprintfn  "There are more then one rule in one module for some nonterminals:"
+                repeatedInnerRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
+                )
+            if repeatedExportRules.Length > 0 then
+                eprintfn  "There are rules, exported from different modules:"
+                repeatedExportRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                        |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                        |> String.concat "; ")
+                )
 //            printfn "%A" <| ilTree
+            let lostSources = ref false
+            // Let possible to know, after what conversion we lost reference to original code
+            let checkSources name il = 
+                if not !lostSources then
+                    match sourcesWithoutFileNames il with
+                    | [] -> ()
+                    | x ->
+                        lostSources := true
+                        x |> List.map(fun s -> s.text) |> String.concat "\n"
+                        |> printfn "Lost sources after frontend or conversion %s:\n %s" name
+            checkSources fe.Name !ilTree
             // Apply Conversions
-            Seq.iter (fun conv -> ilTree := (ConversionsManager.ApplyConversion conv !ilTree)) conversions
-
+            for conv in conversions do
+                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
             let gen =

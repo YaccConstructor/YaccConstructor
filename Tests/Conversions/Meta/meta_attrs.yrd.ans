@@ -1,6 +1,7 @@
-go:  NUMBER;
+[<Start>]
+s:  a = yard_rule_do_1[c] {a};
 
 yard_rule_do_1[c]:  res = go * {res};
 
-[<Start>]
-s:  a = yard_rule_do_1[c] {a};
+go:  NUMBER;
+

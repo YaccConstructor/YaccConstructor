@@ -45,11 +45,13 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
                                 { elem with rule = (List.head subelements).rule }
                             | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = Namer.nextName Namer.Names.brackets
-                                toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
+                                toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
+                                                  isStart=false; isPublic=false; metaArgs=[]})
                                 { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
                             | PAlt(_,_) -> 
                                 let newName = Namer.nextName Namer.Names.brackets
-                                toExpand.Enqueue({name= dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
+                                toExpand.Enqueue({name= dummyPos newName; args=attrs; body=elem.rule;
+                                                  isStart=false; isPublic=false; metaArgs=[]})
                                 { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
                             | _ -> elem
                         newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
@@ -69,5 +71,5 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
 type ExpandBrackets() = 
     inherit Conversion()
         override this.Name = "ExpandInnerAlt"
-        override this.ConvertList (ruleList,_) = expandInnerAlts ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar expandInnerAlts grammar
         override this.EliminatedProductionTypes = [""]

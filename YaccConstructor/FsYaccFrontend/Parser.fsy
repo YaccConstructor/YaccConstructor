@@ -67,7 +67,8 @@ rule : IDENT COLON yard_option_11 alternative yard_list_12 {
                      and args=[] 
                      and body=if opt_alts=[] then alt
                               else PAlt(alt, List.reduce (fun acc prod -> PAlt(acc, prod)) opt_alts)
-                     and _public=false
+                     and isStart=false
+                     and isPublic=false
                      and metaArgs=[] } }
 
 yard_list_12 : { [] }
@@ -96,7 +97,7 @@ yard_option_9 : TYPE {let yard_item=$1 in  Some yard_item }
 
 s : yard_option_3 yard_list_4 yard_list_5 start yard_nlist_6 DOUBLE_PERC
     yard_list_7 yard_option_8 EOF
-    {let h=$1 in let tokens=$2 in let st=$4 in let rules=$7 in  h, List.concat tokens, st, rules }
+    {let h=$1 in let tokens=$2 in let st=$4 in let rules=$7 in  h, List.concat tokens, st, defaultModules rules }
 
 yard_option_8 : DOUBLE_PERC { }
               | {  }

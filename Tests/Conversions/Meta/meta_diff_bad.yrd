@@ -1,6 +1,6 @@
-b[s] : empty;
+[<Start>]
+s : r1<<f>>;
 
 r1<<a>> : l=a r1<<b[l]>>;
 
-[<Start>]
-s : r1<<f>>;
+b[s] : empty;

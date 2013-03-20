@@ -33,6 +33,8 @@ let currentFile = ref ""
 let make_lexeme n1 n2 =
     source.Value.Substring(offset n1, offset n2 - offset n1)
     |> fun s -> new Source.t(s, new Source.Position(n1), new Source.Position(n2), !currentFile)
+
+let nextline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 }
 
 let eol = "\r\n" | '\n'
@@ -57,21 +59,25 @@ rule token = parse
   | "%right" { ASSOC_KW }
   | "%nonassoc" { ASSOC_KW }
   | eof { EOF }
+  | eol { nextline lexbuf; token lexbuf }
   | _ { token lexbuf }
 and typedef = parse
   | '>' { TYPE(make_lexeme !lexeme_start lexbuf.StartPos) }
   | eof { EOF }
+  | eol { nextline lexbuf; typedef lexbuf }
   | _ { typedef lexbuf }
 and head = parse
   // TODO breaks if "%}" is in literal for example
   | "%}" { HEAD(make_lexeme !lexeme_start lexbuf.StartPos) }
   | eof { EOF }
+  | eol { nextline lexbuf; head lexbuf }
   | _ { head lexbuf }
 and multiline_comment = parse
   | "/*" { incr comment_depth; multiline_comment lexbuf }
   | "*/" { decr comment_depth;
            if !comment_depth = 0 then token lexbuf else multiline_comment lexbuf }
   | eof { EOF }
+  | eol { nextline lexbuf; multiline_comment lexbuf }
   | _ { multiline_comment lexbuf }
 and action_code = parse
   // TODO: breaks if brace is commented in code - add f# comments
@@ -83,11 +89,14 @@ and action_code = parse
   | '\'' { literal lexbuf; action_code lexbuf }
   | '"' { literal2 lexbuf; action_code lexbuf }
   | eof { EOF }
+  | eol { nextline lexbuf; action_code lexbuf }
   | _ { action_code lexbuf }
 and literal = parse
   | '\'' { } // LITERAL(make_lexeme !lexeme_start lexbuf.StartPos)
+  | eol { nextline lexbuf; literal lexbuf }
   | "\\\\" | "\\'" | _ { literal lexbuf }
 and literal2 = parse
   | '"' { } // LITERAL(make_lexeme !lexeme_start lexbuf.StartPos)
+  | eol { nextline lexbuf; literal2 lexbuf }
   | "\\\\" | "\\\"" | _ { literal2 lexbuf }
 

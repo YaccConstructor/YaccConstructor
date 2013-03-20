@@ -101,11 +101,12 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {
-                 name = genNewSource generatedName p
-                 args = formList attrs 
-                 body = newBody
-                 _public=false
-                 metaArgs = metaArgs
+                    name = genNewSource generatedName p
+                    args = formList attrs 
+                    body = newBody
+                    isStart=false
+                    isPublic=false
+                    metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
         | PMany p -> 
@@ -132,7 +133,8 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  name= genNewSource generatedName p
                  args = formList attrs
                  body= newBody
-                 _public=false
+                 isStart=false
+                 isPublic=false
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
@@ -150,7 +152,8 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                  name= genNewSource generatedName p
                  args = formList attrs
                  body= newBody
-                 _public=false
+                 isStart=false
+                 isPublic=false
                  metaArgs = metaArgs
                 }) :: !addedBnfRules
             newRule
@@ -164,5 +167,5 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
 type ExpandEbnf() = 
     inherit Conversion()
         override this.Name = "ExpandEbnf"
-        override this.ConvertList (ruleList,_) = ruleList |> List.map (convertToBnf) |> List.concat
+        override this.ConvertGrammar (grammar,_) = mapGrammar (fun rules -> rules |> List.map (convertToBnf) |> List.concat) grammar
         override this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]

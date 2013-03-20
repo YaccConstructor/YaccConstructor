@@ -81,7 +81,7 @@ type RNGLR() =
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar);
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules);
 
             let printRules () =
                 let printSymbol (symbol : int) =

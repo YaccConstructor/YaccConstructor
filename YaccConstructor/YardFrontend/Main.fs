@@ -27,7 +27,7 @@ open Yard.Generators.RNGLR.AST
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 open GrammarParser
 
-let private tokenToRange = function
+let private tokenFun f = function
     | ACTION st
     | BAR st
     | COLON st
@@ -53,15 +53,25 @@ let private tokenToRange = function
     | STAR st
     | START_RULE_SIGN st
     | STRING st
+    | ALL_PUBLIC st
+    | MODULE st
+    | PUBLIC st
+    | PRIVATE st
+    | OPEN st
     | UIDENT st ->
-        st.startPos, st.endPos
+        f st
+
+let private tokenToRange = tokenFun <| fun st -> st.startPos, st.endPos
+let private tokenToFile = tokenFun <| fun st -> st.file
 
 let private bufFromFile path = 
     let content = System.IO.File.ReadAllText(path)
-    Lexer.currentFileContent := content;
+    Lexer.currentFileContent := content
     Lexer.currentFile := path
     let reader = new System.IO.StringReader(content)
-    LexBuffer<_>.FromTextReader reader
+    let res = LexBuffer<_>.FromTextReader reader
+    res.EndPos <- res.EndPos.NextLine
+    res
 
 let private bufFromString string =
     Lexer.currentFileContent := string;
@@ -152,7 +162,8 @@ let parse buf userDefs =
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
     | Parser.Error (_, token, msg, _) ->
-        failwithf "Parse error on position %s on token %A: %s" (token |> tokenToRange |> rangeToString) token msg
+        failwithf "Parse error on position %s:%s on token %A: %s" (token |> tokenToFile)
+                    (token |> tokenToRange |> rangeToString) token msg
     //GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
 
 let ParseText (s:string) path =

@@ -45,6 +45,11 @@ type ``MS-SQL parser tests`` () =
         file "TopLevelSet.sql" |> runParserTest
 
     [<Test>]
+    member test.``Case statement.`` () =
+        file "CaseStmt.sql" |> runParserTest
+
+
+    [<Test>]
     member test.``Top level sets.`` () =
         file "TopLevelSets.sql" |> runParserTest
 
@@ -84,7 +89,7 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_addextendedproperty complex test.`` () =
         complexSpFile "sp_addextendedproperty.sql" |> runParserTest
 
-    //[<Test>]
+    [<Test>]
     member test.``sp_addserver complex test.`` () =
         complexSpFile "sp_addserver.sql" |> runParserTest
 
@@ -92,7 +97,7 @@ type ``MS-SQL parser tests`` () =
     member test.``sp_adduser complex test.`` () =
         complexSpFile "sp_adduser.sql" |> runParserTest
 
-    //[<Test>]
+    [<Test>]
     member test.``sp_autostats complex test.`` () =
         complexSpFile "sp_autostats.sql" |> runParserTest
 

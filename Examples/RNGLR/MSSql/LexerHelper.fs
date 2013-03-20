@@ -24,6 +24,8 @@ let getKwToken =
         ucis.TryGetValue' upperName
         |> Option.map (fun ctor ->  ctor [| fst defaultSourceText; snd defaultSourceText |] :?>Token)
 
+let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+
 let commendepth = ref 0
 let startPos = ref Position.Empty
 let str_buf = new System.Text.StringBuilder()
@@ -49,6 +51,20 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
 
 let tokenPos token =
     match token with
+    | KW_DATETIME(_,(x,y))
+    | KW_DROP(_,(x,y))
+    | KW_ABSOLUTE(_,(x,y))
+    | KW_FETCH(_,(x,y))
+    | KW_FETCH(_,(x,y))
+    | KW_FIRST(_,(x,y))
+    | KW_GLOBAL(_,(x,y))
+    | KW_IS_MEMBER(_,(x,y))
+    | KW_LAST(_,(x,y))
+    | KW_LOCAL(_,(x,y))
+    | KW_NEXT(_,(x,y))
+    | KW_PRIOR(_,(x,y))
+    | KW_RELATIVE(_,(x,y))
+    | KW_ROLLBACK(_,(x,y))
     | KW_COMMIT (_,(x,y))
     | KW_MARK (_,(x,y))
     | KW_TRAN (_,(x,y))    
@@ -88,6 +104,7 @@ let tokenPos token =
     | KW_CASE (_,(x,y))
     | KW_CHAR (_,(x,y))
     | KW_CHECK (_,(x,y))
+    | KW_CLASS (_,(x,y))
     | KW_CODEPAGE (_,(x,y))
     | KW_COLLATE (_,(x,y))
     | KW_COMPUTE (_,(x,y))
@@ -241,6 +258,7 @@ let tokenPos token =
     | KW_RETURN (_,(x,y))
     | KW_RIGHT (_,(x,y))
     | KW_ROBUST (_,(x,y))
+    | KW_ROLLBACK (_,(x,y))
     | KW_ROLLUP (_,(x,y))
     | KW_ROOT (_,(x,y))
     | KW_ROWGUID (_,(x,y))
@@ -268,6 +286,7 @@ let tokenPos token =
     | KW_SMALLMONEY (_,(x,y))
     | KW_SOME (_,(x,y))
     | KW_SQL_VARIANT (_,(x,y))
+    | KW_STATE (_,(x,y))
     | KW_STATIC (_,(x,y))
     | KW_STATISTICS (_,(x,y))
     | KW_SUM (_,(x,y))
@@ -320,7 +339,6 @@ let tokenPos token =
     | OP_MOD (_,(x,y))
     | OP_MOD_EQ (_,(x,y))
     | OP_MT (_,(x,y))
-    | OP_MUL (_,(x,y))
     | OP_MUL_EQ (_,(x,y))
     | OP_OR_EQ (_,(x,y))
     | OP_PLUS (_,(x,y))

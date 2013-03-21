@@ -24,6 +24,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
+open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
@@ -38,29 +39,15 @@ type ``Expand subseq tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq1.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             (PSeq ([{dummyRule with rule = PRef (Source.t("x"),None)}
-                                    ;{dummyRule with rule = PRef (Source.t("y"),None)}],None,None))
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+            ) @ (
+                verySimpleNotStartRules "yard_exp_brackets_1"
+                    [{dummyRule with rule = PRef (Source.t("x"),None)}
+                    ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+            )
+        let expected = defaultGrammar rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -72,41 +59,21 @@ type ``Expand subseq tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq2.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body =
-                                PSeq([{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
-                                     ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PSeq ([{dummyRule with rule = PRef (Source.t("x"),None)}
-                                   ;{dummyRule with rule = PRef (Source.t("y"),None)}],None,None)
-                            _public = false
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_2")
-                            args = []
-                            body =
-                             (PSeq ([{dummyRule with rule = PRef (Source.t("n"),None)}
-                                    ;{dummyRule with rule = PRef (Source.t("m"),None)}],None,None))
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
+                ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}]
+            ) @ (
+                verySimpleNotStartRules "yard_exp_brackets_1"
+                    [{dummyRule with rule = PRef (Source.t("x"),None)}
+                    ;{dummyRule with rule = PRef (Source.t("y"),None)}]
+            ) @ (
+                verySimpleNotStartRules "yard_exp_brackets_2"
+                    [{dummyRule with rule = PRef (Source.t("n"),None)}
+                    ;{dummyRule with rule = PRef (Source.t("m"),None)}]
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -117,40 +84,20 @@ type ``Expand subseq tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"innerSubseq.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PSeq ([{dummyRule with rule = PRef (Source.t("x"),None)}
-                                   ; {dummyRule with rule = PRef (Source.t("yard_exp_brackets_2"),None)}
-                                   ; {dummyRule with rule = PRef (Source.t("y"),None)}],None,None)
-                            _public = false
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_2")
-                            args = []
-                            body =
-                             PSeq ([{dummyRule with rule = PRef (Source.t("n"),None)}
-                                   ;{dummyRule with rule = PRef (Source.t("m"),None)}],None,None)
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
-
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
+            ) @ (
+                verySimpleNotStartRules "yard_exp_brackets_1"
+                    [{dummyRule with rule = PRef (Source.t "x", None)}
+                    ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}
+                    ;{dummyRule with rule = PRef (Source.t "y", None)}]
+            ) @ (
+                verySimpleNotStartRules "yard_exp_brackets_2"
+                    [{dummyRule with rule = PRef (Source.t "n", None)}
+                    ;{dummyRule with rule = PRef (Source.t "m", None)}]
+            )
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

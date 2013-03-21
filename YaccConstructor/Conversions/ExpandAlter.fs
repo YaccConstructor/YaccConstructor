@@ -34,5 +34,5 @@ let extractOneRule (rule:Rule.t<'a,'b>) =
 type ExpandTopLevelAlt() = 
     inherit Conversion()
         override this.Name = "ExpandTopLevelAlt"
-        override this.ConvertList (ruleList,_) = List.collect extractOneRule ruleList
+        override this.ConvertGrammar (grammar,_) = mapGrammar (List.collect extractOneRule) grammar
         override this.EliminatedProductionTypes = ["PAlt"]

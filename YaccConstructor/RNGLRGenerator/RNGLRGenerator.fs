@@ -81,7 +81,7 @@ type RNGLR() =
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar);
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules);
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -161,7 +161,7 @@ type RNGLR() =
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
-                        else tables + printTranslator grammar newDefinition.grammar
+                        else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos
             let res = 
                 match definition.foot with

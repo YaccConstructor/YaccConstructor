@@ -40,8 +40,8 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
             | PSeq(elements, actionCode, l) ->
-                (elements
-                 |>List.fold
+                elements
+                |>List.fold
                     (fun (res, attrs) elem ->
                         let newElem =
                             match elem.rule with 
@@ -55,15 +55,14 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
                             | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
                                 let newName = newName()
                                 toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
-                                                    body=elem.rule; _public=false; metaArgs=[]})
+                                                    body=elem.rule; isStart=false; isPublic=false; metaArgs=[]})
                                 { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
                             | _ -> elem
                         newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
                     )
                     ([], attrs)
-                 |> fst |> List.rev
-                 ,actionCode, l)
-                |> PSeq
+                |> fst |> List.rev
+                |> fun elems -> PSeq (elems,actionCode, l)
             | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x
         
@@ -75,5 +74,6 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
 type ExpandBrackets() = 
     inherit Conversion()
         override this.Name = "ExpandBrackets"
-        override this.ConvertList (ruleList,_) = expandBrackets ruleList
+        override this.ConvertGrammar (grammar,_) =
+            mapGrammar expandBrackets grammar
         override this.EliminatedProductionTypes = [""]

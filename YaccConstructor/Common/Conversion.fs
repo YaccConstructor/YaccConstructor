@@ -22,9 +22,9 @@ open Yard.Core.IL
 [<AbstractClass>]
 type Conversion() as this =
     abstract Name : string
-    abstract ConvertList : Rule.t<Source.t, Source.t> list * string[] -> Rule.t<Source.t, Source.t> list
-    abstract ConvertList : Rule.t<Source.t, Source.t> list          -> Rule.t<Source.t, Source.t> list
-    default this.ConvertList ruleList = this.ConvertList (ruleList,[||]) 
+    abstract ConvertGrammar : Grammar.t<Source.t, Source.t> * string[] -> Grammar.t<Source.t, Source.t>
+    abstract ConvertGrammar : Grammar.t<Source.t, Source.t>          -> Grammar.t<Source.t, Source.t>
+    default this.ConvertGrammar grammar = this.ConvertGrammar (grammar,[||]) 
     abstract EliminatedProductionTypes : string list
     interface Yard.Core.Manager.IComponent with 
         member self.Name : string =  this.Name

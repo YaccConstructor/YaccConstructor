@@ -61,6 +61,7 @@
     <Compile Include="Conversion.fs" />
     <Compile Include="ConversionsManager.fs" />
     <Compile Include="Layouts.fs" />
+    <Compile Include="Helpers.fs" />
     <Compile Include="ILCheckers.fs" />
     <Compile Include="ILComparators.fs" />
   </ItemGroup>

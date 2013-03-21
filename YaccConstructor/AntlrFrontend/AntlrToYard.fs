@@ -27,7 +27,7 @@ open Yard.Core.IL.Definition
 
 
 let ParseFile fileName : t<Source.t, Source.t> =
-    let content = System.IO.File.ReadAllText(fileName)
+    let content = System.IO.File.ReadAllText fileName
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader

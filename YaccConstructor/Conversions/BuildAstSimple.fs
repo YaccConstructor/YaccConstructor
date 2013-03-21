@@ -99,6 +99,6 @@ let buildAstSimple (ruleList: Rule.t<Source.t, Source.t> list)  =
 type BuildAstSimple() = 
     inherit Conversion()
         override this.Name = "BuildAstSimple"
-        override this.ConvertList (ruleList,_) = buildAstSimple ruleList 
+        override this.ConvertGrammar (grammar,_) = mapGrammar buildAstSimple grammar
         override this.EliminatedProductionTypes = [""]
 

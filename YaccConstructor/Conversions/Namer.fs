@@ -66,11 +66,11 @@ let newName (n : string) =
     let addPrefix = 
       try
         let yardPrefix = withPrefix ""
-        if (n.Substring (0, System.Math.Min(n.Length, yardPrefix.Length))) = yardPrefix 
-        then fun x->x 
-        else withPrefix
-      with (*Invalid_argument*) _ -> withPrefix
-    sprintf "%s_%d" (addPrefix n) !curNum
+        if n.Substring (0, min n.Length yardPrefix.Length) = yardPrefix 
+        then n
+        else withPrefix n
+      with (*Invalid_argument*) _ -> withPrefix n
+    sprintf "%s_%d" addPrefix !curNum
 
 let createName ((n:string), b, e, f) = newName n, b, e, f
 

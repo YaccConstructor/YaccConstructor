@@ -113,10 +113,11 @@ let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
 type BuildAST() =
     inherit Conversion()
         override this.Name = "BuildAST"
-        override this.ConvertList(ruleList, tokenType) = 
-            if tokenType.Length > 0
-            then tokenType.[0]
-            else ""
-            |> buildAST ruleList
+        override this.ConvertGrammar(grammar, tokenType) = 
+            let token = 
+                if tokenType.Length > 0
+                then tokenType.[0]
+                else ""
+            mapGrammar (fun rules -> buildAST rules token) grammar
         override this.EliminatedProductionTypes = [""]
 

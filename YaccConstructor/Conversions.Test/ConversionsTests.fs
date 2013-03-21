@@ -46,69 +46,42 @@ let getBE name =
     | None -> failwith (name + " is not found.")
 let treeDump = getBE "TreeDump"
 
-let dummyRule = {omit=false; binding=None; checker=None; rule=PToken(Source.t("DUMMY"))}
+let dummyRule : elem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
 
 [<TestFixture>]
 type ``Conversions tests`` () =
     //[<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
-        Namer.resetRuleEnumerator()        
-        let ilTree = 
-            {
-                info = { fileName = "" } 
-                head = None 
-                foot = None 
-                grammar = 
-                    [{ 
-                        name = dummyPos"s"
-                        args = []
-                        metaArgs = []
-                        _public = true
-                        body =
-                          (([
-                                {dummyRule with rule=dummyToken "NUMBER"};
-                                {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
-                                {dummyRule with rule=dummyToken "CHUMBER"};
-                            ], None, None)
-                            |> PSeq
-                            , dummyToken "OUTER")
-                            |> PAlt
-                    }
-                ]
-                options = Map.empty
-            }
+        Namer.resetRuleEnumerator()
+        let rules =
+            PAlt (
+                PSeq(
+                    [
+                        {dummyRule with rule=dummyToken "NUMBER"};
+                        {dummyRule with rule=PAlt(dummyToken "ALT1", dummyToken "ALT2")}
+                        {dummyRule with rule=dummyToken "CHUMBER"};
+                    ], None, None),
+                dummyToken "OUTER")
+            |> simpleRules "s"
+        let ilTree = defaultGrammar rules
         let ilTreeConverted = ConversionsManager.ApplyConversion "ExpandBrackets" ilTree
 #if DEBUG
         printfn "%A" ilTreeConverted
 #endif
-        let correctConverted:t<Source.t,Source.t> = {
-            info = {fileName = ""}
-            head = None;
-            grammar = 
-                [{
-                    name = dummyPos"s"
-                    args = []
-                    body =
-                        PAlt(
-                            PSeq([
-                                    {dummyRule with rule = dummyToken "NUMBER"};
-                                    {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
-                                    {dummyRule with rule = dummyToken "CHUMBER"}
-                            ],None, None)
-                            , dummyToken "OUTER")
-                    _public = true
-                    metaArgs = []
-                 };
-                 {
-                    name = dummyPos"yard_exp_brackets_1"
-                    args = []
-                    body = PAlt (dummyToken "ALT1", dummyToken "ALT2")
-                    _public = false
-                    metaArgs = []
-                 }]
-            foot = None
-            options = Map.empty
-        }
+        let rules = 
+            (simpleRules "s"
+                <| PAlt(
+                        PSeq([
+                                {dummyRule with rule = dummyToken "NUMBER"};
+                                {dummyRule with rule = PRef (dummyPos "yard_exp_brackets_1",None)}; 
+                                {dummyRule with rule = dummyToken "CHUMBER"}
+                        ],None, None)
+                        , dummyToken "OUTER")
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_1"
+                <| PAlt (dummyToken "ALT1", dummyToken "ALT2")
+            )
+        let correctConverted = defaultGrammar rules
         Assert.AreEqual(ilTreeConverted, correctConverted)
     
     [<Test>]
@@ -129,14 +102,18 @@ type ``Conversions tests`` () =
             |> ConversionsManager.ApplyConversion "ExpandInnerAlt"
             |> ConversionsManager.ApplyConversion "ExpandBrackets"
         let hasNotInnerSeq = 
-            ilTreeConverted.grammar 
-            |> List.forall 
-                (fun rule ->
-                    let rec eachProd = function
-                        | PAlt(a,b) -> eachProd a && eachProd b
-                        | PSeq(elements, _, _) -> elements |> List.forall (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
-                        | _ -> true
-                    eachProd rule.body
+            ilTreeConverted.grammar
+            |> List.forall (fun m ->
+                m.rules |> List.forall
+                    (fun rule ->
+                        let rec eachProd = function
+                            | PAlt(a,b) -> eachProd a && eachProd b
+                            | PSeq(elements, _, _) ->
+                                elements |> List.forall
+                                    (fun elem -> match elem.rule with PSeq _ -> false | _ -> true)
+                            | _ -> true
+                        eachProd rule.body
+                    )
                 )
             
 #if DEBUG
@@ -161,29 +138,15 @@ type ``Expand rop level alters`` () =
     member test.``No alter`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"noAlters.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "d", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("d")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PToken (Source.t "NUM")}],None, None)
-                            _public = false
-                            metaArgs = []
-                         }]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "d", None)}]
+            ) @ (
+                verySimpleNotStartRules "d"
+                    [{dummyRule with rule = PToken (Source.t "NUM")}]
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -193,29 +156,15 @@ type ``Expand rop level alters`` () =
     member test.``One alter`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"oneAlter.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "c", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "d", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         }]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "c", None)}]
+            ) @ (
+                verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "d", None)}]
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -226,43 +175,20 @@ type ``Expand rop level alters`` () =
     member test.``Multi alters`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"multiAlters.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "x", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "y", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "z", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "m", None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         }]
-                foot = None
-                options = Map.empty
-            }
-
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "x", None)}]
+            ) @ (
+                verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "y", None)}]
+            ) @ (
+                verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "z", None)}]
+            ) @ (
+                verySimpleRules "s"
+                    [{dummyRule with rule = PRef (Source.t "m", None)}]
+            )
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

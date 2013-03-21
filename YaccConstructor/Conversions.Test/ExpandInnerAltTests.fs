@@ -38,35 +38,18 @@ type ``Expand inner alts tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq1.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body =
-                        
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (Source.t("x"),None)}
-                                        ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t("y"),None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t("z"),None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules = 
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t("x"),None)}
+                ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}]
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_1"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t("y"),None)}],None,None),
+                     PSeq ([{dummyRule with rule = PRef (Source.t("z"),None)}],None,None))
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -78,35 +61,19 @@ type ``Expand inner alts tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq2.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-             {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body =
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (Source.t "x",None)}
-                                        ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
-                                        ;{dummyRule with rule = PRef (Source.t "m", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "x",None)}
+                ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
+                ;{dummyRule with rule = PRef (Source.t "m", None)}]
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_1"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
+                     PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None))
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -117,44 +84,24 @@ type ``Expand inner alts tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altsInSeq.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-             {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body =
-                                PSeq([                                        
-                                        {dummyRule with rule = PRef (Source.t "x", None)}
-                                        ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
-                                        ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}],None, None)                        
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None));
-                            _public = false
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_2")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t "n", None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "x", None)}
+                ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}
+                ;{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}]
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_1"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
+                     PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None))
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_2"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
+                     PSeq ([{dummyRule with rule = PRef (Source.t "n", None)}],None,None))
+            )
+            
+        let expected = defaultGrammar rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -166,40 +113,21 @@ type ``Expand inner alts tests`` () =
         Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"nestedAlts.yrd"))
         let result = ConversionsManager.ApplyConversion conversion loadIL
-        let expected = 
-             {
-                info = {fileName = ""}
-                head = None
-                grammar =
-                     [{
-                            name = Source.t("s")
-                            args = []
-                            body = PSeq([{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}],None, None)
-                            _public = true
-                            metaArgs = []
-                         };
-                         {
-                            name = Source.t("yard_exp_brackets_1")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}],None,None));
-                            _public = false
-                            metaArgs = []
-                         };
-                          {
-                            name = Source.t("yard_exp_brackets_2")
-                            args = []
-                            body =
-                             PAlt
-                               (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
-                                PSeq ([{dummyRule with rule = PRef (Source.t "n",None)}],None,None));
-                            _public = false
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty
-            }
+        let rules =
+            (verySimpleRules "s"
+                [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}]
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_1"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t "y", None)}],None,None),
+                        PSeq ([{dummyRule with rule = PRef (Source.t "yard_exp_brackets_2", None)}],None,None))
+            ) @ (
+                simpleNotStartRules "yard_exp_brackets_2"
+                <| PAlt
+                    (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
+                        PSeq ([{dummyRule with rule = PRef (Source.t "n",None)}],None,None))
+            )
+        let expected = defaultGrammar rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"

@@ -37,12 +37,12 @@ let private removeAC (ruleList: Rule.t<Source.t, Source.t> list) =
         | PRepet _
         | PPerm _
         | PMetaRef _ as p -> p
-        | POpt p -> inner p |> POpt        
+        | POpt p -> inner p |> POpt
 
     ruleList |> List.map (fun rule -> {rule with body=(inner rule.body) } )
 
 type RemoveAC() =
     inherit Conversion()
     override this.Name = "RemoveAC"
-    override this.ConvertList(ruleList,_) = removeAC ruleList
+    override this.ConvertGrammar(grammar,_) = mapGrammar removeAC grammar
     override this.EliminatedProductionTypes = [""]

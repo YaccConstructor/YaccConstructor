@@ -79,8 +79,9 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
         if not <| updatedRules.Contains bfsFor then    
             //printfn "u: %s" bfsFor
             updatedRules.Add bfsFor |> ignore        
-            let emptyRule = {Rule.t.name=new Source.t ""; Rule.t.args=[]; Rule.t.body=PSeq([], None, None);
-                                Rule.t._public=false; Rule.t.metaArgs=[]}
+            let emptyRule = {Rule.t.name = new Source.t(""); Rule.t.args = []; Rule.t.body = PSeq([], None, None)
+                            ;Rule.t.isPublic = false; Rule.t.metaArgs = []; Rule.isStart = false
+                            }
             let ruleFor = ref emptyRule
             if rulesMap.TryGetValue(bfsFor, ruleFor) then
                 // Some generators need to have a sequence on the top of body tree
@@ -108,6 +109,6 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
 type AddDefaultAC() = 
     inherit Conversion()
         override this.Name = "AddDefaultAC"
-        override this.ConvertList (ruleList,_) = addDefaultAC ruleList 
+        override this.ConvertGrammar (grammar,_) = mapGrammar addDefaultAC grammar
         override this.EliminatedProductionTypes = [""]
 

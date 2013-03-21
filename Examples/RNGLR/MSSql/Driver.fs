@@ -25,9 +25,27 @@ open Yard.Examples.MSParser
 open LexerHelper
 
 let justParse (path:string) =
+    let t = System.DateTime.Now
     use reader = new System.IO.StreamReader(path)
     let lexbuf = LexBuffer<_>.FromTextReader reader
-    let allTokens = seq{while not lexbuf.IsPastEndOfStream do yield Lexer.tokens lexbuf}
+
+    let i = ref 0L
+    let traceStep = 100000L
+    let timeOfIteration = ref System.DateTime.Now        
+
+
+    let allTokens = 
+        seq{
+            while not lexbuf.IsPastEndOfStream do 
+                i := 1L + !i 
+
+                if (!i % traceStep) = 0L then 
+                  let oldTime = !timeOfIteration
+                  timeOfIteration := System.DateTime.Now
+                  let seconds = (!timeOfIteration - oldTime).TotalSeconds
+                  printfn "tkn# %10d Tkns/s:%8.0f - p" i.Value (float traceStep / seconds)
+
+                yield Lexer.tokens lexbuf}
 
     let translateArgs = {
         tokenToRange = fun x -> 0,0
@@ -36,7 +54,9 @@ let justParse (path:string) =
         filterEpsilons = true
     }
 
-    buildAst allTokens
+    let res = buildAst allTokens
+    printfn "time = %A" (System.DateTime.Now - t)
+    res
 
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
@@ -46,7 +66,7 @@ let Parse (srcFilePath:string) =
     | Yard.Generators.RNGLR.Parser.Success ast ->
         ast.collectWarnings (fun x -> 0,0)
         |> ResizeArray.iter (fun (pos, prods) -> ())
-        defaultAstToDot ast @"..\..\ast.dot"
+        //defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated

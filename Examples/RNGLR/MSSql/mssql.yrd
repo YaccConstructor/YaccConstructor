@@ -22,11 +22,27 @@
 {
 open Microsoft.FSharp.Text.Lexing
 }
-include "../../../GrammarTemplates/Common.yrd"
+(* include "../../../GrammarTemplates/Common.yrd" *)
+
+
+list <<item separator>>: 
+      {[]}
+    | hd=item tl=(separator itm=item {itm})* {hd::tl}
+    ;
+
+not_empty_list<<item separator>>:
+    hd=item tl=(separator itm=item {itm})* {hd::tl}
+    ;
+
+brace_opt<<o_br block cl_br>>:
+      block 
+    | -o_br block -cl_br
+    ;
+
+
 
 [<Start>]
-root_rule: 
-     (batch_body KW_GO?)+
+root_rule: (batch_body KW_GO?)+
 
 batch_body: 
    create_proc
@@ -476,7 +492,7 @@ case:
         (KW_WHEN sql_expr KW_THEN sql_expr)*
         ( KW_ELSE sql_expr )? 
     KW_END 
-	
+    
 (*
 (*****************************************CREATE TABLE****************************************************)
 create_table:
@@ -495,89 +511,89 @@ column_definition:
         ( KW_NULL | KW_NOT KW_NULL )?
         ( 
             ( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
-		  | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
+          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
         )?
         ( KW_ROWGUIDCOL )? column_constraint* 
 
 data type: 
     ( IDENT DOT ) IDENT 
-		(LPAREN DEC_NUMBER (COMMA DEC_NUMBER)? | KW_MAX | 
-			(KW_CONTENT | KW_DOCUMENT)? IDENT RPAREN)? 
+        (LPAREN DEC_NUMBER (COMMA DEC_NUMBER)? | KW_MAX | 
+            (KW_CONTENT | KW_DOCUMENT)? IDENT RPAREN)? 
 
 column_constraint: 
-	(KW_CONSTRAINT IDENT)? 
-	((KW_PRIMARY KW_KEY | KW_UNIQUE) 
-			(KW_CLUSTERED | KW_NONCLUSTERED)? 
-			( 
-				KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER  
-			  | KW_WITH LPAREN comma_list<<index_option>> RPAREN 
+    (KW_CONSTRAINT IDENT)? 
+    ((KW_PRIMARY KW_KEY | KW_UNIQUE) 
+            (KW_CLUSTERED | KW_NONCLUSTERED)? 
+            ( 
+                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER  
+              | KW_WITH LPAREN comma_list<<index_option>> RPAREN 
 
-			)?
-			(KW_ON ( IDENT LPAREN IDENT RPAREN 
-				| IDENT | KW_DEFAULT))?
-	  | (KW_FOREIGN KW_KEY)? 
-			KW_REFERENCES (IDENT DOT)? IDENT (LPAREN IDENT RPAREN)? 
-			delete_update*
-			(KW_NOT KW_FOR KW_REPLICATION)? 
-	  | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
-	) 
+            )?
+            (KW_ON ( IDENT LPAREN IDENT RPAREN 
+                | IDENT | KW_DEFAULT))?
+      | (KW_FOREIGN KW_KEY)? 
+            KW_REFERENCES (IDENT DOT)? IDENT (LPAREN IDENT RPAREN)? 
+            delete_update*
+            (KW_NOT KW_FOR KW_REPLICATION)? 
+      | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
+    ) 
 
 computed_column_definition:
-	IDENT KW_AS sql_expr 
-	(KW_PERSISTED (KW_NOT KW_NULL)?)?
-	( 
-		(KW_CONSTRAINT IDENT)?
-		(KW_PRIMARY KW_KEY | KW_UNIQUE)
-			(KW_CLUSTERED | KW_NONCLUSTERED)?
-			( 
-				KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
-			  | KW_WITH LPAREN comma_list<<index_option>> RPAREN
-			)?
-			(KW_ON (IDENT LPAREN IDENT RPAREN 
-				| IDENT | KW_DEFAULT))?
-		| (KW_FOREIGN KW_KEY)? 
-			KW_REFERENCES IDENT (LPAREN IDENT RPAREN)? 
-			delete_update*
-			(KW_NOT KW_FOR KW_REPLICATION)? 
-		| KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
-	)? 
+    IDENT KW_AS sql_expr 
+    (KW_PERSISTED (KW_NOT KW_NULL)?)?
+    ( 
+        (KW_CONSTRAINT IDENT)?
+        (KW_PRIMARY KW_KEY | KW_UNIQUE)
+            (KW_CLUSTERED | KW_NONCLUSTERED)?
+            ( 
+                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
+              | KW_WITH LPAREN comma_list<<index_option>> RPAREN
+            )?
+            (KW_ON (IDENT LPAREN IDENT RPAREN 
+                | IDENT | KW_DEFAULT))?
+        | (KW_FOREIGN KW_KEY)? 
+            KW_REFERENCES IDENT (LPAREN IDENT RPAREN)? 
+            delete_update*
+            (KW_NOT KW_FOR KW_REPLICATION)? 
+        | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
+    )? 
 
 table_constraint:
-	(KW_CONSTRAINT IDENT)? 
-	( 
-		(KW_PRIMARY KW_KEY | KW_UNIQUE) 
-			(KW_CLUSTERED | KW_NONCLUSTERED)? 
-					LPAREN comma_list<<(IDENT (KW_ASC | KW_DESC)?)>> RPAREN 
-			( 
-				KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
-			   |KW_WITH LPAREN comma_list<<index_option>> RPAREN 
-			)?
-			(KW_ON (IDENT LPAREN IDENT RPAREN
-				| IDENT | KW_DEFAULT))? 
-		| KW_FOREIGN KW_KEY 
-					LPAREN comma_list<<IDENT>> RPAREN 
-			KW_REFERENCES IDENT (LPAREN comma_list<<IDENT>> RPAREN )? 
-			delete_update*
-			(KW_NOT KW_FOR KW_REPLICATION)? 
-		| KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
-	) 
+    (KW_CONSTRAINT IDENT)? 
+    ( 
+        (KW_PRIMARY KW_KEY | KW_UNIQUE) 
+            (KW_CLUSTERED | KW_NONCLUSTERED)? 
+                    LPAREN comma_list<<(IDENT (KW_ASC | KW_DESC)?)>> RPAREN 
+            ( 
+                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
+               |KW_WITH LPAREN comma_list<<index_option>> RPAREN 
+            )?
+            (KW_ON (IDENT LPAREN IDENT RPAREN
+                | IDENT | KW_DEFAULT))? 
+        | KW_FOREIGN KW_KEY 
+                    LPAREN comma_list<<IDENT>> RPAREN 
+            KW_REFERENCES IDENT (LPAREN comma_list<<IDENT>> RPAREN )? 
+            delete_update*
+            (KW_NOT KW_FOR KW_REPLICATION)? 
+        | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
+    ) 
 
 delete_update:
-	KW_ON (KW_DELETE | KW_UPDATE) delete_update_options
-	
+    KW_ON (KW_DELETE | KW_UPDATE) delete_update_options
+    
 delete_update_options:
-	KW_NO KW_ACTION | KW_CASCADE | KW_SET KW_NULL | KW_SET KW_DEFAULT
-	
+    KW_NO KW_ACTION | KW_CASCADE | KW_SET KW_NULL | KW_SET KW_DEFAULT
+    
 index_option:
-	( 
-		KW_PAD_INDEX OP_EQ (KW_ON | KW_OFF) 
-		| KW_FILLFACTOR OP_EQ DEC_NUMBER 
-		| KW_IGNORE_DUP_KEY OP_EQ (KW_ON | KW_OFF) 
-		| KW_STATISTICS_NORECOMPUTE OP_EQ (KW_ON | KW_OFF) 
-		| KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
-		| KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
-	)
-		
+    ( 
+        KW_PAD_INDEX OP_EQ (KW_ON | KW_OFF) 
+        | KW_FILLFACTOR OP_EQ DEC_NUMBER 
+        | KW_IGNORE_DUP_KEY OP_EQ (KW_ON | KW_OFF) 
+        | KW_STATISTICS_NORECOMPUTE OP_EQ (KW_ON | KW_OFF) 
+        | KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
+        | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
+    )
+        
 *)
 begin_transaction:
     KW_BEGIN (KW_TRAN | KW_TRANSACTION) 

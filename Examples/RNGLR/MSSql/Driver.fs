@@ -25,9 +25,23 @@ open Yard.Examples.MSParser
 open LexerHelper
 
 let justParse (path:string) =
+    let start = System.DateTime.Now
     use reader = new System.IO.StreamReader(path)
     let lexbuf = LexBuffer<_>.FromTextReader reader
-    let allTokens = seq{while not lexbuf.IsPastEndOfStream do yield Lexer.tokens lexbuf}
+    let lastTokenNum = ref 0L
+    let traceStep = 100000L
+    let timeOfIteration = ref System.DateTime.Now
+    let time = ref System.DateTime.Now
+    let allTokens = 
+        seq{
+            while not lexbuf.IsPastEndOfStream do
+                lastTokenNum := !lastTokenNum + 1L
+                if (!lastTokenNum % traceStep) = 0L then 
+                    let oldTime = !timeOfIteration
+                    timeOfIteration := System.DateTime.Now
+                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                yield Lexer.tokens lexbuf}
 
     let translateArgs = {
         tokenToRange = fun x -> 0,0
@@ -36,7 +50,9 @@ let justParse (path:string) =
         filterEpsilons = true
     }
 
-    buildAst allTokens
+    let res = buildAst allTokens
+    printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
+    res
 
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with

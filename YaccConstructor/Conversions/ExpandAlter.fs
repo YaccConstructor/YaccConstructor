@@ -27,12 +27,11 @@ open System
 
 let extractOneRule (rule:Rule.t<'a,'b>) = 
     let rec expand = function
-    | PAlt (a,b) -> {rule with body = a} :: expand b
-    | a   -> [{rule with body = a}]    
+    | PAlt (a,b) -> expand a @ expand b
+    | a   -> [{rule with body = a}]
     expand rule.body
 
 type ExpandTopLevelAlt() = 
     inherit Conversion()
         override this.Name = "ExpandTopLevelAlt"
         override this.ConvertGrammar (grammar,_) = mapGrammar (List.collect extractOneRule) grammar
-        override this.EliminatedProductionTypes = ["PAlt"]

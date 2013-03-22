@@ -334,5 +334,4 @@ type ExpandMeta() =
     inherit Conversion()
         override this.Name = "ExpandMeta"
         override this.ConvertGrammar (grammar,_) = expandMetaRules grammar
-        override this.EliminatedProductionTypes = ["PMetaRef"]
 

@@ -52,8 +52,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
 
     //--Функция для проверки вхождения эпсилон-правила---------------------------------------------
 
-    let isEps s = 
-        epsList |> List.collect (fun eps -> if s = eps then [eps] else [])
+    let isEps s = epsList |> List.filter ((=) s)
     
     //--Список эпсилон-правил входящих в данное правило--------------------------------------------     
 
@@ -61,9 +60,9 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
         elements |> List.collect
                     (fun elem ->
                         match elem.rule with
-                        |PSeq(e, a, l) -> epsInRule e
-                        |PRef(t, _) -> isEps t.text
-                        |x -> []
+                        | PSeq(e, a, l) -> epsInRule e
+                        | PRef(t, _) -> isEps t.text
+                        | _ -> []
                     )
                         
     //--Функция для добавления нового правила------------------------------------------------------
@@ -78,7 +77,7 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                 |> List.collect
                     (fun elem ->
                         match elem.rule with
-                        |PRef(t, _) when t.text |> isEps |> List.isEmpty |> not-> 
+                        | PRef(t, _) when t.text |> isEps |> List.isEmpty |> not-> 
                             incr i
                             [{
                                 omit = elem.omit
@@ -86,33 +85,33 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
                                 binding = elem.binding
                                 checker = elem.checker
                             }]
-                        |x -> [elem]
+                        | _ -> [elem]
                     )
             let numberBody =                
                 match rule.body with
                 |PSeq(elements, _, _) -> 
                     PSeq(newBody elements, ac, lbl)
-                |x -> rule.body
+                |_ -> rule.body
             let addRule (numberRule: Rule.t<_, _>) eps =
                 let epsWithNameExists t = 
                     eps
                     |> List.map string
                     |> List.exists ((=) t)
-                let ac,lbl = match numberRule.body with PSeq(e, a, l) -> a,l | x -> None,None
+                let ac,lbl = match numberRule.body with PSeq(e, a, l) -> a,l | _ -> None,None
                 let newBody = 
-                    match numberRule.body with PSeq(e, a, l) -> e | x -> []
+                    match numberRule.body with PSeq(e, a, l) -> e | _ -> []
                     |> List.collect
                         (fun elem ->
                             match elem.rule with
-                            |PRef(t,_) when epsWithNameExists t.text -> []
-                            |PRef(t,_) when not <| epsWithNameExists t.text -> 
+                            | PRef(t,_) when epsWithNameExists t.text -> []
+                            | PRef(t,_) when not <| epsWithNameExists t.text -> 
                                     [{
                                         omit = elem.omit
                                         rule = PRef(Source.t(epsRef.[int t.text - 1]), None)
                                         binding = elem.binding
                                         checker = elem.checker
                                     }]
-                            |x -> [elem])
+                            | _ -> [elem])
                 [{numberRule with body=PSeq(newBody, ac, lbl)}]
             let numberRule = {rule with body=numberBody}
             numberEpsRef |> List.collect (addRule numberRule)
@@ -124,9 +123,9 @@ let deleteEpsRule (ruleList: Rule.t<_,_> list) =
     ruleList |> List.collect
         (fun rule ->
             match rule.body with
-            |PSeq(elements, actionCode, lbl) when not elements.IsEmpty ->
+            | PSeq(elements, actionCode, lbl) when not elements.IsEmpty ->
                 newRule rule (epsInRule elements) @ [rule]
-            |x -> []
+            | _ -> []
         )
 
 //--Функция для удаления цепных правил-------------------------------------------------------------
@@ -138,30 +137,32 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
             (fun rule ->
                 let isOneRule rule =
                     match rule.body with
-                    |PSeq(elements, actionCode, lbl)
+                    | PSeq(elements, actionCode, lbl)
                         when elements.Length = 1
                         && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> true
-                    |x -> false
-                let label (rl: Rule.t<_, _>) = match rl.body with PSeq(_, _, l) -> l | x -> None
+                    | _ -> false
+                let label (rl: Rule.t<_, _>) = match rl.body with PSeq(_, _, l) -> l | _ -> None
                 let bodyChange (mR: Rule.t<_, _>) (r: Rule.t<_, _>) =
-                    if label mR = None then r.body
-                    else
-                        if label r = None then PSeq(
-                                                (match r.body with PSeq(e, _, _) -> e | x -> []),
-                                                (match r.body with PSeq(_, a, _) -> a | x -> None),
-                                                label mR)
+                    match label mR with
+                    | None -> r.body
+                    | Some _ as labelMR ->
+                        if label r = None then
+                            match r.body with
+                            | PSeq(e, a, _) -> e, a, labelMR
+                            | _ -> [], None, labelMR
+                            |> PSeq
                         else
                             printfn "label1 and label2 confict"
-                            PSeq((match r.body with PSeq(e, _, _) -> e | x -> []),
-                                 (match r.body with PSeq(_, a, _) -> a | x -> None),
-                                 label mR)
+                            match r.body with
+                            | PSeq(e, a, _) -> e, a, labelMR
+                            | _ -> [], None, labelMR
+                            |> PSeq
                 if rule.name.text = name then
                     if isOneRule rule then
-                        newRule mainRule
-                            (match rule.body with
-                             |PSeq(elements, actionCode, lbl) -> (match elements.Head.rule with PRef(t, _) -> t.text | x -> "")
-                             |x -> ""
-                            )
+                        match rule.body with
+                        | PSeq(elements, actionCode, lbl) -> match elements.Head.rule with PRef(t, _) -> t.text | _ -> ""
+                        | _ -> ""
+                        |> newRule mainRule
                     else
                         [{mainRule with body = bodyChange mainRule rule}] 
                 else []
@@ -170,30 +171,30 @@ let deleteChainRule (ruleList: Rule.t<_, _> list) =
     ruleList |> List.collect
         (fun rule -> 
             match rule.body with
-            |PSeq(elements, actionCode, lbl) 
+            | PSeq(elements, actionCode, lbl) 
                 when elements.Length = 1
-                && (match elements.Head.rule with PRef(t, _) -> true | x -> false) -> 
-                newRule rule (match elements.Head.rule with PRef(t, _) -> t.text | x -> "")
-            |x -> [rule]
+                && (match elements.Head.rule with PRef(t, _) -> true | _ -> false) -> 
+                newRule rule (match elements.Head.rule with PRef(t, _) -> t.text | _ -> "")
+            | _ -> [rule]
         )
 
 //--Переименование терминалов в нетерминалы в неподходящих правилах---------------------------
 
 let renameTerm ruleList = 
     
-    let isToken (elem: elem<_,_>) = match elem.rule with PToken _ -> true | x -> false
-    let isRef (elem: elem<_,_>) = match elem.rule with PRef(_,_) -> true | x -> false
+    let isToken (elem: elem<_,_>) = match elem.rule with PToken _ -> true | _ -> false
+    let isRef (elem: elem<_,_>) = match elem.rule with PRef(_,_) -> true | _ -> false
     let isCNF (rule: Rule.t<_,_>) = 
         match rule.body with
-        |PSeq(elements,_,_) when elements.Length = 1 && isToken elements.Head -> true
-        |PSeq(elements,_,_) when elements.Length = 2 && isRef elements.[0] && isRef elements.[1] -> true
-        |x -> false
+        | PSeq(elements,_,_) when elements.Length = 1 && isToken elements.Head -> true
+        | PSeq(elements,_,_) when elements.Length = 2 && isRef elements.[0] && isRef elements.[1] -> true
+        | _ -> false
 
     let list1 = ref []
     let renameRule (rule: Rule.t<_, _>) = 
         let rename (elem: elem<_, _>) = 
             if isToken elem then 
-                let newName = Source.t("new_" + (match elem.rule with PToken t -> t.text | x -> ""))
+                let newName = Source.t("new_" + (match elem.rule with PToken t -> t.text | _ -> ""))
                 if not (!list1 |> List.exists (fun rl -> rl.name.text = newName.text)) then
                     list1 :=
                         [{
@@ -212,10 +213,13 @@ let renameTerm ruleList =
                 }
             else elem
         let elements = match rule.body with PSeq(e, a, l) -> e | x -> []
+        let elems = [rename elements.[0]; rename elements.[1]]
         [{rule with
-            body = PSeq([rename elements.[0]; rename elements.[1]], 
-                                (match rule.body with PSeq(e, a, l) -> a | x -> None),
-                                (match rule.body with PSeq(e, a, l) -> l | x -> None))            
+            body =
+                match rule.body with
+                | PSeq(e, a, l) -> elems, a, l
+                | _ -> elems, None, None
+                |> PSeq
         }]
     
     (ruleList |> List.collect 
@@ -234,14 +238,14 @@ let toCNF (ruleList: Rule.t<_, _> list) =
                 incr i
                 list2 :=
                     [{
-                        name = Source.t("newCnfRule" + (!i).ToString())
+                        name = Source.t("newCnfRule" + i.Value.ToString())
                         args = rule.args
                         isStart = false
                         isPublic = false
                         metaArgs = rule.metaArgs 
                         body = PSeq([elem1; elem2], None, None)
                     }] @ !list2
-                "newCnfRule" + (!i).ToString()
+                "newCnfRule" + i.Value.ToString()
             let cutRule = 
                 if elements.Length > 2 then
                     ((elements |> List.rev).Tail.Tail |> List.rev) @ 
@@ -262,7 +266,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
             else 
                 [rule]
 
-        ( rules |> List.collect (fun rule -> newRule rule) ) @ !list2
+        (rules |> List.collect newRule) @ !list2
 
     ruleList
     |> deleteEpsRule
@@ -274,17 +278,13 @@ type ToCNF() =
     inherit Conversion()
         override this.Name = "ToCNF"
         override this.ConvertGrammar (grammar,_) = mapGrammar toCNF grammar
-        override this.EliminatedProductionTypes = [""]
 
 type DeleteEpsRule() = 
     inherit Conversion()
         override this.Name = "DeleteEpsRule"
         override this.ConvertGrammar (grammar,_) = mapGrammar deleteEpsRule grammar
-        override this.EliminatedProductionTypes = [""]
 
 type DeleteChainRule() = 
     inherit Conversion()
         override this.Name = "DeleteChainRule"
         override this.ConvertGrammar (grammar,_) = mapGrammar deleteChainRule grammar
-        override this.EliminatedProductionTypes = [""]
-

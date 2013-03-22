@@ -35,4 +35,3 @@ type LeaveLast() =
     inherit Conversion()
         override this.Name = "LeaveLast"
         override this.ConvertGrammar (grammar,_) = mapGrammar leaveLast grammar
-        override this.EliminatedProductionTypes = [""]

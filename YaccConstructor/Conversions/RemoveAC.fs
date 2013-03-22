@@ -45,4 +45,3 @@ type RemoveAC() =
     inherit Conversion()
     override this.Name = "RemoveAC"
     override this.ConvertGrammar(grammar,_) = mapGrammar removeAC grammar
-    override this.EliminatedProductionTypes = [""]

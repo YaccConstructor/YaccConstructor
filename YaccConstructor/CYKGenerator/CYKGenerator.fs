@@ -20,8 +20,9 @@
 namespace Yard.Generators.CYKGenerator
 
 open Yard.Core
+open Constraints
+open IL
 open System.Collections.Generic
-open Yard.Core.IL
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open System.IO
@@ -192,4 +193,4 @@ type CYKGenerator() =
             (File.CreateText fullName).Close()
             File.WriteAllText(fullName, code)
             code|> box
-        override this.AcceptableProductionTypes = ["seq"]
+        override this.Constraints = [|noMeta; noEbnf; noLiterals; noInnerAlt; noBrackets; inCNF; singleModule|]

@@ -65,7 +65,7 @@ let rec printBody indent body  =
 //What about following items
     |PSome a -> sprintf "many1 ( attempt(%s))" <| printBody (indent +  "") a
     |POpt a -> sprintf "opt ( attempt(%s))" <| printBody (indent +  "") a
-    | x -> failwith <| sprintf "Unsupported construct\n%A" x
+    | PMetaRef _ | PPerm _ | PRepet _ as x -> failwith <| sprintf "Unsupported construct\n%A" x
 
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 

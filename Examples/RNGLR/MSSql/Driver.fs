@@ -29,18 +29,22 @@ let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
     let lexbuf = LexBuffer<_>.FromTextReader reader
     let lastTokenNum = ref 0L
+    let i = ref 0L
     let traceStep = 100000L
     let timeOfIteration = ref System.DateTime.Now
     let time = ref System.DateTime.Now
+
     let allTokens = 
         seq{
             while not lexbuf.IsPastEndOfStream do
                 lastTokenNum := !lastTokenNum + 1L
                 if (!lastTokenNum % traceStep) = 0L then 
+                if (!i % traceStep) = 0L then 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
                     printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+
                 yield Lexer.tokens lexbuf}
 
     let translateArgs = {
@@ -63,7 +67,7 @@ let Parse (srcFilePath:string) =
     | Yard.Generators.RNGLR.Parser.Success ast ->
         ast.collectWarnings (fun x -> 0,0)
         |> ResizeArray.iter (fun (pos, prods) -> ())
-        defaultAstToDot ast @"..\..\ast.dot"
+        //defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated

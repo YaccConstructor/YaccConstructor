@@ -25,7 +25,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 
 let lastTokenNum = ref 0L
-let traceStep = 1000L
+let traceStep = 50000L
 
 let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
@@ -49,7 +49,7 @@ let justParse (path:string) =
                             timeOfIteration := System.DateTime.Now
                             let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
                             printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)                    
-                            if int64 chan.CurrentQueueLength > 3L then                                                                                  
+                            if int64 chan.CurrentQueueLength > 2L then                                                                                  
                                 int (int64 chan.CurrentQueueLength * mSeconds / traceStep)  |> System.Threading.Thread.Sleep          
                         buf.[int !count] <- Lexer.tokens lexbuf
                         count := !count + 1L
@@ -75,7 +75,7 @@ let justParse (path:string) =
                 yield! arr}
 
     let translateArgs = {
-        tokenToRange = fun x -> 0,0
+        tokenToRange = fun x -> tokenPos x |> (fun (x,y) -> x.Line,y.Line)
         zeroPosition = 0
         clearAST = false
         filterEpsilons = true
@@ -88,12 +88,16 @@ let justParse (path:string) =
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
-        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (tokenPos tok) (tok.GetType()) msg
+        let printPos = tokenPos >> (fun (x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (printPos tok) (tok.GetType()) msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
         ast.collectWarnings (fun x -> 0,0)
-        |> ResizeArray.iter (fun (pos, prods) -> ())
+        |> ResizeArray.iter (fun (pos, prods) -> 
+            //()
+            printfn "%s %A: %A" (System.IO.Path.GetFileName srcFilePath) pos <| prods
+            )
         //defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            

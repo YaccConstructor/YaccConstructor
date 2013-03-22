@@ -118,8 +118,7 @@ procedure_option:
 proc_body_stmnt:
      select_stmnt
    | set_stmnt
-   | execute_stmnt
-   | sql_expr
+   | execute_stmnt   
    | declare
    | KW_RETURN sql_expr
    | if_stmt
@@ -136,7 +135,7 @@ proc_body_stmnt:
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF brace_opt<<LPAREN sql_expr RPAREN>> proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
                 
 
 raiserror_stmnt:
@@ -189,7 +188,7 @@ select_stmnt:
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
     | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (STAR | IDENT) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
+    (* |KW_SELECT (STAR | IDENT) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )? *)
      
     
 for:
@@ -272,10 +271,9 @@ select_list:
             ( ( STRING_CONST | ident ) 
             | name LPAREN comma_list<<sql_expr>> RPAREN ) )? 
             | sql_expr (KW_AS? name)? ) 
-        | name = sql_expr)>>
+        | ident OP_EQ sql_expr)>>
     
-name:
-     ident | full_ident | LOCALVAR
+name: full_ident
     
 scalar_function:
     KW_LOWER LPAREN sql_expr RPAREN
@@ -617,7 +615,7 @@ execute_proc:
       (name (SEMI DEC_NUMBER)? | LOCALVAR) 
       brace_opt<<
          LPAREN 
-         (comma_list<<((ident OP_EQ)? 
+         (comma_list<<((LOCALVAR OP_EQ)? 
             (sql_expr 
             | LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
@@ -625,7 +623,7 @@ execute_proc:
         RPAREN>>
       (KW_WITH KW_RECOMPILE)?
     )
-    | create_object DOT IDENT LPAREN (comma_list<<((ident OP_EQ)? (sql_expr| DEC_NUMBER))>>)? RPAREN)
+    | create_object DOT IDENT LPAREN comma_list<<((LOCALVAR OP_EQ)? sql_expr)>> RPAREN)
 
 create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>>? RPAREN
 
@@ -664,6 +662,7 @@ binop:
      OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
     | OP_EQ | OP_PLUS | OP_MINUS | STAR | OP_DIV | OP_MOD | OP_TILDA 
     | OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+
 fetch_stmnt:    
     KW_FETCH 
               ((KW_NEXT | KW_PRIOR | KW_FIRST | KW_LAST 
@@ -678,14 +677,13 @@ fetch_stmnt:
 sql_expr:
     sql_value
     | scalar_function
-    | (name DOT) name
     | LPAREN sql_expr RPAREN
-    | LOCALVAR 
     | call_expr
     | select_stmnt
-    | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+    | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
     | GLOBALVAR
-    | name
+    | full_ident
+    | LOCALVAR
     | sql_expr binop sql_expr
     | sql_expr KW_IS KW_NOT? KW_NULL
     | ranking_windowed_function 
@@ -693,9 +691,8 @@ sql_expr:
     | sql_expr KW_COLLATE ident
     | case
     | begin_transaction
-    | KW_NOT? KW_EXISTS sql_expr
-    | KW_NOT? KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | KW_IS? KW_NOT? KW_NULL
+    | KW_EXISTS sql_expr
+    | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident

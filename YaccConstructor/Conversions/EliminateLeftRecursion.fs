@@ -46,5 +46,4 @@ type EliminateLeftRecursion() =
         override this.ConvertGrammar (grammar,_) =
             let prevConversions = ["ExpandEbnf"; "ExpandMeta"; "ExpandAlter"]
             mapGrammar eliminateLeftRecursion grammar
-        override this.EliminatedProductionTypes = [""]
 

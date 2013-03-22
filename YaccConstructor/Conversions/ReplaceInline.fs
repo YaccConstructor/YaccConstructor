@@ -76,4 +76,3 @@ type ReplaceInline() =
     inherit Conversion()
         override this.Name = "ReplaceInline"
         override this.ConvertGrammar (grammar,_) = mapGrammar replaceInline grammar
-        override this.EliminatedProductionTypes = [""]

@@ -68,17 +68,15 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             inner factList, inner formList
         match production with
         | PSeq(elem_list, ac, l) ->
-            PSeq(elem_list
-                 |> List.fold
-                    (fun (res,curAttrs) elem ->
-                        {elem with rule = replaceEbnf elem.rule curAttrs metaArgs}::res
-                        , if elem.binding.IsNone then curAttrs
-                           else curAttrs@[elem.binding.Value, elem.binding.Value(*createNewName <| createSource "arg"*)]
-                    )
-                    ([],attrs)
-                 |> fst
-                 |> List.rev
-                 , ac, l)
+            elem_list
+            |> List.fold (fun (res,curAttrs) elem ->
+                {elem with rule = replaceEbnf elem.rule curAttrs metaArgs}::res
+                , if elem.binding.IsNone then curAttrs
+                    else curAttrs@[elem.binding.Value, elem.binding.Value(*createNewName <| createSource "arg"*)]
+            ) ([],attrs)
+            |> fst
+            |> List.rev
+            |> fun elems -> PSeq(elems , ac, l)
         | PAlt(left, right) -> PAlt(replaceEbnf left attrs metaArgs, replaceEbnf right attrs metaArgs)
         | PSome p ->
             let generatedName = genSomeName()
@@ -87,17 +85,18 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             let newBody =
                 PAlt(
                     PSeq([{default_elem with rule = expandedBody; binding=genBinding "yard_elem" p}], genAction "[yard_elem]" p, None) ,
-                    PSeq([
-                            {omit=false;
-                                rule = expandedBody;
-                                binding=genBinding "yard_head" p;
-                                checker=None};
-                            {omit=false;
-                                rule = insideNewRule;
-                                binding=genBinding "yard_tail" p;
-                                checker=None}
-                            ]
-                            , genAction "yard_head::yard_tail" p, None)
+                    PSeq([{
+                            omit=false;
+                            rule = expandedBody;
+                            binding=genBinding "yard_head" p;
+                            checker=None
+                        }; {
+                            omit=false;
+                            rule = insideNewRule;
+                            binding=genBinding "yard_tail" p;
+                            checker=None
+                        }]
+                        , genAction "yard_head::yard_tail" p, None)
                 ) 
             addedBnfRules := (
                 {
@@ -168,4 +167,3 @@ type ExpandEbnf() =
     inherit Conversion()
         override this.Name = "ExpandEbnf"
         override this.ConvertGrammar (grammar,_) = mapGrammar (fun rules -> rules |> List.map (convertToBnf) |> List.concat) grammar
-        override this.EliminatedProductionTypes = ["POpt"; "PSome"; "PMany"]

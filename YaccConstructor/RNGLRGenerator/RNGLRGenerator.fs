@@ -20,18 +20,21 @@
 namespace Yard.Generators.RNGLR
 
 open Yard.Core
-open Yard.Core.IL
-open Yard.Generators.RNGLR.InitialConvert
+open IL
+open Constraints
+open Yard.Generators.RNGLR
+open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
-open Yard.Generators.RNGLR.States
-open Yard.Generators.RNGLR.Printer
-open Yard.Generators.RNGLR.TranslatorPrinter
+open States
+open Printer
+open TranslatorPrinter
 open Option
 
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
+        override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -189,6 +192,3 @@ type RNGLR() =
             //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate definition = this.Generate (definition, "")
-        override this.AcceptableProductionTypes =
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)

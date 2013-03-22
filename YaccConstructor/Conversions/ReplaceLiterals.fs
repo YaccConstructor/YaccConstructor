@@ -115,4 +115,3 @@ type ReplaceLiterals() =
         override this.Name = "ReplaceLiterals"
         override this.ConvertGrammar grammar = this.ConvertGrammar(grammar, [|"%s"|])
         override this.ConvertGrammar (grammar, token_format) = mapGrammar (fun rules -> replaceLiterals rules token_format.[0]) grammar
-        override this.EliminatedProductionTypes = [""]

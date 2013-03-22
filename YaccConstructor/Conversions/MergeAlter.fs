@@ -53,4 +53,3 @@ type MergeAlter() =
     inherit Conversion()
         override this.Name = "MergeAlter"
         override this.ConvertGrammar (grammar,_) = mapGrammar mergeAlter grammar
-        override this.EliminatedProductionTypes = [""]

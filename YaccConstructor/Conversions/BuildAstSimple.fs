@@ -100,5 +100,4 @@ type BuildAstSimple() =
     inherit Conversion()
         override this.Name = "BuildAstSimple"
         override this.ConvertGrammar (grammar,_) = mapGrammar buildAstSimple grammar
-        override this.EliminatedProductionTypes = [""]
 

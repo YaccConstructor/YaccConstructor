@@ -32,16 +32,17 @@ open Yard.Core.Conversions.TransformAux
 /// Adds action code to production considering it is used somewhere
 let rec addAcToProduction neededRules ruleBody = 
     match ruleBody with
-    | PSeq(elements, Some(ac), l) -> 
+    | PSeq(elements, Some ac, l) -> 
         PSeq(
             elements 
             |> List.map 
                 (fun elem ->
-                    match elem.binding with
-                    | Some(binding) -> { elem with rule=addAcToProduction neededRules elem.rule }
-                    | None -> elem
+                    { elem with rule=addAcToProduction neededRules elem.rule }
+                    (*match elem.binding with
+                    | Some binding -> { elem with rule=addAcToProduction neededRules elem.rule }
+                    | None -> elem*)
                 )
-            , Some(ac), l
+            , Some ac, l
         )
     | PSeq(elements, None, l) -> 
         let getBinding i elem =
@@ -97,18 +98,17 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
                 let updatedBody =
                     addAcToProduction neededRules (ruleFor.Value.body)
                     //|> bodyToSeq
-                !neededRules |> List.iter (fun r -> if not (updatedRules.Contains(r)) then rulesQueueBfs.Enqueue(r))
+                !neededRules |> List.iter (fun r -> if not <| updatedRules.Contains r then rulesQueueBfs.Enqueue r)
                 rulesMap.[bfsFor] <- { !ruleFor with body=updatedBody}
     ruleList
     |> List.map (fun rule ->
-                    let ruleRef = ref rule in
-                    rulesMap.TryGetValue(rule.name.text ,ruleRef)
-                    |> ignore;
+                    let ruleRef = ref rule
+                    rulesMap.TryGetValue(rule.name.text, ruleRef)
+                    |> ignore
                     !ruleRef)
 
 type AddDefaultAC() = 
     inherit Conversion()
         override this.Name = "AddDefaultAC"
         override this.ConvertGrammar (grammar,_) = mapGrammar addDefaultAC grammar
-        override this.EliminatedProductionTypes = [""]
 

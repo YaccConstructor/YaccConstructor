@@ -25,6 +25,5 @@ type Conversion() as this =
     abstract ConvertGrammar : Grammar.t<Source.t, Source.t> * string[] -> Grammar.t<Source.t, Source.t>
     abstract ConvertGrammar : Grammar.t<Source.t, Source.t>          -> Grammar.t<Source.t, Source.t>
     default this.ConvertGrammar grammar = this.ConvertGrammar (grammar,[||]) 
-    abstract EliminatedProductionTypes : string list
     interface Yard.Core.Manager.IComponent with 
         member self.Name : string =  this.Name

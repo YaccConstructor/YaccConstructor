@@ -111,8 +111,7 @@ let private linearize (grammar: Grammar.t<_,_>) =
     defaultModules newRules
 
 
-type ExpandBrackets() = 
+type Linearize() = 
     inherit Conversion()
         override this.Name = "Linearize"
         override this.ConvertGrammar (grammar,_) = linearize grammar
-        override this.EliminatedProductionTypes = [""]

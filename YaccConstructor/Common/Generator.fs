@@ -25,6 +25,6 @@ type Generator() as this =
     abstract Generate : Definition.t<Source.t,Source.t> -> obj
     abstract Generate : Definition.t<Source.t,Source.t> * string -> obj
     default this.Generate(grammar, string) = this.Generate(grammar)
-    abstract AcceptableProductionTypes : string list
+    abstract Constraints : Constraint []
     interface Yard.Core.Manager.IComponent with
         member self.Name : string =  this.Name

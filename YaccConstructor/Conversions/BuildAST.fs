@@ -119,5 +119,4 @@ type BuildAST() =
                 then tokenType.[0]
                 else ""
             mapGrammar (fun rules -> buildAST rules token) grammar
-        override this.EliminatedProductionTypes = [""]
 

@@ -105,4 +105,3 @@ type AddEOF() =
     inherit Conversion()
         override this.Name = "AddEOF"
         override this.ConvertGrammar (grammar,_) = mapGrammar addEOF grammar
-        override this.EliminatedProductionTypes = [""]

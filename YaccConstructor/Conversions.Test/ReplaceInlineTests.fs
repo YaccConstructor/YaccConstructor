@@ -35,8 +35,8 @@ type ``Inline tests`` () =
     let conversion = "ReplaceInline"
     //[<Test>]
     member test.``Inline 1`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"inline1.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules = 
             (verySimpleRules "s"

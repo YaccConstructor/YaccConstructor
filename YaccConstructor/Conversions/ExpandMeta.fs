@@ -34,7 +34,7 @@ let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule.t<Sou
     | :?System.Collections.Generic.KeyNotFoundException ->
         failwith <| sprintf "unable to find metarule %s in module %s" metaName module'
     
-
+(*
 /// Create pair (formal argument name, actual argument name)
 let addBindingPair attrs (*binding*) = function
     | None -> attrs
@@ -58,7 +58,7 @@ let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
         accBindings (curRes @ res) t
     | [] -> res
     accBindings init rule.args
-
+*)
 /// <summary>
 /// <para> Replace rule with new one, replacing references to metarules, </para>
 /// <para> and generate new rules for every such reference </para>
@@ -172,7 +172,7 @@ let expandMeta body (module' : string) metaRules expanded =
                                 |> (fun (body, accRes) ->
                                         if not <| canUseBinding body then (body::accMeta, accRes)
                                         else
-                                            let newMetaArgName = genNewSource (nextName "rule") _body
+                                            let newMetaArgName = genNewSource (newName "rule") _body
                                             let newMetaArg = PRef(newMetaArgName, None)
                                             let (newRule: Rule.t<_,_>) =
                                                 {
@@ -190,7 +190,7 @@ let expandMeta body (module' : string) metaRules expanded =
                         |> applyToRes (List.rev)
                     // TODO catch exception
                     let declModule, metaRule = findMetaRule metaRules module' name.text
-                    let newRuleName = new Source.t(nextName ("rule_" + name.text), metaRule.name)
+                    let newRuleName = new Source.t(newName ("rule_" + name.text), metaRule.name)
                     let formalArgs = metaRule.args
                     let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
                     let newKey = module' + ":" + getKey (PMetaRef(name, attrs, newMetaArgs))

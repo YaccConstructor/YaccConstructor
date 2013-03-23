@@ -31,7 +31,7 @@ open Yard.Core.IL.Production
 
 //let dummyPos s = new Source.t(s)
 
-let private newName () = Namer.nextName Namer.Names.brackets
+let private newName () = Namer.newName Namer.Names.brackets
     
 let private expandBrackets (ruleList: Rule.t<_, _> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule.t<_, _>>(List.toArray ruleList)

@@ -35,8 +35,8 @@ type ``Expand inner alts tests`` () =
     let conversion = "ExpandInnerAlt"
     [<Test>]
     member test.``Alt in seq 1`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq1.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules = 
             (verySimpleRules "s"
@@ -58,8 +58,8 @@ type ``Expand inner alts tests`` () =
 
     [<Test>]
     member test.``Alt in seq 2`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq2.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"
@@ -81,8 +81,8 @@ type ``Expand inner alts tests`` () =
 
     [<Test>]
     member test.``Alts in seq`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altsInSeq.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"
@@ -110,8 +110,8 @@ type ``Expand inner alts tests`` () =
 
     [<Test>]
     member test.``Nested alts`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"nestedAlts.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"

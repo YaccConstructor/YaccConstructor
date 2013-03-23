@@ -30,9 +30,10 @@ open System.Collections.Generic
 let dummyPos s = new Source.t(s)
 let dummyToken s = PToken <| new Source.t(s)
 
-let nameIndex = ref 0
-let createName() = nameIndex := !nameIndex + 1 ;sprintf "yard_start_%d" !nameIndex
-let getLastName() = sprintf "yard_start_%d" !nameIndex
+let lastName = ref ""
+let createName() =
+    lastName := Namer.newName "start"
+    !lastName
 
 let rec eachProduction f productionList =
     List.iter (function    
@@ -94,7 +95,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                     body=   [{
                                 omit=false
                                 rule=PRef (dummyPos rule.name.text, None)
-                                binding=getLastName() |> dummyPos |> Some
+                                binding= !lastName |> dummyPos |> Some
                                 checker=None
                             }; {
                                 omit=false
@@ -102,7 +103,7 @@ let addEOF (ruleList: Rule.t<Source.t, Source.t> list) =
                                 binding=None
                                 checker=None
                             }]
-                            |> fun elems -> PSeq (elems, getLastName() |> dummyPos |> Some, None)
+                            |> fun elems -> PSeq (elems, !lastName |> dummyPos |> Some, None)
                 }]
             else
                 [{rule with body=(addEOFToProduction rule.body)}]

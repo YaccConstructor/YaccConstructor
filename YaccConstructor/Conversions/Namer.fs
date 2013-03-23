@@ -29,7 +29,7 @@ open System.Collections.Generic
 let private withPrefix s = "yard_" + s
 
 (** global variable for number of current generated rule *)
-let curNum = ref 1
+let private curNum = ref 0
 
 //let private genYardName n (b, e, f) = new Source.t(sprintf "%s_%d" (withPrefix n) !curNum, b, e, f)
 
@@ -64,7 +64,8 @@ end
 let usedNames = new HashSet<_>()
 
 let initNamer (grammar : Grammar.t<_,_>) =
-    curNum := 1
+    curNum := 0
+    usedNames.Clear()
     let add s = usedNames.Add s |> ignore
     let addSrc (s : Source.t) = usedNames.Add s.text |> ignore
     let acceptable c = System.Char.IsLetterOrDigit c || c = '_'
@@ -117,6 +118,7 @@ let newName (n : string) =
             then n
             else withPrefix n
         with (*Invalid_argument*) _ -> withPrefix n
+    incr curNum
     let res = ref <| sprintf "%s_%d" addPrefix !curNum
     while usedNames.Contains !res do
         incr curNum

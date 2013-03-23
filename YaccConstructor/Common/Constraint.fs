@@ -20,6 +20,7 @@ open Yard.Core.IL
 
 type Constraint(name : string, checker : Grammar.t<Source.t, Source.t> -> bool, conv : Conversion, ?args : string[]) =
     member this.Name = name
+    member this.Conversion = conv
     member this.Fix grammar =
         match args with
         | None -> conv.ConvertGrammar grammar

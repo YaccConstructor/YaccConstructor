@@ -22,6 +22,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
 open Yard.Core.Checkers
+open Yard.Core.Constraints
 open Microsoft.FSharp.Text
 open System.IO
 
@@ -100,7 +101,7 @@ let () =
     let run () =
         match !testFile, !feName, !generatorName with
         | Some fName, Some feName, Some generatorName ->
-            let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
+            let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
                 if Seq.exists ((=) feName) FrontendsManager.Available
@@ -116,7 +117,7 @@ let () =
             // Parse grammar
             let ilTree =
                 //try
-                    let defStr = List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
+                    let defStr = String.concat ";" !userDefs
                     if System.String.IsNullOrEmpty defStr
                     then grammarFilePath
                     else grammarFilePath + "%" + defStr
@@ -170,7 +171,7 @@ let () =
                 if Seq.exists ((=) generatorName) GeneratorsManager.Available
                 then              
                     try
-                        match GeneratorsManager.Component  generatorName with
+                        match GeneratorsManager.Component generatorName with
                         | Some gen -> gen
                         | None -> failwith "TreeDump is not found."
                     with
@@ -183,6 +184,13 @@ let () =
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
                 //try
+                //let gen = new Yard.Generators.RNGLR.RNGLR()
+                for constr in gen.Constraints do
+                    let grammar = ilTree.Value.grammar
+                    if not <| constr.Check grammar then
+                        eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+                        ilTree := {!ilTree with grammar = constr.Fix grammar}
+
                 match !generatorParams with
                 | None -> gen.Generate !ilTree
                 | Some genParams -> gen.Generate(!ilTree, genParams)
@@ -192,9 +200,7 @@ let () =
 //                       |> raise
                 //| e -> GenError e.Message |> raise
 
-//#if DEBUG               
-            printf "%A" result
-//#endif
+            //printf "%A" result
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise

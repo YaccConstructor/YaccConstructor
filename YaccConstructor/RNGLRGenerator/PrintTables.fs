@@ -68,7 +68,7 @@ let printTables
                                     printer x)
         print rBr
 
-    let print2DArrList prefix lBr rBr sep (bindKW:string) printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name =
+    let print2DArrList lBr rBr sep (bindKW:string) printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name =
         printInd 0 (Printf.StringFormat<_,_>(bindKW + " lists_%s = ")) name
         let lists = new Dictionary<_,_>()
         let next =
@@ -83,7 +83,6 @@ let printTables
             listsArr.[v.Value] <- v.Key
         printArr listsArr printer
         printBrInd 0 (Printf.StringFormat<_,_>(bindKW + " small_%s =")) name
-        printInd 2 prefix
         printInd 2 lBr
         let mutable next = 1000
         let mutable cur = 0
@@ -102,7 +101,7 @@ let printTables
                 for v = 0 to good.Count - 1 do
                     let j = good.[v]
                     print sep
-                    print "%d" <| pack j (lists.[arr.[i,j]])
+                    print "%d" <| pack j lists.[arr.[i,j]]
                     cur <- cur + 1
                     if cur > next then
                         next <- next + 1000
@@ -158,7 +157,7 @@ let printTables
             printBrInd 1 "cur <- cur + length"
 
         let print2DArrList (arr : 'a list[,]) checker printer name =
-            print2DArrList "" "[|" "|]" "; " "let private" printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
+            print2DArrList "[|" "|]" "; " "let private" printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
 
         printBr "type Token ="
         let indexator = grammar.indexator
@@ -270,7 +269,7 @@ let printTables
         let print2DArrList (arr : 'a list[,]) checker printer name = 
             let mutable c = 1
             c <- c + 1            
-            let r = print2DArrList "Array" "(" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
+            let r = print2DArrList "Array (" ")" ", " "val " printArr resultArrayCreationCodePrinter (arr : 'a list[,]) checker printer name
             r
 
         printBr "abstract class Token"        

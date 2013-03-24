@@ -52,7 +52,6 @@ let dummyRule : elem<Source.t,Source.t> = {omit=false; binding=None; checker=Non
 type ``Conversions tests`` () =
     //[<Test>]
     member test.``ExpandBrackets tests. Lexer seq test`` () =
-        Namer.resetRuleEnumerator()
         let rules =
             PAlt (
                 PSeq(
@@ -64,6 +63,7 @@ type ``Conversions tests`` () =
                 dummyToken "OUTER")
             |> simpleRules "s"
         let ilTree = defaultGrammar rules
+        Namer.initNamer ilTree.grammar
         let ilTreeConverted = ConversionsManager.ApplyConversion "ExpandBrackets" ilTree
 #if DEBUG
         printfn "%A" ilTreeConverted
@@ -87,7 +87,6 @@ type ``Conversions tests`` () =
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
         let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
-        Namer.resetRuleEnumerator()
         let frontend =
             match FrontendsManager.Component "YardFrontend" with
                | Some fron -> fron
@@ -95,6 +94,7 @@ type ``Conversions tests`` () =
         let ilTree = 
             System.IO.Path.Combine(conversionTestPath,"expandbrackets_1.yrd")
             |> frontend.ParseGrammar
+        Namer.initNamer ilTree.grammar
         let ilTreeConverted = 
             ilTree 
             |> ConversionsManager.ApplyConversion "ExpandMeta"   

@@ -41,12 +41,12 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
                     | PSeq(subelements, None, l) when subelements.Length = 1 -> 
                         { elem with rule = (List.head subelements).rule }
                     | PSeq(subelements, subActionCode, l) when subelements.Length > 1 || subActionCode <> None ->
-                        let newName = Namer.nextName Namer.Names.brackets
+                        let newName = Namer.newName Namer.Names.brackets
                         toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
                                             isStart=false; isPublic=false; metaArgs=[]})
                         { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
                     | PAlt(_,_) -> 
-                        let newName = Namer.nextName Namer.Names.brackets
+                        let newName = Namer.newName Namer.Names.brackets
                         toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
                                             isStart=false; isPublic=false; metaArgs=[]})
                         { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }

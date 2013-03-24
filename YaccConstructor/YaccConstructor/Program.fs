@@ -125,6 +125,7 @@ let () =
                     |> ref
                 //with
                 //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
+            Namer.initNamer ilTree.Value.grammar
 
             let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
             if undeclaredRules.Length > 0 then

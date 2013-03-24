@@ -30,15 +30,14 @@ let justParse (path:string) =
     let lexbuf = LexBuffer<_>.FromTextReader reader
 
     let i = ref 0L
-    let traceStep = 100000L
+    let traceStep = 10000L
     let timeOfIteration = ref System.DateTime.Now        
 
 
     let allTokens = 
         seq{
             while not lexbuf.IsPastEndOfStream do 
-                i := 1L + !i 
-
+                i := 1L + !i
                 if (!i % traceStep) = 0L then 
                   let oldTime = !timeOfIteration
                   timeOfIteration := System.DateTime.Now
@@ -61,12 +60,17 @@ let justParse (path:string) =
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
-        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (tokenPos tok) (tok.GetType()) msg
+        let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (print tok) (tok.GetType()) msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
-        ast.collectWarnings (fun x -> 0,0)
-        |> ResizeArray.iter (fun (pos, prods) -> ())
+        ast.collectWarnings (tokenPos >> fun (x,y) -> x.Line, x.Column)
+        |> Seq.groupBy snd
+        |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
+        |> Seq.iter (fun (prods, gv) -> 
+            printfn "conf# %i  prods: %A" (Seq.length gv) prods
+            gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
         //defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            

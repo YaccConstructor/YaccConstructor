@@ -352,7 +352,7 @@ let tokenPos token =
     | STAR (_,(x,y))
     | STOREDPROCEDURE (_,(x,y))
     | STRING_CONST (_,(x,y))
-    | WEIGHT (_,(x,y)) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column
+    | WEIGHT (_,(x,y)) -> x,y
 
 
 let defaultSourceText (lexbuf : LexBuffer<_>) value =

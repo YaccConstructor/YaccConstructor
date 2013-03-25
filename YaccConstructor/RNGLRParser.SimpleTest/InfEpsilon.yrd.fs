@@ -99,11 +99,21 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
-          []
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_many_1) 
+             |> List.iter (fun (S1) -> 
+              _rnglr_cycle_res := (
+                
+# 2 "InfEpsilon.yrd"
+                    S1
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_s) 
-# 106 "InfEpsilon.yrd.fs"
+# 116 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -113,7 +123,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 116 "InfEpsilon.yrd.fs"
+# 126 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,7 +143,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_opt_1) 
-# 136 "InfEpsilon.yrd.fs"
+# 146 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -151,7 +161,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_opt_1) 
-# 154 "InfEpsilon.yrd.fs"
+# 164 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -173,7 +183,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_many_1) 
-# 176 "InfEpsilon.yrd.fs"
+# 186 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -191,7 +201,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_many_1) 
-# 194 "InfEpsilon.yrd.fs"
+# 204 "InfEpsilon.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

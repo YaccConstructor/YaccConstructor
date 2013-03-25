@@ -39,8 +39,8 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``ToCNF test`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"cnf_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionCNF loadIL
         let rules = 
             (verySimpleRules "e"
@@ -73,8 +73,8 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``Delete chain-rule`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"chain_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionChain loadIL
         let rules =
             (verySimpleRules "e"
@@ -102,8 +102,8 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``delete Eps rule test`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionEps loadIL
         let rules =
             (verySimpleRules "e"

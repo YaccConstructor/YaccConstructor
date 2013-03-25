@@ -36,8 +36,8 @@ type ``Expand subseq tests`` () =
     let conversion = "ExpandBrackets"
     [<Test>]
     member test.``Subseq 1`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq1.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"
@@ -56,8 +56,8 @@ type ``Expand subseq tests`` () =
 
     [<Test>]
     member test.``Subseq 2`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq2.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"
@@ -81,8 +81,8 @@ type ``Expand subseq tests`` () =
     
     [<Test>]
     member test.``Inner subseq`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"innerSubseq.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversion loadIL
         let rules =
             (verySimpleRules "s"

@@ -43,36 +43,38 @@ let justParse (path:string) =
                     let count = ref 0L
                     let buf = int traceStep |> Array.zeroCreate
                     while !count < traceStep && not lexbuf.IsPastEndOfStream do
-                        lastTokenNum := 1L + !lastTokenNum
-                        if (!lastTokenNum % (traceStep)) = 0L then 
-                            let oldTime = !timeOfIteration
-                            timeOfIteration := System.DateTime.Now
-                            let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                            printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)                    
-                            if int64 chan.CurrentQueueLength > 2L then                                                                                  
-                                int (int64 chan.CurrentQueueLength * mSeconds / traceStep)  |> System.Threading.Thread.Sleep          
+                        lastTokenNum := 1L + !lastTokenNum                        
                         buf.[int !count] <- Lexer.tokens lexbuf
-                        count := !count + 1L
+                        count := !count + 1L                    
+                    let oldTime = !timeOfIteration
+                    timeOfIteration := System.DateTime.Now
+                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    if int64 chan.CurrentQueueLength > 3L then                        
+                        int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
                             
             with e -> printfn "LexerError:%A" e.Message
         }   
 
     let start = System.DateTime.Now
-    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
+    //use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
     let lastTokenNum = ref 0L    
     let timeOfIteration = ref System.DateTime.Now
+    let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let allTokens = 
         seq{
             while true do
-                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + int64 arr.Length
+                //let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
+                lastTokenNum := !lastTokenNum + 1L // int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
                     printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                yield! arr}
+                //yield! arr
+                yield Lexer.tokens lexbuf
+                }
 
     let translateArgs = {
         tokenToRange = fun x -> tokenPos x |> (fun (x,y) -> x.Line,y.Line)

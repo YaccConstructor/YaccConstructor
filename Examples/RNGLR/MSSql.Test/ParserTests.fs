@@ -28,7 +28,8 @@ type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (tokenPos tok) (tok.GetType()) msg
+            let printPos = tokenPos >> (fun (x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (printPos tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
         | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -115,6 +116,7 @@ type ``MS-SQL parser tests`` () =
     //[<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
+        [1;2] |> Seq.countBy id
 
     
     [<Test>]

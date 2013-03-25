@@ -186,10 +186,7 @@ select_stmnt:
         (KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
-    | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    (* |KW_SELECT (STAR | IDENT) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )? *)
-     
+    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? ) SEMI?
     
 for:
     (KW_FOR (KW_BROWSE | xml))?

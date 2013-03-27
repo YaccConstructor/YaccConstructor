@@ -13,8 +13,7 @@ let dependencesForRemove =
              ;@"..\YardFrontend\YardFrontend.fsproj"
              ;@"..\YardPrinter\YardPrinter.fsproj"
              ;@"Irony"
-             ;@"Irony.Samples"
-             ;@"..\Conversions\Conversions.fsproj"])
+             ;@"Irony.Samples"])
     ]
 
 let basePath = @".\..\workdir\src"

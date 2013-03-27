@@ -23,6 +23,8 @@ let getKwToken =
     ucis.TryGetValue' upperName
     |> Option.map (fun ctor ->  ctor [| name |] :?>Token)
 
+//function
+
 let commendepth = ref 0
 let startPos = ref Position.Empty
 let str_buf = new System.Text.StringBuilder()

@@ -65,7 +65,7 @@ let rec printBody indent body  =
 //What about following items
     |PSome a -> sprintf "many1 ( attempt(%s))" <| printBody (indent +  "") a
     |POpt a -> sprintf "opt ( attempt(%s))" <| printBody (indent +  "") a
-    | x -> failwith <| sprintf "Unsupported construct\n%A" x
+    | PMetaRef _ | PPerm _ | PRepet _ as x -> failwith <| sprintf "Unsupported construct\n%A" x
 
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 
@@ -76,10 +76,12 @@ let grammarName filename =
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 
     
     let header = printArg input_grammar.head 
-    let functions = List.map (fun e -> (if e._public then "public " else "private " ) 
-                                      + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
-                                      + printBody "" e.body ) 
-                         input_grammar.grammar
+    let functions =
+        input_grammar.grammar.Head.rules |> List.map (fun e ->
+            (if e.isStart then "public " else "private " ) 
+                + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+                + printBody "" e.body ) 
+                         
 
     let res = "module " + (grammarName input_grammar.info.fileName) + "\n" + "\nopen FParsec.Primitives\n" + header + "let rec " + String.concat ( "\n\n and ") functions
   

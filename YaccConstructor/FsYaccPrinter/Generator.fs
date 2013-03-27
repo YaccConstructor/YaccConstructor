@@ -37,8 +37,8 @@ let findTokens (grammar:Rule.t<Source.t, Source.t> list) =
     List.fold (fun unique token -> if List.exists ((=) token) unique then unique else token::unique)
         [] allTokens
 
-let findStartRules (grammar:Rule.t<Source.t, Source.t> list) =
-    grammar |> List.choose (fun rule -> if rule._public then Some rule.name.text else None)
+let findStartRules (rules : Rule.t<Source.t, Source.t> list) =
+    rules |> List.choose (fun rule -> if rule.isStart then Some rule.name.text else None)
    
 let indentedListL = List.reduce (---) 
 
@@ -88,19 +88,19 @@ let fsYaccRule (yardRule : Rule.t<Source.t, Source.t>) =
     let layout = (^^) (wordL (yardRule.name.text + " :")) (layoutProduction true yardRule.body)
     Display.layout_to_string FormatOptions.Default layout
 
-let generate2 (ilDef:Definition.t<Source.t, Source.t>) tokenType =
+let generate2 (ilDef : Definition.t<Source.t, Source.t>) tokenType =
     let headerSection = match ilDef.head with Some v -> sprintf "%%{\n%s\n%%}\n" v.text | None -> ""
-    let tokens = findTokens ilDef.grammar
+    let tokens = findTokens ilDef.grammar.Head.rules
     // TODO: use String.concat instead of fold+sprintf
     let tokensSection =
         tokens |> List.fold
             (fun text token -> sprintf "%s%%token <%s> %s\n" text (tokenType token) token)
             ""
         |> sprintf "%s\n"
-    let startRules = findStartRules ilDef.grammar
+    let startRules = findStartRules ilDef.grammar.Head.rules
     let startRulesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%start %s\n" text start) "" startRules)
     let typesSection = sprintf "%s\n" (List.fold (fun text start -> sprintf "%s%%type <'a> %s\n" text start) "" startRules)
-    let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar))
+    let rulesSection  = sprintf "%%%%\n\n%s\n" (String.concat "\n\n" (List.map fsYaccRule ilDef.grammar.Head.rules))
     let footerSection = match ilDef.foot with Some v -> sprintf "%%%%\n%s\n" v.text | None -> ""
     headerSection + tokensSection + startRulesSection + typesSection + rulesSection + footerSection
 

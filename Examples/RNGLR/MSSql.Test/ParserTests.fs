@@ -20,13 +20,16 @@
 module ParserTests
 
 open NUnit.Framework
+open LexerHelper
+
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let msg = sprintf "Error in file %s on position %d on Token %A: %s" file num tok msg
+            let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (print tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
         | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -43,12 +46,21 @@ type ``MS-SQL parser tests`` () =
         file "TopLevelSet.sql" |> runParserTest
 
     [<Test>]
+    member test.``Case statement.`` () =
+        file "CaseStmt.sql" |> runParserTest
+
+
+    [<Test>]
     member test.``Top level sets.`` () =
         file "TopLevelSets.sql" |> runParserTest
 
     [<Test>]
     member test.``Create procedure without parameters.`` () =
         file "CreateProcWithoutParams.sql" |> runParserTest
+
+    //[<Test>]
+    member test.``Select local var.`` () =
+        file "SelectLocalVar.sql" |> runParserTest
 
     [<Test>]
     member test.``Create procedure.`` () =
@@ -58,6 +70,18 @@ type ``MS-SQL parser tests`` () =
     member test.``Declare local vars.`` () =
         file "DeclareLocalVars.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Begin transaction.`` () =
+        file "BeginTransaction.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Begin mark transaction.`` () =
+        file "MarkBeginTransaction.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Execute procedure. Very simple test.`` () =
+        file "ExecProc_1.sql" |> runParserTest
+        
     [<Test>]
     member test.``sp_addlogin complex test.`` () =
         complexSpFile "sp_addlogin.sql" |> runParserTest
@@ -84,26 +108,26 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_droplogin.sql" |> runParserTest
    
     
-//    [<Test>]
+    //[<Test>]
     member test.``sp_help complex test.`` () =
         complexSpFile "sp_help.sql" |> runParserTest
 
     
-//    [<Test>]
+    //[<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
 
     
-  //  [<Test>]
+    [<Test>]
     member test.``sp_password complex test.`` () =
         complexSpFile "sp_password.sql" |> runParserTest
 
     
-//    [<Test>]
+    //[<Test>]
     member test.``sp_revokedbaccess complex test.`` () =
         complexSpFile "sp_revokedbaccess.sql" |> runParserTest
 
     
-//    [<Test>]
+    //[<Test>]
     member test.``sp_tables_ex complex test.`` () =
         complexSpFile "sp_tables_ex.sql" |> runParserTest

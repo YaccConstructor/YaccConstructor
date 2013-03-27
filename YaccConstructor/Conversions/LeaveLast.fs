@@ -34,5 +34,4 @@ let leaveLast (ruleList: Rule.t<_,_> list) =
 type LeaveLast() = 
     inherit Conversion()
         override this.Name = "LeaveLast"
-        override this.ConvertList (ruleList,_) = leaveLast ruleList
-        override this.EliminatedProductionTypes = [""]
+        override this.ConvertGrammar (grammar,_) = mapGrammar leaveLast grammar

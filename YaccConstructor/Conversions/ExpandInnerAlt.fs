@@ -36,28 +36,25 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
             | PSeq(elements, actionCode, l) -> 
-                (elements
-                 |>List.fold
-                    (fun (res, attrs) elem ->
-                        let newElem =
-                            match elem.rule with 
-                            | PSeq(subelements, None, l) when List.length subelements = 1 -> 
-                                { elem with rule = (List.head subelements).rule }
-                            | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
-                                let newName = Namer.nextName Namer.Names.brackets
-                                toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
-                            | PAlt(_,_) -> 
-                                let newName = Namer.nextName Namer.Names.brackets
-                                toExpand.Enqueue({name= dummyPos newName; args=attrs; body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
-                            | _ -> elem
-                        newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
-                    )
-                    ([], attrs)
-                 |> fst |> List.rev
-                 ,actionCode, l)
-                |> PSeq
+                elements |> List.fold (fun (res, attrs) elem ->
+                    match elem.rule with 
+                    | PSeq(subelements, None, l) when subelements.Length = 1 -> 
+                        { elem with rule = (List.head subelements).rule }
+                    | PSeq(subelements, subActionCode, l) when subelements.Length > 1 || subActionCode <> None ->
+                        let newName = Namer.newName Namer.Names.brackets
+                        toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
+                                            isStart=false; isPublic=false; metaArgs=[]})
+                        { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+                    | PAlt(_,_) -> 
+                        let newName = Namer.newName Namer.Names.brackets
+                        toExpand.Enqueue({name = dummyPos newName; args=attrs; body=elem.rule;
+                                            isStart=false; isPublic=false; metaArgs=[]})
+                        { elem with rule = PRef(dummyPos newName, list2opt <| createParams attrs) }
+                    | _ -> elem
+                    |> fun newElem -> newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
+                ) ([], attrs)
+                |> fst |> List.rev
+                |> fun elems -> PSeq (elems, actionCode, l)
             | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x
         
@@ -66,8 +63,7 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
         ()
     List.rev !expanded
 
-type ExpandBrackets() = 
+type ExpandInnerAlt() = 
     inherit Conversion()
         override this.Name = "ExpandInnerAlt"
-        override this.ConvertList (ruleList,_) = expandInnerAlts ruleList
-        override this.EliminatedProductionTypes = [""]
+        override this.ConvertGrammar (grammar,_) = mapGrammar expandInnerAlts grammar

@@ -24,6 +24,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
+open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
@@ -38,56 +39,32 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``ToCNF test`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"cnf_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionCNF loadIL
-        let expected = 
-            {
-                info = {fileName = ""}
-                head = None
-                grammar = [{
-                                name = Source.t("e")
-                                args = []
-                                body = 
-                                    PSeq (
-                                            [{
-                                                omit = false
-                                                rule = PRef (Source.t "new_A", None)
-                                                binding = None
-                                                checker = None
-                                            }; 
-                                            {
-                                                omit = false
-                                                rule = PRef (Source.t "e", None)
-                                                binding = None
-                                                checker = None
-                                            }],
-                                            None,
-                                            None)
-                                _public = true
-                                metaArgs = []
-                          };
-                          {
-                                name = Source.t("new_A")
-                                args = []
-                                body = 
-                                    PSeq (
-                                            [{
-                                                omit = false
-                                                rule = PToken (Source.t "A")
-                                                binding = None
-                                                checker = None
-                                            }],
-                                            None,
-                                            None
-                                         )   
-                                _public = false
-                                metaArgs = []
-                          }]
-                foot = None
-                options = Map.empty
-            }
-
+        let rules = 
+            (verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PRef (Source.t "new_A", None)
+                    binding = None
+                    checker = None
+                }; {
+                    omit = false
+                    rule = PRef (Source.t "e", None)
+                    binding = None
+                    checker = None
+                }]
+            ) @ (
+             verySimpleNotStartRules "new_A"
+                [{
+                    omit = false
+                    rule = PToken (Source.t "A")
+                    binding = None
+                    checker = None
+                }]
+            )
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -96,40 +73,28 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``Delete chain-rule`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"chain_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionChain loadIL
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar =
+        let rules =
+            (verySimpleRules "e"
                 [{
-                    name = Source.t("e")
-                    args = []
-                    body = PSeq ([{
-                                    omit = false
-                                    rule = PToken (Source.t "STRING")
-                                    binding = None
-                                    checker = None
-                                }],None,None)
-                    _public = true
-                    metaArgs = []
-                }
-                ;{
-                    name = Source.t("s")
-                    args = []
-                    body = PSeq ([{
-                                    omit = false
-                                    rule = PToken (Source.t "STRING")
-                                    binding = None
-                                    checker = None
-                                }],None,None)
-                    _public = false
-                    metaArgs = []
+                    omit = false
+                    rule = PToken (Source.t "STRING")
+                    binding = None
+                    checker = None
                 }]
-             foot = None
-             options = Map.empty}
+            ) @ (
+                verySimpleNotStartRules "s"
+                    [{
+                        omit = false
+                        rule = PToken (Source.t "STRING")
+                        binding = None
+                        checker = None
+                    }]
+            )
 
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -137,41 +102,45 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``delete Eps rule test`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_0.yrd"))
+        Namer.initNamer loadIL.grammar
         let result = ConversionsManager.ApplyConversion conversionEps loadIL
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar =
-                 [{
-                         name = Source.t("e")
-                         args = []
-                         body = PSeq ([],None,None)
-                         _public = true
-                         metaArgs = []
-                 }; 
-                 {       name = Source.t("e")
-                         args = []
-                         body = PSeq ([{ omit = false
-                                         rule = PRef (Source.t "s", None)
-                                         binding = None
-                                         checker = None}],None,None)
-                         _public = true
-                         metaArgs = []
-                 };
-                 {
-                         name = Source.t("s")
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken (Source.t "STRING")
-                                        binding = None
-                                        checker = None}],None,None)
-                         _public = false
-                         metaArgs = []
-                 }]
-             foot = None
-             options = Map.empty}
+        let rules =
+            (verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (Source.t "STRING")
+                    binding = None
+                    checker = None
+                }]
+            ) @ (
+                verySimpleNotStartRules "s"
+                    [{
+                        omit = false
+                        rule = PToken (Source.t "STRING")
+                        binding = None
+                        checker = None
+                    }]
+            )
+        let rules =
+            (verySimpleRules "e" [])
+            @ (verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PRef (Source.t "s", None)
+                    binding = None
+                    checker = None
+                }]
+            ) @ (
+                verySimpleNotStartRules "s"
+                    [{
+                        omit = false
+                        rule = PToken (Source.t "STRING")
+                        binding = None
+                        checker = None
+                    }]
+            )
+        let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

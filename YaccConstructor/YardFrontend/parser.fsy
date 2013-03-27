@@ -19,7 +19,10 @@
 #nowarn "62";; 
 open Microsoft.FSharp.Text
 open Yard.Core.IL
+open Yard.Core
 open Yard.Core.IL.Production
+open Yard.Core.IL.Grammar
+open Yard.Core.IL.Definition
  
 type Range = struct
     val Start: Lexing.Position
@@ -31,6 +34,7 @@ end
 exception Parse_error
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
+let allPublic = ref false
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
 
@@ -46,19 +50,25 @@ let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
 
+let concatModOpt a b = fst a :: fst b, joinMaps (snd a) (snd b)
+
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
+    let oldFileName = !currentFilename
+    currentFilename := filename
     let ext = filename.Substring(filename.LastIndexOf(".") + 1)
     let frontend = FrontendsManager.GetByExtension ext
     let userDefs =
-        let args = (!currentFilename).Trim().Split('%') in
+        let args = oldFileName.Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
-    let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName !currentFilename, filename) in
+    let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName oldFileName, filename) in
 
     match FrontendsManager.GetByExtension ext with
-    | Some(frontend) -> 
-        frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
+    | Some frontend -> 
+        let res = frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
+        currentFilename := oldFileName
+        res
     | None -> 
         failwith (sprintf "Not supported extension %s in file %s" ext filename )
 %}
@@ -95,46 +105,95 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %%
 
 file: action_opt
-      rule_nlist
+      includes
+      unnamed_module_opt
+      modules
       foot_opt
       { 
-        { Definition.empty with
-            Definition.info = { fileName = !currentFilename }
-            Definition.head = $1
-            Definition.grammar = (fst $2)
-            Definition.foot = $3
-            Definition.options = (snd $2)
+        {
+            info = { fileName = !currentFilename }
+            head = $1
+            grammar = fst $2 @ fst $3 @ fst $4
+            foot = $5
+            options = (snd $4) |> joinMaps (snd $3) |> joinMaps (snd $2)
         }
       }
+
+unnamed_module_opt : rule_nlist
+    {
+        match fst $1 with
+        | [] -> [], Map.empty
+        | x ->  defaultModules x, snd $1
+    }
+
+modules : module_ modules { concatModOpt $1 $2 }
+        | { [], Map.empty }
+
+module_ : module_header ident openings rule_nlist
+    {
+        {
+            allPublic = $1
+            name = Some $2
+            openings = $3
+            rules = fst $4
+        }
+        , snd $4
+    }
+
+ident : UIDENT { $1 } | LIDENT { $1 }
+
+
+module_header : ALL_PUBLIC MODULE {
+                  (* It's important the word "module" is here. It guaranties, that it won't be an epsilon-tree, so allPublic will be evaluated before rules *)
+                  allPublic := true; true
+                }
+              | MODULE { allPublic := false; false }
+
+openings :  { [] } | OPEN ident open_list { $2::$3 }
+
+open_list : COMMA ident open_list { $2::$3 } | { [] }
 
 action_opt: { None } | ACTION { Some $1 }
 
 foot_opt: { None } | SEMICOLON ACTION { Some $2 }
 
+includes : include_ includes { fst $1 @ fst $2, joinMaps (snd $1) (snd $2) } | { [], Map.empty }
+
+include_:
+    INCLUDE STRING 
+    {
+        let def = parseRules $2.text in
+        if def.grammar |> List.exists (fun m -> m.name.IsNone) then
+            eprintfn "Error %s: Grammar in included files must be inside modules" $2.text
+        def.grammar, def.options
+    } 
+
+
 rule_nlist: rule semi_opt rule_nlist 
-        { (fst $1) :: (fst $3), joinMaps (snd $1) (snd $3) }
-    | INCLUDE STRING rule_nlist 
-        { let def = parseRules $2.text in
-          (def.grammar @ (fst $3), joinMaps def.options (snd $3)) 
-        } 
+      { concatModOpt $1 $3 }
     | { [], Map.empty }
     | rule error { missing "SEMI"; raise Parse_error  }
 
-rule: start_rule_sign_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
+rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
       { 
-        let newRule = { Rule._public = $1
-                        Rule.name = $2
-                        Rule.metaArgs = getList $3
-                        Rule.body = $7
-                        Rule.args = $4
-                      }
+        let newRule =
+            {
+                Rule.isStart = $1
+                Rule.isPublic = $2
+                Rule.name = $3
+                Rule.metaArgs = getList $4
+                Rule.body = $8
+                Rule.args = $5
+            }
         in
-        match $6 with
+        match $7 with
         | Some m -> newRule, Map.empty.Add (newRule, m)
         | None -> newRule, Map.empty
        }
 
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
+
+access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !allPublic }
 
 formal_meta_param_opt: { None } | DLESS formal_meta_list DGREAT {Some $2}
 
@@ -199,6 +258,6 @@ option_opt: { None } | SET option_params { Some $2 }
 option_params: option_param { Map.empty.Add $1}
              | option_param COMMA option_params {($3).Add $1}
 
-option_param: LIDENT EQUAL STRING { (Source.toString $1, Source.toString $3) }
+option_param: LIDENT EQUAL STRING { Source.toString $1, Source.toString $3 }
 
 tada_rule : SHARPLINE {} | EOF {};

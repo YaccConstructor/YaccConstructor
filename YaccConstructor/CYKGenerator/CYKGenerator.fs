@@ -20,8 +20,9 @@
 namespace Yard.Generators.CYKGenerator
 
 open Yard.Core
+open Constraints
+open IL
 open System.Collections.Generic
-open Yard.Core.IL
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open System.IO
@@ -83,15 +84,17 @@ type CYKGeneartorImpl () =
         |> spaceListL
     
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
-        ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name.text]
+        ntermDict.[(il.grammar.[0].rules |> List.find (fun r -> r.isStart)).name.text]
 
     let code il grammarInfo =
-        [ header
-         ; tokenTypes grammarInfo.termDict
-         ; getTokenTypeTag grammarInfo.termDict
-         ; rulesArray grammarInfo.rules
-         ; startNTerm il grammarInfo.nTermDict |> genStartNTermID
-         ; tokenStreamEncoder]
+        [
+            header
+            tokenTypes grammarInfo.termDict
+            getTokenTypeTag grammarInfo.termDict
+            rulesArray grammarInfo.rules
+            startNTerm il grammarInfo.nTermDict |> genStartNTermID
+            tokenStreamEncoder
+        ]
         |> aboveListL
         |> layoutToStr    
     
@@ -161,7 +164,7 @@ type CYKGeneartorImpl () =
             | _ -> failwith "CYK. Incorrect rule structure. Must be in CNF"
             
         {
-            rules = il.grammar |> List.map processRule |> Array.ofList
+            rules = il.grammar.[0].rules |> List.map processRule |> Array.ofList
             termDict = termDict
             nTermDict = ntermDict
         }
@@ -190,4 +193,4 @@ type CYKGenerator() =
             (File.CreateText fullName).Close()
             File.WriteAllText(fullName, code)
             code|> box
-        override this.AcceptableProductionTypes = ["seq"]
+        override this.Constraints = [|noMeta; noEbnf; noLiterals; noInnerAlt; noBrackets; inCNF; singleModule|]

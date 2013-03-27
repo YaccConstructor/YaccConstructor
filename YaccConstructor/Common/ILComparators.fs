@@ -22,7 +22,7 @@ module Yard.Core.ILComparators
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
-
+open Yard.Core.Helpers
 
 let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Grammar.t<Source.t, Source.t>) =
     let srcEquals (a:Source.t) (b:Source.t) =
@@ -31,7 +31,7 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
 
     let srcOptEquals a b =
         match a,b with
-        | Some(sa), Some(sb) -> srcEquals sa sb
+        | Some sa, Some sb -> srcEquals sa sb
         | None, None -> true
         | _ -> printfn "badOpt %A %A" a b; false
 
@@ -67,12 +67,19 @@ let GrammarEqualsWithoutLineNumbers (g1:Grammar.t<Source.t,Source.t>) (g2:Gramma
         | PLiteral s1, PLiteral s2 -> srcEquals s1 s2
         | _ -> false
 
-    List.forall2  
-        (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
-            rule1._public = rule2._public &&
-            argsAreEqual rule1.args rule2.args &&
-            ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
-            List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
-            rule1.name.text = rule2.name.text
+    List.forall2
+        (fun (m1 : Grammar.Module<_,_>) (m2 : Grammar.Module<_,_>) ->
+            getModuleName m1 = getModuleName m2
+            && m1.allPublic = m2.allPublic
+            && List.forall2 srcEquals m1.openings m2.openings
+            && List.forall2
+                (fun (rule1:Rule.t<Source.t, Source.t>) (rule2:Rule.t<Source.t, Source.t>) ->
+                    rule1.isStart = rule2.isStart &&
+                    rule1.isPublic = rule2.isPublic &&
+                    argsAreEqual rule1.args rule2.args &&
+                    ilTreeEqualsWithoutLineNumbers rule1.body rule2.body &&
+                    List.forall2 srcEquals rule1.metaArgs rule2.metaArgs &&
+                    srcEquals rule1.name rule2.name
+                ) m1.rules m2.rules
         ) g1 g2
 

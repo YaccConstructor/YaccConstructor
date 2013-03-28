@@ -5,11 +5,7 @@ module Yard.Generators.GLL.AST
 type GrammarItem = Trm of int | Ntrm of int
 // item : terminal/nonterminal represented by this node
 [<AllowNullLiteral>]
-type Node (item:GrammarItem)=
-    // parents of this node in the SPPF
-    // each parent is associated with the production number and item index in the production; see (*1*)
-    let mutable parents = ResizeArray<int * int * Node> ()
-
+type Node (item:GrammarItem) =
     // terminal/nonterminal represented by this node
     member val Item = item with get
     // input buffer position of the matched input terminal
@@ -18,9 +14,12 @@ type Node (item:GrammarItem)=
     member val PrevNode = null with get, set
     // nodes that are the next node for this in a left-to-right traversal
     member val NextNodes = ResizeArray<Node> () with get, set
+    // parents of this node in the SPPF
+    // each parent is associated with the production number and item index in the production; see (*1*)
+    member val Parents = ResizeArray<int * int * Node> () with get    
     
     // add a new parent node
-    member this.addParent = parents.Add
+    member this.addParent = this.Parents.Add
     // add a node that is next in a left-to-right traversal
     member this.addNext node =
         this.NextNodes.Add node

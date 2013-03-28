@@ -5,7 +5,6 @@ open Microsoft.FSharp.Text.Lexing
 type Trinity = {Id : int; Column : int; Line : int}
 
 
-
 let private constId = 17
 let private constColumn = 17
 let private constLine = 64 - constId - constColumn

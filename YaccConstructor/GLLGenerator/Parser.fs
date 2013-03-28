@@ -5,7 +5,7 @@ open Yard.Generators.GLL.AST
 
 type Production = GrammarItem list
 
-// startNonTerm: int that represents start Ntrm
+// startNonTerm: int that represents start Ntrm (yard_start_rule)
 // eofToken: what to expect as the last token of input
 // actionsTable: (lookahead terminal, nonterminal on parse stack topm, production(s) to use)
 // productions: right sides of grammar rules
@@ -17,52 +17,56 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
     member this.parse () =
         // remove node and all its useless predecessors from the SPPF
         // they all and their parents are left alone waitng for the GC
-        let rec removeNode (node : Node) =
-            let prev = node.PrevNode
-            node.removePrevAndNexts ()
-            if prev <> null
-            then
-                prev.removeNext node
-                if prev.NextNodes.Count = 0 then removeNode prev
+        let removeNode (node : Node) (prevNode : Node) =
+            let rec removeWhileAlone (node: BackNode) =
+                node.Node.removeParent node.ParentLink
+                if node.PrevNodes.Count = 1
+                then
+                    let prevNode = node.PrevNodes.[0]
+                    prevNode.Node.removeNext node.Node
+                    removeWhileAlone prevNode
+
+            node.removeParent node.BackNode.ParentLink
+            prevNode.removeNext node
+            removeWhileAlone prevNode.BackNode
 
         // expands the nonterminals following specified node in right-to-left traversals
         // until a terminal matching current input terminal is found in every traversal
         let expandToCurrentInput currentInputTerm currentSet (startNode : Node) =
-            let rec expandFromNode (currentSet : Node list) (node : Node) =
+            let rec expandFromNode (prevNode : Node ) (currentSet : Node list) (node : Node) =
                 match node.Item with
+                // found tree node matching current input terminal: add it to found set
                 | Trm trm when trm = currentInputTerm ->
-                    // found tree node matching current input terminal: add it to found set
                     node :: currentSet
-                | Trm _ ->
-                    // found tree node not matching current input terminal
-                    removeNode node
+                // found tree node not matching current input terminal
+                | Trm trm ->
+                    removeNode node prevNode
                     currentSet
                 | Ntrm ntrm ->
                     match actions (currentInputTerm, ntrm) with
                     // found nonterminal; expand all its available productions
                     | Some productionIndices ->
-                        let nextNode = Seq.nth 0 node.NextNodes // nonterms always have 1 next node
-                        let prevNode = node.PrevNode
+                        let nextNode = node.NextNodes.[0] // nonterms always have 1 next node
                         let expandProduction productionIndex =
                             let production = productions.[productionIndex]
                             List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
                                           (List.zip production [0..production.Length-1])
                                           nextNode
                         let newNextNodes = List.map expandProduction productionIndices
-                        node.PrevNode.reassignNext node newNextNodes
-                        List.fold expandFromNode currentSet newNextNodes
+                        prevNode.reassignNext node newNextNodes
+                        List.fold (expandFromNode prevNode) currentSet newNextNodes
                     // found nonterminal but no productions
                     | None ->
-                        removeNode node
+                        removeNode node prevNode
                         currentSet
-            Array.fold expandFromNode currentSet (startNode.NextNodes.ToArray ())
-        
+            // use ToArray because startNode.NextNodes can be changed by expandFromNode
+            Array.fold (expandFromNode startNode) currentSet (startNode.NextNodes.ToArray ())
+
         // prepare initial structure
         let fakeEndNode = Node (Trm eofToken)
-        let rootNode = Node (Ntrm startNonTerm)
-        let fakeStartNode = Node (Trm eofToken)
-        fakeStartNode.addNext rootNode
-        rootNode.addNext fakeEndNode
+        fakeEndNode.BackNode <- BackNode (fakeEndNode, (0,0,null))
+        let rootNode = Node (Ntrm startNonTerm, fakeEndNode, (0,0,null))
+        let fakeStartNode = Node (Trm eofToken, rootNode, (0,0,null))
 
         // tree leafs to match with current terminal in the input buffer
         let mutable currentTreeTerminals : Node list = [fakeStartNode]

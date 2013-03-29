@@ -1,4 +1,4 @@
-﻿//  Driver.fs contains tests of MS-SQL parser.
+﻿// Driver.fs contains tests of MS-SQL parser.
 //
 //  Copyright 2012 Semen Grigorev <rsdpisuy@gmail.com>
 //
@@ -21,6 +21,7 @@ module ParserTests
 
 open NUnit.Framework
 open LexerHelper
+open Yard.Utils.SourceText
 
 
 [<TestFixture>]
@@ -28,7 +29,7 @@ type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+            let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" ((RePack x).Line + 1) (RePack x).Column ((RePack y).Line + 1) ((RePack y).Column))
             let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (print tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)

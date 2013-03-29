@@ -21,6 +21,7 @@
 (*Вопрос про execute*)
 {
 open Microsoft.FSharp.Text.Lexing
+open Yard.Utils.SourceText
 }
 (* include "../../../GrammarTemplates/Common.yrd" *)
 

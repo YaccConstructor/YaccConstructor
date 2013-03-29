@@ -11,4 +11,4 @@ xcopy /Y ..\YaccConstructor\RNGLRCommon\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\RNGLRParser\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\RNGLRGenerator\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\Constraints\bin\Release\*.dll yc
-
+xcopy /Y ..\YaccConstructor\Utils.SourceText\bin\Release\*.dll yc

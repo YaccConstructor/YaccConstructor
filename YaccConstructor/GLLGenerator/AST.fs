@@ -5,14 +5,32 @@ module Yard.Generators.GLL.AST
 type GrammarItem = Trm of int | Ntrm of int
 
 /// <summary>
+/// Contains a backward link for a left-to-right travsersal.
+/// </summary>
+[<AllowNullLiteral>]
+type BackNode (node:Node, parentLink) =
+    // SPPF node this BackNode stores links for
+    member val Node = node with get, set
+    // nodes that are previous for this in a left-to-right traversal
+    member val PrevNodes = ResizeArray<BackNode> () with get
+    // link to the Node's parent that should be removed if this BackNode is removed
+    member val ParentLink = parentLink with get
+   
+    // adds a node that is previous for this in a left-to-right traversal
+    member this.addPrev = this.PrevNodes.Add
+    // removes this node from left-to-right traversals 
+    member this.removePrev = this.PrevNodes.Remove >> ignore
+    // removes all backward links from this node
+    member this.clearPrev = this.PrevNodes.Clear
+
+/// <summary>
 /// SPPF Node that also contains forward links for left-to-right traversals.
 /// Graph consisting of all Nodes (except FakeStart and FakeEnd) is a tree (DAG with Next links).
 /// </summary>
 /// <param name="item">
 /// Terminal/nonterminal represented by this node
 /// </param>
-[<AllowNullLiteral>]
-type Node (item:GrammarItem) =
+and [<AllowNullLiteral>] Node (item:GrammarItem) =
     // terminal/nonterminal represented by this node
     member val Item = item with get
     // input buffer position of the matched input terminal
@@ -43,28 +61,18 @@ type Node (item:GrammarItem) =
         this.removeNext oldNode
         Seq.iter this.addNext newNodes
         oldNode.NextNodes <- null
+    // checks whether there are links to next nodes
+    member this.hasNextNodes () =
+        this.NextNodes <> null && this.NextNodes.Count > 0
 
-    new (item, next, parentLink) as this =
+    new (item, next : Node, parentLink) as this =
         Node(item) then
         this.BackNode <- BackNode(this, parentLink)
+
+        next.BackNode.clearPrev ()
+
         this.addNext(next)
         this.addParent(parentLink)
-
-/// <summary>
-/// Contains a backward link for a left-to-right travsersal.
-/// </summary>
-and [<AllowNullLiteral>] BackNode (node:Node, parentLink) =
-    // SPPF node this BackNode stores links for
-    member val Node = node with get, set
-    // nodes that are previous for this in a left-to-right traversal
-    member val PrevNodes = ResizeArray<BackNode> () with get
-    // link to the Node's parent that should be removed if this BackNode is removed
-    member val ParentLink = parentLink with get
-   
-    // adds a node that is previous for this in a left-to-right traversal
-    member this.addPrev = this.PrevNodes.Add
-    // removes this node from left-to-right traversals 
-    member this.removePrev = this.PrevNodes.Remove >> ignore
 
 (*1: condider the following ambiguous grammar:
        S -> AxxA

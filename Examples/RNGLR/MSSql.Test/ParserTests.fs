@@ -29,7 +29,12 @@ type ``MS-SQL parser tests`` () =
     let runParserTest file = 
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" ((RePack x).Line + 1) (RePack x).Column ((RePack y).Line + 1) ((RePack y).Column))
+            let print = 
+                tokenPos
+                >> (fun(x,y) -> 
+                    let x = RePack x
+                    let y = RePack y
+                    sprintf "(%i,%i) - (%i,%i)" (x.Line + 1) x.Column (y.Line + 1) y.Column)
             let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (print tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
@@ -59,7 +64,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Create procedure without parameters.`` () =
         file "CreateProcWithoutParams.sql" |> runParserTest
 
-    //[<Test>]
+    [<Test>]
     member test.``Select local var.`` () =
         file "SelectLocalVar.sql" |> runParserTest
 

@@ -46,9 +46,6 @@
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="mssql.yrd" />
     <Compile Include="MSParser.fs" />
     <Compile Include="LexerHelper.fs" />

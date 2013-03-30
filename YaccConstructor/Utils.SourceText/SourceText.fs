@@ -9,8 +9,6 @@ let private constId = 17
 let private constColumn = 17
 let private constLine = 64 - constId - constColumn
 
-
-
 let Pack id column line = ((uint64 id) <<< constColumn + constLine) ||| 
                           ((uint64 column) <<< constLine) ||| 
                           (uint64 line)
@@ -26,7 +24,6 @@ let RePack (trinity : uint64) =
     let (res : Trinity) = {Id = id; Column = column; Line = line}
     res
     
-
 [<Struct>]
 type SourceRange =
     val start : uint64

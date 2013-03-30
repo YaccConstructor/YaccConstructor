@@ -1,6 +1,8 @@
-﻿open Microsoft.FSharp.Text
+﻿module Yard.FsYard
 
-let generate inFile =
+open Microsoft.FSharp.Text
+
+let generate inFile ycArgs rnglrArgs =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let be = new Yard.Generators.RNGLR.RNGLR()
     fe.ParseGrammar inFile |> be.Generate |> ignore
@@ -17,5 +19,5 @@ let () =
          "-i", ArgType.String (fun s -> inFile := s|> Some), "Input grammar"
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
-    generate inFile
+    generate inFile 1 1
 

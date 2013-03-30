@@ -3,15 +3,27 @@
 open Microsoft.Build.Framework
 
 [<Class>] 
-type SetEnv() =
+type FsYard() =
     let mutable engine = Unchecked.defaultof<IBuildEngine>
     let mutable host = Unchecked.defaultof<ITaskHost>
-    let mutable items =  Array.empty<ITaskItem>
+    let mutable items = Array.empty<ITaskItem>
+    let mutable moduleName = ""
+    let mutable tokenType = ""
+    let mutable fullPath = false
+    let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
+    let mutable needTranslate = true
+    let mutable light = true
+    let mutable printInfiniteEpsilonPath = ""
+    let mutable output = ""
 
     [<Required>]
     member this.InputFiles
         with get () = items
         and set v = items <- v
+
+    member this.OutFile
+        with get() = output
+        and set v = output <- v
 
     interface ITask with
         override this.Execute() =          

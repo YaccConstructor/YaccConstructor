@@ -43,7 +43,11 @@ brace_opt<<o_br block cl_br>>:
 
 
 [<Start>]
-root_rule: list<<batch_body KW_GO?>> KW_GO?
+root_rule: (batch_body KW_GO?)+
+
+(* root_rule: list<<batch_body KW_GO?>> KW_GO?
+*)
+
 
 batch_body: 
    create_proc

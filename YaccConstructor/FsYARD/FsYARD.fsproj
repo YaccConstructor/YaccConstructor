@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9aea3f62-7f50-4939-85dc-ce29ab43815d}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>FsYARD</RootNamespace>
     <AssemblyName>FsYARD</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -33,20 +33,25 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <UsingTask AssemblyFile="FsYARD.dll" TaskName="SetEnv" />
+  <PropertyGroup>
+    <light>on</light>
+    <RLiterals>KW_%s</RLiterals>
+  </PropertyGroup>
+
+  <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />
   <PropertyGroup>
     <CompileDependsOn>MyTarget;$(CompileDependsOn)</CompileDependsOn>
   </PropertyGroup>
   <Target Name="MyTarget" Inputs="@(SE)" Condition="'@(SE)'!=''" Outputs="@(SE->'dddd.fs')">
-    <SetEnv Name="a" InputFiles="@(SE)" Value="lslsls">
-    </SetEnv>
-  </Target>
+    <FsYard InputFiles="@(SE)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
+            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
+    </FsYard>
+  </Target-->
   <ItemGroup>
-    <AvailableItemName Include="SE">
+    <!--AvailableItemName Include="SE">
       <Visible>false</Visible>
     </AvailableItemName>
-    <SE Include="rr" />
-    <SE Include="rr2" />
+    <SE Include="mssql.yrd" /-->
     <Compile Include="FsYARD.fs" />
     <Compile Include="FsYARDBuildTask.fs" />
   </ItemGroup>
@@ -94,10 +99,10 @@
     </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

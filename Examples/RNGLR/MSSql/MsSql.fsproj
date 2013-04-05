@@ -55,6 +55,7 @@
     <Compile Include="Lexer.fs" />
     <None Include="mssql.yrd" />
     <Compile Include="Driver.fs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">
@@ -63,6 +64,10 @@
     <Reference Include="FSharp.Core" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.7.11\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="RNGLR">

@@ -23,6 +23,7 @@ open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
 open LexerHelper
+open Yard.Utils.SourceText
 
 let lastTokenNum = ref 0L
 let traceStep = 10000L
@@ -91,12 +92,17 @@ let justParse (path:string) =
 let Parse (srcFilePath:string) =    
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
-        let print = tokenPos >> (fun(x,y) -> sprintf "(%i,%i) - (%i,%i)" (x.Line+1) x.Column (y.Line+1) y.Column)
+        let print = 
+            tokenPos 
+            >> (fun(x,y) -> 
+                let x = RePack x
+                let y = RePack y
+                sprintf "(%i,%i) - (%i,%i)" (x.Line + 1) x.Column (y.Line + 1) y.Column)
         printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (print tok) (tok.GetType()) msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
-        ast.collectWarnings (tokenPos >> fun (x,y) -> x.Line, x.Column)
+        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1, x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
         |> Seq.iter (fun (prods, gv) -> 

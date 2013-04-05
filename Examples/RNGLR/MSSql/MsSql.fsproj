@@ -46,9 +46,6 @@
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="mssql.yrd" />
     <Compile Include="MSParser.fs" />
     <Compile Include="LexerHelper.fs" />
@@ -82,6 +79,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\..\yc\Utils.SourceText.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

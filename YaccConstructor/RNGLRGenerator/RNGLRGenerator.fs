@@ -56,7 +56,7 @@ type RNGLR() =
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
                 | "-pos" -> positionType <- value
-                | "-o" -> output <- value
+                | "-o" -> if value.Trim() <> "" then output <- value
                 | "-table" ->
                     match value with
                     | "LALR" -> table <- LALR
@@ -73,7 +73,7 @@ type RNGLR() =
                 | "-light" ->
                     if value = "on" then light <- true
                     elif value = "off" then light <- false
-                    else failwith "Unexpected light value %s" value
+                    else failwith "Unexpected light value %A" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-lang" ->
                     targetLanguage <-

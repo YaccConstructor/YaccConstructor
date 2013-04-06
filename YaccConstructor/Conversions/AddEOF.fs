@@ -30,21 +30,30 @@ open System.Collections.Generic
 let dummyPos s = new Source.t(s)
 let dummyToken s = PToken <| new Source.t(s)
 
-let nameIndex = ref 0
-let createName() = nameIndex := !nameIndex + 1 ;sprintf "yard_start_%d" !nameIndex
-let getLastName() = sprintf "yard_start_%d" !nameIndex
+let lastName = ref ""
+let createName() =
+    lastName := Namer.newName "start"
+    !lastName
 
 let rec eachProduction f productionList =
-    List.iter 
-        (function    
-        | PSeq(elements, actionCode, l) -> f(PSeq(elements, actionCode, l)); eachProduction f (List.map (fun elem -> elem.rule) elements)
-        | PAlt(left, right) -> f(PAlt(left, right)); eachProduction f [left; right]
-        | PMany(x) -> f(PMany(x)); eachProduction f [x]
-        | PSome(x) -> f(PSome(x)); eachProduction f [x]
-        | POpt(x) -> f(POpt(x)); eachProduction f [x]
-        | x -> f(x)
-        )
-        productionList 
+    List.iter (function    
+        | PSeq(elements, actionCode, l) ->
+            f <| PSeq(elements, actionCode, l)
+            elements |> List.map (fun elem -> elem.rule) |> eachProduction f
+        | PAlt(left, right) ->
+            f <| PAlt(left, right)
+            eachProduction f [left; right]
+        | PMany x ->
+            f <| PMany x
+            eachProduction f [x]
+        | PSome x ->
+            f <| PSome x
+            eachProduction f [x]
+        | POpt x ->
+            f <| POpt x
+            eachProduction f [x]
+        | x -> f x
+    ) productionList 
 
 let addEOFToProduction = function
     | PSeq(elements, actionCode, l) -> 
@@ -52,54 +61,55 @@ let addEOFToProduction = function
             elements 
             @ [{omit=true; rule=dummyToken "EOF"; binding=None; checker=None}]
             ,actionCode, l
-        ) 
-        |> PSeq
+        ) |> PSeq
     | x -> (
                 [
                     {omit=false; rule=x; binding=None; checker=None}; 
                     {omit=true; rule=dummyToken "EOF"; binding=None; checker=None}
                 ]
                 ,None, None
-           )
-           |> PSeq
+           ) |> PSeq
 
 let addEOF (ruleList: Rule.t<Source.t, Source.t> list) = 
     let startRules = new HashSet<string>()
     ruleList |> List.iter
         (fun rule -> if rule.isStart then startRules.Add rule.name.text |>ignore )
     let usedRules = new HashSet<string>()
-    eachProduction 
-        (function
+    ruleList |> List.map (fun rule -> rule.body) 
+    |> eachProduction (function
         | PRef(name,_) -> usedRules.Add name.text |>ignore
         | _ -> ()
-        )
-        (ruleList |> List.map (fun rule -> rule.body) )
+    )
     let usedStartRules = new HashSet<string>(startRules)
     usedStartRules.IntersectWith(usedRules)
-    ruleList |> List.collect 
-        (fun rule -> 
-            if rule.isStart then
-                if usedStartRules.Contains rule.name.text then
-                    [{rule with isStart=false
-                    }; {
-                        name= dummyPos (createName())
-                        args=[]
-                        isStart=true
-                        isPublic=false
-                        metaArgs=[] 
-                        body=PSeq([
-                                    {omit=false; rule=PRef(dummyPos rule.name.text, None); binding=Some(dummyPos <| getLastName()); checker=None}; 
-                                    {omit=false; rule=dummyToken "EOF"; binding=None; checker=None}
-                                  ]
-                                  ,Some(dummyPos <| getLastName())
-                                  , None
-                        )
-                    }]
-                else
-                    [{rule with body=(addEOFToProduction rule.body)}]
+    ruleList |> List.collect (fun rule -> 
+        if rule.isStart then
+            if usedStartRules.Contains rule.name.text then
+                [{rule with isStart=false
+                }; {
+                    name= dummyPos <| createName()
+                    args=[]
+                    isStart=true
+                    isPublic=false
+                    metaArgs=[] 
+                    body=   [{
+                                omit=false
+                                rule=PRef (dummyPos rule.name.text, None)
+                                binding= !lastName |> dummyPos |> Some
+                                checker=None
+                            }; {
+                                omit=false
+                                rule=dummyToken "EOF"
+                                binding=None
+                                checker=None
+                            }]
+                            |> fun elems -> PSeq (elems, !lastName |> dummyPos |> Some, None)
+                }]
             else
-                [rule]
-        )  
+                [{rule with body=(addEOFToProduction rule.body)}]
+        else
+            [rule]
+    )  
 
 type AddEOF() = 
     inherit Conversion()

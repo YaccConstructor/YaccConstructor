@@ -34,7 +34,7 @@ open Option
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")

@@ -21,6 +21,7 @@
 (*Вопрос про execute*)
 {
 open Microsoft.FSharp.Text.Lexing
+open Yard.Utils.SourceText
 }
 (* include "../../../GrammarTemplates/Common.yrd" *)
 
@@ -43,6 +44,10 @@ brace_opt<<o_br block cl_br>>:
 
 [<Start>]
 root_rule: (batch_body KW_GO?)+
+
+(* root_rule: list<<batch_body KW_GO?>> KW_GO?
+*)
+
 
 batch_body: 
    create_proc
@@ -552,7 +557,7 @@ computed_column_definition:
             (KW_NOT KW_FOR KW_REPLICATION)? 
         | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
     )? 
-
+(*-*)
 table_constraint:
     (KW_CONSTRAINT IDENT)? 
     ( 

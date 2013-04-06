@@ -3,10 +3,19 @@
   <PropertyGroup>
     <CompileDependsOn>FsYardCall;$(CompileDependsOn)</CompileDependsOn>
   </PropertyGroup>
-  <Target Name="FsYardCall" Inputs="@(FsYard)" Condition="'@(FsYard)'!=''" Outputs="@(FsYard->'dddd.fs')">
+  <Target Name="FsYardCall" 
+          Inputs="@(FsYard)" 
+          Condition="'@(FsYard)'!=''" 
+          Outputs="@(FsYard->'$(FsYardOutputFolder)$(OutFile)')">
+    <MakeDir Directories="$(FsYardOutputFolder)"/>
     <FsYard InputFiles="@(FsYard)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
-            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
+            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)"
+            ProjectBasePath="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="OutFile" ItemName="FileWrites"/>
     </FsYard>
+    <CreateItem Include="$(FsLexOutputFolder)%(FsLex.Filename).fs">
+      <Output TaskParameter="Include" ItemName="FileWrites"/>
+    </CreateItem>
   </Target>
   <ItemGroup>
     <AvailableItemName Include="FsYard">

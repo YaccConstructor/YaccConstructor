@@ -24,10 +24,10 @@ let generate inFile replLit rnglrArgs =
             new ExpandBrackets.ExpandBrackets() :> Yard.Core.Conversion ,[||]
             new LeaveLast.LeaveLast() :> Yard.Core.Conversion ,[||]
         ]
-        |> List.map (fun (x,y) -> fun (il:Definition.t<_,_>) -> System.IO.File.WriteAllText("D:/projects/yc/recursive-ascent/YaccConstructor/FsYARD/сссс"+x.Name,il.grammar.ToString()+y.ToString());applyConversion x y il)
+        |> List.map (fun (x,y) -> fun (il:Definition.t<_,_>) -> applyConversion x y il)
     fe.ParseGrammar inFile 
     |> (fun il -> List.fold (fun il conv -> conv il) il conversions)
-    |>  fun il -> System.IO.File.WriteAllText("D:/projects/yc/recursive-ascent/YaccConstructor/FsYARD/сссс",il.grammar.ToString() + "\n" + rnglrArgs); be.Generate(il,rnglrArgs) |> ignore
+    |>  fun il -> be.Generate(il,rnglrArgs) |> ignore
 
 let () =
     let userDefs = ref []

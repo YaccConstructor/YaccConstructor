@@ -1,6 +1,7 @@
 ﻿module Yard.Build
 
 open Microsoft.Build.Framework
+open System.IO
 
 [<Class>] 
 type FsYard() =
@@ -18,14 +19,16 @@ type FsYard() =
     let mutable printInfiniteEpsilonPath = ""
     let mutable output = ""
     let mutable replLiterals = ""
+    let mutable projectBasePath = ""
 
     [<Required>]
     member this.InputFiles
         with get () = items
         and set v = items <- v
 
+    [<Output>]
     member this.OutFile
-        with get() = output
+        with get() = if output.Trim() <> "" then output else (items.[0].ToString())+".fs"
         and set v = output <- v
 
     member this.Light
@@ -56,8 +59,15 @@ type FsYard() =
         with get() = fullPath
         and set v = fullPath <- v
 
+     [<Required>]
+     member this.ProjectBasePath
+        with get() = projectBasePath
+        and set v = projectBasePath <- v
+
     interface ITask with
-        override this.Execute() =          
+        override this.Execute() =
+            let sw = new System.IO.StreamWriter(Path.Combine(projectBasePath,"FsYard.log"))
+            System.Console.SetOut(sw)
             let rnglrArgs = 
                 sprintf "-translate  %A " needTranslate
                 + if tokenType.Trim() <> "" then  sprintf "-token %s " tokenType else ""
@@ -67,9 +77,9 @@ type FsYard() =
                 + if output.Trim() <> "" then sprintf "-o %s " output else ""
                 + sprintf "-fullpath %A" fullPath
             Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
-            //let args = new BuildMessageEventArgs(message, "", "SetEnvironmentVariable", MessageImportance.Normal)
-            //engine.LogMessageEvent(args)
-            //System.IO.File.WriteAllText("D:/projects/YC/recursive-ascent/YaccConstructor/FsYARD/tttt", message)
+            let eventArgs = { new CustomBuildEventArgs(message=rnglrArgs + " -c ReplaceLiterals " + replLiterals + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
+            engine.LogCustomEvent(eventArgs)
+            sw.Close()
             true
             
         override this.HostObject

@@ -59,13 +59,13 @@ type FsYard() =
     interface ITask with
         override this.Execute() =          
             let rnglrArgs = 
-                if needTranslate then sprintf "-translate  %A " needTranslate else ""
+                sprintf "-translate  %A " needTranslate
                 + if tokenType.Trim() <> "" then  sprintf "-token %s " tokenType else ""
                 + if moduleName.Trim() <> "" then sprintf "-module %s " moduleName else ""
                 + if printInfiniteEpsilonPath.Trim() <> "" then sprintf "-infEpsPath %s " printInfiniteEpsilonPath else ""
                 + if light.Trim() <> "" then sprintf "-light %s " light else ""
                 + if output.Trim() <> "" then sprintf "-o %s " output else ""
-                + if fullPath then sprintf "-fullpath %A"  fullPath else ""
+                + sprintf "-fullpath %A" fullPath
             Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
             //let args = new BuildMessageEventArgs(message, "", "SetEnvironmentVariable", MessageImportance.Normal)
             //engine.LogMessageEvent(args)

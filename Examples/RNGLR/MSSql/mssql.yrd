@@ -43,7 +43,11 @@ brace_opt<<o_br block cl_br>>:
 
 
 [<Start>]
-root_rule: list<<batch_body KW_GO?>> KW_GO?
+root_rule: (batch_body KW_GO?)+
+
+(* root_rule: list<<batch_body KW_GO?>> KW_GO?
+*)
+
 
 batch_body: 
    create_proc
@@ -56,6 +60,7 @@ batch_body:
  | rollback_transaction
  (* | if_stmt *)
  | drop_procedure 
+ | create_table
   
 rollback_transaction:
     KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 
@@ -190,7 +195,7 @@ select_stmnt:
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
     | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (STAR | IDENT) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
+    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
      
     
 for:
@@ -494,19 +499,19 @@ case:
         ( KW_ELSE sql_expr )? 
     KW_END 
     
-(*
+
 (*****************************************CREATE TABLE****************************************************)
 create_table:
     KW_CREATE KW_TABLE 
         ( IDENT DOT IDENT? DOT? )? IDENT 
-            LPAREN ( column_definition | computed_column_definition )
-            comma_list<<table_constraint>>? RPAREN 
+            LPAREN ( column_definition_create_table | computed_column_definition )
+            comma_list<<table_constraint_create_table>>? RPAREN 
         ( KW_ON ( IDENT LPAREN IDENT RPAREN | IDENT 
             | KW_DEFAULT ) )? 
         ( KW_TEXTIMAGE_ON (IDENT | KW_DEFAULT) )?
     SEMI?
 
-column_definition:
+column_definition_create_table:
     IDENT data_type
         (KW_COLLATE IDENT)? 
         ( KW_NULL | KW_NOT KW_NULL )?
@@ -514,14 +519,14 @@ column_definition:
             ( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
           | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
         )?
-        ( KW_ROWGUIDCOL )? column_constraint* 
+        ( KW_ROWGUIDCOL )? column_constraint_create_table* 
 
-data type: 
+data_type: 
     ( IDENT DOT ) IDENT 
         (LPAREN DEC_NUMBER (COMMA DEC_NUMBER)? | KW_MAX | 
             (KW_CONTENT | KW_DOCUMENT)? IDENT RPAREN)? 
 
-column_constraint: 
+column_constraint_create_table: 
     (KW_CONSTRAINT IDENT)? 
     ((KW_PRIMARY KW_KEY | KW_UNIQUE) 
             (KW_CLUSTERED | KW_NONCLUSTERED)? 
@@ -559,7 +564,7 @@ computed_column_definition:
         | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? LPAREN sql_expr RPAREN 
     )? 
 (*-*)
-table_constraint:
+table_constraint_create_table:
     (KW_CONSTRAINT IDENT)? 
     ( 
         (KW_PRIMARY KW_KEY | KW_UNIQUE) 
@@ -595,7 +600,7 @@ index_option:
         | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
     )
         
-*)
+
 begin_transaction:
     KW_BEGIN (KW_TRAN | KW_TRANSACTION) 
         ((ident | LOCALVAR)
@@ -701,7 +706,8 @@ sql_expr:
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident
     | fetch_stmnt
-    | sql_expr KW_IN LPAREN comma_list<<sql_expr>> RPAREN
+    | sql_expr KW_NOT? KW_IN LPAREN comma_list<<sql_expr>> RPAREN
+	| sql_expr KW_LIKE sql_expr
     
 
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>>? RPAREN

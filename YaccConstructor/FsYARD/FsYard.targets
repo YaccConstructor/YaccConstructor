@@ -1,0 +1,16 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask AssemblyFile="FsYARD.exe" TaskName="FsYard" />
+  <PropertyGroup>
+    <CompileDependsOn>FsYardCall;$(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Target Name="FsYardCall" Inputs="@(FsYard)" Condition="'@(FsYard)'!=''" Outputs="@(FsYard->'dddd.fs')">
+    <FsYard InputFiles="@(FsYard)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
+            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
+    </FsYard>
+  </Target>
+  <ItemGroup>
+    <AvailableItemName Include="FsYard">
+      <Visible>false</Visible>
+    </AvailableItemName>
+  </ItemGroup>
+</Project>

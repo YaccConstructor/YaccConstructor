@@ -37,23 +37,12 @@
     <light>on</light>
     <RLiterals>KW_%s</RLiterals>
   </PropertyGroup>
-
-  <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />
-  <PropertyGroup>
-    <CompileDependsOn>MyTarget;$(CompileDependsOn)</CompileDependsOn>
-  </PropertyGroup>
-  <Target Name="MyTarget" Inputs="@(SE)" Condition="'@(SE)'!=''" Outputs="@(SE->'dddd.fs')">
-    <FsYard InputFiles="@(SE)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
-            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
-    </FsYard>
-  </Target-->
   <ItemGroup>
-    <!--AvailableItemName Include="SE">
-      <Visible>false</Visible>
-    </AvailableItemName>
-    <SE Include="mssql.yrd" /-->
     <Compile Include="FsYARD.fs" />
     <Compile Include="FsYARDBuildTask.fs" />
+    <None Include="FsYard.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
@@ -65,8 +54,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -98,6 +85,15 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />
+  <PropertyGroup>
+    <CompileDependsOn>MyTarget;$(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Target Name="MyTarget" Inputs="@(SE)" Condition="'@(SE)'!=''" Outputs="@(SE->'dddd.fs')">
+    <FsYard InputFiles="@(SE)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
+            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
+    </FsYard>
+  </Target-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">

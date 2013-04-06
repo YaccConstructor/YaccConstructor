@@ -114,7 +114,7 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_droplogin.sql" |> runParserTest
    
     
-    //[<Test>]
+    [<Test>]
     member test.``sp_help complex test.`` () =
         complexSpFile "sp_help.sql" |> runParserTest
 
@@ -134,6 +134,6 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_revokedbaccess.sql" |> runParserTest
 
     
-    //[<Test>]
+    [<Test>]
     member test.``sp_tables_ex complex test.`` () =
         complexSpFile "sp_tables_ex.sql" |> runParserTest

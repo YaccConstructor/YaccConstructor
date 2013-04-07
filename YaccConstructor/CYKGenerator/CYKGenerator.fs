@@ -99,6 +99,7 @@ type CYKGeneartorImpl () =
             tokenTypes grammarInfo.termDict
             getTokenTypeTag grammarInfo.termDict
             rulesArray grammarInfo.rules
+            genlblArr grammarInfo.lblNames
             startNTerm il grammarInfo.nTermDict |> genStartNTermID
             tokenStreamEncoder
         ]

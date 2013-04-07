@@ -435,7 +435,7 @@ type ``Yardfrontend label tests`` () =
                             checker = None;}],None,Some {label = "@lbl";
                                                         weight = Some 12.3;});
             isStart = true;
-            isPublic = true;
+            isPublic = false;
             metaArgs = [];
             }]
         parserTest

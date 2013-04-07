@@ -32,7 +32,7 @@ let generate inFile replLit rnglrArgs =
 let cmdRun () =
     let userDefs = ref []
     let userDefsStr = ref ""
-    let inFile = ref None
+    let inFile = ref ""
     let replLit = ref ""
     let rnglrArgs = ref ""
     let commandLineSpecs =
@@ -40,7 +40,7 @@ let cmdRun () =
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
          "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
-         "-i", ArgType.String (fun s -> inFile := s|> Some), "Input grammar"
+         "-i", ArgType.String (fun s -> inFile := s), "Input grammar"
          "-module", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -module " + s), "Target module name."
          "-token", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -token " + s), "Token type."
          "-pos", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -pos " + s), "Token position type."
@@ -54,5 +54,5 @@ let cmdRun () =
          "-replaceLiterals", ArgType.String (fun s -> replLit := s), "Replace literals regexp."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
-    generate inFile !replLit !rnglrArgs
+    generate !inFile !replLit !rnglrArgs
 

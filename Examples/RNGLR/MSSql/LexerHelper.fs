@@ -55,6 +55,9 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
 
 let tokenPos token =
     match token with
+    | KW_FOREIGN(x)
+    | KW_NO(x)
+    | KW_WHILE(x)
     | KW_DATETIME(x)
     | KW_DROP(x)
     | KW_ABSOLUTE(x)
@@ -121,7 +124,7 @@ let tokenPos token =
     | KW_CONCAT_NULL_YIELDS_NULL (x)
     | KW_CONSTRAINT (x)
     | KW_CONTAINSTABLE (x)
-    | KW_CONTENT (x)
+    //| KW_CONTENT (x)
     | KW_COUNT (x)
     | KW_CREATE (x)
     | KW_CROSS (x)
@@ -136,7 +139,7 @@ let tokenPos token =
     | KW_DENSE_RANK (x)
     | KW_DESC (x)
     | KW_DISTINCT (x)
-    | KW_DOCUMENT (x)
+   // | KW_DOCUMENT (x)
     | KW_DYNAMIC (x)
     | KW_EAD (x)
     | KW_ELEMENTS (x)

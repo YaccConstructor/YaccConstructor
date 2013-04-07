@@ -43,25 +43,25 @@ brace_opt<<o_br block cl_br>>:
 
 
 [<Start>]
-root_rule: (batch_body KW_GO?)+
+root_rule: (batch_body KW_GO?)*
 
 (* root_rule: list<<batch_body KW_GO?>> KW_GO?
 *)
 
 
 batch_body: 
-	   create_proc
-	 | set_stmnt
-	 | KW_USE LBRACKET "mdw_control" RBRACKET
-	 | begin_transaction
-	 | commit_transaction
-	 | declare
-	 | case (**&&&***)
-	 | rollback_transaction
-	 (* | if_stmt *)
-	 | drop_procedure 
-	 | create_table
-	 | insert
+       create_proc
+     | set_stmnt
+     | KW_USE LBRACKET "mdw_control" RBRACKET
+     | begin_transaction
+     | commit_transaction
+     | declare
+     | case (**&&&***)
+     | rollback_transaction
+     (* | if_stmt *)
+     | drop_procedure 
+     | create_table
+     | insert
   
 rollback_transaction:
     KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 
@@ -137,9 +137,14 @@ proc_body_stmnt:
    | commit_transaction
    | rollback_transaction
    | drop_procedure
-   
+   | while_stmt
+   | create_table
+   | insert
+   | fetch_stmnt
 
 (***********************************STATEMENTS******************************************************)
+
+while_stmt: KW_WHILE sql_expr proc_body_stmnt
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
@@ -505,7 +510,7 @@ case:
 create_table:
     KW_CREATE KW_TABLE 
         ( IDENT DOT IDENT? DOT? )? IDENT 
-            LPAREN ( column_definition_create_table | computed_column_definition )
+            LPAREN ( comma_list<<(column_definition_create_table | computed_column_definition)>> )
             comma_list<<table_constraint_create_table>>? RPAREN 
         ( KW_ON ( IDENT LPAREN IDENT RPAREN | IDENT 
             | KW_DEFAULT ) )? 
@@ -513,7 +518,7 @@ create_table:
     SEMI?
 
 column_definition_create_table:
-    IDENT data_type
+    ident sql_datatype
         (KW_COLLATE IDENT)? 
         ( KW_NULL | KW_NOT KW_NULL )?
         ( 
@@ -521,11 +526,6 @@ column_definition_create_table:
           | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
         )?
         ( KW_ROWGUIDCOL )? column_constraint_create_table* 
-
-data_type: 
-    ( IDENT DOT ) IDENT 
-        (LPAREN DEC_NUMBER (COMMA DEC_NUMBER)? | KW_MAX | 
-            (KW_CONTENT | KW_DOCUMENT)? IDENT RPAREN)? 
 
 column_constraint_create_table: 
     (KW_CONSTRAINT IDENT)? 
@@ -600,34 +600,34 @@ index_option:
         | KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
         | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
     )
-	
+    
 insert:
-	(KW_WITH comma_list<<common_table_expression>>)?
-	KW_INSERT 
-		(KW_TOP LPAREN sql_expr RPAREN KW_PERCENT?)?
-		KW_INTO? 
-		(object | rowset_function 
-		  (KW_WITH LPAREN table_hint* RPAREN)?
-		)
-	(
-		(LPAREN comma_list<<LOCALVAR>> RPAREN)? 
-		(output_clause)?
-		(VALUES LPAREN comma_list<<(KW_DEFAULT | KW_NULL | sql_expr)>> RPAREN 
-		| batch_body 
-		)?
-	)
-	| (KW_DEFAULT KW_VALUES)?
-	SEMI?
+    (KW_WITH comma_list<<common_table_expression>>)?
+    KW_INSERT 
+        (KW_TOP LPAREN sql_expr RPAREN KW_PERCENT?)?
+        KW_INTO? 
+        (object | rowset_function 
+          (KW_WITH LPAREN table_hint* RPAREN)?
+        )
+    (
+        (LPAREN comma_list<<LOCALVAR>> RPAREN)? 
+        (output_clause)?
+        (KW_VALUES LPAREN comma_list<<(KW_DEFAULT | KW_NULL | sql_expr)>> RPAREN 
+        | batch_body 
+        )?
+    )
+    | (KW_DEFAULT KW_VALUES)?
+    SEMI?
 
 output_clause:
-		KW_OUTPUT dml_select_list KW_INTO (LOCALVAR | IDENT) (LPAREN comma_list<<LOCALVAR>> RPAREN)?
-		(KW_OUTPUT dml_select_list)?
-	
+        KW_OUTPUT dml_select_list KW_INTO (LOCALVAR | IDENT) (LPAREN comma_list<<LOCALVAR>> RPAREN)?
+        (KW_OUTPUT dml_select_list)?
+    
 dml_select_list:
-	(ident | sql_expr) (KW_AS? IDENT)? comma_list<<((ident | sql_expr) (KW_AS? IDENT)?)>>
+    (ident | sql_expr) (KW_AS? IDENT)? comma_list<<((ident | sql_expr) (KW_AS? IDENT)?)>>
 
 column_name:
-	(KW_DELETED | KW_INSERTED | ident) DOT (STAR | ident)
+    (KW_DELETED | KW_INSERTED | ident) DOT (STAR | ident)
 
 object:
     ( IDENT DOT IDENT DOT IDENT DOT 
@@ -635,7 +635,7 @@ object:
       | IDENT DOT
     )?
     ident
-	   
+       
 
 begin_transaction:
     KW_BEGIN (KW_TRAN | KW_TRANSACTION) 
@@ -689,7 +689,7 @@ SEMI?
 type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
 
 sql_datatype:
-      KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_DATETIME | "SMALLMONEY"  | "sysname"
+      KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_DATETIME | KW_SMALLMONEY  | KW_SYSNAME
     | "INT" | KW_TINYINT | KW_MONEY
     | KW_FLOAT type_size?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
     | KW_REAL

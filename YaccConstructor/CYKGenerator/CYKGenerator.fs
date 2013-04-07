@@ -32,6 +32,7 @@ type GrammarInfo =
         rules: uint64 array
         termDict : Dictionary<string,int>
         nTermDict : Dictionary<string,int>
+        lblNames : string[]
     }
 
 type CYKGeneartorImpl () =
@@ -85,6 +86,12 @@ type CYKGeneartorImpl () =
     
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
         ntermDict.[(il.grammar.[0].rules |> List.find (fun r -> r.isStart)).name.text]
+    
+    let genlblArr (lblNames:string[])= 
+        ("let lblName = " |> wordL)
+        @@-- (("[|" |> wordL)
+            @@ ([for lblInfo in lblNames -> ["\"" + lblInfo + "\";"]|> List.map wordL |> spaceListL] |> aboveListL))
+            @@ ("|]" |> wordL)
 
     let code il grammarInfo =
         [
@@ -167,6 +174,7 @@ type CYKGeneartorImpl () =
             rules = il.grammar.[0].rules |> List.map processRule |> Array.ofList
             termDict = termDict
             nTermDict = ntermDict
+            lblNames = Array.ofSeq (Dictionary.KeyCollection lblDict) 
         }
         
     let print rule = 
@@ -178,7 +186,7 @@ type CYKGeneartorImpl () =
         code grammar grammarInfo
     member x.GenRulesList grammar = 
         let grammarInfo = grammarFromIL grammar
-        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict
+        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict, grammarInfo.lblNames
 
 type CYKGenerator() =    
     inherit Generator()

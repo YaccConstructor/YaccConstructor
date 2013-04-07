@@ -27,14 +27,14 @@ type ``CYK generator tests`` () =
     [<Test>]
     member test.``Simple one rule without lable test`` () =        
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_noLBL.yrd"))
-        let result,sNTId = generator.GenRulesList il
+        let result,sNTId,_ = generator.GenRulesList il
         Assert.AreEqual(result.Length,1)
         Assert.AreEqual(result.[0], 281479271743488UL)
 
     [<Test>]
     member test.``Simple one rule with lable without weight test`` () = 
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_LBL_no_weight.yrd"))
-        let result,sNTId = generator.GenRulesList il
+        let result,sNTId,_ = generator.GenRulesList il
         Assert.AreEqual(1,sNTId)
         Assert.AreEqual(result.Length,1)
         Assert.AreEqual(result.[0], 281479271743744UL)
@@ -42,7 +42,7 @@ type ``CYK generator tests`` () =
     [<Test>]
     member test.``Simple one rule term with lable without weight test`` () =        
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_LBL_no_weight.yrd"))
-        let result,sNTId = generator.GenRulesList il
+        let result,sNTId,_ = generator.GenRulesList il
         Assert.AreEqual(1,sNTId)
         Assert.AreEqual(result.Length,1)
         Assert.AreEqual(result.[0], 281479271678208UL)
@@ -50,7 +50,7 @@ type ``CYK generator tests`` () =
     [<Test>]
     member test.``Simple one rule term without lable test`` () =        
         let il = parser.ParseGrammar(Path.Combine(basePath, "basic_term_noLBL.yrd"))        
-        let result,sNTId = generator.GenRulesList il
+        let result,sNTId,_ = generator.GenRulesList il
         Assert.AreEqual(1,sNTId)
         Assert.AreEqual(result.Length,1)
         Assert.AreEqual(result.[0], 281479271677952UL)
@@ -73,6 +73,9 @@ type ``CYK generator tests`` () =
             ; "let rules = "
             ; "  [ 281479271677952UL ]"
             ; "  |> Array.ofList"
+            ; "let lblName = "
+            ; "  [|"
+            ; "  |]"
             ; "let StartNTerm = 1"
             ; "let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = "
             ; "  stream"

@@ -63,8 +63,17 @@
     <Reference Include="FSharp.PowerPack.Parallel.Seq">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
     </Reference>
+    <Reference Include="Brahma.OpenCL">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.OpenCL.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\OpenCL.Net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

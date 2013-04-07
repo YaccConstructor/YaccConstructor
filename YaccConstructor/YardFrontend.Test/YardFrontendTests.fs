@@ -17,7 +17,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 module YardFrontendTester
 
 open Microsoft.FSharp.Text.Lexing
@@ -136,8 +135,6 @@ type ``Yard frontend preprocessor tests`` () =
                 }]
         let expected = defaultGrammar rules
         preprocessorTest (cp "test_0.yrd") expected
-
-
 
     [<Test>]
     member test.if_endif () =
@@ -323,6 +320,7 @@ type ``YardFrontend Parser tests`` () =
         parserTest
             "[<Start>]s: NUMBER PLUS NUMBER;" 
             (defaultGrammar rules) 
+               
 
 [<TestFixture>]
 type ``YardFrontend options tests`` () =  
@@ -425,3 +423,51 @@ type ``Yardfrontend label tests`` () =
                         )
         let expected = defaultGrammar rules
         preprocessorTest (cp "test_0.yrd") expected
+
+    [<Test>]
+    member test.``weight test correct input`` () =
+        parserTest
+            "[<Start>]s: @lbl[12.3](T);"
+            {info = {fileName = "";};
+            head = None;
+            grammar = [{name = dummyPos"s";
+                        args = [];
+                        body = PSeq ([{omit = false;
+                                       rule = PToken (getSource "T" 16 16);
+                                       binding = None;
+                                       checker = None;}],None,Some {label = "@lbl";
+                                                                    weight = Some 12.3;});
+                        _public = true;
+                        metaArgs = [];
+                      }];
+            foot = None;
+            options = Map.empty;
+            }
+    
+    [<Test>]
+    member test.``weight test incorrect input`` () =
+        // must fail
+        try
+            let smth = parserTest
+                        "[<Start>]s: @lbl[q](T);"
+                        {info = {fileName = "";};
+                        head = None;
+                        grammar = [{name = dummyPos"s";
+                                    args = [];
+                                    body = PSeq ([{omit = false;
+                                                   rule = PToken (getSource "T" 16 16);
+                                                   binding = None;
+                                                   checker = None;}],None,Some {label = "@lbl";
+                                                                                weight = None;});
+                                    _public = true;
+                                    metaArgs = [];
+                                  }];
+                        foot = None;
+                        options = Map.empty;
+                        }
+            Assert.IsTrue(false)
+        with 
+        | :? System.Exception as ex ->
+            let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            let actual = ex.Message
+            Assert.AreEqual(expected, actual)

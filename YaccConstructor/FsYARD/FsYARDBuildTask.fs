@@ -101,3 +101,5 @@ type FsYard() =
         override this.BuildEngine
             with get () = engine
             and set v =  engine <- v
+
+do FsYard.cmdRun()

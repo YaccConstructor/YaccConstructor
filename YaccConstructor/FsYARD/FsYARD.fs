@@ -29,17 +29,30 @@ let generate inFile replLit rnglrArgs =
     |> (fun il -> List.fold (fun il conv -> conv il) il conversions)
     |>  fun il -> be.Generate(il,rnglrArgs) |> ignore
 
-let () =
+let cmdRun () =
     let userDefs = ref []
     let userDefsStr = ref ""
     let inFile = ref None
+    let replLit = ref ""
+    let rnglrArgs = ref ""
     let commandLineSpecs =
         [
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
          "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
          "-i", ArgType.String (fun s -> inFile := s|> Some), "Input grammar"
+         "-module", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -module " + s), "Target module name."
+         "-token", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -token " + s), "Token type."
+         "-pos", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -pos " + s), "Token position type."
+         "-o", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -o " + s), "Output file name."
+         "-table", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -table " + s), " Table type."
+         "-fullpath", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -fullpath " + s), "Use full path."
+         "-translate" , ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -translate " + s), "Generate action code."
+         "-light", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -light " + s), "Light on/off."
+         "-infEpsPath", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -infEpsPath " + s), "Path for infinite epsilons stats."
+         "-lang", ArgType.String (fun s -> rnglrArgs := !rnglrArgs + " -lang " + s), "Targrt language."
+         "-replaceLiterals", ArgType.String (fun s -> replLit := s), "Replace literals regexp."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
-    generate inFile "" ""
+    generate inFile !replLit !rnglrArgs
 

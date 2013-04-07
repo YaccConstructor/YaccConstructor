@@ -151,7 +151,7 @@ type ``CNF tests`` () =
     member test.``delete Eps rule test 2`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_1.yrd"))
         let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
-        let expected = 
+        let expected =
             defaultGrammar
                 [{name = Source.t "x";
                 args = [];

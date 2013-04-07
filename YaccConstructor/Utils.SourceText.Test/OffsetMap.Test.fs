@@ -98,7 +98,7 @@ type UtilsTest () =
             Assert.AreEqual(line, actual.Line)
             Assert.AreEqual(column, actual.Column)
         with 
-        | :? _ as ex -> ()
+        | ex -> ()
 
     [<Test>]
     member test.``Test for get right Map`` () =
@@ -126,4 +126,4 @@ type UtilsTest () =
             Assert.AreEqual(line, actual.Line)
             Assert.AreEqual(column, actual.Column)
         with 
-        | :? _ as ex -> ()
+        | ex -> ()

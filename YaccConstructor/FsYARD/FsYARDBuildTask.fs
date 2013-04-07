@@ -66,7 +66,9 @@ type FsYard() =
 
     interface ITask with
         override this.Execute() =
-            let sw = new System.IO.StreamWriter(Path.Combine(projectBasePath,"FsYard.log"))
+            use sw = new StreamWriter(Path.Combine(projectBasePath,"FsYard.log"))
+            use mem = new MemoryStream()
+            use esw = new StreamWriter(mem)
             System.Console.SetOut(sw)
             System.Console.SetError(sw)
             let rnglrArgs = 
@@ -80,6 +82,15 @@ type FsYard() =
             let eventArgs = { new CustomBuildEventArgs(message= "FsYard " + rnglrArgs + " -c ReplaceLiterals " + replLiterals + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
             engine.LogCustomEvent(eventArgs)
             Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
+            mem.Flush()
+            use sr = new StreamReader(mem)
+            let errors = sr.ReadToEnd().Split('\n')
+            //errors
+            //|> fun s ->
+              //  let eventArgs = { new BuildWarningEventArgs(message= s ,helpKeyword="",senderName="") with member x.Equals(y) = false }
+                //engine.LogWarningEvent(eventArgs)
+            mem.Close()
+            esw.Close()
             sw.Close()
             true
             

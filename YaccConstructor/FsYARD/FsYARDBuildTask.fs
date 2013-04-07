@@ -68,6 +68,7 @@ type FsYard() =
         override this.Execute() =
             let sw = new System.IO.StreamWriter(Path.Combine(projectBasePath,"FsYard.log"))
             System.Console.SetOut(sw)
+            System.Console.SetError(sw)
             let rnglrArgs = 
                 sprintf "-translate  %A " needTranslate
                 + if tokenType.Trim() <> "" then  sprintf "-token %s " tokenType else ""
@@ -75,10 +76,10 @@ type FsYard() =
                 + if printInfiniteEpsilonPath.Trim() <> "" then sprintf "-infEpsPath %s " printInfiniteEpsilonPath else ""
                 + if light.Trim() <> "" then sprintf "-light %s " light else ""
                 + if output.Trim() <> "" then sprintf "-o %s " output else ""
-                + sprintf "-fullpath %A" fullPath
-            Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
-            let eventArgs = { new CustomBuildEventArgs(message=rnglrArgs + " -c ReplaceLiterals " + replLiterals + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
+                + sprintf "-fullpath %A" fullPath            
+            let eventArgs = { new CustomBuildEventArgs(message= "FsYard " + rnglrArgs + " -c ReplaceLiterals " + replLiterals + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
             engine.LogCustomEvent(eventArgs)
+            Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
             sw.Close()
             true
             

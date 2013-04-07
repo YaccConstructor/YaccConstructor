@@ -426,48 +426,44 @@ type ``Yardfrontend label tests`` () =
 
     [<Test>]
     member test.``weight test correct input`` () =
+        let rules: Rule.t<_,_> list  =
+          [{name = dummyPos"s";
+            args = [];
+            body = PSeq ([{omit = false;
+                            rule = PToken (getSource "T" 16 16);
+                            binding = None;
+                            checker = None;}],None,Some {label = "@lbl";
+                                                        weight = Some 12.3;});
+            isStart = true;
+            isPublic = true;
+            metaArgs = [];
+            }]
         parserTest
             "[<Start>]s: @lbl[12.3](T);"
-            {info = {fileName = "";};
-            head = None;
-            grammar = [{name = dummyPos"s";
-                        args = [];
-                        body = PSeq ([{omit = false;
-                                       rule = PToken (getSource "T" 16 16);
-                                       binding = None;
-                                       checker = None;}],None,Some {label = "@lbl";
-                                                                    weight = Some 12.3;});
-                        _public = true;
-                        metaArgs = [];
-                      }];
-            foot = None;
-            options = Map.empty;
-            }
+            (defaultGrammar rules)
+            
     
     [<Test>]
     member test.``weight test incorrect input`` () =
         // must fail
         try
-            let smth = parserTest
-                        "[<Start>]s: @lbl[q](T);"
-                        {info = {fileName = "";};
-                        head = None;
-                        grammar = [{name = dummyPos"s";
-                                    args = [];
-                                    body = PSeq ([{omit = false;
-                                                   rule = PToken (getSource "T" 16 16);
-                                                   binding = None;
-                                                   checker = None;}],None,Some {label = "@lbl";
-                                                                                weight = None;});
-                                    _public = true;
-                                    metaArgs = [];
-                                  }];
-                        foot = None;
-                        options = Map.empty;
-                        }
+            let rules: Rule.t<_,_> list  =
+                [{name = dummyPos"s";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (getSource "T" 16 16);
+                                 binding = None;
+                                 checker = None;}],None,Some {label = "@lbl";
+                                                              weight = None;});
+                  isPublic = true;
+                  isStart = true;
+                  metaArgs = [];
+                }]
+            let smth = defaultGrammar rules |> parserTest "[<Start>]s: @lbl[q](T);"
+                  
             Assert.IsTrue(false)
         with 
-        | :? System.Exception as ex ->
+        | ex ->
             let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
             let actual = ex.Message
             Assert.AreEqual(expected, actual)

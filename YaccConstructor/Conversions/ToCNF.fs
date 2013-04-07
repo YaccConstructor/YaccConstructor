@@ -237,8 +237,8 @@ let cnf rules =
                 [{
                     name = Source.t("newCnfRule" + (!i).ToString())
                     args = rule.args
-                    _public = false
-                        isPublic = false
+                    isStart = false                    
+                    isPublic = false
                     metaArgs = rule.metaArgs 
                     body = PSeq([elem1; elem2], None, None)
                 }] @ !list2
@@ -258,7 +258,8 @@ let cnf rules =
                 {
                     name = rule.name
                     args = rule.args
-                    _public = rule._public
+                    isStart = rule.isStart
+                    isPublic = rule.isPublic
                     metaArgs = rule.metaArgs
                     body = PSeq(cutRule, 
                             (match rule.body with PSeq(e, a, l) -> a | x -> None),
@@ -280,8 +281,7 @@ let toCNF (ruleList: Rule.t<_, _> list) =
 type CNF() = 
     inherit Conversion()
         override this.Name = "CNF"
-        override this.ConvertList (ruleList,_) = cnf ruleList
-        override this.EliminatedProductionTypes = [""]
+        override this.ConvertGrammar (ruleList,_) = mapGrammar cnf ruleList
 
 type ToCNF() = 
     inherit Conversion()

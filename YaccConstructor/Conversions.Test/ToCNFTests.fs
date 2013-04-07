@@ -149,13 +149,10 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``delete Eps rule test 2`` () =
-        Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_1.yrd"))
         let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected = 
-            {info = {fileName = " ";};
-            head = None;
-            grammar =
+            defaultGrammar
                 [{name = Source.t "x";
                 args = [];
                 body = PSeq ([{omit = false;
@@ -165,7 +162,8 @@ type ``CNF tests`` () =
                                                     rule = PRef (Source.t "newCnfRule1",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
-                _public = true;
+                isStart = true;
+                isPublic = true;
                 metaArgs = [];};
                 {name = Source.t "s";
                 args = [];
@@ -176,7 +174,8 @@ type ``CNF tests`` () =
                                                     rule = PRef (Source.t "newCnfRule1",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
-                _public = false;
+                isStart = false;
+                isPublic = true;
                 metaArgs = [];};
                 {name = Source.t "y";
                 args = [];
@@ -187,14 +186,16 @@ type ``CNF tests`` () =
                                                     rule = PRef (Source.t "newCnfRule1",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
-                _public = false;
+                isStart = false;
+                isPublic = true;
                 metaArgs = [];}; {name = Source.t "newCnfRule1";
                                     args = [];
                                     body = PSeq ([{omit = false;
                                                     rule = PToken (Source.t "ID");
                                                     binding = None;
                                                     checker = None;}],None,None);
-                                    _public = false;
+                                    isStart = false;
+                                    isPublic = true;
                                     metaArgs = [];};
                 {name = Source.t "newCnfRule1";
                 args = [];
@@ -205,17 +206,18 @@ type ``CNF tests`` () =
                                                     rule = PRef (Source.t "s",None);
                                                     binding = None;
                                                     checker = None;}],None,None);
-                _public = false;
+                isStart = false;
+                isPublic = true;
                 metaArgs = [];}; {name = Source.t "new_ID";
                                     args = [];
                                     body = PSeq ([{omit = false;
                                                     rule = PToken (Source.t "ID");
                                                     binding = None;
                                                     checker = None;}],None,None);
-                                    _public = false;
-                                    metaArgs = [];}];
-            foot = None;
-            options = Map.empty}
+                                    isStart = false;
+                                    isPublic = true;
+                                    metaArgs = [];}]
+
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -223,20 +225,19 @@ type ``CNF tests`` () =
 
     [<Test>]
     member test.``delete Eps rule test 3`` () =
-        Namer.resetRuleEnumerator()
+        //Namer.resetRuleEnumerator()
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_2.yrd"))
         let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar =
+            defaultGrammar
                    [{name = Source.t "x";
                     args = [];
                     body = PSeq ([{omit = false;
                                    rule = PToken (Source.t "ID");
                                    binding = None;
                                    checker = None;}],None,None);
-                    _public = true;
+                    isStart = true;
+                    isPublic = true;
                     metaArgs = [];};
                    {name = Source.t "x";
                     args = [];
@@ -247,7 +248,8 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "s",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = true;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];};
                    {name = Source.t "x";
                     args = [];
@@ -258,14 +260,16 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "newCnfRule1",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = true;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];}; {name = Source.t "s";
                                       args = [];
                                       body = PSeq ([{omit = false;
                                                      rule = PToken (Source.t "ID");
                                                      binding = None;
                                                      checker = None;}],None,None);
-                                      _public = false;
+                                      isStart = false;
+                                      isPublic = true;
                                       metaArgs = [];};
                    {name = Source.t "s";
                     args = [];
@@ -276,7 +280,8 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "s",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = false;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];};
                    {name = Source.t "s";
                     args = [];
@@ -287,14 +292,16 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "newCnfRule1",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = false;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];}; {name = Source.t "y";
                                       args = [];
                                       body = PSeq ([{omit = false;
                                                      rule = PToken (Source.t "ID");
                                                      binding = None;
                                                      checker = None;}],None,None);
-                                      _public = false;
+                                      isStart = false;
+                                      isPublic = true;
                                       metaArgs = [];};
                    {name = Source.t "y";
                     args = [];
@@ -305,7 +312,8 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "s",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = false;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];};
                    {name = Source.t "y";
                     args = [];
@@ -316,14 +324,16 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "newCnfRule1",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = false;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];}; {name = Source.t "newCnfRule1";
                                       args = [];
                                       body = PSeq ([{omit = false;
                                                      rule = PToken (Source.t "ID");
                                                      binding = None;
                                                      checker = None;}],None,None);
-                                      _public = false;
+                                      isStart = false;
+                                      isPublic = true;
                                       metaArgs = [];};
                    {name = Source.t "newCnfRule1";
                     args = [];
@@ -334,15 +344,17 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "s",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    _public = false;
+                    isStart = false;
+                    isPublic = true;
                     metaArgs = [];}; {name = Source.t "new_ID";
                                       args = [];
                                       body = PSeq ([{omit = false;
                                                      rule = PToken (Source.t "ID");
                                                      binding = None;
                                                      checker = None;}],None,None);
-                                      _public = false;
-                                      metaArgs = [];}];
+                                      isStart = false;
+                                      isPublic = true;
+                                      metaArgs = []};]
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

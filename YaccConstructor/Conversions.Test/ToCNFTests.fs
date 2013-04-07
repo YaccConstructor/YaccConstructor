@@ -110,24 +110,6 @@ type ``CNF tests`` () =
             (verySimpleRules "e"
                 [{
                     omit = false
-                    rule = PToken (Source.t "STRING")
-                    binding = None
-                    checker = None
-                }]
-            ) @ (
-                verySimpleNotStartRules "s"
-                    [{
-                        omit = false
-                        rule = PToken (Source.t "STRING")
-                        binding = None
-                        checker = None
-                    }]
-            )
-        let rules =
-            (verySimpleRules "e" [])
-            @ (verySimpleRules "e"
-                [{
-                    omit = false
                     rule = PRef (Source.t "s", None)
                     binding = None
                     checker = None
@@ -141,6 +123,7 @@ type ``CNF tests`` () =
                         checker = None
                     }]
             )
+        
         let expected = defaultGrammar rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -163,7 +146,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                 isStart = true;
-                isPublic = true;
+                isPublic = false;
                 metaArgs = [];};
                 {name = Source.t "s";
                 args = [];
@@ -175,7 +158,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                 isStart = false;
-                isPublic = true;
+                isPublic = false;
                 metaArgs = [];};
                 {name = Source.t "y";
                 args = [];
@@ -187,7 +170,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                 isStart = false;
-                isPublic = true;
+                isPublic = false;
                 metaArgs = [];}; {name = Source.t "newCnfRule1";
                                     args = [];
                                     body = PSeq ([{omit = false;
@@ -195,7 +178,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                                     isStart = false;
-                                    isPublic = true;
+                                    isPublic = false;
                                     metaArgs = [];};
                 {name = Source.t "newCnfRule1";
                 args = [];
@@ -207,7 +190,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                 isStart = false;
-                isPublic = true;
+                isPublic = false;
                 metaArgs = [];}; {name = Source.t "new_ID";
                                     args = [];
                                     body = PSeq ([{omit = false;
@@ -215,7 +198,7 @@ type ``CNF tests`` () =
                                                     binding = None;
                                                     checker = None;}],None,None);
                                     isStart = false;
-                                    isPublic = true;
+                                    isPublic = false;
                                     metaArgs = [];}]
 
         expected |> treeDump.Generate |> string |> printfn "%s"
@@ -237,7 +220,7 @@ type ``CNF tests`` () =
                                    binding = None;
                                    checker = None;}],None,None);
                     isStart = true;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];};
                    {name = Source.t "x";
                     args = [];
@@ -248,8 +231,8 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "s",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    isStart = false;
-                    isPublic = true;
+                    isStart = true;
+                    isPublic = false;
                     metaArgs = [];};
                    {name = Source.t "x";
                     args = [];
@@ -260,8 +243,8 @@ type ``CNF tests`` () =
                                                       rule = PRef (Source.t "newCnfRule1",None);
                                                       binding = None;
                                                       checker = None;}],None,None);
-                    isStart = false;
-                    isPublic = true;
+                    isStart = true;
+                    isPublic = false;
                     metaArgs = [];}; {name = Source.t "s";
                                       args = [];
                                       body = PSeq ([{omit = false;
@@ -269,7 +252,7 @@ type ``CNF tests`` () =
                                                      binding = None;
                                                      checker = None;}],None,None);
                                       isStart = false;
-                                      isPublic = true;
+                                      isPublic = false;
                                       metaArgs = [];};
                    {name = Source.t "s";
                     args = [];
@@ -281,7 +264,7 @@ type ``CNF tests`` () =
                                                       binding = None;
                                                       checker = None;}],None,None);
                     isStart = false;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];};
                    {name = Source.t "s";
                     args = [];
@@ -293,7 +276,7 @@ type ``CNF tests`` () =
                                                       binding = None;
                                                       checker = None;}],None,None);
                     isStart = false;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];}; {name = Source.t "y";
                                       args = [];
                                       body = PSeq ([{omit = false;
@@ -301,7 +284,7 @@ type ``CNF tests`` () =
                                                      binding = None;
                                                      checker = None;}],None,None);
                                       isStart = false;
-                                      isPublic = true;
+                                      isPublic = false;
                                       metaArgs = [];};
                    {name = Source.t "y";
                     args = [];
@@ -313,7 +296,7 @@ type ``CNF tests`` () =
                                                       binding = None;
                                                       checker = None;}],None,None);
                     isStart = false;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];};
                    {name = Source.t "y";
                     args = [];
@@ -325,7 +308,7 @@ type ``CNF tests`` () =
                                                       binding = None;
                                                       checker = None;}],None,None);
                     isStart = false;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];}; {name = Source.t "newCnfRule1";
                                       args = [];
                                       body = PSeq ([{omit = false;
@@ -333,7 +316,7 @@ type ``CNF tests`` () =
                                                      binding = None;
                                                      checker = None;}],None,None);
                                       isStart = false;
-                                      isPublic = true;
+                                      isPublic = false;
                                       metaArgs = [];};
                    {name = Source.t "newCnfRule1";
                     args = [];
@@ -345,7 +328,7 @@ type ``CNF tests`` () =
                                                       binding = None;
                                                       checker = None;}],None,None);
                     isStart = false;
-                    isPublic = true;
+                    isPublic = false;
                     metaArgs = [];}; {name = Source.t "new_ID";
                                       args = [];
                                       body = PSeq ([{omit = false;
@@ -353,7 +336,7 @@ type ``CNF tests`` () =
                                                      binding = None;
                                                      checker = None;}],None,None);
                                       isStart = false;
-                                      isPublic = true;
+                                      isPublic = false;
                                       metaArgs = []};]
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"

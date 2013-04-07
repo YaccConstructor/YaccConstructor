@@ -119,7 +119,7 @@ type ``MS-SQL parser tests`` () =
         complexSpFile "sp_help.sql" |> runParserTest
 
     
-    //[<Test>]
+    [<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
 

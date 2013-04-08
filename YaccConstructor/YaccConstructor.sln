@@ -503,6 +503,7 @@ Global
 		{9AEA3F62-7F50-4939-85DC-CE29AB43815D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9AEA3F62-7F50-4939-85DC-CE29AB43815D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9AEA3F62-7F50-4939-85DC-CE29AB43815D}.Release|x86.ActiveCfg = Release|Any CPU
+		{9AEA3F62-7F50-4939-85DC-CE29AB43815D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

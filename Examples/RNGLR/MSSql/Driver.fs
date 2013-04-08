@@ -79,7 +79,7 @@ let justParse (path:string) =
                 }
 
     let translateArgs = {
-        tokenToRange = fun x -> tokenPos x |> (fun (x,y) -> x.Line,y.Line)
+        tokenToRange = fun x -> 0,0
         zeroPosition = 0
         clearAST = false
         filterEpsilons = true

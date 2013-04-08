@@ -64,6 +64,15 @@ and [<AllowNullLiteral>] Node (item:GrammarItem) =
     // checks whether there are links to next nodes
     member this.hasNextNodes () =
         this.NextNodes <> null && this.NextNodes.Count > 0
+    // sets ItemPos for this node and its parents that start with the same terminal as this
+    member this.setItemPos itemPos =
+        if this.ItemPos = -1
+        then
+            this.ItemPos <- itemPos
+            if this.Parents.Count = 1
+            then
+                let _,_,parent = this.Parents.[0]
+                if parent <> null then parent.setItemPos itemPos
 
     new (item, next : Node, parentLink) as this =
         Node(item) then

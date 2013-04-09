@@ -54,6 +54,7 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     member this.startRule = start
     member this.startSymbol = left.[start]
     member this.leftSide num = left.[num]
+    member this.leftSideArr = left
     member this.rightSide num = right.[num]
     member this.length num = right.[num].Length
     member this.symbol rule pos = right.[rule].[pos]

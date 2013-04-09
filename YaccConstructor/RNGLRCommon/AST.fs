@@ -151,6 +151,7 @@ let inline private getPos (x : obj) = match x with :? AST as n -> n.pos | _ -> f
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
 
 let private emptyArr = [||]
+type private DotNodeType = Prod | AstNode
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
@@ -401,10 +402,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
     member this.collectWarnings tokenToRange =
         let res = new ResizeArray<_>()
-        this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
-            let children = order.[i]
-            if children.other <> null then
-                res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
+        if not isEpsilon then
+            this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
+                let children = order.[i]
+                if children.other <> null then
+                    res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
@@ -515,15 +517,19 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                                                     override this.GetHashCode x = x.GetHashCode()})
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
-        let createNode num isAmbiguous (str : string) =
+        let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
                 if not isAmbiguous then cur
                 else cur + " !"
+            let shape =
+                match nodeType with
+                | AstNode -> ",shape=box"
+                | Prod -> ""
             let color =
                 if not isAmbiguous then ""
                 else ",style=\"filled\",fillcolor=red"
-            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + "]")
+            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
@@ -532,25 +538,25 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
         let createEpsilon ind = 
             let res = next()
-            createNode res false ("n " + indToString (-1-ind))
+            createNode res false AstNode ("n " + indToString (-1-ind))
             let u = next()
-            createNode u false "eps"
+            createNode u false AstNode "eps"
             createEdge res u true ""
             res
         let createTerm t =
             let res = next()
-            createNode res false  ("t " + indToString (tokenToNumber tokens.[t]))
+            createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
             res
         if not isEpsilon then
             //for i in order do
-            for i = 0 to order.Length-1 do
+            for i = order.Length-1 downto 0 do
                 let x = order.[i]
                 if x.pos <> -1 then
                     let children = x
-                    createNode i (children.other <> null) ("n " + indToString leftSide.[children.first.prod])
+                    createNode i (children.other <> null) AstNode ("n " + indToString leftSide.[children.first.prod])
                     let inline handle (family : Family) =
                         let u = next()
-                        createNode u false ("prod " + family.prod.ToString())
+                        createNode u false Prod ("prod " + family.prod.ToString())
                         createEdge i u true ""
                         family.nodes.doForAll <| fun child ->
                             let v = 

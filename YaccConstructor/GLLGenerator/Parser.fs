@@ -17,13 +17,16 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
     member this.parse () =
         // expands the nonterminals following specified node in right-to-left traversals
         // until a terminal matching current input terminal is found in every traversal
-        let rec expandFromNode currentInputTerm (currentSet : Node list) (node : Node) =
+        let rec expandFromNode currentInputPos currentInputTerm (currentSet : NodeWithHistory list) (nodeH : NodeWithHistory) =
+            let node = nodeH.Node
             match node.Item with
             // found tree node matching current input terminal: add its next to found set
             | Trm trm when trm = currentInputTerm ->
-                let nextNode = node.NextNode.Value
-               // node.NextNode <- None
-                nextNode :: currentSet
+                //node.setItemPos currentInputPos
+                let nextNodeH = NodeWithHistory(node.NextNode.Value, nodeH.Traversals)
+                for traversal in nextNodeH.Traversals do
+                    traversal.Add node
+                nextNodeH :: currentSet
             // found tree node not matching current input terminal
             | Trm trm ->
                 currentSet
@@ -34,30 +37,34 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                     let nextNode = node.NextNode.Value
                     let expandProduction productionIndex =
                         let production = productions.[productionIndex]
-                        List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
-                                        (List.zip production [0..production.Length-1])
-                                        nextNode
-                    let newNextNodes = List.map expandProduction productionIndices
-                    List.fold (expandFromNode currentInputTerm) currentSet newNextNodes
+                        let newNextNode =
+                            List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
+                                          (List.zip production [0..production.Length-1])
+                                          nextNode
+                        NodeWithHistory(newNextNode, nodeH.Traversals)
+                    let newNextNodesH = List.map expandProduction productionIndices
+                    List.fold (expandFromNode currentInputPos currentInputTerm) currentSet newNextNodesH
                 // found nonterminal but no productions
                 | None ->
                     currentSet
+        let mergeCurrentTreeNodes nodes =
+            nodes |> Seq.distinct |> List.ofSeq
 
         // prepare initial structure
         let fakeEndNode = Node (Trm eofToken, None)
         let eofNode = Node (Trm eofToken, Some fakeEndNode)
         let rootNode = Node (Ntrm startNonTerm, Some eofNode)
-
+        let rootNodeH = NodeWithHistory (rootNode, ResizeArray<ResizeArray<Node>> ())
+        rootNodeH.Traversals.Add (ResizeArray<Node> ())
+        
         // tree leafs to match with current terminal in the input buffer
-        let mutable currentTreeNodes : Node list = [rootNode]
+        let mutable currentTreeNodes = [rootNodeH]
         let mutable pos = 0
 
         while currentTreeNodes.Length > 0 && pos < tokens.Length do
             currentTreeNodes <-
-                List.fold (expandFromNode tokens.[pos]) [] currentTreeNodes
-                |> Seq.distinct |> List.ofSeq
-            let posLocal = pos
-            List.iter (fun (node:Node) -> node.setItemPos posLocal) currentTreeNodes
+                List.fold (expandFromNode pos tokens.[pos]) [] currentTreeNodes
+                |> mergeCurrentTreeNodes
             pos <- pos + 1
 
-        pos = tokens.Length && List.exists ((=) fakeEndNode) currentTreeNodes
+        pos = tokens.Length && List.exists (fun (nodeH:NodeWithHistory) -> nodeH.Node = fakeEndNode) currentTreeNodes

@@ -28,27 +28,43 @@ type Node (item:GrammarItem, next:Node option) =
     member this.removeParent = this.Parents.Remove >> ignore
     // sets ItemPos for this node and its parents that start with the same terminal as this
     member this.setItemPos itemPos =
-        if this.ItemPos = -1
+        this.ItemPos <- itemPos
+        if this.Parents.Count = 1
         then
-            this.ItemPos <- itemPos
-            if this.Parents.Count = 1
-            then
-                let _,_,parent = this.Parents.[0]
-                parent.setItemPos itemPos
+            let _,productionIndex,parent = this.Parents.[0]
+            if productionIndex = 0
+            then parent.setItemPos itemPos
 
     new (item, next : Node, parentLink) as this =
         Node(item, Some next) then
         this.addParent(parentLink)
 
+// takes a list of lists, returns a list of copies of lists
+let cloneList (list:ResizeArray<ResizeArray<'a>>) =
+    let result = ResizeArray<ResizeArray<'a>> (list.Count)
+    for i in 0..list.Count-1 do
+        result.Add (ResizeArray<'a> (list.[i]))
+    result
+
 /// <summary>
 /// Represents a link to SPPF node with additional information
 /// about left-to-right traversals to this node.
 /// </sumary>
-type NodeWithHistory (node:Node) =
+type NodeWithHistory (node:Node, traversals : ResizeArray<ResizeArray<Node>>) =
     // SPPF node we currently point to
     member val Node = node with get, set
     // all left-to-right traversals that end with our SPPF node
-    member val Traversals = ResizeArray<ResizeArray<Node>> () with get
+    member val Traversals = cloneList traversals with get
+
+    // TODO: better reimplement Seq.distinct with merging than this
+    override this.Equals (other:obj) =
+        match other with
+        | :? NodeWithHistory as otherNodeH ->
+            let areEqual = this.Node = otherNodeH.Node
+            if areEqual then this.Traversals.AddRange (otherNodeH.Traversals)
+            areEqual
+        | _ -> false
+    override this.GetHashCode () = node.GetHashCode()
 
 (*1: condider the following ambiguous grammar:
        S -> AxxA

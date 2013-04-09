@@ -48,5 +48,6 @@ type DebuggedTest() =
     member this.TestParser () =
         Assert.True(Parser.parse [| 5; 5; 8; 4 |])
         Assert.True(Parser.parse [| 5; 6; 6; 4 |])
+        Assert.True(Parser.parse [| 7; 6; 5; 8; 8; 4 |])
         Assert.False(Parser.parse [| 8; 4 |])
         

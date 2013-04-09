@@ -22,10 +22,11 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
             match node.Item with
             // found tree node matching current input terminal: add its next to found set
             | Trm trm when trm = currentInputTerm ->
-                //node.setItemPos currentInputPos
-                let nextNodeH = NodeWithHistory(node.NextNode.Value, nodeH.Traversals)
-                for traversal in nextNodeH.Traversals do
-                    traversal.Add node
+                node.setItemPos currentInputPos
+                let newTraversals = ResizeArray<Node list> (nodeH.Traversals.Count)
+                for i in 0..nodeH.Traversals.Count-1 do
+                    newTraversals.Add (node :: nodeH.Traversals.[i])
+                let nextNodeH = NodeWithHistory(node.NextNode.Value, newTraversals)
                 nextNodeH :: currentSet
             // found tree node not matching current input terminal
             | Trm trm ->
@@ -54,8 +55,8 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
         let fakeEndNode = Node (Trm eofToken, None)
         let eofNode = Node (Trm eofToken, Some fakeEndNode)
         let rootNode = Node (Ntrm startNonTerm, Some eofNode)
-        let rootNodeH = NodeWithHistory (rootNode, ResizeArray<ResizeArray<Node>> ())
-        rootNodeH.Traversals.Add (ResizeArray<Node> ())
+        let rootNodeH = NodeWithHistory (rootNode, ResizeArray<Node list> ())
+        rootNodeH.Traversals.Add ([])
         
         // tree leafs to match with current terminal in the input buffer
         let mutable currentTreeNodes = [rootNodeH]

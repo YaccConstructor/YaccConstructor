@@ -11,6 +11,9 @@ type GrammarItem = Trm of int | Ntrm of int
 /// <param name="item">
 /// Terminal/nonterminal represented by this node
 /// </param>
+/// <param name="next">
+/// Terminal/nonterminal that is next in a production
+/// </param>
 type Node (item:GrammarItem, next:Node option) =
     // terminal/nonterminal represented by this node
     member val Item = item with get
@@ -39,22 +42,15 @@ type Node (item:GrammarItem, next:Node option) =
         Node(item, Some next) then
         this.addParent(parentLink)
 
-// takes a list of lists, returns a list of copies of lists
-let cloneList (list:ResizeArray<ResizeArray<'a>>) =
-    let result = ResizeArray<ResizeArray<'a>> (list.Count)
-    for i in 0..list.Count-1 do
-        result.Add (ResizeArray<'a> (list.[i]))
-    result
-
 /// <summary>
 /// Represents a link to SPPF node with additional information
 /// about left-to-right traversals to this node.
 /// </sumary>
-type NodeWithHistory (node:Node, traversals : ResizeArray<ResizeArray<Node>>) =
+type NodeWithHistory (node:Node, traversals : ResizeArray<Node list>) =
     // SPPF node we currently point to
     member val Node = node with get, set
     // all left-to-right traversals that end with our SPPF node
-    member val Traversals = cloneList traversals with get
+    member val Traversals = traversals with get
 
     // TODO: better reimplement Seq.distinct with merging than this
     override this.Equals (other:obj) =

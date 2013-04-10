@@ -1,3 +1,6 @@
+[<AllPublic>]
+module Common
+
 list <<item separator>>: 
       {[]}
     | hd=item tl=(separator itm=item {itm})* {hd::tl}

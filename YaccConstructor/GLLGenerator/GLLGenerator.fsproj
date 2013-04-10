@@ -48,7 +48,6 @@
     <Compile Include="GLLGenerator.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="Parser.fs" />
-    <Compile Include="TestParser.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

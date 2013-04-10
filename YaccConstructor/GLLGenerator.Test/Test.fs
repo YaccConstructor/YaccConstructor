@@ -61,3 +61,8 @@ type DebuggedTest() =
         Assert.False(Parser.parse [| 8; 4 |])
         Assert.False(Parser.parse [| 7; 4; |])       // input too short
         Assert.False(Parser.parse [| 7; 8; 8; 4; |]) // input too long
+
+    [<Test>]
+    member this.TestCalcParser () =
+        // (1+3) * (2 * 3 - 4) / 10
+        Assert.True(CalcParser.parse [| 16; 19; 20; 19; 22; 18; 16; 19; 18; 19; 17; 19; 22; 14; 19; 15|])        

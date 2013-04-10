@@ -45,6 +45,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestParser.fs" />
+    <Compile Include="calc.yrd.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Starter.fs" />
   </ItemGroup>

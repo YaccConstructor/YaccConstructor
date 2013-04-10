@@ -56,7 +56,7 @@ batch_body:
      | declare
      | case (**&&&***)
      | rollback_transaction
-     (* | if_stmt *)
+     | if_stmt 
      | drop_procedure 
      | create_table
      | insert
@@ -109,7 +109,7 @@ proc_formal_param:
 create_proc:
     KW_CREATE (KW_PROCEDURE | KW_PROC)
     (ident DOT)? ident (SEMI DEC_NUMBER)? 
-    brace_opt<<LPAREN (comma_list<<proc_formal_param>>?) RPAREN>>
+    brace_opt<<LPAREN comma_list<<proc_formal_param>> RPAREN>>
     (KW_WITH (execute_as)+ )? 
     ( KW_FOR KW_REPLICATION )?
     KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
@@ -191,7 +191,7 @@ table_constraint:
 select_stmnt:  
     ((KW_WITH comma_list<<common_table_expression>>)?
     query_expression 
-    (KW_ORDER KW_BY comma_list<<( (ident| IDENT | DEC_NUMBER) (KW_ASC | KW_DESC)?)>>)? 
+    (KW_ORDER KW_BY comma_list<<( (ident | DEC_NUMBER) (KW_ASC | KW_DESC)?)>>)? 
     (KW_COMPUTE 
         comma_list<<( (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) LPAREN sql_expr RPAREN)>> 
         (KW_BY comma_list<<sql_expr>>)? 
@@ -199,7 +199,7 @@ select_stmnt:
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
     | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
+    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) brace_opt<<LPAREN sql_expr RPAREN>> )*)?
      
     
 for:
@@ -282,7 +282,7 @@ select_list:
             ( ( STRING_CONST | ident ) 
             | name LPAREN comma_list<<sql_expr>> RPAREN ) )? 
             | sql_expr (KW_AS? name)? ) 
-        | name = sql_expr)>>
+        | ident OP_EQ sql_expr)>>
     
 name:
      ident | full_ident | LOCALVAR
@@ -468,7 +468,7 @@ joined_table:
     table_source join_type table_source KW_ON search_condition 
     | table_source KW_CROSS KW_JOIN table_source 
     (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
-    | LPAREN? joined_table RPAREN? 
+    | brace_opt<<LPAREN joined_table RPAREN>> 
     
 
 join_type: 
@@ -509,7 +509,7 @@ create_table:
     KW_CREATE KW_TABLE 
         ( IDENT DOT IDENT? DOT? )? IDENT 
             LPAREN ( comma_list<<(column_definition_create_table | computed_column_definition)>> )
-            comma_list<<table_constraint_create_table>>? RPAREN 
+            comma_list<<table_constraint_create_table>> RPAREN 
         ( KW_ON ( IDENT LPAREN IDENT RPAREN | IDENT 
             | KW_DEFAULT ) )? 
         ( KW_TEXTIMAGE_ON (IDENT | KW_DEFAULT) )?
@@ -654,20 +654,19 @@ execute_stmnt:
 execute_proc:
     (KW_EXEC | KW_EXECUTE)?
     (((LOCALVAR OP_EQ)?
-      (name (SEMI DEC_NUMBER)? | LOCALVAR) 
+      (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
       brace_opt<<
          LPAREN 
          (comma_list<<((ident OP_EQ)? 
-            (sql_expr 
-            | LOCALVAR (KW_OUTPUT | KW_OUT)? 
+            (sql_expr (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
          )?>>)
         RPAREN>>
       (KW_WITH KW_RECOMPILE)?
     )
-    | create_object DOT IDENT LPAREN (comma_list<<((ident OP_EQ)? (sql_expr| DEC_NUMBER))>>)? RPAREN)
+    | create_object DOT IDENT LPAREN comma_list<<((ident OP_EQ)? sql_expr)>> RPAREN)
 
-create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>>? RPAREN
+create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>> RPAREN
 
 execute_character_string:
     (KW_EXEC | KW_EXECUTE) 
@@ -698,7 +697,7 @@ sql_datatype:
     | KW_NVARCHAR type_size?
     | KW_SQL_VARIANT
 
-execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER | username = STRING_CONST) 
+execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER |ident OP_EQ STRING_CONST) 
 
 binop:
      OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
@@ -743,7 +742,7 @@ sql_expr:
     | sql_expr KW_NOT? KW_IN LPAREN comma_list<<sql_expr>> RPAREN
     | sql_expr KW_LIKE sql_expr
      
-call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>>? RPAREN
+call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
 
 comma_list<<item>>: list<<item COMMA>>
 

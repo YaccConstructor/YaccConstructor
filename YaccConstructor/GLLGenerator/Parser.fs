@@ -26,7 +26,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                 let newTraversals = ResizeArray<Node list> (nodeH.Traversals.Count)
                 for i in 0..nodeH.Traversals.Count-1 do
                     newTraversals.Add (node :: nodeH.Traversals.[i])
-                let nextNodeH = NodeWithHistory(node.NextNode.Value, newTraversals)
+                let nextNodeH = NodeWithHistory(node.NextNode, newTraversals)
                 nextNodeH :: currentSet
             // found tree node not matching current input terminal
             | Trm trm ->
@@ -35,7 +35,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                 match actions (currentInputTerm, ntrm) with
                 // found nonterminal; expand all its available productions
                 | Some productionIndices ->
-                    let nextNode = node.NextNode.Value
+                    let nextNode = node.NextNode
                     let expandProduction productionIndex =
                         let production = productions.[productionIndex]
                         let newNextNode =
@@ -52,8 +52,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
             nodes |> Seq.distinct |> List.ofSeq
 
         // prepare initial structure
-        let fakeEndNode = Node (Trm eofToken, None)
-        let eofNode = Node (Trm eofToken, Some fakeEndNode)
+        let eofNode = Node (Trm eofToken, None)
         let rootNode = Node (Ntrm startNonTerm, Some eofNode)
         let rootNodeH = NodeWithHistory (rootNode, ResizeArray<Node list> ())
         rootNodeH.Traversals.Add ([])
@@ -68,4 +67,4 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                 |> mergeCurrentTreeNodes
             pos <- pos + 1
 
-        pos = tokens.Length && List.exists (fun (nodeH:NodeWithHistory) -> nodeH.Node = fakeEndNode) currentTreeNodes
+        pos = tokens.Length && List.exists (fun (nodeH:NodeWithHistory) -> nodeH.Node = eofNode) currentTreeNodes

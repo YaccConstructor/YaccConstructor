@@ -14,13 +14,13 @@ type GrammarItem = Trm of int | Ntrm of int
 /// <param name="next">
 /// Terminal/nonterminal that is next in a production
 /// </param>
-type Node (item:GrammarItem, next:Node option) =
+type Node (item:GrammarItem, next:Node option) as this =
     // terminal/nonterminal represented by this node
     member val Item = item with get
     // input buffer position of the matched input terminal
     member val ItemPos = -1 with get, set
     // nodes that are the next node for this in a left-to-right traversal
-    member val NextNode = next with get, set
+    member val NextNode = (match next with |Some x -> x | None -> this) with get, set
     // parents of this node in the SPPF
     // each parent is associated with the production number and item index in the production; see (*1*)
     member val Parents = ResizeArray<int * int * Node> () with get

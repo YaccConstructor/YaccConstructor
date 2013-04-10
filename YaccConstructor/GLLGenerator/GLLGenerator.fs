@@ -22,6 +22,7 @@ type GLLGenerator() =
             let out = new System.Text.StringBuilder()            
 
             emitNameAndUsages "Parser" out
+            emitTokenType grammar.indexator out
             emitGrammar grammar out
 
             System.IO.File.WriteAllText(outFileName, out.ToString())

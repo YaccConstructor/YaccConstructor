@@ -65,6 +65,19 @@ let emitNameAndUsages moduleName (out:StringBuilder) =
     out |> emitLine 0 "open Yard.Generators.GLL.AST"
     out |> emitLine 0 "open Yard.Generators.GLL.Parser"
 
+let emitTokenType (indexator:Indexator) (out:StringBuilder) =
+    out |> emitLine 0 "type Token ="
+    for i = indexator.termsStart to indexator.termsEnd do
+        let tokenName = indexator.indexToTerm i
+        out |> emitLine 1 (sprintf "| %s" tokenName)
+    out |> emitEmptyLine
+    out |> emitLine 0 "let tokenToNumber = function"
+    for i = indexator.termsStart to indexator.termsEnd do
+        let tokenName = indexator.indexToTerm i
+        out |> emitLine 1 (sprintf "| %s -> %d" tokenName i)
+    out |> emitEmptyLine
+
+
 let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
     let followSets = getFollowSets grammar
 
@@ -118,7 +131,7 @@ let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
     out
       .AppendLine(sprintf "let private productions = %s" productionsArr)
       .AppendLine(sprintf "let private actions = %s " actionsArr)
-      .AppendLine(sprintf "let parse tokens = ParserBase(%d, %d, actions, productions, tokens).parse()"
+      .AppendLine(sprintf "let parse tokens = ParserBase(%d, %d, actions, productions, (Seq.map tokenToNumber tokens)).parse()"
                           grammar.rules.startSymbol
                           grammar.indexator.eofIndex)
     |> ignore

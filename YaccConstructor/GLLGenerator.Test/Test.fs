@@ -5,6 +5,9 @@ open Yard.Core.IL.Production
 open Yard.Generators.GLL
 open NUnit.Framework
 
+open Parser
+open CalcParser
+
 [<TestFixture>]
 type DebuggedTest() =
     let filename = "testfile"
@@ -13,8 +16,8 @@ type DebuggedTest() =
         let tkn text = Source.t text
         let getCase (str:string) =
             if System.Char.IsUpper (str.[0])
-                then PRef (tkn str, None)
-                else PToken (tkn str)
+                then PToken (tkn str)
+                else PRef (tkn str, None)
         let getElem case = { omit = false; rule = case; binding = None; checker = None }
         let rec getSeq = function
             | []          -> PSeq ([], None, None)
@@ -37,7 +40,8 @@ type DebuggedTest() =
                                                        body = getProductionBody prods;
                                                        isStart = (i = 0);
                                                        isPublic = (i = 0);
-                                                       metaArgs = [] }) def
+                                                       metaArgs = [] })
+                             def
          }]
 
     [<Test>]
@@ -47,22 +51,24 @@ type DebuggedTest() =
             head = None
             foot = None
             options = Map.empty
-            grammar = getGrammar ["S", [["A"; "S"; "d"]; ["B"; "S"]; []];
-                                  "A", [["a"]; ["c"]];
-                                  "B", [["a"]; ["b"]]]
+            grammar = getGrammar ["nS", [["nA"; "nS"; "D"]; ["nB"; "nS"]; []];
+                                  "nA", [["A"]; ["C"]];
+                                  "nB", [["A"]; ["B"]]]
         }
         GLLGenerator().Generate definition |> ignore
-
+        
     [<Test>]
     member this.TestParser () =
-        Assert.True(Parser.parse [| 5; 5; 8; 4 |])
-        Assert.True(Parser.parse [| 5; 6; 6; 4 |])
-        Assert.True(Parser.parse [| 7; 6; 5; 8; 8; 4 |])
-        Assert.False(Parser.parse [| 8; 4 |])
-        Assert.False(Parser.parse [| 7; 4; |])       // input too short
-        Assert.False(Parser.parse [| 7; 8; 8; 4; |]) // input too long
+        Assert.True(Parser.parse [| A; A; D; Parser.EOF |])
+        Assert.True(Parser.parse [| A; B; B; Parser.EOF |])
+        Assert.True(Parser.parse [| C; B; A; D; D; Parser.EOF |])
+        Assert.False(Parser.parse [| D; Parser.EOF |])
+        Assert.False(Parser.parse [| C; Parser.EOF; |])       // input too short
+        Assert.False(Parser.parse [| C; D; D; Parser.EOF; |]) // input too long
 
     [<Test>]
     member this.TestCalcParser () =
         // (1+3) * (2 * 3 - 4) / 10
-        Assert.True(CalcParser.parse [| 16; 19; 20; 19; 22; 18; 16; 19; 18; 19; 17; 19; 22; 14; 19; 15|])        
+        Assert.True(CalcParser.parse [| LBRACE; NUMBER; PLUS; NUMBER; RBRACE;
+                                        MULT; LBRACE; NUMBER; MULT; NUMBER; MINUS; NUMBER; RBRACE;
+                                        DIV; NUMBER; EOF |] )

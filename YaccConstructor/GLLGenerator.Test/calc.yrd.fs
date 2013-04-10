@@ -1,6 +1,28 @@
 ﻿module CalcParser
 open Yard.Generators.GLL.AST
 open Yard.Generators.GLL.Parser
+type Token =
+    | DIV
+    | EOF
+    | LBRACE
+    | MINUS
+    | MULT
+    | NUMBER
+    | PLUS
+    | POW
+    | RBRACE
+
+let tokenToNumber = function
+    | DIV -> 14
+    | EOF -> 15
+    | LBRACE -> 16
+    | MINUS -> 17
+    | MULT -> 18
+    | NUMBER -> 19
+    | PLUS -> 20
+    | POW -> 21
+    | RBRACE -> 22
+
 (*
     0 -> expr
     1 -> factor
@@ -56,4 +78,4 @@ open Yard.Generators.GLL.Parser
 *)
 let private productions = [|[Ntrm 7];[Ntrm 0];[Ntrm 5;Ntrm 10];[Ntrm 6;Ntrm 5;Ntrm 10];[];[Trm 17];[Trm 20];[Ntrm 8];[Ntrm 1;Ntrm 11];[Ntrm 2;Ntrm 1;Ntrm 11];[];[Trm 14];[Trm 18];[Ntrm 9];[Ntrm 3;Ntrm 12];[Ntrm 4;Ntrm 3;Ntrm 12];[];[Trm 21];[Trm 16;Ntrm 0;Trm 22];[Trm 19]|]
 let private actions = [|(14,2),[11];(14,11),[9];(14,12),[16];(15,10),[4];(15,11),[10];(15,12),[16];(16,0),[0];(16,1),[13];(16,3),[18];(16,5),[7];(16,7),[2];(16,8),[8];(16,9),[14];(16,13),[1];(17,6),[5];(17,10),[3];(17,11),[10];(17,12),[16];(18,2),[12];(18,11),[9];(18,12),[16];(19,0),[0];(19,1),[13];(19,3),[19];(19,5),[7];(19,7),[2];(19,8),[8];(19,9),[14];(19,13),[1];(20,6),[6];(20,10),[3];(20,11),[10];(20,12),[16];(21,4),[17];(21,12),[15];(22,10),[4];(22,11),[10];(22,12),[16]|] 
-let parse tokens = ParserBase(13, 15, actions, productions, tokens).parse()
+let parse tokens = ParserBase(13, 15, actions, productions, (Seq.map tokenToNumber tokens)).parse()

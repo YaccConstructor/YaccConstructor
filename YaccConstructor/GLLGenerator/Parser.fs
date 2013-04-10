@@ -10,7 +10,7 @@ type Production = GrammarItem list
 // actionsTable: (lookahead terminal, nonterminal on parse stack topm, production(s) to use)
 // productions: right sides of grammar rules
 // tokens: input stream of grammar terminals (their int codes)
-type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[], tokens : int[]) =
+type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[], tokens : int seq) =
     // represents actions table: (lookahead terminal, nonterminal on parse stack top) -> production(s) to use
     let actions : int * int -> int list option =  (Map.ofArray actionsTable).TryFind
 
@@ -61,10 +61,11 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
         let mutable currentTreeNodes = [rootNodeH]
         let mutable pos = 0
 
-        while currentTreeNodes.Length > 0 && pos < tokens.Length do
+        let tokensEnumerator = tokens.GetEnumerator ()
+        while currentTreeNodes.Length > 0 && tokensEnumerator.MoveNext () do
             currentTreeNodes <-
-                List.fold (expandFromNode pos tokens.[pos]) [] currentTreeNodes
+                List.fold (expandFromNode pos tokensEnumerator.Current) [] currentTreeNodes
                 |> mergeCurrentTreeNodes
             pos <- pos + 1
 
-        pos = tokens.Length && List.exists (fun (nodeH:NodeWithHistory) -> nodeH.Node = eofNode) currentTreeNodes
+        List.exists (fun (nodeH:NodeWithHistory) -> nodeH.Node = eofNode) currentTreeNodes

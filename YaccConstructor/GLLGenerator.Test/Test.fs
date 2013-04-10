@@ -7,9 +7,9 @@ open NUnit.Framework
 
 [<TestFixture>]
 type DebuggedTest() =
-    let filename = "testfile"    
+    let filename = "testfile"
 
-    let getGrammar def : Grammar.t<Source.t, Source.t>=
+    let getGrammar def : Grammar.t<Source.t, Source.t> =
         let tkn text = Source.t text
         let getCase (str:string) =
             if System.Char.IsUpper (str.[0])
@@ -19,20 +19,20 @@ type DebuggedTest() =
         let rec getSeq = function
             | []          -> PSeq ([], None, None)
             | [only]      -> getCase only
-            | first::rest -> 
+            | first::rest ->
                 let firstElem = getElem <| getCase first
                 match getSeq rest with
                 | PSeq (restElems, _, _) -> PSeq (firstElem::restElems, None, None)
                 | restCase -> PSeq ([firstElem; getElem restCase], None, None)
-        let rec getProductionBody productions =                            
-            match productions with        
+        let rec getProductionBody productions =
+            match productions with
             | [right] -> getSeq right
             | right::rest -> PAlt(getSeq right, getProductionBody rest)
-            | [] -> failwith "Empty productions are not allowed"        
+            | [] -> failwith "Empty productions are not allowed"
         List.mapi (fun i (name, prods) -> { name = tkn name; args = []; body = getProductionBody prods; _public = (i = 0); metaArgs = [] }) def
 
     [<Test>]
-    member this.Test () =        
+    member this.Test () =
         let definition : Definition.t<Source.t, Source.t> = {
             info = { fileName = filename }
             head = None
@@ -50,4 +50,5 @@ type DebuggedTest() =
         Assert.True(Parser.parse [| 5; 6; 6; 4 |])
         Assert.True(Parser.parse [| 7; 6; 5; 8; 8; 4 |])
         Assert.False(Parser.parse [| 8; 4 |])
-        
+        Assert.False(Parser.parse [| 7; 4; |])       // input too short
+        Assert.False(Parser.parse [| 7; 8; 8; 4; |]) // input too long

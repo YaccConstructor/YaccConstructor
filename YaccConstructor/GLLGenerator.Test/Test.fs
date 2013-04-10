@@ -29,7 +29,16 @@ type DebuggedTest() =
             | [right] -> getSeq right
             | right::rest -> PAlt(getSeq right, getProductionBody rest)
             | [] -> failwith "Empty productions are not allowed"
-        List.mapi (fun i (name, prods) -> { name = tkn name; args = []; body = getProductionBody prods; _public = (i = 0); metaArgs = [] }) def
+        [{ name = None;
+           openings = [];
+           allPublic = false;
+           rules = List.mapi (fun i (name, prods) -> { name = tkn name;
+                                                       args = [];
+                                                       body = getProductionBody prods;
+                                                       isStart = (i = 0);
+                                                       isPublic = (i = 0);
+                                                       metaArgs = [] }) def
+         }]
 
     [<Test>]
     member this.Test () =

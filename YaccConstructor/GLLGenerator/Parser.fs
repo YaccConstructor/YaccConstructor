@@ -22,7 +22,6 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
             match node.Item with
             // found tree node matching current input terminal: add its next to found set
             | Trm trm when trm = currentInputTerm ->
-                node.setItemPos currentInputPos
                 let newTraversals =
                     match nodeH.Traversals with
                     | IncompleteLink tails -> Link (node, tails)
@@ -40,7 +39,7 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
                     let expandProduction productionIndex =
                         let production = productions.[productionIndex]
                         let newNextNode =
-                            List.foldBack (fun (item, itemIndex) next -> Node (item, next, (productionIndex, itemIndex, node)))
+                            List.foldBack (fun (item, itemIndex) next -> Node (item, Some next, Some node, productionIndex, itemIndex))
                                           (List.zip production [0..production.Length-1])
                                           nextNode
                         NodeWithHistory(newNextNode, nodeH.Traversals)
@@ -53,8 +52,8 @@ type ParserBase (startNonTerm, eofToken, actionsTable, productions : Production[
             nodes |> Seq.distinct |> List.ofSeq
 
         // prepare initial structure
-        let eofNode = Node (Trm eofToken, None)
-        let rootNode = Node (Ntrm startNonTerm, Some eofNode)
+        let eofNode = Node (Trm eofToken, None, None, 0, 0)
+        let rootNode = Node (Ntrm startNonTerm, Some eofNode, None, 0, 0)
         let rootNodeH = NodeWithHistory (rootNode, Empty)
         
         // tree leafs to match with current terminal in the input buffer

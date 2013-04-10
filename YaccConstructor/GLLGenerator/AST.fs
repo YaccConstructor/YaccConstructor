@@ -1,4 +1,4 @@
-﻿// AST.fs contains a data structure to represent SPPF during parsing
+﻿// AST.fs contains data structures to represent SPPF during parsing
 
 module Yard.Generators.GLL.AST
 
@@ -6,46 +6,24 @@ type GrammarItem = Trm of int | Ntrm of int
 
 /// <summary>
 /// SPPF Node that also contains forward links for left-to-right traversals.
-/// Graph consisting of all Nodes (except FakeStart and FakeEnd) is a tree (DAG with Next links).
+/// Graph consisting of all Nodes (except FakeEnd) is a tree (DAG with Next links).
 /// </summary>
-/// <param name="item">
-/// Terminal/nonterminal represented by this node
-/// </param>
-/// <param name="next">
-/// Terminal/nonterminal that is next in a production
-/// </param>
-type Node (item:GrammarItem, next:Node option) as this =
+type Node (item:GrammarItem, next:Node option, parent:Node option, productionNumber:int, indexInProduction:int) as this =
     // terminal/nonterminal represented by this node
     member val Item = item with get
-    // input buffer position of the matched input terminal
-    member val ItemPos = -1 with get, set
-    // nodes that are the next node for this in a left-to-right traversal
-    member val NextNode = (match next with |Some x -> x | None -> this) with get, set
-    // parents of this node in the SPPF
-    // each parent is associated with the production number and item index in the production; see (*1*)
-    member val Parents = ResizeArray<int * int * Node> () with get
+    // node that is the next node for this in a left-to-right traversal
+    member val NextNode = (match next with |Some x -> x | None -> this) with get
+    // parent of this node in the SPPF
+    member val Parent = (match parent with |Some x -> x | None -> this) with get
+    // number of production that was used to get this node from parent
+    member val ParentProductionNumber = productionNumber with get
+    // index of this node in parent's production
+    member val ParentProductionIndex = indexInProduction with get
     
-    // add a new parent node
-    member this.addParent = this.Parents.Add
-    // remove the parent node
-    member this.removeParent = this.Parents.Remove >> ignore
-    // sets ItemPos for this node and its parents that start with the same terminal as this
-    member this.setItemPos itemPos =
-        this.ItemPos <- itemPos
-        if this.Parents.Count = 1
-        then
-            let _,productionIndex,parent = this.Parents.[0]
-            if productionIndex = 0
-            then parent.setItemPos itemPos
-
     override x.ToString () =
         match x.Item with
         | Trm num -> "Trm " + num.ToString()
         | Ntrm num -> "Ntrm " + num.ToString()
-
-    new (item, next : Node, parentLink) as this =
-        Node(item, Some next) then
-        this.addParent(parentLink)
 
 /// <summary>
 /// Represents a list that can have more than one tail.

@@ -38,29 +38,64 @@ type Node (item:GrammarItem, next:Node option) as this =
             if productionIndex = 0
             then parent.setItemPos itemPos
 
+    override x.ToString () =
+        match x.Item with
+        | Trm num -> "Trm " + num.ToString()
+        | Ntrm num -> "Ntrm " + num.ToString()
+
     new (item, next : Node, parentLink) as this =
         Node(item, Some next) then
         this.addParent(parentLink)
 
 /// <summary>
+/// Represents a list that can have more than one tail.
+/// </summary>
+type BranchedList<'a> =
+    | Empty
+    | Link of 'a * BranchedList<'a> list
+    | IncompleteLink of BranchedList<'a> list
+
+    // creates a branched list that combines two specified lists 
+    member x.mergeWith (y:BranchedList<'a>) =
+        match x, y with
+        | x, Empty -> x
+        | Empty, y -> y
+        | Link (_), Link (_) -> IncompleteLink [x;y]
+        | IncompleteLink xTails, Link (_) -> IncompleteLink (y::xTails)
+        | Link(_), IncompleteLink yTails -> IncompleteLink (x::yTails)
+        | IncompleteLink xTails, IncompleteLink yTails -> IncompleteLink (List.append xTails yTails)
+
+    override this.ToString () =
+        let toString = function
+            | [] -> ""
+            | [tail] -> "::" + tail.ToString()
+            | tails -> List.fold (fun str tail -> str + "(" + tail.ToString() + ")") "" tails
+        match this with
+        | Empty -> "[]"
+        | Link (item, tails) -> item.ToString() + toString tails
+        | IncompleteLink tails -> toString tails
+
+/// <summary>
 /// Represents a link to SPPF node with additional information
 /// about left-to-right traversals to this node.
 /// </sumary>
-type NodeWithHistory (node:Node, traversals : ResizeArray<Node list>) =
+type NodeWithHistory (node:Node, traversals : BranchedList<Node>) =
     // SPPF node we currently point to
     member val Node = node with get, set
     // all left-to-right traversals that end with our SPPF node
-    member val Traversals = traversals with get
+    member val Traversals = traversals with get, set
 
     // TODO: better reimplement Seq.distinct with merging than this
     override this.Equals (other:obj) =
         match other with
         | :? NodeWithHistory as otherNodeH ->
             let areEqual = this.Node = otherNodeH.Node
-            if areEqual then this.Traversals.AddRange (otherNodeH.Traversals)
+            if areEqual then this.Traversals <- this.Traversals.mergeWith otherNodeH.Traversals
             areEqual
         | _ -> false
     override this.GetHashCode () = node.GetHashCode()
+
+    override this.ToString () = this.Node.ToString ()
 
 (*1: condider the following ambiguous grammar:
        S -> AxxA

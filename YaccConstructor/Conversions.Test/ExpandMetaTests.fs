@@ -38,10 +38,9 @@ type ``Conversions expand metarules tests`` () =
 
     let runMetaTest srcFile =
         let srcFile = System.IO.Path.Combine(basePath, srcFile)                                         
-        Namer.resetRuleEnumerator()
         let ilTree = frontend.ParseGrammar srcFile                
+        Namer.initNamer ilTree.grammar
         let ilTreeConverted = ConversionsManager.ApplyConversion conversion ilTree 
-        Namer.resetRuleEnumerator()
         let expected =
             try
                 srcFile + ".ans" |> frontend.ParseGrammar

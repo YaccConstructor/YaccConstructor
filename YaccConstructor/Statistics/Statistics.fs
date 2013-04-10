@@ -25,7 +25,7 @@ open Yard.Core.IL.Production
 open Yard.Reports
 
 let RuleLength (def:Yard.Core.IL.Definition.t<_,_>) =
-    let rules = def.grammar
+    let grammar = def.grammar
     let rec length body =
         match body with
         | PRef _ 
@@ -42,8 +42,10 @@ let RuleLength (def:Yard.Core.IL.Definition.t<_,_>) =
             max (length lExpr) (length rExpr) //hack for toplevel alternatives
          
     let lengths = 
-        rules
-        |> List.map (fun r -> length r.body)
+        grammar
+        |> List.collect (fun m ->
+            m.rules |> List.map (fun r -> length r.body)
+        )
 
     let avg =
         lengths

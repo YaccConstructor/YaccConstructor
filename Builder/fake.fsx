@@ -60,6 +60,7 @@ Target "Clean" (fun _ ->
 Target "CollectAllBinaries" (fun _ ->
     !+ (solutionRootDir + "/**/bin/Release/*.exe")
     ++ (solutionRootDir + "/**/bin/Release/*.dll")
+    ++ (solutionRootDir + "/**/bin/Release/*.targets")
     |> Scan
     |> CopyTo distrYCDir
 )

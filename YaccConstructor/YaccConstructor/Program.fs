@@ -20,7 +20,9 @@ module YaccConstructor.Program
 
 open Yard.Core
 open Yard.Core.IL
+open Yard.Core.Helpers
 open Yard.Core.Checkers
+open Yard.Core.Constraints
 open Microsoft.FSharp.Text
 open System.IO
 
@@ -99,7 +101,7 @@ let () =
     let run () =
         match !testFile, !feName, !generatorName with
         | Some fName, Some feName, Some generatorName ->
-            let grammarFilePath = System.IO.Path.Combine((!testsPath).Value, fName)
+            let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
                 if Seq.exists ((=) feName) FrontendsManager.Available
@@ -115,7 +117,7 @@ let () =
             // Parse grammar
             let ilTree =
                 //try
-                    let defStr = List.fold (fun acc x -> if acc = "" then x else (acc + ";" + x)) "" !userDefs
+                    let defStr = String.concat ";" !userDefs
                     if System.String.IsNullOrEmpty defStr
                     then grammarFilePath
                     else grammarFilePath + "%" + defStr
@@ -123,11 +125,46 @@ let () =
                     |> ref
                 //with
                 //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
+            Namer.initNamer ilTree.Value.grammar
 
+            let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
+            if undeclaredRules.Length > 0 then
+                eprintfn  "Input grammar contains some undeclared nonterminals:"
+                undeclaredRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                            |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                            |> String.concat "; ")
+                )
+            if repeatedInnerRules.Length > 0 then
+                eprintfn  "There are more then one rule in one module for some nonterminals:"
+                repeatedInnerRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
+                )
+            if repeatedExportRules.Length > 0 then
+                eprintfn  "There are rules, exported from different modules:"
+                repeatedExportRules |> List.iter (fun (m, rules) ->
+                    eprintfn "Module %s: %s" (getModuleName m)
+                        (rules
+                        |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                        |> String.concat "; ")
+                )
 //            printfn "%A" <| ilTree
+            let lostSources = ref false
+            // Let possible to know, after what conversion we lost reference to original code
+            let checkSources name il = 
+                if not !lostSources then
+                    match sourcesWithoutFileNames il with
+                    | [] -> ()
+                    | x ->
+                        lostSources := true
+                        x |> List.map(fun s -> s.text) |> String.concat "\n"
+                        |> printfn "Lost sources after frontend or conversion %s:\n %s" name
+            checkSources fe.Name !ilTree
             // Apply Conversions
-            Seq.iter (fun conv -> ilTree := (ConversionsManager.ApplyConversion conv !ilTree)) conversions
-
+            for conv in conversions do
+                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
             let gen =
@@ -135,7 +172,7 @@ let () =
                 if Seq.exists ((=) generatorName) GeneratorsManager.Available
                 then              
                     try
-                        match GeneratorsManager.Component  generatorName with
+                        match GeneratorsManager.Component generatorName with
                         | Some gen -> gen
                         | None -> failwith "TreeDump is not found."
                     with
@@ -147,14 +184,14 @@ let () =
             let result =  
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
-                let undeclaredNonterminals = GetUndeclaredNonterminalsList !ilTree
-                if undeclaredNonterminals.Length > 0 then
-                    String.concat "\n" undeclaredNonterminals
-                    |> eprintfn  "Input grammar contains some undeclared nonterminals: \n %s"                      
-
-//                    |> CheckerError
-  //                  |> raise
                 //try
+                //let gen = new Yard.Generators.RNGLR.RNGLR()
+                for constr in gen.Constraints do
+                    let grammar = ilTree.Value.grammar
+                    if not <| constr.Check grammar then
+                        eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+                        ilTree := {!ilTree with grammar = constr.Fix grammar}
+
                 match !generatorParams with
                 | None -> gen.Generate !ilTree
                 | Some genParams -> gen.Generate(!ilTree, genParams)
@@ -164,9 +201,7 @@ let () =
 //                       |> raise
                 //| e -> GenError e.Message |> raise
 
-//#if DEBUG               
-            printf "%A" result
-//#endif
+            //printf "%A" result
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise

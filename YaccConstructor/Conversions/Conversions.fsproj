@@ -60,6 +60,7 @@
     <Compile Include="ExpandInnerAlt.fs" />
     <Compile Include="RemoveAC.fs" />
     <Compile Include="ReplaceInline.fs" />
+    <Compile Include="Linearize.fs" />
     <Compile Include="ToCNF.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,4 @@ type TreeDump() =
     inherit Generator()
         override this.Name = "TreeDump"
         override this.Generate t = (sprintf "%A" t) :> obj
-        override this.AcceptableProductionTypes = 
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)
+        override this.Constraints = [||]

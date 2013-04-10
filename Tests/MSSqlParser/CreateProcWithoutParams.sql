@@ -1,5 +1,5 @@
 CREATE procedure testProc
 as
-        select @test = 'trestVal'
+        select @test = 'testVal'
 
 GO

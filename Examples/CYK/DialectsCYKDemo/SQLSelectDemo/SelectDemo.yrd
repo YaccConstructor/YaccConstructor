@@ -1,4 +1,16 @@
-+s : select;
+[<Start>]
+start: (create_proc KW_GO)+;
+   
+create_proc: KW_CREATE (@bad[1](KW_PROC)|@good[2](KW_PROCEDURE)) IDENT  AS body;
 
-select : SELECT (STAR|ident) FROM ident;
-ident : IDENT | @l1(IDENT AS IDENT);
+body: KW_BEGIN (sql_stmt SEMI)+ KW_END ;
+fld: expr | @bad_as(expr IDENT) | expr AS IDENT; 
+sql_stmt: SELECT (fld COMMA)+ fld FROM tbl;
+tbl: IDENT;
+expr: 
+      IDENT
+    | LOCALVAR
+    | NUM
+    | LBR expr RBR
+    | expr(PLUS|STAR)expr
+    ;

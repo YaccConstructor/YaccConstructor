@@ -17,6 +17,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 open Yard.Core.IL.Production
+open Yard.Core
 
 (* Run with fsyacc.exe --module Yard.Frontends.AntlrFrontend.Parser --open Yard.Core.IL Parser.fsy *)
 
@@ -101,7 +102,7 @@ let makeToken (src : Source.t) descr =
 
 //file: GrammarDeclaration Options GlobalScope Header Members Rules { Prog() }
 
-ParseAntlr: GrammarName TopLevelDefs EOF { (($2), terminals)  }
+ParseAntlr: GrammarName TopLevelDefs EOF { (defaultModules ($2), terminals)  }
 
 GrammarName: T_GRAMMAR TERMINAL SEMICOLON { }
     | T_GRAMMAR IDENTIFIER SEMICOLON { }
@@ -119,7 +120,17 @@ TopLevelDef: Rule { [$1] }
 ActionNameOpt: ACTION_NAME { }
     | { }
     
-Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON { { new Rule.t<Source.t, Source.t> with name = ($1) and args = [] and body = $6 and _public = false and metaArgs = [] } }
+Rule: IDENTIFIER OptionsOpt ScopeOpt CatOpt COLON RuleBody SEMICOLON
+    {
+        {
+            name = ($1)
+            args = []
+            body = $6
+            isStart = false
+            isPublic = false
+            metaArgs = []
+        } : Rule.t<Source.t, Source.t>
+    }
 
 ScopeOpt: T_SCOPE TERMINAL SEMICOLON { }
     | { }

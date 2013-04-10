@@ -95,10 +95,12 @@ module SolutionData =
                 |  PToken _  -> ()
 
          let getNonterminals newTree =
-            newTree.grammar |> List.iter (fun node ->
-                if node.name.file = info.FullPath then
-                    addNotTermToDEFPosition (node.name)
-                    addNotTermToPosition (node.body)
+            newTree.grammar |> List.iter (fun mod' ->
+                mod'.rules |> List.iter (fun node ->
+                    if node.name.file = info.FullPath then
+                        addNotTermToDEFPosition (node.name)
+                        addNotTermToPosition (node.body)
+                )
             //  else (match node.name with (_,(_,_,path)) ->  findInlistOfVisibleYardFileHelper path)
             )
          

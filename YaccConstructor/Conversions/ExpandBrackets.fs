@@ -31,7 +31,7 @@ open Yard.Core.IL.Production
 
 //let dummyPos s = new Source.t(s)
 
-let private newName () = Namer.nextName Namer.Names.brackets
+let private newName () = Namer.newName Namer.Names.brackets
     
 let private expandBrackets (ruleList: Rule.t<_, _> list) = 
     let toExpand = new System.Collections.Generic.Queue<Rule.t<_, _>>(List.toArray ruleList)
@@ -40,30 +40,26 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
         let toExpandRule = toExpand.Dequeue()
         let rec expandBody attrs = function
             | PSeq(elements, actionCode, l) ->
-                (elements
-                 |>List.fold
-                    (fun (res, attrs) elem ->
-                        let newElem =
-                            match elem.rule with 
-                            | PSeq(subelements, None, l) as s when List.length subelements = 1  ->
-                                 let rule = (List.head subelements).rule
-                                 let body = 
-                                    match rule with
-                                    | PSeq(x,y,l1) -> PSeq(x,y,l)
-                                    | x -> s 
-                                 { elem with rule = body }
-                            | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
-                                let newName = newName()
-                                toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
-                                                    body=elem.rule; _public=false; metaArgs=[]})
-                                { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
-                            | _ -> elem
-                        newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
-                    )
-                    ([], attrs)
-                 |> fst |> List.rev
-                 ,actionCode, l)
-                |> PSeq
+                elements
+                |> List.fold (fun (res, attrs) elem ->
+                    let newElem =
+                        match elem.rule with 
+                        | PSeq(subelements, None, l) as s when List.length subelements = 1  ->
+                            let body = 
+                                match subelements.Head.rule with
+                                | PSeq(x,y,_) -> PSeq(x,y,l)
+                                | _ -> s 
+                            { elem with rule = body }
+                        | PSeq(subelements, subActionCode, l) when List.length subelements > 1 || subActionCode <> None ->
+                            let newName = newName()
+                            toExpand.Enqueue({name= genNewSource newName elem.rule; args=attrs;
+                                                body=elem.rule; isStart=false; isPublic=false; metaArgs=[]})
+                            { elem with rule = PRef(genNewSource newName elem.rule, list2opt <| createParams attrs) }
+                        | _ -> elem
+                    newElem::res, if elem.binding.IsSome then attrs@[elem.binding.Value] else attrs
+                ) ([], attrs)
+                |> fst |> List.rev
+                |> fun elems -> PSeq (elems,actionCode, l)
             | PAlt(left, right) -> PAlt(expandBody attrs left, expandBody attrs right)
             | x -> x
         
@@ -75,5 +71,5 @@ let private expandBrackets (ruleList: Rule.t<_, _> list) =
 type ExpandBrackets() = 
     inherit Conversion()
         override this.Name = "ExpandBrackets"
-        override this.ConvertList (ruleList,_) = expandBrackets ruleList
-        override this.EliminatedProductionTypes = [""]
+        override this.ConvertGrammar (grammar,_) =
+            mapGrammar expandBrackets grammar

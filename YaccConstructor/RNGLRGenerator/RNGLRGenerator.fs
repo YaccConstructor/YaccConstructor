@@ -20,18 +20,21 @@
 namespace Yard.Generators.RNGLR
 
 open Yard.Core
-open Yard.Core.IL
-open Yard.Generators.RNGLR.InitialConvert
+open IL
+open Constraints
+open Yard.Generators.RNGLR
+open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
-open Yard.Generators.RNGLR.States
-open Yard.Generators.RNGLR.Printer
-open Yard.Generators.RNGLR.TranslatorPrinter
+open States
+open Printer
+open TranslatorPrinter
 open Option
 
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -53,7 +56,7 @@ type RNGLR() =
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
                 | "-pos" -> positionType <- value
-                | "-o" -> output <- value
+                | "-o" -> if value.Trim() <> "" then output <- value
                 | "-table" ->
                     match value with
                     | "LALR" -> table <- LALR
@@ -70,7 +73,7 @@ type RNGLR() =
                 | "-light" ->
                     if value = "on" then light <- true
                     elif value = "off" then light <- false
-                    else failwith "Unexpected light value %s" value
+                    else failwith "Unexpected light value %A" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-lang" ->
                     targetLanguage <-
@@ -81,7 +84,7 @@ type RNGLR() =
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar);
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules);
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -161,7 +164,7 @@ type RNGLR() =
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
-                        else tables + printTranslator grammar newDefinition.grammar
+                        else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos
             let res = 
                 match definition.foot with
@@ -189,6 +192,3 @@ type RNGLR() =
             //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate definition = this.Generate (definition, "")
-        override this.AcceptableProductionTypes =
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)

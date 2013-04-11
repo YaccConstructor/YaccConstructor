@@ -18,31 +18,17 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
-(*Вопрос про execute*) 
+(*Вопрос про execute*)
 {
 open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.SourceText
-} 
-(* include "../../../GrammarTemplates/Common.yrd" *)
+}
 
-(* module Main*)
+include "../../../GrammarTemplates/Common.yrd"
 
-(* open Common *)
+module Main
 
- list <<item separator>>: 
-      {[]}
-    | hd=item tl=(separator itm=item {itm})* {hd::tl}
-    ;
-
-not_empty_list<<item separator>>:
-    hd=item tl=(separator itm=item {itm})* {hd::tl}
-
-brace_opt<<o_br block cl_br>>:
-      block 
-    | -o_br block -cl_br
-    ;
-
-
+open Common
 
 [<Start>]
 root_rule: (batch_body KW_GO?)*

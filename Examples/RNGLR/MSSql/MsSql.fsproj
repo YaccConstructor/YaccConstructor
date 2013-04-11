@@ -53,7 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <FsYard Include="mssql.yrd"/>
-
+    <FsYard Include="../../../GrammarTemplates/Common.yrd"/>
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>

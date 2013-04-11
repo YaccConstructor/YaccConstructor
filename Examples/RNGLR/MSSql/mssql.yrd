@@ -18,14 +18,18 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
-(*Вопрос про execute*)
+(*Вопрос про execute*) 
 {
 open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.SourceText
-}
+} 
 (* include "../../../GrammarTemplates/Common.yrd" *)
 
-list <<item separator>>: 
+(* module Main*)
+
+(* open Common *)
+
+ list <<item separator>>: 
       {[]}
     | hd=item tl=(separator itm=item {itm})* {hd::tl}
     ;
@@ -193,13 +197,13 @@ select_stmnt:
     query_expression 
     (KW_ORDER KW_BY comma_list<<( (ident| IDENT | DEC_NUMBER) (KW_ASC | KW_DESC)?)>>)? 
     (KW_COMPUTE 
-        comma_list<<( (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) LPAREN sql_expr RPAREN)>> 
+        comma_list<<((KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) LPAREN sql_expr RPAREN)>> 
         (KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
     (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
     | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
+    | KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) LPAREN? sql_expr RPAREN? )*)?
      
     
 for:

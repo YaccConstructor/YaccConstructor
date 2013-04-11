@@ -18,6 +18,7 @@
 namespace Yard.Generators.FsYaccPrinter
 
 open Yard.Core
+open Constraints
 
 type FsYaccPrinter() = 
     inherit Generator()
@@ -29,4 +30,4 @@ type FsYaccPrinter() =
             let res = Generator.generate t tokenType
             System.IO.File.WriteAllText(outFile,res)
             res :> obj
-        override this.AcceptableProductionTypes = ["PAlt"; "PSeq"; "PRef"; "PToken"]
+        override this.Constraints = [|noMeta; noEbnf; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]

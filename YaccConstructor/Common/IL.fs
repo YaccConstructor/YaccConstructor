@@ -158,13 +158,16 @@ module Rule = begin
     /// </summary>
     type t<'patt,'expr> = {
         /// Rule name. Used to start from this or to be referenced to from other rules.
-        name    : Source.t;
+        name    : Source.t
         /// Heritable arguments of rule
-        args    : 'patt list;
+        args    : 'patt list
         /// Rule body (production).
-        body    : (Production.t<'patt,'expr>);
-        /// Is this rule a start non-terminal (in this case '+' is used before rule)
-        _public : bool;
+        body    : (Production.t<'patt,'expr>)
+        /// Is this rule a start non-terminal (in this case '[<Start>]' is used before rule)
+        isStart : bool
+        /// Can this rule be seen from another module.
+        /// It's true if ('public' is used before rule) or (module is marked as AllPublic and rule isn't marked as private)
+        isPublic : bool
         /// List of meta-arguments - names of rules, parametrizing this rule.
         metaArgs: 'patt list
     }
@@ -172,8 +175,17 @@ end
 
 
 module Grammar =  begin
-    /// Grammar is a list of rules
-    type t<'patt,'expr> = (Rule.t<'patt,'expr>) list
+    type Module<'patt,'expr> = {
+        /// Module is a list of rules
+        rules : Rule.t<'patt,'expr> list
+        openings : Source.t list
+        name : Source.t option
+        /// Are all rules public (can be seen form another module), except explicitly marked as private.
+        /// Otherwise rule must be directly marked as public to be seen.
+        allPublic : bool
+    }
+    /// Grammar is a list of modules
+    type t<'patt,'expr> = Module<'patt,'expr> list
 end 
 
 module Definition = begin

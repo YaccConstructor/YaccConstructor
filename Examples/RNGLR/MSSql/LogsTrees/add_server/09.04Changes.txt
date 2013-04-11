@@ -1,0 +1,21 @@
+09.04
+
+find 2 signs "="
+
+Three comma_list<<...>>? except only comma_list<<...>>
+
+execute_proc:
+name->full_ident
+
+sql_expr|dec number -> sql_expr
+
+ident|IDENT -> ident
+
+sql_expr | LOCALVAR -> sql_expr
+
+select_list: name->full_ident
+name->ident
+
+name killed
+
+LPAREN sql_expr RPAREN -> sql_expr

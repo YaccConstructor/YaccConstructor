@@ -20,6 +20,7 @@ module Yard.Frontends.FsYaccFrontend.Main
 open Yard.Frontends.FsYaccFrontend.Lexer
 open Yard.Frontends.FsYaccFrontend.Parser
 open Yard.Core.IL
+open Yard.Core
 open Yard.Core.IL.Production
 
 open Microsoft.FSharp.Text.Lexing
@@ -27,45 +28,49 @@ open Microsoft.FSharp.Core
 open System.Text.RegularExpressions
 
 let addStarts starts (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
-                                     then { rule with _public=true }
-                                     else rule)
+    grammar |> List.map (fun m ->
+        {m with rules = m.rules |> List.map (fun rule ->
+            if List.exists (fun (x : Source.t) -> x.text = rule.name.text) starts
+            then { rule with isStart=true }
+            else rule
+        )}
+    )
 
 let rec _addBindings = function
     | PSeq(elements, Some (ac : Source.t), l) -> 
-        (elements
-         |> List.mapi 
-            (
-                fun i elem -> 
-                    if Regex.Match(ac.text, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
-                        { elem with rule=(_addBindings elem.rule) ; binding=Some(new Source.t(sprintf "_S%d" (i+1))) } 
-                    else 
-                        { elem with rule=_addBindings elem.rule} 
-            ) 
-        , Some(new Source.t(Regex.Replace(ac.text, "\\$(\\d+)", "_S$1"))), l)
-        |> PSeq
+        (elements |> List.mapi (fun i elem -> 
+            if Regex.Match(ac.text, sprintf "\\$%d([^\\d]|$)" (i+1)).Success then 
+                { elem with rule=(_addBindings elem.rule) ; binding=Some <| new Source.t(sprintf "_S%d" (i+1), ac) } 
+            else 
+                { elem with rule=_addBindings elem.rule} 
+            )
+         , Some <| new Source.t(Regex.Replace(ac.text, "\\$(\\d+)", "_S$1"), ac)
+         , l
+        ) |> PSeq
     | PSeq(elements, None, l) -> PSeq(List.map (fun elem -> { elem with rule=_addBindings elem.rule} ) elements, None, l)
     | PAlt(left, right) -> PAlt(_addBindings left, _addBindings right)
     | PSome(x) -> PSome(_addBindings x)
     | POpt(x) -> POpt(_addBindings x)
     | PMany(x) -> PMany(_addBindings x)
     | x -> x
+
 let addBindings (grammar: Grammar.t<Source.t, Source.t>) = 
-    grammar |> List.map (fun rule -> { rule with body=_addBindings rule.body } )
+    grammar |> mapGrammar (List.map (fun rule -> { rule with body=_addBindings rule.body } ))
 
 let ParseFile fileName =
-    let content = System.IO.File.ReadAllText(fileName)
+    let content = System.IO.File.ReadAllText fileName
     Lexer.currentFile := fileName
     Lexer.source := content
     let reader = new System.IO.StringReader(content)
     let lexbuf = LexBuffer<_>.FromTextReader reader
+    lexbuf.EndPos <- lexbuf.EndPos.NextLine
     try 
-        let (res:System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
+        let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { new Definition.t<Source.t, Source.t>
             with info = {new Definition.info with fileName = ""}
             and head = defHead
-            and grammar = addBindings (addStarts res.Item3 res.Item4)
+            and grammar = addBindings <| addStarts res.Item3 res.Item4
             and foot = None
             and options = Map.empty}
     with e -> // when e.Message="parse error" -> 

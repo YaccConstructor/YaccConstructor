@@ -24,7 +24,4 @@ type YardPrinter() =
     inherit Generator()
         override this.Name = "YardPrinter"
         override this.Generate t = Generator.generate t :> obj
-        override this.AcceptableProductionTypes = 
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)
- 
+        override this.Constraints = [||]

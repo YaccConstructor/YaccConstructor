@@ -204,7 +204,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
         | LALR -> dfsLALR
         | LR -> dfsLR
     |> ignore
-    eprintfn "Dfs calls count: %d" !incount
+    //eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()
         (*

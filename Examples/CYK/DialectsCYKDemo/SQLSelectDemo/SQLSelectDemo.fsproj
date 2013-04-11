@@ -23,6 +23,7 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Debug\SQLSelectDemo.XML</DocumentationFile>
+    <StartArguments>-i "../../test input.sql"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,11 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Release\SQLSelectDemo.XML</DocumentationFile>
+    <StartArguments>-i "../../test input.sql"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
   </PropertyGroup>
   <PropertyGroup>
     <FsYaccToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
@@ -44,7 +50,7 @@
   <Import Project="..\..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <FsLex Include="SelectDemo.fsl">
-       <OtherFlags>--unicode</OtherFlags>
+      <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <Compile Include="SelectDemo.yrd.CYK.fs" />
     <Compile Include="SelectDemo.fs" />

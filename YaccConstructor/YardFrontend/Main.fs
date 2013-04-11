@@ -27,7 +27,7 @@ open Yard.Generators.RNGLR.AST
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 open GrammarParser
 
-let private tokenToRange = function
+let private tokenFun f = function
     | ACTION st
     | BAR st
     | COLON st
@@ -53,15 +53,25 @@ let private tokenToRange = function
     | STAR st
     | START_RULE_SIGN st
     | STRING st
+    | ALL_PUBLIC st
+    | MODULE st
+    | PUBLIC st
+    | PRIVATE st
+    | OPEN st
     | UIDENT st ->
-        st.startPos, st.endPos
+        f st
+
+let private tokenToRange = tokenFun <| fun st -> st.startPos, st.endPos
+let private tokenToFile = tokenFun <| fun st -> st.file
 
 let private bufFromFile path = 
     let content = System.IO.File.ReadAllText(path)
-    Lexer.currentFileContent := content;
+    Lexer.currentFileContent := content
     Lexer.currentFile := path
     let reader = new System.IO.StringReader(content)
-    LexBuffer<_>.FromTextReader reader
+    let res = LexBuffer<_>.FromTextReader reader
+    res.EndPos <- res.EndPos.NextLine
+    res
 
 let private bufFromString string =
     Lexer.currentFileContent := string;
@@ -89,12 +99,6 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
 
     let currentDefined = ref [] 
     let currentState = ref true
-//    let filter x =
-//        let flg = 
-//            if List.isEmpty !currentDefined 
-//            then true
-//            else (!currentDefined).All(fun (x,y) -> x)
-//        flg
 
     let filtered =
         seq{
@@ -128,13 +132,6 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                 | t -> if !currentState then yield t
             }
     filtered
-    (*
-    let tokensEnumerator = filtered.GetEnumerator()
-    let getNextToken (lexbuf:Lexing.LexBuffer<_>) =
-        tokensEnumerator.MoveNext() |> ignore
-        let res = tokensEnumerator.Current
-        res
-    getNextToken*)
 
 let parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
@@ -152,24 +149,25 @@ let parse buf userDefs =
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
     | Parser.Error (_, token, msg, _) ->
-        failwithf "Parse error on position %s on token %A: %s" (token |> tokenToRange |> rangeToString) token msg
-    //GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
+        failwithf "Parse error on position %s:%s on token %A: %s" (token |> tokenToFile)
+                    (token |> tokenToRange |> rangeToString) token msg
+    
+let posTo2D (source:string) pos =    
+    source.ToCharArray(0, min (pos+1) (source.Length))
+    |> Array.fold
+        (fun (col,row) -> function
+            | '\n' -> (col+1, 0)
+            | '\r' -> (col, row)
+            | _ -> (col, row+1)
+        )
+        (1,0)
 
 let ParseText (s:string) path =
     let buf = bufFromString s    
-    let userDefs = [||]//
+    let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path
-    let posTo2D pos =
-        let source = s
-        source.ToCharArray(0, min (pos+1) (source.Length))
-        |> Array.fold
-            (fun (col,row) -> function
-                | '\n' -> (col+1, 0)
-                | '\r' -> (col, row)
-                | _ -> (col, row+1)
-            )
-            (1,0)
+    let posTo2D = posTo2D s
     try
         parse buf userDefs
     with
@@ -177,7 +175,8 @@ let ParseText (s:string) path =
         let pos2D = posTo2D pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
 
-let ParseFile (args:string) =
+let rec ParseFile (args:string) =
+    Yard.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile
     let path,userDefs =
         let args = args.Trim().Split('%')
         let defs = 
@@ -188,26 +187,14 @@ let ParseFile (args:string) =
         
     let buf = bufFromFile path
     GrammarParser.currentFilename := args
-    let posTo2D pos =
-        let source = System.IO.File.ReadAllText path
-        source.ToCharArray(0, min (pos+1) (source.Length))
-        |> Array.fold
-            (fun (col,row) -> function
-                | '\n' -> (col+1, 0)
-                | '\r' -> (col, row)
-                | _ -> (col, row+1)
-            )
-            (1,0)
+    let posTo2D = System.IO.File.ReadAllText path |> posTo2D
     try
         parse buf userDefs
     with
     | Lexer.Lexical_error (msg, pos) ->
         let pos2D = posTo2D pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
-    (*| GrammarParser.Parse_error msg ->
-        let pos2D = posTo2D pos
-        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg*)
-    
+      
 let LexString string =
     Lexer.currentFileContent := string;
     let reader = new System.IO.StringReader(string)

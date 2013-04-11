@@ -54,6 +54,7 @@
   <ItemGroup>
     <FsYard Include="mssql.yrd"/>
     <FsYard Include="../../../GrammarTemplates/Common.yrd"/>
+    <FsYard Include="MsCommon.yrd"/>
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>

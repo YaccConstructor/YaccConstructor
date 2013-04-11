@@ -82,6 +82,16 @@ type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
     let basePath = @"..\..\..\..\Tests\Checkers\"
 
+    let getUndecl path =
+        path
+        |> frontend.ParseGrammar
+        |> GetUndeclaredNonterminalsList
+        |> (fun (_,_,u) -> u)
+        |> List.map snd
+        |> List.concat
+        |> List.map (fun r -> r.text)
+        |> List.sort
+
     [<Test>]
     member test.``Start rule exists. No start rule.`` () =
         Path.Combine(basePath, "no_start_rule.yrd")
@@ -128,13 +138,7 @@ type ``Checker test`` () =
     member test.``Undeclared nonterminals checker. Metarules. Right grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> (fun (_,_,u) -> u)
-            |> List.map snd
-            |> List.concat
-            |> List.map (fun r -> r.text)
-            |> List.sort
+            |> getUndecl
         let expetedResult = []
         Seq.iter (printfn "%s;") result
         printfn "**********************"
@@ -145,13 +149,7 @@ type ``Checker test`` () =
     member test.``Undeclared nonterminals checker. Metarules. Wrong grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Incorrect.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> (fun (_,_,u) -> u)
-            |> List.map snd
-            |> List.concat
-            |> List.map (fun r -> r.text)
-            |> List.sort
+            |> getUndecl
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
         Seq.iter (printf "%s; ") result
         printfn ""
@@ -163,9 +161,7 @@ type ``Checker test`` () =
     member test.``Undeclared nonterminals checker. Simple. Right grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Correct.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> List.sort
+            |> getUndecl
         let expetedResult = []
         Seq.iter (printfn "%A;") result
         printfn "**********************"
@@ -176,9 +172,7 @@ type ``Checker test`` () =
     member test.``Undeclared nonterminals checker. Simple. Wrong grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Uncorrect.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> List.sort
+            |> getUndecl
         let expetedResult = List.sort ["b"]
         Seq.iter (printfn "%A;") result
         printfn "**********************"

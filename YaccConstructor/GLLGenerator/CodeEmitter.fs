@@ -65,23 +65,26 @@ let emitNameAndUsages moduleName (out:StringBuilder) =
     out |> emitLine 0 "open Yard.Generators.GLL.AST"
     out |> emitLine 0 "open Yard.Generators.GLL.Parser"
 
-let emitTokenType (indexator:Indexator) (out:StringBuilder) =
+let emitTokenType tokenType (indexator:Indexator) (out:StringBuilder) =
     out |> emitLine 0 "type Token ="
     for i = indexator.termsStart to indexator.termsEnd do
         let tokenName = indexator.indexToTerm i
-        out |> emitLine 1 (sprintf "| %s" tokenName)
+        let line = match tokenType with
+                   | None -> sprintf "| %s" tokenName
+                   | Some tokenType -> sprintf "| %s of %s" tokenName tokenType
+        out |> emitLine 1 line
     out |> emitEmptyLine
     out |> emitLine 0 "let tokenToNumber = function"
     for i = indexator.termsStart to indexator.termsEnd do
         let tokenName = indexator.indexToTerm i
-        out |> emitLine 1 (sprintf "| %s -> %d" tokenName i)
+        let line = match tokenType with
+                   | None -> sprintf "| %s -> %d" tokenName i
+                   | Some _ -> sprintf "| %s(_) -> %d" tokenName i
+        out |> emitLine 1 line
     out |> emitEmptyLine
 
-
-let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
+let emitDebugInfo (grammar:FinalGrammar) (out:StringBuilder) =
     let followSets = getFollowSets grammar
-
-    // emit grammar info
     out |> emitLine 0 "(*"
     seq { 0 .. (grammar.indexator.nonTermCount-1) }
     |> Seq.iter (fun i -> out |> emitLine 1 (sprintf "%d -> %s" i (grammar.indexator.indexToNonTerm i)))
@@ -95,7 +98,10 @@ let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
     emitSets "FIRST" (fun i -> grammar.firstSet.[i])
     emitSets "FOLLOW" (fun i -> followSets.[i])    
     out |> emitLine 0 "*)"
-    
+
+let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =
+    let followSets = getFollowSets grammar
+        
     let productionsArr =
         seq { 0 .. (grammar.rules.rulesCount-1) }
         |> Seq.map (grammar.rules.rightSide

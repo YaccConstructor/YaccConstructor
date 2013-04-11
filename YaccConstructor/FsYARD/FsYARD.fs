@@ -23,6 +23,7 @@ let generate inFile replLit rnglrArgs =
             new ExpandInnerAlt.ExpandInnerAlt() :> Yard.Core.Conversion ,[||]
             new ExpandBrackets.ExpandBrackets() :> Yard.Core.Conversion ,[||]
             new LeaveLast.LeaveLast() :> Yard.Core.Conversion ,[||]
+            //new Linearize.Linearize() :> Yard.Core.Conversion ,[||]
         ]
         |> List.map (fun (x,y) -> fun (il:Definition.t<_,_>) -> applyConversion x y il)
     fe.ParseGrammar inFile 

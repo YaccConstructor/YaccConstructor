@@ -4,12 +4,14 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.GLL
 open NUnit.Framework
+open Yard.Core.Helpers
+open Yard.Core.IL.Rule
 
 [<TestFixture>]
 type DebuggedTest() =
     let filename = "testfile"    
 
-    let getGrammar def : Grammar.t<Source.t, Source.t>=
+    let getGrammar def : Definition.t<Source.t, Source.t>=
         let tkn text = Source.t text
         let getCase (str:string) =
             if System.Char.IsUpper (str.[0])
@@ -29,19 +31,17 @@ type DebuggedTest() =
             | [right] -> getSeq right
             | right::rest -> PAlt(getSeq right, getProductionBody rest)
             | [] -> failwith "Empty productions are not allowed"        
-        List.mapi (fun i (name, prods) -> { name = tkn name; args = []; body = getProductionBody prods; _public = (i = 0); metaArgs = [] }) def
+        List.mapi (fun i (name, prods) -> 
+            { name = tkn name; isStart = (i = 0) ; args = []; body = getProductionBody prods; isPublic = false; metaArgs = [] }) def
+        |> defaultGrammar
 
     [<Test>]
     member this.Test () =        
-        let definition : Definition.t<Source.t, Source.t> = {
-            info = { fileName = filename }
-            head = None
-            foot = None
-            options = Map.empty
-            grammar = getGrammar ["S", [["A"; "S"; "d"]; ["B"; "S"]; []];
+        let definition : Definition.t<Source.t, Source.t> =
+            getGrammar ["S", [["A"; "S"; "d"]; ["B"; "S"]; []];
                                   "A", [["a"]; ["c"]];
                                   "B", [["a"]; ["b"]]]
-        }
+        
         GLLGenerator().Generate definition |> ignore
 
     [<Test>]

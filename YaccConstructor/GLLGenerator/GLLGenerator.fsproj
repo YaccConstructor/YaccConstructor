@@ -55,6 +55,16 @@
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

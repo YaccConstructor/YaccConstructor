@@ -232,7 +232,7 @@ predicate_opt: { None } | PREDICATE { Some $1 }
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
      | prim            { createSeqElem None false $1 None      }
 
-patt: LIDENT {$1} | PATTERN {$1}
+patt: LIDENT {$1} | ACTION {$1}
 
 prim: prim STAR           {PMany $1}
     | prim PLUS           {PSome $1}

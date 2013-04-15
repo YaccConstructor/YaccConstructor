@@ -120,8 +120,8 @@ let printProduction =
             | None -> ""
         let printElem (elem:elem<Source.t,Source.t>) = 
             let binding = function
-                | Some x when String.forall System.Char.IsLetter (Source.toString x) -> Source.toString x + " ="
-                | Some x  -> "<" + Source.toString x + "> ="
+                | Some x when String.forall (fun x -> System.Char.IsLetterOrDigit x || x = '_')  (Source.toString x) -> Source.toString x + " ="
+                | Some x  -> "{" + Source.toString x + "} ="
                 | None -> ""
             let omit = if elem.omit then "-" else ""
             let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1

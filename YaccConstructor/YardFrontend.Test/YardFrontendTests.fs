@@ -387,9 +387,9 @@ type ``YardFrontend Complete tests`` () =
                 metaArgs = []
             }]
         completeTest
-            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: {res:int} = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
             [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
-                LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); PATTERN (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
+                LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); ACTION (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
                 SEMICOLON (getSource ":" 2 9); LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON(getSource ":" 2 9);
                 LIDENT (getSource "n" 84 85); EQUAL(getSource ":" 2 9); UIDENT (getSource "NUMBER" 86 92);

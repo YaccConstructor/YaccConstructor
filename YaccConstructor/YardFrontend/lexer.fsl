@@ -152,7 +152,7 @@ and  main = parse
          PREDICATE (from_lexbuf lexbuf n1 n2)
        }
      | '@' identstart identbody * {DLABEL <| lex2source lexbuf}
-	 | identstart identbody *
+     | identstart identbody *
        {  let text = lex2source lexbuf in
           match text.text with
           | "include" -> INCLUDE text
@@ -169,19 +169,19 @@ and  main = parse
          let n2 = handle_lexical_error action lexbuf in
          ACTION (from_lexbuf lexbuf n1 n2)
        }
-    | '<'
+  (*| '<'
        { let n1 = lexbuf.EndPos in
          ang_br_depth := 1;
          let n2 = handle_lexical_error pattern lexbuf in
          PATTERN (from_lexbuf lexbuf n1 n2)
-       }
+       }*)
     | '['
        { let n1 = lexbuf.EndPos in
          sq_br_depth := 1;
          let n2 = handle_lexical_error param lexbuf in
          PARAM (from_lexbuf lexbuf n1 n2)
        }
-	| '"'
+    | '"'
       { reset_string_buffer();
         let string_start = lexbuf.StartPos in
         string lexbuf;
@@ -234,7 +234,7 @@ and action = parse
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {action lexbuf}
  
-and pattern = parse
+(*and pattern = parse
     '<'
     { incr ang_br_depth;
       pattern lexbuf }
@@ -255,7 +255,7 @@ and pattern = parse
   | '\n' { newline lexbuf; pattern lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {pattern lexbuf}
-
+*)
 
 and param = parse
     '['

@@ -42,7 +42,7 @@ let private tokenFun f = function
     | LPAREN st
     | MINUS st
     | PARAM st
-    | PATTERN st
+    //| PATTERN st
     | PLUS st
     | PREDICATE st
     | QUESTION st
@@ -167,12 +167,11 @@ let ParseText (s:string) path =
     let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path
-    let posTo2D = posTo2D s
     try
         parse buf userDefs
     with
     | Lexer.Lexical_error (msg, pos) ->
-        let pos2D = posTo2D pos
+        let pos2D = posTo2D s pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
 
 let rec ParseFile (args:string) =

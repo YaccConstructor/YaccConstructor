@@ -70,9 +70,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
-    let buf = LexBuffer<_>.FromString str
-    Lexer.currentFileContent := str
-    let ilDef = { Main.parse buf [||] with info = {fileName =""}}
+    let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
@@ -387,7 +385,7 @@ type ``YardFrontend Complete tests`` () =
                 metaArgs = []
             }]
         completeTest
-            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: {res:int} = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: {res:int} = e<<1>> {res};  e<<i>>: n=NUMBER {(value n |> int) + i};"
             [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
                 LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); ACTION (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
@@ -464,6 +462,8 @@ type ``Yardfrontend label tests`` () =
             Assert.IsTrue(false)
         with 
         | ex ->
-            let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            let expected = "Parse error on position :((0,17)-(0,18)) on token LIDENT q: Parse error"
             let actual = ex.Message
+            printfn "%s" ex.Message
             Assert.AreEqual(expected, actual)

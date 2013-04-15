@@ -1,6 +1,6 @@
-b[s]:  empty;
+b<<s>>:  empty;
 
-yard_rule_2:  b[l];
+yard_rule_2:  b<<l>>;
 
 yard_rule_r1_3:  l = yard_rule_2 yard_rule_r1_3;
 

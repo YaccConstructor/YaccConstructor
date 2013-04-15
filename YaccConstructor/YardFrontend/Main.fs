@@ -32,9 +32,10 @@ let private tokenFun f = function
     | BAR st
     | COLON st
     | COMMA st
-    | DGREAT st
+    | GREAT st
     | DLABEL st
-    | DLESS st
+    | NUMBER st
+    | LESS st
     | EOF st
     | EQUAL st
     | INCLUDE st
@@ -42,11 +43,12 @@ let private tokenFun f = function
     | LPAREN st
     | MINUS st
     | PARAM st
-    //| PATTERN st
     | PLUS st
     | PREDICATE st
     | QUESTION st
     | RPAREN st
+    | SQR_LBR st
+    | SQR_RBR st
     | SEMICOLON st
     | SET st
     | SHARPLINE st
@@ -133,7 +135,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
             }
     filtered
 
-let parse buf userDefs =
+let private parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
     match GrammarParser.buildAst (filterByDefs buf userDefs) with

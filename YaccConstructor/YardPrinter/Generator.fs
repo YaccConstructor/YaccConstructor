@@ -78,9 +78,13 @@ let printTextBox tabSize windowSize tbSeq =
 
 let printSeqBrackets l_br r_br metaArgs =
     if Seq.isEmpty metaArgs then ""
-    elif (Seq.length metaArgs) > 1 then
-        l_br + String.concat " " metaArgs + r_br
-    else l_br + Seq.head metaArgs + r_br
+    else
+        String.concat " " metaArgs
+        |> (fun s ->
+                if s.Length > 0 && (s.Chars (s.Length - 1) = '>' || s.Chars 0 = '<')
+                then " " + s + " "
+                else s
+        ) |> fun s -> l_br + s + r_br
 
 let printProduction =
     let rec unboxText textBoxSeq =
@@ -94,7 +98,7 @@ let printProduction =
                                 | _ -> s
              ) metaArgs
         |> Seq.concat
-        |> printSeqBrackets "<<" ">>"
+        |> printSeqBrackets "<" ">"
 
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
     and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
@@ -116,7 +120,7 @@ let printProduction =
             | Some attr -> "{" + Source.toString attr + "}"
             | None -> ""
         let printArg = function
-            | Some attr  -> "[" + Source.toString attr + "]"
+            | Some attr  -> "<<" + Source.toString attr + ">>"
             | None -> ""
         let printElem (elem:elem<Source.t,Source.t>) = 
             let binding = function
@@ -173,14 +177,14 @@ let printProduction =
         // expr+
         | PSome some -> printEbnf "+" some
         // expr?
-        | POpt opt -> printEbnf "?" opt
+        | POpt opt -> seq {yield Str "["; yield! printProduction false opt; yield Str "]"}
         | _ -> Seq.singleton <| Str "ERROR"
     printProduction
 
 let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
     let printArgs args =
         args
-        |> List.map (fun src -> "[" + Source.toString src + "]")
+        |> List.map (fun src -> "<<" + Source.toString src + ">>")
         |> String.concat ""
     let startSign = if rule.isStart then "[<Start>]" + endl else ""
     let accessModifier =
@@ -188,7 +192,7 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
         elif rule.isPublic then "public "
         else "private "
     seq {yield Line(seq{yield Str(startSign + accessModifier + rule.name.text
-                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>")
+                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<" ">")
                                     + (printArgs rule.args) + ":");
                         yield Str " ";
                         yield! printProduction false rule.body;

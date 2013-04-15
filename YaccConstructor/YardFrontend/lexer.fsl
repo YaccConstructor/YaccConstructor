@@ -122,17 +122,18 @@ and skipSpaces  = parse blank {lexbuf}
 and  main = parse
        blank  { main lexbuf }
      | '\n' { newline lexbuf; main lexbuf }
+     | ['-']?digit+('.'digit+)?(['e''E']digit+)? { NUMBER <| lex2source lexbuf }
      | '-'  {MINUS <| lex2source lexbuf}
      | ':'  {COLON <| lex2source lexbuf}
      | ';'  {SEMICOLON <| lex2source lexbuf}
      | ','  {COMMA <| lex2source lexbuf}     
      | '|'  {BAR <| lex2source lexbuf}
      | '='  {EQUAL <| lex2source lexbuf}
-     | "<<" {DLESS <| lex2source lexbuf}
-     | ">>" {DGREAT <| lex2source lexbuf}
      | '*'  {STAR <| lex2source lexbuf}
      | "[<Start>]" { START_RULE_SIGN <| lex2source lexbuf}
      | "[<AllPublic>]" { ALL_PUBLIC <| lex2source lexbuf}
+     | '[' { SQR_LBR <| lex2source lexbuf }
+     | ']' { SQR_RBR <| lex2source lexbuf }
      | "open" { OPEN <| lex2source lexbuf}
      | "module" { MODULE <| lex2source lexbuf}
      | "private" { PRIVATE <| lex2source lexbuf}
@@ -169,18 +170,13 @@ and  main = parse
          let n2 = handle_lexical_error action lexbuf in
          ACTION (from_lexbuf lexbuf n1 n2)
        }
-  (*| '<'
+    | "<<"
        { let n1 = lexbuf.EndPos in
-         ang_br_depth := 1;
-         let n2 = handle_lexical_error pattern lexbuf in
-         PATTERN (from_lexbuf lexbuf n1 n2)
-       }*)
-    | '['
-       { let n1 = lexbuf.EndPos in
-         sq_br_depth := 1;
          let n2 = handle_lexical_error param lexbuf in
          PARAM (from_lexbuf lexbuf n1 n2)
        }
+    | "<"  {LESS <| lex2source lexbuf}
+    | ">"  {GREAT <| lex2source lexbuf}
     | '"'
       { reset_string_buffer();
         let string_start = lexbuf.StartPos in
@@ -233,37 +229,10 @@ and action = parse
   | '\n' { newline lexbuf; action lexbuf }
   | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
   |  _ {action lexbuf}
- 
-(*and pattern = parse
-    '<'
-    { incr ang_br_depth;
-      pattern lexbuf }
-  | '>'
-    { decr ang_br_depth;
-      if !ang_br_depth = 0 then lexbuf.StartPos else pattern lexbuf }
-  | '"'
-    { reset_string_buffer();
-      string lexbuf;
-      reset_string_buffer();
-      pattern lexbuf }
-  | "(*"
-    { comment_depth := 1;
-      comment lexbuf;
-      pattern lexbuf }
-  | eof
-    { raise (Lexical_error("unterminated pattern", lexbuf.StartPos.AbsoluteOffset)) }
-  | '\n' { newline lexbuf; pattern lexbuf }
-  | "'" [^ '\\' '\''] "'" | "'" '\\' backslash_escapes "'"  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
-  |  _ {pattern lexbuf}
-*)
 
 and param = parse
-    '['
-    { incr sq_br_depth;
-      param lexbuf }
-  | ']'
-    { decr sq_br_depth;
-      if !sq_br_depth = 0 then lexbuf.StartPos else param lexbuf }
+   ">>"
+    { lexbuf.StartPos }
   | '"'
     { reset_string_buffer();
       string lexbuf;

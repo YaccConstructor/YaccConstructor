@@ -1,6 +1,6 @@
 [<Start>]
-s : a<< (l=a r=b {(l,r)}) >>  b<< (r=a l=b {(l,r)}) >>;
+s : a<(l=a r=b {l,r})>  b<(r=a l=b {l,r})>;
 
-b<<c>> : c;
+b<c> : c;
 
-a<<c>> : c;
+a<c> : c;

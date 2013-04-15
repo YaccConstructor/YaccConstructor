@@ -1,17 +1,17 @@
 [<Start>]
 s: 
-      a[b c]
-    | a[c b];
+      a<<b c>>
+    | a<<c b>>;
 
-a[b c]:  yard_rule_d_2 yard_rule_d_4;
+a<<b c>>:  yard_rule_d_2 yard_rule_d_4;
 
 yard_rule_d_4:  yard_rule_3;
 
-yard_rule_3:  t[c];
+yard_rule_3:  t<<c>>;
 
 yard_rule_d_2:  yard_rule_1;
 
-yard_rule_1:  t[b];
+yard_rule_1:  t<<b>>;
 
-t[arg]:  do[arg];
+t<<arg>>:  do<<arg>>;
 

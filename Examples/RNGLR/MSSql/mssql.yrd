@@ -74,18 +74,16 @@ set_localvar:
     KW_SET
     ( 
         LOCALVAR 
-        (DOUBLE_COLON (*property_name |*) ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
+        (DOUBLE_COLON ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN 
     )
-    |
-    ( LOCALVAR OP_EQ 
-        ( LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
+    |( LOCALVAR OP_EQ 
+        LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
         ( KW_STATIC | KW_KEYSET | KW_DYNAMIC | KW_FAST_FORWARD )? 
         ( KW_READ_ONLY | KW_SCROLL_LOCKS | KW_OPTIMISTIC )? 
         KW_TYPE_WARNING? 
         KW_FOR select_stmnt 
         ( KW_FOR ( KW_EAD ONLY | KW_UPDATE ( KW_OF comma_list<<ident>> )?))? 
         ) 
-        )
     )   
     
 (*********************************PROCEDURE************************************************************)    
@@ -482,7 +480,7 @@ unpivoted_table:
 unpivot_clause:
         LPAREN ident KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN
  
-    
+   
 case:
     KW_CASE sql_expr?
         (KW_WHEN sql_expr KW_THEN sql_expr)*
@@ -505,10 +503,8 @@ column_definition_create_table:
     ident sql_datatype
         (KW_COLLATE IDENT)? 
         ( KW_NULL | KW_NOT KW_NULL )?
-        ( 
-            ( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
-          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
-        )?
+        (( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
+          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?)?
         ( KW_ROWGUIDCOL )? column_constraint_create_table* 
 
 column_constraint_create_table: 
@@ -644,7 +640,8 @@ execute_proc:
       brace_opt<<
          LPAREN 
          (comma_list<<((ident OP_EQ)? 
-            (sql_expr (KW_OUTPUT | KW_OUT)? 
+            (ident | KW_NULL|DEC_NUMBER
+			|LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
          )?>>)
         RPAREN>>

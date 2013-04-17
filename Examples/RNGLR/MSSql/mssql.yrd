@@ -110,8 +110,7 @@ procedure_option:
 proc_body_stmnt:
      select_stmnt
    | set_stmnt
-   | execute_stmnt
-   | sql_expr
+   | execute_stmnt   
    | declare
    | KW_RETURN sql_expr
    | if_stmt
@@ -132,7 +131,7 @@ while_stmt: KW_WHILE sql_expr proc_body_stmnt
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF brace_opt<<LPAREN sql_expr RPAREN>> proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
                 
 
 raiserror_stmnt:
@@ -183,10 +182,7 @@ select_stmnt:
         (KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
-    | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) brace_opt<<LPAREN sql_expr RPAREN>> )*)?
-     
+    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? ) SEMI?
     
 for:
     (KW_FOR (KW_BROWSE | xml))?
@@ -636,7 +632,7 @@ execute_proc:
       (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
       brace_opt<<
          LPAREN 
-         (comma_list<<((ident OP_EQ)? 
+         (comma_list<<((LOCALVAR OP_EQ)? 
             (ident | KW_NULL|DEC_NUMBER
 			|LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
@@ -644,7 +640,7 @@ execute_proc:
         RPAREN>>
       (KW_WITH KW_RECOMPILE)?
     )
-    | create_object DOT IDENT LPAREN comma_list<<((ident OP_EQ)? sql_expr)>> RPAREN)
+    | create_object DOT IDENT LPAREN comma_list<<((LOCALVAR OP_EQ)? sql_expr)>> RPAREN)
 
 create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>> RPAREN
 
@@ -699,12 +695,12 @@ sql_expr:
     sql_value
     | scalar_function
     | LPAREN sql_expr RPAREN
-    | LOCALVAR 
     | call_expr
     | full_ident
     | select_stmnt
     | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
     | GLOBALVAR
+    | LOCALVAR
     | sql_expr binop sql_expr
     | sql_expr KW_IS KW_NOT? KW_NULL
     | ranking_windowed_function 
@@ -714,7 +710,6 @@ sql_expr:
     | begin_transaction
     | KW_EXISTS sql_expr
     | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | sql_expr KW_IS KW_NOT? sql_expr
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident

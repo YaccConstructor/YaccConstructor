@@ -122,6 +122,7 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
+        [1;2] |> Seq.countBy id
 
     
     [<Test>]

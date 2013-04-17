@@ -34,8 +34,6 @@ open Common, MsCommon
 [<Start>]
 root_rule: (batch_body KW_GO?)*
 
-(* root_rule: list<<batch_body KW_GO?>> KW_GO?
-*)
 
 
 batch_body: 

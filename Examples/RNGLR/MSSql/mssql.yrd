@@ -101,7 +101,7 @@ create_proc:
     brace_opt<<LPAREN comma_list<<proc_formal_param>> RPAREN>>
     (KW_WITH (execute_as)+ )? 
     ( KW_FOR KW_REPLICATION )?
-    KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
+    KW_AS brace_opt<<KW_BEGIN (proc_body_stmnt SEMI?)* KW_END>>
     SEMI?
 
 procedure_option: 
@@ -119,7 +119,6 @@ proc_body_stmnt:
    | if_stmt
    | raiserror_stmnt
    | stmt_block
-   | KW_BEGIN proc_body_stmnt KW_END
    | begin_transaction
    | commit_transaction
    | rollback_transaction
@@ -704,10 +703,9 @@ sql_expr:
     | LPAREN sql_expr RPAREN
     | LOCALVAR 
     | call_expr
-	| ident
-	| full_ident
+    | full_ident
     | select_stmnt
-    | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+    | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
     | GLOBALVAR
     | sql_expr binop sql_expr
     | sql_expr KW_IS KW_NOT? KW_NULL
@@ -716,9 +714,9 @@ sql_expr:
     | sql_expr KW_COLLATE ident
     | case
     | begin_transaction
-    | KW_NOT? KW_EXISTS sql_expr
-    | KW_NOT? KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | KW_IS? KW_NOT? KW_NULL
+    | KW_EXISTS sql_expr
+    | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
+    | sql_expr KW_IS NOT? sql_expr
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident

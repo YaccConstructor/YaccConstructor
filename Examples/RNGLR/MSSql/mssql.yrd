@@ -714,7 +714,7 @@ sql_expr:
     | begin_transaction
     | KW_EXISTS sql_expr
     | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | sql_expr KW_IS NOT? sql_expr
+    | sql_expr KW_IS KW_NOT? sql_expr
     | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident

@@ -55,6 +55,7 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
 
 let tokenPos token =
     match token with
+    | KW_PRINT(x)
     | KW_FOREIGN(x)
     | KW_NO(x)
     | KW_WHILE(x)

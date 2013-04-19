@@ -449,7 +449,7 @@ joined_table:
     table_source join_type table_source KW_ON search_condition 
     | table_source KW_CROSS KW_JOIN table_source 
     (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
-    | brace_opt<<LPAREN joined_table RPAREN>> 
+    | LPAREN joined_table RPAREN
     
 
 join_type: 

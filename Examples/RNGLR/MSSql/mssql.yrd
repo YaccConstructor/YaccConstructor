@@ -269,8 +269,8 @@ select_list:
         | ident OP_EQ sql_expr)>>
     
 scalar_function:
-    KW_LOWER sql_expr
-    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr 
+      KW_LOWER sql_expr
+    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr RPAREN
     
 aggregate_windowed_function:
     KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
@@ -284,7 +284,6 @@ order_by_clause:
     (KW_ORDER KW_BY 
         comma_list<< (sql_expr (KW_ASC | KW_DESC)?) >>
     )? 
-
     
 search_condition: 
     ( KW_NOT? predicate | LPAREN search_condition RPAREN )
@@ -447,7 +446,7 @@ joined_table:
     table_source join_type table_source KW_ON search_condition 
     | table_source KW_CROSS KW_JOIN table_source 
     (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
-    | brace_opt<<LPAREN joined_table RPAREN>> 
+    | LPAREN joined_table RPAREN
     
 
 join_type: 

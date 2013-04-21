@@ -34,3 +34,6 @@ type ``Conversions eliminate left recursion tests`` () =
 
     [<Test>]
     member test.``Test hidden recursion``() = runTest "hidden.yrd"
+
+    [<Test>]
+    member test.``Test epsilon rule`` () = runTest "epsilon.yrd"

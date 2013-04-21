@@ -3,6 +3,7 @@
 module Yard.Generators.GLL.CodeEmitter
 
 open System.Text
+open Yard.Core.IL
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.FinalGrammar
 
@@ -65,6 +66,11 @@ let emitNameAndUsages moduleName (out:StringBuilder) =
     out |> emitLine 0 "open Yard.Generators.GLL.AST"
     out |> emitLine 0 "open Yard.Generators.GLL.Parser"
 
+let emitSource (source:Source.t option) (out:StringBuilder) =
+    match source with
+    | None -> ()
+    | Some x -> out.AppendLine x.text |> ignore
+
 let emitTokenType tokenType (indexator:Indexator) (out:StringBuilder) =
     out |> emitLine 0 "type Token ="
     for i = indexator.termsStart to indexator.termsEnd do
@@ -84,6 +90,7 @@ let emitTokenType tokenType (indexator:Indexator) (out:StringBuilder) =
     out |> emitEmptyLine
 
 let emitDebugInfo (grammar:FinalGrammar) (out:StringBuilder) =
+    (*
     let followSets = getFollowSets grammar
     out |> emitLine 0 "(*"
     seq { 0 .. (grammar.indexator.nonTermCount-1) }
@@ -97,6 +104,21 @@ let emitDebugInfo (grammar:FinalGrammar) (out:StringBuilder) =
                               out |> emitLine 1 (sprintf "%s(%s) = %s" setName (grammar.indexator.indexToNonTerm i) array))
     emitSets "FIRST" (fun i -> grammar.firstSet.[i])
     emitSets "FOLLOW" (fun i -> followSets.[i])    
+    out |> emitLine 0 "*)"
+    *)
+    out |> emitLine 0 "(*"
+    seq { 0 .. (grammar.rules.rulesCount-1) }
+        |> Seq.iter (fun rule ->
+            let leftSide = grammar.rules.leftSide rule |> grammar.indexator.indexToNonTerm
+            let rightSideItems =
+                rule
+                |> grammar.rules.rightSide
+                |> Array.map (fun idx -> 
+                                  if grammar.indexator.isNonTerm idx
+                                  then grammar.indexator.indexToNonTerm idx
+                                  else grammar.indexator.indexToTerm idx)
+            let rightSide = System.String.Join (" ", rightSideItems)
+            out |> emitLine 0 (sprintf "%d %s -> %s" rule leftSide rightSide))
     out |> emitLine 0 "*)"
 
 let emitGrammar (grammar:FinalGrammar) (out:StringBuilder) =

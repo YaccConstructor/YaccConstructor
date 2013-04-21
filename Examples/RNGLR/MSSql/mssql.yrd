@@ -326,7 +326,7 @@ table_source:
         | sql_expr (KW_AS? ident)? (LPAREN comma_list<<ident>> RPAREN)?)
     (*| openxml_clause*)
     | ident  KW_AS? ident (LPAREN comma_list<<ident>> RPAREN)? 
-    | joined_table 
+    | brace_opt<<LPAREN joined_table RPAREN>> 
     | pivoted_table 
     | (unpivoted_table                                                     
         | LOCALVAR (KW_AS? full_ident)?
@@ -463,7 +463,6 @@ joined_table:
     table_source join_type table_source KW_ON search_condition 
     | table_source KW_CROSS KW_JOIN table_source 
     (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
-    | brace_opt<<LPAREN joined_table RPAREN>> 
     
 
 join_type: 

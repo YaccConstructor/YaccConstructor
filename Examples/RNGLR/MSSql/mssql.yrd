@@ -605,10 +605,10 @@ insert:
         (LPAREN comma_list<<LOCALVAR>> RPAREN)? 
         (output_clause)?
         (KW_VALUES LPAREN comma_list<<(KW_DEFAULT | KW_NULL | sql_expr)>> RPAREN 
-        | batch_body 
+        | batch_body
+        | KW_DEFAULT KW_VALUES
         )?
-    )
-    | (KW_DEFAULT KW_VALUES)?
+    )    
     SEMI?
 
 output_clause:

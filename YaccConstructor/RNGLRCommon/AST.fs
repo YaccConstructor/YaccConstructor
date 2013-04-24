@@ -78,7 +78,6 @@ and Nodes =
             {fst = res.fst; snd = res.snd; other = res.other}
             //match arr with
 
-
         member nodes.doForAll f =
             if nodes.fst <> null then
                 f nodes.fst
@@ -135,7 +134,7 @@ and Nodes =
                         for i = 0 to nodes.other.Length-1 do
                             res.[i+2] <- f nodes.other.[i]
             res
-    end
+        end
 
 let inline getFamily (node : obj) =
     match node with
@@ -553,7 +552,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let x = order.[i]
                 if x.pos <> -1 then
                     let children = x
-                    createNode i (children.other <> null) AstNode ("n " + indToString leftSide.[children.first.prod])
+                    
+                    let label = 
+                        if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
+                        else "error"
+                     
+                    createNode i (children.other <> null) AstNode ("n " + label)
+                     
                     let inline handle (family : Family) =
                         let u = next()
                         createNode u false Prod ("prod " + family.prod.ToString())
@@ -573,4 +578,9 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         
         out.WriteLine("}")
         out.Close()
-    
+
+type Error = 
+    inherit AST
+    //val unbrowsed : obj[] 
+    val expected : int[]
+    new (prod, unbr, exp) = {inherit AST(new Family (prod, unbr), null); expected = exp} 

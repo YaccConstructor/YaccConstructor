@@ -26,7 +26,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let unique s = s |> Set.ofSeq |> Array.ofSeq
     let connect x = 
         let dict = x |> Array.mapi (fun i n -> n, i) |> dict
-        (fun nTerm -> dict.Item nTerm)
+        (fun nTerm -> dict.[nTerm])
         , (fun i -> x.[i])
         , x.Length
 
@@ -44,13 +44,13 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
                     
         rules
         |> Array.map (fun rule -> rule.body)
-        |> Array.fold collectTermsAndLits (["EOF"], [])
+        |> Array.fold collectTermsAndLits (["RNGLR_EOF"(*; "ERROR"*)], [])
         |> (fun (x, y) -> unique x, unique y)
 
     let nonTermsConnect = 
         rules
         |> Array.map (fun x -> x.name.text)
-        //|> Array.append ([|"error"|])
+        |> Array.append ([|"error"|])
         |> unique
         |> connect
     let termsConnect = connect terms
@@ -59,7 +59,15 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let nonTermsShift = 0
     let (_,_,termsShift) = nonTermsConnect
     let literalsShift = termsShift + (let (_,_,x) = termsConnect in x)
-    let _eofIndex = (let (x,_,_) = termsConnect in x "EOF") + termsShift
+    let _eofIndex = (let (x,_,_) = termsConnect in x "RNGLR_EOF") + termsShift
+    
+    let _errorTIndex = 
+        if terms |> Array.exists((=) "ERROR") then 
+            (let (x,_,_) = termsConnect in x "ERROR") + termsShift
+        else
+            -1
+    let _errorNIndex = let (x,_,_) = nonTermsConnect in x "error"
+        
 
     static member inline private fst (x,_,_) = x
     static member inline private snd (_,x,_) = x
@@ -86,3 +94,5 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
 
     member this.fullCount = (Indexator.trd literalsConnect) + (Indexator.trd termsConnect) + (Indexator.trd nonTermsConnect)
     member this.eofIndex = _eofIndex
+    member this.errorNIndex = _errorNIndex
+    member this.errorTIndex = _errorTIndex

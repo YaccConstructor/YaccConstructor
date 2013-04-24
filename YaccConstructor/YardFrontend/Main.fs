@@ -36,6 +36,7 @@ let private tokenToRange = function
     | DLABEL st
     | DLESS st
     | EOF st
+    | ERROR st
     | EQUAL st
     | INCLUDE st
     | LIDENT st
@@ -46,6 +47,7 @@ let private tokenToRange = function
     | PLUS st
     | PREDICATE st
     | QUESTION st
+    | RNGLR_EOF st
     | RPAREN st
     | SEMICOLON st
     | SET st
@@ -139,6 +141,8 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
 let parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
+    //let tokens = List.ofSeq (filterByDefs buf userDefs)
+    //tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
     match GrammarParser.buildAst (filterByDefs buf userDefs) with
     | Parser.Success ast ->
         ast.collectWarnings tokenToRange
@@ -151,7 +155,8 @@ let parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
-    | Parser.Error (_, token, msg, _) ->
+    | Parser.Error (_, token, msg, debugs) ->
+        debugs.drawGSSDot "res.dot"
         failwithf "Parse error on position %s on token %A: %s" (token |> tokenToRange |> rangeToString) token msg
     //GrammarParser.file (filterByDefs buf userDefs) <|Lexing.LexBuffer<_>.FromString "*this is stub*"
 

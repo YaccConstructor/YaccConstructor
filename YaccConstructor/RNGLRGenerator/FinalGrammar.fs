@@ -23,6 +23,7 @@ open Yard.Core.IL
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.Epsilon
 open Yard.Generators.RNGLR.SymbolSets
+//open Yard.Generators.RNGLR.Error
 
 
 type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
@@ -34,7 +35,9 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     let _epsilonCyclicNonTerms = getEpsilonCyclicNonTerms _numberedRules _indexator _canInferEpsilon
     let _epsilonTrees = epsilonTrees _numberedRules _indexator _canInferEpsilon
     let _epsilonTailStart = epsilonTailStart _numberedRules _canInferEpsilon
-    
+    let _errorNIndex = _indexator.errorNIndex
+    let _errorTIndex = _indexator.errorTIndex
+
     member this.indexator = _indexator
     member this.rules = _numberedRules
     member this.EpsilonCyclicNonTerms = _epsilonCyclicNonTerms
@@ -44,3 +47,5 @@ type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
     member this.epsilonTrees = _epsilonTrees
     member this.epsilonTailStart = _epsilonTailStart
     member this.startRule = _numberedRules.startRule
+    member this.errorNIndex = _errorNIndex
+    member this.errorTIndex = _errorTIndex

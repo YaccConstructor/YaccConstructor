@@ -63,7 +63,6 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
         failwith (sprintf "Not supported extension %s in file %s" ext filename )
 %}
 
-%token EOF
 %token COLON
 %token <Range> SEMICOLON
 %token COMMA
@@ -82,6 +81,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token COMMUT
 %token INCLUDE
 %token SET
+%token <IL.Source.t> EOF
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
@@ -97,6 +97,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 file: action_opt
       rule_nlist
       foot_opt
+      EOF
       { 
         { Definition.empty with
             Definition.info = { fileName = !currentFilename }

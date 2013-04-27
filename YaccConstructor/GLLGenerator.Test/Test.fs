@@ -37,20 +37,13 @@ type DebuggedTest() =
         List.mapi (fun i (name, prods) -> 
             { name = tkn name; isStart = (i = 0) ; args = []; body = getProductionBody prods; isPublic = false; metaArgs = [] }) def
         |> defaultGrammar
-                             def
-
+                             
     [<Test>]
     member this.Test () =
-        let definition : Definition.t<Source.t, Source.t> = {
-            info = { fileName = filename }
-            head = None
-            foot = None
-            options = Map.empty
-            grammar = getGrammar ["nS", [["nA"; "nS"; "D"]; ["nB"; "nS"]; []];
+        let grammar = getGrammar ["nS", [["nA"; "nS"; "D"]; ["nB"; "nS"]; []];
                                   "nA", [["A"]; ["C"]];
                                   "nB", [["A"]; ["B"]]]
-        
-        GLLGenerator().Generate definition |> ignore
+        GLLGenerator().Generate grammar |> ignore
         
     [<Test>]
     member this.TestParser () =

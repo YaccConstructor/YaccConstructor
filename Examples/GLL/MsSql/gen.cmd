@@ -1,7 +1,7 @@
 echo off
 echo "##teamcity[testStarted name='Generate MS-SQL grammar.' captureStandardOutput='true']"
 
-..\..\yc\YaccConstructor.exe -g "GLLGenerator -token SourceText -module Yard.Examples.MSParser -o mssql.yrd.fs" -i ..\..\RNGLR\MSSql\\mssql.yrd > log.txt
+..\..\yc\YaccConstructor.exe -g "GLLGenerator -token SourceText -module Yard.Examples.MSParser -o mssql.yrd.fs" -i ..\..\RNGLR\MSSql\mssql.yrd > log.txt
 
 set el=%errorlevel%
 echo %el%

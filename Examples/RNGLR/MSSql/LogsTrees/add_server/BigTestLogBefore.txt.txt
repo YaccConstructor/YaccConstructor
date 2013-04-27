@@ -1,0 +1,2001 @@
+Lost sources after frontend or conversion ExpandInnerAlt:
+ yard_exp_brackets_55
+yard_exp_brackets_56
+yard_exp_brackets_57
+yard_exp_brackets_58
+yard_exp_brackets_59
+yard_exp_brackets_60
+yard_exp_brackets_61
+yard_exp_brackets_62
+yard_exp_brackets_63
+yard_exp_brackets_64
+yard_exp_brackets_65
+yard_exp_brackets_66
+yard_exp_brackets_67
+yard_exp_brackets_68
+yard_exp_brackets_69
+yard_exp_brackets_70
+yard_exp_brackets_71
+yard_exp_brackets_72
+yard_exp_brackets_73
+yard_exp_brackets_74
+yard_exp_brackets_75
+yard_exp_brackets_76
+yard_exp_brackets_77
+yard_exp_brackets_78
+yard_exp_brackets_79
+yard_exp_brackets_80
+yard_exp_brackets_81
+yard_exp_brackets_82
+yard_exp_brackets_83
+yard_exp_brackets_84
+yard_exp_brackets_85
+yard_exp_brackets_86
+yard_exp_brackets_87
+yard_exp_brackets_88
+yard_exp_brackets_89
+yard_exp_brackets_90
+yard_exp_brackets_91
+yard_exp_brackets_92
+yard_exp_brackets_93
+yard_exp_brackets_94
+yard_exp_brackets_95
+yard_exp_brackets_96
+yard_exp_brackets_97
+yard_exp_brackets_98
+yard_exp_brackets_99
+yard_exp_brackets_100
+yard_exp_brackets_101
+yard_exp_brackets_102
+yard_exp_brackets_103
+yard_exp_brackets_104
+yard_exp_brackets_105
+yard_exp_brackets_106
+yard_exp_brackets_107
+yard_exp_brackets_108
+yard_exp_brackets_109
+yard_exp_brackets_110
+yard_exp_brackets_111
+yard_exp_brackets_112
+yard_exp_brackets_113
+yard_exp_brackets_114
+yard_exp_brackets_115
+yard_exp_brackets_116
+yard_exp_brackets_117
+yard_exp_brackets_118
+yard_exp_brackets_119
+yard_exp_brackets_120
+yard_exp_brackets_121
+yard_exp_brackets_122
+yard_exp_brackets_123
+yard_exp_brackets_124
+yard_exp_brackets_125
+yard_exp_brackets_126
+yard_exp_brackets_127
+yard_exp_brackets_128
+yard_exp_brackets_129
+yard_exp_brackets_130
+yard_exp_brackets_131
+yard_exp_brackets_132
+yard_exp_brackets_133
+yard_exp_brackets_134
+yard_exp_brackets_135
+yard_exp_brackets_136
+yard_exp_brackets_137
+yard_exp_brackets_138
+yard_exp_brackets_139
+yard_exp_brackets_140
+yard_exp_brackets_141
+yard_exp_brackets_142
+yard_exp_brackets_143
+yard_exp_brackets_144
+yard_exp_brackets_145
+yard_exp_brackets_146
+yard_exp_brackets_147
+yard_exp_brackets_148
+yard_exp_brackets_149
+yard_exp_brackets_150
+yard_exp_brackets_151
+yard_exp_brackets_152
+yard_exp_brackets_153
+yard_exp_brackets_154
+yard_exp_brackets_155
+yard_exp_brackets_156
+yard_exp_brackets_157
+yard_exp_brackets_158
+yard_exp_brackets_159
+yard_exp_brackets_160
+yard_exp_brackets_161
+yard_exp_brackets_162
+yard_exp_brackets_163
+yard_exp_brackets_164
+yard_exp_brackets_165
+yard_exp_brackets_166
+yard_exp_brackets_167
+yard_exp_brackets_168
+yard_exp_brackets_169
+yard_exp_brackets_170
+yard_exp_brackets_171
+yard_exp_brackets_172
+yard_exp_brackets_173
+yard_exp_brackets_174
+yard_exp_brackets_175
+yard_exp_brackets_176
+yard_exp_brackets_177
+yard_exp_brackets_178
+yard_exp_brackets_179
+yard_exp_brackets_180
+yard_exp_brackets_181
+yard_exp_brackets_182
+yard_exp_brackets_183
+yard_exp_brackets_184
+yard_exp_brackets_185
+yard_exp_brackets_186
+yard_exp_brackets_187
+yard_exp_brackets_188
+yard_exp_brackets_189
+yard_exp_brackets_190
+yard_exp_brackets_191
+yard_exp_brackets_192
+yard_exp_brackets_193
+yard_exp_brackets_194
+yard_exp_brackets_195
+yard_exp_brackets_196
+yard_exp_brackets_197
+yard_exp_brackets_198
+yard_exp_brackets_199
+yard_exp_brackets_200
+yard_exp_brackets_201
+yard_exp_brackets_202
+yard_exp_brackets_203
+yard_exp_brackets_204
+yard_exp_brackets_205
+yard_exp_brackets_206
+yard_exp_brackets_207
+yard_exp_brackets_208
+yard_exp_brackets_209
+yard_exp_brackets_210
+yard_exp_brackets_211
+yard_exp_brackets_212
+yard_exp_brackets_213
+yard_exp_brackets_214
+yard_exp_brackets_215
+yard_exp_brackets_216
+yard_exp_brackets_217
+yard_exp_brackets_218
+yard_exp_brackets_219
+yard_exp_brackets_220
+yard_exp_brackets_221
+yard_exp_brackets_222
+yard_exp_brackets_223
+yard_exp_brackets_224
+yard_exp_brackets_225
+yard_exp_brackets_226
+yard_exp_brackets_227
+yard_exp_brackets_228
+yard_exp_brackets_229
+yard_exp_brackets_230
+yard_exp_brackets_231
+yard_exp_brackets_232
+yard_exp_brackets_233
+yard_exp_brackets_234
+yard_exp_brackets_235
+yard_exp_brackets_236
+yard_exp_brackets_237
+yard_exp_brackets_238
+yard_exp_brackets_239
+yard_exp_brackets_240
+yard_exp_brackets_241
+yard_exp_brackets_242
+yard_exp_brackets_243
+yard_exp_brackets_244
+yard_exp_brackets_245
+yard_exp_brackets_246
+yard_exp_brackets_247
+yard_exp_brackets_248
+yard_exp_brackets_249
+yard_exp_brackets_250
+yard_exp_brackets_251
+yard_exp_brackets_252
+yard_exp_brackets_253
+yard_exp_brackets_254
+yard_exp_brackets_255
+yard_exp_brackets_256
+yard_exp_brackets_257
+yard_exp_brackets_258
+yard_exp_brackets_259
+yard_exp_brackets_260
+yard_exp_brackets_261
+yard_exp_brackets_262
+yard_exp_brackets_263
+yard_exp_brackets_264
+yard_exp_brackets_265
+yard_exp_brackets_266
+yard_exp_brackets_267
+yard_exp_brackets_268
+yard_exp_brackets_269
+yard_exp_brackets_270
+yard_exp_brackets_271
+yard_exp_brackets_272
+yard_exp_brackets_273
+yard_exp_brackets_274
+yard_exp_brackets_275
+yard_exp_brackets_276
+yard_exp_brackets_277
+yard_exp_brackets_278
+yard_exp_brackets_279
+yard_exp_brackets_280
+yard_exp_brackets_281
+yard_exp_brackets_282
+yard_exp_brackets_283
+yard_exp_brackets_284
+yard_exp_brackets_55
+yard_exp_brackets_56
+yard_exp_brackets_57
+yard_exp_brackets_58
+yard_exp_brackets_285
+yard_exp_brackets_59
+yard_exp_brackets_60
+yard_exp_brackets_286
+yard_exp_brackets_61
+yard_exp_brackets_287
+yard_exp_brackets_62
+yard_exp_brackets_63
+yard_exp_brackets_64
+yard_exp_brackets_65
+yard_exp_brackets_66
+yard_exp_brackets_67
+yard_exp_brackets_288
+yard_exp_brackets_68
+yard_exp_brackets_69
+yard_exp_brackets_70
+yard_exp_brackets_71
+yard_exp_brackets_72
+yard_exp_brackets_73
+yard_exp_brackets_74
+yard_exp_brackets_75
+yard_exp_brackets_289
+yard_exp_brackets_76
+yard_exp_brackets_77
+yard_exp_brackets_78
+yard_exp_brackets_79
+yard_exp_brackets_80
+yard_exp_brackets_81
+yard_exp_brackets_82
+yard_exp_brackets_83
+yard_exp_brackets_84
+yard_exp_brackets_85
+yard_exp_brackets_86
+yard_exp_brackets_87
+yard_exp_brackets_88
+yard_exp_brackets_89
+yard_exp_brackets_90
+yard_exp_brackets_290
+yard_exp_brackets_91
+yard_exp_brackets_92
+yard_exp_brackets_93
+yard_exp_brackets_291
+yard_exp_brackets_94
+yard_exp_brackets_95
+yard_exp_brackets_292
+yard_exp_brackets_96
+yard_exp_brackets_97
+yard_exp_brackets_98
+yard_exp_brackets_99
+yard_exp_brackets_100
+yard_exp_brackets_101
+yard_exp_brackets_102
+yard_exp_brackets_103
+yard_exp_brackets_293
+yard_exp_brackets_104
+yard_exp_brackets_105
+yard_exp_brackets_106
+yard_exp_brackets_107
+yard_exp_brackets_108
+yard_exp_brackets_109
+yard_exp_brackets_110
+yard_exp_brackets_111
+yard_exp_brackets_112
+yard_exp_brackets_294
+yard_exp_brackets_113
+yard_exp_brackets_114
+yard_exp_brackets_295
+yard_exp_brackets_115
+yard_exp_brackets_296
+yard_exp_brackets_116
+yard_exp_brackets_297
+yard_exp_brackets_117
+yard_exp_brackets_118
+yard_exp_brackets_119
+yard_exp_brackets_298
+yard_exp_brackets_120
+yard_exp_brackets_121
+yard_exp_brackets_122
+yard_exp_brackets_299
+yard_exp_brackets_123
+yard_exp_brackets_300
+yard_exp_brackets_124
+yard_exp_brackets_301
+yard_exp_brackets_125
+yard_exp_brackets_126
+yard_exp_brackets_127
+yard_exp_brackets_302
+yard_exp_brackets_128
+yard_exp_brackets_129
+yard_exp_brackets_130
+yard_exp_brackets_131
+yard_exp_brackets_132
+yard_exp_brackets_133
+yard_exp_brackets_134
+yard_exp_brackets_135
+yard_exp_brackets_136
+yard_exp_brackets_137
+yard_exp_brackets_138
+yard_exp_brackets_139
+yard_exp_brackets_140
+yard_exp_brackets_141
+yard_exp_brackets_303
+yard_exp_brackets_304
+yard_exp_brackets_305
+yard_exp_brackets_306
+yard_exp_brackets_142
+yard_exp_brackets_143
+yard_exp_brackets_307
+yard_exp_brackets_144
+yard_exp_brackets_145
+yard_exp_brackets_146
+yard_exp_brackets_147
+yard_exp_brackets_308
+yard_exp_brackets_148
+yard_exp_brackets_149
+yard_exp_brackets_309
+yard_exp_brackets_150
+yard_exp_brackets_151
+yard_exp_brackets_152
+yard_exp_brackets_153
+yard_exp_brackets_154
+yard_exp_brackets_155
+yard_exp_brackets_310
+yard_exp_brackets_156
+yard_exp_brackets_157
+yard_exp_brackets_158
+yard_exp_brackets_311
+yard_exp_brackets_159
+yard_exp_brackets_160
+yard_exp_brackets_312
+yard_exp_brackets_313
+yard_exp_brackets_161
+yard_exp_brackets_162
+yard_exp_brackets_163
+yard_exp_brackets_314
+yard_exp_brackets_315
+yard_exp_brackets_164
+yard_exp_brackets_165
+yard_exp_brackets_316
+yard_exp_brackets_166
+yard_exp_brackets_167
+yard_exp_brackets_168
+yard_exp_brackets_169
+yard_exp_brackets_170
+yard_exp_brackets_171
+yard_exp_brackets_172
+yard_exp_brackets_173
+yard_exp_brackets_174
+yard_exp_brackets_175
+yard_exp_brackets_176
+yard_exp_brackets_317
+yard_exp_brackets_177
+yard_exp_brackets_178
+yard_exp_brackets_318
+yard_exp_brackets_319
+yard_exp_brackets_179
+yard_exp_brackets_180
+yard_exp_brackets_320
+yard_exp_brackets_321
+yard_exp_brackets_181
+yard_exp_brackets_182
+yard_exp_brackets_183
+yard_exp_brackets_184
+yard_exp_brackets_185
+yard_exp_brackets_186
+yard_exp_brackets_322
+yard_exp_brackets_187
+yard_exp_brackets_188
+yard_exp_brackets_189
+yard_exp_brackets_190
+yard_exp_brackets_191
+yard_exp_brackets_192
+yard_exp_brackets_193
+yard_exp_brackets_194
+yard_exp_brackets_195
+yard_exp_brackets_196
+yard_exp_brackets_197
+yard_exp_brackets_198
+yard_exp_brackets_323
+yard_exp_brackets_324
+yard_exp_brackets_325
+yard_exp_brackets_199
+yard_exp_brackets_200
+yard_exp_brackets_201
+yard_exp_brackets_202
+yard_exp_brackets_203
+yard_exp_brackets_204
+yard_exp_brackets_205
+yard_exp_brackets_206
+yard_exp_brackets_207
+yard_exp_brackets_208
+yard_exp_brackets_326
+yard_exp_brackets_209
+yard_exp_brackets_210
+yard_exp_brackets_211
+yard_exp_brackets_212
+yard_exp_brackets_327
+yard_exp_brackets_213
+yard_exp_brackets_214
+yard_exp_brackets_215
+yard_exp_brackets_328
+yard_exp_brackets_216
+yard_exp_brackets_217
+yard_exp_brackets_218
+yard_exp_brackets_219
+yard_exp_brackets_329
+yard_exp_brackets_330
+yard_exp_brackets_220
+yard_exp_brackets_331
+yard_exp_brackets_332
+yard_exp_brackets_221
+yard_exp_brackets_333
+yard_exp_brackets_222
+yard_exp_brackets_223
+yard_exp_brackets_224
+yard_exp_brackets_334
+yard_exp_brackets_225
+yard_exp_brackets_226
+yard_exp_brackets_227
+yard_exp_brackets_228
+yard_exp_brackets_229
+yard_exp_brackets_335
+yard_exp_brackets_230
+yard_exp_brackets_231
+yard_exp_brackets_232
+yard_exp_brackets_233
+yard_exp_brackets_234
+yard_exp_brackets_235
+yard_exp_brackets_336
+yard_exp_brackets_236
+yard_exp_brackets_237
+yard_exp_brackets_238
+yard_exp_brackets_337
+yard_exp_brackets_239
+yard_exp_brackets_240
+yard_exp_brackets_241
+yard_exp_brackets_242
+yard_exp_brackets_243
+yard_exp_brackets_244
+yard_exp_brackets_245
+yard_exp_brackets_338
+yard_exp_brackets_246
+yard_exp_brackets_247
+yard_exp_brackets_248
+yard_exp_brackets_339
+yard_exp_brackets_249
+yard_exp_brackets_250
+yard_exp_brackets_340
+yard_exp_brackets_251
+yard_exp_brackets_252
+yard_exp_brackets_253
+yard_exp_brackets_341
+yard_exp_brackets_254
+yard_exp_brackets_255
+yard_exp_brackets_342
+yard_exp_brackets_256
+yard_exp_brackets_343
+yard_exp_brackets_257
+yard_exp_brackets_344
+yard_exp_brackets_258
+yard_exp_brackets_259
+yard_exp_brackets_260
+yard_exp_brackets_261
+yard_exp_brackets_345
+yard_exp_brackets_262
+yard_exp_brackets_346
+yard_exp_brackets_263
+yard_exp_brackets_347
+yard_exp_brackets_264
+yard_exp_brackets_265
+yard_exp_brackets_266
+yard_exp_brackets_267
+yard_exp_brackets_268
+yard_exp_brackets_269
+yard_exp_brackets_270
+yard_exp_brackets_271
+yard_exp_brackets_272
+yard_exp_brackets_348
+yard_exp_brackets_273
+yard_exp_brackets_349
+yard_exp_brackets_350
+yard_exp_brackets_274
+yard_exp_brackets_275
+yard_exp_brackets_276
+yard_exp_brackets_277
+yard_exp_brackets_278
+yard_exp_brackets_279
+yard_exp_brackets_280
+yard_exp_brackets_281
+yard_exp_brackets_351
+yard_exp_brackets_282
+yard_exp_brackets_283
+yard_exp_brackets_284
+yard_exp_brackets_285
+yard_exp_brackets_286
+yard_exp_brackets_287
+yard_exp_brackets_352
+yard_exp_brackets_288
+yard_exp_brackets_289
+yard_exp_brackets_290
+yard_exp_brackets_291
+yard_exp_brackets_292
+yard_exp_brackets_293
+yard_exp_brackets_294
+yard_exp_brackets_295
+yard_exp_brackets_296
+yard_exp_brackets_353
+yard_exp_brackets_297
+yard_exp_brackets_298
+yard_exp_brackets_354
+yard_exp_brackets_299
+yard_exp_brackets_300
+yard_exp_brackets_301
+yard_exp_brackets_302
+yard_exp_brackets_303
+yard_exp_brackets_304
+yard_exp_brackets_305
+yard_exp_brackets_306
+yard_exp_brackets_307
+yard_exp_brackets_308
+yard_exp_brackets_309
+yard_exp_brackets_310
+yard_exp_brackets_311
+yard_exp_brackets_355
+yard_exp_brackets_312
+yard_exp_brackets_313
+yard_exp_brackets_356
+yard_exp_brackets_314
+yard_exp_brackets_315
+yard_exp_brackets_357
+yard_exp_brackets_316
+yard_exp_brackets_358
+yard_exp_brackets_317
+yard_exp_brackets_318
+yard_exp_brackets_319
+yard_exp_brackets_320
+yard_exp_brackets_321
+yard_exp_brackets_322
+yard_exp_brackets_323
+yard_exp_brackets_324
+yard_exp_brackets_325
+yard_exp_brackets_326
+yard_exp_brackets_327
+yard_exp_brackets_328
+yard_exp_brackets_359
+yard_exp_brackets_360
+yard_exp_brackets_361
+yard_exp_brackets_329
+yard_exp_brackets_330
+yard_exp_brackets_331
+yard_exp_brackets_332
+yard_exp_brackets_333
+yard_exp_brackets_334
+yard_exp_brackets_362
+yard_exp_brackets_335
+yard_exp_brackets_363
+yard_exp_brackets_336
+yard_exp_brackets_337
+yard_exp_brackets_364
+yard_exp_brackets_338
+yard_exp_brackets_339
+yard_exp_brackets_340
+yard_exp_brackets_341
+yard_exp_brackets_365
+yard_exp_brackets_342
+yard_exp_brackets_343
+yard_exp_brackets_344
+yard_exp_brackets_345
+yard_exp_brackets_346
+yard_exp_brackets_347
+yard_exp_brackets_348
+yard_exp_brackets_349
+yard_exp_brackets_350
+yard_exp_brackets_351
+yard_exp_brackets_352
+yard_exp_brackets_353
+yard_exp_brackets_354
+yard_exp_brackets_355
+yard_exp_brackets_356
+yard_exp_brackets_357
+yard_exp_brackets_358
+yard_exp_brackets_366
+yard_exp_brackets_359
+yard_exp_brackets_360
+yard_exp_brackets_361
+yard_exp_brackets_362
+yard_exp_brackets_363
+yard_exp_brackets_364
+yard_exp_brackets_365
+yard_exp_brackets_366
+
+rules:
+   0: yard_exp_brackets_366 = KW_ROWGUID 
+   1: yard_exp_brackets_366 = KW_IDENTITY 
+   2: yard_exp_brackets_366 = name 
+   3: yard_exp_brackets_365 = DEC_NUMBER 
+   4: yard_exp_brackets_365 = sql_expr 
+   5: yard_exp_brackets_364 = LOCALVAR 
+   6: yard_exp_brackets_364 = name yard_opt_175 
+   7: yard_exp_brackets_363 = KW_FULL 
+   8: yard_exp_brackets_363 = KW_RIGHT 
+   9: yard_exp_brackets_363 = KW_LEFT 
+  10: yard_exp_brackets_362 = proximity_term 
+  11: yard_exp_brackets_362 = generation_term 
+  12: yard_exp_brackets_362 = prefix_term 
+  13: yard_exp_brackets_362 = simple_term 
+  14: yard_exp_brackets_361 = EMPTY 
+  15: yard_exp_brackets_361 = KW_OR 
+  16: yard_exp_brackets_360 = EMPTY 
+  17: yard_exp_brackets_360 = KW_AND KW_NOT 
+  18: yard_exp_brackets_359 = EMPTY 
+  19: yard_exp_brackets_359 = KW_AND 
+  20: yard_exp_brackets_358 = sql_expr yard_opt_106 
+  21: yard_exp_brackets_358 = yard_opt_104 yard_exp_brackets_366 yard_opt_105 
+  22: yard_exp_brackets_357 = ident 
+  23: yard_exp_brackets_357 = STRING_CONST 
+  24: yard_exp_brackets_356 = ident 
+  25: yard_exp_brackets_356 = STRING_CONST 
+  26: yard_exp_brackets_355 = KW_ROWGUID 
+  27: yard_exp_brackets_355 = KW_IDENTITY 
+  28: yard_exp_brackets_355 = name 
+  29: yard_exp_brackets_354 = DEC_NUMBER 
+  30: yard_exp_brackets_354 = IDENT 
+  31: yard_exp_brackets_354 = ident 
+  32: yard_exp_brackets_353 = KW_SUM 
+  33: yard_exp_brackets_353 = KW_MIN 
+  34: yard_exp_brackets_353 = KW_MAX 
+  35: yard_exp_brackets_353 = KW_COUNT 
+  36: yard_exp_brackets_353 = KW_AVG 
+  37: yard_exp_brackets_352 = KW_CURSOR yard_opt_7 yard_opt_8 yard_opt_9 yard_opt_10 KW_FOR select_stmnt yard_opt_11 
+  38: yard_exp_brackets_351 = sql_expr 
+  39: yard_exp_brackets_351 = sql_datatype 
+  40: yard_exp_brackets_350 = LOCALVAR 
+  41: yard_exp_brackets_350 = dec_num 
+  42: yard_exp_brackets_349 = LOCALVAR 
+  43: yard_exp_brackets_349 = dec_num 
+  44: yard_exp_brackets_348 = yard_opt_207 IDENT 
+  45: yard_exp_brackets_347 = KW_USER 
+  46: yard_exp_brackets_347 = KW_LOGIN 
+  47: yard_exp_brackets_346 = LOCALVAR yard_opt_195 
+  48: yard_exp_brackets_346 = sql_expr 
+  49: yard_exp_brackets_345 = LOCALVAR yard_opt_195 
+  50: yard_exp_brackets_345 = sql_expr 
+  51: yard_exp_brackets_344 = KW_USER 
+  52: yard_exp_brackets_344 = KW_LOGIN 
+  53: yard_exp_brackets_343 = STRING_CONST 
+  54: yard_exp_brackets_343 = LOCALVAR 
+  55: yard_exp_brackets_342 = STRING_CONST 
+  56: yard_exp_brackets_342 = LOCALVAR 
+  57: yard_exp_brackets_341 = yard_opt_187 yard_exp_brackets_365 
+  58: yard_exp_brackets_340 = DEC_NUMBER 
+  59: yard_exp_brackets_340 = sql_expr 
+  60: yard_exp_brackets_339 = yard_opt_185 
+  61: yard_exp_brackets_339 = LOCALVAR yard_opt_184 
+  62: yard_exp_brackets_339 = sql_expr 
+  63: yard_exp_brackets_338 = yard_opt_181 
+  64: yard_exp_brackets_338 = LOCALVAR yard_opt_180 
+  65: yard_exp_brackets_338 = sql_expr 
+  66: yard_exp_brackets_337 = yard_opt_174 yard_exp_brackets_364 yard_rule_brace_opt_46 yard_opt_176 
+  67: yard_exp_brackets_336 = LOCALVAR 
+  68: yard_exp_brackets_336 = ident 
+  69: yard_exp_brackets_335 = yard_exp_brackets_363 yard_opt_163 
+  70: yard_exp_brackets_334 = yard_exp_brackets_362 yard_opt_154 
+  71: yard_exp_brackets_333 = proximity_term 
+  72: yard_exp_brackets_333 = generation_term 
+  73: yard_exp_brackets_333 = prefix_term 
+  74: yard_exp_brackets_333 = simple_term 
+  75: yard_exp_brackets_332 = prefix_term 
+  76: yard_exp_brackets_332 = simple_term 
+  77: yard_exp_brackets_331 = OP_TILDA 
+  78: yard_exp_brackets_331 = KW_NEAR 
+  79: yard_exp_brackets_330 = prefix_term 
+  80: yard_exp_brackets_330 = simple_term 
+  81: yard_exp_brackets_329 = OP_TILDA 
+  82: yard_exp_brackets_329 = KW_NEAR 
+  83: yard_exp_brackets_328 = yard_exp_brackets_361 
+  84: yard_exp_brackets_328 = yard_exp_brackets_360 
+  85: yard_exp_brackets_328 = yard_exp_brackets_359 
+  86: yard_exp_brackets_327 = DEC_NUMBER 
+  87: yard_exp_brackets_327 = STRING_CONST 
+  88: yard_exp_brackets_326 = DEC_NUMBER 
+  89: yard_exp_brackets_326 = STRING_CONST 
+  90: yard_exp_brackets_325 = KW_SINGLE_NCLOB 
+  91: yard_exp_brackets_325 = KW_SINGLE_CLOB 
+  92: yard_exp_brackets_325 = KW_SINGLE_BLOB 
+  93: yard_exp_brackets_325 = KW_FORMATFILE OP_EQ STRING_CONST yard_opt_142 
+  94: yard_exp_brackets_324 = STRING_CONST 
+  95: yard_exp_brackets_324 = yard_opt_140 yard_opt_141 full_ident 
+  96: yard_exp_brackets_323 = STRING_CONST 
+  97: yard_exp_brackets_323 = STRING_CONST SEMI STRING_CONST SEMI STRING_CONST 
+  98: yard_exp_brackets_322 = rowset_function yard_opt_128 yard_opt_130 
+  99: yard_exp_brackets_321 = STRING_CONST 
+ 100: yard_exp_brackets_321 = dec_num 
+ 101: yard_exp_brackets_320 = STRING_CONST 
+ 102: yard_exp_brackets_320 = dec_num 
+ 103: yard_exp_brackets_319 = LPAREN search_condition RPAREN 
+ 104: yard_exp_brackets_319 = predicate 
+ 105: yard_exp_brackets_318 = KW_OR 
+ 106: yard_exp_brackets_318 = KW_AND 
+ 107: yard_exp_brackets_317 = sql_expr yard_opt_115 
+ 108: yard_exp_brackets_316 = sql_expr 
+ 109: yard_exp_brackets_316 = yard_exp_brackets_358 
+ 110: yard_exp_brackets_316 = name DOT STAR 
+ 111: yard_exp_brackets_316 = STAR 
+ 112: yard_exp_brackets_315 = name LPAREN yard_rule_comma_list_8 RPAREN 
+ 113: yard_exp_brackets_315 = yard_exp_brackets_357 
+ 114: yard_exp_brackets_314 = DOUBLE_COLON 
+ 115: yard_exp_brackets_314 = DOT 
+ 116: yard_exp_brackets_313 = name LPAREN yard_rule_comma_list_8 RPAREN 
+ 117: yard_exp_brackets_313 = yard_exp_brackets_356 
+ 118: yard_exp_brackets_312 = DOUBLE_COLON 
+ 119: yard_exp_brackets_312 = DOT 
+ 120: yard_exp_brackets_311 = sql_expr yard_opt_102 
+ 121: yard_exp_brackets_311 = yard_opt_100 yard_exp_brackets_355 yard_opt_101 
+ 122: yard_exp_brackets_310 = KW_ROLLUP 
+ 123: yard_exp_brackets_310 = KW_CUBE 
+ 124: yard_exp_brackets_309 = LPAREN query_expression RPAREN 
+ 125: yard_exp_brackets_308 = KW_INTERSECT 
+ 126: yard_exp_brackets_308 = KW_EXCEPT 
+ 127: yard_exp_brackets_308 = KW_UNION yard_opt_88 
+ 128: yard_exp_brackets_307 = LOCALVAR OP_EQ STRING_CONST 
+ 129: yard_exp_brackets_306 = KW_FORCED 
+ 130: yard_exp_brackets_306 = KW_SIMPLE 
+ 131: yard_exp_brackets_305 = KW_HASH 
+ 132: yard_exp_brackets_305 = KW_MERGE 
+ 133: yard_exp_brackets_305 = KW_LOOP 
+ 134: yard_exp_brackets_304 = KW_MERGE 
+ 135: yard_exp_brackets_304 = KW_HASH 
+ 136: yard_exp_brackets_304 = KW_CONCAT 
+ 137: yard_exp_brackets_303 = KW_ORDER 
+ 138: yard_exp_brackets_303 = KW_HASH 
+ 139: yard_exp_brackets_302 = KW_XMLSCHEMA yard_opt_72 
+ 140: yard_exp_brackets_302 = KW_XMLDATA 
+ 141: yard_exp_brackets_301 = KW_AUTO 
+ 142: yard_exp_brackets_301 = KW_RAW yard_opt_69 
+ 143: yard_exp_brackets_300 = xml 
+ 144: yard_exp_brackets_300 = KW_BROWSE 
+ 145: yard_exp_brackets_299 = LOCALVAR OP_EQ sql_expr 
+ 146: yard_exp_brackets_298 = yard_exp_brackets_354 yard_opt_67 
+ 147: yard_exp_brackets_297 = DEC_NUMBER 
+ 148: yard_exp_brackets_297 = IDENT 
+ 149: yard_exp_brackets_297 = ident 
+ 150: yard_exp_brackets_296 = yard_exp_brackets_353 LPAREN sql_expr RPAREN 
+ 151: yard_exp_brackets_295 = KW_SUM 
+ 152: yard_exp_brackets_295 = KW_MIN 
+ 153: yard_exp_brackets_295 = KW_MAX 
+ 154: yard_exp_brackets_295 = KW_COUNT 
+ 155: yard_exp_brackets_295 = KW_AVG 
+ 156: yard_exp_brackets_294 = KW_OR 
+ 157: yard_exp_brackets_294 = KW_AND 
+ 158: yard_exp_brackets_293 = KW_UNIQUE 
+ 159: yard_exp_brackets_293 = KW_PRIMARY KW_KEY 
+ 160: yard_exp_brackets_292 = KW_AS sql_expr 
+ 161: yard_exp_brackets_291 = ident yard_opt_47 table_type_definition 
+ 162: yard_exp_brackets_291 = ident KW_CURSOR yard_opt_44 yard_opt_45 yard_opt_46 sql_expr 
+ 163: yard_exp_brackets_291 = LOCALVAR yard_opt_43 sql_datatype 
+ 164: yard_exp_brackets_290 = KW_SETERROR 
+ 165: yard_exp_brackets_290 = KW_NOWAIT 
+ 166: yard_exp_brackets_290 = KW_LOG 
+ 167: yard_exp_brackets_289 = STRING_CONST 
+ 168: yard_exp_brackets_289 = DEC_NUMBER 
+ 169: yard_exp_brackets_289 = KW_NULL 
+ 170: yard_exp_brackets_288 = KW_UPDATE yard_opt_12 
+ 171: yard_exp_brackets_288 = KW_EAD ONLY 
+ 172: yard_exp_brackets_287 = yard_exp_brackets_352 
+ 173: yard_exp_brackets_287 = ident 
+ 174: yard_exp_brackets_287 = LOCALVAR 
+ 175: yard_exp_brackets_286 = DOUBLE_COLON 
+ 176: yard_exp_brackets_286 = DOT 
+ 177: yard_exp_brackets_285 = KW_XML 
+ 178: yard_exp_brackets_285 = KW_TIME 
+ 179: yard_exp_brackets_285 = KW_PROFILE 
+ 180: yard_exp_brackets_285 = KW_IO 
+ 181: yard_exp_brackets_284 = DOT ident 
+ 182: yard_exp_brackets_283 = KW_OWNER 
+ 183: yard_exp_brackets_283 = KW_STATE 
+ 184: yard_exp_brackets_283 = KW_CLASS 
+ 185: yard_exp_brackets_283 = KW_TYPE 
+ 186: yard_exp_brackets_283 = IDENT 
+ 187: yard_exp_brackets_282 = KW_OWNER 
+ 188: yard_exp_brackets_282 = KW_STATE 
+ 189: yard_exp_brackets_282 = KW_CLASS 
+ 190: yard_exp_brackets_282 = KW_TYPE 
+ 191: yard_exp_brackets_282 = IDENT 
+ 192: yard_exp_brackets_281 = COMMA yard_exp_brackets_351 
+ 193: yard_exp_brackets_280 = sql_expr 
+ 194: yard_exp_brackets_280 = sql_datatype 
+ 195: yard_exp_brackets_279 = KW_OR 
+ 196: yard_exp_brackets_279 = KW_AND 
+ 197: yard_exp_brackets_278 = OP_TILDA 
+ 198: yard_exp_brackets_278 = OP_MINUS_EQ 
+ 199: yard_exp_brackets_278 = OP_PLUS_EQ 
+ 200: yard_exp_brackets_277 = name DOT 
+ 201: yard_exp_brackets_276 = COMMA LOCALVAR 
+ 202: yard_exp_brackets_275 = KW_INTO yard_rule_comma_list_49 
+ 203: yard_exp_brackets_274 = yard_opt_206 KW_FROM 
+ 204: yard_exp_brackets_273 = KW_RELATIVE yard_exp_brackets_350 
+ 205: yard_exp_brackets_273 = KW_ABSOLUTE yard_exp_brackets_349 
+ 206: yard_exp_brackets_273 = KW_LAST 
+ 207: yard_exp_brackets_273 = KW_FIRST 
+ 208: yard_exp_brackets_273 = KW_PRIOR 
+ 209: yard_exp_brackets_273 = KW_NEXT 
+ 210: yard_exp_brackets_272 = LOCALVAR 
+ 211: yard_exp_brackets_272 = yard_exp_brackets_348 
+ 212: yard_exp_brackets_271 = OP_LT OP_GT 
+ 213: yard_exp_brackets_270 = OP_MT OP_EQ 
+ 214: yard_exp_brackets_269 = OP_LT OP_EQ 
+ 215: yard_exp_brackets_268 = OP_LT OP_MT 
+ 216: yard_exp_brackets_267 = STRING_CONST 
+ 217: yard_exp_brackets_267 = KW_OWNER 
+ 218: yard_exp_brackets_267 = KW_SELF 
+ 219: yard_exp_brackets_267 = KW_CALLER 
+ 220: yard_exp_brackets_266 = KW_EXECUTE 
+ 221: yard_exp_brackets_266 = KW_EXEC 
+ 222: yard_exp_brackets_265 = KW_MAX 
+ 223: yard_exp_brackets_265 = DEC_NUMBER 
+ 224: yard_exp_brackets_264 = KW_AT full_ident 
+ 225: yard_exp_brackets_263 = KW_AS yard_exp_brackets_347 OP_EQ STRING_CONST 
+ 226: yard_exp_brackets_262 = COMMA yard_exp_brackets_346 
+ 227: yard_exp_brackets_261 = COMMA yard_exp_brackets_345 
+ 228: yard_exp_brackets_260 = STRING_CONST yard_opt_192 yard_opt_193 
+ 229: yard_exp_brackets_260 = LOCALVAR 
+ 230: yard_exp_brackets_259 = STRING_CONST yard_opt_192 yard_opt_193 
+ 231: yard_exp_brackets_259 = LOCALVAR 
+ 232: yard_exp_brackets_258 = KW_EXECUTE 
+ 233: yard_exp_brackets_258 = KW_EXEC 
+ 234: yard_exp_brackets_257 = KW_AS yard_exp_brackets_344 OP_EQ STRING_CONST 
+ 235: yard_exp_brackets_256 = yard_exp_brackets_343 yard_opt_189 
+ 236: yard_exp_brackets_255 = yard_exp_brackets_342 yard_opt_189 
+ 237: yard_exp_brackets_254 = KW_EXECUTE 
+ 238: yard_exp_brackets_254 = KW_EXEC 
+ 239: yard_exp_brackets_253 = COMMA yard_exp_brackets_341 
+ 240: yard_exp_brackets_252 = ident OP_EQ 
+ 241: yard_exp_brackets_251 = ident OP_EQ 
+ 242: yard_exp_brackets_250 = yard_opt_186 yard_exp_brackets_340 
+ 243: yard_exp_brackets_249 = COMMA yard_opt_182 
+ 244: yard_exp_brackets_248 = yard_opt_183 yard_exp_brackets_339 
+ 245: yard_exp_brackets_247 = KW_OUT 
+ 246: yard_exp_brackets_247 = KW_OUTPUT 
+ 247: yard_exp_brackets_246 = ident OP_EQ 
+ 248: yard_exp_brackets_245 = yard_opt_179 yard_exp_brackets_338 
+ 249: yard_exp_brackets_244 = KW_OUT 
+ 250: yard_exp_brackets_244 = KW_OUTPUT 
+ 251: yard_exp_brackets_243 = ident OP_EQ 
+ 252: yard_exp_brackets_242 = KW_WITH KW_RECOMPILE 
+ 253: yard_exp_brackets_241 = SEMI DEC_NUMBER 
+ 254: yard_exp_brackets_240 = LOCALVAR OP_EQ 
+ 255: yard_exp_brackets_239 = KW_EXECUTE 
+ 256: yard_exp_brackets_239 = KW_EXEC 
+ 257: yard_exp_brackets_238 = create_object DOT IDENT LPAREN yard_opt_177 RPAREN 
+ 258: yard_exp_brackets_238 = yard_exp_brackets_337 
+ 259: yard_exp_brackets_237 = LOCALVAR 
+ 260: yard_exp_brackets_237 = IDENT 
+ 261: yard_exp_brackets_236 = KW_TRANSACTION 
+ 262: yard_exp_brackets_236 = KW_TRAN 
+ 263: yard_exp_brackets_235 = yard_exp_brackets_336 yard_opt_168 
+ 264: yard_exp_brackets_234 = KW_WITH KW_MARK yard_opt_169 
+ 265: yard_exp_brackets_233 = KW_TRANSACTION 
+ 266: yard_exp_brackets_233 = KW_TRAN 
+ 267: yard_exp_brackets_232 = KW_ELSE sql_expr 
+ 268: yard_exp_brackets_231 = KW_WHEN sql_expr KW_THEN sql_expr 
+ 269: yard_exp_brackets_230 = name 
+ 270: yard_exp_brackets_230 = sql_expr 
+ 271: yard_exp_brackets_229 = yard_exp_brackets_335 yard_opt_164 
+ 272: yard_exp_brackets_229 = KW_INNER 
+ 273: yard_exp_brackets_228 = KW_REPEATABLE LPAREN sql_expr RPAREN 
+ 274: yard_exp_brackets_227 = KW_ROWS 
+ 275: yard_exp_brackets_227 = KW_PERCENT 
+ 276: yard_exp_brackets_226 = KW_XLOCK 
+ 277: yard_exp_brackets_226 = KW_UPDLOCK 
+ 278: yard_exp_brackets_226 = KW_TABLOCKX 
+ 279: yard_exp_brackets_226 = KW_TABLOCK 
+ 280: yard_exp_brackets_226 = KW_SERIALIZABLE 
+ 281: yard_exp_brackets_226 = KW_ROWLOCK 
+ 282: yard_exp_brackets_226 = KW_REPEATABLEREAD 
+ 283: yard_exp_brackets_226 = KW_READPAST 
+ 284: yard_exp_brackets_226 = KW_READCOMMITTEDLOCK 
+ 285: yard_exp_brackets_226 = KW_READCOMMITTED 
+ 286: yard_exp_brackets_226 = KW_PAGLOCK 
+ 287: yard_exp_brackets_226 = KW_NOWAIT 
+ 288: yard_exp_brackets_226 = KW_IGNORE_TRIGGERS 
+ 289: yard_exp_brackets_226 = KW_IGNORE_CONSTRAINTS 
+ 290: yard_exp_brackets_226 = KW_HOLDLOCK 
+ 291: yard_exp_brackets_226 = KW_FASTFIRSTROW 
+ 292: yard_exp_brackets_226 = KW_KEEPDEFAULTS 
+ 293: yard_exp_brackets_226 = KW_KEEPIDENTITY 
+ 294: yard_exp_brackets_225 = KW_XLOCK 
+ 295: yard_exp_brackets_225 = KW_UPDLOCK 
+ 296: yard_exp_brackets_225 = KW_TABLOCKX 
+ 297: yard_exp_brackets_225 = KW_TABLOCK 
+ 298: yard_exp_brackets_225 = KW_SERIALIZABLE 
+ 299: yard_exp_brackets_225 = KW_ROWLOCK 
+ 300: yard_exp_brackets_225 = KW_REPEATABLEREAD 
+ 301: yard_exp_brackets_225 = KW_READUNCOMMITTED 
+ 302: yard_exp_brackets_225 = KW_READPAST 
+ 303: yard_exp_brackets_225 = KW_READCOMMITTEDLOCK 
+ 304: yard_exp_brackets_225 = KW_READCOMMITTED 
+ 305: yard_exp_brackets_225 = KW_PAGLOCK 
+ 306: yard_exp_brackets_225 = KW_NOWAIT 
+ 307: yard_exp_brackets_225 = KW_NOLOCK 
+ 308: yard_exp_brackets_225 = KW_HOLDLOCK 
+ 309: yard_exp_brackets_225 = KW_FASTFIRSTROW 
+ 310: yard_exp_brackets_225 = KW_INDEX LPAREN yard_rule_comma_list_4 RPAREN 
+ 311: yard_exp_brackets_224 = COMMA yard_exp_brackets_334 
+ 312: yard_exp_brackets_223 = WEIGHT LPAREN DEC_NUMBER RPAREN 
+ 313: yard_exp_brackets_222 = WEIGHT LPAREN DEC_NUMBER RPAREN 
+ 314: yard_exp_brackets_221 = yard_exp_brackets_333 yard_opt_153 
+ 315: yard_exp_brackets_220 = yard_exp_brackets_331 yard_exp_brackets_332 
+ 316: yard_exp_brackets_219 = yard_exp_brackets_329 yard_exp_brackets_330 
+ 317: yard_exp_brackets_218 = prefix_term 
+ 318: yard_exp_brackets_218 = simple_term 
+ 319: yard_exp_brackets_217 = COMMA simple_term 
+ 320: yard_exp_brackets_216 = KW_THESAURUS 
+ 321: yard_exp_brackets_216 = KW_INFLECTIONAL 
+ 322: yard_exp_brackets_215 = LPAREN contains_search_condition RPAREN yard_exp_brackets_328 yard_some_3 
+ 323: yard_exp_brackets_214 = weighted_term 
+ 324: yard_exp_brackets_214 = proximity_term 
+ 325: yard_exp_brackets_214 = generation_term 
+ 326: yard_exp_brackets_214 = prefix_term 
+ 327: yard_exp_brackets_214 = simple_term 
+ 328: yard_exp_brackets_213 = COMMA DEC_NUMBER 
+ 329: yard_exp_brackets_212 = COMMA KW_LANGUAGE yard_exp_brackets_327 
+ 330: yard_exp_brackets_211 = STAR 
+ 331: yard_exp_brackets_211 = LPAREN yard_rule_comma_list_4 RPAREN 
+ 332: yard_exp_brackets_211 = ident 
+ 333: yard_exp_brackets_210 = COMMA full_ident 
+ 334: yard_exp_brackets_209 = COMMA DEC_NUMBER 
+ 335: yard_exp_brackets_208 = COMMA KW_LANGUAGE yard_exp_brackets_326 
+ 336: yard_exp_brackets_207 = STAR 
+ 337: yard_exp_brackets_207 = LPAREN yard_rule_comma_list_38 RPAREN 
+ 338: yard_exp_brackets_207 = full_ident 
+ 339: yard_exp_brackets_206 = COMMA KW_ROWS_PER_BATCH OP_EQ DEC_NUMBER 
+ 340: yard_exp_brackets_205 = COMMA KW_MAXERRORS OP_EQ DEC_NUMBER 
+ 341: yard_exp_brackets_204 = COMMA KW_LASTROW OP_EQ DEC_NUMBER 
+ 342: yard_exp_brackets_203 = COMMA KW_FIRSTROW OP_EQ DEC_NUMBER 
+ 343: yard_exp_brackets_202 = COMMA KW_ERRORFILE OP_EQ STRING_CONST 
+ 344: yard_exp_brackets_201 = COMMA KW_CODEPAGE OP_EQ STRING_CONST 
+ 345: yard_exp_brackets_200 = full_ident DOT 
+ 346: yard_exp_brackets_199 = full_ident DOT 
+ 347: yard_exp_brackets_198 = KW_BULK STRING_CONST COMMA yard_exp_brackets_325 
+ 348: yard_exp_brackets_198 = STRING_CONST COMMA yard_exp_brackets_323 COMMA yard_exp_brackets_324 
+ 349: yard_exp_brackets_197 = COMMA name 
+ 350: yard_exp_brackets_196 = LPAREN yard_rule_comma_list_36 RPAREN 
+ 351: yard_exp_brackets_195 = KW_AS name 
+ 352: yard_exp_brackets_194 = yard_opt_137 full_ident 
+ 353: yard_exp_brackets_193 = LPAREN yard_rule_comma_list_36 RPAREN 
+ 354: yard_exp_brackets_192 = LPAREN yard_rule_comma_list_36 RPAREN 
+ 355: yard_exp_brackets_191 = yard_opt_132 name 
+ 356: yard_exp_brackets_190 = LPAREN yard_rule_comma_list_36 RPAREN 
+ 357: yard_exp_brackets_189 = yard_opt_129 name 
+ 358: yard_exp_brackets_188 = KW_WITH LPAREN table_hint yard_many_24 RPAREN 
+ 359: yard_exp_brackets_187 = LOCALVAR DOT name LPAREN yard_rule_comma_list_8 RPAREN yard_opt_138 yard_opt_139 
+ 360: yard_exp_brackets_187 = LOCALVAR yard_opt_136 
+ 361: yard_exp_brackets_187 = unpivoted_table 
+ 362: yard_exp_brackets_186 = sql_expr yard_opt_131 yard_opt_133 
+ 363: yard_exp_brackets_186 = yard_exp_brackets_322 
+ 364: yard_exp_brackets_185 = COMMA table_source 
+ 365: yard_exp_brackets_184 = KW_FROM yard_rule_comma_list_34 
+ 366: yard_exp_brackets_183 = LPAREN RPAREN 
+ 367: yard_exp_brackets_182 = DOT IDENT 
+ 368: yard_exp_brackets_181 = KW_ESCAPE STRING_CONST 
+ 369: yard_exp_brackets_180 = yard_exp_brackets_320 COMMA yard_exp_brackets_321 
+ 370: yard_exp_brackets_179 = KW_ANY 
+ 371: yard_exp_brackets_179 = KW_SOME 
+ 372: yard_exp_brackets_179 = KW_ALL 
+ 373: yard_exp_brackets_178 = yard_exp_brackets_318 yard_opt_117 yard_exp_brackets_319 
+ 374: yard_exp_brackets_177 = LPAREN search_condition RPAREN 
+ 375: yard_exp_brackets_177 = yard_opt_116 predicate 
+ 376: yard_exp_brackets_176 = COMMA yard_exp_brackets_317 
+ 377: yard_exp_brackets_175 = KW_DESC 
+ 378: yard_exp_brackets_175 = KW_ASC 
+ 379: yard_exp_brackets_174 = KW_DESC 
+ 380: yard_exp_brackets_174 = KW_ASC 
+ 381: yard_exp_brackets_173 = sql_expr yard_opt_114 
+ 382: yard_exp_brackets_172 = KW_ORDER KW_BY yard_rule_comma_list_32 
+ 383: yard_exp_brackets_171 = full_ident 
+ 384: yard_exp_brackets_171 = select_stmnt 
+ 385: yard_exp_brackets_171 = KW_PARTITION KW_BY LOCALVAR 
+ 386: yard_exp_brackets_170 = KW_NTILE 
+ 387: yard_exp_brackets_170 = KW_ROW_NUMBER 
+ 388: yard_exp_brackets_170 = KW_DENSE_RANK 
+ 389: yard_exp_brackets_170 = KW_RANK 
+ 390: yard_exp_brackets_169 = COMMA yard_opt_110 
+ 391: yard_exp_brackets_168 = select_stmnt 
+ 392: yard_exp_brackets_168 = KW_PARTITION KW_BY LOCALVAR 
+ 393: yard_exp_brackets_167 = select_stmnt 
+ 394: yard_exp_brackets_167 = KW_PARTITION KW_BY LOCALVAR 
+ 395: yard_exp_brackets_166 = KW_DISTINCT 
+ 396: yard_exp_brackets_166 = KW_ALL 
+ 397: yard_exp_brackets_165 = COMMA yard_exp_brackets_316 
+ 398: yard_exp_brackets_164 = yard_opt_107 name 
+ 399: yard_exp_brackets_163 = yard_exp_brackets_314 yard_exp_brackets_315 
+ 400: yard_exp_brackets_162 = name DOT 
+ 401: yard_exp_brackets_161 = yard_opt_103 name 
+ 402: yard_exp_brackets_160 = yard_exp_brackets_312 yard_exp_brackets_313 
+ 403: yard_exp_brackets_159 = name DOT 
+ 404: yard_exp_brackets_158 = sql_expr 
+ 405: yard_exp_brackets_158 = yard_exp_brackets_311 
+ 406: yard_exp_brackets_158 = name DOT STAR 
+ 407: yard_exp_brackets_158 = STAR 
+ 408: yard_exp_brackets_157 = KW_HAVING search_condition 
+ 409: yard_exp_brackets_156 = KW_GROUP KW_BY yard_opt_97 yard_rule_comma_list_8 yard_opt_98 
+ 410: yard_exp_brackets_155 = KW_WITH yard_exp_brackets_310 
+ 411: yard_exp_brackets_154 = KW_WHERE search_condition 
+ 412: yard_exp_brackets_153 = KW_INTO name 
+ 413: yard_exp_brackets_152 = KW_TOP sql_expr yard_opt_91 yard_opt_92 
+ 414: yard_exp_brackets_151 = KW_WITH KW_TIES 
+ 415: yard_exp_brackets_150 = KW_DISTINCT 
+ 416: yard_exp_brackets_150 = KW_ALL 
+ 417: yard_exp_brackets_149 = COMMA yard_exp_brackets_309 
+ 418: yard_exp_brackets_148 = LPAREN query_expression RPAREN 
+ 419: yard_exp_brackets_147 = yard_rule_comma_list_26 
+ 420: yard_exp_brackets_147 = yard_exp_brackets_308 query_specification 
+ 421: yard_exp_brackets_146 = LPAREN query_expression RPAREN 
+ 422: yard_exp_brackets_146 = query_specification 
+ 423: yard_exp_brackets_145 = LPAREN yard_rule_comma_list_4 RPAREN 
+ 424: yard_exp_brackets_144 = ident 
+ 425: yard_exp_brackets_144 = full_ident 
+ 426: yard_exp_brackets_143 = COMMA yard_exp_brackets_307 
+ 427: yard_exp_brackets_142 = LOCALVAR OP_EQ STRING_CONST 
+ 428: yard_exp_brackets_141 = KW_USE KW_PLAN STRING_CONST 
+ 429: yard_exp_brackets_141 = KW_MAXRECURSION DEC_NUMBER 
+ 430: yard_exp_brackets_141 = KW_EXPAND KW_VIEWS 
+ 431: yard_exp_brackets_141 = KW_KEEPFIXED KW_PLAN 
+ 432: yard_exp_brackets_141 = KW_KEEP KW_PLAN 
+ 433: yard_exp_brackets_141 = KW_ROBUST KW_PLAN 
+ 434: yard_exp_brackets_141 = KW_RECOMPILE 
+ 435: yard_exp_brackets_141 = KW_PARAMETERIZATION yard_exp_brackets_306 
+ 436: yard_exp_brackets_141 = KW_OPTIMIZE KW_FOR LPAREN yard_rule_comma_list_24 RPAREN 
+ 437: yard_exp_brackets_141 = KW_MAXDOP DEC_NUMBER 
+ 438: yard_exp_brackets_141 = KW_FORCE KW_ORDER 
+ 439: yard_exp_brackets_141 = KW_FAST DEC_NUMBER 
+ 440: yard_exp_brackets_141 = yard_exp_brackets_305 KW_JOIN 
+ 441: yard_exp_brackets_141 = yard_exp_brackets_304 KW_UNION 
+ 442: yard_exp_brackets_141 = yard_exp_brackets_303 KW_GROUP 
+ 443: yard_exp_brackets_140 = COMMA KW_ROOT yard_opt_84 
+ 444: yard_exp_brackets_139 = LPAREN STRING_CONST RPAREN 
+ 445: yard_exp_brackets_138 = COMMA KW_TYPE 
+ 446: yard_exp_brackets_137 = COMMA KW_BINARY KW_BASE64 
+ 447: yard_exp_brackets_136 = common_directives yard_opt_79 
+ 448: yard_exp_brackets_135 = COMMA KW_ELEMENTS yard_opt_80 
+ 449: yard_exp_brackets_134 = KW_ABSENT 
+ 450: yard_exp_brackets_134 = KW_XSINIL 
+ 451: yard_exp_brackets_133 = LPAREN STRING_CONST RPAREN 
+ 452: yard_exp_brackets_132 = common_directives yard_opt_76 
+ 453: yard_exp_brackets_131 = COMMA KW_XMLDATA 
+ 454: yard_exp_brackets_130 = common_directives yard_opt_71 yard_opt_73 
+ 455: yard_exp_brackets_129 = COMMA KW_ELEMENTS yard_opt_74 
+ 456: yard_exp_brackets_128 = KW_ABSENT 
+ 457: yard_exp_brackets_128 = KW_XSINIL 
+ 458: yard_exp_brackets_127 = COMMA yard_exp_brackets_302 
+ 459: yard_exp_brackets_126 = LPAREN STRING_CONST RPAREN 
+ 460: yard_exp_brackets_125 = LPAREN STRING_CONST RPAREN 
+ 461: yard_exp_brackets_124 = KW_PATH yard_opt_77 yard_opt_78 
+ 462: yard_exp_brackets_124 = KW_EXPLICIT yard_opt_75 
+ 463: yard_exp_brackets_124 = yard_exp_brackets_301 yard_opt_70 
+ 464: yard_exp_brackets_123 = KW_FOR yard_exp_brackets_300 
+ 465: yard_exp_brackets_122 = COMMA yard_exp_brackets_299 
+ 466: yard_exp_brackets_121 = LOCALVAR OP_EQ sql_expr 
+ 467: yard_exp_brackets_120 = COMMA common_table_expression 
+ 468: yard_exp_brackets_119 = COMMA yard_exp_brackets_298 
+ 469: yard_exp_brackets_118 = KW_DESC 
+ 470: yard_exp_brackets_118 = KW_ASC 
+ 471: yard_exp_brackets_117 = KW_DESC 
+ 472: yard_exp_brackets_117 = KW_ASC 
+ 473: yard_exp_brackets_116 = yard_exp_brackets_297 yard_opt_66 
+ 474: yard_exp_brackets_115 = COMMA yard_exp_brackets_296 
+ 475: yard_exp_brackets_114 = yard_exp_brackets_295 LPAREN sql_expr RPAREN 
+ 476: yard_exp_brackets_113 = COMMA query_hint 
+ 477: yard_exp_brackets_112 = yard_exp_brackets_294 yard_opt_64 sql_expr yard_opt_65 
+ 478: yard_exp_brackets_111 = KW_OPTION LPAREN yard_rule_comma_list_20 RPAREN 
+ 479: yard_exp_brackets_110 = KW_COMPUTE yard_rule_comma_list_18 yard_opt_59 
+ 480: yard_exp_brackets_109 = KW_BY yard_rule_comma_list_8 
+ 481: yard_exp_brackets_108 = KW_ORDER KW_BY yard_rule_comma_list_16 
+ 482: yard_exp_brackets_107 = KW_WITH yard_rule_comma_list_14 
+ 483: yard_exp_brackets_106 = IDENT 
+ 484: yard_exp_brackets_106 = STAR 
+ 485: yard_exp_brackets_105 = yard_opt_56 query_expression yard_opt_57 yard_opt_58 yard_opt_60 yard_opt_61 
+ 486: yard_exp_brackets_104 = KW_CHECK LPAREN search_condition RPAREN 
+ 487: yard_exp_brackets_103 = yard_exp_brackets_293 LPAREN yard_rule_comma_list_4 RPAREN 
+ 488: yard_exp_brackets_102 = KW_UNIQUE 
+ 489: yard_exp_brackets_102 = KW_PRIMARY KW_KEY 
+ 490: yard_exp_brackets_101 = KW_NOT KW_NULL 
+ 491: yard_exp_brackets_101 = KW_NULL 
+ 492: yard_exp_brackets_100 = KW_CHECK sql_expr 
+ 493: yard_exp_brackets_100 = yard_opt_55 
+ 494: yard_exp_brackets_100 = yard_opt_54 
+ 495: yard_exp_brackets_99 = KW_IDENTITY yard_opt_51 
+ 496: yard_exp_brackets_99 = yard_opt_50 
+ 497: yard_exp_brackets_98 = DEC_NUMBER COMMA DEC_NUMBER 
+ 498: yard_exp_brackets_97 = KW_DEFAULT sql_expr 
+ 499: yard_exp_brackets_96 = KW_COLLATE ident 
+ 500: yard_exp_brackets_95 = yard_exp_brackets_292 
+ 501: yard_exp_brackets_95 = KW_SCALAR_DATA_TYPE 
+ 502: yard_exp_brackets_94 = table_constraint 
+ 503: yard_exp_brackets_94 = column_definition 
+ 504: yard_exp_brackets_93 = COMMA yard_exp_brackets_291 
+ 505: yard_exp_brackets_92 = ident yard_opt_42 table_type_definition 
+ 506: yard_exp_brackets_92 = ident KW_CURSOR yard_opt_39 yard_opt_40 yard_opt_41 sql_expr 
+ 507: yard_exp_brackets_92 = LOCALVAR yard_opt_38 sql_datatype 
+ 508: yard_exp_brackets_91 = COMMA sql_expr 
+ 509: yard_exp_brackets_90 = COMMA yard_exp_brackets_290 
+ 510: yard_exp_brackets_89 = KW_SETERROR 
+ 511: yard_exp_brackets_89 = KW_NOWAIT 
+ 512: yard_exp_brackets_89 = KW_LOG 
+ 513: yard_exp_brackets_88 = KW_WITH yard_rule_comma_list_10 
+ 514: yard_exp_brackets_87 = COMMA yard_rule_comma_list_8 
+ 515: yard_exp_brackets_86 = COMMA dec_num COMMA dec_num 
+ 516: yard_exp_brackets_85 = LOCALVAR 
+ 517: yard_exp_brackets_85 = STRING_CONST 
+ 518: yard_exp_brackets_85 = dec_num 
+ 519: yard_exp_brackets_84 = KW_ELSE proc_body_stmnt 
+ 520: yard_exp_brackets_83 = proc_body_stmnt yard_opt_33 
+ 521: yard_exp_brackets_82 = proc_body_stmnt yard_opt_25 
+ 522: yard_exp_brackets_81 = KW_FOR KW_REPLICATION 
+ 523: yard_exp_brackets_80 = KW_WITH yard_some_2 
+ 524: yard_exp_brackets_79 = SEMI DEC_NUMBER 
+ 525: yard_exp_brackets_78 = ident DOT 
+ 526: yard_exp_brackets_77 = KW_PROC 
+ 527: yard_exp_brackets_77 = KW_PROCEDURE 
+ 528: yard_exp_brackets_76 = KW_OUTPUT 
+ 529: yard_exp_brackets_76 = KW_OUT 
+ 530: yard_exp_brackets_75 = OP_EQ yard_exp_brackets_289 
+ 531: yard_exp_brackets_74 = full_ident DOT 
+ 532: yard_exp_brackets_73 = yard_opt_13 ident 
+ 533: yard_exp_brackets_72 = yard_opt_13 ident 
+ 534: yard_exp_brackets_71 = ident DOT 
+ 535: yard_exp_brackets_70 = KW_PROCEDURE 
+ 536: yard_exp_brackets_70 = KW_PROC 
+ 537: yard_exp_brackets_69 = COMMA ident 
+ 538: yard_exp_brackets_68 = COMMA proc_formal_param 
+ 539: yard_exp_brackets_67 = KW_FOR yard_exp_brackets_288 
+ 540: yard_exp_brackets_66 = KW_OF yard_rule_comma_list_4 
+ 541: yard_exp_brackets_65 = KW_OPTIMISTIC 
+ 542: yard_exp_brackets_65 = KW_SCROLL_LOCKS 
+ 543: yard_exp_brackets_65 = KW_READ_ONLY 
+ 544: yard_exp_brackets_64 = KW_FAST_FORWARD 
+ 545: yard_exp_brackets_64 = KW_DYNAMIC 
+ 546: yard_exp_brackets_64 = KW_KEYSET 
+ 547: yard_exp_brackets_64 = KW_STATIC 
+ 548: yard_exp_brackets_63 = KW_SCROLL 
+ 549: yard_exp_brackets_63 = KW_FORWARD_ONLY 
+ 550: yard_exp_brackets_62 = DOUBLE_COLON ident 
+ 551: yard_exp_brackets_61 = LOCALVAR OP_EQ yard_exp_brackets_287 
+ 552: yard_exp_brackets_60 = STRING_CONST yard_exp_brackets_286 ident LPAREN yard_rule_comma_list_2 RPAREN 
+ 553: yard_exp_brackets_60 = LOCALVAR yard_opt_6 OP_EQ sql_expr 
+ 554: yard_exp_brackets_59 = KW_OFF 
+ 555: yard_exp_brackets_59 = KW_ON 
+ 556: yard_exp_brackets_58 = KW_XACT_ABORT 
+ 557: yard_exp_brackets_58 = KW_STATISTICS yard_exp_brackets_285 
+ 558: yard_exp_brackets_58 = KW_SHOWPLAN_XML 
+ 559: yard_exp_brackets_58 = KW_SHOWPLAN_TEXT 
+ 560: yard_exp_brackets_58 = KW_SHOWPLAN_ALL 
+ 561: yard_exp_brackets_58 = KW_REMOTE_PROC_TRANSACTIONS 
+ 562: yard_exp_brackets_58 = KW_PARSEONLY 
+ 563: yard_exp_brackets_58 = KW_NUMERIC_ROUNDABORT 
+ 564: yard_exp_brackets_58 = KW_NOEXEC 
+ 565: yard_exp_brackets_58 = KW_NOCOUNT 
+ 566: yard_exp_brackets_58 = KW_IMPLICIT_TRANSACTIONS 
+ 567: yard_exp_brackets_58 = KW_FORCEPLAN 
+ 568: yard_exp_brackets_58 = KW_FMTONLY 
+ 569: yard_exp_brackets_58 = KW_QUOTED_IDENTIFIER 
+ 570: yard_exp_brackets_58 = KW_CURSOR_CLOSE_ON_COMMIT 
+ 571: yard_exp_brackets_58 = KW_CONCAT_NULL_YIELDS_NULL 
+ 572: yard_exp_brackets_58 = KW_ANSI_WARNINGS 
+ 573: yard_exp_brackets_58 = KW_ANSI_PADDING 
+ 574: yard_exp_brackets_58 = KW_ANSI_NULL_DFLT 
+ 575: yard_exp_brackets_58 = KW_ANSI_DEFAULTS 
+ 576: yard_exp_brackets_58 = KW_ANSI_NULLS 
+ 577: yard_exp_brackets_57 = LOCALVAR 
+ 578: yard_exp_brackets_57 = IDENT 
+ 579: yard_exp_brackets_56 = KW_TRANSACTION 
+ 580: yard_exp_brackets_56 = KW_TRAN 
+ 581: yard_exp_brackets_55 = yard_opt_2 batch_body 
+ 582: yard_many_34 = yard_exp_brackets_284 yard_many_34 
+ 583: yard_many_34 = 
+ 584: yard_rule_not_empty_list_54 = ident yard_many_34 
+ 585: full_ident = yard_rule_not_empty_list_54 
+ 586: yard_rule_brace_opt_53 = LBRACKET yard_exp_brackets_283 RBRACKET 
+ 587: yard_rule_brace_opt_53 = yard_exp_brackets_282 
+ 588: ident = yard_rule_brace_opt_53 
+ 589: sql_value = KW_NULL 
+ 590: sql_value = dec_num 
+ 591: sql_value = STRING_CONST 
+ 592: yard_opt_215 = OP_MINUS 
+ 593: yard_opt_215 = 
+ 594: dec_num = yard_opt_215 DEC_NUMBER 
+ 595: yard_many_33 = yard_exp_brackets_281 yard_many_33 
+ 596: yard_many_33 = 
+ 597: yard_rule_list_52 = yard_exp_brackets_280 yard_many_33 
+ 598: yard_rule_list_52 = 
+ 599: yard_rule_comma_list_51 = yard_rule_list_52 
+ 600: yard_opt_214 = yard_rule_comma_list_51 
+ 601: yard_opt_214 = 
+ 602: call_expr = full_ident LPAREN yard_opt_214 RPAREN 
+ 603: yard_opt_213 = KW_NOT 
+ 604: yard_opt_213 = 
+ 605: yard_opt_212 = KW_IS 
+ 606: yard_opt_212 = 
+ 607: yard_opt_211 = KW_NOT 
+ 608: yard_opt_211 = 
+ 609: yard_opt_210 = KW_NOT 
+ 610: yard_opt_210 = 
+ 611: yard_opt_209 = KW_NOT 
+ 612: yard_opt_209 = 
+ 613: sql_expr = sql_expr KW_IN LPAREN yard_rule_comma_list_8 RPAREN 
+ 614: sql_expr = fetch_stmnt 
+ 615: sql_expr = KW_TYPE KW_FROM full_ident 
+ 616: sql_expr = sql_expr yard_exp_brackets_279 sql_expr 
+ 617: sql_expr = IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN 
+ 618: sql_expr = yard_opt_212 yard_opt_213 KW_NULL 
+ 619: sql_expr = yard_opt_211 KW_IS_MEMBER LPAREN STRING_CONST RPAREN 
+ 620: sql_expr = yard_opt_210 KW_EXISTS sql_expr 
+ 621: sql_expr = begin_transaction 
+ 622: sql_expr = case 
+ 623: sql_expr = sql_expr KW_COLLATE ident 
+ 624: sql_expr = aggregate_windowed_function 
+ 625: sql_expr = ranking_windowed_function 
+ 626: sql_expr = sql_expr KW_IS yard_opt_209 KW_NULL 
+ 627: sql_expr = sql_expr binop sql_expr 
+ 628: sql_expr = name 
+ 629: sql_expr = GLOBALVAR 
+ 630: sql_expr = yard_exp_brackets_278 sql_expr 
+ 631: sql_expr = select_stmnt 
+ 632: sql_expr = call_expr 
+ 633: sql_expr = LOCALVAR 
+ 634: sql_expr = LPAREN sql_expr RPAREN 
+ 635: sql_expr = yard_exp_brackets_277 name 
+ 636: sql_expr = scalar_function 
+ 637: sql_expr = sql_value 
+ 638: yard_many_32 = yard_exp_brackets_276 yard_many_32 
+ 639: yard_many_32 = 
+ 640: yard_rule_list_50 = LOCALVAR yard_many_32 
+ 641: yard_rule_list_50 = 
+ 642: yard_rule_comma_list_49 = yard_rule_list_50 
+ 643: yard_opt_208 = yard_exp_brackets_275 
+ 644: yard_opt_208 = 
+ 645: yard_opt_207 = KW_GLOBAL 
+ 646: yard_opt_207 = 
+ 647: yard_opt_205 = yard_exp_brackets_274 
+ 648: yard_opt_205 = 
+ 649: yard_opt_206 = yard_exp_brackets_273 
+ 650: yard_opt_206 = 
+ 651: fetch_stmnt = KW_FETCH yard_opt_205 yard_exp_brackets_272 yard_opt_208 
+ 652: binop = yard_exp_brackets_271 
+ 653: binop = yard_exp_brackets_270 
+ 654: binop = yard_exp_brackets_269 
+ 655: binop = yard_exp_brackets_268 
+ 656: binop = OP_MT 
+ 657: binop = OP_LT 
+ 658: binop = OP_TILDA 
+ 659: binop = OP_MOD 
+ 660: binop = OP_DIV 
+ 661: binop = STAR 
+ 662: binop = OP_MINUS 
+ 663: binop = OP_PLUS 
+ 664: binop = OP_EQ 
+ 665: binop = OP_OR_EQ 
+ 666: binop = OP_XOR_EQ 
+ 667: binop = OP_AND_EQ 
+ 668: binop = OP_MOD_EQ 
+ 669: binop = OP_DIV_EQ 
+ 670: binop = OP_MUL_EQ 
+ 671: binop = OP_MINUS_EQ 
+ 672: binop = OP_PLUS_EQ 
+ 673: execute_as = yard_exp_brackets_266 KW_AS yard_exp_brackets_267 
+ 674: yard_opt_204 = type_size 
+ 675: yard_opt_204 = 
+ 676: yard_opt_203 = type_size 
+ 677: yard_opt_203 = 
+ 678: yard_opt_202 = type_size 
+ 679: yard_opt_202 = 
+ 680: yard_opt_201 = type_size 
+ 681: yard_opt_201 = 
+ 682: yard_opt_200 = type_size 
+ 683: yard_opt_200 = 
+ 684: yard_opt_199 = type_size 
+ 685: yard_opt_199 = 
+ 686: sql_datatype = KW_SQL_VARIANT 
+ 687: sql_datatype = KW_NVARCHAR yard_opt_204 
+ 688: sql_datatype = KW_NCHAR yard_opt_203 
+ 689: sql_datatype = KW_VARBINARY yard_opt_202 
+ 690: sql_datatype = KW_VARCHAR yard_opt_201 
+ 691: sql_datatype = KW_CHAR yard_opt_200 
+ 692: sql_datatype = KW_REAL 
+ 693: sql_datatype = KW_FLOAT yard_opt_199 
+ 694: sql_datatype = KW_MONEY 
+ 695: sql_datatype = KW_TINYINT 
+ 696: sql_datatype = KW_INT 
+ 697: sql_datatype = KW_SYSNAME 
+ 698: sql_datatype = KW_SMALLMONEY 
+ 699: sql_datatype = KW_DATETIME 
+ 700: sql_datatype = KW_DECIMAL 
+ 701: sql_datatype = KW_SMALLINT 
+ 702: sql_datatype = KW_BIT 
+ 703: sql_datatype = KW_NUMERIC 
+ 704: sql_datatype = KW_BIGINT 
+ 705: type_size = LPAREN yard_exp_brackets_265 RPAREN 
+ 706: yard_opt_198 = SEMI 
+ 707: yard_opt_198 = 
+ 708: yard_opt_197 = yard_exp_brackets_264 
+ 709: yard_opt_197 = 
+ 710: yard_opt_196 = yard_exp_brackets_263 
+ 711: yard_opt_196 = 
+ 712: yard_opt_194 = yard_some_7 
+ 713: yard_opt_194 = 
+ 714: yard_some_7 = yard_exp_brackets_262 yard_some_7 
+ 715: yard_some_7 = yard_exp_brackets_261 
+ 716: yard_opt_195 = KW_OUTPUT 
+ 717: yard_opt_195 = 
+ 718: yard_some_6 = yard_exp_brackets_260 yard_some_6 
+ 719: yard_some_6 = yard_exp_brackets_259 
+ 720: yard_opt_193 = PLUS 
+ 721: yard_opt_193 = 
+ 722: yard_opt_192 = EMPTY 
+ 723: yard_opt_192 = 
+ 724: execute_command = yard_exp_brackets_258 LPAREN yard_some_6 yard_opt_194 RPAREN yard_opt_196 yard_opt_197 yard_opt_198 
+ 725: yard_opt_191 = SEMI 
+ 726: yard_opt_191 = 
+ 727: yard_opt_190 = yard_exp_brackets_257 
+ 728: yard_opt_190 = 
+ 729: yard_some_5 = yard_exp_brackets_256 yard_some_5 
+ 730: yard_some_5 = yard_exp_brackets_255 
+ 731: yard_opt_189 = PLUS 
+ 732: yard_opt_189 = 
+ 733: execute_character_string = yard_exp_brackets_254 LPAREN yard_some_5 RPAREN yard_opt_190 yard_opt_191 
+ 734: yard_opt_188 = yard_rule_comma_list_8 
+ 735: yard_opt_188 = 
+ 736: create_object = STOREDPROCEDURE LPAREN yard_opt_188 RPAREN 
+ 737: yard_many_31 = yard_exp_brackets_253 yard_many_31 
+ 738: yard_many_31 = 
+ 739: yard_opt_187 = yard_exp_brackets_252 
+ 740: yard_opt_187 = 
+ 741: yard_opt_186 = yard_exp_brackets_251 
+ 742: yard_opt_186 = 
+ 743: yard_rule_list_48 = yard_exp_brackets_250 yard_many_31 
+ 744: yard_rule_list_48 = 
+ 745: yard_rule_comma_list_47 = yard_rule_list_48 
+ 746: yard_many_30 = yard_exp_brackets_249 yard_many_30 
+ 747: yard_many_30 = 
+ 748: yard_opt_182 = yard_exp_brackets_248 
+ 749: yard_opt_182 = 
+ 750: yard_opt_185 = KW_DEFAULT 
+ 751: yard_opt_185 = 
+ 752: yard_opt_184 = yard_exp_brackets_247 
+ 753: yard_opt_184 = 
+ 754: yard_opt_183 = yard_exp_brackets_246 
+ 755: yard_opt_183 = 
+ 756: yard_opt_178 = yard_exp_brackets_245 
+ 757: yard_opt_178 = 
+ 758: yard_opt_181 = KW_DEFAULT 
+ 759: yard_opt_181 = 
+ 760: yard_opt_180 = yard_exp_brackets_244 
+ 761: yard_opt_180 = 
+ 762: yard_opt_179 = yard_exp_brackets_243 
+ 763: yard_opt_179 = 
+ 764: yard_rule_list_45 = yard_opt_178 yard_many_30 
+ 765: yard_rule_list_45 = 
+ 766: yard_rule_comma_list_44 = yard_rule_list_45 
+ 767: yard_rule_brace_opt_46 = LPAREN yard_rule_comma_list_44 RPAREN 
+ 768: yard_rule_brace_opt_46 = yard_rule_comma_list_44 
+ 769: yard_opt_177 = yard_rule_comma_list_47 
+ 770: yard_opt_177 = 
+ 771: yard_opt_176 = yard_exp_brackets_242 
+ 772: yard_opt_176 = 
+ 773: yard_opt_175 = yard_exp_brackets_241 
+ 774: yard_opt_175 = 
+ 775: yard_opt_174 = yard_exp_brackets_240 
+ 776: yard_opt_174 = 
+ 777: yard_opt_173 = yard_exp_brackets_239 
+ 778: yard_opt_173 = 
+ 779: execute_proc = yard_opt_173 yard_exp_brackets_238 
+ 780: execute_stmnt = execute_command 
+ 781: execute_stmnt = execute_character_string 
+ 782: execute_stmnt = execute_proc 
+ 783: yard_opt_172 = SEMI 
+ 784: yard_opt_172 = 
+ 785: yard_opt_171 = yard_exp_brackets_237 
+ 786: yard_opt_171 = 
+ 787: commit_transaction = KW_COMMIT yard_exp_brackets_236 yard_opt_171 yard_opt_172 
+ 788: yard_opt_170 = SEMI 
+ 789: yard_opt_170 = 
+ 790: yard_opt_167 = yard_exp_brackets_235 
+ 791: yard_opt_167 = 
+ 792: yard_opt_168 = yard_exp_brackets_234 
+ 793: yard_opt_168 = 
+ 794: yard_opt_169 = STRING_CONST 
+ 795: yard_opt_169 = 
+ 796: begin_transaction = KW_BEGIN yard_exp_brackets_233 yard_opt_167 yard_opt_170 
+ 797: yard_opt_166 = yard_exp_brackets_232 
+ 798: yard_opt_166 = 
+ 799: yard_many_29 = yard_exp_brackets_231 yard_many_29 
+ 800: yard_many_29 = 
+ 801: yard_opt_165 = sql_expr 
+ 802: yard_opt_165 = 
+ 803: case = KW_CASE yard_opt_165 yard_many_29 yard_opt_166 KW_END 
+ 804: unpivot_clause = LPAREN name KW_FOR sql_expr KW_IN LPAREN yard_rule_comma_list_38 RPAREN RPAREN 
+ 805: unpivoted_table = table_source KW_UNPIVOT unpivot_clause full_ident 
+ 806: pivot_clause = LPAREN sql_expr LPAREN yard_exp_brackets_230 RPAREN KW_FOR sql_expr KW_IN LPAREN yard_rule_comma_list_36 RPAREN RPAREN 
+ 807: pivoted_table = table_source KW_PIVOT pivot_clause full_ident 
+ 808: join_hint = KW_REMOTE 
+ 809: join_hint = KW_MERGE 
+ 810: join_hint = KW_HASH 
+ 811: join_hint = KW_LOOP 
+ 812: yard_opt_162 = yard_exp_brackets_229 
+ 813: yard_opt_162 = 
+ 814: yard_opt_164 = join_hint 
+ 815: yard_opt_164 = 
+ 816: yard_opt_163 = KW_OUTER 
+ 817: yard_opt_163 = 
+ 818: join_type = yard_opt_162 KW_JOIN 
+ 819: yard_opt_161 = RPAREN 
+ 820: yard_opt_161 = 
+ 821: yard_opt_160 = LPAREN 
+ 822: yard_opt_160 = 
+ 823: joined_table = yard_opt_160 joined_table yard_opt_161 
+ 824: joined_table = table_source KW_CROSS KW_JOIN table_source 
+ 825: joined_table = table_source join_type table_source KW_ON search_condition 
+ 826: yard_opt_159 = yard_exp_brackets_228 
+ 827: yard_opt_159 = 
+ 828: yard_opt_158 = yard_exp_brackets_227 
+ 829: yard_opt_158 = 
+ 830: yard_opt_157 = KW_SYSTEM 
+ 831: yard_opt_157 = 
+ 832: tablesample_clause = KW_TABLESAMPLE yard_opt_157 LPAREN sql_expr yard_opt_158 RPAREN yard_opt_159 
+ 833: yard_opt_156 = yard_exp_brackets_226 
+ 834: yard_opt_156 = 
+ 835: table_hint_limited = yard_opt_156 
+ 836: yard_opt_155 = KW_NOEXPAND 
+ 837: yard_opt_155 = 
+ 838: table_hint = yard_opt_155 yard_exp_brackets_225 
+ 839: yard_many_28 = yard_exp_brackets_224 yard_many_28 
+ 840: yard_many_28 = 
+ 841: yard_opt_154 = yard_exp_brackets_223 
+ 842: yard_opt_154 = 
+ 843: yard_opt_153 = yard_exp_brackets_222 
+ 844: yard_opt_153 = 
+ 845: yard_rule_list_43 = yard_exp_brackets_221 yard_many_28 
+ 846: yard_rule_list_43 = 
+ 847: yard_rule_comma_list_42 = yard_rule_list_43 
+ 848: weighted_term = KW_ISABOUT LPAREN yard_rule_comma_list_42 RPAREN 
+ 849: yard_some_4 = yard_exp_brackets_220 yard_some_4 
+ 850: yard_some_4 = yard_exp_brackets_219 
+ 851: proximity_term = yard_exp_brackets_218 yard_some_4 
+ 852: yard_many_27 = yard_exp_brackets_217 yard_many_27 
+ 853: yard_many_27 = 
+ 854: yard_rule_list_41 = simple_term yard_many_27 
+ 855: yard_rule_list_41 = 
+ 856: yard_rule_comma_list_40 = yard_rule_list_41 
+ 857: generation_term = KW_FORMSOF LPAREN yard_exp_brackets_216 COMMA yard_rule_comma_list_40 RPAREN 
+ 858: prefix_term = STRING_CONST 
+ 859: simple_term = STRING_CONST 
+ 860: yard_some_3 = contains_search_condition yard_some_3 
+ 861: yard_some_3 = contains_search_condition 
+ 862: contains_search_condition = yard_exp_brackets_215 
+ 863: contains_search_condition = yard_exp_brackets_214 
+ 864: yard_opt_152 = yard_exp_brackets_213 
+ 865: yard_opt_152 = 
+ 866: yard_opt_151 = yard_exp_brackets_212 
+ 867: yard_opt_151 = 
+ 868: containstable = KW_CONTAINSTABLE LPAREN full_ident COMMA yard_exp_brackets_211 COMMA EMPTY contains_search_condition EMPTY yard_opt_151 yard_opt_152 RPAREN 
+ 869: yard_many_26 = yard_exp_brackets_210 yard_many_26 
+ 870: yard_many_26 = 
+ 871: yard_rule_list_39 = full_ident yard_many_26 
+ 872: yard_rule_list_39 = 
+ 873: yard_rule_comma_list_38 = yard_rule_list_39 
+ 874: yard_opt_150 = yard_exp_brackets_209 
+ 875: yard_opt_150 = 
+ 876: yard_opt_149 = yard_exp_brackets_208 
+ 877: yard_opt_149 = 
+ 878: freetexttable = KW_FREETEXTTABLE LPAREN full_ident COMMA yard_exp_brackets_207 COMMA STRING_CONST yard_opt_149 yard_opt_150 RPAREN 
+ 879: opendatasource = KW_OPENDATASOURCE LPAREN ident COMMA STRING_CONST RPAREN 
+ 880: openquery = KW_OPENQUERY LPAREN full_ident COMMA STRING_CONST RPAREN 
+ 881: yard_opt_148 = yard_exp_brackets_206 
+ 882: yard_opt_148 = 
+ 883: yard_opt_147 = yard_exp_brackets_205 
+ 884: yard_opt_147 = 
+ 885: yard_opt_146 = yard_exp_brackets_204 
+ 886: yard_opt_146 = 
+ 887: yard_opt_145 = yard_exp_brackets_203 
+ 888: yard_opt_145 = 
+ 889: yard_opt_144 = yard_exp_brackets_202 
+ 890: yard_opt_144 = 
+ 891: yard_opt_143 = yard_exp_brackets_201 
+ 892: yard_opt_143 = 
+ 893: bulk_options = yard_opt_143 yard_opt_144 yard_opt_145 yard_opt_146 yard_opt_147 yard_opt_148 
+ 894: yard_opt_142 = bulk_options 
+ 895: yard_opt_142 = 
+ 896: yard_opt_141 = yard_exp_brackets_200 
+ 897: yard_opt_141 = 
+ 898: yard_opt_140 = yard_exp_brackets_199 
+ 899: yard_opt_140 = 
+ 900: openrowset = KW_OPENROWSET LPAREN yard_exp_brackets_198 RPAREN 
+ 901: rowset_function = openrowset 
+ 902: rowset_function = openquery 
+ 903: rowset_function = opendatasource 
+ 904: rowset_function = freetexttable 
+ 905: rowset_function = containstable 
+ 906: yard_many_25 = yard_exp_brackets_197 yard_many_25 
+ 907: yard_many_25 = 
+ 908: yard_rule_list_37 = name yard_many_25 
+ 909: yard_rule_list_37 = 
+ 910: yard_rule_comma_list_36 = yard_rule_list_37 
+ 911: yard_opt_139 = yard_exp_brackets_196 
+ 912: yard_opt_139 = 
+ 913: yard_opt_138 = yard_exp_brackets_195 
+ 914: yard_opt_138 = 
+ 915: yard_opt_136 = yard_exp_brackets_194 
+ 916: yard_opt_136 = 
+ 917: yard_opt_137 = KW_AS 
+ 918: yard_opt_137 = 
+ 919: yard_opt_135 = yard_exp_brackets_193 
+ 920: yard_opt_135 = 
+ 921: yard_opt_134 = KW_AS 
+ 922: yard_opt_134 = 
+ 923: yard_opt_133 = yard_exp_brackets_192 
+ 924: yard_opt_133 = 
+ 925: yard_opt_131 = yard_exp_brackets_191 
+ 926: yard_opt_131 = 
+ 927: yard_opt_132 = KW_AS 
+ 928: yard_opt_132 = 
+ 929: yard_opt_130 = yard_exp_brackets_190 
+ 930: yard_opt_130 = 
+ 931: yard_opt_128 = yard_exp_brackets_189 
+ 932: yard_opt_128 = 
+ 933: yard_opt_129 = KW_AS 
+ 934: yard_opt_129 = 
+ 935: yard_opt_127 = yard_exp_brackets_188 
+ 936: yard_opt_127 = 
+ 937: yard_many_24 = COMMA yard_many_24 
+ 938: yard_many_24 = 
+ 939: yard_opt_126 = tablesample_clause 
+ 940: yard_opt_126 = 
+ 941: yard_opt_125 = KW_AS 
+ 942: yard_opt_125 = 
+ 943: table_source = yard_exp_brackets_187 
+ 944: table_source = pivoted_table 
+ 945: table_source = joined_table 
+ 946: table_source = name yard_opt_134 name yard_opt_135 
+ 947: table_source = yard_exp_brackets_186 
+ 948: table_source = name yard_opt_125 full_ident yard_opt_126 yard_opt_127 
+ 949: yard_many_23 = yard_exp_brackets_185 yard_many_23 
+ 950: yard_many_23 = 
+ 951: yard_rule_list_35 = table_source yard_many_23 
+ 952: yard_rule_list_35 = 
+ 953: yard_rule_comma_list_34 = yard_rule_list_35 
+ 954: yard_opt_124 = yard_exp_brackets_184 
+ 955: yard_opt_124 = 
+ 956: from = yard_opt_124 
+ 957: yard_opt_123 = yard_exp_brackets_183 
+ 958: yard_opt_123 = 
+ 959: yard_opt_122 = yard_exp_brackets_182 
+ 960: yard_opt_122 = 
+ 961: yard_opt_121 = KW_NOT 
+ 962: yard_opt_121 = 
+ 963: yard_opt_120 = KW_NOT 
+ 964: yard_opt_120 = 
+ 965: yard_opt_119 = yard_exp_brackets_181 
+ 966: yard_opt_119 = 
+ 967: yard_opt_118 = KW_NOT 
+ 968: yard_opt_118 = 
+ 969: predicate = IDENT yard_opt_122 yard_opt_123 KW_IN LPAREN yard_exp_brackets_180 RPAREN 
+ 970: predicate = KW_EXISTS LPAREN query_expression RPAREN 
+ 971: predicate = sql_expr binop yard_exp_brackets_179 LPAREN query_expression RPAREN 
+ 972: predicate = sql_expr KW_IS yard_opt_121 KW_NULL 
+ 973: predicate = sql_expr yard_opt_120 KW_BETWEEN sql_expr KW_AND sql_expr 
+ 974: predicate = STRING_CONST yard_opt_118 KW_LIKE STRING_CONST yard_opt_119 
+ 975: predicate = sql_expr binop sql_expr 
+ 976: yard_many_22 = yard_exp_brackets_178 yard_many_22 
+ 977: yard_many_22 = 
+ 978: yard_opt_117 = KW_NOT 
+ 979: yard_opt_117 = 
+ 980: yard_opt_116 = KW_NOT 
+ 981: yard_opt_116 = 
+ 982: search_condition = yard_exp_brackets_177 yard_many_22 
+ 983: yard_many_21 = yard_exp_brackets_176 yard_many_21 
+ 984: yard_many_21 = 
+ 985: yard_opt_115 = yard_exp_brackets_175 
+ 986: yard_opt_115 = 
+ 987: yard_opt_114 = yard_exp_brackets_174 
+ 988: yard_opt_114 = 
+ 989: yard_rule_list_33 = yard_exp_brackets_173 yard_many_21 
+ 990: yard_rule_list_33 = 
+ 991: yard_rule_comma_list_32 = yard_rule_list_33 
+ 992: yard_opt_113 = yard_exp_brackets_172 
+ 993: yard_opt_113 = 
+ 994: order_by_clause = yard_opt_113 
+ 995: yard_opt_112 = yard_many_20 
+ 996: yard_opt_112 = 
+ 997: yard_many_20 = yard_exp_brackets_171 yard_many_20 
+ 998: yard_many_20 = 
+ 999: yard_opt_111 = sql_expr 
+1000: yard_opt_111 = 
+1001: ranking_windowed_function = yard_exp_brackets_170 LPAREN yard_opt_111 RPAREN KW_OVER LPAREN yard_opt_112 order_by_clause RPAREN 
+1002: yard_many_19 = yard_exp_brackets_169 yard_many_19 
+1003: yard_many_19 = 
+1004: yard_opt_110 = yard_exp_brackets_168 
+1005: yard_opt_110 = 
+1006: yard_opt_109 = yard_exp_brackets_167 
+1007: yard_opt_109 = 
+1008: yard_rule_list_31 = yard_opt_109 yard_many_19 
+1009: yard_rule_list_31 = 
+1010: yard_rule_comma_list_30 = yard_rule_list_31 
+1011: aggregate_windowed_function = KW_OVER LPAREN yard_rule_comma_list_30 order_by_clause RPAREN 
+1012: yard_opt_108 = yard_exp_brackets_166 
+1013: yard_opt_108 = 
+1014: scalar_function = KW_SUM LPAREN yard_opt_108 sql_expr 
+1015: scalar_function = KW_LOWER LPAREN sql_expr RPAREN 
+1016: name = LOCALVAR 
+1017: name = full_ident 
+1018: name = ident 
+1019: yard_many_18 = yard_exp_brackets_165 yard_many_18 
+1020: yard_many_18 = 
+1021: yard_opt_106 = yard_exp_brackets_164 
+1022: yard_opt_106 = 
+1023: yard_opt_107 = KW_AS 
+1024: yard_opt_107 = 
+1025: yard_opt_105 = yard_exp_brackets_163 
+1026: yard_opt_105 = 
+1027: yard_opt_104 = yard_exp_brackets_162 
+1028: yard_opt_104 = 
+1029: yard_opt_102 = yard_exp_brackets_161 
+1030: yard_opt_102 = 
+1031: yard_opt_103 = KW_AS 
+1032: yard_opt_103 = 
+1033: yard_opt_101 = yard_exp_brackets_160 
+1034: yard_opt_101 = 
+1035: yard_opt_100 = yard_exp_brackets_159 
+1036: yard_opt_100 = 
+1037: yard_rule_list_29 = yard_exp_brackets_158 yard_many_18 
+1038: yard_rule_list_29 = 
+1039: yard_rule_comma_list_28 = yard_rule_list_29 
+1040: select_list = yard_rule_comma_list_28 
+1041: yard_opt_99 = yard_exp_brackets_157 
+1042: yard_opt_99 = 
+1043: yard_opt_96 = yard_exp_brackets_156 
+1044: yard_opt_96 = 
+1045: yard_opt_98 = yard_exp_brackets_155 
+1046: yard_opt_98 = 
+1047: yard_opt_97 = KW_ALL 
+1048: yard_opt_97 = 
+1049: yard_opt_95 = yard_exp_brackets_154 
+1050: yard_opt_95 = 
+1051: yard_opt_94 = from 
+1052: yard_opt_94 = 
+1053: yard_opt_93 = yard_exp_brackets_153 
+1054: yard_opt_93 = 
+1055: yard_opt_90 = yard_exp_brackets_152 
+1056: yard_opt_90 = 
+1057: yard_opt_92 = yard_exp_brackets_151 
+1058: yard_opt_92 = 
+1059: yard_opt_91 = KW_PERCENT 
+1060: yard_opt_91 = 
+1061: yard_opt_89 = yard_exp_brackets_150 
+1062: yard_opt_89 = 
+1063: query_specification = KW_SELECT yard_opt_89 yard_opt_90 select_list yard_opt_93 yard_opt_94 yard_opt_95 yard_opt_96 yard_opt_99 
+1064: yard_many_17 = yard_exp_brackets_149 yard_many_17 
+1065: yard_many_17 = 
+1066: yard_rule_list_27 = yard_exp_brackets_148 yard_many_17 
+1067: yard_rule_list_27 = 
+1068: yard_rule_comma_list_26 = yard_rule_list_27 
+1069: yard_opt_87 = yard_exp_brackets_147 
+1070: yard_opt_87 = 
+1071: yard_opt_88 = KW_ALL 
+1072: yard_opt_88 = 
+1073: query_expression = yard_exp_brackets_146 yard_opt_87 
+1074: yard_opt_86 = SEMI 
+1075: yard_opt_86 = 
+1076: yard_opt_85 = yard_exp_brackets_145 
+1077: yard_opt_85 = 
+1078: common_table_expression = yard_exp_brackets_144 yard_opt_85 KW_AS LPAREN select_stmnt RPAREN yard_opt_86 
+1079: yard_many_16 = yard_exp_brackets_143 yard_many_16 
+1080: yard_many_16 = 
+1081: yard_rule_list_25 = yard_exp_brackets_142 yard_many_16 
+1082: yard_rule_list_25 = 
+1083: yard_rule_comma_list_24 = yard_rule_list_25 
+1084: query_hint = yard_exp_brackets_141 
+1085: yard_opt_83 = yard_exp_brackets_140 
+1086: yard_opt_83 = 
+1087: yard_opt_84 = yard_exp_brackets_139 
+1088: yard_opt_84 = 
+1089: yard_opt_82 = yard_exp_brackets_138 
+1090: yard_opt_82 = 
+1091: yard_opt_81 = yard_exp_brackets_137 
+1092: yard_opt_81 = 
+1093: common_directives = yard_opt_81 yard_opt_82 yard_opt_83 
+1094: yard_opt_78 = yard_exp_brackets_136 
+1095: yard_opt_78 = 
+1096: yard_opt_79 = yard_exp_brackets_135 
+1097: yard_opt_79 = 
+1098: yard_opt_80 = yard_exp_brackets_134 
+1099: yard_opt_80 = 
+1100: yard_opt_77 = yard_exp_brackets_133 
+1101: yard_opt_77 = 
+1102: yard_opt_75 = yard_exp_brackets_132 
+1103: yard_opt_75 = 
+1104: yard_opt_76 = yard_exp_brackets_131 
+1105: yard_opt_76 = 
+1106: yard_opt_70 = yard_exp_brackets_130 
+1107: yard_opt_70 = 
+1108: yard_opt_73 = yard_exp_brackets_129 
+1109: yard_opt_73 = 
+1110: yard_opt_74 = yard_exp_brackets_128 
+1111: yard_opt_74 = 
+1112: yard_opt_71 = yard_exp_brackets_127 
+1113: yard_opt_71 = 
+1114: yard_opt_72 = yard_exp_brackets_126 
+1115: yard_opt_72 = 
+1116: yard_opt_69 = yard_exp_brackets_125 
+1117: yard_opt_69 = 
+1118: xml = KW_XML yard_exp_brackets_124 
+1119: yard_opt_68 = yard_exp_brackets_123 
+1120: yard_opt_68 = 
+1121: for = yard_opt_68 
+1122: yard_many_15 = yard_exp_brackets_122 yard_many_15 
+1123: yard_many_15 = 
+1124: yard_rule_list_23 = yard_exp_brackets_121 yard_many_15 
+1125: yard_rule_list_23 = 
+1126: yard_rule_comma_list_22 = yard_rule_list_23 
+1127: yard_many_14 = yard_exp_brackets_120 yard_many_14 
+1128: yard_many_14 = 
+1129: yard_rule_list_15 = common_table_expression yard_many_14 
+1130: yard_rule_list_15 = 
+1131: yard_rule_comma_list_14 = yard_rule_list_15 
+1132: yard_many_13 = yard_exp_brackets_119 yard_many_13 
+1133: yard_many_13 = 
+1134: yard_opt_67 = yard_exp_brackets_118 
+1135: yard_opt_67 = 
+1136: yard_opt_66 = yard_exp_brackets_117 
+1137: yard_opt_66 = 
+1138: yard_rule_list_17 = yard_exp_brackets_116 yard_many_13 
+1139: yard_rule_list_17 = 
+1140: yard_rule_comma_list_16 = yard_rule_list_17 
+1141: yard_many_12 = yard_exp_brackets_115 yard_many_12 
+1142: yard_many_12 = 
+1143: yard_rule_list_19 = yard_exp_brackets_114 yard_many_12 
+1144: yard_rule_list_19 = 
+1145: yard_rule_comma_list_18 = yard_rule_list_19 
+1146: yard_many_11 = yard_exp_brackets_113 yard_many_11 
+1147: yard_many_11 = 
+1148: yard_rule_list_21 = query_hint yard_many_11 
+1149: yard_rule_list_21 = 
+1150: yard_rule_comma_list_20 = yard_rule_list_21 
+1151: yard_opt_63 = yard_many_10 
+1152: yard_opt_63 = 
+1153: yard_many_10 = yard_exp_brackets_112 yard_many_10 
+1154: yard_many_10 = 
+1155: yard_opt_65 = RPAREN 
+1156: yard_opt_65 = 
+1157: yard_opt_64 = LPAREN 
+1158: yard_opt_64 = 
+1159: yard_opt_62 = SEMI 
+1160: yard_opt_62 = 
+1161: yard_opt_61 = yard_exp_brackets_111 
+1162: yard_opt_61 = 
+1163: yard_opt_60 = for 
+1164: yard_opt_60 = 
+1165: yard_opt_58 = yard_exp_brackets_110 
+1166: yard_opt_58 = 
+1167: yard_opt_59 = yard_exp_brackets_109 
+1168: yard_opt_59 = 
+1169: yard_opt_57 = yard_exp_brackets_108 
+1170: yard_opt_57 = 
+1171: yard_opt_56 = yard_exp_brackets_107 
+1172: yard_opt_56 = 
+1173: select_stmnt = KW_SELECT yard_exp_brackets_106 KW_FROM full_ident KW_WHERE sql_expr yard_opt_63 
+1174: select_stmnt = KW_SELECT yard_rule_comma_list_22 yard_opt_62 
+1175: select_stmnt = yard_exp_brackets_105 
+1176: table_constraint = yard_exp_brackets_104 
+1177: table_constraint = yard_exp_brackets_103 
+1178: yard_opt_55 = yard_exp_brackets_102 
+1179: yard_opt_55 = 
+1180: yard_opt_54 = yard_exp_brackets_101 
+1181: yard_opt_54 = 
+1182: column_constraint = yard_exp_brackets_100 
+1183: yard_opt_53 = column_constraint 
+1184: yard_opt_53 = 
+1185: yard_opt_52 = KW_ROWGUIDCOL 
+1186: yard_opt_52 = 
+1187: yard_opt_49 = yard_exp_brackets_99 
+1188: yard_opt_49 = 
+1189: yard_opt_51 = yard_exp_brackets_98 
+1190: yard_opt_51 = 
+1191: yard_opt_50 = yard_exp_brackets_97 
+1192: yard_opt_50 = 
+1193: yard_opt_48 = yard_exp_brackets_96 
+1194: yard_opt_48 = 
+1195: column_definition = ident yard_exp_brackets_95 yard_opt_48 yard_opt_49 yard_opt_52 yard_opt_53 
+1196: yard_many_9 = yard_exp_brackets_94 yard_many_9 
+1197: yard_many_9 = 
+1198: table_type_definition = KW_TABLE LPAREN yard_many_9 RPAREN 
+1199: yard_many_8 = yard_exp_brackets_93 yard_many_8 
+1200: yard_many_8 = 
+1201: yard_opt_47 = KW_AS 
+1202: yard_opt_47 = 
+1203: yard_opt_46 = KW_FOR 
+1204: yard_opt_46 = 
+1205: yard_opt_45 = KW_STATIC 
+1206: yard_opt_45 = 
+1207: yard_opt_44 = KW_LOCAL 
+1208: yard_opt_44 = 
+1209: yard_opt_43 = KW_AS 
+1210: yard_opt_43 = 
+1211: yard_opt_42 = KW_AS 
+1212: yard_opt_42 = 
+1213: yard_opt_41 = KW_FOR 
+1214: yard_opt_41 = 
+1215: yard_opt_40 = KW_STATIC 
+1216: yard_opt_40 = 
+1217: yard_opt_39 = KW_LOCAL 
+1218: yard_opt_39 = 
+1219: yard_opt_38 = KW_AS 
+1220: yard_opt_38 = 
+1221: yard_rule_list_13 = yard_exp_brackets_92 yard_many_8 
+1222: yard_rule_list_13 = 
+1223: yard_rule_comma_list_12 = yard_rule_list_13 
+1224: yard_opt_37 = SEMI 
+1225: yard_opt_37 = 
+1226: declare = KW_DECLARE yard_rule_comma_list_12 yard_opt_37 
+1227: yard_many_7 = yard_exp_brackets_91 yard_many_7 
+1228: yard_many_7 = 
+1229: yard_rule_list_9 = sql_expr yard_many_7 
+1230: yard_rule_list_9 = 
+1231: yard_rule_comma_list_8 = yard_rule_list_9 
+1232: yard_many_6 = yard_exp_brackets_90 yard_many_6 
+1233: yard_many_6 = 
+1234: yard_rule_list_11 = yard_exp_brackets_89 yard_many_6 
+1235: yard_rule_list_11 = 
+1236: yard_rule_comma_list_10 = yard_rule_list_11 
+1237: yard_opt_36 = yard_exp_brackets_88 
+1238: yard_opt_36 = 
+1239: yard_opt_35 = yard_exp_brackets_87 
+1240: yard_opt_35 = 
+1241: raiserror_stmnt = KW_RAISERROR LPAREN yard_exp_brackets_85 yard_exp_brackets_86 yard_opt_35 RPAREN yard_opt_36 
+1242: yard_rule_brace_opt_7 = LPAREN sql_expr RPAREN 
+1243: yard_rule_brace_opt_7 = sql_expr 
+1244: yard_opt_34 = yard_exp_brackets_84 
+1245: yard_opt_34 = 
+1246: if_stmt = KW_IF yard_rule_brace_opt_7 proc_body_stmnt yard_opt_34 
+1247: yard_many_5 = yard_exp_brackets_83 yard_many_5 
+1248: yard_many_5 = 
+1249: yard_opt_33 = SEMI 
+1250: yard_opt_33 = 
+1251: stmt_block = KW_BEGIN yard_many_5 KW_END 
+1252: proc_body_stmnt = drop_procedure 
+1253: proc_body_stmnt = rollback_transaction 
+1254: proc_body_stmnt = commit_transaction 
+1255: proc_body_stmnt = begin_transaction 
+1256: proc_body_stmnt = KW_BEGIN proc_body_stmnt KW_END 
+1257: proc_body_stmnt = stmt_block 
+1258: proc_body_stmnt = raiserror_stmnt 
+1259: proc_body_stmnt = if_stmt 
+1260: proc_body_stmnt = KW_RETURN sql_expr 
+1261: proc_body_stmnt = declare 
+1262: proc_body_stmnt = sql_expr 
+1263: proc_body_stmnt = execute_stmnt 
+1264: proc_body_stmnt = set_stmnt 
+1265: proc_body_stmnt = select_stmnt 
+1266: yard_opt_32 = KW_EXECUTE_AS_Clause 
+1267: yard_opt_32 = 
+1268: yard_opt_31 = KW_RECOMPILE 
+1269: yard_opt_31 = 
+1270: yard_opt_30 = KW_ENCRYPTION 
+1271: yard_opt_30 = 
+1272: procedure_option = yard_opt_32 
+1273: procedure_option = yard_opt_31 
+1274: procedure_option = yard_opt_30 
+1275: yard_opt_29 = yard_rule_comma_list_2 
+1276: yard_opt_29 = 
+1277: yard_opt_28 = yard_rule_comma_list_2 
+1278: yard_opt_28 = 
+1279: yard_rule_brace_opt_6 = LPAREN yard_opt_29 RPAREN 
+1280: yard_rule_brace_opt_6 = yard_opt_28 
+1281: yard_opt_27 = SEMI 
+1282: yard_opt_27 = 
+1283: yard_opt_26 = KW_END 
+1284: yard_opt_26 = 
+1285: yard_many_4 = yard_exp_brackets_82 yard_many_4 
+1286: yard_many_4 = 
+1287: yard_opt_25 = SEMI 
+1288: yard_opt_25 = 
+1289: yard_opt_24 = KW_BEGIN 
+1290: yard_opt_24 = 
+1291: yard_opt_23 = yard_exp_brackets_81 
+1292: yard_opt_23 = 
+1293: yard_opt_22 = yard_exp_brackets_80 
+1294: yard_opt_22 = 
+1295: yard_some_2 = execute_as yard_some_2 
+1296: yard_some_2 = execute_as 
+1297: yard_opt_21 = yard_exp_brackets_79 
+1298: yard_opt_21 = 
+1299: yard_opt_20 = yard_exp_brackets_78 
+1300: yard_opt_20 = 
+1301: create_proc = KW_CREATE yard_exp_brackets_77 yard_opt_20 ident yard_opt_21 yard_rule_brace_opt_6 yard_opt_22 yard_opt_23 KW_AS yard_opt_24 yard_many_4 yard_opt_26 yard_opt_27 
+1302: yard_opt_19 = KW_READONLY 
+1303: yard_opt_19 = 
+1304: yard_opt_18 = yard_exp_brackets_76 
+1305: yard_opt_18 = 
+1306: yard_opt_17 = yard_exp_brackets_75 
+1307: yard_opt_17 = 
+1308: yard_opt_16 = KW_VARYING 
+1309: yard_opt_16 = 
+1310: yard_opt_15 = sql_datatype 
+1311: yard_opt_15 = 
+1312: yard_opt_14 = yard_exp_brackets_74 
+1313: yard_opt_14 = 
+1314: proc_formal_param = LOCALVAR yard_opt_14 yard_opt_15 yard_opt_16 yard_opt_17 yard_opt_18 yard_opt_19 
+1315: yard_some_1 = yard_exp_brackets_73 yard_some_1 
+1316: yard_some_1 = yard_exp_brackets_72 
+1317: yard_opt_13 = yard_exp_brackets_71 
+1318: yard_opt_13 = 
+1319: drop_procedure = KW_DROP yard_exp_brackets_70 yard_some_1 
+1320: yard_many_3 = yard_exp_brackets_69 yard_many_3 
+1321: yard_many_3 = 
+1322: yard_rule_list_5 = ident yard_many_3 
+1323: yard_rule_list_5 = 
+1324: yard_rule_comma_list_4 = yard_rule_list_5 
+1325: yard_many_2 = yard_exp_brackets_68 yard_many_2 
+1326: yard_many_2 = 
+1327: yard_rule_list_3 = proc_formal_param yard_many_2 
+1328: yard_rule_list_3 = 
+1329: yard_rule_comma_list_2 = yard_rule_list_3 
+1330: yard_opt_11 = yard_exp_brackets_67 
+1331: yard_opt_11 = 
+1332: yard_opt_12 = yard_exp_brackets_66 
+1333: yard_opt_12 = 
+1334: yard_opt_10 = KW_TYPE_WARNING 
+1335: yard_opt_10 = 
+1336: yard_opt_9 = yard_exp_brackets_65 
+1337: yard_opt_9 = 
+1338: yard_opt_8 = yard_exp_brackets_64 
+1339: yard_opt_8 = 
+1340: yard_opt_7 = yard_exp_brackets_63 
+1341: yard_opt_7 = 
+1342: yard_opt_6 = yard_exp_brackets_62 
+1343: yard_opt_6 = 
+1344: set_localvar = yard_exp_brackets_61 
+1345: set_localvar = KW_SET yard_exp_brackets_60 
+1346: set_stmnt = set_localvar 
+1347: set_stmnt = KW_SET yard_exp_brackets_58 yard_exp_brackets_59 
+1348: yard_opt_5 = SEMI 
+1349: yard_opt_5 = 
+1350: yard_opt_4 = yard_exp_brackets_57 
+1351: yard_opt_4 = 
+1352: yard_opt_3 = yard_exp_brackets_56 
+1353: yard_opt_3 = 
+1354: rollback_transaction = KW_ROLLBACK yard_opt_3 yard_opt_4 yard_opt_5 
+1355: batch_body = drop_procedure 
+1356: batch_body = rollback_transaction 
+1357: batch_body = case 
+1358: batch_body = declare 
+1359: batch_body = commit_transaction 
+1360: batch_body = begin_transaction 
+1361: batch_body = KW_USE LBRACKET KW_MDW_CONTROL RBRACKET 
+1362: batch_body = set_stmnt 
+1363: batch_body = create_proc 
+1364: yard_many_1 = yard_exp_brackets_55 yard_many_1 
+1365: yard_many_1 = 
+1366: yard_opt_2 = KW_GO 
+1367: yard_opt_2 = 
+1368: yard_rule_list_1 = batch_body yard_many_1 
+1369: yard_rule_list_1 = 
+1370: yard_opt_1 = KW_GO 
+1371: yard_opt_1 = 
+1372: root_rule = yard_rule_list_1 yard_opt_1 
+1373: yard_start_rule = root_rule 

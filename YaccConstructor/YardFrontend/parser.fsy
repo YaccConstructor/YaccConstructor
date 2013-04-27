@@ -32,6 +32,7 @@ type Range = struct
 end
 
 exception Parse_error
+let parseFile = ref Unchecked.defaultof<_>
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let allPublic = ref false
@@ -62,22 +63,16 @@ let concatModOpt a b = fst a :: fst b, joinMaps (snd a) (snd b)
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     let oldFileName = !currentFilename
     currentFilename := filename
-    let ext = filename.Substring(filename.LastIndexOf(".") + 1)
-    let frontend = FrontendsManager.GetByExtension ext
+    let ext = filename.Substring(filename.LastIndexOf(".") + 1)    
     let userDefs =
         let args = oldFileName.Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName oldFileName, filename) in
-
-    match FrontendsManager.GetByExtension ext with
-    | Some frontend -> 
-        let res = frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
-        currentFilename := oldFileName
-        res
-    | None -> 
-        failwith (sprintf "Not supported extension %s in file %s" ext filename )
+    let res = !parseFile (sameDirFilename + "%" + userDefs)
+    currentFilename := oldFileName
+    res
 %}
 
 %token EOF

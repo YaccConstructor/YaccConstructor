@@ -8,11 +8,12 @@ open Constraints
 open Yard.Generators.RNGLR.InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open CodeEmitter
+open Constraints
 
 type GLLGenerator() =
     inherit Generator()
         override this.Name = "GLLGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noLiterals; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
 
         override this.Generate (definition, args) =
             // parse arguments

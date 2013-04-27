@@ -23,28 +23,17 @@
 open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.SourceText
 }
-(* include "../../../GrammarTemplates/Common.yrd" *)
 
-list <<item separator>>: 
-      {[]}
-    | hd=item tl=(separator itm=item {itm})* {hd::tl}
-    ;
+include "../../../GrammarTemplates/Common.yrd"
+include "MsCommon.yrd"
 
-not_empty_list<<item separator>>:
-    hd=item tl=(separator itm=item {itm})* {hd::tl}
+module Main
 
-brace_opt<<o_br block cl_br>>:
-      block 
-    | -o_br block -cl_br
-    ;
-
-
+open Common, MsCommon
 
 [<Start>]
 root_rule: (batch_body KW_GO?)*
 
-(* root_rule: list<<batch_body KW_GO?>> KW_GO?
-*)
 
 
 batch_body: 
@@ -83,18 +72,16 @@ set_localvar:
     KW_SET
     ( 
         LOCALVAR 
-        (DOUBLE_COLON (*property_name |*) ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN (*свойство пользовательского типа или общее поле польз типа*)
+        (DOUBLE_COLON ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN 
     )
-    |
-    ( LOCALVAR OP_EQ 
-        ( LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
+    |( LOCALVAR OP_EQ 
+        LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
         ( KW_STATIC | KW_KEYSET | KW_DYNAMIC | KW_FAST_FORWARD )? 
         ( KW_READ_ONLY | KW_SCROLL_LOCKS | KW_OPTIMISTIC )? 
         KW_TYPE_WARNING? 
         KW_FOR select_stmnt 
         ( KW_FOR ( KW_EAD ONLY | KW_UPDATE ( KW_OF comma_list<<ident>> )?))? 
         ) 
-        )
     )   
     
 (*********************************PROCEDURE************************************************************)    
@@ -112,7 +99,7 @@ create_proc:
     brace_opt<<LPAREN comma_list<<proc_formal_param>> RPAREN>>
     (KW_WITH (execute_as)+ )? 
     ( KW_FOR KW_REPLICATION )?
-    KW_AS KW_BEGIN? (proc_body_stmnt SEMI?)* KW_END?
+    KW_AS (proc_body_stmnt SEMI?)*
     SEMI?
 
 procedure_option: 
@@ -123,14 +110,12 @@ procedure_option:
 proc_body_stmnt:
      select_stmnt
    | set_stmnt
-   | execute_stmnt
-   | sql_expr
+   | execute_stmnt   
    | declare
    | KW_RETURN sql_expr
    | if_stmt
    | raiserror_stmnt
    | stmt_block
-   | KW_BEGIN proc_body_stmnt KW_END
    | begin_transaction
    | commit_transaction
    | rollback_transaction
@@ -139,14 +124,16 @@ proc_body_stmnt:
    | create_table
    | insert
    | fetch_stmnt
+   | print_stmt
 
 (***********************************STATEMENTS******************************************************)
 
+print_stmt: KW_PRINT sql_expr SEMI?
 while_stmt: KW_WHILE sql_expr proc_body_stmnt
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF brace_opt<<LPAREN sql_expr RPAREN>> proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
                 
 
 raiserror_stmnt:
@@ -197,10 +184,7 @@ select_stmnt:
         (KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
-    | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) brace_opt<<LPAREN sql_expr RPAREN>> )*)?
-     
+    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? ) SEMI?
     
 for:
     (KW_FOR (KW_BROWSE | xml))?
@@ -285,8 +269,8 @@ select_list:
         | ident OP_EQ sql_expr)>>
     
 scalar_function:
-    KW_LOWER sql_expr
-    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr 
+      KW_LOWER sql_expr
+    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr RPAREN
     
 aggregate_windowed_function:
     KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
@@ -300,7 +284,6 @@ order_by_clause:
     (KW_ORDER KW_BY 
         comma_list<< (sql_expr (KW_ASC | KW_DESC)?) >>
     )? 
-
     
 search_condition: 
     ( KW_NOT? predicate | LPAREN search_condition RPAREN )
@@ -326,7 +309,7 @@ table_source:
         | sql_expr (KW_AS? ident)? (LPAREN comma_list<<ident>> RPAREN)?)
     (*| openxml_clause*)
     | ident  KW_AS? ident (LPAREN comma_list<<ident>> RPAREN)? 
-    | brace_opt<<LPAREN joined_table RPAREN>> 
+    | joined_table 
     | pivoted_table 
     | (unpivoted_table                                                     
         | LOCALVAR (KW_AS? full_ident)?
@@ -463,6 +446,7 @@ joined_table:
     table_source join_type table_source KW_ON search_condition 
     | table_source KW_CROSS KW_JOIN table_source 
     (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
+    | LPAREN joined_table RPAREN
     
 
 join_type: 
@@ -490,7 +474,7 @@ unpivoted_table:
 unpivot_clause:
         LPAREN ident KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN
  
-    
+   
 case:
     KW_CASE sql_expr?
         (KW_WHEN sql_expr KW_THEN sql_expr)*
@@ -513,10 +497,8 @@ column_definition_create_table:
     ident sql_datatype
         (KW_COLLATE IDENT)? 
         ( KW_NULL | KW_NOT KW_NULL )?
-        ( 
-            ( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
-          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?
-        )?
+        (( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
+          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?)?
         ( KW_ROWGUIDCOL )? column_constraint_create_table* 
 
 column_constraint_create_table: 
@@ -651,14 +633,15 @@ execute_proc:
       (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
       brace_opt<<
          LPAREN 
-         (comma_list<<((ident OP_EQ)? 
-            (sql_expr (KW_OUTPUT | KW_OUT)? 
+         (comma_list<<((LOCALVAR OP_EQ)? 
+            (sql_expr
+			|LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
          )?>>)
         RPAREN>>
       (KW_WITH KW_RECOMPILE)?
     )
-    | create_object DOT IDENT LPAREN comma_list<<((ident OP_EQ)? sql_expr)>> RPAREN)
+    | create_object DOT IDENT LPAREN comma_list<<((LOCALVAR OP_EQ)? sql_expr)>> RPAREN)
 
 create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>> RPAREN
 
@@ -697,6 +680,7 @@ binop:
      OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
     | OP_EQ | OP_PLUS | OP_MINUS | STAR | OP_DIV | OP_MOD | OP_TILDA 
     | OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+
 fetch_stmnt:    
     KW_FETCH 
               ((KW_NEXT | KW_PRIOR | KW_FIRST | KW_LAST 
@@ -712,13 +696,13 @@ sql_expr:
     sql_value
     | scalar_function
     | LPAREN sql_expr RPAREN
-    | LOCALVAR 
     | call_expr
-	| ident
-	| full_ident
+    | full_ident
     | select_stmnt
-    | (OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+    | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
     | GLOBALVAR
+    | LOCALVAR
+	| STAR
     | sql_expr binop sql_expr
     | sql_expr KW_IS KW_NOT? KW_NULL
     | ranking_windowed_function 
@@ -726,10 +710,8 @@ sql_expr:
     | sql_expr KW_COLLATE ident
     | case
     | begin_transaction
-    | KW_NOT? KW_EXISTS sql_expr
-    | KW_NOT? KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | KW_IS? KW_NOT? KW_NULL
-    | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
+    | KW_EXISTS sql_expr
+    | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident
     | fetch_stmnt
@@ -737,17 +719,3 @@ sql_expr:
     | sql_expr KW_NOT? KW_LIKE sql_expr
      
 call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
-
-comma_list<<item>>: list<<item COMMA>>
-
-dec_num: OP_MINUS? DEC_NUMBER
-
-sql_value:
-     STRING_CONST  (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
-   | dec_num
-   | KW_NULL
-
-(* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
-ident: brace_opt<<LBRACKET (IDENT | KW_TYPE | KW_CLASS | KW_STATE | KW_OWNER | KW_IGNORE_DUP_KEY) RBRACKET>>
-
-full_ident: not_empty_list<<ident DOT>>

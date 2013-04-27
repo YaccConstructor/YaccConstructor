@@ -37,7 +37,7 @@ type GLLGenerator() =
                         
             let out = new System.Text.StringBuilder()
 
-            //emitDebugInfo grammar out
+            emitDebugInfo grammar out
             emitNameAndUsages moduleName out
             emitSource definition.head out
             emitTokenType tokenType grammar.indexator out

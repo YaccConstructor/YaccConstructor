@@ -31,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\FsYARD.XML</DocumentationFile>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\MsSql.fsproj</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

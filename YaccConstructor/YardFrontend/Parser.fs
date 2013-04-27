@@ -41,6 +41,7 @@ type Range = struct
 end
 
 exception Parse_error
+let parseFile = ref Unchecked.defaultof<_>
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let allPublic = ref false
@@ -71,24 +72,18 @@ let concatModOpt a b = fst a :: fst b, joinMaps (snd a) (snd b)
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     let oldFileName = !currentFilename
     currentFilename := filename
-    let ext = filename.Substring(filename.LastIndexOf(".") + 1)
-    let frontend = FrontendsManager.GetByExtension ext
+    let ext = filename.Substring(filename.LastIndexOf(".") + 1)    
     let userDefs =
         let args = oldFileName.Trim().Split('%') in
         if args.Length = 2
         then args.[1]
         else ""
     let sameDirFilename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName oldFileName, filename) in
+    let res = !parseFile (sameDirFilename + "%" + userDefs)
+    currentFilename := oldFileName
+    res
 
-    match FrontendsManager.GetByExtension ext with
-    | Some frontend -> 
-        let res = frontend.Value.ParseGrammar (sameDirFilename + "%" + userDefs)
-        currentFilename := oldFileName
-        res
-    | None -> 
-        failwith (sprintf "Not supported extension %s in file %s" ext filename )
-
-# 91 "Parser.fs"
+# 86 "Parser.fs"
 type Token =
     | ACTION of Source.t
     | ALL_PUBLIC of Source.t
@@ -323,7 +318,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                      |> List.iter (fun (_S5) -> 
                       _rnglr_cycle_res := (
                         
-# 118 "Parser.fsy"
+# 113 "Parser.fsy"
                                 
                                 {
                                     info = { fileName = !currentFilename }
@@ -337,9 +332,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 113 "Parser.fsy"
+# 108 "Parser.fsy"
                : '_rnglr_type_file) 
-# 342 "Parser.fs"
+# 337 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -347,9 +342,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_file) 
             )
-# 113 "Parser.fsy"
+# 108 "Parser.fsy"
                : '_rnglr_type_yard_start_rule) 
-# 352 "Parser.fs"
+# 347 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -361,7 +356,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 129 "Parser.fsy"
+# 124 "Parser.fsy"
                      
                         match fst _S1 with
                         | [] -> [], Map.empty
@@ -371,9 +366,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 128 "Parser.fsy"
+# 123 "Parser.fsy"
                : '_rnglr_type_unnamed_module_opt) 
-# 376 "Parser.fs"
+# 371 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -383,15 +378,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 136 "Parser.fsy"
+# 131 "Parser.fsy"
                           [], Map.empty 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 135 "Parser.fsy"
+# 130 "Parser.fsy"
                : '_rnglr_type_modules) 
-# 394 "Parser.fs"
+# 389 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -405,15 +400,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 135 "Parser.fsy"
+# 130 "Parser.fsy"
                                               concatModOpt _S1 _S2 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 135 "Parser.fsy"
+# 130 "Parser.fsy"
                : '_rnglr_type_modules) 
-# 416 "Parser.fs"
+# 411 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -431,7 +426,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                    |> List.iter (fun (_S4) -> 
                     _rnglr_cycle_res := (
                       
-# 139 "Parser.fsy"
+# 134 "Parser.fsy"
                            
                               {
                                   allPublic = _S1
@@ -445,9 +440,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 138 "Parser.fsy"
+# 133 "Parser.fsy"
                : '_rnglr_type_module_) 
-# 450 "Parser.fs"
+# 445 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -459,15 +454,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 149 "Parser.fsy"
+# 144 "Parser.fsy"
                                                  _S1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 149 "Parser.fsy"
+# 144 "Parser.fsy"
                : '_rnglr_type_ident) 
-# 470 "Parser.fs"
+# 465 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -479,15 +474,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 149 "Parser.fsy"
+# 144 "Parser.fsy"
                                  _S1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 149 "Parser.fsy"
+# 144 "Parser.fsy"
                : '_rnglr_type_ident) 
-# 490 "Parser.fs"
+# 485 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -499,15 +494,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 156 "Parser.fsy"
+# 151 "Parser.fsy"
                                          allPublic := false; false 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 152 "Parser.fsy"
+# 147 "Parser.fsy"
                : '_rnglr_type_module_header) 
-# 510 "Parser.fs"
+# 505 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -521,7 +516,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 152 "Parser.fsy"
+# 147 "Parser.fsy"
                                                      
                                     (* It's important the word "module" is here. It guaranties, that it won't be an epsilon-tree, so allPublic will be evaluated before rules *)
                                     allPublic := true; true
@@ -530,9 +525,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 152 "Parser.fsy"
+# 147 "Parser.fsy"
                : '_rnglr_type_module_header) 
-# 535 "Parser.fs"
+# 530 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -548,15 +543,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 158 "Parser.fsy"
+# 153 "Parser.fsy"
                                                                 _S2::_S3 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 158 "Parser.fsy"
+# 153 "Parser.fsy"
                : '_rnglr_type_openings) 
-# 559 "Parser.fs"
+# 554 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -566,15 +561,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 158 "Parser.fsy"
+# 153 "Parser.fsy"
                             [] 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 158 "Parser.fsy"
+# 153 "Parser.fsy"
                : '_rnglr_type_openings) 
-# 577 "Parser.fs"
+# 572 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -584,15 +579,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 160 "Parser.fsy"
+# 155 "Parser.fsy"
                                                                [] 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 160 "Parser.fsy"
+# 155 "Parser.fsy"
                : '_rnglr_type_open_list) 
-# 595 "Parser.fs"
+# 590 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -608,15 +603,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 160 "Parser.fsy"
+# 155 "Parser.fsy"
                                                         _S2::_S3 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 160 "Parser.fsy"
+# 155 "Parser.fsy"
                : '_rnglr_type_open_list) 
-# 619 "Parser.fs"
+# 614 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -628,15 +623,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 162 "Parser.fsy"
+# 157 "Parser.fsy"
                                                 Some _S1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 162 "Parser.fsy"
+# 157 "Parser.fsy"
                : '_rnglr_type_action_opt) 
-# 639 "Parser.fs"
+# 634 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -646,15 +641,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 162 "Parser.fsy"
+# 157 "Parser.fsy"
                             None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 162 "Parser.fsy"
+# 157 "Parser.fsy"
                : '_rnglr_type_action_opt) 
-# 657 "Parser.fs"
+# 652 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -668,15 +663,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 164 "Parser.fsy"
+# 159 "Parser.fsy"
                                                           Some _S2 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 164 "Parser.fsy"
+# 159 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
-# 679 "Parser.fs"
+# 674 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -686,15 +681,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 164 "Parser.fsy"
+# 159 "Parser.fsy"
                           None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 164 "Parser.fsy"
+# 159 "Parser.fsy"
                : '_rnglr_type_foot_opt) 
-# 697 "Parser.fs"
+# 692 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -704,15 +699,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 166 "Parser.fsy"
+# 161 "Parser.fsy"
                                                                                                [], Map.empty 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 166 "Parser.fsy"
+# 161 "Parser.fsy"
                : '_rnglr_type_includes) 
-# 715 "Parser.fs"
+# 710 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -726,15 +721,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 166 "Parser.fsy"
+# 161 "Parser.fsy"
                                                  fst _S1 @ fst _S2, joinMaps (snd _S1) (snd _S2) 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 166 "Parser.fsy"
+# 161 "Parser.fsy"
                : '_rnglr_type_includes) 
-# 737 "Parser.fs"
+# 732 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -748,7 +743,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 170 "Parser.fsy"
+# 165 "Parser.fsy"
                        
                           let def = parseRules _S2.text in
                           if def.grammar |> List.exists (fun m -> m.name.IsNone) then
@@ -759,9 +754,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 168 "Parser.fsy"
+# 163 "Parser.fsy"
                : '_rnglr_type_include_) 
-# 764 "Parser.fs"
+# 759 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -771,15 +766,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 180 "Parser.fsy"
+# 175 "Parser.fsy"
                       [], Map.empty 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 178 "Parser.fsy"
+# 173 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
-# 782 "Parser.fs"
+# 777 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -795,15 +790,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 179 "Parser.fsy"
+# 174 "Parser.fsy"
                             concatModOpt _S1 _S3 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 178 "Parser.fsy"
+# 173 "Parser.fsy"
                : '_rnglr_type_rule_nlist) 
-# 806 "Parser.fs"
+# 801 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -829,7 +824,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                            |> List.iter (fun (_S8) -> 
                             _rnglr_cycle_res := (
                               
-# 184 "Parser.fsy"
+# 179 "Parser.fsy"
                                       
                                       let newRule =
                                           {
@@ -849,9 +844,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 183 "Parser.fsy"
+# 178 "Parser.fsy"
                : '_rnglr_type_rule) 
-# 854 "Parser.fs"
+# 849 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -863,15 +858,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 200 "Parser.fsy"
+# 195 "Parser.fsy"
                                                                 true
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 200 "Parser.fsy"
+# 195 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
-# 874 "Parser.fs"
+# 869 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -881,15 +876,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 200 "Parser.fsy"
+# 195 "Parser.fsy"
                                     false
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 200 "Parser.fsy"
+# 195 "Parser.fsy"
                : '_rnglr_type_start_rule_sign_opt) 
-# 892 "Parser.fs"
+# 887 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -899,15 +894,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                                                                            !allPublic 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                : '_rnglr_type_access_modifier_opt) 
-# 910 "Parser.fs"
+# 905 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -919,15 +914,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                                                                  false 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                : '_rnglr_type_access_modifier_opt) 
-# 930 "Parser.fs"
+# 925 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -939,15 +934,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                                               true 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 202 "Parser.fsy"
+# 197 "Parser.fsy"
                : '_rnglr_type_access_modifier_opt) 
-# 950 "Parser.fs"
+# 945 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -963,15 +958,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_) -> 
                   _rnglr_cycle_res := (
                     
-# 204 "Parser.fsy"
+# 199 "Parser.fsy"
                                                                                      Some _S2
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 204 "Parser.fsy"
+# 199 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
-# 974 "Parser.fs"
+# 969 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -981,15 +976,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 204 "Parser.fsy"
+# 199 "Parser.fsy"
                                        None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 204 "Parser.fsy"
+# 199 "Parser.fsy"
                : '_rnglr_type_formal_meta_param_opt) 
-# 992 "Parser.fs"
+# 987 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1003,15 +998,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 207 "Parser.fsy"
+# 202 "Parser.fsy"
                                                              _S1::_S2
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 206 "Parser.fsy"
+# 201 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
-# 1014 "Parser.fs"
+# 1009 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1023,15 +1018,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 206 "Parser.fsy"
+# 201 "Parser.fsy"
                                           [_S1]
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 206 "Parser.fsy"
+# 201 "Parser.fsy"
                : '_rnglr_type_formal_meta_list) 
-# 1034 "Parser.fs"
+# 1029 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1043,15 +1038,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 209 "Parser.fsy"
+# 204 "Parser.fsy"
                                              Some _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 209 "Parser.fsy"
+# 204 "Parser.fsy"
                : '_rnglr_type_param_opt) 
-# 1054 "Parser.fs"
+# 1049 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1061,15 +1056,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 209 "Parser.fsy"
+# 204 "Parser.fsy"
                            None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 209 "Parser.fsy"
+# 204 "Parser.fsy"
                : '_rnglr_type_param_opt) 
-# 1072 "Parser.fs"
+# 1067 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1083,15 +1078,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 211 "Parser.fsy"
+# 206 "Parser.fsy"
                                                          _S1::_S2
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 211 "Parser.fsy"
+# 206 "Parser.fsy"
                : '_rnglr_type_param_list) 
-# 1094 "Parser.fs"
+# 1089 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1101,15 +1096,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 211 "Parser.fsy"
+# 206 "Parser.fsy"
                             [] 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 211 "Parser.fsy"
+# 206 "Parser.fsy"
                : '_rnglr_type_param_list) 
-# 1112 "Parser.fs"
+# 1107 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1121,15 +1116,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 213 "Parser.fsy"
+# 208 "Parser.fsy"
                                                Some _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 213 "Parser.fsy"
+# 208 "Parser.fsy"
                : '_rnglr_type_weight_opt) 
-# 1132 "Parser.fs"
+# 1127 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1139,15 +1134,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 213 "Parser.fsy"
+# 208 "Parser.fsy"
                             None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 213 "Parser.fsy"
+# 208 "Parser.fsy"
                : '_rnglr_type_weight_opt) 
-# 1150 "Parser.fs"
+# 1145 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1161,15 +1156,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 215 "Parser.fsy"
+# 210 "Parser.fsy"
                                                         PAlt (_S1,_S2)
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 215 "Parser.fsy"
+# 210 "Parser.fsy"
                : '_rnglr_type_alts) 
-# 1172 "Parser.fs"
+# 1167 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1181,15 +1176,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 215 "Parser.fsy"
+# 210 "Parser.fsy"
                             _S1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 215 "Parser.fsy"
+# 210 "Parser.fsy"
                : '_rnglr_type_alts) 
-# 1192 "Parser.fs"
+# 1187 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1203,15 +1198,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 218 "Parser.fsy"
+# 213 "Parser.fsy"
                                            _S2
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 217 "Parser.fsy"
+# 212 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
-# 1214 "Parser.fs"
+# 1209 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1227,15 +1222,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 217 "Parser.fsy"
+# 212 "Parser.fsy"
                                                            PAlt(_S2,_S3) 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 217 "Parser.fsy"
+# 212 "Parser.fsy"
                : '_rnglr_type_bar_seq_nlist) 
-# 1238 "Parser.fs"
+# 1233 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1247,15 +1242,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 220 "Parser.fsy"
+# 215 "Parser.fsy"
                                                 _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 220 "Parser.fsy"
+# 215 "Parser.fsy"
                : '_rnglr_type_seq) 
-# 1258 "Parser.fs"
+# 1253 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1267,15 +1262,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 220 "Parser.fsy"
+# 215 "Parser.fsy"
                                  _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 220 "Parser.fsy"
+# 215 "Parser.fsy"
                : '_rnglr_type_seq) 
-# 1278 "Parser.fs"
+# 1273 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1287,15 +1282,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 223 "Parser.fsy"
+# 218 "Parser.fsy"
                                      PSeq([], Some _S1, None) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 222 "Parser.fsy"
+# 217 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
-# 1298 "Parser.fs"
+# 1293 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1311,15 +1306,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 222 "Parser.fsy"
+# 217 "Parser.fsy"
                                                                     PSeq (_S1::_S2, _S3, None)
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 222 "Parser.fsy"
+# 217 "Parser.fsy"
                : '_rnglr_type_no_lbl_seq) 
-# 1322 "Parser.fs"
+# 1317 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1339,15 +1334,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                      |> List.iter (fun (_) -> 
                       _rnglr_cycle_res := (
                         
-# 225 "Parser.fsy"
+# 220 "Parser.fsy"
                                                                              makeNewSeq _S4 _S1 _S2
                           )::!_rnglr_cycle_res ) ) ) ) )
             !_rnglr_cycle_res
           )
             )
-# 225 "Parser.fsy"
+# 220 "Parser.fsy"
                : '_rnglr_type_lbl_seq) 
-# 1350 "Parser.fs"
+# 1345 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1361,15 +1356,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 227 "Parser.fsy"
+# 222 "Parser.fsy"
                                                                   _S1::_S2
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 227 "Parser.fsy"
+# 222 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
-# 1372 "Parser.fs"
+# 1367 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1379,15 +1374,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 227 "Parser.fsy"
+# 222 "Parser.fsy"
                                [] 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 227 "Parser.fsy"
+# 222 "Parser.fsy"
                : '_rnglr_type_seq_elem_list) 
-# 1390 "Parser.fs"
+# 1385 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1403,15 +1398,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 229 "Parser.fsy"
+# 224 "Parser.fsy"
                                                             {_S2 with checker = _S3; omit = _S1 }
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 229 "Parser.fsy"
+# 224 "Parser.fsy"
                : '_rnglr_type_seq_elem) 
-# 1414 "Parser.fs"
+# 1409 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1423,15 +1418,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 231 "Parser.fsy"
+# 226 "Parser.fsy"
                                               true 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 231 "Parser.fsy"
+# 226 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
-# 1434 "Parser.fs"
+# 1429 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1441,15 +1436,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 231 "Parser.fsy"
+# 226 "Parser.fsy"
                           false 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 231 "Parser.fsy"
+# 226 "Parser.fsy"
                : '_rnglr_type_omit_opt) 
-# 1452 "Parser.fs"
+# 1447 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1461,15 +1456,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 233 "Parser.fsy"
+# 228 "Parser.fsy"
                                                   true
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 233 "Parser.fsy"
+# 228 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
-# 1472 "Parser.fs"
+# 1467 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1479,15 +1474,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 233 "Parser.fsy"
+# 228 "Parser.fsy"
                            false 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 233 "Parser.fsy"
+# 228 "Parser.fsy"
                : '_rnglr_type_semi_opt) 
-# 1490 "Parser.fs"
+# 1485 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1499,15 +1494,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 235 "Parser.fsy"
+# 230 "Parser.fsy"
                                                       Some _S1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 235 "Parser.fsy"
+# 230 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
-# 1510 "Parser.fs"
+# 1505 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1517,15 +1512,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 235 "Parser.fsy"
+# 230 "Parser.fsy"
                                None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 235 "Parser.fsy"
+# 230 "Parser.fsy"
                : '_rnglr_type_predicate_opt) 
-# 1528 "Parser.fs"
+# 1523 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1537,15 +1532,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 238 "Parser.fsy"
+# 233 "Parser.fsy"
                                          createSeqElem None false _S1 None      
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 237 "Parser.fsy"
+# 232 "Parser.fsy"
                : '_rnglr_type_bound) 
-# 1548 "Parser.fs"
+# 1543 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1561,15 +1556,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 237 "Parser.fsy"
+# 232 "Parser.fsy"
                                              createSeqElem (Some _S1) false _S3 None 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 237 "Parser.fsy"
+# 232 "Parser.fsy"
                : '_rnglr_type_bound) 
-# 1572 "Parser.fs"
+# 1567 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1581,15 +1576,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 240 "Parser.fsy"
+# 235 "Parser.fsy"
                                              _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 240 "Parser.fsy"
+# 235 "Parser.fsy"
                : '_rnglr_type_patt) 
-# 1592 "Parser.fs"
+# 1587 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1601,15 +1596,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 240 "Parser.fsy"
+# 235 "Parser.fsy"
                               _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 240 "Parser.fsy"
+# 235 "Parser.fsy"
                : '_rnglr_type_patt) 
-# 1612 "Parser.fs"
+# 1607 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1621,15 +1616,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 248 "Parser.fsy"
+# 243 "Parser.fsy"
                                            PLiteral _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1632 "Parser.fs"
+# 1627 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1641,15 +1636,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 247 "Parser.fsy"
+# 242 "Parser.fsy"
                                            _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1652 "Parser.fs"
+# 1647 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1661,15 +1656,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 246 "Parser.fsy"
+# 241 "Parser.fsy"
                                            _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1672 "Parser.fs"
+# 1667 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1685,15 +1680,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_) -> 
                   _rnglr_cycle_res := (
                     
-# 245 "Parser.fsy"
+# 240 "Parser.fsy"
                                                _S2
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1696 "Parser.fs"
+# 1691 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1707,15 +1702,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 244 "Parser.fsy"
+# 239 "Parser.fsy"
                                              POpt _S1
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1718 "Parser.fs"
+# 1713 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1729,15 +1724,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 243 "Parser.fsy"
+# 238 "Parser.fsy"
                                              PSome _S1
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1740 "Parser.fs"
+# 1735 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1751,15 +1746,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_) -> 
                 _rnglr_cycle_res := (
                   
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                                              PMany _S1
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 242 "Parser.fsy"
+# 237 "Parser.fsy"
                : '_rnglr_type_prim) 
-# 1762 "Parser.fs"
+# 1757 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1771,15 +1766,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 250 "Parser.fsy"
+# 245 "Parser.fsy"
                                   _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 250 "Parser.fsy"
+# 245 "Parser.fsy"
                : '_rnglr_type_meta_param) 
-# 1782 "Parser.fs"
+# 1777 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1793,15 +1788,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 253 "Parser.fsy"
+# 248 "Parser.fsy"
                                                        _S1 :: _S2
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 252 "Parser.fsy"
+# 247 "Parser.fsy"
                : '_rnglr_type_meta_params) 
-# 1804 "Parser.fs"
+# 1799 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1813,15 +1808,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 252 "Parser.fsy"
+# 247 "Parser.fsy"
                                          [_S1]
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 252 "Parser.fsy"
+# 247 "Parser.fsy"
                : '_rnglr_type_meta_params) 
-# 1824 "Parser.fs"
+# 1819 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1837,15 +1832,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_) -> 
                   _rnglr_cycle_res := (
                     
-# 255 "Parser.fsy"
+# 250 "Parser.fsy"
                                                                          Some _S2
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 255 "Parser.fsy"
+# 250 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
-# 1848 "Parser.fs"
+# 1843 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1855,15 +1850,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 255 "Parser.fsy"
+# 250 "Parser.fsy"
                                 None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 255 "Parser.fsy"
+# 250 "Parser.fsy"
                : '_rnglr_type_meta_param_opt) 
-# 1866 "Parser.fs"
+# 1861 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1879,7 +1874,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 259 "Parser.fsy"
+# 254 "Parser.fsy"
                             match _S2 with
                             | None -> PRef  (_S1, _S3)
                             | Some x -> PMetaRef (_S1,_S3,x)
@@ -1888,9 +1883,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 257 "Parser.fsy"
+# 252 "Parser.fsy"
                : '_rnglr_type_call) 
-# 1893 "Parser.fs"
+# 1888 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1902,15 +1897,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 257 "Parser.fsy"
+# 252 "Parser.fsy"
                               PToken _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 257 "Parser.fsy"
+# 252 "Parser.fsy"
                : '_rnglr_type_call) 
-# 1913 "Parser.fs"
+# 1908 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1924,15 +1919,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                |> List.iter (fun (_S2) -> 
                 _rnglr_cycle_res := (
                   
-# 264 "Parser.fsy"
+# 259 "Parser.fsy"
                                                              Some _S2 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 264 "Parser.fsy"
+# 259 "Parser.fsy"
                : '_rnglr_type_option_opt) 
-# 1935 "Parser.fs"
+# 1930 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1942,15 +1937,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 264 "Parser.fsy"
+# 259 "Parser.fsy"
                             None 
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 264 "Parser.fsy"
+# 259 "Parser.fsy"
                : '_rnglr_type_option_opt) 
-# 1953 "Parser.fs"
+# 1948 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1966,15 +1961,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 267 "Parser.fsy"
+# 262 "Parser.fsy"
                                                                      (_S3).Add _S1
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 266 "Parser.fsy"
+# 261 "Parser.fsy"
                : '_rnglr_type_option_params) 
-# 1977 "Parser.fs"
+# 1972 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -1986,15 +1981,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_S1) -> 
               _rnglr_cycle_res := (
                 
-# 266 "Parser.fsy"
+# 261 "Parser.fsy"
                                               Map.empty.Add _S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 266 "Parser.fsy"
+# 261 "Parser.fsy"
                : '_rnglr_type_option_params) 
-# 1997 "Parser.fs"
+# 1992 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -2010,15 +2005,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_S3) -> 
                   _rnglr_cycle_res := (
                     
-# 269 "Parser.fsy"
+# 264 "Parser.fsy"
                                                         Source.toString _S1, Source.toString _S3 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 269 "Parser.fsy"
+# 264 "Parser.fsy"
                : '_rnglr_type_option_param) 
-# 2021 "Parser.fs"
+# 2016 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -2030,15 +2025,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 271 "Parser.fsy"
+# 266 "Parser.fsy"
                                                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 271 "Parser.fsy"
+# 266 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
-# 2041 "Parser.fs"
+# 2036 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (Source.Position * Source.Position)) -> 
@@ -2050,15 +2045,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 271 "Parser.fsy"
+# 266 "Parser.fsy"
                                        
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 271 "Parser.fsy"
+# 266 "Parser.fsy"
                : '_rnglr_type_tada_rule) 
-# 2061 "Parser.fs"
+# 2056 "Parser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

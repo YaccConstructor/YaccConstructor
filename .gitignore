@@ -55,3 +55,4 @@ Examples/Calc/yc/YardPrinter.dll
 Builder/workdir/*
 Examples/RNGLR/MSSql/stack.dot
 Examples/RNGLR/MSSql/*.dot.*
+Examples/RNGLR/MSSql/MsParser.fs

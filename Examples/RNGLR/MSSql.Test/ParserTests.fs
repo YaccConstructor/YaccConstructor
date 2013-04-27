@@ -84,7 +84,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Begin mark transaction.`` () =
         file "MarkBeginTransaction.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``Execute procedure. Very simple test.`` () =
         file "ExecProc_1.sql" |> runParserTest
         
@@ -122,8 +122,7 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
-
-    
+            
     [<Test>]
     member test.``sp_password complex test.`` () =
         complexSpFile "sp_password.sql" |> runParserTest

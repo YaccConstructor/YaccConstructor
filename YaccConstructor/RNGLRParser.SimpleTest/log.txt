@@ -69,6 +69,13 @@ rules:
    3: s = A 
 
 rules:
+   0: start = e 
+   1: yard_start_rule = start 
+   2: e = A 
+   3: e = red 
+   4: red = e 
+
+rules:
    0: list = A 
    1: list = list list 
    2: yard_start_rule = list 

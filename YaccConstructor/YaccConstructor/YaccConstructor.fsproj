@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend    -c ExpandMeta -c ExpandEbnf     -g "RNGLRGenerator -token string -module Calc.Parse -o Parser.scala -lang scala" -i ..\..\..\..\Examples\Calc\Calc\calc.yrd</StartArguments>
+    <StartArguments>-f YardFrontend    -c ExpandMeta -c ExpandEbnf     -g "RNGLRGenerator -token string -module Calc.Parse -o Parser.scala " -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>
@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%s" -c ExpandInnerAlt -c ExpandBrackets -c LeaveLast -g "RNGLRGenerator -translate false -token string*(Position*Position) -module Yard.Examples.MSParser -infEpsPath epsilons -o MSParser.fs" -i C:\Projects\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd</StartArguments>
+    <StartArguments>-f YardFrontend    -c ExpandMeta -c ExpandEbnf     -g "RNGLRGenerator -token string -module Calc.Parse -o Parser.scala " -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>

@@ -130,11 +130,32 @@ type ``RNGLR parser tests with simple lexer`` () =
             printf "OK\n"
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesBefore.dot"
             //mAst.EliminateCycles()
+            mAst.collectWarnings (fun _ -> 0,0)
+            |> ResizeArray.iter (printfn "%A")
             mAst.ChooseLongestMatch()
             RNGLR.ParseCycle.defaultAstToDot mAst "cyclesAfter.dot"
             let res = translate RNGLR.ParseCycle.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([0], res)
+
+    [<Test>]
+    member test.``AST, containing long cycles``() =
+        let parser = RNGLR.ParseLongCycle.buildAst
+        let path = dir + "LongCycle.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err,_) -> printErr (num, tok, err)
+        | Parser.Success mAst ->
+            //mAst.PrintAst
+            printf "OK\n"
+            RNGLR.ParseLongCycle.defaultAstToDot mAst "LongCyclesBefore.dot"
+            //mAst.EliminateCycles()
+            mAst.collectWarnings (fun _ -> 0,0)
+            |> ResizeArray.iter (printfn "%A")
+            mAst.ChooseLongestMatch()
+            let res = translate RNGLR.ParseLongCycle.translate mAst
+            printfn "Result: %A" res
+            Assert.AreEqual([1], res)
 
     [<Test>]
     member test.``Parse empty string``() =
@@ -202,3 +223,6 @@ type ``RNGLR parser tests with simple lexer`` () =
             let res = translate RNGLR.ParseLongest.translate mAst
             printfn "Result: %A" res
             Assert.AreEqual([5,0], res)
+
+//[<EntryPoint>]
+//(new ``RNGLR parser tests with simple lexer``()).``AST, containing long cycles``()

@@ -27,6 +27,10 @@ open Microsoft.FSharp.Reflection
 open Yard.Examples.MSParser
 open LexerHelper
 open System
+open Yard.Utils.StructClass
+
+let mutable id = 0<id>
+
 }
 
 let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] + 
@@ -45,40 +49,40 @@ let floae = 'e' | 'E'
 let floatnumber = decnumber ('.' decnumber)? ( floae decnumber) ? (* what with 100.   ?? *)
 let label = ident ':'
 
-
 rule tokens = parse
  | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } 
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
-                  DEC_NUMBER(defaultSourceText lexbuf  (LexBuffer<_>.LexemeString(lexbuf))) }
+                  DEC_NUMBER(defaultSourceText id lexbuf  (LexBuffer<_>.LexemeString(lexbuf))) }
  | whitespaces  { tokens lexbuf }
- | "."          { DOT(defaultSourceText lexbuf ".") }
- | ","          { COMMA(defaultSourceText lexbuf ",") }
- | "="          { OP_EQ(defaultSourceText lexbuf "=") }
- | ">"          { OP_MT(defaultSourceText lexbuf ">") }
- | "<"          { OP_LT(defaultSourceText lexbuf "<") }
- | ";"          { SEMI(defaultSourceText lexbuf ";") }
- | "("      { LPAREN(defaultSourceText lexbuf "(") }
- | ")"      { RPAREN(defaultSourceText lexbuf ")") }
- | "["      { LBRACKET(defaultSourceText lexbuf "[") }
- | "]"      { RBRACKET(defaultSourceText lexbuf "]") }
- | "+"      { OP_PLUS(defaultSourceText lexbuf "+") }
- | "-"      { OP_MINUS(defaultSourceText lexbuf "-") }
- | "~"      { OP_TILDA(defaultSourceText lexbuf "~") }
- | "*"      { STAR(defaultSourceText lexbuf "*") }
+ | "."          { DOT(defaultSourceText id lexbuf ".") }
+ | ","          { COMMA(defaultSourceText id lexbuf ",") }
+ | "="          { OP_EQ(defaultSourceText id lexbuf "=") }
+ | ">"          { OP_MT(defaultSourceText id lexbuf ">") }
+ | "<"          { OP_LT(defaultSourceText id lexbuf "<") }
+ | ";"          { SEMI(defaultSourceText id lexbuf ";") }
+ | "("      { LPAREN(defaultSourceText id lexbuf "(") }
+ | ")"      { RPAREN(defaultSourceText id lexbuf ")") }
+ | "["      { LBRACKET(defaultSourceText id lexbuf "[") }
+ | "]"      { RBRACKET(defaultSourceText id lexbuf "]") }
+ | "+"      { OP_PLUS(defaultSourceText id lexbuf "+") }
+ | "-"      { OP_MINUS(defaultSourceText id lexbuf "-") }
+ | "~"      { OP_TILDA(defaultSourceText id lexbuf "~") }
+ | "*"      { STAR(defaultSourceText id lexbuf "*") }
  //| "$"      { DOLLAR(defaultSourceText lexbuf "$") } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
             let hasdot = l.IndexOf '.' <> -1
-            match makeIdent false l (lexbuf.StartPos, lexbuf.EndPos) with
+            match makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 
+                                     new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)) with
             | x -> x
          }
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }
- | eof  {EOF(defaultSourceText lexbuf  "")}
+ | eof  {EOF(defaultSourceText id lexbuf  "")}
  | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
 and literal = parse
   | "''" { appendBuf("'"); literal lexbuf }
-  | '\'' { STRING_CONST(defaultSourceText lexbuf (string str_buf)) }
+  | '\'' { STRING_CONST(defaultSourceText id  lexbuf (string str_buf)) }
   | eol { appendBuf(lexeme lexbuf); lexbuf.EndPos <- lexbuf.EndPos.NextLine; literal lexbuf }
   | eof { failwith "unclosed literal at the end of file" }
   | _ { appendBuf(lexeme lexbuf); literal lexbuf }

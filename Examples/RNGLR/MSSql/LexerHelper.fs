@@ -5,6 +5,8 @@ open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
 open Yard.Examples.MSParser
 open Yard.Utils.SourceText
+open Yard.Utils.StructClass
+
 open System
 
 type Collections.Generic.IDictionary<'k,'v> with
@@ -52,6 +54,12 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
   else  match getKwToken name defaultSourceText with
         | Some(kwToken) -> kwToken
         | None -> IDENT(defaultSourceText)
+
+
+let defaultSourceText id (lexbuf : LexBuffer<_>) value =
+    new SourceText(value
+        , SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
+                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
 
 let tokenPos token =
     match token with
@@ -382,7 +390,3 @@ let tokenPos token =
     | STOREDPROCEDURE (x)
     | STRING_CONST (x)
     | WEIGHT (x) -> x.Range.Start, x.Range.End
-
-
-let defaultSourceText (lexbuf : LexBuffer<_>) value =
-    new SourceText(value, SourceRange.ofTuple(lexbuf.StartPos, lexbuf.EndPos))

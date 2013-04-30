@@ -1,101 +1,129 @@
 ﻿module Yard.Utils.OffsetMap.Test
 
 open System.IO
+open System.Collections.Generic
 open NUnit.Framework
+open Yard.Utils.StructClass
+open Yard.Utils.InfoClass
+open Yard.Utils.SourceText
+
 
 [<TestFixture>]
 type UtilsTest () =
+    let p  = new ProjInfo()
+    let map : int64<symbol>[] = [| 0L<symbol>; 30L<symbol>; 44L<symbol>; 88L<symbol>; 116L<symbol>;
+                               274L<symbol>; 333L<symbol>; 448L<symbol>; 511L<symbol>; 690L<symbol>;
+                               820L<symbol>; 1042L<symbol> |]
+    do p.AddLine 1<id> map
+
     [<Test>]
     member test.``Test for random values of line and column`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 5
-        let column = 20
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 5<line>
+        let column = 20<symbol> 
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme lower values of line`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 1
-        let column = 25
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 1<line>
+        let column = 25<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme upper values of line`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 11
-        let column = 23
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 11<line>
+        let column = 23<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme lower values of column`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 4
-        let column = 1
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 4<line>
+        let column = 1<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme upper values of column`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 4
-        let column = 27 
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 4<line>
+        let column = 27<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme lower values of line and column`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 1
-        let column = 1
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 1<line>
+        let column = 1<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for the extreme upper values of line and column`` () =
-        let map : int[] = [| 0; 30; 44; 88; 116; 274; 333; 448; 511; 690; 820; 1042 |]
-        let line = 11
-        let column = 130
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let id = 1<id>
+        let line = 11<line>
+        let column = 130<symbol>
+        let packTrinity = Pack id line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 1<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for line and column in received Map`` () =
         let basePass = @"../../../../Tests/SourceText/Map.txt"
-        let map : int[] = Yard.Utils.OffsetMap.getMap basePass
-        let line = 6
-        let column = 5
-        let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-        let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+        let map = p.GetMap basePass
+        p.AddLine 2<id> map
+        let line = 6<line>
+        let column = 5<symbol>
+        let packTrinity = Pack 2<id> line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 2<id> offset
+        let actual = p.GetCoordinates packPair
         Assert.AreEqual(line, actual.Line)
-        Assert.AreEqual(column, actual.Column) 
+        Assert.AreEqual(column, actual.Column)
 
     [<Test>]
     member test.``Test for get Map with empty line`` () =
         try
-            let basePass = @"../../../../Tests/SourceText/Map.txt"
-            let map : int[] = Yard.Utils.OffsetMap.getMap basePass
-            let line = 4
-            let column = 5
-            let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-            let actual = Yard.Utils.OffsetMap.getCoordinates map offset
-            Assert.AreEqual(line, actual.Line)
+            let line = 4<line>
+            let column = 5<symbol>
+            let packTrinity = Pack 2<id> line column         
+            let offset = p.GetAbsoluteOffset packTrinity
+            let packPair = PackPair 2<id> offset
+            let actual = p.GetCoordinates packPair
+            Assert.AreEqual(line, actual.Line)            
             Assert.AreEqual(column, actual.Column)
         with 
         | ex -> ()
@@ -103,27 +131,37 @@ type UtilsTest () =
     [<Test>]
     member test.``Test for get right Map`` () =
         let basePass = @"../../../../Tests/SourceText/LittleMap.txt"
-        let map : int[] = Yard.Utils.OffsetMap.getMap basePass
-        let actual = [| 0; 10; 11; 28; 29; 43; 48 |]
+        let map = p.GetMap basePass
+        let actual : int64<symbol>[] = [| 0L<symbol>; 10L<symbol>; 11L<symbol>; 28L<symbol>; 
+                                        29L<symbol>; 43L<symbol>; 48L<symbol> |]
         Assert.AreEqual(map, actual)
 
     [<Test>]
     member test.``Test for get right empty Map`` () =
         let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
-        let map : int[] = Yard.Utils.OffsetMap.getMap basePass
-        let actual = [| 0 |]
+        let map = p.GetMap basePass
+        let actual : int64<symbol>[] = [| 0L<symbol> |]
         Assert.AreEqual(map, actual)
 
     [<Test>]
     member test.``Test for empty Map`` () =
         try
             let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
-            let map : int[] = Yard.Utils.OffsetMap.getMap basePass
-            let line = 4
-            let column = 5
-            let offset = Yard.Utils.OffsetMap.getAbsoluteOffset map line column
-            let actual = Yard.Utils.OffsetMap.getCoordinates map offset
+            let map = p.GetMap basePass
+            p.AddLine 3<id> map
+            let line = 4<line>
+            let column = 5<symbol>
+            let packTrinity = Pack 2<id> line column         
+            let offset = p.GetAbsoluteOffset packTrinity
+            let packPair = PackPair 2<id> offset
+            let actual = p.GetCoordinates packPair
             Assert.AreEqual(line, actual.Line)
             Assert.AreEqual(column, actual.Column)
         with 
         | ex -> ()
+
+
+(*[<EntryPoint>]
+let f _ = 
+    (new UtilsTest ()).``Test for random values of line and column``()
+    0*)

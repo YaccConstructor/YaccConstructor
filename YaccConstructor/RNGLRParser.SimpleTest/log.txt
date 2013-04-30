@@ -8,6 +8,18 @@ rules:
    5: yard_rule_op_3 = C 
    6: s = yard_rule_op_1 yard_rule_op_2 yard_rule_op_3 
    7: yard_start_rule = s 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = yard_many_1 yard_many_2 
@@ -16,6 +28,18 @@ rules:
    3: yard_many_1 = 
    4: yard_many_2 = A yard_many_2 
    5: yard_many_2 = 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = yard_many_1 
@@ -24,6 +48,18 @@ rules:
    3: yard_opt_1 = 
    4: yard_many_1 = yard_opt_1 yard_many_1 
    5: yard_many_1 = 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = e1 e1 
@@ -31,6 +67,18 @@ rules:
    2: e1 = e2 e2 
    3: e2 = e3 e3 
    4: e3 = A 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = if 
@@ -42,11 +90,35 @@ rules:
    6: good = stmt 
    7: stmt = if 
    8: stmt = A 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = A 
    1: s = s A 
    2: yard_start_rule = s 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: expr = fact 
@@ -56,22 +128,70 @@ rules:
    4: fact = fact MUL fact 
    5: num = B 
    6: num = A 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = A 
    1: s = A s 
    2: yard_start_rule = s 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: start = s B 
    1: yard_start_rule = start 
    2: s = s 
    3: s = A 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: list = A 
    1: list = list list 
    2: yard_start_rule = list 
+ERROR!
+Stack trace:    at Microsoft.FSharp.Primitives.Basics.List.map[T,TResult](FSharpFunc`2 mapping, FSharpList`1 x)
+   at Yard.Generators.RNGLR.TranslatorPrinter.getConcat@211(Indexator indexator, FSharpList`1[] args, Int32 i) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 214
+   at Yard.Generators.RNGLR.TranslatorPrinter.concats@222.GenerateNext(IEnumerable`1& next) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 223
+   at Microsoft.FSharp.Core.CompilerServices.GeneratedSequenceBase`1.MoveNextImpl()
+   at Microsoft.FSharp.Collections.SeqModule.ToArray[T](IEnumerable`1 source)
+   at Yard.Generators.RNGLR.TranslatorPrinter.printTranslator(FinalGrammar grammar, FSharpList`1 srcGrammar, String positionType, Boolean fullPath, String output, Char dummyPos) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\PrintTranslator.fs:line 227
+   at Yard.Generators.RNGLR.RNGLR.Generate(t`2 definition, String args) in D:\projects\YC\recursive-ascent\YaccConstructor\RNGLRGenerator\RNGLRGenerator.fs:line 138
+   at YaccConstructor.Program.run@102-1.Invoke(Unit unitVar) in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 160
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in D:\projects\YC\recursive-ascent\YaccConstructor\YaccConstructor\Program.fs:line 176
+Internal message: Object reference not set to an instance of an object.
+Message: Unrecognized error.
 
 rules:
    0: s = 
@@ -79,26 +199,27 @@ rules:
    2: s = B t s s 
    3: yard_start_rule = s 
    4: t = 
-
+<null>
 rules:
    0: e = e P e 
    1: e = N 
    2: yard_start_rule = e 
-
+<null>
 rules:
    0: a = A a 
    1: a = B 
    2: yard_start_rule = a 
-
+<null>
 rules:
    0: list = elem 
    1: list = list C elem 
    2: yard_start_rule = list 
    3: elem = B 
    4: elem = A 
-
+<null>
 rules:
    0: s = 
    1: s = A s t 
    2: yard_start_rule = s 
    3: t = 
+<null>

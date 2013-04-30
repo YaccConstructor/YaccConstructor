@@ -6,24 +6,25 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | EOF of int
     | N of int
     | P of int
+    | RNGLR_EOF of int
 
 let numToString = function
     | 0 -> "e"
-    | 1 -> "yard_start_rule"
-    | 2 -> "EOF"
+    | 1 -> "error"
+    | 2 -> "yard_start_rule"
     | 3 -> "N"
     | 4 -> "P"
+    | 5 -> "RNGLR_EOF"
     | _ -> ""
 let tokenToNumber = function
-    | EOF _ -> 2
     | N _ -> 3
     | P _ -> 4
+    | RNGLR_EOF _ -> 5
 
 let mutable private cur = 0
-let leftSide = [|0; 0; 1|]
+let leftSide = [|0; 0; 2|]
 let private rules = [|0; 4; 0; 3; 0|]
 let private rulesStart = [|0; 3; 4; 5|]
 let startRule = 2
@@ -38,7 +39,7 @@ let private small_gotos =
         [|2; 0; 196609; 65537; 262146; 131074; 3; 196609; 196609; 262146|]
 let gotos = Array.zeroCreate 5
 for i = 0 to 4 do
-        gotos.[i] <- Array.zeroCreate 5
+        gotos.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -51,10 +52,10 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|0,3|]; [|1,1|]|]
 let private small_reduces =
-        [|196610; 131072; 262144; 262146; 131073; 262145|]
+        [|196610; 262144; 327680; 262146; 262145; 327681|]
 let reduces = Array.zeroCreate 5
 for i = 0 to 4 do
-        reduces.[i] <- Array.zeroCreate 5
+        reduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -70,7 +71,7 @@ let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 5
 for i = 0 to 4 do
-        zeroReduces.[i] <- Array.zeroCreate 5
+        zeroReduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -85,8 +86,10 @@ let private small_acc = [1]
 let private accStates = Array.zeroCreate 5
 for i = 0 to 4 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 2
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
+let eofIndex = 5
+let errorNIndex = 1
+let errorTIndex = -1
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

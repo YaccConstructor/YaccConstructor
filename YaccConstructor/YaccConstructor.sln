@@ -63,7 +63,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Statistics", "Statistics\St
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Reports", "Reports\Reports.fsproj", "{B390E0A5-8733-4B8C-ABEE-6BF5A74F6B67}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParserSimpleTest", "RNGLRParser.SimpleTest\RNGLRParserSimpleTest.fsproj", "{D65BDE42-D396-458C-BE08-104477314657}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParser.SimpleTest", "RNGLRParser.SimpleTest\RNGLRParser.SimpleTest.fsproj", "{D65BDE42-D396-458C-BE08-104477314657}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRApplication", "RNGLRApplication\RNGLRApplication.fsproj", "{7DAE51E2-3A17-4941-AD36-D61170069366}"
 EndProject

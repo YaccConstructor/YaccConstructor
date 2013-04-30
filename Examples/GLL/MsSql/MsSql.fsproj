@@ -40,7 +40,7 @@
       <HintPath>..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="GLLGenerator">
-      <HintPath>..\..\..\YaccConstructor\YaccConstructor\bin\Release\GLLGenerator.dll</HintPath>
+      <HintPath>..\..\yc\GLLGenerator.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

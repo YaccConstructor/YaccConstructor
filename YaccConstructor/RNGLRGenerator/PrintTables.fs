@@ -241,8 +241,11 @@ let printTables (grammar : FinalGrammar) head (tables : Tables) (moduleName : st
     printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
     printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
-
-    printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+    
+    printBrInd 0 "let errorNIndex = %d" grammar.indexator.errorNIndex
+    printBrInd 0 "let errorTIndex = %d" grammar.indexator.errorTIndex
+        
+    printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)"
 
     printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
     printBrInd 1 "buildAst<Token> parserSource"

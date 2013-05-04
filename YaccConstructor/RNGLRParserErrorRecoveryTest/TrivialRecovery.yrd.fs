@@ -1,31 +1,33 @@
 
-# 2 "Expr.yrd.fs"
-module RNGLR.ParseExpr
+# 2 "TrivialRecovery.yrd.fs"
+module RNGLR.ParseTrivialRecovery
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | N of int
-    | P of int
-    | RNGLR_EOF of int
+    | A of int
+    | B of int
+    | EOF of int
+    | SEMICOLON of int
 
 let numToString = function
-    | 0 -> "e"
-    | 1 -> "error"
-    | 2 -> "yard_start_rule"
-    | 3 -> "N"
-    | 4 -> "P"
-    | 5 -> "RNGLR_EOF"
+    | 0 -> "a"
+    | 1 -> "yard_start_rule"
+    | 2 -> "A"
+    | 3 -> "B"
+    | 4 -> "EOF"
+    | 5 -> "SEMICOLON"
     | _ -> ""
 let tokenToNumber = function
-    | N _ -> 3
-    | P _ -> 4
-    | RNGLR_EOF _ -> 5
+    | A _ -> 2
+    | B _ -> 3
+    | EOF _ -> 4
+    | SEMICOLON _ -> 5
 
 let mutable private cur = 0
-let leftSide = [|0; 0; 2|]
-let private rules = [|0; 4; 0; 3; 0|]
+let leftSide = [|0; 0; 1|]
+let private rules = [|2; 5; 0; 3; 0|]
 let private rulesStart = [|0; 3; 4; 5|]
 let startRule = 2
 
@@ -34,11 +36,11 @@ let acceptEmptyInput = false
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 4; 2; 3|]
+let private lists_gotos = [|1; 2; 5; 3; 4|]
 let private small_gotos =
-        [|2; 0; 196609; 65537; 262146; 131074; 3; 196609; 196609; 262146|]
-let gotos = Array.zeroCreate 5
-for i = 0 to 4 do
+        [|3; 0; 131073; 196610; 131073; 327683; 196611; 4; 131073; 196610|]
+let gotos = Array.zeroCreate 6
+for i = 0 to 5 do
         gotos.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_gotos.Length do
@@ -52,9 +54,9 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|0,3|]; [|1,1|]|]
 let private small_reduces =
-        [|196610; 262144; 327680; 262146; 262145; 327681|]
-let reduces = Array.zeroCreate 5
-for i = 0 to 4 do
+        [|262145; 262144; 327681; 262145|]
+let reduces = Array.zeroCreate 6
+for i = 0 to 5 do
         reduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_reduces.Length do
@@ -69,8 +71,8 @@ while cur < small_reduces.Length do
 let private lists_zeroReduces = [||]
 let private small_zeroReduces =
         [||]
-let zeroReduces = Array.zeroCreate 5
-for i = 0 to 4 do
+let zeroReduces = Array.zeroCreate 6
+for i = 0 to 5 do
         zeroReduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_zeroReduces.Length do
@@ -83,13 +85,11 @@ while cur < small_zeroReduces.Length do
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
 let private small_acc = [1]
-let private accStates = Array.zeroCreate 5
-for i = 0 to 4 do
+let private accStates = Array.zeroCreate 6
+for i = 0 to 5 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 5
-let errorNIndex = 1
-let errorTIndex = -1
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)
+let eofIndex = 4
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

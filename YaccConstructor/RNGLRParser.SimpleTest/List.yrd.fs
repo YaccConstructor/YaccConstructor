@@ -9,27 +9,26 @@ type Token =
     | A of int
     | B of int
     | C of int
-    | RNGLR_EOF of int
+    | EOF of int
 
 let numToString = function
     | 0 -> "elem"
-    | 1 -> "error"
-    | 2 -> "list"
-    | 3 -> "yard_start_rule"
-    | 4 -> "A"
-    | 5 -> "B"
-    | 6 -> "C"
-    | 7 -> "RNGLR_EOF"
+    | 1 -> "list"
+    | 2 -> "yard_start_rule"
+    | 3 -> "A"
+    | 4 -> "B"
+    | 5 -> "C"
+    | 6 -> "EOF"
     | _ -> ""
 let tokenToNumber = function
-    | A _ -> 4
-    | B _ -> 5
-    | C _ -> 6
-    | RNGLR_EOF _ -> 7
+    | A _ -> 3
+    | B _ -> 4
+    | C _ -> 5
+    | EOF _ -> 6
 
 let mutable private cur = 0
-let leftSide = [|2; 2; 3; 0; 0|]
-let private rules = [|0; 2; 6; 0; 2; 5; 4|]
+let leftSide = [|1; 1; 2; 0; 0|]
+let private rules = [|0; 1; 5; 0; 1; 4; 3|]
 let private rulesStart = [|0; 1; 4; 5; 6; 7|]
 let startRule = 2
 
@@ -40,10 +39,10 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 2; 5; 6; 3; 4|]
 let private small_gotos =
-        [|4; 0; 131073; 262146; 327683; 131073; 393220; 196611; 5; 262146; 327683|]
+        [|4; 0; 65537; 196610; 262147; 131073; 327684; 196611; 5; 196610; 262147|]
 let gotos = Array.zeroCreate 7
 for i = 0 to 6 do
-        gotos.[i] <- Array.zeroCreate 8
+        gotos.[i] <- Array.zeroCreate 7
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -56,10 +55,10 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|0,1|]; [|1,3|]; [|4,1|]; [|3,1|]|]
 let private small_reduces =
-        [|65538; 393216; 458752; 262146; 393217; 458753; 327682; 393218; 458754; 393218; 393219; 458755|]
+        [|65538; 327680; 393216; 262146; 327681; 393217; 327682; 327682; 393218; 393218; 327683; 393219|]
 let reduces = Array.zeroCreate 7
 for i = 0 to 6 do
-        reduces.[i] <- Array.zeroCreate 8
+        reduces.[i] <- Array.zeroCreate 7
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -75,7 +74,7 @@ let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 7
 for i = 0 to 6 do
-        zeroReduces.[i] <- Array.zeroCreate 8
+        zeroReduces.[i] <- Array.zeroCreate 7
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -90,10 +89,8 @@ let private small_acc = [2]
 let private accStates = Array.zeroCreate 7
 for i = 0 to 6 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 7
-let errorNIndex = 1
-let errorTIndex = -1
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)
+let eofIndex = 6
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

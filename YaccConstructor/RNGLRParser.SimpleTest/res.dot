@@ -1,0 +1,17 @@
+digraph GSS {
+    rankdir=RL
+    0 [label="86"]
+    1 [label="0"]
+    0 -> 1 [label="file"]
+    2 [label="83"]
+    3 [label="82"]
+    4 [label="81"]
+    5 [label="1"]
+    5 -> 1 [label="eps action_opt"]
+    4 -> 5 [label="rule_nlist"]
+    3 -> 4 [label="eps foot_opt"]
+    2 -> 3 [label="EOF"]
+    {rank=same; 2 0}
+    {rank=same; 5 1}
+    {rank=same; 4 3}
+}

@@ -36,7 +36,7 @@ let private tokenFun f = function
     | DLABEL st
     | DLESS st
     | EOF st
-    | ERROR st
+    //| ERROR st
     | EQUAL st
     | INCLUDE st
     | LIDENT st
@@ -152,10 +152,9 @@ let parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
-    | Parser.Error (_, token, msg, debugs) ->
+    | Parser.Error (_, token, msg, debugs) -> 
         debugs.drawGSSDot "res.dot"
-                    (token |> tokenToRange |> rangeToString) token msg
-        failwithf "Parse error on position %s:%s on token %A: %s" (token |> tokenToFile)
+        failwithf "Parse error on position %s on token %A: %s"  (token |> tokenToRange |> rangeToString) token msg
     
 let posTo2D (source:string) pos =    
     source.ToCharArray(0, min (pos+1) (source.Length))

@@ -10,7 +10,7 @@ rules:
    7: yard_rule_op_1 = A 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = yard_many_1 yard_many_2 
    1: yard_start_rule = s 
@@ -20,7 +20,7 @@ rules:
    5: yard_many_2 = 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = yard_many_1 
    1: yard_start_rule = s 
@@ -30,7 +30,7 @@ rules:
    5: yard_many_1 = 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = e1 e1 
    1: yard_start_rule = s 
@@ -39,7 +39,7 @@ rules:
    4: e3 = A 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = if 
    1: yard_start_rule = s 
@@ -52,14 +52,14 @@ rules:
    8: stmt = A 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = A 
    1: s = s A 
    2: yard_start_rule = s 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: expr = fact 
    1: expr = expr ADD expr 
@@ -70,14 +70,14 @@ rules:
    6: num = A 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = A 
    1: s = A s 
    2: yard_start_rule = s 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: start = s B 
    1: yard_start_rule = start 
@@ -85,45 +85,49 @@ rules:
    3: s = A 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
+rules:
+   0: start = e 
    1: yard_start_rule = start 
    2: e = A 
    3: e = red 
    4: red = e 
+Source without filename: parserRange
+Source without filename: error
+
 rules:
    0: list = A 
    1: list = list list 
    2: yard_start_rule = list 
 Source without filename: parserRange
 Source without filename: error
-<null>
+
 rules:
    0: s = 
    1: s = A 
    2: s = B t s s 
    3: yard_start_rule = s 
    4: t = 
-<null>
+
 rules:
    0: e = e P e 
    1: e = N 
    2: yard_start_rule = e 
-<null>
+
 rules:
    0: a = A a 
    1: a = B 
    2: yard_start_rule = a 
-<null>
+
 rules:
    0: list = elem 
    1: list = list C elem 
    2: yard_start_rule = list 
    3: elem = B 
    4: elem = A 
-<null>
+
 rules:
    0: s = 
    1: s = A s t 
    2: yard_start_rule = s 
    3: t = 
-<null>

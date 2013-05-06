@@ -20,8 +20,9 @@
 namespace Yard.Generators.CYKGenerator
 
 open Yard.Core
+open Constraints
+open IL
 open System.Collections.Generic
-open Yard.Core.IL
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open System.IO
@@ -31,6 +32,7 @@ type GrammarInfo =
         rules: uint64 array
         termDict : Dictionary<string,int>
         nTermDict : Dictionary<string,int>
+        lblNames : string[]
     }
 
 type CYKGeneartorImpl () =
@@ -83,15 +85,24 @@ type CYKGeneartorImpl () =
         |> spaceListL
     
     let startNTerm (il:Yard.Core.IL.Definition.t<_,_>) (ntermDict:Dictionary<_,_>) =
-        ntermDict.[(il.grammar |> List.find (fun r -> r._public)).name.text]
+        ntermDict.[(il.grammar.[0].rules |> List.find (fun r -> r.isStart)).name.text]
+    
+    let genlblArr (lblNames:string[])= 
+        ("let lblName = " |> wordL)
+        @@-- (("[|" |> wordL)
+            @@ ([for lblInfo in lblNames -> ["\"" + lblInfo + "\";"]|> List.map wordL |> spaceListL] |> aboveListL))
+            @@ ("|]" |> wordL)
 
     let code il grammarInfo =
-        [ header
-         ; tokenTypes grammarInfo.termDict
-         ; getTokenTypeTag grammarInfo.termDict
-         ; rulesArray grammarInfo.rules
-         ; startNTerm il grammarInfo.nTermDict |> genStartNTermID
-         ; tokenStreamEncoder]
+        [
+            header
+            tokenTypes grammarInfo.termDict
+            getTokenTypeTag grammarInfo.termDict
+            rulesArray grammarInfo.rules
+            genlblArr grammarInfo.lblNames
+            startNTerm il grammarInfo.nTermDict |> genStartNTermID
+            tokenStreamEncoder
+        ]
         |> aboveListL
         |> layoutToStr    
     
@@ -161,9 +172,10 @@ type CYKGeneartorImpl () =
             | _ -> failwith "CYK. Incorrect rule structure. Must be in CNF"
             
         {
-            rules = il.grammar |> List.map processRule |> Array.ofList
+            rules = il.grammar.[0].rules |> List.map processRule |> Array.ofList
             termDict = termDict
             nTermDict = ntermDict
+            lblNames = Array.ofSeq (Dictionary.KeyCollection lblDict) 
         }
         
     let print rule = 
@@ -175,7 +187,7 @@ type CYKGeneartorImpl () =
         code grammar grammarInfo
     member x.GenRulesList grammar = 
         let grammarInfo = grammarFromIL grammar
-        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict
+        grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict, grammarInfo.lblNames
 
 type CYKGenerator() =    
     inherit Generator()
@@ -190,4 +202,4 @@ type CYKGenerator() =
             (File.CreateText fullName).Close()
             File.WriteAllText(fullName, code)
             code|> box
-        override this.AcceptableProductionTypes = ["seq"]
+        override this.Constraints = [|noMeta; noEbnf; noLiterals; noInnerAlt; noBrackets; inCNF; singleModule|]

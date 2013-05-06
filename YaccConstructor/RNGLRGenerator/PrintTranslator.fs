@@ -40,7 +40,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
         printfn "Source without filename: %s" <| src.ToString()
         "\n"
     elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
-    else sprintf "\n# %d \"%s\"" (src.startPos.line + 1) file
+    else sprintf "\n# %d \"%s\"" src.startPos.line file
 
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
@@ -193,6 +193,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     (wordL (resCycleName + " := (") @@-- actionCodeLayout @@-- wordL (")::!" + resCycleName))
                 |> (fun x -> [wordL <| "let " + resCycleName + " = ref []"
                               x
+                              //wordL <| getPosFromSource fullPath dummyPos ac
                               wordL <| "!" + resCycleName
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")

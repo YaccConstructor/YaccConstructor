@@ -23,6 +23,8 @@ let combine x y = Path.Combine(x,y)
 let customCopy dest files = 
     files |> List.iter (fun f -> System.IO.File.Copy(f,(Path.GetFileName f) |> combine dest))
 
+let getDistrName () = productName + "_" + !version
+
 let rec DirectoryCopy sourceDirName destDirName copySubDirs =
         let dir = new DirectoryInfo(sourceDirName)
         let dirs = dir.GetDirectories()
@@ -58,6 +60,7 @@ Target "Clean" (fun _ ->
 Target "CollectAllBinaries" (fun _ ->
     !+ (solutionRootDir + "/**/bin/Release/*.exe")
     ++ (solutionRootDir + "/**/bin/Release/*.dll")
+    ++ (solutionRootDir + "/**/bin/Release/*.targets")
     |> Scan
     |> CopyTo distrYCDir
 )
@@ -76,12 +79,15 @@ Target "CollectRedistGrammars" (fun _ ->
     DirectoryCopy (combine workDir "GrammarTemplates") distrGTemplates true
 )
 
+Target "GenVersionFile" (fun _ ->
+    System.IO.File.WriteAllText(System.IO.Path.Combine(distrDir,"version"), getDistrName())
+)
 
 Target "ZipAll" (fun _ ->
     !+ (distrDir + "/**/*")
     ++ (distrDir + "/*")
     |> Scan
-    |> Zip distrDir (Path.Combine(zipDir, productName + "_" + !version + ".zip"))
+    |> Zip distrDir (Path.Combine(zipDir, (getDistrName()) + ".zip"))
 )
 
 
@@ -90,6 +96,7 @@ Target "ZipAll" (fun _ ->
 ==> "CollectLicensesStuff" 
 ==> "CollectExaples"
 ==> "CollectRedistGrammars"
+==> "GenVersionFile"
 ==> "ZipAll"
 
 version := getBuildParam "ver"

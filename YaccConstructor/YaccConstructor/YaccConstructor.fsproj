@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-i C:\Projects\recursive-ascent\Tests\RNGLR\calc\calc.yrd -g "RNGLRGenerator int"</StartArguments>
+    <StartArguments>-f YardFrontend    -c ExpandMeta -c ExpandEbnf     -g "RNGLRGenerator -token string -module Calc.Parse -o Parser.scala " -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>
@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-c ExpandMeta -c ExpandEbnf -c "ReplaceLiterals KW_%%s" -c ExpandInnerAlt -c ExpandBrackets -c LeaveLast -c AddDefaultAC -g "RNGLRGenerator -token string -module Yard.Examples.MSParser -o MSParser.fs" -i "C:\Projects\recursive-ascent\Examples\MsSql\MSSql\mssql.yrd "</StartArguments>
+    <StartArguments>-f YardFrontend    -c ExpandMeta -c ExpandEbnf     -g "RNGLRGenerator -token string -module Calc.Parse -o Parser.scala " -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>
@@ -56,6 +56,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
@@ -66,7 +67,6 @@
       <HintPath>..\..\3rdParty\lib\Irony.Samples.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -78,6 +78,11 @@
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Conversions\Conversions.fsproj">

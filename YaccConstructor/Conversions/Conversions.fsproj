@@ -33,7 +33,9 @@
     <DocumentationFile>bin\Release\Conversions.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -58,6 +60,7 @@
     <Compile Include="ExpandInnerAlt.fs" />
     <Compile Include="RemoveAC.fs" />
     <Compile Include="ReplaceInline.fs" />
+    <Compile Include="Linearize.fs" />
     <Compile Include="ToCNF.fs" />
   </ItemGroup>
   <ItemGroup>

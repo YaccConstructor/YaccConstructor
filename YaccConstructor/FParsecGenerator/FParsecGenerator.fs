@@ -20,9 +20,10 @@
 namespace Yard.Generators.FParsecGenerator
 
 open Yard.Core
+open Constraints
 
 type FParsecGenerator() = 
     inherit Generator()
         override this.Name = "FParsecGenerator"
         override this.Generate t = Program.generate t :> obj
-        override this.AcceptableProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+        override this.Constraints = [|noMeta|]

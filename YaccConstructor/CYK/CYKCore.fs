@@ -46,18 +46,28 @@ type CYKCore() =
 
     let mutable recTable:_[,] = null
 
+    let mutable lblNameArr = [||]
+
     [<Literal>]
     let noLbl = 0uy
 
+    let lblString lbl = 
+        match lblNameArr with
+        | [||] -> "0" 
+        | _ -> 
+                match lbl with 
+                | 0uy -> "0"
+                | _ -> lblNameArr.[(int lbl) - 1]
+
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
-    let getCellRuleTop (cellContent:ResizeArray<CellData>) i =
-        let curRuleNum,_,_,_ = getData cellContent.[cellContent.Count - 1 - i].rData
+    let getCellRuleTop (cellData:CellData) =
+        let curRuleNum,_,_,_ = getData cellData.rData
         let curNT,_,_,_,_ = getRule rules.[int curRuleNum]
         curNT
 
     // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
-    let getCellData (cellContent:ResizeArray<CellData>) i =
-        let _,curlblState,curcl,curcw = getData cellContent.[cellContent.Count - 1 - i].rData
+    let getCellData (cellData:CellData) =
+        let _,curlblState,curcl,curcw = getData cellData.rData
         curlblState,curcl,curcw
 
     // возвращает координаты дочерних ячеек 
@@ -68,7 +78,15 @@ type CYKCore() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
-        recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun i j -> new ResizeArray<CellData>(2))
+        let nTermsCount = 
+            rules
+            |> Array.map(fun r -> 
+                            let a,_,_,_,_ = getRule r
+                            a)
+            |> Set.ofArray
+            |> Set.count
+
+        recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun _ _ -> Array.init nTermsCount (fun _ -> None))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
             let conflictLbl = (noLbl,LblState.Conflict)
@@ -89,33 +107,28 @@ type CYKCore() =
             if c <> 0us then
                 let left = recTable.[i, k]
                 let right = recTable.[k+i+1, l-k-1]
-                let count1 = left.Count
-                let count2 = right.Count
-
-                if count1 > 0 && count2 > 0
-                then
-                    for m in 0..(count1 - 1) do
-                        for n in 0..(count2 - 1) do
-                            if (getCellRuleTop left m = b) && (getCellRuleTop right n = c)
+                for m in 0..(nTermsCount - 1) do
+                    let lf = left.[m]
+                    if lf.IsSome
+                    then
+                        for n in 0..(nTermsCount - 1) do
+                            let r = right.[n]
+                            if r.IsSome && (getCellRuleTop lf.Value = b) && (getCellRuleTop r.Value = c)
                             then
-                                let lState1,lbl1,weight1 = getCellData left m
-                                let lState2,lbl2,weight2 = getCellData right n
+                                let lState1,lbl1,weight1 = getCellData lf.Value
+                                let lState2,lbl2,weight2 = getCellData r.Value
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                recTable.[i,l].Add (new CellData(currentElem,uint32 k))
+                                recTable.[i,l].[int a - 1] <- new CellData(currentElem,uint32 k) |> Some
 
-        let elem i l = rules |> Array.Parallel.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
+        let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
-        let rec fillTable i l =
-                if l = s.Length-1
-                then elem i l
-                elif i+l <= s.Length-1
-                then
-                     elem i l
-                     fillTable (i+1) l
-                else
-                     fillTable 0 (l+1)
+        let fillTable () =
+          [|1..s.Length-1|]
+          |> Array.iter (fun l ->
+                [|0..s.Length-1-l|]
+                |> Array.Parallel.iter (fun i -> elem i l))
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -128,11 +141,10 @@ type CYKCore() =
                                     | 0uy -> LblState.Undefined
                                     | _   -> LblState.Defined
                                 let currentElem = buildData ruleIndex lState rl rw
-                                recTable.[k,0].Add (new CellData(currentElem,0u))                                                                
+                                recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some
                     |_ -> ())
     
-        fillTable 0 1
-
+        fillTable ()
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
@@ -146,70 +158,86 @@ type CYKCore() =
                 |LblState.Conflict -> "conflict"
                 |_ -> ""
 
-            String.concat " " [stateString; string lbl; string weight]
+            String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
-        let rec out i last = 
-            if i <= last
-            then let state,lbl,weight = getCellData (recTable.[0, s.Length-1]) i
-                 match i with
-                 |v when (v = last) -> getString state lbl weight
-                 |_ -> String.concat "\n" [getString state lbl weight; out (i+1) last]
-            else ""
+        let rec out i last =
+            let cellData = recTable.[0, s.Length-1]
+            if i <= last && cellData.[i].IsSome
+            then let state,lbl,weight = getCellData (cellData.[i].Value)
+                 if i = last
+                 then [getString state lbl weight]
+                 else getString state lbl weight :: out (i+1) last
+            else [""]
 
-        let lastIndex = (recTable.[0,s.Length-1]).Count - 1
+        let lastIndex = (recTable.[0,0]).Length - 1
         out 0 lastIndex
 
-    let print lblValue leftI rightL leftL =
-        let out = "label value = " + string lblValue + " left = " + string leftI + " right = " + string (leftI+rightL+leftL+1)
+    let print lblValue weight leftI rightL leftL =
+        let out = String.concat " " ["label ="; lblString lblValue; "weight ="; string weight; 
+                    "left ="; string leftI; "right ="; string (leftI+rightL+leftL+1)]
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
-        let ruleInd,_,curL,_ = getData cell.rData
+        let ruleInd,_,curL,curW = getData cell.rData
         let _,b,c,lbl,_ = getRule rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
         if l = 0
         then if curL <> noLbl
-             then print curL leftI rightL leftL
+             then print curL curW leftI rightL leftL
         else 
-            let left = ResizeArray.tryFind (fun (x:CellData) -> 
-                                            let ind,lSt,lbl,_ = getData x.rData
-                                            let top,_,_,_,_ = getRule rules.[int ind]
-                                            top = b) recTable.[leftI,leftL]
-            let right = 
-                    ResizeArray.tryFind (fun (x:CellData) -> 
+            let left =
+                recTable.[leftI,leftL]
+                |> Array.tryFind (fun (x:Option<CellData>) -> 
+                                            match x with
+                                            | Some x ->
                                                 let ind,lSt,lbl,_ = getData x.rData
                                                 let top,_,_,_,_ = getRule rules.[int ind]
-                                                top = c) recTable.[rightI,rightL]
+                                                top = b
+                                            | None -> false)
+            let right = 
+                recTable.[rightI,rightL]
+                |> Array.tryFind (fun (x:Option<CellData>) -> 
+                                        match x with
+                                        | Some x -> 
+                                            let ind,lSt,lbl,_ = getData x.rData
+                                            let top,_,_,_,_ = getRule rules.[int ind]
+                                            top = c
+                                        | None -> false)
 
             
             match right with
-            | Some right ->
+            | Some (Some right) ->
                 match left with 
-                | Some left ->
+                | Some (Some left) ->
                     let _,_,lLbl,_ = getData left.rData
                     let _,_,rLbl,_ = getData right.rData
                     if curL <> noLbl && lLbl = noLbl && rLbl = noLbl
-                    then print curL leftI rightL leftL
+                    then print curL curW leftI rightL leftL
                     else
                         trackLabel leftI leftL left  true
                         trackLabel rightI rightL right  true
-                | None -> ()
-            | None ->
+                | _ -> ()
+            | _ ->
                 if flag && lbl <> noLbl
-                then print curL leftI rightL leftL
+                then print curL curW leftI rightL leftL
             
     let labelTracking lastInd = 
         let i,l = 0,lastInd
-        ResizeArray.iteri (fun k x ->
-                    let out = "derivation #" + string k
-                    printfn "%s" out
-                    trackLabel i l x false
+        Array.iteri (fun k x ->
+                    x |> Option.iter(fun x ->
+                        let out = "derivation #" + string (k + 1)
+                        printfn "%s" out
+                        trackLabel i l x false)
         ) recTable.[i, l]
             
     
-    member this.Recognize ((grules, start) as g) s weightCalcFun = 
+    member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 
         rules <- grules
-        let out = recognize g s weightCalcFun
+        lblNameArr <- lblNames
+        // Info about dialects of derivation
+        // in format: "<lblState> <lblName> <weight>"
+        // If dialect undefined or was conflict lblName = "0"
+        let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
         | "" -> "Строка не выводима в заданной грамматике."
         | _ -> 

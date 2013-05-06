@@ -33,7 +33,7 @@ type ConversionsManager () as this =
                   if parameters.Length = 0 then failwith "Missing Conversion name"
                   else
                       match this.Component parameters.[0] with 
-                      | Some conv -> conv.ConvertList (ilTree.grammar, Array.sub parameters 1 (parameters.Length - 1))
+                      | Some conv -> conv.ConvertGrammar (ilTree.grammar, Array.sub parameters 1 (parameters.Length - 1))
                       | None -> failwith <| "Conversion not found: " + parameters.[0]
         and  foot = ilTree.foot
         and options = ilTree.options

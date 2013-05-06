@@ -45,13 +45,15 @@ and Edge =
         new (d,a) = {Dest = d; Ast = a}
     end
 
-type ParserDebugFuns = {
+type ParserDebugFuns<'TokenType> = {
     drawGSSDot : string -> unit
+    /// If you need more then one last token
+    lastTokens : int -> 'TokenType[]
 }
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
-    | Error of int * 'TokenType * string * ParserDebugFuns
+    | Error of int * 'TokenType * string * ParserDebugFuns<'TokenType>
 
 
 /// Compare vertex like a pair: (level, state)
@@ -167,7 +169,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         if parserSource.AcceptEmptyInput then
             Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
         else
-            Error ( 0 , Unchecked.defaultof<'TokenType> , "This grammar cannot accept empty string", {drawGSSDot = fun _ -> ()})
+            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string",
+                    {
+                        drawGSSDot = fun _ -> ()
+                        lastTokens = fun _ -> [||]
+                    })
     else                                     
         // Currently processed token
         let curToken = ref enum.Current
@@ -471,12 +477,15 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 else
                     incr curInd
                     shift !curInd
-        //printfn "%A" <| tokens.ToArray()
-
-        
+        let lastTokens count =
+            [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do
+                yield tokens.[i]|]
         let debugFuns () =
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
-            {drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorNIndex}
+            {
+                drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString
+                lastTokens = lastTokens
+            }
                     
         if not errorList.IsEmpty then
             errorList <- List.rev errorList

@@ -1,13 +1,13 @@
 
 rules:
-   0: yard_rule_op_1 = 
-   1: yard_rule_op_1 = A 
-   2: yard_rule_op_2 = 
-   3: yard_rule_op_2 = B 
-   4: yard_rule_op_3 = 
-   5: yard_rule_op_3 = C 
-   6: s = yard_rule_op_1 yard_rule_op_2 yard_rule_op_3 
-   7: yard_start_rule = s 
+   0: s = yard_rule_op_1 yard_rule_op_2 yard_rule_op_3 
+   1: yard_start_rule = s 
+   2: yard_rule_op_3 = 
+   3: yard_rule_op_3 = C 
+   4: yard_rule_op_2 = 
+   5: yard_rule_op_2 = B 
+   6: yard_rule_op_1 = 
+   7: yard_rule_op_1 = A 
 Source without filename: parserRange
 Source without filename: error
 <null>
@@ -86,6 +86,10 @@ rules:
 Source without filename: parserRange
 Source without filename: error
 <null>
+   1: yard_start_rule = start 
+   2: e = A 
+   3: e = red 
+   4: red = e 
 rules:
    0: list = A 
    1: list = list list 

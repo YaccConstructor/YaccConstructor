@@ -35,11 +35,45 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\CYK.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\CYK.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\CYK.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
-    <Reference Include="FSharp.PowerPack.Parallel.Seq"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Parallel.Seq.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Parallel.Seq">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
+    </Reference>
+    <Reference Include="Brahma.OpenCL">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.OpenCL.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\..\3rdParty\Brahma.FSharp\OpenCL.Net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

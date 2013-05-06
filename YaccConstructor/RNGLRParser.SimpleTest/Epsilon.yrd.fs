@@ -32,8 +32,8 @@ let tokenToNumber = function
 let mutable private cur = 0
 let leftSide = [|2; 2; 3; 3; 4; 4; 1; 5|]
 let private rules = [|6; 7; 8; 2; 3; 4; 1|]
-let private rulesStart = [|0; 0; 1; 1; 2; 2; 3; 6; 7|]
-let startRule = 7
+let private rulesStart = [|0; 3; 4; 4; 5; 5; 6; 6; 7|]
+let startRule = 1
 
 let acceptEmptyInput = true
 
@@ -56,7 +56,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|6,1|]; [|6,2|]; [|6,3|]; [|5,1|]; [|3,1|]; [|1,1|]|]
+let private lists_reduces = [|[|0,1|]; [|0,2|]; [|0,3|]; [|3,1|]; [|5,1|]; [|7,1|]|]
 let private small_reduces =
         [|131073; 589824; 196609; 589825; 262145; 589826; 327681; 589827; 393218; 524292; 589828; 458755; 458757; 524293; 589829|]
 let reduces = Array.zeroCreate 8
@@ -72,7 +72,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|0|]; [|7; 6; 0|]; [|2|]; [|4|]|]
+let private lists_zeroReduces = [|[|6|]; [|6; 1; 0|]; [|4|]; [|2|]|]
 let private small_zeroReduces =
         [|3; 458752; 524288; 589825; 131074; 524290; 589826; 196609; 589827|]
 let zeroReduces = Array.zeroCreate 8
@@ -111,36 +111,32 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 3 "Epsilon.yrd"
-                                  1
-                )::!_rnglr_cycle_res
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_op_1) 
+             |> List.iter (fun (a1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_op_2) 
+               |> List.iter (fun (a2) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_op_3) 
+                 |> List.iter (fun (a3) -> 
+                  _rnglr_cycle_res := (
+                    
+# 2 "Epsilon.yrd"
+                                                          a1 + a2 + a3
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 3 "Epsilon.yrd"
-               : '_rnglr_type_yard_rule_op_1) 
+# 2 "Epsilon.yrd"
+               : '_rnglr_type_s) 
 # 124 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 3 "Epsilon.yrd"
-                             10
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
+          ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
-# 3 "Epsilon.yrd"
-               : '_rnglr_type_yard_rule_op_1) 
+# 2 "Epsilon.yrd"
+               : '_rnglr_type_yard_start_rule) 
 # 144 "Epsilon.yrd.fs"
       );
   (
@@ -158,46 +154,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           )
             )
 # 3 "Epsilon.yrd"
-               : '_rnglr_type_yard_rule_op_2) 
-# 162 "Epsilon.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 3 "Epsilon.yrd"
-                             10
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 3 "Epsilon.yrd"
-               : '_rnglr_type_yard_rule_op_2) 
-# 182 "Epsilon.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 3 "Epsilon.yrd"
-                                  1
-                )::!_rnglr_cycle_res
-            !_rnglr_cycle_res
-          )
-            )
-# 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
-# 200 "Epsilon.yrd.fs"
+# 162 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -217,6 +175,44 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Epsilon.yrd"
                : '_rnglr_type_yard_rule_op_3) 
+# 182 "Epsilon.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 3 "Epsilon.yrd"
+                                  1
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 3 "Epsilon.yrd"
+               : '_rnglr_type_yard_rule_op_2) 
+# 200 "Epsilon.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 3 "Epsilon.yrd"
+                             10
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 3 "Epsilon.yrd"
+               : '_rnglr_type_yard_rule_op_2) 
 # 220 "Epsilon.yrd.fs"
       );
   (
@@ -225,29 +221,22 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_op_1) 
-             |> List.iter (fun (a1) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_op_2) 
-               |> List.iter (fun (a2) -> 
-                ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_op_3) 
-                 |> List.iter (fun (a3) -> 
-                  _rnglr_cycle_res := (
-                    
-# 2 "Epsilon.yrd"
-                                                          a1 + a2 + a3
-                      )::!_rnglr_cycle_res ) ) )
+            _rnglr_cycle_res := (
+              
+# 3 "Epsilon.yrd"
+                                  1
+                )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 2 "Epsilon.yrd"
-               : '_rnglr_type_s) 
+# 3 "Epsilon.yrd"
+               : '_rnglr_type_yard_rule_op_1) 
 # 244 "Epsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
-          ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
             )
 # 2 "Epsilon.yrd"
                : '_rnglr_type_yard_start_rule) 
@@ -259,6 +248,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_) -> 
             _rnglr_cycle_res := (
               
 

@@ -20,18 +20,21 @@
 namespace Yard.Generators.RNGLR
 
 open Yard.Core
-open Yard.Core.IL
-open Yard.Generators.RNGLR.InitialConvert
+open IL
+open Constraints
+open Yard.Generators.RNGLR
+open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.YardPrinter
-open Yard.Generators.RNGLR.States
-open Yard.Generators.RNGLR.Printer
-open Yard.Generators.RNGLR.TranslatorPrinter
+open States
+open Printer
+open TranslatorPrinter
 open Option
 
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -47,12 +50,13 @@ type RNGLR() =
             let mutable light = true
             let mutable printInfiniteEpsilonPath = ""
             let mutable output = definition.info.fileName + ".fs"
+            let mutable targetLanguage = FSharp
             for opt, value in pairs do
                 match opt with
                 | "-module" -> moduleName <- value
                 | "-token" -> tokenType <- value
                 | "-pos" -> positionType <- value
-                | "-o" -> output <- value
+                | "-o" -> if value.Trim() <> "" then output <- value
                 | "-table" ->
                     match value with
                     | "LALR" -> table <- LALR
@@ -69,12 +73,18 @@ type RNGLR() =
                 | "-light" ->
                     if value = "on" then light <- true
                     elif value = "off" then light <- false
-                    else failwith "Unexpected light value %s" value
+                    else failwith "Unexpected light value %A" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
+                | "-lang" ->
+                    targetLanguage <-
+                        match value.ToLowerInvariant() with
+                        | "fsharp" -> FSharp
+                        | "scala" -> Scala
+                        | s -> "Language " + s + "is not supported" |> failwith
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar);
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules);
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -114,28 +124,47 @@ type RNGLR() =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
             let print (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
-            println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
-            println "module %s"
-            <|  match moduleName with
-                | "" -> "RNGLR.Parse"
-                | s -> s
-            if not light then
-                println "#light \"off\""
-            println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+            let package, _class  =
+                        match moduleName with
+                        | "" -> "RNGLR","Parse"
+                        | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
+                        | s -> "RNGLR",s
+            let printHeaders moduleName fullPath light output targetLanguage =
+                let fsHeaders() = 
+                    println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
+                    println "module %s"
+                    <|  match moduleName with
+                        | "" -> "RNGLR.Parse"
+                        | s -> s
+                    if not light then
+                        println "#light \"off\""
+                    println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-            println "open Yard.Generators.RNGLR.Parser"
-            println "open Yard.Generators.RNGLR"
-            println "open Yard.Generators.RNGLR.AST"
+                    println "open Yard.Generators.RNGLR.Parser"
+                    println "open Yard.Generators.RNGLR"
+                    println "open Yard.Generators.RNGLR.AST"
 
-            match definition.head with
-            | None -> ()
-            | Some (s : Source.t) ->
-                println "%s" <| getPosFromSource fullPath dummyPos s
-                println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
+                    match definition.head with
+                    | None -> ()
+                    | Some (s : Source.t) ->
+                        println "%s" <| getPosFromSource fullPath dummyPos s
+                        println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
 
-            let tables = printTables grammar definition.head tables moduleName tokenType res
-            let res = if not needTranslate then tables
-                        else tables + printTranslator grammar newDefinition.grammar
+                let scalaHeaders () =
+
+                    println "package %s" package
+                    println "//import Yard.Generators.RNGLR.Parser"
+                    println "//import Yard.Generators.RNGLR"
+                    println "//import Yard.Generators.RNGLR.AST"
+
+                match targetLanguage with
+                | FSharp -> fsHeaders()
+                | Scala -> scalaHeaders()
+
+            printHeaders moduleName fullPath light output targetLanguage
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
+            let res = if not needTranslate || targetLanguage = Scala then tables
+                        else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos
             let res = 
                 match definition.foot with
@@ -144,22 +173,22 @@ type RNGLR() =
                     res + (getPosFromSource fullPath dummyPos s + "\n"
                                 + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
             let res =
-                let init = res.Replace("\r\n", "\n")
-                let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
-                let res = new System.Text.StringBuilder(init.Length * 2)
-                for c in init do
-                    match c with
-                    | '\n' -> incr curLine; res.Append System.Environment.NewLine
-                    | c when c = dummyPos -> res.Append (string !curLine)
-                    | x -> res.Append x
-                    |> ignore
-                res.ToString()
+                match targetLanguage with
+                | FSharp ->
+                    let init = res.Replace("\r\n", "\n")
+                    let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
+                    let res = new System.Text.StringBuilder(init.Length * 2)
+                    for c in init do
+                        match c with
+                        | '\n' -> incr curLine; res.Append System.Environment.NewLine
+                        | c when c = dummyPos -> res.Append (string !curLine)
+                        | x -> res.Append x
+                        |> ignore
+                    res.ToString()
+                | Scala -> res + "\n}"
             out.WriteLine res
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
             //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate definition = this.Generate (definition, "")
-        override this.AcceptableProductionTypes =
-            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
-            |> List.map (fun unionCase -> unionCase.Name)

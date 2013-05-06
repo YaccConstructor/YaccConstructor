@@ -32,7 +32,9 @@
     <DocumentationFile>bin\Release\CYKGenerator.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -46,6 +48,11 @@
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">

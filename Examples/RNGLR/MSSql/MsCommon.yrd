@@ -3,7 +3,6 @@
 [<AllPublic>]
 module MsCommon
 
-
 open Common
 
 comma_list<<item>>: list<<item COMMA>>

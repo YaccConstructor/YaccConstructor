@@ -1,0 +1,8 @@
+[<Start>]
+s: MUMBER;
+
+s2: NUMBER | empty ;
+
+default_val: EQUAL? ("null" | LITERAL | NUMBER);
+
+closure: NUMBER+;

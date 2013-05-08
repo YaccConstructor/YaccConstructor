@@ -1,0 +1,7 @@
+[<Start>]
+s:  yard_rule_metar_1;
+
+yard_rule_metar_1:  mrArg;
+
+mrArg:  NUMBER;
+

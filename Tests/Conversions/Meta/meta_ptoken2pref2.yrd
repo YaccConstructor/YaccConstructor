@@ -1,0 +1,6 @@
+[<Start>]
+s:  metar<<mrArg>>;
+
+metar<<mfArg>>:  mfArg;
+
+mrArg:  NUMBER;

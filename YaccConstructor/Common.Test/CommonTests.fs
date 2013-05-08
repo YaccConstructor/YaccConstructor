@@ -18,7 +18,7 @@ type ``Components loader tests`` () =
             List.ofSeq GeneratorsManager.Available
             |> List.sort
         let expetedResult = 
-            ["FParsecGenerator"; "FsYaccPrinter"; "TreeDump"; "YardPrinter"]            
+            ["CYKGenerator";"FParsecGenerator";"FsYaccPrinter";"TreeDump";"YardPrinter"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
@@ -45,14 +45,14 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        let ConvertionsManager = ConvertionsManager.ConvertionsManager()
+        let ConversionsManager = ConversionsManager.ConversionsManager()
         let allConversions = 
-            List.ofSeq ConvertionsManager.Available
+            List.ofSeq ConversionsManager.Available
             |> List.sort
         let expetedResult =
-             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "EliminateLeftRecursion";
-             "ExpandAlter"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
-             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals";]
+             ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "CNF"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";
+             "ExpandTopLevelAlt"; "ExpandBrackets"; "ExpandEbnf"; "ExpandInnerAlt"; "ExpandMeta"; "LeaveLast"; "MergeAlter";
+             "RemoveAC"; "ReplaceInline"; "ReplaceLiterals"; "ToCNF"; "Linearize"]
             |> List.sort
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"
@@ -130,25 +130,34 @@ type ``Checker test`` () =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
             |> frontend.ParseGrammar
             |> GetUndeclaredNonterminalsList
+            |> (fun (_,_,u) -> u)
+            |> List.map snd
+            |> List.concat
+            |> List.map (fun r -> r.text)
             |> List.sort
         let expetedResult = []
-        Seq.iter (printfn "%A;") result
+        Seq.iter (printfn "%s;") result
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult  
+        Seq.iter (printfn "%s;") expetedResult  
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]
     member test.``Undeclared nonterminals checker. Wrong grammar.`` () =
         let result =
-            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Uncorrect.yrd")
+            Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Incorrect.yrd")
             |> frontend.ParseGrammar
             |> GetUndeclaredNonterminalsList
+            |> (fun (_,_,u) -> u)
+            |> List.map snd
+            |> List.concat
+            |> List.map (fun r -> r.text)
             |> List.sort
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
-        Seq.iter (printfn "%A;") result
+        Seq.iter (printf "%s; ") result
+        printfn ""
         printfn "**********************"
-        Seq.iter (printfn "%A;") expetedResult 
-        Assert.AreEqual(result,expetedResult)
+        Seq.iter (printf "%s; ") expetedResult 
+        Assert.AreEqual(result, expetedResult)
 
     [<Test>]
     member test.``Unused nonterminals checker. Right grammar.`` () =

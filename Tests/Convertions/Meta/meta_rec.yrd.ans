@@ -1,7 +1,0 @@
-yard_rule_1:  NUMBER;
-
-yard_rule_a_2:  (
-      yard_rule_1
-    | yard_rule_1 yard_rule_a_2 );
-
-+s:  yard_rule_a_2;

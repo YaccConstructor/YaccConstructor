@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9aea3f62-7f50-4939-85dc-ce29ab43815d}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>FsYARD</RootNamespace>
+    <AssemblyName>FsYARD</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>FsYARD</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\FsYARD.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\FsYARD.XML</DocumentationFile>
+    <StartAction>Project</StartAction>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>-replaceLiterals "KW_%s" -translate false -token SourceText -module Yard.Examples.MSParser -infEpsPath epsilons -o MsParser.fs -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd"</StartArguments>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <PropertyGroup>
+    <light>on</light>
+    <RLiterals>KW_%s</RLiterals>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="FsYARD.fs" />
+    <Compile Include="FsYARDBuildTask.fs" />
+    <None Include="FsYard.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
+      <Name>RNGLRGenerator</Name>
+      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />
+  <PropertyGroup>
+    <CompileDependsOn>MyTarget;$(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Target Name="MyTarget" Inputs="@(SE)" Condition="'@(SE)'!=''" Outputs="@(SE->'dddd.fs')">
+    <FsYard InputFiles="@(SE)" ReplLiterals="$(RLiterals)" Light="$(light)" OutFile="$(OutFile)" ModuleName="$(Module)" 
+            NeedTranslate="$(NeedTranslate)" TokenType="$(Token)" EpsilonPath="$(EpsilonPath)" FullPath="$(FullPath)">
+    </FsYard>
+  </Target-->
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+</Project>

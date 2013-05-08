@@ -20,7 +20,7 @@
 
 namespace Yard.Generators.RNGLR
 
-type ParserSource<'TokenType> (gotos : int option[][]
+type ParserSource<'TokenType> (gotos : int[][]
                                , reduces : (int * int)[][][]
                                , zeroReduces : int[][][]
                                , accStates : bool[]
@@ -29,20 +29,30 @@ type ParserSource<'TokenType> (gotos : int option[][]
                                , leftSide : int[]
                                , startRule : int
                                , eofIndex : int
-                               , tokenToNumber : 'TokenType -> int) =
+                               , tokenToNumber : 'TokenType -> int
+                               , acceptEmptyInput : bool
+                               , numToString : int -> string
+                               ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
         for i=0 to res.Length-1 do
             res.[i] <- rulesStart.[i+1] - rulesStart.[i]
         res
+    let _rules = Array.zeroCreate length.Length
+    do for i = 0 to length.Length-1 do
+        _rules.[i] <- Array.zeroCreate length.[i]
+        for j = 0 to length.[i]-1 do
+            _rules.[i].[j] <- rules.[rulesStart.[i] + j]
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
     member this.AccStates = accStates
-    member this.Rules = rules
+    member this.Rules = _rules
     member this.RulesStart = rulesStart
     member this.Length = length
     member this.LeftSide = leftSide
     member this.StartRule = startRule
     member this.EofIndex = eofIndex
     member this.TokenToNumber = tokenToNumber
+    member this.AcceptEmptyInput = acceptEmptyInput
+    member this.NumToString = numToString

@@ -21,7 +21,8 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-let printSourceOpt = function None -> "" | Some arg -> "\n{"+(fst arg)+"}\n\n"
+let endl = System.Environment.NewLine
+let printSourceOpt = function None -> "" | Some (arg : Source.t) -> endl + "{" + arg.text + "}" + endl + endl
 
 type TextBox =
 | Tabbed of seq<TextBox> 
@@ -31,6 +32,8 @@ type TextBox =
 with 
   member x.IsTab with get() = match x with Tabbed _ -> true | _ -> false
   
+let str2line s = s |> Str |> Seq.singleton |> Line
+
 let printTextBox tabSize windowSize tbSeq =
 
     /// Return new sequence, what has the same elements, what tbSeq has,
@@ -38,9 +41,9 @@ let printTextBox tabSize windowSize tbSeq =
     let rec printIndentedSeq tbSeq indent =
         Seq.collect (function
             | Str s -> Seq.singleton (s, indent)
-            | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq (indent)}
+            | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq indent}
             | Tabbed tbSeq | Line tbSeq as x -> 
-             seq { yield ("\n", indent);
+             seq { yield endl, indent
                    yield! printIndentedSeq tbSeq (indent + (if x.IsTab then tabSize else 0) ) } 
         ) tbSeq
 
@@ -51,93 +54,171 @@ let printTextBox tabSize windowSize tbSeq =
 
     /// Convert obtained sequence to resulting string.
     /// newline is true iff there was a line feed.
-    let (text,_,_) = 
-        Seq.fold (fun (str_acc, newline, chars_in_line) (word,indent) -> 
-            if word="\n" then 
+    let (text,_,_) =
+        strSeq
+        |> Seq.fold (fun (str_acc, newline, chars_in_line) (word,indent) -> 
+            if word=endl then 
                 if newline then
                     (str_acc, true, 0)
                 else
-                    (str_acc+word, true, 0)
+                    (str_acc + word, true, 0)
             else
-                let spaces_count = if newline then indent else if word.Length=0 || word.[0]=';' || word.[0]=' ' then 0 else 1
-                if (String.length word <= windowSize - chars_in_line - spaces_count) then
-                    let appended = (write_spaces spaces_count) + word
-                    (str_acc + appended, false, chars_in_line + (String.length appended))
+                let spaces_count =
+                    if newline then indent
+                    elif word.Length = 0 || word.[0] = ';' || word.[0] = ' ' then 0
+                    else 1
+                if String.length word <= windowSize - chars_in_line - spaces_count then
+                    let appended = write_spaces spaces_count + word
+                    (str_acc + appended, false, chars_in_line + String.length appended)
                 else
-                    let newlineStr = (write_spaces (indent + tabSize)) + word
-                    (str_acc + "\n" + newlineStr, false, String.length newlineStr)
-            ) ("", true, 0) strSeq
+                    let newlineStr = write_spaces (indent + tabSize) + word
+                    str_acc + endl + newlineStr, false, String.length newlineStr
+            ) ("", true, 0)
     text
 
-let printRule (rule:Rule.t<Source.t, Source.t>) = 
-    let bracketsIf cond s = if cond then seq { yield Str "("; yield! s; yield Str ")"} else s
-    let startSign = if rule._public then "+" else ""
-    let printAttr = function
-        | Some(attr) -> "{"+(Source.toString attr)+"}"
-        | None -> ""
-    let printArg = function
-        | Some(attr) -> "["+(Source.toString attr)+"]"
-        | None -> ""
-    let seqCount seq =
-        Seq.fold(fun acc a -> acc+1) 0 seq
-    let printSeqBrackets l_br r_br metaArgs =
-        if (Seq.isEmpty metaArgs) then ""
-        else if (seqCount metaArgs) > 1 then l_br + (String.concat " " metaArgs) + r_br
-        else l_br + (Seq.head metaArgs) + r_br
-    let printArgs args = List.map Source.toString args |> printSeqBrackets "[" "]"
-    let rec priority = function 
-        | PAlt(_) -> 1
-        | PSeq([elem],None) -> 
-            match elem.binding with
-            | Some(_) -> 10
-            | None -> priority elem.rule
-        | PSeq(_) -> 1
-        | PToken(_) | PRef(_) | PMetaRef(_) | PLiteral(_) -> 100
-        | PMany(_) | POpt(_) | PSome(_) -> 50
-        | _ -> -1
+let printSeqBrackets l_br r_br metaArgs =
+    if Seq.isEmpty metaArgs then ""
+    elif (Seq.length metaArgs) > 1 then
+        l_br + String.concat " " metaArgs + r_br
+    else l_br + Seq.head metaArgs + r_br
 
-    let rec unboxText textBoxSeq = Seq.collect (function Tabbed(s) | Line(s) | StrSeq(s) -> unboxText s | Str(s) -> Seq.singleton s) textBoxSeq
+let printProduction =
+    let rec unboxText textBoxSeq =
+        Seq.collect (function | Tabbed s | Line s | StrSeq s -> unboxText s
+                              | Str s -> Seq.singleton s) textBoxSeq
+
     let rec printMetaArgs metaArgs = 
-        List.map (printProduction true >> unboxText) metaArgs |> Seq.concat |> printSeqBrackets "<<" ">>"
+        List.map (printProduction true >> unboxText) metaArgs
+        |> List.map2 (fun init s ->
+                match init with | PSeq _ | PAlt _ -> seq {yield "("; yield! s; yield ")"}
+                                | _ -> s
+             ) metaArgs
+        |> Seq.concat
+        |> printSeqBrackets "<<" ">>"
+
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
     and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
+        let rec priority = function 
+            | PAlt _ -> 1
+            | PSeq ([elem],None,_) -> 
+                match elem.binding with
+                | Some _ -> 10
+                | None -> priority elem.rule
+            | PSeq _ -> 1
+            | PToken _ | PRef _ | PMetaRef _ | PLiteral _ -> 100
+            | PMany _ | POpt _ | PSome _ -> 50
+            | _ -> -1
+
+        let bracketsIf cond s =
+            if cond then seq { yield Str "("; yield! s; yield Str ")"}
+            else s
+        let printAttr = function
+            | Some attr -> "{" + Source.toString attr + "}"
+            | None -> ""
+        let printArg = function
+            | Some attr  -> "[" + Source.toString attr + "]"
+            | None -> ""
         let printElem (elem:elem<Source.t,Source.t>) = 
             let binding = function
-                | Some x when String.forall System.Char.IsLetter (Source.toString x) -> (Source.toString x) + " ="
+                | Some x when String.forall System.Char.IsLetter (Source.toString x) -> Source.toString x + " ="
                 | Some x  -> "<" + Source.toString x + "> ="
                 | None -> ""
             let omit = if elem.omit then "-" else ""
             let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1
-            seq { yield Str(omit + binding elem.binding); yield! bracketsIf needBrackets (printProduction false elem.rule) }
+            seq { yield Str <| omit + binding elem.binding
+                  yield! bracketsIf needBrackets (printProduction false elem.rule) }
+        let printEbnf sign expr =
+            seq { yield! bracketsIf (priority expr < 50) (printProduction false expr);
+                  yield Str sign}
+
         match production with
         // Alternatives
         | PAlt(alt1, alt2) ->
-            if not wasAlt then seq {yield Tabbed(seq {yield Str (" "); yield! printProduction true production})}
-            else seq {yield StrSeq(printProduction true alt1); yield Line (seq {yield Str ("|"); yield! printProduction true alt2})} 
+            if not wasAlt then
+                seq {yield Str " "
+                     yield! printProduction true production}
+                |> Tabbed
+                |> Seq.singleton
+            else seq {yield StrSeq <| printProduction true alt1
+                      yield Line (seq {yield Str "|"
+                                       yield! printProduction true alt2}
+                                 )
+                     } 
         // Sequence * attribute.(attribute is always applied to sequence) 
-        | PSeq(elem_seq, attr_option) -> seq {yield! (Seq.collect printElem elem_seq); yield Str(printAttr attr_option)}
+        | PSeq(elem_seq, attr_option,lbl) -> 
+            let isLbl = lbl.IsSome
+            let isWght = isLbl && lbl.Value.weight.IsSome
+
+            seq {if isLbl then yield Str <| lbl.Value.label + "("
+                 if isWght then yield Str <| "[" + (lbl.Value.weight.Value |> int |> string) + "]"
+                 yield! Seq.collect printElem elem_seq
+                 if isLbl then yield Str ")"
+                 yield Str <| printAttr attr_option
+                }
         // Token
         | PToken(source) -> Seq.singleton <| Str (Source.toString source)
         // Vanilla rule reference with an optional args list.
         | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
         // expr*
-        | PMany(many) -> seq { yield! bracketsIf (priority many < 50) (printProduction false many) ; yield Str "*"}
+        | PMany many -> printEbnf "*" many
         // Metarule reference like in "a: mr<x> y z"
-        | PMetaRef(rule_name, opt_arg, metaArgs) -> Seq.singleton <| Str((Source.toString rule_name)+(printMetaArgs metaArgs)+(printArg opt_arg))
+        | PMetaRef(rule_name, opt_arg, metaArgs) ->
+            Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
+            |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
         | PLiteral(source) -> Seq.singleton <| Str ("\"" + Source.toString source + "\"") 
-//        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
-//        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
-///// The following are obsolete and reduction to PRepet should be discussed.
+    //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
+    //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
+    ///// The following are obsolete and reduction to PRepet should be discussed.
         // expr+
-        | PSome(some) -> seq {yield! (bracketsIf (priority some<50) (printProduction false some)); yield Str("+")}
+        | PSome some -> printEbnf "+" some
         // expr?
-        | POpt(opt) -> seq {yield! (bracketsIf (priority opt<50) (printProduction false opt)); yield Str("?")}
-        | _ -> Seq.singleton <| Str("ERROR")
+        | POpt opt -> printEbnf "?" opt
+        | _ -> Seq.singleton <| Str "ERROR"
+    printProduction
 
-    seq {yield Line(seq{yield Str(startSign + fst rule.name + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>"  ) + (printArgs rule.args) + ":");
-         yield Str(" "); yield! printProduction false rule.body; yield Str(";\n")})}
+let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
+    let printArgs args =
+        args
+        |> List.map (fun src -> "[" + Source.toString src + "]")
+        |> String.concat ""
+    let startSign = if rule.isStart then "[<Start>]" + endl else ""
+    let accessModifier =
+        if isPublicModule = rule.isPublic then ""
+        elif rule.isPublic then "public "
+        else "private "
+    seq {yield Line(seq{yield Str(startSign + accessModifier + rule.name.text
+                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>")
+                                    + (printArgs rule.args) + ":");
+                        yield Str " ";
+                        yield! printProduction false rule.body;
+                        yield Str <| ";" + endl
+                       }
+                   )
+        }
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) =
-    let tbSeq = Seq.collect (fun rule -> printRule rule) input_grammar.grammar
-    printSourceOpt(input_grammar.head)+(printTextBox 4 80 tbSeq)+printSourceOpt(input_grammar.foot)
+    let tbSeq =
+        input_grammar.grammar
+        |> Seq.collect (fun m ->
+            seq {
+                match m.name with
+                | Some name ->
+                    if m.allPublic then yield Line <| Seq.singleton (Str "[<AllPublic>]")
+                    yield str2line <| "module " +  name.text
+                    if not m.openings.IsEmpty then
+                        yield
+                            m.openings |> List.map (fun op -> op.text)
+                            |> String.concat ", "
+                            |> (fun ops -> str2line <| "open " + ops)
+                        
+                | None -> ()
+                yield! Seq.collect (fun rule -> printRule m.allPublic rule) m.rules
+            }
+        )
+    String.concat ""
+        [
+            printSourceOpt input_grammar.head
+            printTextBox 4 80 tbSeq
+            printSourceOpt input_grammar.foot
+        ]

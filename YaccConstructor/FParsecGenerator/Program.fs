@@ -27,7 +27,7 @@ open Yard.Generators.FParsecGenerator.WriteToFile
 
 open System.Text.RegularExpressions
 
-let repr = fst
+let repr x = (x : Source.t).text
 let printArgs indent = List.map repr  >> String.concat " " >> (+) indent
 let printBinding = function None -> "_" | Some patt -> repr patt
 let printArg = function None -> "" | Some arg -> repr arg
@@ -37,14 +37,14 @@ let printArg = function None -> "" | Some arg -> repr arg
 let rec printBody indent body  =
     match body with
     |PAlt(a,b)  -> sprintf "(attempt (%s)) <|> (%s)" (printBody (indent) a) (printBody (indent) b) 
-    |PSeq (elems,Some a) ->  
+    |PSeq (elems,Some a,_) ->  
       match  List.rev elems with
         | [] -> sprintf "preturn %s" (repr a)
         | lastElem::otherElems -> 
             let lastRepr = sprintf "%s |>> fun (%s) -> (%s) " (printBody indent lastElem.rule) (printBinding lastElem.binding) (repr a)
             let list = List.fold (fun r e -> printElem indent e + ") -> (" + r + ")" ) (lastRepr  ) otherElems 
             sprintf "%s  " list 
-    |PSeq(elems,None) -> 
+    |PSeq(elems,None,_) -> 
       match List.rev elems with
         | [] -> "???" 
         | lastElem::otherElems ->
@@ -65,7 +65,7 @@ let rec printBody indent body  =
 //What about following items
     |PSome a -> sprintf "many1 ( attempt(%s))" <| printBody (indent +  "") a
     |POpt a -> sprintf "opt ( attempt(%s))" <| printBody (indent +  "") a
-    | x -> failwith <| sprintf "Unsupported construct\n%A" x
+    | PMetaRef _ | PPerm _ | PRepet _ as x -> failwith <| sprintf "Unsupported construct\n%A" x
 
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 
@@ -76,10 +76,12 @@ let grammarName filename =
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 
     
     let header = printArg input_grammar.head 
-    let functions = List.map (fun e -> (if e._public then "public " else "private " ) 
-                                      + fst e.name + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
-                                      + printBody "" e.body ) 
-                         input_grammar.grammar
+    let functions =
+        input_grammar.grammar.Head.rules |> List.map (fun e ->
+            (if e.isStart then "public " else "private " ) 
+                + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+                + printBody "" e.body ) 
+                         
 
     let res = "module " + (grammarName input_grammar.info.fileName) + "\n" + "\nopen FParsec.Primitives\n" + header + "let rec " + String.concat ( "\n\n and ") functions
   

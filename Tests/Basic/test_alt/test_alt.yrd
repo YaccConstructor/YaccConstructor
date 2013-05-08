@@ -1,1 +1,2 @@
-+s: PLUS | MULT;
+[<Start>]
+s: PLUS | MULT;

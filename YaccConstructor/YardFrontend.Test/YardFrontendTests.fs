@@ -17,7 +17,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 module YardFrontendTester
 
 open Microsoft.FSharp.Text.Lexing
@@ -26,11 +25,16 @@ open Yard.Frontends.YardFrontend.GrammarParser
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
+open Yard.Core.Helpers
 open NUnit.Framework
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 
-let dummyPos s = (s,(0,0,""))
+let dummyPos s = new Source.t(s)
+
+let equalTokens x y =
+    let getCtor arg = fst <| Microsoft.FSharp.Reflection.FSharpValue.GetUnionFields(arg, typeof<Token>)
+    getCtor x = getCtor y
 
 let lexerTest str lexemsListCorrect =
     let buf = LexBuffer<_>.FromString str
@@ -50,7 +54,9 @@ let lexerTest str lexemsListCorrect =
 
     let areEqual lexemsListCorrect lexemsList =
         try 
-            List.map2 (fun x y -> match x,y with | LPAREN _, LPAREN _ |RPAREN _ ,RPAREN _| SEMICOLON _, SEMICOLON _ -> true | x,y -> x = y) lexemsListCorrect lexemsList
+            List.map2
+                (fun x y -> equalTokens x y)
+                lexemsListCorrect lexemsList
             |> List.reduce (&&)
         with _ -> false
     Assert.IsTrue (areEqual lexemsListCorrect lexemsList)
@@ -66,7 +72,7 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
     let buf = LexBuffer<_>.FromString str
     Lexer.currentFileContent := str
-    let ilDef = {GrammarParser.file Lexer.main buf with info = {fileName =""}}
+    let ilDef = { Main.parse buf [||] with info = {fileName =""}}
 
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
@@ -83,34 +89,35 @@ let optionsTest path optionsCorrect =
     let optionsAreEq (m1:Map<Rule.t<_,_>,_>) (m2:Map<Rule.t<_,_>,_>) = 
         Assert.AreEqual (m1.Count,m2.Count)
         Assert.IsTrue (m2 |> Seq.forall2 (fun (x1:System.Collections.Generic.KeyValuePair<Rule.t<_,_>,_>) x2 
-                                             -> fst x1.Key.name = fst x2.Key.name && x1.Value = x2.Value) m1)
+                                             -> x1.Key.name.text = x2.Key.name.text && x1.Value = x2.Value) m1)
     optionsAreEq currentOptions optionsCorrect
         
-let dummyRange = Range (Lexing.Position.Empty,Lexing.Position.Empty)
+let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
 
 [<TestFixture>]
 type ``YardFrontend lexer tests`` () = 
     [<Test>]
     member test.``Lexer seq test`` () =
         lexerTest 
-            "+s: NUMBER PLUS NUMBER;"
-            [PLUS; LIDENT ("s", (1, 2, "")); COLON; UIDENT ("NUMBER", (4, 10, ""))
-            ; UIDENT ("PLUS", (11, 15, "")); UIDENT ("NUMBER", (16, 22, "")); SEMICOLON dummyRange; EOF]
+            "[<Start>]s: NUMBER PLUS NUMBER;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3);
+                UIDENT (getSource "NUMBER" 4 10); UIDENT (getSource "PLUS" 11 15);
+                UIDENT (getSource "NUMBER" 16 22); SEMICOLON (getSource ";" 22 23); EOF (getSource "" 23 23)]
 
     [<Test>]
     member test.``Lexer cls test`` () =
         lexerTest 
-            "+s: (MINUS|PLUS)*;"
-            [PLUS; LIDENT ("s", (1, 2, "")); COLON; LPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); UIDENT ("MINUS", (5, 10, "")); BAR
-            ; UIDENT ("PLUS", (11, 15, "")); RPAREN (Range (Lexing.Position.Empty,Lexing.Position.Empty)); STAR; SEMICOLON dummyRange; EOF]
+            "[<Start>]s: (MINUS|PLUS)*;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3);
+                LPAREN (getSource "(" 4 5); UIDENT (getSource "MINUS" 5 10); BAR (getSource "|" 10 11); UIDENT (getSource "PLUS" 11 15);
+                RPAREN (getSource ")" 15 16); STAR (getSource "*" 16 17); SEMICOLON (getSource ";" 17 18); EOF (getSource "" 18 18)]
 
     [<Test>]            
     member test.``Include test`` () =
-        lexerTest @"
-include ""test_included.yrd""
-+s:PLUS;"
-            [INCLUDE; STRING ("test_included.yrd", (11, 28, "")); PLUS; LIDENT ("s", (32, 33, ""))
-            ; COLON; UIDENT ("PLUS", (34, 38, "")); SEMICOLON dummyRange; EOF]
+        lexerTest @"  include ""test_included.yrd""  [<Start>]s:PLUS;"
+            [INCLUDE (getSource "include" 2 9); STRING (getSource "test_included.yrd" 11 28);
+             START_RULE_SIGN (getSource "[<Start>]" 2 3); LIDENT (getSource "s" 32 33); COLON (getSource ":" 33 34);
+                UIDENT (getSource "PLUS" 34 38); SEMICOLON (getSource ":" 38 39); EOF (getSource ":" 39 39)]
 
 [<TestFixture>]
 type ``Yard frontend preprocessor tests`` () =
@@ -118,261 +125,202 @@ type ``Yard frontend preprocessor tests`` () =
     let cp file = System.IO.Path.Combine(basePath,file)
     [<Test>]
     member test.noUserDefs () =
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos "e"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("R", (28, 29, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "R" 28 29)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest (cp "test_0.yrd") expected
-
-
 
     [<Test>]
     member test.if_endif () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17, ""))
-                                        binding = None
-                                        checker = None}; {omit = false
-                                                          rule = PToken ("R", (28, 29, ""))
-                                                          binding = None
-                                                          checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
-        preprocessorTest ((cp "test_0.yrd")+"%ora") expected
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "N" 16 17)
+                    binding = None
+                    checker = None
+                }; {
+                    omit = false
+                    rule = PToken (getSource "R" 28 29)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
+        preprocessorTest (cp "test_0.yrd" + "%ora") expected
 
     [<Test>]
     member test.``if_else_end. No user defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("R", (29, 30, ""))
-                                        binding = None
-                                        checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "R" 29 30)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest (cp "test_1.yrd") expected
 
     [<Test>]
     member test.``if_else_end. User defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("N", (17, 18, ""))
-                                        binding = None
-                                        checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "N" 17 18)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest ((cp "test_1.yrd")+"%ora") expected
 
     [<Test>]
     member test.``Inner if. No user defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58, ""))
-                                        binding = None
-                                        checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken <| getSource "Q" 57 58
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest (cp "test_2.yrd") expected
 
     [<Test>]
     member test.``Inner if. Inner user defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("Q", (57, 58, ""))
-                                        binding = None
-                                        checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken <| getSource "Q" 57 58
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest ((cp "test_2.yrd")+"%x") expected
 
     [<Test>]
     member test.``Inner if. Full user defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos"e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17, ""))
-                                        binding = None
-                                        checker = None}; {omit = false
-                                                          rule = PToken ("G", (27, 28, ""))
-                                                          binding = None
-                                                          checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "N" 16 17)
+                    binding = None
+                    checker = None
+                }; {
+                    omit = false
+                    rule = PToken (getSource "G" 27 28)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest ((cp "test_2.yrd")+"%ora;x") expected
 
     [<Test>]
     member test.``Inner if. Top user defs.`` () =
-        let expected = 
-            {info = {fileName = ""}
-             head = None
-             grammar = [{name = dummyPos "e"
-                         args = []
-                         body = PSeq ([{omit = false
-                                        rule = PToken ("N", (16, 17, ""))
-                                        binding = None
-                                        checker = None}; {omit = false
-                                                          rule = PToken ("H", (38, 39, ""))
-                                                          binding = None
-                                                          checker = None}],None)
-                         _public = true
-                         metaArgs = []}]
-             foot = None
-             options = Map.empty}
-        preprocessorTest ((cp "test_2.yrd")+"%ora") expected
+        let rules =
+            verySimpleRules "e"
+                [{
+                    omit = false
+                    rule = PToken (getSource "N" 16 17)
+                    binding = None
+                    checker = None
+                }; {
+                    omit = false
+                    rule = PToken (getSource "H" 38 39)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
+        preprocessorTest (cp "test_2.yrd" + "%ora") expected
 
     [<Test>]
     member test.``elif with no defs.`` () =
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos"s"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("C", (40, 41, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            verySimpleRules "s"
+                [{
+                    omit = false
+                    rule = PToken (getSource "C" 40 41)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest (cp "test_3.yrd") expected
 
     [<Test>]
     member test.``elif with first def.`` () =
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos"s"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            verySimpleRules "s"
+                [{
+                    omit = false
+                    rule = PToken (getSource "A" 15 16)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest ((cp "test_3.yrd")+"%first") expected
 
     [<Test>]
     member test.``elif with second def.`` () =
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos"s"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("B", (31, 32, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            verySimpleRules "s"
+                [{
+                    omit = false
+                    rule = PToken (getSource "B" 31 32)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
+
         preprocessorTest ((cp "test_3.yrd")+"%second") expected
 
     [<Test>]
     member test.``elif with both defs.`` () =
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos"s"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("A", (15, 16, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            verySimpleRules "s"
+                [{
+                    omit = false
+                    rule = PToken (getSource "A" 15 16)
+                    binding = None
+                    checker = None
+                }]
+        let expected = defaultGrammar rules
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
              
 [<TestFixture>]
 type ``YardFrontend Parser tests`` () =    
     [<Test>]
     member test.``Seq test`` () =
+        let rules =
+            verySimpleRules "s"
+                [{ 
+                    omit = false
+                    rule = PToken (getSource "NUMBER" 4 10)
+                    binding = None
+                    checker = None
+                }; { 
+                    omit = false
+                    rule = PToken (getSource "PLUS" 11 15)
+                    binding = None
+                    checker = None
+                }; {
+                    omit = false
+                    rule = PToken (getSource "NUMBER" 16 22)
+                    binding = None
+                    checker = None
+                }]
         parserTest
-            "+s: NUMBER PLUS NUMBER;" 
-            { info = {fileName = ""} 
-              head = None  
-              grammar = 
-                    [{ 
-                        name = dummyPos"s"
-                        args = []
-                        body =
-                            PSeq(
-                                [{ 
-                                    omit = false
-                                    rule = PToken ("NUMBER", (4, 10, ""))
-                                    binding = None
-                                    checker = None
-                                }; { 
-                                    omit = false
-                                    rule = PToken ("PLUS", (11, 15, ""))
-                                    binding = None
-                                    checker = None
-                                }; {
-                                    omit = false
-                                    rule = PToken ("NUMBER", (16, 22, ""))
-                                    binding = None
-                                    checker = None
-                                }],
-                                None)
-                        _public = true
-                        metaArgs = []
-                    }] 
-              foot = None
-              options = Map.empty
-            } 
+            "[<Start>]s: NUMBER PLUS NUMBER;" 
+            (defaultGrammar rules) 
+               
 
 [<TestFixture>]
 type ``YardFrontend options tests`` () =  
@@ -382,81 +330,74 @@ type ``YardFrontend options tests`` () =
     [<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
-            "+s:
-#set a = \"smth\"
-A;"
-            [PLUS; LIDENT ("s", (1, 2, "")); COLON; SET; LIDENT ("a", (10, 11, ""))
-            ; EQUAL; STRING ("smth", (15, 19, "")); UIDENT ("A", (22, 23, "")); SEMICOLON dummyRange; EOF]
+            "[<Start>]s:  #set a = \"smth\"  A;"
+            [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); SET (getSource "#set" 5 9);
+             LIDENT (getSource "a" 10 11) ; EQUAL (getSource "=" 12 13); STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23);
+             SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]
 
     [<Test>]
     member test.``Basic options test`` () =
-        let rule : Rule.t<Source.t, Source.t> = {
-            Rule.name = dummyPos"s"
-            Rule._public = true
-            Rule.args = []
-            Rule.body = PSeq ([{omit = false
-                                rule = PToken ("A", (22, 23, ""))
-                                binding = None
-                                checker = None}], None)
-            Rule.metaArgs = []
-            }
-        let optionsForRule = Map.ofList [("a", "smth")]//[("dialect", "ora"), ("comment","smth")]
+        let rule =
+            verySimpleRules "s"
+                [{
+                    omit = false
+                    rule = PToken (getSource "A" 22 23)
+                    binding = None
+                    checker = None
+                }]
+        let optionsForRule = Map.ofList ["a", "smth"]//[("dialect", "ora"), ("comment","smth")]
 
-        optionsTest (cp "options_test_0.yrd") (Map.empty.Add (rule, optionsForRule))
+        optionsTest (cp "options_test_0.yrd") (Map.empty.Add (rule.Head, optionsForRule))
     
                 
 [<TestFixture>]
 type ``YardFrontend Complete tests`` () =    
     [<Test>]
     member test.``L_attr test`` () =
-        completeTest @"
-{
-let value x = (x:>Lexeme<string>).value
-}
-+s: <res:int> = e[1] {res};
-e[i]: n=NUMBER {(value n |> int) + i};"
-            [ACTION (@"
-let value x = (x:>Lexeme<string>).value
-", 
-                (3, 46, "")); PLUS;
-                LIDENT ("s", (50, 51, "")); COLON; PATTERN ("res:int", (54, 61, "")); EQUAL;
-                LIDENT ("e", (65, 66, "")); PARAM ("1", (67, 68, "")); ACTION ("res", (71, 74, ""));
-                SEMICOLON dummyRange; LIDENT ("e", (78, 79, "")); PARAM ("i", (80, 81, "")); COLON;
-                LIDENT ("n", (84, 85, "")); EQUAL; UIDENT ("NUMBER", (86, 92, ""));
-                ACTION ("(value n |> int) + i", (94, 114, "")); SEMICOLON dummyRange; EOF]
+        let rules : Rule.t<_,_> list = 
+            [{ 
+                name = dummyPos"s"
+                args = []
+                body = 
+                    PSeq (
+                        [{
+                            omit = false
+                            rule = PRef ((getSource "e" 65 66),Some (getSource "1" 67 68))
+                            binding = Some (getSource "res:int" 54 61)
+                            checker = None
+                        }],
+                        Some (getSource "res" 71 74), None)
+                isStart = true
+                isPublic = false
+                metaArgs = []
+            }; { 
+                name = dummyPos"e"
+                args = [(getSource "i" 80 81)]
+                body = 
+                    PSeq (
+                        [{
+                            omit = false
+                            rule = PToken (getSource "NUMBER" 86 92)
+                            binding = Some (getSource "n" 84 85)
+                            checker = None
+                        }],
+                        Some (getSource "(value n |> int) + i" 94 114), None)
+                isStart = false
+                isPublic = false
+                metaArgs = []
+            }]
+        completeTest
+            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
+                LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); PATTERN (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
+                LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
+                SEMICOLON (getSource ":" 2 9); LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON(getSource ":" 2 9);
+                LIDENT (getSource "n" 84 85); EQUAL(getSource ":" 2 9); UIDENT (getSource "NUMBER" 86 92);
+                ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON (getSource ":" 2 9); EOF(getSource ":" 2 9)]
             {
              info = { fileName = ""; }
-             head = Some ("\r\nlet value x = (x:>Lexeme<string>).value\r\n", (3, 46, ""))
-             grammar = 
-                    [{ 
-                        name = dummyPos"s"
-                        args = []
-                        body = 
-                            PSeq (
-                                [{
-                                    omit = false
-                                    rule = PRef (("e", (65, 66, "")),Some ("1", (67, 68, "")))
-                                    binding = Some ("res:int", (54, 61, ""))
-                                    checker = None
-                                }],
-                                Some ("res", (71, 74, "")))
-                        _public = true
-                        metaArgs = []
-                      }; { 
-                        name = dummyPos"e"
-                        args = [("i", (80, 81, ""))]
-                        body = 
-                            PSeq (
-                                [{
-                                    omit = false
-                                    rule = PToken ("NUMBER", (86, 92, ""))
-                                    binding = Some ("n", (84, 85, ""))
-                                    checker = None
-                                }],
-                                Some ("(value n |> int) + i", (94, 114, "")))
-                        _public = false
-                        metaArgs = []
-                    }]
+             head = Some (getSource "  let value x = (x:>Lexeme<string>).value  " 3 46)
+             grammar = defaultModules rules
              foot = None
              options = Map.empty
             }
@@ -468,18 +409,61 @@ type ``Yardfrontend label tests`` () =
 
     [<Test>]
     member test.``label test.`` () = 
-        let expected = 
-            {
-                info = {fileName =""}
-                head = None
-                grammar = [{name = dummyPos"s"
-                            args = []
-                            body = PSeq ([{omit = false
-                                           rule = PToken ("A", (12, 13, ""))
-                                           binding = None
-                                           checker = None}],None)
-                            _public = true
-                            metaArgs = []}]
-                foot = None
-                options = Map.empty}
+        let rules =
+            simpleRules "s"
+                <| PSeq ([{
+                               omit = false
+                               rule = PToken <| getSource "A" 12 13
+                               binding = None
+                               checker = None
+                         }],
+                         None,
+                         Some {label = "@label"
+                               weight = None}
+                        )
+        let expected = defaultGrammar rules
         preprocessorTest (cp "test_0.yrd") expected
+
+    [<Test>]
+    member test.``weight test correct input`` () =
+        let rules: Rule.t<_,_> list  =
+          [{name = dummyPos"s";
+            args = [];
+            body = PSeq ([{omit = false;
+                            rule = PToken (getSource "T" 16 16);
+                            binding = None;
+                            checker = None;}],None,Some {label = "@lbl";
+                                                        weight = Some 12.3;});
+            isStart = true;
+            isPublic = false;
+            metaArgs = [];
+            }]
+        parserTest
+            "[<Start>]s: @lbl[12.3](T);"
+            (defaultGrammar rules)
+            
+    
+    [<Test>]
+    member test.``weight test incorrect input`` () =
+        // must fail
+        try
+            let rules: Rule.t<_,_> list  =
+                [{name = dummyPos"s";
+                  args = [];
+                  body = PSeq ([{omit = false;
+                                 rule = PToken (getSource "T" 16 16);
+                                 binding = None;
+                                 checker = None;}],None,Some {label = "@lbl";
+                                                              weight = None;});
+                  isPublic = true;
+                  isStart = true;
+                  metaArgs = [];
+                }]
+            let smth = defaultGrammar rules |> parserTest "[<Start>]s: @lbl[q](T);"
+                  
+            Assert.IsTrue(false)
+        with 
+        | ex ->
+            let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            let actual = ex.Message
+            Assert.AreEqual(expected, actual)

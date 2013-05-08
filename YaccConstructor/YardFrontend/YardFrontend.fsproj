@@ -48,24 +48,34 @@
     <GenerateXmlDoc>false</GenerateXmlDoc>
     <GenerateTailCalls>false</GenerateTailCalls>
   </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\3rdParty\FsPowerPack\</FsLexToolPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FsYaccToolPath>..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
+    <FsLexToolPath>..\..\3rdParty\FsPowerPack\</FsLexToolPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack.Compatibility, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Compatibility">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Compatibility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
+  <Import Project="..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <FsLex Include="Lexer.fsl">
-      <OtherFlags>--unicode --light-off</OtherFlags>
+      <OtherFlags>--unicode</OtherFlags>
     </FsLex>
-    <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Yard.Frontends.YardFrontend.GrammarParser --open Yard.Core --light-off</OtherFlags>
-    </FsYacc>
+    <None Include="Parser.fsy" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Main.fs" />
@@ -75,6 +85,17 @@
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
+      <Name>RNGLRParser</Name>
+      <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <!--PropertyGroup>

@@ -1,5 +1,0 @@
-{
-let value x = (x:>Lexer_alt_in_cls.MyLexeme).MValue
-}
-
-+s: res = (m = MINUS {m} | p = PLUS {p})* {List.map value res|> String.concat ";"};

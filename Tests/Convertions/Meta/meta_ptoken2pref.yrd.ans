@@ -1,5 +1,0 @@
-yard_rule_1:  NUMBER;
-
-yard_rule_metar_2:  yard_rule_1;
-
-+s:  yard_rule_metar_2;

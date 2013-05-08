@@ -51,7 +51,7 @@ let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (ca
     let result = ref []
     for i in 0..indexator.nonTermCount-1 do
         if (was.[i] = 0 && canInferEpsilon.[i]) then
-            let rec dfs u =
+            let rec dfs path u =
                 was.[u] <- 1
                 for rule in rules.rulesWithLeftSide u do
                     let allEpsilon =
@@ -62,12 +62,17 @@ let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (ca
                         |> Array.iter
                             (fun v ->
                                 if was.[v] = 1 then
-                                    result := (indexator.indexToNonTerm v)::!result
+                                    let cycle =
+                                        path |> Seq.takeWhile (fun v' -> v' <> v)
+                                        |> List.ofSeq
+                                        |> (fun l -> v::l@[v])
+                                        |> List.map indexator.indexToNonTerm
+                                    result := cycle::!result
                                 elif was.[v] = 0 then
-                                    dfs v
+                                    dfs (v::path) v
                             )
                 was.[u] <- 2
-            dfs i
+            dfs [i] i
     !result
 
 let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
@@ -90,17 +95,17 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
     let pos = Array.zeroCreate indexator.nonTermCount
     for u = 0 to indexator.nonTermCount-1 do
-        if (canInferEpsilon.[u]) then
+        if canInferEpsilon.[u] then
             let order = new ResizeArray<_>()
             let res = new ResizeArray<_>()
             for j = 0 to indexator.nonTermCount-1 do
                 pos.[j] <- -1
             pos.[u] <- 0
             order.Add u
+            res.Add (new AST (Unchecked.defaultof<_>, null))
             let mutable i = 0
             while i < order.Count do
                 let v = order.[i]
-                i <- i + 1
                 let children = new ResizeArray<_>()
                 for rule in rules.rulesWithLeftSide v do
                     if allEpsilon.[rule] then
@@ -111,10 +116,15 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                     if pos.[w] = -1 then
                                         pos.[w] <- order.Count
                                         order.Add w
-                                    pos.[w])
-                        children.Add (rule, nodes)
-                res.Add (NonTerm children)
-            result.[u] <- new Tree<_>(res.ToArray(), 0)
+                                        res.Add (new AST (Unchecked.defaultof<_>, null))
+                                    box res.[pos.[w]])
+                        children.Add <| new Family(rule, new Nodes(nodes))
+                let first = children.[0]
+                children.RemoveAt 0
+                res.[i].first <- first
+                res.[i].other <- if children.Count > 0 then children.ToArray() else null
+                i <- i + 1
+            result.[u] <- new Tree<_>(null, res.[0], null)
     result
 
 let epsilonTailStart (rules : NumberedRules) (canInferEpsilon : bool[]) =

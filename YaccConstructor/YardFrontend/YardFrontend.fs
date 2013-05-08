@@ -25,8 +25,10 @@ type YardFrontend() =
         override this.ParseGrammar t = 
             match t with
             | (:? System.String as s) -> Main.ParseFile s
-            | _ -> IL.Definition.empty
-        override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+            | _ -> failwithf "File name expacted as argumnet for YardFrontend.ParseGrammar, but get: %A" t
+        override this.ProductionTypes =
+            List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>)
+            |> List.map (fun unionCase -> unionCase.Name)
     
 
 // For testing switch to Console App and then switch back to Class Library

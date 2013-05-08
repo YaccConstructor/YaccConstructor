@@ -1,7 +1,0 @@
-go:  NUMBER;
-
-yard_rule_1:  b;
-
-yard_rule_do_2[c]:  res = go * {res};
-
-+s:  a = yard_rule_do_2[c] {a};

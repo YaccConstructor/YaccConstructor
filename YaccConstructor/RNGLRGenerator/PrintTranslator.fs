@@ -20,6 +20,7 @@
 
 module Yard.Generators.RNGLR.TranslatorPrinter
 
+open System
 open Yard.Generators.RNGLR.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.RNGLR
@@ -29,14 +30,23 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list) (out : System.IO.StreamWriter)
-        tokenToRangeFunction positionType =
+let getPosFromSource fullPath dummyPos (src : Source.t) =
+    let file =
+        if fullPath then src.file
+        else
+            let start = src.file.LastIndexOfAny [|'\\'; '/'|] + 1
+            src.file.Substring start
+    if file = "" then
+        printfn "Source without filename: %s" <| src.ToString()
+        "\n"
+    elif src.startPos.line = -1 then sprintf "\n# %c \"%s\"" dummyPos file
+    else sprintf "\n# %d \"%s\"" src.startPos.line file
+
+let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
+
+let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
+        positionType fullPath output dummyPos =
     let tab = 4
-    let print (x : 'a) =
-        fprintf out x
-    let printInd num (x : 'a) =
-        print "%s" (String.replicate (tab * num) " ")
-        print x
 
     let rules = grammar.rules
     let srcGrammar = Array.ofList srcGrammar
@@ -48,6 +58,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let tokenCall = "_rnglr_translate_token"
     let ruleName = "_rnglr_rule_"
     let epsilonName = "_rnglr_epsilons"
+    let epsilonNameFiltered = "_rnglr_filtered_epsilons"
     let childrenName = "_rnglr_children"
     let concatsName = "_rnglr_concats"
     //let pathToModule = "Yard.Generators.RNGLR.AST."
@@ -83,14 +94,16 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             args.[nonTerm] <- srcGrammar.[i].args
 
     let printArr (arr : 'a[]) (printer: 'a -> string) =
-        let res = new System.Text.StringBuilder()
-        let append (s : string) = res.Append s |> ignore
-        append "[|"
-        for i = 0 to arr.Length-1 do
-            if i <> 0 then append "; "
-            append (printer arr.[i])
-        append "|]"
-        res.ToString()
+        if arr = null then "null"
+        else
+            let res = new System.Text.StringBuilder()
+            let append (s : string) = res.Append s |> ignore
+            append "[|"
+            for i = 0 to arr.Length-1 do
+                if i <> 0 then append "; "
+                append (printer arr.[i])
+            append "|]"
+            res.ToString()
 
     let printList (list : list<'a>) (printer: 'a -> string) =
         let res = new System.Text.StringBuilder()
@@ -105,26 +118,29 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let aboveStringListL = List.map wordL >> aboveListL
 
-    (*let declareNonTermsArrays = 
-        wordL ("let " + ruleName + " = Array.zeroCreate " + rules.rulesCount.ToString())
-        @@ wordL ("let " + concatsName + " = Array.zeroCreate " + args.Length.ToString())*)
-
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let printChild (prod, arr) = "(" + toStr prod + "," + printArr arr toStr + ")"
-        let printAst =
+        let rec printAst : (obj -> _) =
             function
-            | Term _ -> failwith "Term was not expected in epsilon tree"
-            | Epsilon _ -> failwith "Epsilon was not expected in epsilon tree"
-            | NonTerm arr ->
-                "NonTerm (new ResizeArray<_>(" + printList (ResizeArray.toList arr) printChild + "))"
-        "let " + epsilonName + " : Tree<Token>[] = " +
-            printArr grammar.epsilonTrees
-                (function
-                 | null -> "null"
-                 | tree -> "new Tree<_>(" + printArr tree.Nodes printAst + ",0)")
-        |> wordL
+            | :? AST as arr ->
+                "box (new AST(" + printChild arr.first
+                        + ", " + printArr arr.other printChild + "))"
+            | _ -> failwith "SingleNode was not expected in epsilon tree"
+        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
+                                            + printArr (family.nodes.map id) printAst + "))"
+        let printEps name = 
+            "let " + name + " : Tree<Token>[] = " +
+                printArr grammar.epsilonTrees
+                    (function
+                     | null -> "null"
+                     | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
+            |> wordL
+        printEps epsilonName
+        @@
+        printEps epsilonNameFiltered
+        @@
+        (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
 
     // Realise rules
     let rec getProductionLayout num = function
@@ -140,45 +156,54 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
-        | PSeq (s, ac) ->
+        | PSeq (s, ac, _) ->
             match ac with
             | None -> wordL "[]"
             | Some ac ->
                 let actionCodeLayout =
-                    (Source.toString ac).Split([|'\r'; '\n'|])
-                    |> Array.filter ((<>) "")
+                    let strings = (Source.toString ac).Replace("\r\n", "\n").Split([|'\n'|])
+                    strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
+                    strings
                     |> List.ofArray
+                    |> (fun l -> getPosFromSource fullPath dummyPos ac ::l)
                     |> List.map wordL
                     |> aboveListL
                 s
-                |> List.map
+                |> List.collect
                     (fun e ->
                         let var = 
-                            if e.binding.IsNone || e.omit then (sprintf "_rnglr_var_%d" <| !num + 1)
+                            if e.binding.IsNone || e.omit then "_"//(sprintf "_rnglr_var_%d" <| !num + 1)
                             else Source.toString e.binding.Value
                         let prod = getProductionLayout num e.rule
-                        prod
-                        -- wordL ("|> List.iter (fun (" + var + ") -> ")
+                        match e.checker with
+                        | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
+                        | Some ch ->
+                            let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource fullPath dummyPos ch)
+                            let cond = wordL <| "if (" + ch.text + ") then (" 
+                            [res; cond]
                         //-- wordL (" do")
                     )
                 |> List.rev
                 |> List.fold
                     (fun acc x -> x @@-- acc -- wordL ")")
-                    (wordL (resCycleName + " := (") -- actionCodeLayout -- wordL (")::!" + resCycleName))
+                    (wordL (resCycleName + " := (") @@-- actionCodeLayout @@-- wordL (")::!" + resCycleName))
                 |> (fun x -> [wordL <| "let " + resCycleName + " = ref []"
                               x
+                              //wordL <| getPosFromSource fullPath dummyPos ac
                               wordL <| "!" + resCycleName
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
         let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
-                    -- wordL (") : '_rnglr_type_" + nonTermName + ")" )
+                    @@-- wordL (")" + getPosFromSource fullPath dummyPos rule.name)
+                    @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
+                    -- wordL (getPosFromSource fullPath dummyPos (defaultSource output))
+                    //@@-- wordL ("")
                     )
              )
 
@@ -220,22 +245,19 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 @@-- concats)
             @@ wordL "|] ")
 
-    let isDefaultName = tokenToRangeFunction = "_rnglr_tokenToEmptyRange"
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate " + (if isDefaultName then "" else tokenToRangeFunction) + " (tree : Tree<_>) : " + typeName + " = ")
+        let funHead = wordL ("let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : " + typeName + " = ")
         let body =
-            [if isDefaultName then
-                yield wordL "let inline _rnglr_tokenToEmptyRange (x : 'a) = Microsoft.FSharp.Text.Lexing.Position.Empty, Microsoft.FSharp.Text.Lexing.Position.Empty"
-             yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
-                            + " " + epsilonName + " " + tokenToRangeFunction + ") : " + typeName)
+            [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
+                            + " (if args.filterEpsilons then " + epsilonNameFiltered + " else " + epsilonName + ")"
+                            + " args.tokenToRange args.zeroPosition args.clearAST) : " + typeName)
             ] |> aboveListL
         funHead @@-- body
 
-    let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+    //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-    [nowarn; defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
+    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
-    |> out.WriteLine
     

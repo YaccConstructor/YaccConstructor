@@ -1,2 +1,0 @@
-+list : l=list "," r=elem { l@[r] };
-elem : A | B;

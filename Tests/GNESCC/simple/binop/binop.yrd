@@ -1,3 +1,0 @@
-binop : s O s;
-
-+s : binop | A;

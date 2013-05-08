@@ -39,7 +39,7 @@ as
         BEGIN TRANSACTION
         
         begin
-                EXEC %%ExtendedPropertySet().AddValue(Name = @name, Value = @value, Level0type = @level0type, Level0name = @level0name, Level1type = @level1type, Level1name = @level1name, Level2type = @level2type, Level2name = @level2name)
+                EXEC %%ExtendedPropertySet ().AddValue(Name = @name, Value = @value, Level0type = @level0type, Level0name = @level0name, Level1type = @level1type, Level1name = @level1name, Level2type = @level2type, Level2name = @level2name)
                 IF @@error <> 0
                 begin
                         COMMIT TRANSACTION

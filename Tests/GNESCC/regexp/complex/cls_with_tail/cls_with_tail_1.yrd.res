@@ -1,1 +1,0 @@
-["tail minus" |> box]

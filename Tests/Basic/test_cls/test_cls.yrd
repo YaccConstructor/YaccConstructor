@@ -1,1 +1,2 @@
-+s: (MINUS|PLUS)*;
+[<Start>]
+s: (MINUS|PLUS)*;

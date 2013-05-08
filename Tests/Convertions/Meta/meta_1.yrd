@@ -1,3 +1,0 @@
-do<<op>> : (op | op IDENT)*;
-
-+s : do<<NUMBER?*>> ;

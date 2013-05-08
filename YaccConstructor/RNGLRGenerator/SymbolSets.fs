@@ -24,7 +24,7 @@ open Yard.Generators.RNGLR.Epsilon
 
 let firstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
     let result : Set<int>[] = Array.create indexator.fullCount Set.empty
-    for term in indexator.nonTermCount..indexator.fullCount-1 do
+    for term = indexator.nonTermCount to indexator.fullCount-1 do
         let was : bool[] = Array.zeroCreate indexator.fullCount
         let rec dfs u = 
             result.[u] <- result.[u].Add term
@@ -34,7 +34,7 @@ let firstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : 
                 elif (prod.[i] = u) then true
                 elif (not canInferEpsilon.[prod.[i]]) then false
                 else check prod (i+1)
-            for i in 0..rules.rulesCount-1 do
+            for i = 0 to rules.rulesCount-1 do
                 let v = rules.leftSide i
                 if (not was.[v]) then
                     if (check (rules.rightSide i) 0) then

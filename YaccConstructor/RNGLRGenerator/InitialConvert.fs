@@ -23,9 +23,7 @@ module Yard.Generators.RNGLR.InitialConvert
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
-open Yard.Core.Convertions.TransformAux
-
-let dummyPos s = (s,(0,0,""))
+open Yard.Core.Conversions.TransformAux
 
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
@@ -33,14 +31,15 @@ let initialConvert (def : Definition.t<_,_>) =
         ruleList
         |> List.fold
             (fun res rule ->
-                if not rule._public then rule::res
+                if not rule.isStart then rule::res
                 else
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
                     let startRule : Rule.t<_,_> =
-                        {_public = true; name = dummyPos"yard_start_rule"; args = rule.args;
-                         metaArgs = []; body = PRef(createSource (fst rule.name), rule.args |> createParams |> list2opt)}
-                    startRule::{rule with _public = false}::res
+                        {isStart = true; name = new Source.t("yard_start_rule", rule.name); args = rule.args;
+                         metaArgs = []; isPublic=false;
+                         body = PRef(rule.name, rule.args |> createParams |> list2opt)}
+                    startRule::{rule with isStart = false}::res
             )
             []
         |> (fun x -> if not !wasStart then failwith "No startRule was found"
@@ -62,13 +61,13 @@ let initialConvert (def : Definition.t<_,_>) =
         ruleList
         |> List.iter
             (fun (rule : Rule.t<_,_>) ->
-                let str = fst rule.name
+                let str = rule.name.text
                 count.[str] <- getCount str + 1)
         let rec reachable =
             function
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
-            | PSeq (s,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false
@@ -79,9 +78,12 @@ let initialConvert (def : Definition.t<_,_>) =
                         if reachable rule.body then true
                         else
                             iter := true
-                            count.[fst rule.name] <- count.[fst rule.name] - 1
+                            count.[rule.name.text] <- count.[rule.name.text] - 1
                             false)
             if not !iter then res
             else inner res
         inner ruleList
-    {def with grammar = def.grammar |> addStartRule |> splitAlters |> filterNonReachable}
+    if def.grammar.Length > 1 then
+        failwith "More than one module. Use 'Linearize' conversion"
+    let rules = def.grammar.Head.rules |> addStartRule |> splitAlters |> filterNonReachable
+    {def with grammar = [{def.grammar.Head with rules=rules}]}

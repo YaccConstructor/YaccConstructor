@@ -21,6 +21,7 @@
 namespace Yard.Frontends.IronyFrontend
 
 open Yard.Core
+open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Rule
 open Irony.Parsing
@@ -30,7 +31,8 @@ open Microsoft.FSharp.Collections
 module Converter =
 
 
-    let dummyPos s = (s,(0,0,""))
+    let dummyPos s = new Source.t(s)
+    let pos419 = new Source.Position(-419,0,0)
 
     let formatTermName termName = 
         String.collect (
@@ -61,36 +63,42 @@ module Converter =
         findBnfTerms ironyGrammar.Root
 
         let nonTerminals = List.filter (fun (t : BnfTerm) -> (t :? NonTerminal)) !refTerms
-        let (grammar : IL.Grammar.t<IL.Source.t, IL.Source.t>) = 
-            List.map
-                (fun (bnfTerm : BnfTerm) ->
-                    let nt = bnfTerm :?> NonTerminal
-                    let productionOpt = 
-                        ResizeArray.fold
-                            (fun prOpt bnfTermList -> 
-                                let pseq = 
-                                    PSeq(
-                                        ResizeArray.toList (ResizeArray.map 
-                                            (fun (bnfTerm : BnfTerm)-> 
-                                                ({omit = false; 
-                                                rule = match bnfTerm with
-                                                        | :? NonTerminal as term -> PRef((formatNontermName term.Name, (-419,-419,"")), None)
-                                                        | :? Terminal as term -> PToken(formatTermName term.Name, (-419,-419,""))
-                                                        | _ -> failwith "Not supported BnfTerm type"
-                                                        ;
-                                                binding=None; 
-                                                checker=None})) 
-                                            (bnfTermList)), 
-                                        None)
-                                match prOpt with
-                                | Some(pr)  -> Some(PAlt(pr, pseq))
-                                | None      -> Some(pseq) )
-                            None
-                            nt.Rule.Data
-                    match productionOpt with
-                    | Some(pr)  -> {name = dummyPos( formatNontermName nt.Name); args = []; body = pr; metaArgs = []; _public = (nt = (ironyGrammar.Root))}
-                    | None      -> failwith "minimum 1 alternative is required" )
-                nonTerminals
-        grammar
+        nonTerminals |> List.map (fun (bnfTerm : BnfTerm) ->
+            let nt = bnfTerm :?> NonTerminal
+            let productionOpt = 
+                ResizeArray.fold
+                    (fun prOpt bnfTermList -> 
+                        let pseq = 
+                            PSeq(
+                                ResizeArray.toList (ResizeArray.map 
+                                    (fun (bnfTerm : BnfTerm)-> 
+                                        ({omit = false; 
+                                        rule = match bnfTerm with
+                                                | :? NonTerminal as term -> PRef(new Source.t(formatNontermName term.Name, pos419, pos419,""), None)
+                                                | :? Terminal as term -> PToken(new Source.t(formatTermName term.Name, pos419, pos419,""))
+                                                | _ -> failwith "Not supported BnfTerm type"
+                                                ;
+                                        binding=None; 
+                                        checker=None})) 
+                                    (bnfTermList)), 
+                                None,None)
+                        match prOpt with
+                        | Some(pr)  -> Some(PAlt(pr, pseq))
+                        | None      -> Some(pseq) )
+                    None
+                    nt.Rule.Data
+            match productionOpt with
+            | Some(pr)  ->
+                {
+                    name = dummyPos (formatNontermName nt.Name);
+                    args = [];
+                    body = pr;
+                    metaArgs = [];
+                    isStart = (nt = (ironyGrammar.Root))
+                    isPublic=false
+                }
+            | None      -> failwith "minimum 1 alternative is required"
+        )
+        |> defaultModules
 
 

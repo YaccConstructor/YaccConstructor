@@ -1,0 +1,4 @@
+[<Start>]
+s:  metar<<NUMBER>>;
+
+metar<<item>>:  item;

@@ -36,6 +36,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack"><HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath></Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

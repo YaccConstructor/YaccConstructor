@@ -150,6 +150,17 @@ type CYKCore() =
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
+        let printTbl () =
+            for i in 0..s.Length-1 do
+                for j in 0..s.Length-1 do
+                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length <> 0
+                    printf "! %A !" cd
+                printfn " "
+            printfn "" 
+
+        //printfn "%A" recTable
+        printTbl ()
+
         let getString state lbl weight = 
             let stateString = 
                 match state with

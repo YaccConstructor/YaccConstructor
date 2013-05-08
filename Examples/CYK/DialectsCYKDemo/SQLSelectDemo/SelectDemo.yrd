@@ -32,7 +32,7 @@ module Main
 open Common, MsCommon
 
 [<Start>]
-root_rule: (batch_body KW_GO?)*
+root_rule: (@lbl2(batch_body) KW_GO?)*
 
 
 

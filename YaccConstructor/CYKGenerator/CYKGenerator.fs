@@ -72,12 +72,19 @@ type CYKGeneartorImpl () =
 
     let rulesArray rules = 
         ("let rules = "|> wordL)
-        @@-- (([wordL "["; [for rule in rules -> string rule + "UL" |> wordL] |> semiListL; wordL "]"]|>spaceListL)
-             @@ (wordL "|> Array.ofList"))
+        @@-- (([wordL "[|"; [for rule in rules -> string rule + "UL" |> wordL] |> semiListL; wordL "|]"]|>spaceListL))
 
-    let layoutToStr = 
-        StructuredFormat.Display.layout_to_string 
-          {StructuredFormat.FormatOptions.Default with PrintWidth=80}
+    let layoutToStr l =
+        let res = ref ""
+        let f () = 
+            res := 
+                StructuredFormat.Display.layout_to_string 
+                    {StructuredFormat.FormatOptions.Default with PrintWidth=80} l
+        let thread = new System.Threading.Thread(f, 134217728)
+        thread.Start()
+        thread.Join()
+        !res
+
 
     let genStartNTermID id =
         [wordL "let StartNTerm ="

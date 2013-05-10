@@ -44,7 +44,6 @@
     <FsYaccToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
     <FsLexToolPath>..\..\..\..\3rdParty\FsPowerPack\</FsLexToolPath>
   </PropertyGroup>
-
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="..\..\..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
@@ -53,6 +52,7 @@
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <Compile Include="SelectDemo.yrd.CYK.fs" />
+    <Compile Include="LexerHelper.fs" />
     <Compile Include="SelectDemo.fs" />
     <Compile Include="Program.fs" />
     <None Include="SelectDemo.yrd" />
@@ -75,6 +75,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\..\..\yc\Utils.SourceText.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

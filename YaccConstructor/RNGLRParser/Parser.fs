@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.RNGLR.Parser
+module Yard.Generators.RNGLR.Parser              
 
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
@@ -105,7 +105,7 @@ let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * F
     i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
 
 let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
-        (initNodes : seq<Vertex>) (numToString : int -> string) (path : string) =
+        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
     use out = new System.IO.StreamWriter (path)
     let was = new Dictionary<_,_>()
     let levels = new Dictionary<_,_>()
@@ -115,9 +115,13 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     print "rankdir=RL"
     let getAstString (ast : obj) =
         match ast with
-        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"
+        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"    
         | :? int as i when i < 0 -> "eps " + numToString (-i-1)
-        | :? AST as ast -> numToString leftSide.[ast.first.prod]
+        | :? AST as ast -> 
+            let nonT = 
+                if ast.first.prod < leftSide.Length then ast.first.prod
+                else errInd
+            numToString leftSide.[nonT]
         | _ -> failwith "Unexpected ast"
 
     let rec dfs (u : Vertex) =
@@ -159,7 +163,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let getEpsilon =
         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
-
+                          
     // If input stream is empty or consists only of EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput then
@@ -170,7 +174,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
                     })
-    else
+    else                                     
         // Currently processed token
         let curToken = ref enum.Current
         let curNum = ref (parserSource.TokenToNumber enum.Current)
@@ -187,6 +191,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
+
+        //let newRules = new BlockResizeArray<_>()
 
         let addVertex state level (edgeOpt : option<Vertex * obj>) =
             let dict = stateToVertex
@@ -220,6 +226,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let handlePath (path : obj[]) (final : Vertex) =
                     let state = parserSource.Gotos.[final.State].[nonTerm]
                     let newVertex = addVertex state num None
+                    
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
                         let isCreated, edgeLabel = addEdge final family edges.[state]
@@ -341,16 +348,132 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             for (vertex, state) in oldPushes do
                 let newVertex = addVertex state num <| Some (vertex, newAstNode)
                 addSimpleEdge vertex newAstNode simpleEdges.[state]
+        
+        let recovery() =
+            //printfn "recovery start"
 
-        let mutable errorIndex = -1
-        while errorIndex = -1 && not !isEnd do
+            //let errorToken = !curToken
+            curNum := parserSource.ErrorTIndex
+            let unbrowsed = new Stack<_>()
+                        
+            let mutable curVertices = new Stack<_> (statesCount)
+
+            for vertex in usedStates do
+                curVertices.Push stateToVertex.[vertex]
+                stateToVertex.[vertex] <- null
+            usedStates.Clear()
+
+            let searchRecState(oldVertices : Stack<Vertex>) =
+                
+                let oldVert = oldVertices.ToArray()
+
+                let isEnd = ref false
+                for vertex in oldVert do
+                    if not !isEnd then
+                        let push = parserSource.Gotos.[vertex.State].[!curNum]
+                        if push <> 0 then 
+                            pushes.Push (vertex, push)
+                            isEnd := true
+                !isEnd
+
+            let makeErrReductions (vertex : Vertex) state (unbrowsed : obj[]) = 
+                let prodNumber = parserSource.Rules.Length// + newRules.Count
+                let pos = !curInd
+                let edgeOpt = vertex, vertex.OutEdges.first.Ast
+                let nonTerm = parserSource.ErrorNIndex
+
+                let family = new Family(prodNumber, new Nodes(unbrowsed))
+                if not <| containsEdge vertex family edges.[state] then
+                    let isCreated, edgeLabel = addEdge vertex family edges.[state]
+                    if (pos > 0 && isCreated) then
+                        let arr = parserSource.Reduces.[state].[!curNum]
+                        if arr <> null then
+                            for (prod, pos) in arr do
+                                reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
+            
+            let searchRecSymbol() = 
+                //newRules.Add <| unbrowsed.ToArray()
+                let oldPushes = pushes.ToArray()
+                
+                for state in usedStates do
+                    stateToVertex.[state] <- null
+                pushes.Clear()
+                usedStates.Clear()
+                
+                for vertex, state in oldPushes do
+                    makeErrReductions vertex state <| Array.rev (unbrowsed.ToArray())
+                    let push = parserSource.Gotos.[state].[!curNum]
+                    let astNode = box tokens.Count
+                    tokens.Add !curToken
+
+                    addVertex state !curInd <| Some (vertex, astNode) |> ignore       
+
+            let getPrevVertices (oldVertices : Vertex [])= 
+                let res = new Stack<_> (statesCount)
+                for vertex in oldVertices do
+                    if vertex.OutEdges.other <> null then
+                        for edge in vertex.OutEdges.other do 
+                            res.Push edge.Dest
+                    res.Push vertex.OutEdges.first.Dest
+                res                
+            
+                       
+            while not <| searchRecState curVertices do
+                //unbrowsed.Push <| curVertices.Peek().OutEdges.first.Ast
+                let oldVertices = curVertices.ToArray()
+                curVertices <- getPrevVertices(oldVertices)
+
+             
+            curToken := enum.Current
+            curNum := parserSource.TokenToNumber enum.Current
+
+            let curState = snd <| pushes.Peek()
+            let recoveryTokens = parserSource.GetExpectedTokens curState
+
+            while not <| (recoveryTokens |> Array.exists ((=) !curNum)) && !curNum <> parserSource.EofIndex do
+                let newAstNode = box tokens.Count
+                tokens.Add !curToken
+                unbrowsed.Push newAstNode
+                if enum.MoveNext() then
+                    curToken := enum.Current
+                    curNum := parserSource.TokenToNumber enum.Current
+                    incr curInd
+                else             
+                    curNum := parserSource.EofIndex
+                    for vertex, state in pushes do
+                        let newAstNode = box tokens.Count
+                        tokens.Add !curToken
+                        //let newAstNode = vertex.OutEdges.first.Ast
+                                               
+                        let newVertex = addVertex state !curInd <| Some (vertex, newAstNode)
+                        addSimpleEdge vertex newAstNode simpleEdges.[state]
+
+            if !curNum <> parserSource.EofIndex then 
+                  searchRecSymbol()
+            
+            printfn "%A" <| unbrowsed.ToArray()      
+            //printfn "recovery end"
+
+        let mutable errorList = []
+                                                           
+        let errorRuleExist = parserSource.ErrorTIndex >= 0
+        let mutable isError = ref false
+
+        while not !isEnd && not !isError do
             if usedStates.Count = 0 then
-                errorIndex <- !curInd
+                let errInfo =  !curInd, !curToken 
+                errorList <- errInfo :: errorList
+                if errorRuleExist then recovery()
+                else isError <- ref true
             else
                 makeReductions !curInd
                 attachEdges()
                 if !curNum = parserSource.EofIndex then isEnd := true
-                elif pushes.Count = 0 then errorIndex <- !curInd
+                elif pushes.Count = 0 then 
+                    let errInfo =  !curInd, !curToken 
+                    errorList <- errInfo :: errorList
+                    if errorRuleExist then recovery()
+                    else isError <- ref true
                 else
                     incr curInd
                     shift !curInd
@@ -360,11 +483,19 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let debugFuns () =
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
             {
-                drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString
+                drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorNIndex
                 lastTokens = lastTokens
             }
-        if errorIndex <> -1 then
-            Error (errorIndex, !curToken, "Parse error", debugFuns ())
+                    
+        if not errorList.IsEmpty then
+            errorList <- List.rev errorList
+            let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
+            for i = 0 to errorList.Length-1 do
+                printfn "Parse error in %d position in %s token" <| fst errorList.[i] <| tokenToString (snd errorList.[i])
+            //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
+        if !isError then 
+            Error (!curInd , Unchecked.defaultof<'TokenType> ,
+                        "There is no accepting state. Check this: grammar can contain ERROR token.", debugFuns ())
         else
             let root = ref None
             let addTreeTop res =
@@ -377,6 +508,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, Unchecked.defaultof<'TokenType>,
-                             "There is no accepting state. Check this: grammar can't contain EOF token.", debugFuns ())
-            | Some res -> Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)
+            | None -> Error (!curInd , Unchecked.defaultof<'TokenType> ,
+                            "There is no accepting state. Check this: grammar can't contain EOF token.", debugFuns ())
+            | Some res -> 
+                debugFuns().drawGSSDot "res.dot"
+                Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)

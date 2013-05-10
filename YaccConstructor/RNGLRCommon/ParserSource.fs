@@ -32,6 +32,8 @@ type ParserSource<'TokenType> (gotos : int[][]
                                , tokenToNumber : 'TokenType -> int
                                , acceptEmptyInput : bool
                                , numToString : int -> string
+                               , errorNIndex : int
+                               , errorTIndex : int
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -43,6 +45,14 @@ type ParserSource<'TokenType> (gotos : int[][]
         _rules.[i] <- Array.zeroCreate length.[i]
         for j = 0 to length.[i]-1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
+
+    let getExpectedTokens state = 
+        let mutable expected = []
+        for i = 0 to gotos.[0].GetLength(0)-1 do
+            if gotos.[state].[i] <> 0 || reduces.[state].[i] <> null then
+               expected <- i :: expected
+        expected |> List.rev |> List.toArray
+
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
@@ -56,3 +66,7 @@ type ParserSource<'TokenType> (gotos : int[][]
     member this.TokenToNumber = tokenToNumber
     member this.AcceptEmptyInput = acceptEmptyInput
     member this.NumToString = numToString
+    member this.ErrorTIndex = errorTIndex
+    member this.ErrorNIndex = errorNIndex
+    //member this.ErrorToken = errorToken
+    member this.GetExpectedTokens state = getExpectedTokens state

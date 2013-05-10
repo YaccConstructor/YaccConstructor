@@ -7,21 +7,22 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
     | A of int
-    | EOF of int
+    | RNGLR_EOF of int
 
 let numToString = function
-    | 0 -> "s"
-    | 1 -> "yard_start_rule"
-    | 2 -> "A"
-    | 3 -> "EOF"
+    | 0 -> "error"
+    | 1 -> "s"
+    | 2 -> "yard_start_rule"
+    | 3 -> "A"
+    | 4 -> "RNGLR_EOF"
     | _ -> ""
 let tokenToNumber = function
-    | A _ -> 2
-    | EOF _ -> 3
+    | A _ -> 3
+    | RNGLR_EOF _ -> 4
 
 let mutable private cur = 0
-let leftSide = [|0; 0; 1|]
-let private rules = [|2; 0; 2; 0|]
+let leftSide = [|1; 1; 2|]
+let private rules = [|3; 1; 3; 1|]
 let private rulesStart = [|0; 1; 3; 4|]
 let startRule = 2
 
@@ -32,10 +33,10 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 3; 2|]
 let private small_gotos =
-        [|2; 0; 131073; 65537; 131074|]
+        [|2; 65536; 196609; 65537; 196610|]
 let gotos = Array.zeroCreate 4
 for i = 0 to 3 do
-        gotos.[i] <- Array.zeroCreate 4
+        gotos.[i] <- Array.zeroCreate 5
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -48,10 +49,10 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|1,2|]; [|0,1|]|]
 let private small_reduces =
-        [|131074; 131072; 196608; 196610; 131073; 196609|]
+        [|131074; 196608; 262144; 196610; 196609; 262145|]
 let reduces = Array.zeroCreate 4
 for i = 0 to 3 do
-        reduces.[i] <- Array.zeroCreate 4
+        reduces.[i] <- Array.zeroCreate 5
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -67,7 +68,7 @@ let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 4
 for i = 0 to 3 do
-        zeroReduces.[i] <- Array.zeroCreate 4
+        zeroReduces.[i] <- Array.zeroCreate 5
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -82,16 +83,18 @@ let private small_acc = [1]
 let private accStates = Array.zeroCreate 4
 for i = 0 to 3 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 3
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
+let eofIndex = 4
+let errorNIndex = 0
+let errorTIndex = -1
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -111,7 +114,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Attrs.yrd"
                : '_rnglr_type_s) 
-# 114 "Attrs.yrd.fs"
+# 117 "Attrs.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,7 +136,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Attrs.yrd"
                : '_rnglr_type_s) 
-# 136 "Attrs.yrd.fs"
+# 139 "Attrs.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -143,9 +146,30 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Attrs.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 146 "Attrs.yrd.fs"
+# 149 "Attrs.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+
+              parserRange
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+
+               : '_rnglr_type_error) 
+# 167 "Attrs.yrd.fs"
       );
   |] , [|
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_error)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( fun arg ->
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_s)  arg ) |> List.concat));

@@ -90,7 +90,7 @@ let tokenPos token =
     | DOT (x)
     | DOUBLE_COLON (x)
     | EMPTY (x)
-    | EOF (x)
+    | RNGLR_EOF (x)
     | GLOBALVAR (x)
     | IDENT (x)
     | KW_ABSENT (x)

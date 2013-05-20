@@ -451,7 +451,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if !curNum <> parserSource.EofIndex then 
                   searchRecSymbol()
             
-            printfn "%A" <| unbrowsed.ToArray()      
+            //printfn "%A" <| unbrowsed.ToArray()      
             //printfn "recovery end"
 
         let mutable errorList = []

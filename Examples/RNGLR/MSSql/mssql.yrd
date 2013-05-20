@@ -32,7 +32,7 @@ module Main
 open Common, MsCommon
 
 [<Start>]
-root_rule: (batch_body KW_GO?)*
+root_rule: (batch_body KW_GO)*
 
 
 
@@ -49,6 +49,7 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
+	 | ERROR
   
 rollback_transaction:
     KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 

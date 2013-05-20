@@ -99,7 +99,7 @@ create_proc:
     brace_opt<<LPAREN comma_list<<proc_formal_param>> RPAREN>>
     (KW_WITH (execute_as)+ )? 
     ( KW_FOR KW_REPLICATION )?
-    KW_AS brace_opt<<KW_BEGIN (proc_body_stmnt SEMI?)* KW_END>>
+    KW_AS (proc_body_stmnt SEMI?)*
     SEMI?
 
 procedure_option: 
@@ -110,8 +110,7 @@ procedure_option:
 proc_body_stmnt:
      select_stmnt
    | set_stmnt
-   | execute_stmnt
-   | sql_expr
+   | execute_stmnt   
    | declare
    | KW_RETURN sql_expr
    | if_stmt
@@ -125,14 +124,16 @@ proc_body_stmnt:
    | create_table
    | insert
    | fetch_stmnt
+   | print_stmt
 
 (***********************************STATEMENTS******************************************************)
 
+print_stmt: KW_PRINT sql_expr SEMI?
 while_stmt: KW_WHILE sql_expr proc_body_stmnt
 
 stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
 
-if_stmt: KW_IF brace_opt<<LPAREN sql_expr RPAREN>> proc_body_stmnt (KW_ELSE proc_body_stmnt)?
+if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
                 
 
 raiserror_stmnt:
@@ -183,10 +184,7 @@ select_stmnt:
         (KW_BY comma_list<<sql_expr>>)? 
     )? 
     for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? )
-    | KW_SELECT comma_list<<(LOCALVAR OP_EQ sql_expr)>> SEMI?
-    |KW_SELECT (KW_COUNT LPAREN (STAR|IDENT) RPAREN |(STAR | IDENT)) KW_FROM full_ident KW_WHERE sql_expr (((KW_AND | KW_OR) brace_opt<<LPAREN sql_expr RPAREN>> )*)?
-     
+    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? ) SEMI?
     
 for:
     (KW_FOR (KW_BROWSE | xml))?
@@ -271,8 +269,8 @@ select_list:
         | ident OP_EQ sql_expr)>>
     
 scalar_function:
-    KW_LOWER sql_expr
-    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr 
+      KW_LOWER sql_expr
+    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr RPAREN
     
 aggregate_windowed_function:
     KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
@@ -286,7 +284,6 @@ order_by_clause:
     (KW_ORDER KW_BY 
         comma_list<< (sql_expr (KW_ASC | KW_DESC)?) >>
     )? 
-
     
 search_condition: 
     ( KW_NOT? predicate | LPAREN search_condition RPAREN )
@@ -593,7 +590,7 @@ insert:
         | batch_body 
         )?
     )
-    | (KW_DEFAULT KW_VALUES)?
+    | KW_DEFAULT KW_VALUES
     SEMI?
 
 output_clause:
@@ -636,15 +633,15 @@ execute_proc:
       (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
       brace_opt<<
          LPAREN 
-         (comma_list<<((ident OP_EQ)? 
-            (ident | KW_NULL|DEC_NUMBER
+         (comma_list<<((LOCALVAR OP_EQ)? 
+            (sql_expr
 			|LOCALVAR (KW_OUTPUT | KW_OUT)? 
             | KW_DEFAULT?)
          )?>>)
         RPAREN>>
       (KW_WITH KW_RECOMPILE)?
     )
-    | create_object DOT IDENT LPAREN comma_list<<((ident OP_EQ)? sql_expr)>> RPAREN)
+    | create_object DOT IDENT LPAREN comma_list<<((LOCALVAR OP_EQ)? sql_expr)>> RPAREN)
 
 create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>> RPAREN
 
@@ -699,12 +696,13 @@ sql_expr:
     sql_value
     | scalar_function
     | LPAREN sql_expr RPAREN
-    | LOCALVAR 
     | call_expr
     | full_ident
     | select_stmnt
     | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
     | GLOBALVAR
+    | LOCALVAR
+	| STAR
     | sql_expr binop sql_expr
     | sql_expr KW_IS KW_NOT? KW_NULL
     | ranking_windowed_function 
@@ -714,8 +712,6 @@ sql_expr:
     | begin_transaction
     | KW_EXISTS sql_expr
     | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | sql_expr KW_IS KW_NOT? sql_expr
-    | IDENT LPAREN LOCALVAR COMMA STRING_CONST RPAREN
     | sql_expr ( KW_AND | KW_OR ) sql_expr
     | KW_TYPE KW_FROM full_ident
     | fetch_stmnt

@@ -151,13 +151,13 @@ type CYKCore() =
         let printTbl () =
             for i in 0..s.Length-1 do
                 for j in 0..s.Length-1 do
-                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length <> 0
-                    printf "! %A !" cd
+                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
+                    printf "! %s !" (string cd)
                 printfn " "
             printfn "" 
 
         //printfn "%A" recTable
-        printTbl ()
+        //printTbl ()
 
         let getString state lbl weight = 
             let stateString = 
@@ -170,15 +170,20 @@ type CYKCore() =
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
-            let cellData = recTable.[0, s.Length-1]
-            if i <= last && cellData.[i].IsSome
-            then let state,lbl,weight = getCellData (cellData.[i].Value)
-                 if i = last
-                 then [getString state lbl weight]
-                 else getString state lbl weight :: out (i+1) last
+            let cellDatas = recTable.[0, s.Length-1]
+            if i <= last 
+            then 
+                if cellDatas.[i].IsSome 
+                then
+                    let state,lbl,weight = getCellData (cellDatas.[i].Value)
+                    if i = last
+                    then [getString state lbl weight]
+                    else getString state lbl weight :: out (i+1) last
+                else "" :: out (i+1) last
             else [""]
 
-        let lastIndex = (recTable.[0,0]).Length - 1
+        let lastIndex = (recTable.[0,s.Length-1]).Length - 1
+        
         out 0 lastIndex
 
     let print lblValue weight leftI rightL leftL =

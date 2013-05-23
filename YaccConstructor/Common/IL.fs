@@ -200,7 +200,7 @@ module Definition = begin
      grammar : Grammar.t<'patt,'expr>;
      /// Text after a grammar description, what will be simply copied
      foot    :'expr option;
-     options : Map<Rule.t<'patt, 'expr>, Map<string, string>>
+     options : Map<string, string>
     }    
     
     /// Empty grammar

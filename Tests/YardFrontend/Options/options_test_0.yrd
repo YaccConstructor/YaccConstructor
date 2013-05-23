@@ -1,4 +1,7 @@
+options {
+    first="Some name"
+    second = ololo
+}
+
 [<Start>]
-s:
-#set a = "smth"
-A;
+s: A;

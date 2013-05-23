@@ -22,6 +22,7 @@ module YardFrontendTester
 open Microsoft.FSharp.Text.Lexing
 open Yard.Frontends.YardFrontend
 open Yard.Frontends.YardFrontend.GrammarParser
+open System.Collections.Generic
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
@@ -84,10 +85,12 @@ let completeTest str lexemsListCorrect ilDefCorrect =
 let optionsTest path optionsCorrect =
     let definition = {Main.ParseFile path with info = {fileName =""}}
     let currentOptions = definition.options
-    let optionsAreEq (m1:Map<Rule.t<_,_>,_>) (m2:Map<Rule.t<_,_>,_>) = 
-        Assert.AreEqual (m1.Count,m2.Count)
-        Assert.IsTrue (m2 |> Seq.forall2 (fun (x1:System.Collections.Generic.KeyValuePair<Rule.t<_,_>,_>) x2 
-                                             -> x1.Key.name.text = x2.Key.name.text && x1.Value = x2.Value) m1)
+    let optionsAreEq (m1 : Map<_,_>) (m2 : Map<_,_>) = 
+        Assert.AreEqual (m1.Count, m2.Count)
+        Seq.forall2 (fun (x1 : KeyValuePair<_,_>) (x2 : KeyValuePair<_,_>) ->
+                            x1.Key = x2.Key && x1.Value = x2.Value
+                    ) m1 m2
+        |> Assert.IsTrue
     optionsAreEq currentOptions optionsCorrect
         
 let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
@@ -325,13 +328,13 @@ type ``YardFrontend options tests`` () =
     let basePath = "../../../../Tests/YardFrontend/Options"
     let cp file = System.IO.Path.Combine(basePath,file)  
 
-    [<Test>]
+    (*[<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
             "[<Start>]s:  #set a = \"smth\"  A;"
             [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); SET (getSource "#set" 5 9);
              LIDENT (getSource "a" 10 11) ; EQUAL (getSource "=" 12 13); STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23);
-             SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]
+             SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]*)
 
     [<Test>]
     member test.``Basic options test`` () =
@@ -343,9 +346,9 @@ type ``YardFrontend options tests`` () =
                     binding = None
                     checker = None
                 }]
-        let optionsForRule = Map.ofList ["a", "smth"]//[("dialect", "ora"), ("comment","smth")]
+        let options = Map.ofList ["first", "Some name"; "second", "ololo"]
 
-        optionsTest (cp "options_test_0.yrd") (Map.empty.Add (rule.Head, optionsForRule))
+        optionsTest (cp "options_test_0.yrd") options
     
                 
 [<TestFixture>]

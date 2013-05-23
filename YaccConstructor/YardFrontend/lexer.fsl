@@ -135,12 +135,12 @@ and  main = parse
      | '[' { SQR_LBR <| lex2source lexbuf }
      | ']' { SQR_RBR <| lex2source lexbuf }
      | "open" { OPEN <| lex2source lexbuf}
+     | "options" blank '{' { OPTIONS_START <| lex2source lexbuf}
      | "module" { MODULE <| lex2source lexbuf}
      | "private" { PRIVATE <| lex2source lexbuf}
      | "public" { PUBLIC <| lex2source lexbuf}
      | '+'  {PLUS <| lex2source lexbuf}
      | '?'  {QUESTION <| lex2source lexbuf}
-     | "#set" {SET <| lex2source lexbuf}
      | sharpline {SHARPLINE <| lex2source lexbuf }   
      | "(*"
        { comment_depth := 1;
@@ -164,6 +164,7 @@ and  main = parse
                 |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF <| lex2source lexbuf}
+     | '}' {BLOCK_END <| lex2source lexbuf}
      | '{'
        { let n1 = lexbuf.EndPos in
          brace_depth := 1;

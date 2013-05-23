@@ -50,7 +50,7 @@ let private tokenFun f = function
     | SQR_LBR st
     | SQR_RBR st
     | SEMICOLON st
-    | SET st
+//    | SET st
     | SHARPLINE st
     | STAR st
     | START_RULE_SIGN st
@@ -60,8 +60,11 @@ let private tokenFun f = function
     | PUBLIC st
     | PRIVATE st
     | OPEN st
-    | UIDENT st ->
+    | UIDENT st
+    | BLOCK_END st
+    | OPTIONS_START st ->
         f st
+    //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 
 let private tokenToRange = tokenFun <| fun st -> st.startPos, st.endPos
 let private tokenToFile = tokenFun <| fun st -> st.file

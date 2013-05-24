@@ -1,0 +1,4 @@
+tokens {}
+
+[<Start>]
+s: A;

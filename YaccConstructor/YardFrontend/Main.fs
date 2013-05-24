@@ -62,6 +62,7 @@ let private tokenFun f = function
     | OPEN st
     | UIDENT st
     | BLOCK_END st
+    | TOKENS_BLOCK st
     | OPTIONS_START st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
@@ -152,7 +153,12 @@ let private parse buf userDefs =
                 filterEpsilons = true
             }
         ast.ChooseLongestMatch()
-        (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+        try
+            (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+        with
+        | ParseError (src, msg) ->
+            failwithf "Parse error on position %s:%s. %s: %s" src.file
+                        (rangeToString (src.startPos, src.endPos)) msg src.text
     | Parser.Error (_, token, msg, _) ->
         failwithf "Parse error on position %s:%s on token %A: %s" (token |> tokenToFile)
                     (token |> tokenToRange |> rangeToString) token msg

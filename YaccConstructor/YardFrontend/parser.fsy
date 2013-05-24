@@ -23,6 +23,7 @@ open Yard.Core
 open Yard.Core.IL.Production
 open Yard.Core.IL.Grammar
 open Yard.Core.IL.Definition
+open System.Text.RegularExpressions
  
 type Range = struct
     val Start: Lexing.Position
@@ -31,13 +32,16 @@ type Range = struct
     new (start,end_) = {Start = start; End = end_}
 end
 
-exception Parse_error
+exception ParseError of Source.t * string
 let parseFile = ref Unchecked.defaultof<_>
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let allPublic = ref false
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
+let fst_ (x,_,_) = x
+let snd_ (_,x,_) = x
+let trd_ (_,_,x) = x
 
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
@@ -106,7 +110,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 kw : MODULE {$1} | INCLUDE {$1} | OPEN {$1} | PUBLIC {$1} | PRIVATE {$1}
 
 file: action_opt
-      includesOrOptions
+      includes_or_options_or_tokens
       unnamed_module_opt
       modules
       foot_opt
@@ -114,16 +118,42 @@ file: action_opt
         {
             info = { fileName = !currentFilename }
             head = $1
-            grammar = fst $2 @ $3 @ $4
+            grammar = fst_ $2 @ $3 @ $4
             foot = $5
-            options = snd $2
+            options = snd_ $2
+            tokens = trd_ $2
         }
       }
 
-includesOrOptions : 
-    { [], Map.empty }
-  | include_ includesOrOptions { ($1 @ fst $2), snd $2}
-  | option_block includesOrOptions { fst $2, joinMaps $1 (snd $2)}
+includes_or_options_or_tokens : 
+    /* rules, options,   tokens   */
+    {  [],    Map.empty, Map.empty }
+  | include_ includes_or_options_or_tokens       { ($1 @ fst_ $2), snd_ $2, trd_ $2}
+  | option_block includes_or_options_or_tokens   { fst_ $2, joinMaps $1 (snd_ $2), trd_ $2}
+  | tokens_block includes_or_options_or_tokens { fst_ $2, snd_ $2, joinMaps $1 (trd_ $2)}
+
+tokens_block : TOKENS_BLOCK
+  {
+    let block = $1.text
+    let inner = block.[block.IndexOf '{' + 1 .. block.LastIndexOf '}' - 1]
+    inner.Split [|'|'|]
+    |> Array.map (fun s -> s.Trim())
+    |> Array.filter ((<>) "")
+    |> Array.map (fun s ->
+        let genError msg = raise <| ParseError (new Source.t(s, fst parserRange, snd parserRange, !currentFilename),
+                                                "Error in tokens block: " + msg)
+        if Regex.IsMatch(s, @"^(_|[A-Z][A-Za-z0-9_]*)$") then s, None
+        else
+            let m = Regex.Match(s, @"^(_|[A-Z][A-Za-z0-9_]*)\s*of\s*(.*)$")
+            if m.Success then
+                m.Groups.[1].Value, Some m.Groups.[2].Value
+            else
+                if not (System.Char.IsUpper s.[0]) && not (s.[0] = '_' && s.Length > 1 && System.Char.IsWhiteSpace s.[1])
+                then genError "Terminal must start from upper letter"
+                else genError "Token type description is incorrect"
+            
+    ) |> Map.ofArray
+  }
 
 include_:
     INCLUDE STRING 

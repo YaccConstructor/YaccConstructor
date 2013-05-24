@@ -47,7 +47,7 @@ type ``Inline tests`` () =
                 ;{dummyRule with rule = PRef (Source.t("y"),None)}
                 ]
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

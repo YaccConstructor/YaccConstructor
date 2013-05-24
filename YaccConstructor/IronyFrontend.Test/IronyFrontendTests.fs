@@ -34,7 +34,7 @@ let seq_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
             binding = None;
             checker = None;
         }]
-    |> defaultGrammar
+    |> defaultDefinition
 
 
 let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
@@ -53,7 +53,7 @@ let i22_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
                 binding = None;
                 checker = None;}],None,None))
     |> simpleRules "start"
-    |> defaultGrammar
+    |> defaultDefinition
 
 let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> = 
     verySimpleRules "myNonTerm"
@@ -63,7 +63,7 @@ let nTermName_res : IL.Definition.t<IL.Source.t,IL.Source.t> =
             binding = None
             checker = None
         }]
-    |> defaultGrammar
+    |> defaultDefinition
 
 [<TestFixture>]
 type ``Irony frontend tests`` () =

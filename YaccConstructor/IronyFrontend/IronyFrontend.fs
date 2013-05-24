@@ -26,12 +26,9 @@ type IronyFrontend() =
         override this.Name = "IronyFrontend"
         override this.ParseGrammar t = 
             match t with
-            | :? Irony.Parsing.Grammar as g -> 
-                {info = {fileName = ""};
-                head = None;
-                grammar = Converter.Convert g;
-                foot = None;
-                options = Map.empty}
+            | :? Irony.Parsing.Grammar as g -> {IL.Definition.empty with grammar = Converter.Convert g}
             | _ -> IL.Definition.empty
-        override this.ProductionTypes = List.ofArray(Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>) |> List.map (fun unionCase -> unionCase.Name)
+        override this.ProductionTypes =
+            Reflection.FSharpType.GetUnionCases typeof<IL.Production.t<string,string>>
+            |> List.ofArray |> List.map (fun unionCase -> unionCase.Name)
    

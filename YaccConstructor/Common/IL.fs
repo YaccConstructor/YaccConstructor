@@ -201,8 +201,9 @@ module Definition = begin
      /// Text after a grammar description, what will be simply copied
      foot    :'expr option;
      options : Map<string, string>
+     tokens : Map<string, string option>
     }    
     
     /// Empty grammar
-    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty}
+    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty; tokens = Map.empty}
 end

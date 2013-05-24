@@ -67,12 +67,11 @@ let ParseFile fileName =
     try 
         let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
-        { new Definition.t<Source.t, Source.t>
-            with info = {new Definition.info with fileName = ""}
-            and head = defHead
-            and grammar = addBindings <| addStarts res.Item3 res.Item4
-            and foot = None
-            and options = Map.empty}
+        { Definition.empty
+            with info = {fileName = ""}
+                 head = defHead
+                 grammar = addBindings <| addStarts res.Item3 res.Item4
+            }
     with e -> // when e.Message="parse error" -> 
         fprintfn stderr "%A" e
         let pos = lexbuf.EndPos

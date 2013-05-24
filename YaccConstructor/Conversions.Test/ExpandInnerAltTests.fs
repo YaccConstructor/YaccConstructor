@@ -49,7 +49,7 @@ type ``Expand inner alts tests`` () =
                      PSeq ([{dummyRule with rule = PRef (Source.t("z"),None)}],None,None))
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -73,7 +73,7 @@ type ``Expand inner alts tests`` () =
                      PSeq ([{dummyRule with rule = PRef (Source.t "z", None)}],None,None))
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -101,7 +101,7 @@ type ``Expand inner alts tests`` () =
                      PSeq ([{dummyRule with rule = PRef (Source.t "n", None)}],None,None))
             )
             
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -127,7 +127,7 @@ type ``Expand inner alts tests`` () =
                     (PSeq ([{dummyRule with rule = PRef (Source.t "m", None)}],None,None),
                         PSeq ([{dummyRule with rule = PRef (Source.t "n",None)}],None,None))
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"

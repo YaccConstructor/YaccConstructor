@@ -8,13 +8,7 @@ let generate inFile replLit rnglrArgs =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let be = new Yard.Generators.RNGLR.RNGLR()
     let applyConversion (conv:Yard.Core.Conversion) parameters (ilTree:Definition.t<Source.t,Source.t>)  = 
-      {new Definition.t<Source.t,Source.t>
-        with info = ilTree.info
-        and  head = ilTree.head
-        and  grammar = conv.ConvertGrammar (ilTree.grammar, parameters)
-        and  foot = ilTree.foot
-        and options = ilTree.options
-      }
+      { ilTree with  grammar = conv.ConvertGrammar (ilTree.grammar, parameters) }
     let conversions =
         [
             new ExpandMeta.ExpandMeta() :> Yard.Core.Conversion ,[||]

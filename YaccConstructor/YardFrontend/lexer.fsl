@@ -99,6 +99,8 @@ let from_lexbuf (lexbuf:Lexing.LexBuffer<_>) lStart lEnd =
 let lex2source (lexbuf:Lexing.LexBuffer<_>)= from_lexbuf lexbuf lexbuf.StartPos lexbuf.EndPos
 let newline (lexbuf:Lexing.LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
+let countNewLines lexbuf =
+    (lex2source lexbuf).text |> String.iter (fun c -> if c = '\n' then newline lexbuf)
 }
 
 
@@ -115,6 +117,7 @@ let sharplineBody =  ['A'-'Z' 'a'-'z' ' ']*
 let sharpline = '#' ("if" | "elif" | "else" | "endif") sharplineBody
 
 
+let ws =  [' ' '\r' '\009' '\012' '\n']
 let blank =  [' ' '\r' '\009' '\012'] *
 
 rule skip n = parse   _ {if n > 0 then skip (n-1) lexbuf else lexbuf}
@@ -135,7 +138,10 @@ and  main = parse
      | '[' { SQR_LBR <| lex2source lexbuf }
      | ']' { SQR_RBR <| lex2source lexbuf }
      | "open" { OPEN <| lex2source lexbuf}
-     | "options" blank '{' { OPTIONS_START <| lex2source lexbuf}
+     | "options" ws '{' { countNewLines lexbuf
+                          OPTIONS_START <| lex2source lexbuf}
+     | "tokens" ws '{' [^'}']* '}' { countNewLines lexbuf
+                                     TOKENS_BLOCK <| lex2source lexbuf}
      | "module" { MODULE <| lex2source lexbuf}
      | "private" { PRIVATE <| lex2source lexbuf}
      | "public" { PUBLIC <| lex2source lexbuf}

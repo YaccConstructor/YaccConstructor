@@ -65,7 +65,7 @@ type ``CNF tests`` () =
                     checker = None
                 }]
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -95,7 +95,7 @@ type ``CNF tests`` () =
                     }]
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -124,7 +124,7 @@ type ``CNF tests`` () =
                     }]
             )
         
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -135,7 +135,7 @@ type ``CNF tests`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_1.yrd"))
         let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected =
-            defaultGrammar
+            defaultDefinition
                 [{name = Source.t "x";
                 args = [];
                 body = PSeq ([{omit = false;
@@ -212,7 +212,7 @@ type ``CNF tests`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"eps_2.yrd"))
         let result = loadIL |> ConversionsManager.ApplyConversion conversionExpandTLAlt |> ConversionsManager.ApplyConversion conversionCNF
         let expected = 
-            defaultGrammar
+            defaultDefinition
                    [{name = Source.t "x";
                     args = [];
                     body = PSeq ([{omit = false;

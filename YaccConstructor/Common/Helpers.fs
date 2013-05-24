@@ -19,14 +19,7 @@ let defaultModules rules : Grammar.Module<_,_> list =
         allPublic = false
     }]
 
-let defaultGrammar rules =
-    {
-        info = {fileName = ""}
-        head = None
-        grammar = defaultModules rules
-        foot = None
-        options = Map.empty
-    }
+let defaultDefinition rules = {empty with grammar = defaultModules rules}
 
 let simpleRules nonTerm body : Rule.t<_,_> list =
     [{

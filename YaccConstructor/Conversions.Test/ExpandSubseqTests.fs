@@ -47,7 +47,7 @@ type ``Expand subseq tests`` () =
                     [{dummyRule with rule = PRef (Source.t("x"),None)}
                     ;{dummyRule with rule = PRef (Source.t("y"),None)}]
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
 
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
@@ -73,7 +73,7 @@ type ``Expand subseq tests`` () =
                     ;{dummyRule with rule = PRef (Source.t("m"),None)}]
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -97,7 +97,7 @@ type ``Expand subseq tests`` () =
                     [{dummyRule with rule = PRef (Source.t "n", None)}
                     ;{dummyRule with rule = PRef (Source.t "m", None)}]
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

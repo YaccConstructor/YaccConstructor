@@ -20,23 +20,19 @@ module Yard.Core.ConversionsManager
 open Yard.Core
 open Yard.Core.IL
 
-//Не понял еще сути этой функции, так что просто сделал что-бы работало
 type ConversionsManager () as this =
     inherit Yard.Core.Manager.Manager<Conversion>()
     let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)  = 
-      {new Definition.t<Source.t,Source.t>
-        with info = ilTree.info
-        and  head = ilTree.head
-        and  grammar =
-                  let parameters = convNameWithParams.Split(' ')
-                  //printfn "Conversion: %s" convNameWithParams
-                  if parameters.Length = 0 then failwith "Missing Conversion name"
-                  else
-                      match this.Component parameters.[0] with 
-                      | Some conv -> conv.ConvertGrammar (ilTree.grammar, Array.sub parameters 1 (parameters.Length - 1))
-                      | None -> failwith <| "Conversion not found: " + parameters.[0]
-        and  foot = ilTree.foot
-        and options = ilTree.options
+      {ilTree
+        with grammar =
+                let parameters = convNameWithParams.Split(' ')
+                //printfn "Conversion: %s" convNameWithParams
+                if parameters.Length = 0 then failwith "Missing Conversion name"
+                else
+                    match this.Component parameters.[0] with 
+                    | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
+                    | None -> failwith <| "Conversion not found: " + parameters.[0]
       }
-    member  self.ApplyConversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>)
+    member  self.ApplyConversion convNameWithParams ilTree =
+        apply_Conversion convNameWithParams ilTree
      

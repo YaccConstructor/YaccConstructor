@@ -62,7 +62,7 @@ type ``Conversions tests`` () =
                     ], None, None),
                 dummyToken "OUTER")
             |> simpleRules "s"
-        let ilTree = defaultGrammar rules
+        let ilTree = defaultDefinition rules
         Namer.initNamer ilTree.grammar
         let ilTreeConverted = ConversionsManager.ApplyConversion "ExpandBrackets" ilTree
 #if DEBUG
@@ -81,7 +81,7 @@ type ``Conversions tests`` () =
                 simpleNotStartRules "yard_exp_brackets_1"
                 <| PAlt (dummyToken "ALT1", dummyToken "ALT2")
             )
-        let correctConverted = defaultGrammar rules
+        let correctConverted = defaultDefinition rules
         Assert.AreEqual(ilTreeConverted, correctConverted)
     
     [<Test>]
@@ -146,7 +146,7 @@ type ``Expand rop level alters`` () =
                     [{dummyRule with rule = PToken (Source.t "NUM")}]
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -164,7 +164,7 @@ type ``Expand rop level alters`` () =
                     [{dummyRule with rule = PRef (Source.t "d", None)}]
             )
 
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"
@@ -188,7 +188,7 @@ type ``Expand rop level alters`` () =
                 verySimpleRules "s"
                     [{dummyRule with rule = PRef (Source.t "m", None)}]
             )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         expected |> treeDump.Generate |> string |> printfn "%s"
         printfn "%s" "************************"
         result |> treeDump.Generate |> string |> printfn "%s"

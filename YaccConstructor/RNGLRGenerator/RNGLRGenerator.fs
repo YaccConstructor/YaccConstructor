@@ -49,6 +49,7 @@ type RNGLR() =
             let mutable needTranslate = true
             let mutable light = true
             let mutable printInfiniteEpsilonPath = ""
+            let mutable isRelaxed = false
             let mutable output = definition.info.fileName + ".fs"
             let mutable targetLanguage = FSharp
             for opt, value in pairs do
@@ -81,6 +82,10 @@ type RNGLR() =
                         | "fsharp" -> FSharp
                         | "scala" -> Scala
                         | s -> "Language " + s + "is not supported" |> failwith
+                | "-relaxed" ->
+                    if value = "true" then isRelaxed <- true
+                    elif value = "false" then isRelaxed <- false
+                    else failwith "Unexpected relaxed value"
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
@@ -116,7 +121,9 @@ type RNGLR() =
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             let statesInterpreter = buildStates table grammar
-            let tables = new Tables(grammar, statesInterpreter)
+            let mutable tables = new Tables(grammar, statesInterpreter)
+            if isRelaxed then
+                tables <- new RelaxedTables(grammar, statesInterpreter)
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -162,10 +169,11 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
+            let  tables = printTables grammar definition.head tables moduleName tokenType res isRelaxed targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
                         else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos
+
             let res = 
                 match definition.foot with
                 | None -> res

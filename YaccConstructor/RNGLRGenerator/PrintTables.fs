@@ -31,7 +31,7 @@ type TargetLanguage =
 
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
-    (tokenType : string) (res : System.Text.StringBuilder) targetLanguage 
+    (tokenType : string) (res : System.Text.StringBuilder) (isRelaxed : bool) targetLanguage
     _class =
     
     let inline print (x : 'a) =
@@ -209,10 +209,25 @@ let printTables
             (fun x -> not x.IsEmpty)
             (fun x -> print "%d" x.[0])
             "gotos"
-        print2DArrList reduces
-            (fun l -> not l.IsEmpty)
-            (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
-            "reduces"
+        let mutable relaxedTable : RelaxedTables =  Unchecked.defaultof<RelaxedTables>
+        if isRelaxed then 
+            relaxedTable <- tables :?> RelaxedTables
+            print "let private attendedPushes = "
+            printArr relaxedTable.attendedPushes 
+                (fun x -> printListAsArray x (fun (y,z) -> printListAsArray z (fun w -> print "%d,%d" y w ) ))
+                // TYPE : Array(array(int,int))
+
+        if isRelaxed then
+            relaxedTable <- tables :?> RelaxedTables
+            print2DArrList relaxedTable.attendedReduces
+                (fun l -> not l.IsEmpty)
+                (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
+                "reduces"
+        else
+            print2DArrList reduces
+                (fun l -> not l.IsEmpty)
+                (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
+                "reduces"
 
         print2DArrList zeroReduces
             (fun l -> not l.IsEmpty)
@@ -228,7 +243,9 @@ let printTables
 
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
 
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+        if isRelaxed then
+            printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, attendedPushes)"
+        else printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"

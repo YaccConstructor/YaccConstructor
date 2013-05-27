@@ -49,3 +49,71 @@ type Tables (grammar : FinalGrammar, states : StatesInterpreter) =
     member this.reduces = _reduces
     member this.gotos = _gotos
     member this.acc = _acc
+
+type AttendedReduce = {symbol : int; reduces: list<int*int>}
+type ReduceValue = {value: list<int*int>}
+type RelaxedTables(grammar : FinalGrammar, states : StatesInterpreter) = 
+    inherit Tables(grammar, states)
+    let newGotos = base.gotos
+    let mutable newReduces = base.reduces
+    let mutable _attendedPushes : list<int * int list>[] = Array.create states.count [] // first is symbol, list is array of pushes
+    let fillReduces(reduce : list<int*int>, i:int) = 
+        for j in grammar.indexator.termsStart..grammar.indexator.termsEnd do
+            newReduces.[i,j] <- reduce
+    let caclulateReduces(ar:list<int * int>[,]) =
+        let rec walk i (ar:list<int * int>[,]) =
+            let rec inspectRow i j (ar:list<int * int>[,])(lastReduce:Option<list<int*int>>) =
+                match ar.[i,j], lastReduce with
+                | value, opt when value <> List.Empty  && opt.IsSome && opt.Value = List.Empty
+                    -> if j< grammar.indexator.termsEnd then
+                        inspectRow i (j+1) ar (Some(ar.[i,j]))
+                       else 
+                        if (not lastReduce.Value.IsEmpty) then  fillReduces(lastReduce.Value, i)
+                        if (i < newGotos.GetLength(0) - 1) then walk (i+1) ar
+                | value, opt when value <> List.Empty && opt.IsSome && opt.Value <> List.Empty
+                    -> fillReduces(lastReduce.Value, i);
+                        if(i < newReduces.GetLength(0) - 1) then
+                            walk (i+1) ar
+                | value, opt when (opt.IsSome && value = opt.Value) || value = List.Empty
+                    -> if j < grammar.indexator.termsEnd then
+                        inspectRow i (j+1) ar lastReduce
+                       else
+                        if (not lastReduce.Value.IsEmpty) then fillReduces(lastReduce.Value, i)
+                        if (i < newGotos.GetLength(0) - 1) then walk (i+1) ar
+                | _ -> if (i < newReduces.GetLength(0) - 1) then
+                        walk (i+1) ar
+            inspectRow i grammar.indexator.termsStart ar (Some(List.Empty))
+        walk 0 newReduces
+    let result = caclulateReduces(newReduces)
+    let traverseArray(ar:int list[,]) = 
+        let rec walk i (ar:int list[,]) = 
+            let zeroList=List.Empty
+            let rec inspectRow i j (ar:int list[,])(lastShift:Option<int list>) = 
+                match ar.[i,j], lastShift with
+                | value, opt when value <> zeroList && opt.IsSome && opt.Value = zeroList
+                    -> if j < grammar.indexator.termsEnd then 
+                        inspectRow i (j+1) ar (Some(ar.[i,j])) // init lastShift, go to next elem in row
+                       else
+                        if (not lastShift.Value.IsEmpty) then _attendedPushes.[i] <- [j, lastShift.Value] 
+                        if (i < newGotos.GetLength(0) - 1) then  walk (i+1) ar
+                | value, opt when value <> List.Empty && opt.IsSome && opt.Value <> zeroList
+                    -> _attendedPushes.[i] <- [j, lastShift.Value]; 
+                        if (i < newGotos.GetLength(0) - 1 ) then
+                            walk (i+1) ar // to next row
+                       //else true
+                | value, opt when (opt.IsSome && value = opt.Value) || value = zeroList
+                    -> if j < grammar.indexator.termsEnd then
+                        inspectRow i (j+1) ar lastShift // go to next elem in row
+                       else
+                        if (not lastShift.Value.IsEmpty) then _attendedPushes.[i] <- [j, lastShift.Value];
+                        if (i < newGotos.GetLength(0) - 1) then walk (i+1) ar
+                | _ -> if (i < newGotos.GetLength(0) - 1) then 
+                        walk (i+1) ar// to next row if we can
+                       //else true
+            inspectRow i grammar.indexator.termsStart ar (Some(List.Empty)) // start row inspecting at first elem of row with no lastShift
+        walk 0 newGotos // start walking on array at first row
+    let result = traverseArray(newGotos)
+    
+    member this.attendedPushes = _attendedPushes
+    member this.attendedReduces = newReduces
+

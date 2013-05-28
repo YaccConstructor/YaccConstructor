@@ -69,6 +69,7 @@ let private linearize (grammar: Grammar.t<_,_>) =
         let rulesMap = getRulesMap grammar
         fun module' metaArgs (name : Source.t) ->
             if List.exists (fun (arg : Source.t) -> arg.text = name.text) metaArgs then name
+            elif name.text = errorToken then name
             else
                 try
                     let ruleModule = rulesMap.[module'].[name.text]

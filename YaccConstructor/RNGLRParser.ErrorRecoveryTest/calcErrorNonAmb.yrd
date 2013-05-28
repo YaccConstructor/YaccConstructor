@@ -1,5 +1,0 @@
-﻿[<Start>]
-list: expr SEMICOLON list| ERROR SEMICOLON list | expr
-expr: expr ADD expr | fact
-fact: fact MUL fact | num
-num: A | B | LBRACE expr RBRACE | LBRACE ERROR RBRACE

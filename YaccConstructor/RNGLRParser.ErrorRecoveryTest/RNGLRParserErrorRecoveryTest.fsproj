@@ -36,12 +36,8 @@
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
     <Compile Include="CalcErrorAmb.yrd.fs" />
-    <Compile Include="CalcErrorNonAmb.yrd.fs" />
-    <Compile Include="TrivialRecovery.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
-    <None Include="TrivialRecovery.yrd" />
     <None Include="calcErrorAmb.yrd" />
-    <None Include="calcErrorNonAmb.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">

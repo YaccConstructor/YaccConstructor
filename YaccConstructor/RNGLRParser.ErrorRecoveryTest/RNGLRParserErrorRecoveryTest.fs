@@ -30,50 +30,108 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 type ``RNGLR error recovery tests`` () =
 
     [<Test>]
-    member test.``Calc test non-amb``() =
-        let parser = RNGLR.ParseCalcErrorNonAmb.buildAst
-        let path = dir + "CalcRecoveryBrace1.txt"
+    member test.``Calc error after right brace``() =
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc error after right brace.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            debugs.drawGSSDot "res.dot"
+            //debugs.drawGSSDot "res.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst() 
-            RNGLR.ParseCalcErrorNonAmb.defaultAstToDot mAst "calcTestNonAmb.dot"
-                                  
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error after right brace.dot"
+            
     [<Test>]
-    member test.``Calc test amb``() = 
+    member test.``Calc error inside in braces``() =
         let parser = RNGLR.ParseCalcErrorAmb.buildAst
-        let path = dir + "CalcRecoveryBrace1.txt"                                    
+        let path = dir + "Calc error inside in braces.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            debugs.drawGSSDot "res.dot"
+            //debugs.drawGSSDot "res.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
-            mAst.PrintAst()
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "calcTestAmb.dot"
-                                                                         
+            mAst.PrintAst() 
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces.dot"                          
+
     [<Test>]
-    member test.``Trivial test``() =                                                                                
-        let parser = RNGLR.ParseTrivialRecovery.buildAst                                                                         
-        let path = dir + "RecoveryTrivial.txt"
+    member test.``Calc error inside in braces2``() =
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc error inside in braces2.txt"
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            debugs.drawGSSDot "res.dot"
+            //debugs.drawGSSDot "Calc error_in_middle3.dot"
+            printErr (num, tok, err)
+        | Parser.Success mAst -> 
+            mAst.PrintAst() 
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc error inside in braces2.dot"
+
+    [<Test>]
+    member test.``Calc missing left brace``() =
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc missing left brace.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) -> 
+            debugs.drawGSSDot "Calc error_in_middle4.dot"
+            printErr (num, tok, err)
+        | Parser.Success mAst -> 
+            mAst.PrintAst() 
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing left brace.dot"
+
+    [<Test>]
+    member test.``Calc missing operand``() =
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc missing operand.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) -> 
+            debugs.drawGSSDot "Calc error_in_middle5.dot"
+            printErr (num, tok, err)
+        | Parser.Success mAst -> 
+            mAst.PrintAst() 
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operand.dot"
+
+    [<Test>]
+    member test.``Calc missing operator``() =
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc missing operator.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) -> 
+            //debugs.drawGSSDot "Calc error_in_middle6.dot"
+            printErr (num, tok, err)
+        | Parser.Success mAst -> 
+            mAst.PrintAst() 
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operator.dot"
+
+    [<Test>]
+    member test.``Calc missing right brace``() = 
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc missing right brace.txt"                                    
+
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) -> 
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst()
-            RNGLR.ParseTrivialRecovery.defaultAstToDot mAst "trivial.dot"
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing right brace.dot"
 
+    [<Test>]
+    member test.``Calc no operand in the end``() = 
+        let parser = RNGLR.ParseCalcErrorAmb.buildAst
+        let path = dir + "Calc no operand in the end.txt"                                    
 
-//[<EntryPoint>]
-(*(new ``RNGLR error recovery tests``()).``Trivial test`` ()
-0*)
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) -> 
+            //debugs.drawGSSDot "CCalc no operand in the end.dot"
+            printErr (num, tok, err)
+        | Parser.Success mAst -> 
+            mAst.PrintAst()
+            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc no operand in the end.dot"
+
 
 [<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc test amb``()
-(new ``RNGLR error recovery tests``()).``Calc test non-amb``()
-0
+(new ``RNGLR error recovery tests``()).``Calc error inside in braces2``()

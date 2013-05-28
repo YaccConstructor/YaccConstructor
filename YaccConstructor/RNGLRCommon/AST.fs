@@ -599,9 +599,3 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         
         out.WriteLine("}")
         out.Close()
-
-type Error = 
-    inherit AST
-    //val unbrowsed : obj[] 
-    val expected : int[]
-    new (prod, unbr, exp) = {inherit AST(new Family (prod, unbr), null); expected = exp} 

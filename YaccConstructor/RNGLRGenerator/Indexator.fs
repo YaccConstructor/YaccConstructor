@@ -61,13 +61,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
     let literalsShift = termsShift + (let (_,_,x) = termsConnect in x)
     let _eofIndex = (let (x,_,_) = termsConnect in x "RNGLR_EOF") + termsShift
     
-    let _errorTIndex = 
-        if terms |> Array.exists((=) "ERROR") then 
-            (let (x,_,_) = termsConnect in x "ERROR") + termsShift
-        else
-            -1
-    let _errorNIndex = let (x,_,_) = nonTermsConnect in x "error"
-        
+    let _errorIndex = let (x,_,_) = nonTermsConnect in x "error"
 
     static member inline private fst (x,_,_) = x
     static member inline private snd (_,x,_) = x
@@ -94,5 +88,4 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
 
     member this.fullCount = (Indexator.trd literalsConnect) + (Indexator.trd termsConnect) + (Indexator.trd nonTermsConnect)
     member this.eofIndex = _eofIndex
-    member this.errorNIndex = _errorNIndex
-    member this.errorTIndex = _errorTIndex
+    member this.errorIndex = _errorIndex

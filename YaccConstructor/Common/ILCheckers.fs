@@ -122,7 +122,7 @@ let checkModuleRules (publicRules : IDictionary<_,_>) (module' : Grammar.Module<
     let undeclaredRules = new HashSet<_>()
     let addUndeclaredRule (name : Source.t) additionRules = 
         if not (declaredRules.Contains name.text
-                || Seq.exists ((=) name.text) additionRules)
+                || Seq.exists ((=) name.text) additionRules) && name.text <> "error"
         then
             undeclaredRules.Add name |> ignore
 

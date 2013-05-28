@@ -93,9 +93,9 @@ let private accStates = Array.zeroCreate 8
 for i = 0 to 7 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 9
-let errorNIndex = 0
-let errorTIndex = -1
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorNIndex, errorTIndex)
+let errorIndex = 0
+let errorRulesExists = false
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

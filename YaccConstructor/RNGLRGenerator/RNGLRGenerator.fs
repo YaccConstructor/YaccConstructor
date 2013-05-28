@@ -50,6 +50,7 @@ type RNGLR() =
             let mutable light = true
             let mutable printInfiniteEpsilonPath = ""
             let mutable isRelaxed = false
+            let mutable printAnlysis = false
             let mutable output = definition.info.fileName + ".fs"
             let mutable targetLanguage = FSharp
             for opt, value in pairs do
@@ -86,6 +87,10 @@ type RNGLR() =
                     if value = "true" then isRelaxed <- true
                     elif value = "false" then isRelaxed <- false
                     else failwith "Unexpected relaxed value"
+                | "-printAnalysis" ->
+                    if value = "true" then printAnlysis <- true
+                    elif value = "false" then printAnlysis <- false
+                    else failwith "Unexpected printAnalysis value"
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
@@ -122,8 +127,23 @@ type RNGLR() =
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             let statesInterpreter = buildStates table grammar
             let mutable tables = new Tables(grammar, statesInterpreter)
+
+            let grammarAnalyzis(table:RelaxedTables) : string  = 
+                let mutable result = "# Grammar analyzis \n"
+                let pushes = table.attendedPushes
+                for i in 0 .. pushes.Length - 1 do
+                    if not pushes.[i].IsEmpty then
+                        for j in pushes.[i] do
+                            let symbol = grammar.indexator.indexToTerm (fst j)
+                            result <- result +  "# State " + (string i) + " accepst only "
+                            + symbol + " symbol; \t defalut: push and goto to " + string (snd j) + " \n"
+                result
+            let mutable grammarAnalyze = ""
             if isRelaxed then
-                tables <- new RelaxedTables(grammar, statesInterpreter)
+                let relaxedTable = new RelaxedTables(grammar, statesInterpreter)
+                tables <- relaxedTable
+                if printAnlysis then
+                    grammarAnalyze <- grammarAnalyzis(relaxedTable);
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -195,6 +215,8 @@ type RNGLR() =
                     res.ToString()
                 | Scala -> res + "\n}"
             out.WriteLine res
+            if printAnlysis && isRelaxed then
+                out.WriteLine grammarAnalyze
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
             //(new YardPrinter()).Generate newDefinition

@@ -32,6 +32,8 @@ type ParserSource<'TokenType> (gotos : int[][]
                                , tokenToNumber : 'TokenType -> int
                                , acceptEmptyInput : bool
                                , numToString : int -> string
+                               , ?attendedPushes : array<int>
+                               , ?numToToken : int -> 'TokenType
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -56,3 +58,5 @@ type ParserSource<'TokenType> (gotos : int[][]
     member this.TokenToNumber = tokenToNumber
     member this.AcceptEmptyInput = acceptEmptyInput
     member this.NumToString = numToString
+    member this.AttendedPushes = attendedPushes
+    member this.NumToToken = numToToken

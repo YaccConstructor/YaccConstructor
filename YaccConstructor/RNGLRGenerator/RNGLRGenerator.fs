@@ -138,10 +138,13 @@ type RNGLR() =
                             + symbol + " symbol; \t defalut: push and goto to " + string (snd pushes.[i]) + " \n"
                 result
             let mutable grammarAnalyze = ""
+            //let mutable relaxedTable RelaxedTables =
+            let mutable attendedPushes = null
             if isRelaxed then
                 let relaxedTable = new RelaxedTables(grammar, statesInterpreter)
                 tables.gotos <- relaxedTable.attendedGotos
                 tables.reduces <- relaxedTable.attendedReduces
+                attendedPushes <- relaxedTable.attendedPushes
                 if printAnlysis then
                    grammarAnalyze <- grammarAnalyzis(relaxedTable);
             use out = new System.IO.StreamWriter (output)
@@ -188,8 +191,13 @@ type RNGLR() =
                 | FSharp -> fsHeaders()
                 | Scala -> scalaHeaders()
 
+            let mutable relaxedPushes : Option<array<int>> = Option.None
+            if isRelaxed then
+                relaxedPushes <- Option.Some(Array.create (attendedPushes.GetLength 0) 0)
+                for i = 0 to attendedPushes.Length-1 do
+                    relaxedPushes.Value.[i] <- fst attendedPushes.[i]
             printHeaders moduleName fullPath light output targetLanguage
-            let  tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
+            let tables = printTables grammar definition.head tables moduleName tokenType res relaxedPushes targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
                         else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos

@@ -197,6 +197,17 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 // Push to init state is impossible
                 if push <> 0 then
                     pushes.Push (v, push)
+                    if parserSource.AttendedPushes.IsSome && parserSource.AttendedPushes.Value.[state] <> 0 
+                    && parserSource.AttendedPushes.Value.[state] <> curNum.Value then
+                        let i = parserSource.AttendedPushes.Value.[state]
+                        let a = parserSource.NumToToken.Value i 
+                        tokens.Add(a)
+                        if enum.MoveNext() then
+                            curToken := a
+                            curNum := parserSource.TokenToNumber a
+                        else
+                            curNum := parserSource.EofIndex
+
                 let arr = parserSource.ZeroReduces.[state].[!curNum]
                 if arr <> null then
                     for prod in arr do

@@ -129,21 +129,21 @@ type RNGLR() =
             let mutable tables = new Tables(grammar, statesInterpreter)
 
             let grammarAnalyzis(table:RelaxedTables) : string  = 
-                let mutable result = "# Grammar analyzis \n"
+                let mutable result = "// Grammar analyzis \n"
                 let pushes = table.attendedPushes
                 for i in 0 .. pushes.Length - 1 do
-                    if not pushes.[i].IsEmpty then
-                        for j in pushes.[i] do
-                            let symbol = grammar.indexator.indexToTerm (fst j)
-                            result <- result +  "# State " + (string i) + " accepst only "
-                            + symbol + " symbol; \t defalut: push and goto to " + string (snd j) + " \n"
+                    if pushes.[i] <> (0, List.Empty) then
+                            let symbol = grammar.indexator.indexToTerm (fst pushes.[i])
+                            result <- result +  "// State " + (string i) + " accepst only "
+                            + symbol + " symbol; \t defalut: push and goto to " + string (snd pushes.[i]) + " \n"
                 result
             let mutable grammarAnalyze = ""
             if isRelaxed then
                 let relaxedTable = new RelaxedTables(grammar, statesInterpreter)
-                tables <- relaxedTable
+                tables.gotos <- relaxedTable.attendedGotos
+                tables.reduces <- relaxedTable.attendedReduces
                 if printAnlysis then
-                    grammarAnalyze <- grammarAnalyzis(relaxedTable);
+                   grammarAnalyze <- grammarAnalyzis(relaxedTable);
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0
@@ -189,7 +189,7 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let  tables = printTables grammar definition.head tables moduleName tokenType res isRelaxed targetLanguage _class
+            let  tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
             let res = if not needTranslate || targetLanguage = Scala then tables
                         else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos

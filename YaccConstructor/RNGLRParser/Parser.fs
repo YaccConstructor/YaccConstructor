@@ -197,9 +197,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 // Push to init state is impossible
                 if push <> 0 then
                     pushes.Push (v, push)
-                elif parserSource.AttendedGotos.IsSome then
-                    if parserSource.AttendedGotos.Value.[state].[!curNum] <> (0,0) then
-                        pushes.Push(v, snd(parserSource.AttendedGotos.Value.[state].[!curNum]))
                 let arr = parserSource.ZeroReduces.[state].[!curNum]
                 if arr <> null then
                     for prod in arr do

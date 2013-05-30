@@ -218,26 +218,6 @@ let printTables
         if attendedPushes.IsSome then
             print "let attendedPushes = "
             printArr attendedPushes.Value (print "%d")
-        (*let mutable relaxedTable : RelaxedTables =  Unchecked.defaultof<RelaxedTables>
-        if isRelaxed then 
-            relaxedTable <- tables :?> RelaxedTables
-            print "let private attendedPushes = "
-            (*printArr relaxedTable.attendedPushes 
-                (fun x -> printListAsArray x (fun (y,z) -> print "%d,%d" y z.Head ))
-                                                            
-                                                           //printList z (fun(w) -> print "%d" w) ))
-                // TYPE : Array(array(int,int)) *)
-            printArr relaxedTable.attendedPushes
-                (fun x -> print "%d" (fst x)
-                          printList (snd x) (fun y -> print "%d" y))
-
-        if isRelaxed then
-            relaxedTable <- tables :?> RelaxedTables
-            print2DArrList relaxedTable.attendedReduces
-                (fun l -> not l.IsEmpty)
-                (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
-                "reduces"
-        else*)
         print2DArrList reduces
             (fun l -> not l.IsEmpty)
             (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))

@@ -138,7 +138,6 @@ type RNGLR() =
                             + symbol + " symbol; \t defalut: push and goto to " + string (snd pushes.[i]) + " \n"
                 result
             let mutable grammarAnalyze = ""
-            //let mutable relaxedTable RelaxedTables =
             let mutable attendedPushes = null
             if isRelaxed then
                 let relaxedTable = new RelaxedTables(grammar, statesInterpreter)

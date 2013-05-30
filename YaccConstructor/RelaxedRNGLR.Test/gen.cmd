@@ -1,0 +1,2 @@
+@echo off
+..\YaccConstructor\bin\Release\YaccConstructor.exe -c ExpandMeta -c ExpandEbnf -c ExpandInnerAlt -c ExpandBrackets -c "ReplaceLiterals KW_%%s" -c LeaveLast -g "RNGLRGenerator -translate false -token int  -module AttendedRNGLR.Simple1 -infEpsPath epsilons -o SimpleParser1.yrd.fs -relaxed true -printAnalysis true" -i simple_1.yrd >> log.txt

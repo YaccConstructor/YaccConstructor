@@ -201,7 +201,8 @@ let () =
 //                       |> raise
                 //| e -> GenError e.Message |> raise
 
-            //printf "%A" result
+            printf "%A" result
+            System.IO.File.WriteAllText("out", string result)
             ()
         | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
         | _, _, None          -> EmptyArg "generator name (-g)" |> raise

@@ -10,8 +10,7 @@ let getTag token =
   | EOF -> 0us
   | NUM -> 1us
 let rules = 
-  [ 281479271677952UL ]
-  |> Array.ofList
+  [| 281479271677952UL |]
 let lblName = 
   [|
   |]

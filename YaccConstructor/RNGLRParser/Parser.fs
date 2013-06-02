@@ -474,7 +474,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     var := isRecToken !curNum
 
             //printfn "%A" <| unbrowsed.ToArray()      
-            //printfn "recovery end"
+                if  !var >= 0 then 
+                    let path = temp.ToArray()
+                    let need = List.toArray path.[!var]
+                    let skippedArray = skipped.ToArray()
+                    let unbrowsed = Array.append need skippedArray
+                    pushes.Push (recVertex.[!var], recPush.[!var])
+                    searchRecSymbol unbrowsed 
 
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists

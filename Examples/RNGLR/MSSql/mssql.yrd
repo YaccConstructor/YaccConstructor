@@ -34,8 +34,6 @@ open Common, MsCommon
 [<Start>]
 root_rule: (batch_body KW_GO)*
 
-
-
 batch_body: 
        create_proc
      | set_stmnt

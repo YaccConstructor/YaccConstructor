@@ -62,8 +62,7 @@ let defaultSourceText id (lexbuf : LexBuffer<_>) value =
                                , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
 
 let tokenPos token =
-    match token with
-    | ERROR (x) 
+    match token with 
     | KW_PRINT(x)
     | KW_FOREIGN(x)
     | KW_NO(x)

@@ -19,6 +19,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MsSql", "..\RNGLR\MSSql\MsS
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SQRT.Core", "SQRT.Core\SQRT.Core.fsproj", "{9BC26A02-8847-46BB-899D-0AB6DF21F88E}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "..\..\YaccConstructor\Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,16 @@ Global
 		{9BC26A02-8847-46BB-899D-0AB6DF21F88E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9BC26A02-8847-46BB-899D-0AB6DF21F88E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9BC26A02-8847-46BB-899D-0AB6DF21F88E}.Release|x86.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -63,6 +63,7 @@ let defaultSourceText id (lexbuf : LexBuffer<_>) value =
 
 let tokenPos token =
     match token with
+    | ERROR (x) 
     | KW_PRINT(x)
     | KW_FOREIGN(x)
     | KW_NO(x)

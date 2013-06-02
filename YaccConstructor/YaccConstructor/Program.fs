@@ -185,16 +185,16 @@ let () =
                 //if not (IsSingleStartRule !ilTree) then
                 //   raise <| CheckerError "Input grammar should contains only one start rule."
                 //try
-                //let gen = new Yard.Generators.RNGLR.RNGLR()
-                for constr in gen.Constraints do
-                    let grammar = ilTree.Value.grammar
-                    if not <| constr.Check grammar then
-                        eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
-                        ilTree := {!ilTree with grammar = constr.Fix grammar}
+                //    let gen = new Yard.Generators.RNGLR.RNGLR()
+                    for constr in gen.Constraints do
+                        let grammar = ilTree.Value.grammar
+                        if not <| constr.Check grammar then
+                            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+                            ilTree := {!ilTree with grammar = constr.Fix grammar}
 
-                match !generatorParams with
-                | None -> gen.Generate !ilTree
-                | Some genParams -> gen.Generate(!ilTree, genParams)
+                    match !generatorParams with
+                    | None -> gen.Generate !ilTree
+                    | Some genParams -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
 //                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."

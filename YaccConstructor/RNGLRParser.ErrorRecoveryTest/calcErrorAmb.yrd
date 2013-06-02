@@ -1,0 +1,3 @@
+﻿[<Start>]   
+list : (expr | error) (SEMICOLON list)?
+expr : expr ADD expr | LBRACE (expr | error) RBRACE | A

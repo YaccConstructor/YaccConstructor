@@ -56,7 +56,8 @@ let initialConvert (def : Definition.t<_,_>) =
     let filterNonReachable ruleList =
         let count = new Dictionary<_,_>()
         let inline getCount str = 
-            if not <| count.ContainsKey str then 0
+            if str = "error" then 1
+            elif not <| count.ContainsKey str then 0
             else count.[str]
         ruleList
         |> List.iter

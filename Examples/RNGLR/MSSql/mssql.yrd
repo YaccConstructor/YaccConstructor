@@ -49,6 +49,7 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
+     | error
   
 rollback_transaction:
     KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 

@@ -78,7 +78,7 @@ rule tokens = parse
          }
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }
- | eof  {EOF(defaultSourceText id lexbuf  "")}
+ | eof  {RNGLR_EOF(defaultSourceText id lexbuf  "")}
  | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
 and literal = parse
   | "''" { appendBuf("'"); literal lexbuf }

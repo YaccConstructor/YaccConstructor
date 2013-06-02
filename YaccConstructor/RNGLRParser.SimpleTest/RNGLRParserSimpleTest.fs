@@ -224,5 +224,5 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual([5,0], res)
 
-//[<EntryPoint>]
-//(new ``RNGLR parser tests with simple lexer``()).``AST, containing long cycles``()
+(*[<EntryPoint>]
+(new ``RNGLR parser tests with simple lexer``()).``AST, containing long cycles``()*)

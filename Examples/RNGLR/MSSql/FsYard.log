@@ -1627,23 +1627,24 @@ rules:
 1624: yard_opt_3 = yard_exp_brackets_67 
 1625: yard_opt_3 = 
 1626: rollback_transaction = KW_ROLLBACK yard_opt_3 yard_opt_4 yard_opt_5 
-1627: batch_body = insert 
-1628: batch_body = create_table 
-1629: batch_body = drop_procedure 
-1630: batch_body = if_stmt 
-1631: batch_body = rollback_transaction 
-1632: batch_body = case 
-1633: batch_body = declare 
-1634: batch_body = commit_transaction 
-1635: batch_body = begin_transaction 
-1636: batch_body = KW_USE LBRACKET KW_MDW_CONTROL RBRACKET 
-1637: batch_body = set_stmnt 
-1638: batch_body = create_proc 
-1639: yard_many_2 = yard_exp_brackets_66 yard_many_2 
-1640: yard_many_2 = 
-1641: yard_opt_2 = KW_GO 
-1642: yard_opt_2 = 
-1643: root_rule = yard_many_2 
-1644: yard_start_rule = root_rule 
-States count: 2190
-Generation time: 00:00:28.0616051
+1627: batch_body = ERROR 
+1628: batch_body = insert 
+1629: batch_body = create_table 
+1630: batch_body = drop_procedure 
+1631: batch_body = if_stmt 
+1632: batch_body = rollback_transaction 
+1633: batch_body = case 
+1634: batch_body = declare 
+1635: batch_body = commit_transaction 
+1636: batch_body = begin_transaction 
+1637: batch_body = KW_USE LBRACKET KW_MDW_CONTROL RBRACKET 
+1638: batch_body = set_stmnt 
+1639: batch_body = create_proc 
+1640: yard_many_2 = yard_exp_brackets_66 yard_many_2 
+1641: yard_many_2 = 
+1642: yard_opt_2 = KW_GO 
+1643: yard_opt_2 = 
+1644: root_rule = yard_many_2 
+1645: yard_start_rule = root_rule 
+States count: 2191
+Generation time: 00:00:49.6608405

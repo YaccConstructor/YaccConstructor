@@ -1,3 +1,5 @@
+
+# 2 "Calc.yrd.fs"
 module RNGLR.ParseCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
@@ -7,30 +9,31 @@ type Token =
     | A of int
     | ADD of int
     | B of int
-    | EOF of int
     | MUL of int
+    | RNGLR_EOF of int
 
 let numToString = function
-    | 0 -> "expr"
-    | 1 -> "fact"
-    | 2 -> "num"
-    | 3 -> "yard_start_rule"
-    | 4 -> "A"
-    | 5 -> "ADD"
-    | 6 -> "B"
-    | 7 -> "EOF"
+    | 0 -> "error"
+    | 1 -> "expr"
+    | 2 -> "fact"
+    | 3 -> "num"
+    | 4 -> "yard_start_rule"
+    | 5 -> "A"
+    | 6 -> "ADD"
+    | 7 -> "B"
     | 8 -> "MUL"
+    | 9 -> "RNGLR_EOF"
     | _ -> ""
 let tokenToNumber = function
-    | A _ -> 4
-    | ADD _ -> 5
-    | B _ -> 6
-    | EOF _ -> 7
+    | A _ -> 5
+    | ADD _ -> 6
+    | B _ -> 7
     | MUL _ -> 8
+    | RNGLR_EOF _ -> 9
 
 let mutable private cur = 0
-let leftSide = [|0; 0; 3; 1; 1; 2; 2|]
-let private rules = [|1; 0; 5; 0; 0; 2; 1; 8; 1; 6; 4|]
+let leftSide = [|1; 1; 4; 2; 2; 3; 3|]
+let private rules = [|2; 1; 6; 1; 1; 3; 2; 8; 2; 7; 5|]
 let private rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
 let startRule = 2
 
@@ -41,10 +44,10 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 4; 7; 8; 9; 2; 3; 5; 6|]
 let private small_gotos =
-        [|5; 0; 65537; 131074; 262147; 393220; 65537; 327685; 131077; 6; 65537; 131074; 262147; 393220; 196609; 327685; 262145; 524295; 327684; 65544; 131074; 262147; 393220; 393217; 524295|]
+        [|5; 65536; 131073; 196610; 327683; 458756; 65537; 393221; 131077; 65542; 131073; 196610; 327683; 458756; 196609; 393221; 262145; 524295; 327684; 131080; 196610; 327683; 458756; 393217; 524295|]
 let gotos = Array.zeroCreate 10
 for i = 0 to 9 do
-        gotos.[i] <- Array.zeroCreate 9
+        gotos.[i] <- Array.zeroCreate 10
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -57,10 +60,10 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|1,3|]; [|0,1|]; [|4,3|]; [|3,1|]; [|6,1|]; [|5,1|]|]
 let private small_reduces =
-        [|196610; 327680; 458752; 262146; 327681; 458753; 393219; 327682; 458754; 524290; 458755; 327683; 458755; 524291; 524291; 327684; 458756; 524292; 589827; 327685; 458757; 524293|]
+        [|196610; 393216; 589824; 262146; 393217; 589825; 393219; 393218; 524290; 589826; 458755; 393219; 524291; 589827; 524291; 393220; 524292; 589828; 589827; 393221; 524293; 589829|]
 let reduces = Array.zeroCreate 10
 for i = 0 to 9 do
-        reduces.[i] <- Array.zeroCreate 9
+        reduces.[i] <- Array.zeroCreate 10
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -76,7 +79,7 @@ let private small_zeroReduces =
         [||]
 let zeroReduces = Array.zeroCreate 10
 for i = 0 to 9 do
-        zeroReduces.[i] <- Array.zeroCreate 9
+        zeroReduces.[i] <- Array.zeroCreate 10
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -91,16 +94,18 @@ let private small_acc = [1]
 let private accStates = Array.zeroCreate 10
 for i = 0 to 9 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 7
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
+let eofIndex = 9
+let errorIndex = 0
+let errorRulesExists = false
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_expr * '_rnglr_type_fact * '_rnglr_type_num * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_fact * '_rnglr_type_num * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -112,15 +117,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (f) -> 
               _rnglr_cycle_res := (
                 
-# 1 "Calc.yrd"
-                                                            f
+# 2 "Calc.yrd"
+                                                           f
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 123 "Calc.yrd.fs"
+# 128 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -136,15 +141,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 1 "Calc.yrd"
-                                               a + b
+# 2 "Calc.yrd"
+                                              a + b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 147 "Calc.yrd.fs"
+# 152 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -152,9 +157,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
             )
-# 1 "Calc.yrd"
+# 2 "Calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 157 "Calc.yrd.fs"
+# 162 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -166,15 +171,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (n) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                                                           n
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 177 "Calc.yrd.fs"
+# 182 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -190,15 +195,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                                               a * b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 201 "Calc.yrd.fs"
+# 206 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -210,15 +215,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                                 5
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 221 "Calc.yrd.fs"
+# 226 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -230,17 +235,38 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                          3
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 241 "Calc.yrd.fs"
+# 246 "Calc.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+
+              parserRange
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+
+               : '_rnglr_type_error) 
+# 264 "Calc.yrd.fs"
       );
   |] , [|
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_error)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_expr)   ) |> List.concat));

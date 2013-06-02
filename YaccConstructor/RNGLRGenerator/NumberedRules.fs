@@ -49,6 +49,14 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
             result.[left.[i]] <- i::result.[left.[i]]
         result
         |> Array.map (List.rev >> Array.ofList)
+
+    let errRulesExists = 
+        let errInd = indexator.errorIndex
+        let res = ref false
+        for i in 0..right.GetLength(0)-1 do
+            if not !res && Array.exists((=) errInd) right.[i] then
+                res := true
+        !res
         
     member this.rulesCount = rules.Length
     member this.startRule = start
@@ -59,3 +67,4 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     member this.length num = right.[num].Length
     member this.symbol rule pos = right.[rule].[pos]
     member this.rulesWithLeftSide symbol = rulesWithLeft.[symbol]
+    member this.errorRulesExists = errRulesExists

@@ -559,13 +559,13 @@ table_constraint_create_table:
             (KW_NOT KW_FOR KW_REPLICATION)? 
         | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? sql_expr
     ) 
-
+	
 delete_update:
     KW_ON (KW_DELETE | KW_UPDATE) delete_update_options
-    
+   
 delete_update_options:
     KW_NO KW_ACTION | KW_CASCADE | KW_SET KW_NULL | KW_SET KW_DEFAULT
-    
+   
 index_option:
     ( 
         KW_PAD_INDEX OP_EQ (KW_ON | KW_OFF) 
@@ -574,7 +574,7 @@ index_option:
         | KW_STATISTICS_NORECOMPUTE OP_EQ (KW_ON | KW_OFF) 
         | KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
         | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
-    )
+    ) 
     
 insert:
     (KW_WITH comma_list<<common_table_expression>>)?

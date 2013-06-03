@@ -75,7 +75,6 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     res
 %}
 
-%token EOF
 %token COLON
 %token <Range> SEMICOLON
 %token COMMA
@@ -94,6 +93,7 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token COMMUT
 %token INCLUDE
 %token SET
+%token <IL.Source.t> EOF
 %token <IL.Source.t> STRING LIDENT UIDENT
 %token <IL.Source.t> PREDICATE ACTION
 %token <IL.Source.t> PATTERN PARAM
@@ -110,6 +110,7 @@ file: action_opt
       unnamed_module_opt
       modules
       foot_opt
+      EOF
       { 
         {
             info = { fileName = !currentFilename }

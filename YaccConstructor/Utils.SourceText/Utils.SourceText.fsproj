@@ -43,8 +43,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="StructClass.fs" />
     <Compile Include="SourceText.fs" />
-    <Compile Include="OffsetMap.fs" />
+    <Compile Include="InfoClass.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

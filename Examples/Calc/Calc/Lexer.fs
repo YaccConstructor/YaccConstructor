@@ -105,7 +105,7 @@ and _fslex_token  _fslex_state lexbuf =
           )
   | 9 -> ( 
 # 22 "Lexer.fsl"
-                       EOF <| lexeme lexbuf 
+                       RNGLR_EOF <| lexeme lexbuf 
 # 109 "Lexer.fs"
           )
   | 10 -> ( 

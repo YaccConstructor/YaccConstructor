@@ -14,7 +14,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
+   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
@@ -33,8 +33,6 @@ open Common, MsCommon
 
 [<Start>]
 root_rule: (batch_body KW_GO?)*
-
-
 
 batch_body: 
        create_proc
@@ -558,13 +556,13 @@ table_constraint_create_table:
             (KW_NOT KW_FOR KW_REPLICATION)? 
         | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? sql_expr
     ) 
-
+	
 delete_update:
     KW_ON (KW_DELETE | KW_UPDATE) delete_update_options
-    
+   
 delete_update_options:
     KW_NO KW_ACTION | KW_CASCADE | KW_SET KW_NULL | KW_SET KW_DEFAULT
-    
+   
 index_option:
     ( 
         KW_PAD_INDEX OP_EQ (KW_ON | KW_OFF) 
@@ -573,7 +571,7 @@ index_option:
         | KW_STATISTICS_NORECOMPUTE OP_EQ (KW_ON | KW_OFF) 
         | KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
         | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
-    )
+    ) 
     
 insert:
     (KW_WITH comma_list<<common_table_expression>>)?

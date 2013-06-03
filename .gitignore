@@ -56,3 +56,5 @@ Builder/workdir/*
 Examples/RNGLR/MSSql/stack.dot
 Examples/RNGLR/MSSql/*.dot.*
 Examples/RNGLR/MSSql/MsParser.fs
+ppush.txt
+Examples/RNGLR/MSSql/FsYard.log

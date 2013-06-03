@@ -24,6 +24,9 @@ open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
 open LexerHelper
 open Yard.Utils.SourceText
+open Yard.Utils.StructClass
+open Yard.Utils.InfoClass
+open System
 
 let lastTokenNum = ref 0L
 let traceStep = 50000L
@@ -89,20 +92,33 @@ let justParse (path:string) =
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 
-let Parse (srcFilePath:string) =    
+let p = new ProjInfo()
+let mutable counter = 1<id>
+
+let Parse (srcFilePath:string) =   
+    let map = p.GetMap(srcFilePath)
+    Lexer.id <- counter
+    p.AddLine counter map
+    counter <- counter + 1<id>
+    //Lexer.id <- from (ProjInfo)
     match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
         let print = 
             tokenPos 
             >> (fun(x,y) -> 
                 let x = RePack x
                 let y = RePack y
-                sprintf "(%i,%i) - (%i,%i)" (x.Line + 1) x.Column (y.Line + 1) y.Column)
+                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column)
         printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (print tok) (tok.GetType()) msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
-        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1, x.Column)
+        let GC_Collect () = 
+            GC.Collect()    
+            GC.WaitForPendingFinalizers()
+            GC.GetTotalMemory(true)
+        GC_Collect() |> printfn "%A" 
+        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
         |> Seq.iter (fun (prods, gv) -> 
@@ -119,7 +135,9 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
+    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql"
+    //fbfbd5c6e01eb5f834265f5849446514ce56d22e
+    //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> inPath := s), "Input file."

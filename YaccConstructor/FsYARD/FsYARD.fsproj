@@ -50,9 +50,6 @@
   <ItemGroup>
     <Compile Include="FsYARD.fs" />
     <Compile Include="FsYARDBuildTask.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="FsYard.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

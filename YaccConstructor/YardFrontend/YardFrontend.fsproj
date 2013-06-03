@@ -72,12 +72,12 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <Compile Include="Parser.fs" />
-    <Compile Include="Lexer.fs" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
     <None Include="Parser.fsy" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="YardFrontend.fs" />
   </ItemGroup>

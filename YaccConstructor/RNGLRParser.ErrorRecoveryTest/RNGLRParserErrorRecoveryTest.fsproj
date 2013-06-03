@@ -42,9 +42,6 @@
     <Compile Include="LexCommon.fs" />
     <Compile Include="CalcErrorAmb.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="calcErrorAmb.yrd" />
   </ItemGroup>
   <ItemGroup>

@@ -58,9 +58,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="Program.fs" />

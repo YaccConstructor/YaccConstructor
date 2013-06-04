@@ -15,7 +15,7 @@ let parseFile (fileName:string) =
         with
            | e -> printfn "%s" (e.ToString ())
     finally
-        printfn " %f s" (System.DateTime.Now - startTime).TotalSeconds
+        printfn " %A " (System.DateTime.Now - startTime)
 
 [<EntryPoint>]
 let main argv =
@@ -25,7 +25,7 @@ let main argv =
     //parseFile "MSSqlParser/BeginTransaction.sql"
     //parseFile "MSSqlParser/DeclareLocalVars.sql"
     parseFile "materials/ms-sql/sysprocs/sp_addextendedproperty.sql"
-    parseFile "materials/ms-sql/sysprocs/sp_help.sql"
-    parseFile "materials/ms-sql/sysprocs/test.sql"
+    //parseFile "materials/ms-sql/sysprocs/sp_help.sql"
+    //parseFile "materials/ms-sql/sysprocs/test.sql"
 
     0 // return an integer exit code

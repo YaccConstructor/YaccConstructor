@@ -1,12 +1,11 @@
 {
 (* (c) Microsoft Corporation 2005-2008.  *)
   
-module internal FSharp.PowerPack.FsLex.Lexer
+module FSharp.PowerPack.FsLex.Lexer
   
 open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
-open Internal.Utilities
-open Internal.Utilities.Text.Lexing
+open Microsoft.FSharp.Text.Lexing
 open System.Text
 
 let escape c = 
@@ -95,7 +94,7 @@ rule token = parse
      CHAR (unicodegraph_short s.[3..6]) }
  
  | '\'' unicodegraph_long '\''
-   { let s = lexeme lexbuf in 
+   { let s = lexeme lexbuf in
      match (unicodegraph_long s.[3..10]) with 
      | None, c -> CHAR(c)
      | Some _ , _ -> failwith "Unicode characters needing surrogate pairs are not yet supported by this tool" }

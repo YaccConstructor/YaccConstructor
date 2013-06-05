@@ -6,8 +6,9 @@ open FSharp.PowerPack.FsLex
 open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
 open Printf
-open Internal.Utilities
-open Internal.Utilities.Text.Lexing
+open Microsoft.FSharp.Text.Lexing
+//open Internal.Utilities
+//open Internal.Utilities.Text.Lexing
 open System
 open System.Collections.Generic
 open System.IO 

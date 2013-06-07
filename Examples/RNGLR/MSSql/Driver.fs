@@ -24,9 +24,12 @@ open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
 open LexerHelper
 open Yard.Utils.SourceText
+open Yard.Utils.StructClass
+open Yard.Utils.InfoClass
+open System
 
 let lastTokenNum = ref 0L
-let traceStep = 10000L
+let traceStep = 50000L
 
 let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
@@ -44,16 +47,15 @@ let justParse (path:string) =
                     let count = ref 0L
                     let buf = int traceStep |> Array.zeroCreate
                     while !count < traceStep && not lexbuf.IsPastEndOfStream do
-                        lastTokenNum := 1L + !lastTokenNum
-                        if (!lastTokenNum % (traceStep)) = 0L then 
-                            let oldTime = !timeOfIteration
-                            timeOfIteration := System.DateTime.Now
-                            let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                            printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)                    
-                            if int64 chan.CurrentQueueLength > 3L then                                                                                  
-                                int (int64 chan.CurrentQueueLength * mSeconds / traceStep)  |> System.Threading.Thread.Sleep          
+                        lastTokenNum := 1L + !lastTokenNum                        
                         buf.[int !count] <- Lexer.tokens lexbuf
-                        count := !count + 1L
+                        count := !count + 1L                    
+                    let oldTime = !timeOfIteration
+                    timeOfIteration := System.DateTime.Now
+                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    if int64 chan.CurrentQueueLength > 3L then                        
+                        int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
                             
             with e -> printfn "LexerError:%A" e.Message
@@ -64,11 +66,12 @@ let justParse (path:string) =
     let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let lastTokenNum = ref 0L    
     let timeOfIteration = ref System.DateTime.Now
+    let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let allTokens = 
         seq{
             while true do
                 //let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + 1L
+                lastTokenNum := !lastTokenNum + 1L // int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
@@ -89,20 +92,33 @@ let justParse (path:string) =
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 
-let Parse (srcFilePath:string) =    
+let p = new ProjInfo()
+let mutable counter = 1<id>
+
+let Parse (srcFilePath:string) =   
+    let map = p.GetMap(srcFilePath)
+    Lexer.id <- counter
+    p.AddLine counter map
+    counter <- counter + 1<id>
+    //Lexer.id <- from (ProjInfo)
     match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
         let print = 
             tokenPos 
             >> (fun(x,y) -> 
                 let x = RePack x
                 let y = RePack y
-                sprintf "(%i,%i) - (%i,%i)" (x.Line + 1) x.Column (y.Line + 1) y.Column)
+                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column)
         printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (print tok) (tok.GetType()) msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
-        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1, x.Column)
+        let GC_Collect () = 
+            GC.Collect()    
+            GC.WaitForPendingFinalizers()
+            GC.GetTotalMemory(true)
+        GC_Collect() |> printfn "%A" 
+        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
         |> Seq.iter (fun (prods, gv) -> 
@@ -119,7 +135,9 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
+    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql"
+    //fbfbd5c6e01eb5f834265f5849446514ce56d22e
+    //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> inPath := s), "Input file."

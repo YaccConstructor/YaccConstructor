@@ -165,8 +165,8 @@ and  main = parse
           | "include" -> INCLUDE text
           | _ -> 
                 match text.text.[0] with
-                | c when List.contains c ['a'..'z'] -> LIDENT text
-                | c when List.contains c ['A'..'Z'] -> UIDENT text
+                | c when List.exists ((=)c) ['a'..'z'] -> LIDENT text
+                | c when List.exists ((=)c) ['A'..'Z'] -> UIDENT text
                 |_       -> failwith "Incorrect indentStart" 
        }
      | eof {EOF <| lex2source lexbuf}

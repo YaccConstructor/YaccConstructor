@@ -5,13 +5,17 @@ let commandLineSpecs =
     ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
 
 let run input =
-    let  buf = Lexing.LexBuffer<_>.FromTextReader input 
-    let tokens =
+    let  buf = Lexing.LexBuffer<_>.FromTextReader input
+    let ts =  
         seq { 
-            while not buf.IsPastEndOfStream do
-            let t = Lexer.token buf
-            yield t
-        }
+                while not buf.IsPastEndOfStream do
+                let t = Lexer.tokens buf
+                yield t
+            }
+        |> Array.ofSeq
+
+    let tokens =
+        ts
         |> Yard.Generators.CYK.CodeTokenStream
         
     let cyk = new Yard.Generators.CYKGenerator.CYKCore()
@@ -21,12 +25,11 @@ let time () =
     let start = System.DateTime.Now
     ArgParser.Parse commandLineSpecs
     match path with
-    | Some v -> 
-        let res = 
-            run(new System.IO.StreamReader(v))
+    | Some v ->
+        let res = run(new System.IO.StreamReader(v))
         printfn "%s" res
         printfn "%A" (System.DateTime.Now - start)
-    | _ -> 
+    | _ ->
         printfn "%s" "Не задано имя входного файла."
     
 do 

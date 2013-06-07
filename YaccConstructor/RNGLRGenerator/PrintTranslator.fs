@@ -92,6 +92,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         count.[nonTerm] <- count.[nonTerm] + 1
         if index.[i] = 0 then
             args.[nonTerm] <- srcGrammar.[i].args
+    
+    for i = 0 to indexator.nonTermCount-1 do
+        if count.[i] = 0 then
+            args.[i] <- []
 
     let printArr (arr : 'a[]) (printer: 'a -> string) =
         if arr = null then "null"
@@ -194,8 +198,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                              ] |> aboveListL)
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
-    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) i =
-        let nonTermName = indexator.indexToNonTerm (rules.leftSide i)
+    let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
@@ -206,6 +209,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     //@@-- wordL ("")
                     )
              )
+        |> fun res ->
+            wordL "("
+            @@-- res
+            @@-- wordL ");"
 
     let aboveArrayL = List.ofArray >> aboveListL
     let concats =
@@ -229,18 +236,26 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             [for i = 0 to args.Length - 1 do
                 yield "'_rnglr_type_" + indexator.indexToNonTerm i ]
             |> List.reduce (fun l r -> l + " * " + r)
+        let errorRule : Rule.t<_,_> = 
+            {
+                name    = new Source.t("error")
+                args    = []
+                body    = PSeq([], Some <| new Source.t("parserRange"), None)
+                isStart = false
+                isPublic = false
+                metaArgs= []
+            }
         wordL ("let _rnglr_extra_array, " + ruleName + ", " + concatsName + " = ")
         @@--
            (wordL ("(Array.zeroCreate 0 : array<" + allTypes + ">), ")
             @@ wordL "[|"
             @@
             (srcGrammar
-             |> Array.mapi
-                (fun i rule ->
-                    wordL "("
-                    @@-- getRuleLayout rule i
-                    @@-- wordL ");")
-             |> aboveArrayL)
+             |> Array.mapi (fun i rule ->
+                    let name = indexator.indexToNonTerm <| rules.leftSide i
+                    getRuleLayout rule name
+             ) |> aboveArrayL
+             |> fun res -> res @@ getRuleLayout errorRule "error")
             @@ (wordL "|] , [|"
                 @@-- concats)
             @@ wordL "|] ")

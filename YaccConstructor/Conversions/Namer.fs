@@ -59,6 +59,7 @@ module Names =
    let alt  = x "alt"
    let predicate = x "predicate"
    let brackets = x "exp_brackets"
+   let leftRec = x "lr_" 
 end 
 
 let usedNames = new HashSet<_>()

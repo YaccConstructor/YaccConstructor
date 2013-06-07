@@ -5,6 +5,8 @@ open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
 open Yard.Examples.MSParser
 open Yard.Utils.SourceText
+open Yard.Utils.StructClass
+
 open System
 
 type Collections.Generic.IDictionary<'k,'v> with
@@ -53,8 +55,15 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
         | Some(kwToken) -> kwToken
         | None -> IDENT(defaultSourceText)
 
+
+let defaultSourceText id (lexbuf : LexBuffer<_>) value =
+    new SourceText(value
+        , SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
+                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
+
 let tokenPos token =
-    match token with
+    match token with 
+    | KW_PRINT(x)
     | KW_FOREIGN(x)
     | KW_NO(x)
     | KW_WHILE(x)
@@ -81,7 +90,7 @@ let tokenPos token =
     | DOT (x)
     | DOUBLE_COLON (x)
     | EMPTY (x)
-    | EOF (x)
+    | RNGLR_EOF (x)
     | GLOBALVAR (x)
     | IDENT (x)
     | KW_ABSENT (x)
@@ -135,7 +144,7 @@ let tokenPos token =
     | KW_DECLARE (x)
     | KW_DEFAULT (x)
     | KW_DELETE (x)
-    | KW_DELETED (x)
+    //| KW_DELETED (x)
     | KW_DENSE_RANK (x)
     | KW_DESC (x)
     | KW_DISTINCT (x)
@@ -144,14 +153,14 @@ let tokenPos token =
     | KW_EAD (x)
     | KW_ELEMENTS (x)
     | KW_ELSE (x)
-    | KW_ENCRYPTION (x)
+    //| KW_ENCRYPTION (x)
     | KW_END (x)
     | KW_ERRORFILE (x)
     | KW_ESCAPE (x)
     | KW_EXCEPT (x)
     | KW_EXEC (x)
     | KW_EXECUTE (x)
-    | KW_EXECUTE_AS_Clause (x)
+    //| KW_EXECUTE_AS_Clause (x)
     | KW_EXISTS (x)
     | KW_EXPAND (x)
     | KW_EXPLICIT (x)
@@ -179,16 +188,16 @@ let tokenPos token =
     | KW_HOLDLOCK (x)
     | KW_IDENTITY (x)
     | KW_IF (x)
-    | KW_IGNORE_CONSTRAINTS (x)
+    //| KW_IGNORE_CONSTRAINTS (x)
     | KW_IGNORE_DUP_KEY (x)
-    | KW_IGNORE_TRIGGERS (x)
+    //| KW_IGNORE_TRIGGERS (x)
     | KW_IMPLICIT_TRANSACTIONS (x)
     | KW_IN (x)
     | KW_INDEX (x)
     | KW_INFLECTIONAL (x)
     | KW_INNER (x)
     | KW_INSERT (x)
-    | KW_INSERTED (x)
+    //| KW_INSERTED (x)
     | KW_INT (x)
     | KW_INTERSECT (x)
     | KW_INTO (x)
@@ -197,9 +206,9 @@ let tokenPos token =
     | KW_ISABOUT (x)
     | KW_JOIN (x)
     | KW_KEEP (x)
-    | KW_KEEPDEFAULTS (x)
+    //| KW_KEEPDEFAULTS (x)
     | KW_KEEPFIXED (x)
-    | KW_KEEPIDENTITY (x)
+    //| KW_KEEPIDENTITY (x)
     | KW_KEY (x)
     | KW_KEYSET (x)
     | KW_LANGUAGE (x)
@@ -381,7 +390,3 @@ let tokenPos token =
     | STOREDPROCEDURE (x)
     | STRING_CONST (x)
     | WEIGHT (x) -> x.Range.Start, x.Range.End
-
-
-let defaultSourceText (lexbuf : LexBuffer<_>) value =
-    new SourceText(value, SourceRange.ofTuple(lexbuf.StartPos, lexbuf.EndPos))

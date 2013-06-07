@@ -6,6 +6,8 @@ open Grammar
 open Production
 open Definition
 
+let errorToken = "error"
+
 let getModuleName (m : Module<_,_>) = 
     match m.name with
     | Some n -> n.text

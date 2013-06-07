@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildHelpers", "BuildHelpers\BuildHelpers.fsproj", "{C8EFC4D8-7C9C-4846-88F3-10467D0F3A3F}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GDocUploader", "GDocUploader\GDocUploader.fsproj", "{3DEEA7DB-5694-4B1A-9C00-863015CD53B9}"

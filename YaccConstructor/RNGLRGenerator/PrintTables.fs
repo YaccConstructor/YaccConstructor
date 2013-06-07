@@ -227,8 +227,11 @@ let printTables
         printBrInd 2 "accStates.[i] <- List.exists ((=) i) small_acc"
 
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
-
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
+    
+        printBrInd 0 "let errorIndex = %d" grammar.errorIndex
+        printBrInd 0 "let errorRulesExists = %b" grammar.errorRulesExists
+        
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
 
         printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"
@@ -339,6 +342,9 @@ let printTables
         printBrInd 2 "accStates(i) = small_acc.exists(_==i)"
 
         printBrInd 0 "val eofIndex = %d" grammar.indexator.eofIndex
+
+        printBrInd 0 "val errorIndex = %d" grammar.errorIndex
+        printBrInd 0 "val errorRuleExists = %b" grammar.errorRulesExists
 
         printBrInd 0 "val parserSource = new ParserSource[Token] (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 

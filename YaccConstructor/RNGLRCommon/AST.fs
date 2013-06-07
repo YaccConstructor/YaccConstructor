@@ -45,12 +45,10 @@ type AST =
     val mutable pos : int
     new (f, o) = {pos = -1; first = f; other = o}
     member inline this.findFamily f =
-        if f this.first then this.first
+        if f this.first then Some this.first
         elif this.other <> null then
-            match Array.tryFind f this.other with
-            | Some res -> res
-            | None -> failwith "Can't find family"
-        else failwith "Can't find family"
+            Array.tryFind f this.other
+        else None
 
 and Family =
     struct
@@ -77,7 +75,6 @@ and Nodes =
                             res.other <- arr.[2..]
             {fst = res.fst; snd = res.snd; other = res.other}
             //match arr with
-
 
         member nodes.doForAll f =
             if nodes.fst <> null then
@@ -135,7 +132,7 @@ and Nodes =
                         for i = 0 to nodes.other.Length-1 do
                             res.[i+2] <- f nodes.other.[i]
             res
-    end
+        end
 
 let inline getFamily (node : obj) =
     match node with
@@ -278,6 +275,9 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     k <- k - 1
                 getEnd family.[k]
 
+            /// Compare arrays of nodes using longest match.
+            /// The longest is where the first element with different position is longest
+            ///    or where the total length of array is larger.
             let compareNodesArrs (a1 : _[]) (a2 : _[]) =
                 let lim = min a1.Length a2.Length
                 let rec inner i = 
@@ -337,8 +337,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
             this.FilterChildren handleChildren
 
-    member this.TraverseWithRanges tokenToRange dispose f =
+    /// handleCycleNode is used for handling nodes, contained in cycles
+    ///   and having no children family, where each node has smaller position.
+    member this.TraverseWithRanges tokenToRange dispose handleCycleNode f =
         let ranges = new BlockResizeArray<'Position * 'Position>()
+        let processed = Array.zeroCreate order.Length
         let count = Array.zeroCreate <| (order.Length >>> ranges.Shift) + 1
         for i = 0 to order.Length-1 do
             let x = order.[i]
@@ -368,42 +371,50 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             else
                 let inline goodNodes (family : Family) =
                     family.nodes.isForAll (function
-                        | :? AST as ast -> ast.pos < x.pos
+                        | :? AST as ast -> processed.[ast.pos]
                         | _ -> true)
-                let family = (x.findFamily goodNodes).nodes
-                let mutable j, k = 0, family.Length-1
-                let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
-                (*let left = 
-                    if isEpsilon family.fst then
-                        if isEpsilon family.snd then
-                            family.[2]
-                        else family.snd
-                    else family.fst*)
-                while isEpsilon family.[j] do
-                    j <- j + 1
-                while isEpsilon family.[k] do
-                    k <- k - 1
-                ranges.Add (fst (getRanges family.[j]), snd (getRanges family.[k]))
-                f i ranges
-                let inline clear (x : obj) =
-                    match x with
-                    | :? AST as ast ->
-                        let num = ast.pos >>> ranges.Shift
-                        count.[num] <- count.[num] - 1
-                        if count.[num] = 0 then
-                            dispose num
-                            ranges.DeleteBlock num
-                    | _ -> ()
-                family.doForAll clear
-                if x.other <> null then
-                    for e in x.other do
-                        e.nodes.doForAll clear
+                match x.findFamily goodNodes with
+                | None ->
+                    ranges.Add Unchecked.defaultof<_>
+                    handleCycleNode x
+                | Some family -> 
+                    processed.[x.pos] <- true
+                    let nodes = family.nodes
+                    let mutable j, k = 0, nodes.Length-1
+                    let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
+                    (*let left = 
+                        if isEpsilon family.fst then
+                            if isEpsilon family.snd then
+                                family.[2]
+                            else family.snd
+                        else family.fst*)
+                    while isEpsilon nodes.[j] do
+                        j <- j + 1
+                    while isEpsilon nodes.[k] do
+                        k <- k - 1
+                    let leftRange = getRanges nodes.[j]
+                    let rightRange = getRanges nodes.[k]
+                    ranges.Add (fst leftRange, snd rightRange)
+                    f i ranges
+                    let inline clear (x : obj) =
+                        match x with
+                        | :? AST as ast ->
+                            let num = ast.pos >>> ranges.Shift
+                            count.[num] <- count.[num] - 1
+                            if count.[num] = 0 then
+                                dispose num
+                                ranges.DeleteBlock num
+                        | _ -> ()
+                    nodes.doForAll clear
+                    if x.other <> null then
+                        for e in x.other do
+                            e.nodes.doForAll clear
         //printfn "Memory: %d" ((GC.GetTotalMemory true) >>> 20)
 
     member this.collectWarnings tokenToRange =
         let res = new ResizeArray<_>()
         if not isEpsilon then
-            this.TraverseWithRanges tokenToRange ignore <| fun i ranges ->
+            this.TraverseWithRanges tokenToRange ignore ignore <| fun i ranges ->
                 let children = order.[i]
                 if children.other <> null then
                     res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
@@ -444,7 +455,16 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         order.[k].first <- Unchecked.defaultof<_>
                         order.[k].other <- null
                         order.[k] <- null
-            this.TraverseWithRanges tokenToRange dispose <| fun i ranges ->
+            let reportCycleError (x : AST) =
+                printfn "Rule %d" x.first.prod
+                printf "Subnodes positions: "
+                x.first.nodes.map (function
+                    | :? AST as ast -> sprintf "(%d)" ast.pos
+                    | x -> sprintf "%A" x
+                ) |> Array.iter (printf "%s ")
+                failwith "Please, delete cycles from tree you are going to translate"
+
+            this.TraverseWithRanges tokenToRange dispose reportCycleError <| fun i ranges ->
                 let inline getRes prevRange : (obj -> _) = function
                     | :? int as i when i < 0 -> epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                     | :? int as t ->
@@ -553,7 +573,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let x = order.[i]
                 if x.pos <> -1 then
                     let children = x
-                    createNode i (children.other <> null) AstNode ("n " + indToString leftSide.[children.first.prod])
+                    
+                    let label = 
+                        if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
+                        else "error"
+                     
+                    createNode i (children.other <> null) AstNode ("n " + label)
+                     
                     let inline handle (family : Family) =
                         let u = next()
                         createNode u false Prod ("prod " + family.prod.ToString())
@@ -573,4 +599,3 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         
         out.WriteLine("}")
         out.Close()
-    

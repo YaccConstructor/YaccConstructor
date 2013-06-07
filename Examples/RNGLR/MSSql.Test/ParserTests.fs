@@ -17,10 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+// id Drivers Test for memory
 module ParserTests
 
 open NUnit.Framework
 open LexerHelper
+open Yard.Utils.StructClass
 open Yard.Utils.SourceText
 
 
@@ -34,7 +37,7 @@ type ``MS-SQL parser tests`` () =
                 >> (fun(x,y) -> 
                     let x = RePack x
                     let y = RePack y
-                    sprintf "(%i,%i) - (%i,%i)" (x.Line + 1) x.Column (y.Line + 1) y.Column)
+                    sprintf "(%A,%A) - (%A,%A)" (x.Line + (1<line>)) (x.Column) (y.Line + 1<line>) y.Column)
             let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (print tok) (tok.GetType()) msg
             printfn "%s" msg
             Assert.Fail(msg)
@@ -84,7 +87,7 @@ type ``MS-SQL parser tests`` () =
     member test.``Begin mark transaction.`` () =
         file "MarkBeginTransaction.sql" |> runParserTest
 
-    [<Test>]
+    //[<Test>]
     member test.``Execute procedure. Very simple test.`` () =
         file "ExecProc_1.sql" |> runParserTest
         
@@ -122,8 +125,7 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``sp_helpindex complex test.`` () =
         complexSpFile "sp_helpindex.sql" |> runParserTest
-
-    
+            
     [<Test>]
     member test.``sp_password complex test.`` () =
         complexSpFile "sp_password.sql" |> runParserTest

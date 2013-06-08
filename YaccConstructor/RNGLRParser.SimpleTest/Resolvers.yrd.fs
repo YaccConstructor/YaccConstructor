@@ -106,8 +106,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Resolvers.yrd"
-                                                                     [1]
+# 4 "Resolvers.yrd"
+                       [1]
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -124,14 +124,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_list) 
              |> List.iter (fun (a) -> 
-# 2 "Resolvers.yrd"
+# 3 "Resolvers.yrd"
               if (a.Length = 1) then (
                 ((unbox _rnglr_children.[1]) : '_rnglr_type_list) 
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "Resolvers.yrd"
-                                                             a @ b
+# 3 "Resolvers.yrd"
+                                                          a @ b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )

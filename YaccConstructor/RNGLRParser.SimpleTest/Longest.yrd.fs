@@ -111,7 +111,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 _rnglr_cycle_res := (
                   
 # 2 "Longest.yrd"
-                                  (l : list<_>).Length, (r : list<_>).Length 
+                                  (l : _ list).Length, (r : _ list).Length 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )

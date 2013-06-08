@@ -270,7 +270,7 @@ patt: LIDENT {$1} | ACTION {$1}
 prim: prim STAR            {PMany $1}
     | prim PLUS            {PSome $1}
     | prim QUESTION        {POpt $1}
-    | SQR_LBR prim SQR_RBR {POpt $2}
+    | SQR_LBR alts SQR_RBR {POpt $2}
     | LPAREN alts RPAREN   {$2}
     | call                 {$1}
     | lbl_seq              {$1}

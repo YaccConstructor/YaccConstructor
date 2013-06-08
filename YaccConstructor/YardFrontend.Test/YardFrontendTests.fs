@@ -324,6 +324,30 @@ type ``YardFrontend Parser tests`` () =
                
 
 [<TestFixture>]
+type ``YardFrontend EBNF tests`` () =    
+    [<Test>]
+    member test.``Option seq test`` () =
+        let rules =
+            [{ 
+                omit = false
+                rule = PToken (getSource "A" 4 10)
+                binding = None
+                checker = None
+            }; { 
+                omit = false
+                rule = PToken (getSource "B" 11 15)
+                binding = None
+                checker = None
+            }]
+            |> (fun seq -> PSeq(seq, None, None))
+            |> POpt
+            |> simpleRules "s"
+        parserTest
+            "[<Start>]s: [A B]" 
+            (defaultDefinition rules) 
+               
+
+[<TestFixture>]
 type ``YardFrontend options tests`` () =  
     let basePath = "../../../../Tests/YardFrontend/Options"
     let cp file = System.IO.Path.Combine(basePath,file)  

@@ -160,7 +160,7 @@ let printProduction =
                  yield Str <| printAttr attr_option
                 }
         // Token
-        | PToken(source) -> Seq.singleton <| Str (Source.toString source)
+        | PToken source -> Seq.singleton <| Str (Source.toString source)
         // Vanilla rule reference with an optional args list.
         | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
         // expr*
@@ -170,7 +170,7 @@ let printProduction =
             Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
             |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
-        | PLiteral(source) -> Seq.singleton <| Str ("\"" + Source.toString source + "\"") 
+        | PLiteral source -> Seq.singleton <| Str ("'" + Source.toString source + "'") 
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
     //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
     ///// The following are obsolete and reduction to PRepet should be discussed.

@@ -75,8 +75,10 @@ let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
 
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
-
-    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar)
+    if not <| Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar then
+        //printfn "Expected:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDefCorrect :?> string)
+        //printfn "Given:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDef :?> string)
+        Assert.Fail("Trees are not equal")
 
 let completeTest str lexemsListCorrect ilDefCorrect = 
     lexerTest str lexemsListCorrect
@@ -324,7 +326,7 @@ type ``YardFrontend Parser tests`` () =
                
 
 [<TestFixture>]
-type ``YardFrontend EBNF tests`` () =    
+type ``YardFrontend syntax tests`` () =    
     [<Test>]
     member test.``Option seq test`` () =
         let rules =
@@ -344,6 +346,20 @@ type ``YardFrontend EBNF tests`` () =
             |> simpleRules "s"
         parserTest
             "[<Start>]s: [A B]" 
+            (defaultDefinition rules) 
+               
+    [<Test>]
+    member test.``Literals test`` () =
+        let rules =
+            [{ 
+                omit = false
+                rule = PLiteral (getSource "A" 4 10)
+                binding = None
+                checker = None
+            }]
+            |> verySimpleRules "s"
+        parserTest
+            "[<Start>]s: 'A'" 
             (defaultDefinition rules) 
                
 

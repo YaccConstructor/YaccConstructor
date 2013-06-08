@@ -11,7 +11,7 @@ let find_assoc key list = snd <| List.find (fst >> (=) key) list
 binExpr<<operand binOp>>[list]
 : l=operand[list] r=(binOp operand[list])* {List.fold (fun l (op,r) -> op l r) l r };
 
-termOp: "+" {( +. )} | "-" { ( -. ) } ;
+termOp: '+' {( +. )} | '-' { ( -. ) } ;
 
 factorOp: MULT {( *. )} | DIV { ( /. ) } ;
 

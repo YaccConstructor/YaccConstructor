@@ -65,6 +65,7 @@ let private tokenFun f = function
     | UIDENT st
     | BLOCK_END st
     | TOKENS_BLOCK st
+    | LITERAL st
     | OPTIONS_START st ->
         f st
     //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"

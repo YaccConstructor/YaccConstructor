@@ -189,7 +189,14 @@ and  main = parse
         let string_start = lexbuf.StartPos in
         string lexbuf;
         lexbuf.StartPos <- string_start;
-        STRING (from_lexbuf lexbuf (string_start.ShiftColumnBy 1) (lexbuf.EndPos.ShiftColumnBy -1))
+        STRING <| from_lexbuf lexbuf (string_start.ShiftColumnBy 1) (lexbuf.EndPos.ShiftColumnBy -1)
+      }
+    | '''
+      { reset_string_buffer();
+        let string_start = lexbuf.StartPos in
+        literal lexbuf;
+        lexbuf.StartPos <- string_start;
+        LITERAL <| from_lexbuf lexbuf (string_start.ShiftColumnBy 1) (lexbuf.EndPos.ShiftColumnBy -1)
       }
     | "(" {LPAREN <| lex2source lexbuf}
     | ")" {RPAREN <| lex2source lexbuf}
@@ -277,6 +284,29 @@ and string = parse
   | _
     { store_string_char(lexbuf.LexemeChar 0);
       string lexbuf }
+      
+and literal = parse
+    "'"
+    { () } //lexbuf.StartPos.AbsoluteOffset }
+  | '\\' backslash_escapes
+    { store_string_char(char_for_backslash(lexbuf.LexemeChar 1));
+      literal lexbuf }
+  | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9']
+    { store_string_char(char_for_decimal_code lexbuf 1);
+      literal lexbuf }
+  | eof
+    { raise <| Lexical_error("unterminated string", lexbuf.StartPos.AbsoluteOffset) }
+  | '\\' _
+    { warning lexbuf
+              (Printf.sprintf "illegal backslash escape in string: `\\%c'"
+                              (lexbuf.LexemeChar 1));
+      store_string_char(lexbuf.LexemeChar 0);
+      store_string_char(lexbuf.LexemeChar 1);
+      literal lexbuf }
+  | '\n' { newline lexbuf; store_string_char(lexbuf.LexemeChar 0); literal lexbuf }
+  | _
+    { store_string_char(lexbuf.LexemeChar 0);
+      literal lexbuf }
       
 and comment = parse
     "(*"

@@ -6,8 +6,8 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -25,10 +25,16 @@ let numToString = function
     | 5 -> "A"
     | 6 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 5
     | RNGLR_EOF _ -> 6
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 4; 2; 2; 3; 3|]
 let private rules = [|2; 3; 1; 5; 2; 5; 3|]
@@ -125,7 +131,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_s) 
-# 128 "Longest.yrd.fs"
+# 134 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -135,7 +141,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 138 "Longest.yrd.fs"
+# 144 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -157,7 +163,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_many_1) 
-# 160 "Longest.yrd.fs"
+# 166 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -175,7 +181,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_many_1) 
-# 178 "Longest.yrd.fs"
+# 184 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -197,7 +203,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_many_2) 
-# 200 "Longest.yrd.fs"
+# 206 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -215,7 +221,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_many_2) 
-# 218 "Longest.yrd.fs"
+# 224 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -233,7 +239,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 236 "Longest.yrd.fs"
+# 242 "Longest.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

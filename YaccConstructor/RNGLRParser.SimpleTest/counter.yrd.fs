@@ -6,8 +6,8 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -23,10 +23,16 @@ let numToString = function
     | 3 -> "A"
     | 4 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 3
     | RNGLR_EOF _ -> 4
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 2|]
 let private rules = [|3; 3; 1; 1|]
@@ -121,7 +127,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Counter.yrd"
                : '_rnglr_type_s) 
-# 124 "Counter.yrd.fs"
+# 130 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -143,7 +149,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Counter.yrd"
                : '_rnglr_type_s) 
-# 146 "Counter.yrd.fs"
+# 152 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -153,7 +159,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Counter.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 156 "Counter.yrd.fs"
+# 162 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -171,7 +177,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 174 "Counter.yrd.fs"
+# 180 "Counter.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

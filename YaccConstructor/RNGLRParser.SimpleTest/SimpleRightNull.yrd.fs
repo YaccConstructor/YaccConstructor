@@ -6,8 +6,8 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -24,10 +24,16 @@ let numToString = function
     | 4 -> "A"
     | 5 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 4
     | RNGLR_EOF _ -> 5
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 3; 2|]
 let private rules = [|4; 1; 2; 1|]

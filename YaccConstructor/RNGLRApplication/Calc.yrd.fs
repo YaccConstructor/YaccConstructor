@@ -36,6 +36,7 @@ let numToString = function
     | 8 -> "*"
     | 9 -> "+"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 5
     | B _ -> 6
@@ -43,6 +44,14 @@ let tokenToNumber = function
     | ``L 8`` _ -> 8
     | ``L 9`` _ -> 9
 
+let isLiteral = function
+    | A _ -> false
+    | B _ -> false
+    | RNGLR_EOF _ -> false
+    | ``L 8`` _ -> true
+    | ``L 9`` _ -> true
+
+let getLiteralNames = ["*";"+";]
 let mutable private cur = 0
 let leftSide = [|1; 1; 4; 2; 2; 3; 3|]
 let private rules = [|2; 1; 9; 1; 1; 3; 2; 8; 2; 6; 5|]
@@ -137,7 +146,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 140 "Calc.yrd.fs"
+# 149 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -161,7 +170,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Calc.yrd"
                : '_rnglr_type_expr) 
-# 164 "Calc.yrd.fs"
+# 173 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -171,7 +180,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 174 "Calc.yrd.fs"
+# 183 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -191,7 +200,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 194 "Calc.yrd.fs"
+# 203 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -215,7 +224,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Calc.yrd"
                : '_rnglr_type_fact) 
-# 218 "Calc.yrd.fs"
+# 227 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -235,7 +244,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 238 "Calc.yrd.fs"
+# 247 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -255,7 +264,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Calc.yrd"
                : '_rnglr_type_num) 
-# 258 "Calc.yrd.fs"
+# 267 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -273,7 +282,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 276 "Calc.yrd.fs"
+# 285 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

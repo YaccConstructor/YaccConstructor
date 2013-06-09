@@ -6,8 +6,8 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -25,10 +25,16 @@ let numToString = function
     | 5 -> "A"
     | 6 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 5
     | RNGLR_EOF _ -> 6
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|3; 4; 0; 0; 2|]
 let private rules = [|0; 3; 5; 2; 0|]
@@ -123,7 +129,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "LongCycle.yrd"
                : '_rnglr_type_start) 
-# 126 "LongCycle.yrd.fs"
+# 132 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,7 +139,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "LongCycle.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 136 "LongCycle.yrd.fs"
+# 142 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -153,7 +159,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "LongCycle.yrd"
                : '_rnglr_type_e) 
-# 156 "LongCycle.yrd.fs"
+# 162 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -173,7 +179,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "LongCycle.yrd"
                : '_rnglr_type_e) 
-# 176 "LongCycle.yrd.fs"
+# 182 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -193,7 +199,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "LongCycle.yrd"
                : '_rnglr_type_red) 
-# 196 "LongCycle.yrd.fs"
+# 202 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -211,7 +217,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 214 "LongCycle.yrd.fs"
+# 220 "LongCycle.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

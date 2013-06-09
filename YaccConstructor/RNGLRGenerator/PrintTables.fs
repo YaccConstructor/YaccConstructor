@@ -202,12 +202,26 @@ let printTables
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToLiteral i)
 
         printBrInd 1 "| _ -> \"\""
+        printBr ""
 
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
             printBrInd 1 "| ``L %d`` _ -> %d" i i
+        printBr ""
+
+        printBrInd 0 "let isLiteral = function"
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> true" i
+        printBr ""
+
+        printInd 0 "let getLiteralNames = ["
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            print "\"%s\";" <| indexator.indexToLiteral i
+        print "]"
         printBr ""
 
         printBr "let mutable private cur = 0"

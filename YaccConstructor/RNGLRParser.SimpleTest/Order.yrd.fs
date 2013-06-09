@@ -12,8 +12,8 @@ let res = ref []
 
 # 13 "Order.yrd.fs"
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -32,10 +32,16 @@ let numToString = function
     | 6 -> "A"
     | 7 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 6
     | RNGLR_EOF _ -> 7
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|4; 5; 0; 1; 2|]
 let private rules = [|0; 0; 4; 1; 1; 2; 2; 6|]
@@ -132,7 +138,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Order.yrd"
                : '_rnglr_type_s) 
-# 135 "Order.yrd.fs"
+# 141 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -142,7 +148,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Order.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 145 "Order.yrd.fs"
+# 151 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -164,7 +170,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Order.yrd"
                : '_rnglr_type_e1) 
-# 167 "Order.yrd.fs"
+# 173 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -186,7 +192,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 7 "Order.yrd"
                : '_rnglr_type_e2) 
-# 189 "Order.yrd.fs"
+# 195 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -206,7 +212,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 8 "Order.yrd"
                : '_rnglr_type_e3) 
-# 209 "Order.yrd.fs"
+# 215 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -224,7 +230,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 227 "Order.yrd.fs"
+# 233 "Order.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

@@ -6,9 +6,9 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | B of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | B of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -27,11 +27,18 @@ let numToString = function
     | 5 -> "B"
     | 6 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 4
     | B _ -> 5
     | RNGLR_EOF _ -> 6
 
+let isLiteral = function
+    | A _ -> false
+    | B _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|2; 3; 1; 1|]
 let private rules = [|1; 5; 2; 1; 4|]
@@ -128,7 +135,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cycle.yrd"
                : '_rnglr_type_start) 
-# 131 "Cycle.yrd.fs"
+# 138 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -138,7 +145,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cycle.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 141 "Cycle.yrd.fs"
+# 148 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -158,7 +165,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Cycle.yrd"
                : '_rnglr_type_s) 
-# 161 "Cycle.yrd.fs"
+# 168 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -178,7 +185,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Cycle.yrd"
                : '_rnglr_type_s) 
-# 181 "Cycle.yrd.fs"
+# 188 "Cycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -196,7 +203,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 199 "Cycle.yrd.fs"
+# 206 "Cycle.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

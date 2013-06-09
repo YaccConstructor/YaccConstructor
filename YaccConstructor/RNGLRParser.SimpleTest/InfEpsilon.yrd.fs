@@ -6,8 +6,8 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of int
-    | RNGLR_EOF of int
+    | A of (int)
+    | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -25,10 +25,16 @@ let numToString = function
     | 5 -> "A"
     | 6 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | A _ -> 5
     | RNGLR_EOF _ -> 6
 
+let isLiteral = function
+    | A _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 4; 3; 3; 2; 2|]
 let private rules = [|2; 1; 5; 3; 2|]
@@ -123,7 +129,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_s) 
-# 126 "InfEpsilon.yrd.fs"
+# 132 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -133,7 +139,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 136 "InfEpsilon.yrd.fs"
+# 142 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -153,7 +159,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_opt_1) 
-# 156 "InfEpsilon.yrd.fs"
+# 162 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -171,7 +177,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_opt_1) 
-# 174 "InfEpsilon.yrd.fs"
+# 180 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -193,7 +199,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_many_1) 
-# 196 "InfEpsilon.yrd.fs"
+# 202 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -211,7 +217,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_many_1) 
-# 214 "InfEpsilon.yrd.fs"
+# 220 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -229,7 +235,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 232 "InfEpsilon.yrd.fs"
+# 238 "InfEpsilon.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

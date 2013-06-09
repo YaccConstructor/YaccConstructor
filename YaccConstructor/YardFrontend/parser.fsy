@@ -169,9 +169,11 @@ option_block: OPTIONS_START opts BLOCK_END { Map.ofList $2 : Map<_,_>}
 
 opts: option opts { $1::$2 } | { [] }
 
-option: ident EQUAL option_value { ($1 : Source.t).text, ($3 : Source.t).text }
+option: option_l_value EQUAL option_value { ($1 : Source.t).text, ($3 : Source.t).text }
 
 option_value: ident { $1 } | STRING { $1 } | kw { $1 }
+
+option_l_value: ident { $1 } | kw { $1 }
 
 unnamed_module_opt : rule_nlist
     {

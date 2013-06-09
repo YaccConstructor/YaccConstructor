@@ -1,8 +1,7 @@
 echo off
 echo "##teamcity[testStarted name='Generate MS-SQL grammar.' captureStandardOutput='true']"
 
-..\..\yc\FsYard.exe -translate false -module Yard.Examples.MSParser ^
-    -infEpsPath epsilons -o MsParser.fs -i mssql.yrd -pos uint64 > log.txt
+..\..\yc\FsYard.exe -i mssql.yrd -o MsParser.fs > log.txt
 
 set el=%errorlevel%
 echo %el%

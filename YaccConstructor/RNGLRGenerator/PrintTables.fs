@@ -178,6 +178,8 @@ let printTables
                 | Some s -> " of (" + s + ")"
 
         for i = indexator.literalsStart to indexator.literalsEnd do
+            if positionType = "" then
+                failwith "RNGLR: Unspecified position type"
             printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
 
         printBr ""

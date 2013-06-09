@@ -41,51 +41,66 @@ type RNGLR() =
             let pairs = Array.zeroCreate <| args.Length / 2
             for i = 0 to pairs.Length-1 do
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
-            let mutable moduleName = ""
-            let mutable tokenType = definition.tokens
-            let mutable table = LALR
-            let mutable fullPath = false
-            let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
-            let mutable needTranslate = true
-            let mutable light = true
-            let mutable printInfiniteEpsilonPath = ""
-            let mutable caseSensitive = false
-            let mutable output = definition.info.fileName + ".fs"
-            let mutable targetLanguage = FSharp
+            let getOption name either f =
+                match definition.options.TryFind name with
+                | Some v -> f v
+                | None -> either
+            let getBoolOption opt either =
+                getOption opt either <| function
+                    | "true" -> true
+                    | "false" -> false
+                    | x -> failwithf "Option %s expected values true or false, but %s found." opt x
+            let mapFromType t = Map.ofList ["_", Some t]
+            let mutable moduleName = getOption "module" "" id
+
+            let mutable tokenType = getOption "token" definition.tokens mapFromType
+            let mutable table = getOption "table" LALR <| function
+                                    | "LR" -> LR
+                                    | "LALR" -> LALR
+                                    | x -> failwithf "Unsupported table type: %s." x
+            let mutable fullPath = getBoolOption "fullpath" false
+            let mutable positionType = getOption "pos" "" id
+            let mutable needTranslate = getBoolOption "translate" true
+            let mutable light = getBoolOption "light" true
+            let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
+            let mutable caseSensitive = getBoolOption "caseSensitive" false
+            let mutable output =
+                let fstVal = getOption "output" (definition.info.fileName + ".fs") id
+                getOption "o" fstVal id
+            let mutable targetLanguage =
+                getOption "lang" FSharp <| function
+                    | "fsharp" -> FSharp
+                    | "scala" -> Scala
+                    | x -> failwithf "Unsupported output language: %s." x
+            let getBoolValue name = function
+                    | "true" -> true
+                    | "false" -> false
+                    | value -> failwithf "Unexpected %s value %s" name value
+
             for opt, value in pairs do
                 match opt with
                 | "-module" -> moduleName <- value
-                | "-token" -> tokenType <- Map.ofList ["_", Some value]
+                | "-token" -> tokenType <- mapFromType value
                 | "-pos" -> positionType <- value
                 | "-o" -> if value.Trim() <> "" then output <- value
+                | "-output" -> if value.Trim() <> "" then output <- value
                 | "-table" ->
-                    match value with
-                    | "LALR" -> table <- LALR
-                    | "LR" -> table <- LR
-                    | x -> failwith "Unexpected table type %s" x
-                | "-caseSensitive" ->
-                    if value = "true" then caseSensitive <- true
-                    elif value = "false" then caseSensitive <- false
-                    else failwith "Unexpected caseSensitive value %s" value
-                | "-fullpath" ->
-                    if value = "true" then fullPath <- true
-                    elif value = "false" then fullPath <- false
-                    else failwith "Unexpected fullPath value %s" value
-                | "-translate" ->
-                    if value = "true" then needTranslate <- true
-                    elif value = "false" then needTranslate <- false
-                    else failwith "Unexpected translate value %s" value
-                | "-light" ->
-                    if value = "on" then light <- true
-                    elif value = "off" then light <- false
-                    else failwith "Unexpected light value %A" value
+                    table <- 
+                        match value with
+                        | "LALR" -> LALR
+                        | "LR" -> LR
+                        | x -> failwith "Unexpected table type %s" x
+                | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
+                | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
+                | "-translate" -> needTranslate <- getBoolValue "translate" value
+                | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-lang" ->
                     targetLanguage <-
                         match value.ToLowerInvariant() with
                         | "fsharp" -> FSharp
                         | "scala" -> Scala
-                        | s -> "Language " + s + "is not supported" |> failwith
+                        | s -> failwithf "Language %s is not supported" s
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition

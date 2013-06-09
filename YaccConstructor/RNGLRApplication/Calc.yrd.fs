@@ -6,9 +6,9 @@ open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | A of (int*int)
-    | B of (int*int)
-    | RNGLR_EOF of (int*int)
+    | A of (int * int)
+    | B of (int * int)
+    | RNGLR_EOF of (int * int)
     | ``L 8`` of (int * int)
     | ``L 9`` of (int * int)
 
@@ -138,13 +138,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (f) -> 
               _rnglr_cycle_res := (
                 
-# 2 "Calc.yrd"
+# 10 "Calc.yrd"
                                                            f
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 10 "Calc.yrd"
                : '_rnglr_type_expr) 
 # 149 "Calc.yrd.fs"
       );
@@ -162,13 +162,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "Calc.yrd"
+# 10 "Calc.yrd"
                                               a + b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 2 "Calc.yrd"
+# 10 "Calc.yrd"
                : '_rnglr_type_expr) 
 # 173 "Calc.yrd.fs"
       );
@@ -178,7 +178,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
             )
-# 2 "Calc.yrd"
+# 10 "Calc.yrd"
                : '_rnglr_type_yard_start_rule) 
 # 183 "Calc.yrd.fs"
       );
@@ -192,13 +192,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (n) -> 
               _rnglr_cycle_res := (
                 
-# 3 "Calc.yrd"
+# 11 "Calc.yrd"
                                                           n
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 11 "Calc.yrd"
                : '_rnglr_type_fact) 
 # 203 "Calc.yrd.fs"
       );
@@ -216,13 +216,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (b) -> 
                   _rnglr_cycle_res := (
                     
-# 3 "Calc.yrd"
+# 11 "Calc.yrd"
                                               a * b
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 3 "Calc.yrd"
+# 11 "Calc.yrd"
                : '_rnglr_type_fact) 
 # 227 "Calc.yrd.fs"
       );
@@ -236,13 +236,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 4 "Calc.yrd"
+# 12 "Calc.yrd"
                                 5
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 4 "Calc.yrd"
+# 12 "Calc.yrd"
                : '_rnglr_type_num) 
 # 247 "Calc.yrd.fs"
       );
@@ -256,13 +256,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 4 "Calc.yrd"
+# 12 "Calc.yrd"
                          3
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 4 "Calc.yrd"
+# 12 "Calc.yrd"
                : '_rnglr_type_num) 
 # 267 "Calc.yrd.fs"
       );

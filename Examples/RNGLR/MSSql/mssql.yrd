@@ -31,6 +31,13 @@ tokens {
     _ of SourceText
 }
 
+options {
+    translate = false
+    module = "Yard.Examples.MSParser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
 module Main
 
 open Common, MsCommon

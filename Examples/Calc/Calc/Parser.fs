@@ -2,9 +2,12 @@
 # 2 "Parser.fs"
 module Calc.Parse
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-open Yard.Generators.RNGLR.Parser
+open Yard.Generators.RNGLR.AbstractParser
+//open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
+open QuickGraph
+
 type Token =
     | DIV of string
     | EOF of string
@@ -65,7 +68,7 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 2; 8; 20; 28; 26; 18; 13; 16; 3; 19; 6; 7; 4; 5; 9; 17; 12; 10; 11; 14; 15; 21; 27; 24; 25; 22; 23|]
 let private small_gotos =
-        [|9; 0; 65537; 196610; 327683; 655364; 720901; 786438; 1048583; 1245192; 131076; 131081; 524298; 917515; 1179660; 196613; 65549; 196610; 786438; 1048583; 1245192; 262148; 131081; 524302; 917515; 1179660; 524291; 262159; 589840; 1376273; 589827; 196626; 1048583; 1245192; 655363; 262159; 589843; 1376273; 851977; 20; 65537; 196610; 327683; 655364; 720901; 786438; 1048583; 1245192; 917505; 1441813; 1310724; 393238; 458775; 1114136; 1310745; 1376263; 65537; 196610; 327706; 720901; 786438; 1048583; 1245192; 1441796; 393238; 458779; 1114136; 1310745|]
+                [|9; 0; 65537; 196610; 327683; 655364; 720901; 786438; 1048583; 1245192; 131076; 131081; 524298; 917515; 1179660; 196613; 65549; 196610; 786438; 1048583; 1245192; 262148; 131081; 524302; 917515; 1179660; 524291; 262159; 589840; 1376273; 589827; 196626; 1048583; 1245192; 655363; 262159; 589843; 1376273; 851977; 20; 65537; 196610; 327683; 655364; 720901; 786438; 1048583; 1245192; 917505; 1441813; 1310724; 393238; 458775; 1114136; 1310745; 1376263; 65537; 196610; 327706; 720901; 786438; 1048583; 1245192; 1441796; 393238; 458779; 1114136; 1310745|]
 let gotos = Array.zeroCreate 29
 for i = 0 to 28 do
         gotos.[i] <- Array.zeroCreate 23
@@ -81,7 +84,7 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|7,1|]; [|8,2|]; [|8,3|]; [|11,1|]; [|12,1|]; [|13,1|]; [|14,2|]; [|14,3|]; [|17,1|]; [|18,3|]; [|19,1|]; [|13,2|]; [|16,1|]; [|7,2|]; [|0,1|]; [|1,2|]; [|1,3|]; [|5,1|]; [|6,1|]; [|10,1|]; [|0,2|]; [|3,1|]|]
 let private small_reduces =
-        [|131076; 983040; 1114112; 1310720; 1441792; 262148; 983041; 1114113; 1310721; 1441793; 327684; 983042; 1114114; 1310722; 1441794; 393218; 1048579; 1245187; 458754; 1048580; 1245188; 524294; 917509; 983045; 1114117; 1179653; 1310725; 1441797; 655366; 917510; 983046; 1114118; 1179654; 1310726; 1441798; 720902; 917511; 983047; 1114119; 1179655; 1310727; 1441799; 786434; 1048584; 1245192; 983047; 917513; 983049; 1114121; 1179657; 1310729; 1376265; 1441801; 1048583; 917514; 983050; 1114122; 1179658; 1310730; 1376266; 1441802; 1114118; 917515; 983051; 1114123; 1179659; 1310731; 1441803; 1179654; 917516; 983052; 1114124; 1179660; 1310732; 1441804; 1245188; 983053; 1114125; 1310733; 1441805; 1310722; 983054; 1441806; 1441794; 983055; 1441807; 1507330; 983056; 1441808; 1572866; 1048593; 1245201; 1638402; 1048594; 1245202; 1703940; 983059; 1114131; 1310739; 1441811; 1769474; 983060; 1441812; 1835010; 983061; 1441813|]
+                [|131076; 983040; 1114112; 1310720; 1441792; 262148; 983041; 1114113; 1310721; 1441793; 327684; 983042; 1114114; 1310722; 1441794; 393218; 1048579; 1245187; 458754; 1048580; 1245188; 524294; 917509; 983045; 1114117; 1179653; 1310725; 1441797; 655366; 917510; 983046; 1114118; 1179654; 1310726; 1441798; 720902; 917511; 983047; 1114119; 1179655; 1310727; 1441799; 786434; 1048584; 1245192; 983047; 917513; 983049; 1114121; 1179657; 1310729; 1376265; 1441801; 1048583; 917514; 983050; 1114122; 1179658; 1310730; 1376266; 1441802; 1114118; 917515; 983051; 1114123; 1179659; 1310731; 1441803; 1179654; 917516; 983052; 1114124; 1179660; 1310732; 1441804; 1245188; 983053; 1114125; 1310733; 1441805; 1310722; 983054; 1441806; 1441794; 983055; 1441807; 1507330; 983056; 1441808; 1572866; 1048593; 1245201; 1638402; 1048594; 1245202; 1703940; 983059; 1114131; 1310739; 1441811; 1769474; 983060; 1441812; 1835010; 983061; 1441813|]
 let reduces = Array.zeroCreate 29
 for i = 0 to 28 do
         reduces.[i] <- Array.zeroCreate 23
@@ -97,7 +100,7 @@ while cur < small_reduces.Length do
     cur <- cur + length
 let private lists_zeroReduces = [|[|9|]; [|15|]; [|2|]|]
 let private small_zeroReduces =
-        [|131076; 983040; 1114112; 1310720; 1441792; 262148; 983040; 1114112; 1310720; 1441792; 524294; 917505; 983041; 1114113; 1179649; 1310721; 1441793; 655366; 917505; 983041; 1114113; 1179649; 1310721; 1441793; 1310722; 983042; 1441794; 1441794; 983042; 1441794|]
+                [|131076; 983040; 1114112; 1310720; 1441792; 262148; 983040; 1114112; 1310720; 1441792; 524294; 917505; 983041; 1114113; 1179649; 1310721; 1441793; 655366; 917505; 983041; 1114113; 1179649; 1310721; 1441793; 1310722; 983042; 1441794; 1441794; 983042; 1441794|]
 let zeroReduces = Array.zeroCreate 29
 for i = 0 to 28 do
         zeroReduces.[i] <- Array.zeroCreate 23
@@ -116,9 +119,9 @@ let private accStates = Array.zeroCreate 29
 for i = 0 to 28 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 15
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
-let buildAst : (seq<Token> -> ParseResult<Token>) =
-    buildAst<Token> parserSource
+let private parserSource = new ParserSource<'TokenType> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)
+let buildAst : (AdjacencyGraph<int, TaggedEdge<_,'TokenType>> -> ParseResult<Token>) = buildAst<'TokenType> parserSource
+//let buildAst : (seq<Token> -> ParseResult<Token>) = buildAst<Token> parserSource
 
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); null; null; null; null|]
 let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); null; null; null; null|]

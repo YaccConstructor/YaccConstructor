@@ -43,3 +43,5 @@ type BlockResizeArray<'T> () =
             let i = count >>> shift
             Array.blit arrays.[i] 0 res (i <<< shift) (count &&& smallPart)
         res
+        
+        

@@ -1,0 +1,7 @@
+digraph G {
+3;5;11;13; 17;
+3->5 [ label = "NUMBER" ];
+5->11 [ label = "PLUS" ];
+11->13 [ label = "NUMBER" ];
+13->17 [ label = "EOF" ]
+}

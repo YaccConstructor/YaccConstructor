@@ -32,29 +32,23 @@
     <DocumentationFile>bin\Release\RNGLRParser.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>..\RNGLRCommon\bin\Release\Common.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="RNGLRCommon">
+      <HintPath>..\RNGLRCommon\bin\Release\RNGLRCommon.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Parser.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

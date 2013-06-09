@@ -211,7 +211,7 @@ let printTables
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToLiteral i)
+            printBrInd 1 "| %d -> \"'%s'\"" i (indexator.indexToLiteral i)
 
         printBrInd 1 "| _ -> \"\""
         printBr ""

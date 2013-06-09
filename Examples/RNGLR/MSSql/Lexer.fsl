@@ -53,23 +53,23 @@ rule tokens = parse
  | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } 
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
-                  DEC_NUMBER(defaultSourceText id lexbuf  (LexBuffer<_>.LexemeString(lexbuf))) }
+                  DEC_NUMBER(defaultSourceText id lexbuf <| LexBuffer<_>.LexemeString(lexbuf)) }
  | whitespaces  { tokens lexbuf }
- | "."          { DOT(defaultSourceText id lexbuf ".") }
- | ","          { COMMA(defaultSourceText id lexbuf ",") }
- | "="          { OP_EQ(defaultSourceText id lexbuf "=") }
- | ">"          { OP_MT(defaultSourceText id lexbuf ">") }
- | "<"          { OP_LT(defaultSourceText id lexbuf "<") }
- | ";"          { SEMI(defaultSourceText id lexbuf ";") }
- | "("      { LPAREN(defaultSourceText id lexbuf "(") }
- | ")"      { RPAREN(defaultSourceText id lexbuf ")") }
- | "["      { LBRACKET(defaultSourceText id lexbuf "[") }
- | "]"      { RBRACKET(defaultSourceText id lexbuf "]") }
- | "+"      { OP_PLUS(defaultSourceText id lexbuf "+") }
- | "-"      { OP_MINUS(defaultSourceText id lexbuf "-") }
- | "~"      { OP_TILDA(defaultSourceText id lexbuf "~") }
- | "*"      { STAR(defaultSourceText id lexbuf "*") }
- //| "$"      { DOLLAR(defaultSourceText lexbuf "$") } 
+ | "."          { getLiteral id lexbuf "." }
+ | ","          { getLiteral id lexbuf "," }
+ | "="          { getLiteral id lexbuf "=" }
+ | ">"          { getLiteral id lexbuf ">" }
+ | "<"          { getLiteral id lexbuf "<" }
+ | ";"          { getLiteral id lexbuf ";" }
+ | "("      { getLiteral id lexbuf "(" }
+ | ")"      { getLiteral id lexbuf ")" }
+ | "["      { getLiteral id lexbuf "[" }
+ | "]"      { getLiteral id lexbuf "]" }
+ | "+"      { getLiteral id lexbuf "+" }
+ | "-"      { getLiteral id lexbuf "-" }
+ | "~"      { getLiteral id lexbuf "~" }
+ | "*"      { getLiteral id lexbuf "*" }
+ //| "$"      { getLiteral lexbuf "$" } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
             let hasdot = l.IndexOf '.' <> -1
             match makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 

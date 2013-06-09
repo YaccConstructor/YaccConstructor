@@ -37,7 +37,7 @@ root_rule: (batch_body 'GO'?)*
 batch_body: 
        create_proc
      | set_stmnt
-     | 'USE' LBRACKET 'mdw_control' RBRACKET
+     | 'USE' '[' 'mdw_control' ']'
      | begin_transaction
      | commit_transaction
      | declare
@@ -52,7 +52,7 @@ rollback_transaction:
     'ROLLBACK'
     ['TRAN' | 'TRANSACTION']
     [IDENT | LOCALVAR]
-    SEMI?
+    ';'?
 (*****************************************SET****************************************************)
 
 set_stmnt:
@@ -72,11 +72,11 @@ set_stmnt:
 set_localvar:
     'SET' ( 
         LOCALVAR 
-        [DOUBLE_COLON ident] OP_EQ sql_expr
-      | STRING_CONST (DOT | DOUBLE_COLON) ident
-        LPAREN comma_list<proc_formal_param> RPAREN 
+        [DOUBLE_COLON ident] '=' sql_expr
+      | STRING_CONST ('.' | DOUBLE_COLON) ident
+        '(' comma_list<proc_formal_param> ')' 
     )
-  | LOCALVAR OP_EQ LOCALVAR
+  | LOCALVAR '=' LOCALVAR
   | ident
   | 'CURSOR' ['FORWARD_ONLY' | 'SCROLL']
     ['STATIC' | 'KEYSET' | 'DYNAMIC' | 'FAST_FORWARD']
@@ -92,21 +92,21 @@ set_localvar:
   
 (*********************************PROCEDURE************************************************************)    
 
-drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') ([ident DOT] ident)+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') ([ident '.'] ident)+
 
 proc_formal_param:
-    LOCALVAR [full_ident DOT] sql_datatype?
-    ['VARYING'] [OP_EQ ('NULL' | DEC_NUMBER | STRING_CONST)]
+    LOCALVAR [full_ident '.'] sql_datatype?
+    ['VARYING'] ['=' ('NULL' | DEC_NUMBER | STRING_CONST)]
     ['OUT' | 'OUTPUT'] 'READONLY'?  
   
 create_proc:
     'CREATE' ('PROCEDURE' | 'PROC')
-    [ident DOT] ident [SEMI DEC_NUMBER]
-    brace_opt<LPAREN comma_list<proc_formal_param> RPAREN>
+    [ident '.'] ident [';' DEC_NUMBER]
+    brace_opt<'(' comma_list<proc_formal_param> ')'>
     ['WITH' (execute_as)+]
     ['FOR' 'REPLICATION']
-    'AS' (proc_body_stmnt SEMI?)*
-    SEMI?
+    'AS' (proc_body_stmnt ';'?)*
+    ';'?
 
 procedure_option: 
   [
@@ -136,18 +136,17 @@ proc_body_stmnt:
 
 (***********************************STATEMENTS******************************************************)
 
-print_stmt: 'PRINT' sql_expr SEMI?
+print_stmt: 'PRINT' sql_expr ';'?
 while_stmt: 'WHILE' sql_expr proc_body_stmnt
 
-stmt_block: 'BEGIN' (proc_body_stmnt SEMI?)* 'END'
+stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* 'END'
 
-if_stmt: 'IF' sql_expr proc_body_stmnt ['ELSE' proc_body_stmnt]
-                
+if_stmt: 'IF' sql_expr proc_body_stmnt ['ELSE' proc_body_stmnt]                
 
 raiserror_stmnt:
-    'RAISERROR' LPAREN (dec_num | STRING_CONST | LOCALVAR)
-    (COMMA dec_num COMMA dec_num)
-    [COMMA comma_list<sql_expr>] RPAREN
+    'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
+    (',' dec_num ',' dec_num)
+    [',' comma_list<sql_expr>] ')'
     ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
    
 (***********************************DECLARE**********************************************************)
@@ -159,15 +158,15 @@ declare:
       | ident 'CURSOR' 'LOCAL'? 'STATIC'? 'FOR'? sql_expr
       | ident 'AS'? table_type_definition
     )>
-    SEMI?
+    ';'?
 
 table_type_definition: 
-     'TABLE' LPAREN (column_definition | table_constraint)* RPAREN 
+     'TABLE' '(' (column_definition | table_constraint)* ')' 
 
 column_definition:
     ident ('scalar_data_type' | 'AS' sql_expr)
     ['COLLATE' ident]
-    ['DEFAULT' sql_expr | 'IDENTITY' [DEC_NUMBER COMMA DEC_NUMBER]]
+    ['DEFAULT' sql_expr | 'IDENTITY' [DEC_NUMBER ',' DEC_NUMBER]]
     'ROWGUIDCOL'? 
     column_constraint? 
 
@@ -180,8 +179,8 @@ column_constraint:
   ]
 
 table_constraint: 
-    ('PRIMARY' 'KEY' | 'UNIQUE') LPAREN comma_list<ident> RPAREN
-  | 'CHECK' LPAREN search_condition RPAREN
+    ('PRIMARY' 'KEY' | 'UNIQUE') '(' comma_list<ident> ')'
+  | 'CHECK' '(' search_condition ')'
        
 (*****************************************SELECT****************************************************)
 
@@ -194,29 +193,29 @@ select_stmnt:
       comma_list<( ('AVG' | 'COUNT' | 'MAX' | 'MIN' | 'SUM') sql_expr)>
       ['BY' comma_list<sql_expr>]
     ] 
-    for? ['OPTION' LPAREN comma_list<query_hint> RPAREN]
-    SEMI?
+    for? ['OPTION' '(' comma_list<query_hint> ')']
+    ';'?
     
 for: 'FOR' ('BROWSE' | xml)
     
 xml:
     'XML' 
     ( 
-        ('RAW' [LPAREN STRING_CONST RPAREN] | 'AUTO') 
+        ('RAW' ['(' STRING_CONST ')'] | 'AUTO') 
         [ 
           common_directives
-          [COMMA ('XMLDATA' | 'XMLSCHEMA' [LPAREN STRING_CONST RPAREN] ) ]
-          [COMMA 'ELEMENTS' ['XSINIL' | 'ABSENT'] ]
+          [',' ('XMLDATA' | 'XMLSCHEMA' ['(' STRING_CONST ')'] ) ]
+          [',' 'ELEMENTS' ['XSINIL' | 'ABSENT'] ]
         ]
-      | 'EXPLICIT' [common_directives [COMMA 'XMLDATA'] ]
-      | 'PATH' [LPAREN STRING_CONST RPAREN]
-        [common_directives  [COMMA 'ELEMENTS' ['XSINIL' | 'ABSENT'] ] ]
+      | 'EXPLICIT' [common_directives [',' 'XMLDATA'] ]
+      | 'PATH' ['(' STRING_CONST ')']
+        [common_directives  [',' 'ELEMENTS' ['XSINIL' | 'ABSENT'] ] ]
     )
 
 common_directives:
-    [COMMA 'BINARY' 'BASE64']
-    [COMMA 'TYPE']
-    [COMMA 'ROOT' [LPAREN STRING_CONST RPAREN]]
+    [',' 'BINARY' 'BASE64']
+    [',' 'TYPE']
+    [',' 'ROOT' ['(' STRING_CONST ')']]
 
 query_hint: 
     ('HASH' | 'ORDER') 'GROUP' 
@@ -225,7 +224,7 @@ query_hint:
   | 'FAST' DEC_NUMBER
   | 'FORCE' 'ORDER' 
   | 'MAXDOP' DEC_NUMBER 
-  | 'OPTIMIZE' 'FOR' LPAREN comma_list<(LOCALVAR OP_EQ STRING_CONST)> RPAREN  
+  | 'OPTIMIZE' 'FOR' '(' comma_list<(LOCALVAR '=' STRING_CONST)> ')'  
   | 'PARAMETERIZATION' ('SIMPLE' | 'FORCED')
   | 'RECOMPILE'
   | 'ROBUST' 'PLAN' 
@@ -237,16 +236,16 @@ query_hint:
     
 common_table_expression:
     (full_ident | ident)
-    [LPAREN comma_list<ident> RPAREN]
-    'AS' LPAREN select_stmnt RPAREN
-    SEMI?
+    ['(' comma_list<ident> ')']
+    'AS' '(' select_stmnt ')'
+    ';'?
     
 query_expression: 
-    (query_specification | LPAREN query_expression RPAREN)
+    (query_specification | '(' query_expression ')')
     [
         ('UNION' 'ALL'? | 'EXCEPT' | 'INTERSECT')
         query_specification
-      | comma_list<(LPAREN query_expression RPAREN)>
+      | comma_list<('(' query_expression ')')>
     ]
         
 query_specification: 
@@ -264,38 +263,38 @@ query_specification:
 
 select_list:
     comma_list<(
-        STAR 
-      | full_ident DOT STAR 
+        '*' 
+      | full_ident '.' '*' 
       | (
-            [ident DOT]
+            [ident '.']
             (ident | 'IDENTITY' | 'ROWGUID')
-            [ (DOT | DOUBLE_COLON)
+            [ ('.' | DOUBLE_COLON)
               (
                   STRING_CONST
                 | ident
-                | ident LPAREN comma_list<sql_expr> RPAREN
+                | ident '(' comma_list<sql_expr> ')'
               )
             ] 
           | sql_expr ['AS'? ident]
         ) 
-      | ident OP_EQ sql_expr
+      | ident '=' sql_expr
     )>
     
 scalar_function:
       'LOWER' sql_expr
-    | 'SUM' LPAREN ['ALL' | 'DISTINCT'] sql_expr RPAREN
+    | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
     
 aggregate_windowed_function:
-    'OVER' LPAREN comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause RPAREN
+    'OVER' '(' comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause ')'
 
 ranking_windowed_function:
     ('RANK' | 'DENSE_RANK' | 'ROW_NUMBER' | 'NTILE')
-    LPAREN sql_expr? RPAREN
+    '(' sql_expr? ')'
     'OVER'
-    LPAREN 
+    '(' 
       [('PARTITION' 'BY' LOCALVAR|select_stmnt|full_ident)*]
       order_by_clause
-    RPAREN
+    ')'
     
 order_by_clause:
     ['ORDER' 'BY' comma_list<(sql_expr ['ASC' | 'DESC'])>]
@@ -303,11 +302,11 @@ order_by_clause:
 search_condition: 
     (
         'NOT'? predicate
-      | LPAREN search_condition RPAREN
+      | '(' search_condition ')'
     )
     (
       ('AND' | 'OR')
-      'NOT'? (predicate | LPAREN search_condition RPAREN)
+      'NOT'? (predicate | '(' search_condition ')')
     )*
     
 predicate: 
@@ -315,31 +314,31 @@ predicate:
     | sql_expr 'NOT'? 'BETWEEN' sql_expr 'AND' sql_expr 
     | sql_expr 'IS' 'NOT'? 'NULL'  
     | sql_expr binop ('ALL' | 'SOME' | 'ANY')
-      LPAREN query_expression RPAREN            
-    | 'EXISTS' LPAREN query_expression RPAREN  
-    | IDENT [DOT IDENT] [LPAREN RPAREN] 'IN'
-      LPAREN
-        (dec_num | STRING_CONST) COMMA (dec_num | STRING_CONST)
-      RPAREN
+      '(' query_expression ')'            
+    | 'EXISTS' '(' query_expression ')'  
+    | IDENT ['.' IDENT] ['(' ')'] 'IN'
+      '('
+        (dec_num | STRING_CONST) ',' (dec_num | STRING_CONST)
+      ')'
 
 from:
     'FROM' comma_list<table_source>
 
 table_source: 
     full_ident 'AS'?  full_ident tablesample_clause? 
-    ['WITH' LPAREN table_hint COMMA* RPAREN]
+    ['WITH' '(' table_hint ','* ')']
   | (rowset_function | sql_expr)
     ['AS'? ident]
-    [LPAREN comma_list<ident> RPAREN]
+    ['(' comma_list<ident> ')']
   (*| openxml_clause*)
-  | ident 'AS'? ident [LPAREN comma_list<ident> RPAREN]
+  | ident 'AS'? ident ['(' comma_list<ident> ')']
   | joined_table 
   | pivoted_table 
   | unpivoted_table                                                     
   | LOCALVAR ['AS'? full_ident]
-  | LOCALVAR DOT ident
-    LPAREN comma_list<sql_expr> RPAREN ['AS' ident]
-    [LPAREN comma_list<ident> RPAREN]
+  | LOCALVAR '.' ident
+    '(' comma_list<sql_expr> ')' ['AS' ident]
+    ['(' comma_list<ident> ')']
 
 
 rowset_function:
@@ -352,55 +351,55 @@ rowset_function:
 
 openrowset:
     'OPENROWSET' 
-    LPAREN
+    '('
     (
-        STRING_CONST COMMA
-        (STRING_CONST SEMI STRING_CONST SEMI STRING_CONST | STRING_CONST)
-        COMMA
-        ([ [full_ident DOT] full_ident DOT] full_ident | STRING_CONST)
-      | 'BULK' STRING_CONST COMMA 
+        STRING_CONST ','
+        (STRING_CONST ';' STRING_CONST ';' STRING_CONST | STRING_CONST)
+        ','
+        ([ [full_ident '.'] full_ident '.'] full_ident | STRING_CONST)
+      | 'BULK' STRING_CONST ',' 
         (
-            'FORMATFILE' OP_EQ STRING_CONST bulk_options?
+            'FORMATFILE' '=' STRING_CONST bulk_options?
           | 'SINGLE_BLOB'
           | 'SINGLE_CLOB'
           | 'SINGLE_NCLOB'
         )
-    ) RPAREN 
+    ) ')' 
 
 bulk_options:
-   [COMMA 'CODEPAGE' OP_EQ STRING_CONST]
-   [COMMA 'ERRORFILE' OP_EQ STRING_CONST]
-   [COMMA 'FIRSTROW' OP_EQ DEC_NUMBER]
-   [COMMA 'LASTROW' OP_EQ DEC_NUMBER]
-   [COMMA 'MAXERRORS' OP_EQ DEC_NUMBER]
-   [COMMA 'ROWS_PER_BATCH' OP_EQ DEC_NUMBER]
+   [',' 'CODEPAGE' '=' STRING_CONST]
+   [',' 'ERRORFILE' '=' STRING_CONST]
+   [',' 'FIRSTROW' '=' DEC_NUMBER]
+   [',' 'LASTROW' '=' DEC_NUMBER]
+   [',' 'MAXERRORS' '=' DEC_NUMBER]
+   [',' 'ROWS_PER_BATCH' '=' DEC_NUMBER]
     
 openquery:
-    'OPENQUERY' LPAREN full_ident COMMA STRING_CONST RPAREN    
+    'OPENQUERY' '(' full_ident ',' STRING_CONST ')'    
     
 opendatasource: 
-    'OPENDATASOURCE' LPAREN ident COMMA STRING_CONST RPAREN    
+    'OPENDATASOURCE' '(' ident ',' STRING_CONST ')'    
 
 freetexttable:
-    'FREETEXTTABLE' LPAREN full_ident COMMA
+    'FREETEXTTABLE' '(' full_ident ','
     (
         full_ident
-      | LPAREN comma_list<full_ident> RPAREN
-      | STAR
+      | '(' comma_list<full_ident> ')'
+      | '*'
     )
-    COMMA STRING_CONST 
-    [COMMA 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
-    [COMMA DEC_NUMBER] RPAREN  
+    ',' STRING_CONST 
+    [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+    [',' DEC_NUMBER] ')'  
     
 containstable:
     'CONTAINSTABLE'
-    LPAREN
-      full_ident COMMA
-      (ident | LPAREN comma_list<ident> RPAREN | STAR)
-      COMMA '\'' contains_search_condition '\''
-      [COMMA 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
-      [COMMA DEC_NUMBER]
-    RPAREN 
+    '('
+      full_ident ','
+      (ident | '(' comma_list<ident> ')' | '*')
+      ',' '\'' contains_search_condition '\''
+      [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+      [',' DEC_NUMBER]
+    ')' 
     
 contains_search_condition: 
     simple_term 
@@ -408,7 +407,7 @@ contains_search_condition:
   | generation_term 
   | proximity_term 
   | weighted_term
-  | LPAREN contains_search_condition RPAREN 
+  | '(' contains_search_condition ')' 
     ('AND' | '&' | 'AND' 'NOT' | '&!' | 'OR' | '|' ) 
     contains_search_condition+
         
@@ -420,30 +419,30 @@ prefix_term:
     
 generation_term: 
     'FORMSOF'
-    LPAREN
-      ('INFLECTIONAL' | 'THESAURUS') COMMA comma_list<simple_term>
-    RPAREN
+    '('
+      ('INFLECTIONAL' | 'THESAURUS') ',' comma_list<simple_term>
+    ')'
     
 proximity_term: 
     (simple_term | prefix_term) 
-    (('NEAR' | OP_TILDA) (simple_term | prefix_term))+
+    (('NEAR' | '~') (simple_term | prefix_term))+
      
 weighted_term: 
     'ISABOUT'
-    LPAREN comma_list<(
+    '(' comma_list<(
       ( 
           simple_term 
         | prefix_term 
         | generation_term 
         | proximity_term
       ) 
-      [WEIGHT LPAREN DEC_NUMBER RPAREN]
-    )> RPAREN
+      [WEIGHT '(' DEC_NUMBER ')']
+    )> ')'
         
 table_hint: 
     'NOEXPAND'?
     (
-        'INDEX' LPAREN comma_list<ident> RPAREN     
+        'INDEX' '(' comma_list<ident> ')'     
       | 'FASTFIRSTROW' 
       | 'HOLDLOCK' 
       | 'NOLOCK' 
@@ -484,14 +483,14 @@ table_hint_limited:
 
 tablesample_clause:
     'TABLESAMPLE' 'SYSTEM'?
-    LPAREN sql_expr ['PERCENT' | 'ROWS'] RPAREN  
+    '(' sql_expr ['PERCENT' | 'ROWS'] ')'  
     ['REPEATABLE' sql_expr]
 
 joined_table: 
     table_source join_type? 'JOIN' table_source 'ON' search_condition 
   | table_source 'CROSS' 'JOIN' table_source 
   (*| left_table_source ('CROSS' | 'OUTER') 'APPLY' right_table_source  (*OOOOOOOOOOO*)*)
-  | LPAREN joined_table RPAREN
+  | '(' joined_table ')'
     
 
 join_type: 
@@ -509,20 +508,20 @@ pivoted_table:
     table_source 'PIVOT' pivot_clause full_ident
 
 pivot_clause:
-    LPAREN
+    '('
       sql_expr+  
       'FOR' sql_expr 
-      'IN' LPAREN comma_list<ident> RPAREN      
-    RPAREN
+      'IN' '(' comma_list<ident> ')'      
+    ')'
 
 unpivoted_table:
     table_source 'UNPIVOT' unpivot_clause full_ident
 
 unpivot_clause:
-    LPAREN
+    '('
       ident 'FOR' sql_expr 'IN'
-      LPAREN comma_list<full_ident> RPAREN
-    RPAREN
+      '(' comma_list<full_ident> ')'
+    ')'
  
    
 case:
@@ -535,21 +534,21 @@ case:
 (*****************************************CREATE TABLE****************************************************)
 create_table:
     'CREATE' 'TABLE' 
-    [IDENT DOT IDENT? DOT?] IDENT 
-    LPAREN
+    [IDENT '.' IDENT? '.'?] IDENT 
+    '('
       comma_list<(column_definition_create_table | computed_column_definition)>
       comma_list<table_constraint_create_table>
-    RPAREN 
-    ['ON' (IDENT LPAREN IDENT RPAREN | IDENT | 'DEFAULT')]
+    ')' 
+    ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
     ['TEXTIMAGE_ON' (IDENT | 'DEFAULT')]
-    SEMI?
+    ';'?
 
 column_definition_create_table:
     ident sql_datatype
     ['COLLATE' IDENT]
     ['NOT'? 'NULL']
     [['CONSTRAINT' IDENT] 'DEFAULT' sql_expr]
-  | ['IDENTITY' [LPAREN sql_expr COMMA sql_expr RPAREN] ['NOT' 'FOR' 'REPLICATION']]
+  | ['IDENTITY' ['(' sql_expr ',' sql_expr ')'] ['NOT' 'FOR' 'REPLICATION']]
     ['ROWGUIDCOL'] column_constraint_create_table*
 
 column_constraint_create_table: 
@@ -558,12 +557,12 @@ column_constraint_create_table:
         ('PRIMARY' 'KEY' | 'UNIQUE') 
         ['CLUSTERED' | 'NONCLUSTERED']
         [ 
-            'WITH' 'FILLFACTOR' OP_EQ DEC_NUMBER  
-          | 'WITH' LPAREN comma_list<index_option> RPAREN 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER  
+          | 'WITH' '(' comma_list<index_option> ')' 
         ]
-        ['ON' (IDENT LPAREN IDENT RPAREN | IDENT | 'DEFAULT')]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
       | ['FOREIGN' 'KEY']
-        'REFERENCES' [IDENT DOT] IDENT [LPAREN IDENT RPAREN]
+        'REFERENCES' [IDENT '.'] IDENT ['(' IDENT ')']
         delete_update*
         ['NOT' 'FOR' 'REPLICATION']
       | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
@@ -577,12 +576,12 @@ computed_column_definition:
         ('PRIMARY' 'KEY' | 'UNIQUE')
         ['CLUSTERED' | 'NONCLUSTERED']
         [
-            'WITH' 'FILLFACTOR' OP_EQ DEC_NUMBER 
-          | 'WITH' LPAREN comma_list<index_option> RPAREN
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')'
         ]
-        ['ON' (IDENT LPAREN IDENT RPAREN | IDENT | 'DEFAULT')]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
       | ['FOREIGN' 'KEY']
-        'REFERENCES' IDENT [LPAREN IDENT RPAREN]
+        'REFERENCES' IDENT ['(' IDENT ')']
         delete_update*
         ['NOT' 'FOR' 'REPLICATION']
       | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
@@ -593,15 +592,15 @@ table_constraint_create_table:
     ( 
         ('PRIMARY' 'KEY' | 'UNIQUE') 
         ['CLUSTERED' | 'NONCLUSTERED']
-        LPAREN comma_list<(IDENT ['ASC' | 'DESC'])> RPAREN 
+        '(' comma_list<(IDENT ['ASC' | 'DESC'])> ')' 
         [ 
-            'WITH' 'FILLFACTOR' OP_EQ DEC_NUMBER 
-          | 'WITH' LPAREN comma_list<index_option> RPAREN 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')' 
         ]
-        ['ON' (IDENT LPAREN IDENT RPAREN | IDENT | 'DEFAULT')]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
       | 'FOREIGN' 'KEY' 
-        LPAREN comma_list<IDENT> RPAREN 
-        'REFERENCES' IDENT [LPAREN comma_list<IDENT> RPAREN]
+        '(' comma_list<IDENT> ')' 
+        'REFERENCES' IDENT ['(' comma_list<IDENT> ')']
         delete_update*
         ['NOT' 'FOR' 'REPLICATION']
       | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr
@@ -615,12 +614,12 @@ delete_update_options:
    
 index_option:
     ( 
-        'PAD_INDEX' OP_EQ ('ON' | 'OFF') 
-      | 'FILLFACTOR' OP_EQ DEC_NUMBER 
-      | 'IGNORE_DUP_KEY' OP_EQ ('ON' | 'OFF') 
-      | 'STATISTICS_NORECOMPUTE' OP_EQ ('ON' | 'OFF') 
-      | 'ALLOW_ROW_LOCKS' OP_EQ ('ON' | 'OFF') 
-      | 'ALLOW_PAGE_LOCKS' OP_EQ ('ON' | 'OFF') 
+        'PAD_INDEX' '=' ('ON' | 'OFF') 
+      | 'FILLFACTOR' '=' DEC_NUMBER 
+      | 'IGNORE_DUP_KEY' '=' ('ON' | 'OFF') 
+      | 'STATISTICS_NORECOMPUTE' '=' ('ON' | 'OFF') 
+      | 'ALLOW_ROW_LOCKS' '=' ('ON' | 'OFF') 
+      | 'ALLOW_PAGE_LOCKS' '=' ('ON' | 'OFF') 
     ) 
     
 insert:
@@ -628,19 +627,19 @@ insert:
     'INSERT' 
     ['TOP' sql_expr 'PERCENT'?]
     'INTO'? 
-    (object | rowset_function ['WITH' LPAREN table_hint* RPAREN] )
-    [LPAREN comma_list<LOCALVAR> RPAREN]
+    (object | rowset_function ['WITH' '(' table_hint* ')'] )
+    ['(' comma_list<LOCALVAR> ')']
     output_clause?
     [
-        'VALUES' LPAREN comma_list<('DEFAULT' | 'NULL' | sql_expr)> RPAREN 
+        'VALUES' '(' comma_list<('DEFAULT' | 'NULL' | sql_expr)> ')' 
       | batch_body
       | 'DEFAULT' 'VALUES'
     ]
-    SEMI?
+    ';'?
 
 output_clause:
     'OUTPUT' dml_select_list 'INTO' (LOCALVAR | IDENT)
-    [LPAREN comma_list<LOCALVAR> RPAREN]
+    ['(' comma_list<LOCALVAR> ')']
     ['OUTPUT' dml_select_list]
     
 dml_select_list:
@@ -648,13 +647,13 @@ dml_select_list:
     comma_list<( (ident | sql_expr) ['AS'? IDENT])>
 
 column_name:
-    ('DELETED' | 'INSERTED' | ident) DOT (STAR | ident)
+    ('DELETED' | 'INSERTED' | ident) '.' ('*' | ident)
 
 object:
     [
-        IDENT DOT IDENT DOT IDENT DOT 
-      | IDENT DOT IDENT? DOT 
-      | IDENT DOT
+        IDENT '.' IDENT '.' IDENT '.' 
+      | IDENT '.' IDENT? '.' 
+      | IDENT '.'
     ]
     ident
        
@@ -665,11 +664,11 @@ begin_transaction:
       (ident | LOCALVAR)
       ['WITH' 'MARK' STRING_CONST?]
     ]
-    SEMI?
+    ';'?
 
 commit_transaction:
     'COMMIT' ('TRAN' | 'TRANSACTION') [IDENT | LOCALVAR]
-    SEMI?
+    ';'?
     
 execute_stmnt:
     execute_proc
@@ -679,43 +678,43 @@ execute_stmnt:
 execute_proc:
     ['EXEC' | 'EXECUTE']
     (
-        create_object DOT IDENT LPAREN comma_list<([LOCALVAR OP_EQ] sql_expr)> RPAREN
-      | LOCALVAR OP_EQ?
-        (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
+        create_object '.' IDENT '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
+      | LOCALVAR '='?
+        (full_ident (';' DEC_NUMBER)? | LOCALVAR) 
         brace_opt<
-          LPAREN 
+          '(' 
             comma_list<[
-              LOCALVAR OP_EQ?
+              LOCALVAR '='?
               [
                   sql_expr
       		  | LOCALVAR ['OUTPUT' | 'OUT']
                 | 'DEFAULT'
               ]
             ]>
-          RPAREN
+          ')'
         >
         ['WITH' 'RECOMPILE']
     )
 
-create_object: STOREDPROCEDURE LPAREN comma_list<sql_expr> RPAREN
+create_object: STOREDPROCEDURE '(' comma_list<sql_expr> ')'
 
 execute_character_string:
     ('EXEC' | 'EXECUTE') 
-    LPAREN ((LOCALVAR | STRING_CONST) PLUS?)+ RPAREN    
-    ['AS' ('LOGIN' | 'USER') OP_EQ STRING_CONST]
-    SEMI?
+    '(' ((LOCALVAR | STRING_CONST) '+'?)+ ')'    
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ';'?
 
 execute_command:
     ('EXEC' | 'EXECUTE')
-    LPAREN
-      (LOCALVAR | STRING_CONST '?'? PLUS?)+
-      (COMMA sql_expr 'OUTPUT'?)*
-    RPAREN 
-    ['AS' ('LOGIN' | 'USER') OP_EQ STRING_CONST]
+    '('
+      (LOCALVAR | STRING_CONST '?'? '+'?)+
+      (',' sql_expr 'OUTPUT'?)*
+    ')' 
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
     ['AT' full_ident]
-    SEMI?
+    ';'?
 
-type_size : LPAREN (DEC_NUMBER | 'MAX') RPAREN
+type_size : '(' (DEC_NUMBER | 'MAX') ')'
 
 sql_datatype:
       'BIGINT'
@@ -741,12 +740,12 @@ sql_datatype:
 execute_as:
     ('EXEC' | 'EXECUTE')
     'AS'
-    ('CALLER' | 'SELF' | 'OWNER' |ident OP_EQ STRING_CONST) 
+    ('CALLER' | 'SELF' | 'OWNER' |ident '=' STRING_CONST) 
 
 binop:
-      OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
-    | OP_EQ | OP_PLUS | OP_MINUS | STAR | OP_DIV | OP_MOD | OP_TILDA 
-    | OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+      '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '^=' | '|='
+    | '=' | '+' | '-' | '*' | '/' | '%' | '~'
+    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=')
 
 fetch_stmnt:    
     'FETCH' 
@@ -767,14 +766,14 @@ fetch_stmnt:
 sql_expr:
     sql_value
   | scalar_function
-  | LPAREN sql_expr RPAREN
+  | '(' sql_expr ')'
   | call_expr
   | full_ident
   | select_stmnt
-  | ('NOT' | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
+  | ('NOT' | '+=' | '-=' | '~') sql_expr 
   | GLOBALVAR
   | LOCALVAR
-  | STAR
+  | '*'
   | sql_expr binop sql_expr
   | sql_expr 'IS' 'NOT'? 'NULL'
   | ranking_windowed_function 
@@ -783,11 +782,11 @@ sql_expr:
   | case
   | begin_transaction
   | 'EXISTS' sql_expr
-  | 'IS_MEMBER' LPAREN STRING_CONST RPAREN
+  | 'IS_MEMBER' '(' STRING_CONST ')'
   | sql_expr ('AND' | 'OR') sql_expr
   | 'TYPE' 'FROM' full_ident
   | fetch_stmnt
-  | sql_expr 'NOT'? 'IN' LPAREN comma_list<sql_expr> RPAREN
+  | sql_expr 'NOT'? 'IN' '(' comma_list<sql_expr> ')'
   | sql_expr 'NOT'? 'LIKE' sql_expr
      
-call_expr: full_ident LPAREN comma_list<(sql_datatype|sql_expr)> RPAREN
+call_expr: full_ident '(' comma_list<(sql_datatype|sql_expr)> ')'

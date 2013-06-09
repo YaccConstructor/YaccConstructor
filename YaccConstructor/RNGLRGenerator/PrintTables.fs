@@ -31,7 +31,7 @@ type TargetLanguage =
 
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
-    (tokenType : string) (res : System.Text.StringBuilder) targetLanguage 
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
     _class positionType caseSensitive =
     
     let inline print (x : 'a) =
@@ -161,11 +161,21 @@ let printTables
 
         printBr "type Token ="
         let indexator = grammar.indexator
+        let defaultType = tokenType.TryFind "_"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s%s" (indexator.indexToTerm i)
-            <|  match tokenType with
-                | "" -> ""
-                | s -> " of (" + s + ")"
+            let name = indexator.indexToTerm i
+            let type' =
+                match tokenType.TryFind name with
+                | Some t -> t
+                | None ->
+                    match defaultType with
+                    | Some t -> t
+                    | None -> failwithf "Type of token %s in not defined" name
+
+            printBrInd 1 "| %s%s" name 
+            <|  match type' with
+                | None -> ""
+                | Some s -> " of (" + s + ")"
 
         for i = indexator.literalsStart to indexator.literalsEnd do
             printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
@@ -318,11 +328,21 @@ let printTables
 
         printBr "abstract class Token"        
         let indexator = grammar.indexator
+        let defaultType = tokenType.TryFind "_"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 0 "case class %s%s extends Token" (indexator.indexToTerm i)
-            <|  match tokenType with
-                | "" -> ""
-                | s -> " ( v:" + s + ")"
+            let name = indexator.indexToTerm i
+            let type' =
+                match tokenType.TryFind name with
+                | Some t -> t
+                | None ->
+                    match defaultType with
+                    | Some t -> t
+                    | None -> failwithf "Type of token %s in not defined" name
+
+            printBrInd 0 "case class %s%s extends Token" name
+            <|  match type' with
+                | None -> ""
+                | Some s -> " ( v:" + s + ")"
 
         printBr ""
         printBr "class %s {" _class

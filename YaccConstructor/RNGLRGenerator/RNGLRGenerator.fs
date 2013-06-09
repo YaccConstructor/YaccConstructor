@@ -42,7 +42,7 @@ type RNGLR() =
             for i = 0 to pairs.Length-1 do
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
             let mutable moduleName = ""
-            let mutable tokenType = ""
+            let mutable tokenType = definition.tokens
             let mutable table = LALR
             let mutable fullPath = false
             let mutable positionType = "Microsoft.FSharp.Text.Lexing.Position"
@@ -55,7 +55,7 @@ type RNGLR() =
             for opt, value in pairs do
                 match opt with
                 | "-module" -> moduleName <- value
-                | "-token" -> tokenType <- value
+                | "-token" -> tokenType <- Map.ofList ["_", Some value]
                 | "-pos" -> positionType <- value
                 | "-o" -> if value.Trim() <> "" then output <- value
                 | "-table" ->

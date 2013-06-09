@@ -27,6 +27,10 @@ open Yard.Utils.SourceText
 include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
 
+tokens {
+    _ of SourceText
+}
+
 module Main
 
 open Common, MsCommon

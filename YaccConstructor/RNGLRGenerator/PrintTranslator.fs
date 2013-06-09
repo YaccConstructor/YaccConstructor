@@ -45,7 +45,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos =
+        positionType fullPath output dummyPos caseSensitive =
     let tab = 4
 
     let rules = grammar.rules
@@ -160,6 +160,13 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
+        | PLiteral name -> 
+            incr num
+            let name = Source.toString name
+            let i = Indexator.transformLiteral caseSensitive name |> indexator.literalToIndex
+            sprintf "(match ((unbox %s.[%d]) : Token) with ``L %d`` _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+                childrenName !num i name
+            |> wordL
         | PSeq (s, ac, _) ->
             match ac with
             | None -> wordL "[]"
@@ -199,6 +206,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
+        if positionType = "" then
+            failwith "RNGLR: Unspecified position type"
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args

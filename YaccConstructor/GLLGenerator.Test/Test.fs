@@ -36,7 +36,7 @@ type DebuggedTest() =
             | [] -> failwith "Empty productions are not allowed"
         List.mapi (fun i (name, prods) -> 
             { name = tkn name; isStart = (i = 0) ; args = []; body = getProductionBody prods; isPublic = false; metaArgs = [] }) def
-        |> defaultGrammar
+        |> defaultDefinition
                              
     [<Test>]
     member this.Test () =

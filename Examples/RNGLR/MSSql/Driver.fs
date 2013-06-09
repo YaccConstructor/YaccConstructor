@@ -96,20 +96,24 @@ let p = new ProjInfo()
 let mutable counter = 1<id>
 
 let Parse (srcFilePath:string) =   
-    let map = p.GetMap(srcFilePath)
+    let map = p.GetMap srcFilePath
     Lexer.id <- counter
     p.AddLine counter map
     counter <- counter + 1<id>
     //Lexer.id <- from (ProjInfo)
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
-        let print = 
-            tokenPos 
-            >> (fun(x,y) -> 
-                let x = RePack x
-                let y = RePack y
-                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column)
-        printfn "Error in file %s on position %s on Token %A: %s" srcFilePath (print tok) (tok.GetType()) msg
+        let coordinates = 
+            let x,y = tokenPos tok
+            let x = p.GetCoordinates x
+            let y = p.GetCoordinates y
+            sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+        let data =
+            let d = tokenData tok
+            if isLiteral tok then ""
+            else (d :?> SourceText).text
+        let name = tok |> tokenToNumber |> numToString
+        printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->

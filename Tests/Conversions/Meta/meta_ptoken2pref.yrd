@@ -1,4 +1,4 @@
 [<Start>]
-s:  metar<<NUMBER>>;
+s:  metar<NUMBER>;
 
-metar<<item>>:  item;
+metar<item>:  item;

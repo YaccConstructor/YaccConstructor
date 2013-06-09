@@ -26,9 +26,9 @@ open Yard.Generators.RNGLR.SymbolSets
 //open Yard.Generators.RNGLR.Error
 
 
-type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list) =
-    let _indexator = new Indexator(ruleList)
-    let _numberedRules = new NumberedRules(ruleList, _indexator)
+type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
+    let _indexator = new Indexator(ruleList, caseSensitive)
+    let _numberedRules = new NumberedRules(ruleList, _indexator, caseSensitive)
     let _canInferEpsilon = canInferEpsilon _numberedRules _indexator
     let _firstSet = firstSet _numberedRules _indexator _canInferEpsilon
     let _followSet = followSet _numberedRules _indexator _canInferEpsilon _firstSet

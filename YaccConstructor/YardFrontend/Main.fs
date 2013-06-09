@@ -32,9 +32,10 @@ let private tokenFun f = function
     | BAR st
     | COLON st
     | COMMA st
-    | DGREAT st
+    | GREAT st
     | DLABEL st
-    | DLESS st
+    | NUMBER st
+    | LESS st
     | EOF st
     //| ERROR st
     | EQUAL st
@@ -43,14 +44,15 @@ let private tokenFun f = function
     | LPAREN st
     | MINUS st
     | PARAM st
-    | PATTERN st
     | PLUS st
     | PREDICATE st
     | QUESTION st
     | RNGLR_EOF st
     | RPAREN st
+    | SQR_LBR st
+    | SQR_RBR st
     | SEMICOLON st
-    | SET st
+//    | SET st
     | SHARPLINE st
     | STAR st
     | START_RULE_SIGN st
@@ -60,8 +62,13 @@ let private tokenFun f = function
     | PUBLIC st
     | PRIVATE st
     | OPEN st
-    | UIDENT st ->
+    | UIDENT st
+    | BLOCK_END st
+    | TOKENS_BLOCK st
+    | LITERAL st
+    | OPTIONS_START st ->
         f st
+    //| OPTION_BLOCK _ -> failwith "Unexpected OPTION_BLOCK"
 
 let private tokenToRange = tokenFun <| fun st -> st.startPos, st.endPos
 let private tokenToFile = tokenFun <| fun st -> st.file
@@ -135,7 +142,7 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
             }
     filtered
 
-let parse buf userDefs =
+let private parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
     //let tokens = List.ofSeq (filterByDefs buf userDefs)
@@ -151,10 +158,16 @@ let parse buf userDefs =
                 filterEpsilons = true
             }
         ast.ChooseLongestMatch()
-        (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+        try
+            (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+        with
+        | ParseError (src, msg) ->
+            failwithf "Parse error on position %s:%s. %s: %s" src.file
+                        (rangeToString (src.startPos, src.endPos)) msg src.text
     | Parser.Error (_, token, msg, debugs) -> 
         debugs.drawGSSDot "res.dot"
         failwithf "Parse error on position %s on token %A: %s"  (token |> tokenToRange |> rangeToString) token msg
+    
     
 let posTo2D (source:string) pos =    
     source.ToCharArray(0, min (pos+1) (source.Length))
@@ -171,12 +184,11 @@ let ParseText (s:string) path =
     let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path
-    let posTo2D = posTo2D s
     try
         parse buf userDefs
     with
     | Lexer.Lexical_error (msg, pos) ->
-        let pos2D = posTo2D pos
+        let pos2D = posTo2D s pos
         failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
 
 let rec ParseFile (args:string) =

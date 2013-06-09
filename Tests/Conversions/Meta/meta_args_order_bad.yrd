@@ -1,9 +1,9 @@
 [<Start>]
-s: a[b c] | a[c b];
+s: a<<b c>> | a<<c b>>;
 
-a[b c]: d<<t[b]>> d<<t[c]>>;
+a<<b c>>: d<t<<b>>> d<t<<c>>>;
 
-t[arg]: do[arg];
+t<<arg>>: do<<arg>>;
 
-d<<r>> : r;
+d<r> : r;
 

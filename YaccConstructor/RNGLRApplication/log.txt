@@ -1,0 +1,12 @@
+
+rules:
+   0: expr = fact 
+   1: expr = expr + expr 
+   2: yard_start_rule = expr 
+   3: fact = num 
+   4: fact = fact * fact 
+   5: num = B 
+   6: num = A 
+Source without filename: parserRange
+Source without filename: error
+<null>

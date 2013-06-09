@@ -78,9 +78,13 @@ let printTextBox tabSize windowSize tbSeq =
 
 let printSeqBrackets l_br r_br metaArgs =
     if Seq.isEmpty metaArgs then ""
-    elif (Seq.length metaArgs) > 1 then
-        l_br + String.concat " " metaArgs + r_br
-    else l_br + Seq.head metaArgs + r_br
+    else
+        String.concat " " metaArgs
+        |> (fun s ->
+                if s.Length > 0 && (s.Chars (s.Length - 1) = '>' || s.Chars 0 = '<')
+                then " " + s + " "
+                else s
+        ) |> fun s -> l_br + s + r_br
 
 let printProduction =
     let rec unboxText textBoxSeq =
@@ -94,7 +98,7 @@ let printProduction =
                                 | _ -> s
              ) metaArgs
         |> Seq.concat
-        |> printSeqBrackets "<<" ">>"
+        |> printSeqBrackets "<" ">"
 
     // wasAlt is used for dealing with one set of alternatives (if it's true, we are inside the set).
     and printProduction wasAlt (production:Production.t<Source.t,Source.t>)  = 
@@ -116,12 +120,12 @@ let printProduction =
             | Some attr -> "{" + Source.toString attr + "}"
             | None -> ""
         let printArg = function
-            | Some attr  -> "[" + Source.toString attr + "]"
+            | Some attr  -> "<<" + Source.toString attr + ">>"
             | None -> ""
         let printElem (elem:elem<Source.t,Source.t>) = 
             let binding = function
-                | Some x when String.forall System.Char.IsLetter (Source.toString x) -> Source.toString x + " ="
-                | Some x  -> "<" + Source.toString x + "> ="
+                | Some x when String.forall (fun x -> System.Char.IsLetterOrDigit x || x = '_')  (Source.toString x) -> Source.toString x + " ="
+                | Some x  -> "{" + Source.toString x + "} ="
                 | None -> ""
             let omit = if elem.omit then "-" else ""
             let needBrackets =  let prio = priority elem.rule in if elem.binding.IsSome then prio < 50 else prio <= 1
@@ -156,7 +160,7 @@ let printProduction =
                  yield Str <| printAttr attr_option
                 }
         // Token
-        | PToken(source) -> Seq.singleton <| Str (Source.toString source)
+        | PToken source -> Seq.singleton <| Str (Source.toString source)
         // Vanilla rule reference with an optional args list.
         | PRef(source, attr_option) -> Seq.singleton <| Str (Source.toString source + printArg attr_option)
         // expr*
@@ -166,21 +170,21 @@ let printProduction =
             Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
             |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
-        | PLiteral(source) -> Seq.singleton <| Str ("\"" + Source.toString source + "\"") 
+        | PLiteral source -> Seq.singleton <| Str ("'" + Source.toString source + "'") 
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
     //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
     ///// The following are obsolete and reduction to PRepet should be discussed.
         // expr+
         | PSome some -> printEbnf "+" some
         // expr?
-        | POpt opt -> printEbnf "?" opt
+        | POpt opt -> seq {yield Str "["; yield! printProduction false opt; yield Str "]"}
         | _ -> Seq.singleton <| Str "ERROR"
     printProduction
 
 let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
     let printArgs args =
         args
-        |> List.map (fun src -> "[" + Source.toString src + "]")
+        |> List.map (fun src -> "<<" + Source.toString src + ">>")
         |> String.concat ""
     let startSign = if rule.isStart then "[<Start>]" + endl else ""
     let accessModifier =
@@ -188,7 +192,7 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
         elif rule.isPublic then "public "
         else "private "
     seq {yield Line(seq{yield Str(startSign + accessModifier + rule.name.text
-                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<<" ">>")
+                                    + (rule.metaArgs |> List.map Source.toString |> printSeqBrackets "<" ">")
                                     + (printArgs rule.args) + ":");
                         yield Str " ";
                         yield! printProduction false rule.body;

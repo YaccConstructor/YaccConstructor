@@ -3,20 +3,17 @@
 open Microsoft.FSharp.Text
 open Yard.Generators.RNGLR.Parser
 open Microsoft.FSharp.Reflection
+open RNGLR.ParseCalc
  
-let tokens<'lexType>(path) = 
-    let toLexerTag = 
-        let targetUCIs = 
-            FSharpType.GetUnionCases(typeof<'lexType>) 
-            |> Array.map (fun uci -> (uci.Name,  FSharpValue.PreComputeUnionConstructor(uci)) ) 
-            |> dict
-
-        printfn "%A" targetUCIs
-
-        fun (name:string) ->
+let tokens(path) = 
+    let toLexerTag (name:string) =
             printfn "%s" name
-            let caseCtor = targetUCIs.[name]
-            (caseCtor [|2|]) :?> 'lexType
+            match name with
+            | "A" -> A (2,2)
+            | "B" -> B (2,2)
+            | "+" -> genLiteral "+" 2 2
+            | "*" -> genLiteral "+" 2 2
+            | x -> failwithf "Unexpected token %s" x
 
     System.IO.File.ReadAllText(path)
         .Split([|' '|])

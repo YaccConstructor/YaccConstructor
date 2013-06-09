@@ -22,6 +22,7 @@ module YardFrontendTester
 open Microsoft.FSharp.Text.Lexing
 open Yard.Frontends.YardFrontend
 open Yard.Frontends.YardFrontend.GrammarParser
+open System.Collections.Generic
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
@@ -70,14 +71,14 @@ let preprocessorTest path (expectedIL : t<Source.t,Source.t>) =
     Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers expectedIL.grammar currentIL.grammar)
 
 let parserTest str (ilDefCorrect: t<Source.t,Source.t>) =
-    let buf = LexBuffer<_>.FromString str
-    Lexer.currentFileContent := str
-    let ilDef = { Main.parse buf [||] with info = {fileName =""}}
+    let ilDef = { Main.ParseText str "" with info = {fileName =""}}
 
     printfn "ilDef = %A" ilDef
     printfn "ilDefCorrect = %A" ilDefCorrect
-
-    Assert.IsTrue(Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar)
+    if not <| Yard.Core.ILComparators.GrammarEqualsWithoutLineNumbers ilDef.grammar ilDefCorrect.grammar then
+        //printfn "Expected:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDefCorrect :?> string)
+        //printfn "Given:\n %s" ((new Yard.Generators.YardPrinter.YardPrinter()).Generate ilDef :?> string)
+        Assert.Fail("Trees are not equal")
 
 let completeTest str lexemsListCorrect ilDefCorrect = 
     lexerTest str lexemsListCorrect
@@ -86,10 +87,12 @@ let completeTest str lexemsListCorrect ilDefCorrect =
 let optionsTest path optionsCorrect =
     let definition = {Main.ParseFile path with info = {fileName =""}}
     let currentOptions = definition.options
-    let optionsAreEq (m1:Map<Rule.t<_,_>,_>) (m2:Map<Rule.t<_,_>,_>) = 
-        Assert.AreEqual (m1.Count,m2.Count)
-        Assert.IsTrue (m2 |> Seq.forall2 (fun (x1:System.Collections.Generic.KeyValuePair<Rule.t<_,_>,_>) x2 
-                                             -> x1.Key.name.text = x2.Key.name.text && x1.Value = x2.Value) m1)
+    let optionsAreEq (m1 : Map<_,_>) (m2 : Map<_,_>) = 
+        Assert.AreEqual (m1.Count, m2.Count)
+        Seq.forall2 (fun (x1 : KeyValuePair<_,_>) (x2 : KeyValuePair<_,_>) ->
+                            x1.Key = x2.Key && x1.Value = x2.Value
+                    ) m1 m2
+        |> Assert.IsTrue
     optionsAreEq currentOptions optionsCorrect
         
 let getSource name b e = new Source.t (name, new Source.Position(b, 0, b), new Source.Position(e, 0, e), "")
@@ -133,7 +136,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_0.yrd") expected
 
     [<Test>]
@@ -151,7 +154,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_0.yrd" + "%ora") expected
 
     [<Test>]
@@ -164,7 +167,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_1.yrd") expected
 
     [<Test>]
@@ -177,7 +180,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest ((cp "test_1.yrd")+"%ora") expected
 
     [<Test>]
@@ -190,7 +193,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_2.yrd") expected
 
     [<Test>]
@@ -203,7 +206,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest ((cp "test_2.yrd")+"%x") expected
 
     [<Test>]
@@ -221,7 +224,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest ((cp "test_2.yrd")+"%ora;x") expected
 
     [<Test>]
@@ -239,7 +242,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_2.yrd" + "%ora") expected
 
     [<Test>]
@@ -252,7 +255,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_3.yrd") expected
 
     [<Test>]
@@ -265,7 +268,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest ((cp "test_3.yrd")+"%first") expected
 
     [<Test>]
@@ -278,7 +281,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
 
         preprocessorTest ((cp "test_3.yrd")+"%second") expected
 
@@ -292,7 +295,7 @@ type ``Yard frontend preprocessor tests`` () =
                     binding = None
                     checker = None
                 }]
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest ((cp "test_3.yrd")+"%first;second") expected
              
 [<TestFixture>]
@@ -319,7 +322,45 @@ type ``YardFrontend Parser tests`` () =
                 }]
         parserTest
             "[<Start>]s: NUMBER PLUS NUMBER;" 
-            (defaultGrammar rules) 
+            (defaultDefinition rules) 
+               
+
+[<TestFixture>]
+type ``YardFrontend syntax tests`` () =    
+    [<Test>]
+    member test.``Option seq test`` () =
+        let rules =
+            [{ 
+                omit = false
+                rule = PToken (getSource "A" 4 10)
+                binding = None
+                checker = None
+            }; { 
+                omit = false
+                rule = PToken (getSource "B" 11 15)
+                binding = None
+                checker = None
+            }]
+            |> (fun seq -> PSeq(seq, None, None))
+            |> POpt
+            |> simpleRules "s"
+        parserTest
+            "[<Start>]s: [A B]" 
+            (defaultDefinition rules) 
+               
+    [<Test>]
+    member test.``Literals test`` () =
+        let rules =
+            [{ 
+                omit = false
+                rule = PLiteral (getSource "A" 4 10)
+                binding = None
+                checker = None
+            }]
+            |> verySimpleRules "s"
+        parserTest
+            "[<Start>]s: 'A'" 
+            (defaultDefinition rules) 
                
 
 [<TestFixture>]
@@ -327,13 +368,13 @@ type ``YardFrontend options tests`` () =
     let basePath = "../../../../Tests/YardFrontend/Options"
     let cp file = System.IO.Path.Combine(basePath,file)  
 
-    [<Test>]
+    (*[<Test>]
     member test.``Lexer test for options`` () =
         lexerTest 
             "[<Start>]s:  #set a = \"smth\"  A;"
             [START_RULE_SIGN (getSource "[<Start>]" 0 1); LIDENT (getSource "s" 1 2); COLON (getSource ":" 2 3); SET (getSource "#set" 5 9);
              LIDENT (getSource "a" 10 11) ; EQUAL (getSource "=" 12 13); STRING (getSource "smth" 15 19); UIDENT (getSource "A" 22 23);
-             SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]
+             SEMICOLON (getSource ";" 23 24); EOF (getSource "" 24 24)]*)
 
     [<Test>]
     member test.``Basic options test`` () =
@@ -345,9 +386,9 @@ type ``YardFrontend options tests`` () =
                     binding = None
                     checker = None
                 }]
-        let optionsForRule = Map.ofList ["a", "smth"]//[("dialect", "ora"), ("comment","smth")]
+        let options = Map.ofList ["first", "Some name"; "second", "ololo"]
 
-        optionsTest (cp "options_test_0.yrd") (Map.empty.Add (rule.Head, optionsForRule))
+        optionsTest (cp "options_test_0.yrd") options
     
                 
 [<TestFixture>]
@@ -387,19 +428,16 @@ type ``YardFrontend Complete tests`` () =
                 metaArgs = []
             }]
         completeTest
-            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: <res:int> = e[1] {res};  e[i]: n=NUMBER {(value n |> int) + i};"
+            "  {  let value x = (x:>Lexeme<string>).value  } \n[<Start>]s: {res:int} = e<<1>> {res};  e<<i>>: n=NUMBER {(value n |> int) + i};"
             [ACTION (getSource @"  let value x = (x:>Lexeme<string>).value  " 3 46); START_RULE_SIGN (getSource ":" 2 9);
-                LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); PATTERN (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
+                LIDENT (getSource "s" 50 51); COLON(getSource ":" 2 9); ACTION (getSource "res:int" 54 61); EQUAL(getSource ":" 2 9);
                 LIDENT (getSource "e" 65 66); PARAM (getSource "1" 67 68); ACTION (getSource "res" 71 74);
                 SEMICOLON (getSource ":" 2 9); LIDENT (getSource "e" 78 79); PARAM (getSource "i" 80 81); COLON(getSource ":" 2 9);
                 LIDENT (getSource "n" 84 85); EQUAL(getSource ":" 2 9); UIDENT (getSource "NUMBER" 86 92);
                 ACTION (getSource "(value n |> int) + i" 94 114); SEMICOLON (getSource ":" 2 9); EOF(getSource ":" 2 9)]
-            {
-             info = { fileName = ""; }
-             head = Some (getSource "  let value x = (x:>Lexeme<string>).value  " 3 46)
-             grammar = defaultModules rules
-             foot = None
-             options = Map.empty
+
+            {empty with head = Some <| getSource "  let value x = (x:>Lexeme<string>).value  " 3 46
+                        grammar = defaultModules rules
             }
         
 [<TestFixture>]
@@ -421,7 +459,7 @@ type ``Yardfrontend label tests`` () =
                          Some {label = "@label"
                                weight = None}
                         )
-        let expected = defaultGrammar rules
+        let expected = defaultDefinition rules
         preprocessorTest (cp "test_0.yrd") expected
 
     [<Test>]
@@ -440,7 +478,7 @@ type ``Yardfrontend label tests`` () =
             }]
         parserTest
             "[<Start>]s: @lbl[12.3](T);"
-            (defaultGrammar rules)
+            (defaultDefinition rules)
             
     
     [<Test>]
@@ -459,11 +497,34 @@ type ``Yardfrontend label tests`` () =
                   isStart = true;
                   metaArgs = [];
                 }]
-            let smth = defaultGrammar rules |> parserTest "[<Start>]s: @lbl[q](T);"
+            let smth = defaultDefinition rules |> parserTest "[<Start>]s: @lbl[q](T);"
                   
             Assert.IsTrue(false)
         with 
         | ex ->
-            let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            //let expected = "Parse error on position (0,17) on token q: illegal weight. Number expected."
+            let expected = "Parse error on position ((0,17)-(0,18)) on token LIDENT q: Parse Error"
             let actual = ex.Message
+            printfn "%s" ex.Message
             Assert.AreEqual(expected, actual)
+
+[<TestFixture>]
+type ``Yardfrontend token tests`` () =
+    let basePath = "../../../../Tests/YardFrontend/Tokens"
+    let cp file = System.IO.Path.Combine(basePath, file)
+
+    [<Test>]
+    member test.``Tokens test.`` () = 
+        let currentDefinition = Main.ParseFile (cp "tokens.yrd")
+        let correct = Map.ofList ["Asd_23", Some "string"; "B", None; "_", Some "int"]
+        Assert.AreEqual (correct, currentDefinition.tokens)
+
+    [<Test>]
+    member test.``Empty tokens test.`` () = 
+        let currentDefinition = Main.ParseFile (cp "tokens_empty.yrd")
+        let correct = Map.empty
+        Assert.AreEqual (correct, currentDefinition.tokens)
+
+
+//[<EntryPoint>]
+//(new ``Yardfrontend label tests`` ()).``weight test incorrect input`` ()

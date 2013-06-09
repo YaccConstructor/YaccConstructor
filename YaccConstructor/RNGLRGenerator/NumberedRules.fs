@@ -23,7 +23,8 @@ open Yard.Core.IL.Production;
 open Yard.Core.IL;
 open Yard.Generators.RNGLR;
 
-type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Indexator) =
+type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Indexator, caseSensitive) =
+    let transformLiteral = Indexator.transformLiteral caseSensitive
     let rules = ruleList |> Array.ofList
     let start =
         rules
@@ -31,9 +32,9 @@ type NumberedRules (ruleList : Rule.t<Source.t,Source.t> list, indexator : Index
     let left = rules |> Array.map (fun x -> x.name.text |> indexator.nonTermToIndex)
     let right =
         let rec transformBody acc (*body*) = function
-            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex <| nTerm.text)::acc
-            | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex <| token.text)::acc
-            | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| lit.text)::acc
+            | PRef (nTerm,_) -> (*printfn "N %s" <| fst nTerm;*) (indexator.nonTermToIndex nTerm.text)::acc
+            | PToken token -> (*printfn "T %s" <| fst token;*) (indexator.termToIndex token.text)::acc
+            | PLiteral lit -> (*printfn "L %s" <| fst lit;*) (indexator.literalToIndex <| transformLiteral lit.text)::acc
             | PSeq (s,_,_) -> List.foldBack (fun x acc -> transformBody acc x.rule) s acc
             | _ -> failwith "Unexpected construction in grammar"
         rules

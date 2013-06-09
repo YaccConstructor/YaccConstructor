@@ -22,7 +22,7 @@ namespace Yard.Generators.RNGLR
 open Yard.Core.IL
 open Yard.Core.IL.Production
 
-type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
+type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let unique s = s |> Set.ofSeq |> Array.ofSeq
     let connect x = 
         let dict = x |> Array.mapi (fun i n -> n, i) |> dict
@@ -38,7 +38,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
             | PSeq (s, _, _) ->
                 s |> List.map (fun e -> e.rule)
                 |> List.fold collectTermsAndLits (accTerms, accLiterals)
-            | PLiteral lit -> accTerms, lit.text::accLiterals
+            | PLiteral lit -> accTerms, (Indexator.transformLiteral caseSensitive lit.text)::accLiterals
             | PToken token -> token.text::accTerms, accLiterals
             | x -> failwithf "Unexpected construction %A in grammar" x
                     
@@ -69,6 +69,10 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list) =
 
     static member inline private add value f x = (f x) + value
     static member inline private sub value f x = f (x - value)
+
+    static member transformLiteral caseSensitive (lit : string) =
+        if caseSensitive then lit
+        else lit.ToLower()
 
     member this.nonTermToIndex nt = Indexator.add nonTermsShift (Indexator.fst nonTermsConnect) nt
     member this.indexToNonTerm i = Indexator.sub nonTermsShift (Indexator.snd nonTermsConnect) i

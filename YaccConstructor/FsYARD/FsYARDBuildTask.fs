@@ -18,7 +18,7 @@ type FsYard() =
     let mutable light = "on"
     let mutable printInfiniteEpsilonPath = ""
     let mutable output = ""
-    let mutable replLiterals = ""
+    //let mutable replLiterals = ""
     let mutable projectBasePath = ""
 
     [<Required>]
@@ -51,9 +51,9 @@ type FsYard() =
         with get() = printInfiniteEpsilonPath
         and set v = printInfiniteEpsilonPath <- v
 
-    member this.ReplLiterals
+    (*member this.ReplLiterals
         with get() = replLiterals
-        and set v = replLiterals <- v
+        and set v = replLiterals <- v*)
 
     member this.FullPath
         with get() = fullPath
@@ -79,9 +79,9 @@ type FsYard() =
                 + if light.Trim() <> "" then sprintf "-light %s " light else ""
                 + if output.Trim() <> "" then sprintf "-o %s " output else ""
                 + sprintf "-fullpath %A" fullPath            
-            let eventArgs = { new CustomBuildEventArgs(message= "FsYard " + rnglrArgs + " -c ReplaceLiterals " + replLiterals + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
+            let eventArgs = { new CustomBuildEventArgs(message= "FsYard " + rnglrArgs + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
             engine.LogCustomEvent(eventArgs)
-            Yard.FsYard.generate (items.[0].ToString()) replLiterals rnglrArgs
+            Yard.FsYard.generate (items.[0].ToString()) rnglrArgs
             mem.Flush()
             use sr = new StreamReader(mem)
             let errors = sr.ReadToEnd().Split('\n')

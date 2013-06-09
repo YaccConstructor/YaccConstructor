@@ -11,6 +11,15 @@ type Token =
     | IF of int
     | RNGLR_EOF of int
 
+let genLiteral (str : string) posStart posEnd =
+    match str.ToLower() with
+    | x -> failwithf "Literal %s undefined" x
+let tokenData = function
+    | A x -> box x
+    | ELSE x -> box x
+    | IF x -> box x
+    | RNGLR_EOF x -> box x
+
 let numToString = function
     | 0 -> "error"
     | 1 -> "good"
@@ -124,7 +133,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cond.yrd"
                : '_rnglr_type_s) 
-# 127 "Cond.yrd.fs"
+# 136 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -134,7 +143,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Cond.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 137 "Cond.yrd.fs"
+# 146 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -156,7 +165,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Cond.yrd"
                : '_rnglr_type_if) 
-# 159 "Cond.yrd.fs"
+# 168 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -176,7 +185,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "Cond.yrd"
                : '_rnglr_type_if) 
-# 179 "Cond.yrd.fs"
+# 188 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -202,7 +211,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Cond.yrd"
                : '_rnglr_type_if_else) 
-# 205 "Cond.yrd.fs"
+# 214 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -222,7 +231,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Cond.yrd"
                : '_rnglr_type_good) 
-# 225 "Cond.yrd.fs"
+# 234 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -242,7 +251,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Cond.yrd"
                : '_rnglr_type_good) 
-# 245 "Cond.yrd.fs"
+# 254 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -262,7 +271,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Cond.yrd"
                : '_rnglr_type_stmt) 
-# 265 "Cond.yrd.fs"
+# 274 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -282,7 +291,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Cond.yrd"
                : '_rnglr_type_stmt) 
-# 285 "Cond.yrd.fs"
+# 294 "Cond.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -300,7 +309,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 303 "Cond.yrd.fs"
+# 312 "Cond.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

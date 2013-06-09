@@ -34,7 +34,7 @@ open Option
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"
-        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noLiterals; noInnerAlt; noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noEbnf; noMeta; noInnerAlt; (*noLiterals;*) noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -49,6 +49,7 @@ type RNGLR() =
             let mutable needTranslate = true
             let mutable light = true
             let mutable printInfiniteEpsilonPath = ""
+            let mutable caseSensitive = false
             let mutable output = definition.info.fileName + ".fs"
             let mutable targetLanguage = FSharp
             for opt, value in pairs do
@@ -62,6 +63,10 @@ type RNGLR() =
                     | "LALR" -> table <- LALR
                     | "LR" -> table <- LR
                     | x -> failwith "Unexpected table type %s" x
+                | "-caseSensitive" ->
+                    if value = "true" then caseSensitive <- true
+                    elif value = "false" then caseSensitive <- false
+                    else failwith "Unexpected caseSensitive value %s" value
                 | "-fullpath" ->
                     if value = "true" then fullPath <- true
                     elif value = "false" then fullPath <- false
@@ -84,7 +89,7 @@ type RNGLR() =
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules);
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -162,10 +167,10 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
             let res = if not needTranslate || targetLanguage = Scala then tables
-                        else tables + printTranslator grammar newDefinition.grammar.[0].rules
-                                        positionType fullPath output dummyPos
+                      else tables + printTranslator grammar newDefinition.grammar.[0].rules
+                                        positionType fullPath output dummyPos caseSensitive
             let res = 
                 match definition.foot with
                 | None -> res

@@ -15,6 +15,13 @@ type Token =
     | A of int
     | RNGLR_EOF of int
 
+let genLiteral (str : string) posStart posEnd =
+    match str.ToLower() with
+    | x -> failwithf "Literal %s undefined" x
+let tokenData = function
+    | A x -> box x
+    | RNGLR_EOF x -> box x
+
 let numToString = function
     | 0 -> "e1"
     | 1 -> "e2"
@@ -125,7 +132,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Order.yrd"
                : '_rnglr_type_s) 
-# 128 "Order.yrd.fs"
+# 135 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -135,7 +142,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 5 "Order.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 138 "Order.yrd.fs"
+# 145 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -157,7 +164,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Order.yrd"
                : '_rnglr_type_e1) 
-# 160 "Order.yrd.fs"
+# 167 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -179,7 +186,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 7 "Order.yrd"
                : '_rnglr_type_e2) 
-# 182 "Order.yrd.fs"
+# 189 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -199,7 +206,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 8 "Order.yrd"
                : '_rnglr_type_e3) 
-# 202 "Order.yrd.fs"
+# 209 "Order.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -217,7 +224,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 220 "Order.yrd.fs"
+# 227 "Order.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

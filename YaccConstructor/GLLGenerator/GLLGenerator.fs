@@ -34,7 +34,7 @@ type GLLGenerator() =
             let definition =
                 ConversionsManager.ConversionsManager().ApplyConversion "EliminateLeftRecursion" definition
             let newDefinition = initialConvert definition
-            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules)
+            let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, false)
                         
             let out = new System.Text.StringBuilder()
 

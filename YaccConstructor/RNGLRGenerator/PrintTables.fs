@@ -32,7 +32,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : string) (res : System.Text.StringBuilder) targetLanguage 
-    _class =
+    _class positionType caseSensitive =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -165,7 +165,29 @@ let printTables
             printBrInd 1 "| %s%s" (indexator.indexToTerm i)
             <|  match tokenType with
                 | "" -> ""
-                | s -> " of " + s
+                | s -> " of (" + s + ")"
+
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
+
+        printBr ""
+        printBr "let genLiteral (str : string) posStart posEnd ="
+        if caseSensitive then "str"
+        else "str.ToLower()"
+        |> printBrInd 1 "match %s with"
+            
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (indexator.indexToLiteral i) i
+        printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
+        //
+
+        printBr "let tokenData = function"
+
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
+
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` x -> box x" i
 
         printBr ""
         printBr "let numToString = function"
@@ -176,11 +198,16 @@ let printTables
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
 
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToLiteral i)
+
         printBrInd 1 "| _ -> \"\""
 
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> %d" i i
         printBr ""
 
         printBr "let mutable private cur = 0"

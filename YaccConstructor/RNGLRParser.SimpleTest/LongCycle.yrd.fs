@@ -9,6 +9,13 @@ type Token =
     | A of int
     | RNGLR_EOF of int
 
+let genLiteral (str : string) posStart posEnd =
+    match str.ToLower() with
+    | x -> failwithf "Literal %s undefined" x
+let tokenData = function
+    | A x -> box x
+    | RNGLR_EOF x -> box x
+
 let numToString = function
     | 0 -> "e"
     | 1 -> "error"
@@ -116,7 +123,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "LongCycle.yrd"
                : '_rnglr_type_start) 
-# 119 "LongCycle.yrd.fs"
+# 126 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -126,7 +133,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "LongCycle.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 129 "LongCycle.yrd.fs"
+# 136 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -146,7 +153,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "LongCycle.yrd"
                : '_rnglr_type_e) 
-# 149 "LongCycle.yrd.fs"
+# 156 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -166,7 +173,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "LongCycle.yrd"
                : '_rnglr_type_e) 
-# 169 "LongCycle.yrd.fs"
+# 176 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -186,7 +193,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "LongCycle.yrd"
                : '_rnglr_type_red) 
-# 189 "LongCycle.yrd.fs"
+# 196 "LongCycle.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -204,7 +211,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 207 "LongCycle.yrd.fs"
+# 214 "LongCycle.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

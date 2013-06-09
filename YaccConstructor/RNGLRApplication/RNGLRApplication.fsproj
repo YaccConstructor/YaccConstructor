@@ -57,9 +57,9 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LexCommon.fs" />
     <None Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
+    <Compile Include="LexCommon.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

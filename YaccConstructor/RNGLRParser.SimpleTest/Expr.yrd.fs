@@ -10,6 +10,14 @@ type Token =
     | P of int
     | RNGLR_EOF of int
 
+let genLiteral (str : string) posStart posEnd =
+    match str.ToLower() with
+    | x -> failwithf "Literal %s undefined" x
+let tokenData = function
+    | N x -> box x
+    | P x -> box x
+    | RNGLR_EOF x -> box x
+
 let numToString = function
     | 0 -> "e"
     | 1 -> "error"

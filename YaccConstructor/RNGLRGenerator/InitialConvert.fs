@@ -36,9 +36,13 @@ let initialConvert (def : Definition.t<_,_>) =
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
                     let startRule : Rule.t<_,_> =
-                        {isStart = true; name = new Source.t("yard_start_rule", rule.name); args = rule.args;
-                         metaArgs = []; isPublic=false;
-                         body = PRef(rule.name, rule.args |> createParams |> list2opt)}
+                        {isStart = true;
+                         name = new Source.t("yard_start_rule", rule.name);
+                         args = rule.args;
+                         metaArgs = [];
+                         isPublic=false;
+                         body = PRef(rule.name, rule.args |> createParams |> list2opt)
+                        }
                     startRule::{rule with isStart = false}::res
             )
             []

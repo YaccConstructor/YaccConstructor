@@ -516,6 +516,8 @@ type ``Yardfrontend token tests`` () =
     [<Test>]
     member test.``Tokens test.`` () = 
         let currentDefinition = Main.ParseFile (cp "tokens.yrd")
+        printfn "%A" <| (new Yard.Generators.YardPrinter.YardPrinter()).Generate currentDefinition
+
         let correct = Map.ofList ["Asd_23", Some "string"; "B", None; "_", Some "int"]
         Assert.AreEqual (correct, currentDefinition.tokens)
 

@@ -138,6 +138,7 @@ and  main = parse
      | '[' { SQR_LBR <| lex2source lexbuf }
      | ']' { SQR_RBR <| lex2source lexbuf }
      | "open" { OPEN <| lex2source lexbuf}
+     | "//" [^'\n']*  { main lexbuf }
      | "options" ws '{' { countNewLines lexbuf
                           OPTIONS_START <| lex2source lexbuf}
      | "tokens" ws '{' [^'}']* '}' { countNewLines lexbuf

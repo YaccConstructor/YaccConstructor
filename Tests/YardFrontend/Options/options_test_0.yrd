@@ -3,5 +3,5 @@ options {
     second = ololo
 }
 
-[<Start>]
+[<Start>] // Start rule attribute
 s: A;

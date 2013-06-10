@@ -171,7 +171,6 @@ let printProduction =
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
         | PLiteral source ->
             Source.toString source
-            |> String.collect (function '\'' -> "\\'" | c -> string c)
             |> fun s -> Str ("'" + s + "'") 
             |> Seq.singleton
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details

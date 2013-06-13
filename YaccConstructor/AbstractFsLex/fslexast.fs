@@ -1,10 +1,8 @@
-(* (c) Microsoft Corporation 2005-2008.  *)
-
 module FSharp.PowerPack.FsLex.AST
 
 open System.Collections.Generic
 open Microsoft.FSharp.Text
-open Microsoft.FSharp.Collections
+
 open Microsoft.FSharp.Text.Lexing
 
 let (|KeyValue|) (kvp:KeyValuePair<_,_>) = kvp.Key,kvp.Value

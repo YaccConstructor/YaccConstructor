@@ -51,11 +51,6 @@
     <Compile Include="EntryPoint.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">
-      <Name>FsYaccPrinter</Name>
-      <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
       <Name>TreeDump</Name>
       <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
@@ -64,11 +59,6 @@
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
       <Name>YardFrontend</Name>
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.PowerPack">

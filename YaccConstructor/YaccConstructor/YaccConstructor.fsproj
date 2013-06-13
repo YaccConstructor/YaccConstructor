@@ -72,11 +72,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AntlrFrontend\AntlrFrontend.fsproj">
-      <Name>AntlrFrontend</Name>
-      <Project>{b75aec02-64bd-4b31-8115-6708c64ee5dc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -92,26 +87,6 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CYKGenerator\CYKGenerator.fsproj">
-      <Name>CYKGenerator</Name>
-      <Project>{94eeea1d-60e8-45f8-b6cb-ba0b0fb487b8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
-      <Name>FParsecGenerator</Name>
-      <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FsYaccFrontend\FsYaccFrontend.fsproj">
-      <Name>FsYaccFrontend</Name>
-      <Project>{17103a48-db90-4101-92ee-7b2719db2cf0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FsYaccPrinter\FsYaccPrinter.fsproj">
-      <Name>FsYaccPrinter</Name>
-      <Project>{2238e587-6faa-4a07-a665-aa7fcc9b5602}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
       <Name>RNGLRGenerator</Name>
       <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
@@ -125,11 +100,6 @@
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
       <Name>YardFrontend</Name>
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

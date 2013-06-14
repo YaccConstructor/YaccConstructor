@@ -1,1 +1,0 @@
-lib\YaccConstructor -i grlang.yrd

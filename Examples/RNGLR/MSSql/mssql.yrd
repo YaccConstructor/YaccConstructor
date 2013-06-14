@@ -689,18 +689,19 @@ execute_stmnt:
 execute_proc:
     ['EXEC' | 'EXECUTE']
     (
-        create_object '.' IDENT '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
-      | LOCALVAR '='?
-        (full_ident (';' DEC_NUMBER)? | LOCALVAR) 
+        create_object '.' IDENT
+        '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
+      | [LOCALVAR '=']
+        (full_ident [';' DEC_NUMBER] | LOCALVAR) 
         brace_opt<
           '(' 
             comma_list<[
-              LOCALVAR '='?
-              [
+              [LOCALVAR '=']
+              (
                   sql_expr
-      		  | LOCALVAR ['OUTPUT' | 'OUT']
-                | 'DEFAULT'
-              ]
+                | LOCALVAR ['OUTPUT' | 'OUT']
+                | 'DEFAULT'?
+              )
             ]>
           ')'
         >

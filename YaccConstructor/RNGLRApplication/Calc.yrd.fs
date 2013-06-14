@@ -33,8 +33,8 @@ let numToString = function
     | 5 -> "A"
     | 6 -> "B"
     | 7 -> "RNGLR_EOF"
-    | 8 -> "*"
-    | 9 -> "+"
+    | 8 -> "'*'"
+    | 9 -> "'+'"
     | _ -> ""
 
 let tokenToNumber = function

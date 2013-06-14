@@ -182,6 +182,8 @@ let printTables
                 failwith "RNGLR: Unspecified position type"
             printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
 
+        let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
+
         printBr ""
         printBr "let genLiteral (str : string) posStart posEnd ="
         if caseSensitive then "str"
@@ -189,7 +191,7 @@ let printTables
         |> printBrInd 1 "match %s with"
             
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (indexator.indexToLiteral i) i
+            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (escapeQuotes <| indexator.indexToLiteral i) i
         printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
         //
 
@@ -211,7 +213,7 @@ let printTables
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToLiteral i)
+            printBrInd 1 "| %d -> \"'%s'\"" i (escapeQuotes <| indexator.indexToLiteral i)
 
         printBrInd 1 "| _ -> \"\""
         printBr ""

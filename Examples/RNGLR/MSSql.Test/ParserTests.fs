@@ -25,30 +25,43 @@ open NUnit.Framework
 open LexerHelper
 open Yard.Utils.StructClass
 open Yard.Utils.SourceText
-
+open Yard.Utils.InfoClass
+open Yard.Examples.MSParser
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
     let runParserTest file = 
+        let p = new ProjInfo()
+        let mutable counter = 1<id>
+
+        let map = p.GetMap file
+        Lexer.id <- counter
+        p.AddLine counter map
+        counter <- counter + 1<id>
         match MSSqlParser.justParse file with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,_) ->
-            let print = 
-                tokenPos
-                >> (fun(x,y) -> 
-                    let x = RePack x
-                    let y = RePack y
-                    sprintf "(%A,%A) - (%A,%A)" (x.Line + (1<line>)) (x.Column) (y.Line + 1<line>) y.Column)
-            let msg = sprintf "Error in file %s on position %s on Token %A: %s" file (print tok) (tok.GetType()) msg
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+            let coordinates = 
+                let x,y = tokenPos tok
+                let x = p.GetCoordinates x
+                let y = p.GetCoordinates y
+                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+            let data =
+                let d = tokenData tok
+                if isLiteral tok then ""
+                else (d :?> SourceText).text
+            let name = tok |> tokenToNumber |> numToString
+            printfn "Error in file %s at position %s on Token %s %s: %s" file coordinates name data msg
             printfn "%s" msg
-            Assert.Fail(msg)
+            dbg.drawGSSDot @"..\..\stack.dot"
+            Assert.Fail msg
         | Yard.Generators.RNGLR.Parser.Success ast ->
             Assert.Pass()
 
     let basePath = "../../../../../Tests/MSSqlParser"
     let bigFilesPath = "../../../../../Tests/Materials/ms-sql"
     let spFolder = "sysprocs"
-    let file name = System.IO.Path.Combine(basePath,name)
-    let complexSpFile name = System.IO.Path.Combine(System.IO.Path.Combine(bigFilesPath,spFolder),name)
+    let file name = System.IO.Path.Combine (basePath,name)
+    let complexSpFile name = System.IO.Path.Combine (bigFilesPath, spFolder, name)
 
     [<Test>]
     member test.``Top level set.`` () =

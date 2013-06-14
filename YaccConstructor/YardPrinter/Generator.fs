@@ -34,14 +34,14 @@ with
   
 let str2line s = s |> Str |> Seq.singleton |> Line
 
-let printTextBox tabSize windowSize tbSeq =
+let printTextBox tabSize windowSize (tbSeq : seq<_>) =
 
     /// Return new sequence, what has the same elements, what tbSeq has,
     ///    with proper indent before each element.
     let rec printIndentedSeq tbSeq indent =
         Seq.collect (function
             | Str s -> Seq.singleton (s, indent)
-            | StrSeq tbSeq -> seq {yield! printIndentedSeq tbSeq indent}
+            | StrSeq tbSeq -> printIndentedSeq tbSeq indent
             | Tabbed tbSeq | Line tbSeq as x -> 
              seq { yield endl, indent
                    yield! printIndentedSeq tbSeq (indent + (if x.IsTab then tabSize else 0) ) } 
@@ -58,10 +58,9 @@ let printTextBox tabSize windowSize tbSeq =
         strSeq
         |> Seq.fold (fun (str_acc, newline, chars_in_line) (word,indent) -> 
             if word=endl then 
-                if newline then
-                    (str_acc, true, 0)
-                else
-                    (str_acc + word, true, 0)
+                if newline then str_acc
+                else str_acc + word
+                |> fun text -> (text, true, 0)
             else
                 let spaces_count =
                     if newline then indent
@@ -170,7 +169,10 @@ let printProduction =
             Source.toString rule_name + printMetaArgs metaArgs + printArg opt_arg
             |> Str |> Seq.singleton
         // Literal. Often one wants to write explicitly, e.g.: .."if" expr "then" expr...
-        | PLiteral source -> Seq.singleton <| Str ("'" + Source.toString source + "'") 
+        | PLiteral source ->
+            Source.toString source
+            |> fun s -> Str ("'" + s + "'") 
+            |> Seq.singleton
     //        |PRepet   of (t<'patt,'expr>) * int option * int option  //extended regexp repetition, "man egrep" for details
     //        |PPerm    of (t<'patt,'expr>) list //permutation (A || B || C)   
     ///// The following are obsolete and reduction to PRepet should be discussed.
@@ -201,7 +203,33 @@ let printRule isPublicModule (rule : Rule.t<Source.t, Source.t>) =
                    )
         }
 
-let generate (input_grammar:Definition.t<Source.t,Source.t>) =
+let generate (input_grammar: Definition.t<Source.t,Source.t>) =
+    let print : seq<_> -> _ = printTextBox 4 80 
+    let tab = "    "
+    let tokens =
+        let map = input_grammar.tokens
+        if map.IsEmpty then ""
+        else
+            [
+                "tokens {"
+                String.concat endl [for p in map -> tab + "| " + p.Key + match p.Value with | None -> "" | Some v -> " of " + v]
+                "}"
+                ""
+            ]
+            |> String.concat endl
+            
+    let options =
+        let map = input_grammar.options
+        if map.IsEmpty then ""
+        else
+            [
+                "options {"
+                String.concat endl [for p in map -> tab + p.Key + " = \"" + p.Value + "\""]
+                "}"
+                ""
+            ]
+            |> String.concat endl
+            
     let tbSeq =
         input_grammar.grammar
         |> Seq.collect (fun m ->
@@ -223,6 +251,8 @@ let generate (input_grammar:Definition.t<Source.t,Source.t>) =
     String.concat ""
         [
             printSourceOpt input_grammar.head
-            printTextBox 4 80 tbSeq
+            tokens
+            options
+            print tbSeq
             printSourceOpt input_grammar.foot
         ]

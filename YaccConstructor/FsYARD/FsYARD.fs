@@ -46,7 +46,7 @@ let cmdRun () =
          "-table",      addRnglrArg " -table "     , " Table type."
          "-fullpath",   addRnglrArg " -fullpath "  , "Use full path."
          "-translate",  addRnglrArg " -translate " , "Generate action code."
-         "-light",      addRnglrArg " -light "     , "Light on/off."
+         "-light",      addRnglrArg " -light "     , "Light syntax true/false."
          "-infEpsPath", addRnglrArg " -infEpsPath ", "Path for infinite epsilons stats."
          "-lang",       addRnglrArg " -lang "      , "Target language."
          //"-replaceLiterals", ArgType.String (fun s -> replLit := s), "Replace literals regexp."

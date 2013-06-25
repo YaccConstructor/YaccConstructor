@@ -47,7 +47,7 @@ type ``Abstract lexer tests`` () =
         let qGraph = loadDotToQG "test_1.dot"
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag))) |> ignore
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
         Assert.AreEqual(lexerInputG.Edges |> Seq.length, 5)
         Assert.AreEqual(lexerInputG.Vertices |> Seq.length, 5)
 
@@ -56,10 +56,10 @@ type ``Abstract lexer tests`` () =
         let qGraph = loadDotToQG "test_1.dot"
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag))) |> ignore
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
         let lexerInnerGraph = new LexerInnerGraph<_>(lexerInputG)
         Assert.AreEqual(lexerInnerGraph.StartVertex, 0)
-        Assert.AreEqual(lexerInnerGraph.Edges |> Seq.length, 7)        
+        Assert.AreEqual(lexerInnerGraph.Edges |> Seq.length, 7)
         Assert.AreEqual(lexerInnerGraph.Vertices |> Seq.length, 7)
 
 //[<EntryPoint>]

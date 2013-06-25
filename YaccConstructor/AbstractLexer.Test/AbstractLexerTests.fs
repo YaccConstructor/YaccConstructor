@@ -6,6 +6,7 @@ open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
 open AbstractLexer.Common
+open QuickGraph.Algorithms
 
 let loadGraphFromDOT filePath = 
     let parser = AntlrParserAdapter<string>.GetParser()

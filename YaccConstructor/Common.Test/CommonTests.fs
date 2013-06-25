@@ -82,6 +82,16 @@ type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
     let basePath = @"..\..\..\..\Tests\Checkers\"
 
+    let getUndecl path =
+        path
+        |> frontend.ParseGrammar
+        |> GetUndeclaredNonterminalsList
+        |> (fun (_,_,u) -> u)
+        |> List.map snd
+        |> List.concat
+        |> List.map (fun r -> r.text)
+        |> List.sort
+
     [<Test>]
     member test.``Start rule exists. No start rule.`` () =
         Path.Combine(basePath, "no_start_rule.yrd")
@@ -125,16 +135,10 @@ type ``Checker test`` () =
         |> Assert.IsFalse
 
     [<Test>]
-    member test.``Undeclared nonterminals checker. Right grammar.`` () =
+    member test.``Undeclared nonterminals checker. Metarules. Right grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Correct.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> (fun (_,_,u) -> u)
-            |> List.map snd
-            |> List.concat
-            |> List.map (fun r -> r.text)
-            |> List.sort
+            |> getUndecl
         let expetedResult = []
         Seq.iter (printfn "%s;") result
         printfn "**********************"
@@ -142,16 +146,10 @@ type ``Checker test`` () =
         Assert.AreEqual(result,expetedResult)
 
     [<Test>]
-    member test.``Undeclared nonterminals checker. Wrong grammar.`` () =
+    member test.``Undeclared nonterminals checker. Metarules. Wrong grammar.`` () =
         let result =
             Path.Combine(basePath, @"UndeclaredNonterminals\MetaRules_Incorrect.yrd")
-            |> frontend.ParseGrammar
-            |> GetUndeclaredNonterminalsList
-            |> (fun (_,_,u) -> u)
-            |> List.map snd
-            |> List.concat
-            |> List.map (fun r -> r.text)
-            |> List.sort
+            |> getUndecl
         let expetedResult = List.sort ["b"; "x"; "y"; "w"; "d"]
         Seq.iter (printf "%s; ") result
         printfn ""
@@ -160,14 +158,36 @@ type ``Checker test`` () =
         Assert.AreEqual(result, expetedResult)
 
     [<Test>]
-    member test.``Unused nonterminals checker. Right grammar.`` () =
+    member test.``Undeclared nonterminals checker. Simple. Right grammar.`` () =
+        let result =
+            Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Correct.yrd")
+            |> getUndecl
+        let expetedResult = []
+        Seq.iter (printfn "%A;") result
+        printfn "**********************"
+        Seq.iter (printfn "%A;") expetedResult  
+        Assert.AreEqual(result,expetedResult)
+
+    [<Test>]
+    member test.``Undeclared nonterminals checker. Simple. Wrong grammar.`` () =
+        let result =
+            Path.Combine(basePath, @"UndeclaredNonterminals\Simple_Uncorrect.yrd")
+            |> getUndecl
+        let expetedResult = List.sort ["b"]
+        Seq.iter (printfn "%A;") result
+        printfn "**********************"
+        Seq.iter (printfn "%A;") expetedResult 
+        Assert.AreEqual(result,expetedResult)
+
+    [<Test>]
+    member test.``Unused nonterminals checker. Metarules. Right grammar.`` () =
         Path.Combine(basePath, @"UnusedNonterminals\MetaRules_Correct.yrd")
         |> frontend.ParseGrammar
         |> IsUnusedRulesExists
         |> Assert.IsFalse
 
     [<Test>]
-    member test.``Unused nonterminals checker. Wrong grammar.`` () =
+    member test.``Unused nonterminals checker. Metarules. Wrong grammar.`` () =
         Path.Combine(basePath, @"UnusedNonterminals\MetaRules_Uncorrect.yrd")
         |> frontend.ParseGrammar
         |> IsUnusedRulesExists

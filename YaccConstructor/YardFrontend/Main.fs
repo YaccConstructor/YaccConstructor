@@ -36,6 +36,7 @@ let private tokenFun f = function
     | DLABEL st
     | DLESS st
     | EOF st
+    //| ERROR st
     | EQUAL st
     | INCLUDE st
     | LIDENT st
@@ -46,6 +47,7 @@ let private tokenFun f = function
     | PLUS st
     | PREDICATE st
     | QUESTION st
+    | RNGLR_EOF st
     | RPAREN st
     | SEMICOLON st
     | SET st
@@ -107,13 +109,13 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
                 | GrammarParser.SHARPLINE str ->
                     match str.text with
                     | IF d -> 
-                        let x = Array.contains d userDefined
+                        let x = Array.exists ((=)d) userDefined
                         currentDefined := (x, x, !currentState)::!currentDefined
                         currentState := x && !currentState
                     | ELIF d ->
                         match !currentDefined with
                         | (_, prev, upper) :: tl -> 
-                            let x = (Array.contains d userDefined) && (not prev)
+                            let x = (Array.exists ((=)d) userDefined) && (not prev)
                             currentDefined :=  (x, prev || x, upper) :: tl
                             currentState := x && upper
                         | _ -> failwith "Unexpected #ELIF"
@@ -136,6 +138,8 @@ let private filterByDefs (buf:LexBuffer<_>) userDefined =
 let parse buf userDefs =
     let rangeToString (b : Source.Position, e : Source.Position) =
         sprintf "((%d,%d)-(%d,%d))" b.line b.column e.line e.column
+    //let tokens = List.ofSeq (filterByDefs buf userDefs)
+    //tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
     match GrammarParser.buildAst (filterByDefs buf userDefs) with
     | Parser.Success ast ->
         ast.collectWarnings tokenToRange
@@ -148,9 +152,9 @@ let parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
-    | Parser.Error (_, token, msg, _) ->
-        failwithf "Parse error on position %s:%s on token %A: %s" (token |> tokenToFile)
-                    (token |> tokenToRange |> rangeToString) token msg
+    | Parser.Error (_, token, msg, debugs) -> 
+        debugs.drawGSSDot "res.dot"
+        failwithf "Parse error on position %s on token %A: %s"  (token |> tokenToRange |> rangeToString) token msg
     
 let posTo2D (source:string) pos =    
     source.ToCharArray(0, min (pos+1) (source.Length))

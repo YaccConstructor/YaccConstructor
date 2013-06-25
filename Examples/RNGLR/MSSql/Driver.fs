@@ -135,7 +135,6 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    //let inPath = ref @"D:\projects\YC\recursive-ascent\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"   
     let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

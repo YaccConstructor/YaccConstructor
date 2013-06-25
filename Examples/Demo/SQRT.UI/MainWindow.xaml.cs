@@ -11,7 +11,7 @@ namespace SQRT.UI
 	public partial class MainWindow
 	{
 
-        private SQRT.Core.Context.DataContext dataContext;
+        private SQRT.Core.Context.DataContext dataContext = new Core.Context.DataContext();
 
         private ErrorList.ErrorListControl ErrorLog;
             

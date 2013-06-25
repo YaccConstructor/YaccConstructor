@@ -105,22 +105,22 @@ type CYKCore() =
         let processRule rule ruleIndex i k l =
             let a,b,c,rl,rw = getRule rule
             if c <> 0us then
-                let left = recTable.[i, k]
-                let right = recTable.[k+i+1, l-k-1]
-                for m in 0..(nTermsCount - 1) do
-                    let lf = left.[m]
-                    if lf.IsSome
+                let left = recTable.[i, k] |> Array.choose id
+                let right = recTable.[k+i+1, l-k-1] |> Array.choose id
+                left |> Array.iter (fun lf ->
+                    if getCellRuleTop lf = b
                     then
-                        for n in 0..(nTermsCount - 1) do
-                            let r = right.[n]
-                            if r.IsSome && (getCellRuleTop lf.Value = b) && (getCellRuleTop r.Value = c)
+                        let lState1,lbl1,weight1 = getCellData lf
+                        right |> Array.iter (fun r ->
+                            if getCellRuleTop r = c
                             then
-                                let lState1,lbl1,weight1 = getCellData lf.Value
-                                let lState2,lbl2,weight2 = getCellData r.Value
+                                let lState2,lbl2,weight2 = getCellData r
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                recTable.[i,l].[int a - 1] <- new CellData(currentElem,uint32 k) |> Some
+                                recTable.[i,l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
+                        )
+                )
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
@@ -134,15 +134,13 @@ type CYKCore() =
             (fun ruleIndex rule ->
                 for k in 0..(s.Length-1) do
                     let a,b,c,rl,rw = getRule rule               
-                    match c with
-                    |0us -> if b = s.[k] then
-                                let lState =
-                                    match rl with
-                                    | 0uy -> LblState.Undefined
-                                    | _   -> LblState.Defined
-                                let currentElem = buildData ruleIndex lState rl rw
-                                recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some
-                    |_ -> ())
+                    if c = 0us && b = s.[k] then
+                        let lState =
+                            match rl with
+                            | 0uy -> LblState.Undefined
+                            | _   -> LblState.Defined
+                        let currentElem = buildData ruleIndex lState rl rw
+                        recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
     
         fillTable ()
         recTable
@@ -150,6 +148,17 @@ type CYKCore() =
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
+        let printTbl () =
+            for i in 0..s.Length-1 do
+                for j in 0..s.Length-1 do
+                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
+                    printf "! %s !" (string cd)
+                printfn " "
+            printfn "" 
+
+        //printfn "%A" recTable
+        //printTbl ()
+
         let getString state lbl weight = 
             let stateString = 
                 match state with
@@ -161,15 +170,20 @@ type CYKCore() =
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
-            let cellData = recTable.[0, s.Length-1]
-            if i <= last && cellData.[i].IsSome
-            then let state,lbl,weight = getCellData (cellData.[i].Value)
-                 if i = last
-                 then [getString state lbl weight]
-                 else getString state lbl weight :: out (i+1) last
+            let cellDatas = recTable.[0, s.Length-1]
+            if i <= last 
+            then 
+                if cellDatas.[i].IsSome 
+                then
+                    let state,lbl,weight = getCellData (cellDatas.[i].Value)
+                    if i = last
+                    then [getString state lbl weight]
+                    else getString state lbl weight :: out (i+1) last
+                else "" :: out (i+1) last
             else [""]
 
-        let lastIndex = (recTable.[0,0]).Length - 1
+        let lastIndex = (recTable.[0,s.Length-1]).Length - 1
+        
         out 0 lastIndex
 
     let print lblValue weight leftI rightL leftL =

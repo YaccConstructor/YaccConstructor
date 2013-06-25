@@ -6,7 +6,7 @@ open Microsoft.FSharp.Text.Lexing
 open Microsoft.FSharp.Text.Parsing.ParseHelpers
 # 1 "Parser.fsy"
 
-//  Copyright 2010-2011 Konstantin Ulitin
+// Copyright 2010-2011 Konstantin Ulitin
 //
 //  This file is part of YaccConctructor.
 //

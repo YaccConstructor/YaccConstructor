@@ -1,6 +1,6 @@
 [<Start>]
-s:  metar<<mrArg>>;
+s:  metar<mrArg>;
 
-metar<<mfArg>>:  mfArg;
+metar<mfArg>:  mfArg;
 
 mrArg:  NUMBER;

@@ -27,17 +27,28 @@ open Yard.Utils.SourceText
 include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
 
+tokens {
+    _ of SourceText
+}
+
+options {
+    translate = false
+    module = "Yard.Examples.MSParser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
 module Main
 
 open Common, MsCommon
 
 [<Start>]
-root_rule: (batch_body KW_GO?)*
+root_rule: (batch_body 'GO'?)*
 
 batch_body: 
        create_proc
      | set_stmnt
-     | KW_USE LBRACKET "mdw_control" RBRACKET
+     | 'USE' '[' 'mdw_control' ']'
      | begin_transaction
      | commit_transaction
      | declare
@@ -49,68 +60,78 @@ batch_body:
      | insert
   
 rollback_transaction:
-    KW_ROLLBACK (KW_TRAN | KW_TRANSACTION)? 
-         (IDENT | LOCALVAR)? 
-    SEMI?
+    'ROLLBACK'
+    ['TRAN' | 'TRANSACTION']
+    [IDENT | LOCALVAR]
+    ';'?
 (*****************************************SET****************************************************)
 
 set_stmnt:
-    KW_SET (
-        "ANSI_NULLS" | "ANSI_DEFAULTS" | "ANSI_NULL_DFLT" 
-            | "ANSI_PADDING" | "ANSI_WARNINGS" | "CONCAT_NULL_YIELDS_NULL"
-            | "CURSOR_CLOSE_ON_COMMIT" | "QUOTED_IDENTIFIER" 
-            | "FMTONLY" | "FORCEPLAN" | "IMPLICIT_TRANSACTIONS"
-            | "NOCOUNT" | "NOEXEC" | "NUMERIC_ROUNDABORT" | "PARSEONLY"
-            | "REMOTE_PROC_TRANSACTIONS" | "SHOWPLAN_ALL" | "SHOWPLAN_TEXT"
-            | "SHOWPLAN_XML" | "STATISTICS" ("IO" | "PROFILE" | "TIME" | KW_XML)
-            | "XACT_ABORT" ) (KW_ON | KW_OFF)
-            | set_localvar
+    'SET' (
+        'ANSI_NULLS' | 'ANSI_DEFAULTS' | 'ANSI_NULL_DFLT' 
+      | 'ANSI_PADDING' | 'ANSI_WARNINGS' | 'CONCAT_NULL_YIELDS_NULL'
+      | 'CURSOR_CLOSE_ON_COMMIT' | 'QUOTED_IDENTIFIER' 
+      | 'FMTONLY' | 'FORCEPLAN' | 'IMPLICIT_TRANSACTIONS'
+      | 'NOCOUNT' | 'NOEXEC' | 'NUMERIC_ROUNDABORT' | 'PARSEONLY'
+      | 'REMOTE_PROC_TRANSACTIONS' | 'SHOWPLAN_ALL' | 'SHOWPLAN_TEXT'
+      | 'SHOWPLAN_XML' | 'STATISTICS' ('IO' | 'PROFILE' | 'TIME' | 'XML')
+      | 'XACT_ABORT'
+    )
+    ('ON' | 'OFF')
+  | set_localvar
 
 set_localvar:
-    KW_SET
-    ( 
+    'SET' ( 
         LOCALVAR 
-        (DOUBLE_COLON ident )? OP_EQ sql_expr | STRING_CONST ( DOT | DOUBLE_COLON ) ident LPAREN comma_list<<proc_formal_param>> RPAREN 
+        [DOUBLE_COLON ident] '=' sql_expr
+      | STRING_CONST ('.' | DOUBLE_COLON) ident
+        '(' comma_list<proc_formal_param> ')' 
     )
-    |( LOCALVAR OP_EQ 
-        LOCALVAR | ident | ( KW_CURSOR ( KW_FORWARD_ONLY | KW_SCROLL )? 
-        ( KW_STATIC | KW_KEYSET | KW_DYNAMIC | KW_FAST_FORWARD )? 
-        ( KW_READ_ONLY | KW_SCROLL_LOCKS | KW_OPTIMISTIC )? 
-        KW_TYPE_WARNING? 
-        KW_FOR select_stmnt 
-        ( KW_FOR ( KW_EAD ONLY | KW_UPDATE ( KW_OF comma_list<<ident>> )?))? 
-        ) 
-    )   
-    
+  | LOCALVAR '=' LOCALVAR
+  | ident
+  | 'CURSOR' ['FORWARD_ONLY' | 'SCROLL']
+    ['STATIC' | 'KEYSET' | 'DYNAMIC' | 'FAST_FORWARD']
+    ['READ_ONLY' | 'SCROLL_LOCKS' | 'OPTIMISTIC']
+    'TYPE_WARNING'?
+    'FOR' select_stmnt 
+    [ 'FOR' (
+          'READ' 'ONLY'
+        | 'UPDATE' ['OF' comma_list<ident>]
+      )
+    ]
+
+  
 (*********************************PROCEDURE************************************************************)    
 
-drop_procedure: KW_DROP ( KW_PROC | KW_PROCEDURE ) ( (ident DOT)? ident)+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') ([ident '.'] ident)+
 
 proc_formal_param:
-    LOCALVAR (full_ident DOT)? sql_datatype?
-    KW_VARYING? (OP_EQ (KW_NULL | DEC_NUMBER | STRING_CONST) )?
-    (KW_OUT | KW_OUTPUT)? KW_READONLY?  
+    LOCALVAR [full_ident '.'] sql_datatype?
+    ['VARYING'] ['=' ('NULL' | DEC_NUMBER | STRING_CONST)]
+    ['OUT' | 'OUTPUT'] 'READONLY'?  
   
 create_proc:
-    KW_CREATE (KW_PROCEDURE | KW_PROC)
-    (ident DOT)? ident (SEMI DEC_NUMBER)? 
-    brace_opt<<LPAREN comma_list<<proc_formal_param>> RPAREN>>
-    (KW_WITH (execute_as)+ )? 
-    ( KW_FOR KW_REPLICATION )?
-    KW_AS (proc_body_stmnt SEMI?)*
-    SEMI?
+    'CREATE' ('PROCEDURE' | 'PROC')
+    [ident '.'] ident [';' DEC_NUMBER]
+    brace_opt<'(' comma_list<proc_formal_param> ')'>
+    ['WITH' (execute_as)+]
+    ['FOR' 'REPLICATION']
+    'AS' (proc_body_stmnt ';'?)*
+    ';'?
 
 procedure_option: 
-      KW_ENCRYPTION?
-    | KW_RECOMPILE?
-    | KW_EXECUTE_AS_Clause?
+  [
+      'ENCRYPTION'
+    | 'RECOMPILE'
+    | 'EXECUTE_AS_Clause'
+  ]
 
 proc_body_stmnt:
      select_stmnt
    | set_stmnt
    | execute_stmnt   
    | declare
-   | KW_RETURN sql_expr
+   | 'RETURN' sql_expr
    | if_stmt
    | raiserror_stmnt
    | stmt_block
@@ -126,249 +147,280 @@ proc_body_stmnt:
 
 (***********************************STATEMENTS******************************************************)
 
-print_stmt: KW_PRINT sql_expr SEMI?
-while_stmt: KW_WHILE sql_expr proc_body_stmnt
+print_stmt: 'PRINT' sql_expr ';'?
+while_stmt: 'WHILE' sql_expr proc_body_stmnt
 
-stmt_block: KW_BEGIN (proc_body_stmnt SEMI?)* KW_END
+stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* 'END'
 
-if_stmt: KW_IF sql_expr proc_body_stmnt (KW_ELSE proc_body_stmnt)?
-                
+if_stmt: 'IF' sql_expr proc_body_stmnt ['ELSE' proc_body_stmnt]                
 
 raiserror_stmnt:
-    KW_RAISERROR LPAREN ( dec_num | STRING_CONST | LOCALVAR )
-    ( COMMA dec_num COMMA dec_num )
-    ( COMMA comma_list<<sql_expr>> )? RPAREN
-    ( KW_WITH comma_list<< ("LOG" | KW_NOWAIT | "SETERROR")>> )?
+    'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
+    (',' dec_num ',' dec_num)
+    [',' comma_list<sql_expr>] ')'
+    ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
    
 (***********************************DECLARE**********************************************************)
 
 declare:  
-    KW_DECLARE 
-    comma_list<<(
-        LOCALVAR KW_AS? sql_datatype
-        | ident KW_CURSOR KW_LOCAL? KW_STATIC? KW_FOR? sql_expr
-        | ident KW_AS? table_type_definition
-    )>>
-    SEMI?
+    'DECLARE' 
+    comma_list<(
+        LOCALVAR 'AS'? sql_datatype
+      | ident 'CURSOR' 'LOCAL'? 'STATIC'? 'FOR'? sql_expr
+      | ident 'AS'? table_type_definition
+    )>
+    ';'?
 
 table_type_definition: 
-     KW_TABLE LPAREN (column_definition | table_constraint)* RPAREN 
+     'TABLE' '(' (column_definition | table_constraint)* ')' 
 
 column_definition:
-    ident (("scalar_data_type") | (KW_AS sql_expr))
-    (KW_COLLATE ident)? 
-    ((KW_DEFAULT sql_expr)? | KW_IDENTITY (DEC_NUMBER COMMA DEC_NUMBER)? )? 
-    (KW_ROWGUIDCOL)? 
-    (column_constraint)? 
+    ident ('scalar_data_type' | 'AS' sql_expr)
+    ['COLLATE' ident]
+    ['DEFAULT' sql_expr | 'IDENTITY' [DEC_NUMBER ',' DEC_NUMBER]]
+    'ROWGUIDCOL'? 
+    column_constraint? 
 
 column_constraint: 
-    ((KW_NULL | KW_NOT KW_NULL)? 
-    | (KW_PRIMARY KW_KEY | KW_UNIQUE)?
-    | KW_CHECK sql_expr 
-    ) 
+  [
+      ['NOT'] 'NULL'
+    | 'PRIMARY' 'KEY'
+    | 'UNIQUE'
+    | 'CHECK' sql_expr 
+  ]
 
 table_constraint: 
-     ((KW_PRIMARY KW_KEY | KW_UNIQUE) LPAREN comma_list<<ident>> RPAREN) 
-     | (KW_CHECK LPAREN search_condition RPAREN) 
+    ('PRIMARY' 'KEY' | 'UNIQUE') '(' comma_list<ident> ')'
+  | 'CHECK' '(' search_condition ')'
        
 (*****************************************SELECT****************************************************)
 
 select_stmnt:  
-    ((KW_WITH comma_list<<common_table_expression>>)?
+    ['WITH' comma_list<common_table_expression>]
     query_expression 
-    (KW_ORDER KW_BY comma_list<<( (ident | DEC_NUMBER) (KW_ASC | KW_DESC)?)>>)? 
-    (KW_COMPUTE 
-        comma_list<<( (KW_AVG | KW_COUNT | KW_MAX | KW_MIN | KW_SUM) sql_expr)>> 
-        (KW_BY comma_list<<sql_expr>>)? 
-    )? 
-    for? 
-    (KW_OPTION LPAREN comma_list<<query_hint>> RPAREN)? ) SEMI?
+    ['ORDER' 'BY' comma_list<((ident | DEC_NUMBER) ['ASC' | 'DESC'])>]
+    [
+      'COMPUTE' 
+      comma_list<( ('AVG' | 'COUNT' | 'MAX' | 'MIN' | 'SUM') sql_expr)>
+      ['BY' comma_list<sql_expr>]
+    ] 
+    for? ['OPTION' '(' comma_list<query_hint> ')']
+    ';'?
     
-for:
-    (KW_FOR (KW_BROWSE | xml))?
+for: 'FOR' ('BROWSE' | xml)
     
 xml:
-    KW_XML 
+    'XML' 
     ( 
-        (KW_RAW (LPAREN STRING_CONST RPAREN)? | KW_AUTO) 
-        ( 
-            common_directives
-            (COMMA (KW_XMLDATA | KW_XMLSCHEMA (LPAREN STRING_CONST RPAREN)?))? 
-            (COMMA KW_ELEMENTS (KW_XSINIL | KW_ABSENT)?)?
-        )?
-        | KW_EXPLICIT 
-            ( 
-                common_directives 
-                (COMMA KW_XMLDATA)? 
-            )?
-        | KW_PATH (LPAREN STRING_CONST RPAREN)? 
-            (
-                common_directives 
-                (COMMA KW_ELEMENTS (KW_XSINIL | KW_ABSENT)?)?
-            )?
+        ('RAW' ['(' STRING_CONST ')'] | 'AUTO') 
+        [ 
+          common_directives
+          [',' ('XMLDATA' | 'XMLSCHEMA' ['(' STRING_CONST ')'] ) ]
+          [',' 'ELEMENTS' ['XSINIL' | 'ABSENT'] ]
+        ]
+      | 'EXPLICIT' [common_directives [',' 'XMLDATA'] ]
+      | 'PATH' ['(' STRING_CONST ')']
+        [common_directives  [',' 'ELEMENTS' ['XSINIL' | 'ABSENT'] ] ]
     )
 
 common_directives:
-    (COMMA KW_BINARY KW_BASE64)?
-    (COMMA KW_TYPE)?
-    (COMMA KW_ROOT (LPAREN STRING_CONST RPAREN)?)?
+    [',' 'BINARY' 'BASE64']
+    [',' 'TYPE']
+    [',' 'ROOT' ['(' STRING_CONST ')']]
 
 query_hint: 
-    ((KW_HASH | KW_ORDER) KW_GROUP 
-    | (KW_CONCAT | KW_HASH | KW_MERGE) KW_UNION 
-    | (KW_LOOP | KW_MERGE | KW_HASH) KW_JOIN 
-    | KW_FAST DEC_NUMBER
-    | KW_FORCE KW_ORDER 
-    | KW_MAXDOP DEC_NUMBER 
-    | KW_OPTIMIZE KW_FOR LPAREN comma_list<<(LOCALVAR OP_EQ STRING_CONST)>>RPAREN  
-    | KW_PARAMETERIZATION (KW_SIMPLE | KW_FORCED)
-    | KW_RECOMPILE
-    | KW_ROBUST KW_PLAN 
-    | KW_KEEP KW_PLAN 
-    | KW_KEEPFIXED KW_PLAN
-    | KW_EXPAND KW_VIEWS 
-    | KW_MAXRECURSION DEC_NUMBER 
-    | KW_USE KW_PLAN STRING_CONST    
-    ) 
+    ('HASH' | 'ORDER') 'GROUP' 
+  | ('CONCAT' | 'HASH' | 'MERGE') 'UNION' 
+  | ('LOOP' | 'MERGE' | 'HASH') 'JOIN' 
+  | 'FAST' DEC_NUMBER
+  | 'FORCE' 'ORDER' 
+  | 'MAXDOP' DEC_NUMBER 
+  | 'OPTIMIZE' 'FOR' '(' comma_list<(LOCALVAR '=' STRING_CONST)> ')'  
+  | 'PARAMETERIZATION' ('SIMPLE' | 'FORCED')
+  | 'RECOMPILE'
+  | 'ROBUST' 'PLAN' 
+  | 'KEEP' 'PLAN' 
+  | 'KEEPFIXED' 'PLAN'
+  | 'EXPAND' 'VIEWS' 
+  | 'MAXRECURSION' DEC_NUMBER 
+  | 'USE' 'PLAN' STRING_CONST    
     
 common_table_expression:
-    (full_ident | ident) (LPAREN comma_list<<ident>> RPAREN)?
-    KW_AS
-        LPAREN select_stmnt RPAREN
-    SEMI?
+    (full_ident | ident)
+    ['(' comma_list<ident> ')']
+    'AS' '(' select_stmnt ')'
+    ';'?
     
 query_expression: 
-    ( query_specification | LPAREN query_expression RPAREN )
-    ( ( KW_UNION KW_ALL? | KW_EXCEPT | KW_INTERSECT )
-    query_specification | comma_list<<(LPAREN query_expression RPAREN)>>)? 
+    (query_specification | '(' query_expression ')')
+    [
+        ('UNION' 'ALL'? | 'EXCEPT' | 'INTERSECT')
+        query_specification
+      | comma_list<('(' query_expression ')')>
+    ]
         
 query_specification: 
-    KW_SELECT (KW_ALL | KW_DISTINCT)? 
-    (KW_TOP sql_expr KW_PERCENT? (KW_WITH KW_TIES)?)? 
+    'SELECT' ['ALL' | 'DISTINCT']
+    ['TOP' sql_expr 'PERCENT'? ['WITH' 'TIES'] ]
     select_list                                          
-    (KW_INTO full_ident)? 
+    ['INTO' full_ident]
     from? 
-    (KW_WHERE search_condition)? 
-    (KW_GROUP KW_BY KW_ALL? comma_list<<sql_expr>>
-        (KW_WITH (KW_CUBE | KW_ROLLUP))?
-    )?
-    (KW_HAVING search_condition)? 
+    ['WHERE' search_condition]
+    [
+      'GROUP' 'BY' 'ALL'? comma_list<sql_expr>
+      ['WITH' ('CUBE' | 'ROLLUP')]
+    ]
+    ['HAVING' search_condition]
 
 select_list:
-    comma_list<<(
-        STAR 
-        | full_ident DOT STAR 
-        | ( ( ident DOT )? 
-            ( ident | KW_IDENTITY | KW_ROWGUID )  
-            ( ( DOT | DOUBLE_COLON ) 
-            ( ( STRING_CONST | ident ) 
-            | ident LPAREN comma_list<<sql_expr>> RPAREN ) )? 
-            | sql_expr (KW_AS? ident)? ) 
-        | ident OP_EQ sql_expr)>>
+    comma_list<(
+        '*' 
+      | full_ident '.' '*' 
+      | (
+            [ident '.']
+            (ident | 'IDENTITY' | 'ROWGUID')
+            [ ('.' | DOUBLE_COLON)
+              (
+                  STRING_CONST
+                | ident
+                | ident '(' comma_list<sql_expr> ')'
+              )
+            ] 
+          | sql_expr ['AS'? ident]
+        ) 
+      | ident '=' sql_expr
+    )>
     
 scalar_function:
-      KW_LOWER sql_expr
-    | KW_SUM LPAREN (KW_ALL | KW_DISTINCT)? sql_expr RPAREN
+      'LOWER' sql_expr
+    | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
     
 aggregate_windowed_function:
-    KW_OVER LPAREN comma_list<<((KW_PARTITION KW_BY LOCALVAR | select_stmnt)?)>> order_by_clause RPAREN
+    'OVER' '(' comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause ')'
 
 ranking_windowed_function:
-        (KW_RANK | KW_DENSE_RANK | KW_ROW_NUMBER | KW_NTILE) LPAREN (sql_expr)? RPAREN KW_OVER LPAREN 
-        ((KW_PARTITION KW_BY LOCALVAR|select_stmnt|full_ident)*)?
-        order_by_clause RPAREN
+    ('RANK' | 'DENSE_RANK' | 'ROW_NUMBER' | 'NTILE')
+    '(' sql_expr? ')'
+    'OVER'
+    '(' 
+      [('PARTITION' 'BY' LOCALVAR|select_stmnt|full_ident)*]
+      order_by_clause
+    ')'
     
 order_by_clause:
-    (KW_ORDER KW_BY 
-        comma_list<< (sql_expr (KW_ASC | KW_DESC)?) >>
-    )? 
+    ['ORDER' 'BY' comma_list<(sql_expr ['ASC' | 'DESC'])>]
     
 search_condition: 
-    ( KW_NOT? predicate | LPAREN search_condition RPAREN )
-    ((KW_AND | KW_OR) KW_NOT? (predicate | LPAREN search_condition RPAREN))*
+    (
+        'NOT'? predicate
+      | '(' search_condition ')'
+    )
+    (
+      ('AND' | 'OR')
+      'NOT'? (predicate | '(' search_condition ')')
+    )*
     
 predicate: 
-    sql_expr (KW_ESCAPE STRING_CONST)?                                                
-    | sql_expr KW_NOT? KW_BETWEEN sql_expr KW_AND sql_expr 
-    | sql_expr KW_IS KW_NOT? KW_NULL  
-    | sql_expr binop                     
-        (KW_ALL | KW_SOME | KW_ANY) LPAREN query_expression RPAREN            
-    | KW_EXISTS LPAREN query_expression RPAREN  
-    | IDENT (DOT IDENT)? (LPAREN RPAREN)? KW_IN LPAREN ((dec_num | STRING_CONST) COMMA (dec_num | STRING_CONST)) RPAREN
+      sql_expr ['ESCAPE' STRING_CONST]
+    | sql_expr 'NOT'? 'BETWEEN' sql_expr 'AND' sql_expr 
+    | sql_expr 'IS' 'NOT'? 'NULL'  
+    | sql_expr binop ('ALL' | 'SOME' | 'ANY')
+      '(' query_expression ')'            
+    | 'EXISTS' '(' query_expression ')'  
+    | IDENT ['.' IDENT] ['(' ')'] 'IN'
+      '('
+        (dec_num | STRING_CONST) ',' (dec_num | STRING_CONST)
+      ')'
 
 from:
-    ( KW_FROM comma_list<<table_source>> )? 
+    'FROM' comma_list<table_source>
 
 table_source: 
-    full_ident KW_AS?  full_ident tablesample_clause? 
-        (KW_WITH LPAREN table_hint COMMA* RPAREN)? 
-    | ((rowset_function (KW_AS? ident)? 
-        (LPAREN comma_list<<ident>> RPAREN)?) 
-        | sql_expr (KW_AS? ident)? (LPAREN comma_list<<ident>> RPAREN)?)
-    (*| openxml_clause*)
-    | ident  KW_AS? ident (LPAREN comma_list<<ident>> RPAREN)? 
-    | joined_table 
-    | pivoted_table 
-    | (unpivoted_table                                                     
-        | LOCALVAR (KW_AS? full_ident)?
-            | LOCALVAR DOT ident LPAREN comma_list<<sql_expr>> RPAREN (KW_AS ident)? (LPAREN comma_list<<ident>> RPAREN)?)
+    full_ident 'AS'?  full_ident tablesample_clause? 
+    ['WITH' '(' table_hint ','* ')']
+  | (rowset_function | sql_expr)
+    ['AS'? ident]
+    ['(' comma_list<ident> ')']
+  (*| openxml_clause*)
+  | ident 'AS'? ident ['(' comma_list<ident> ')']
+  | joined_table 
+  | pivoted_table 
+  | unpivoted_table                                                     
+  | LOCALVAR ['AS'? full_ident]
+  | LOCALVAR '.' ident
+    '(' comma_list<sql_expr> ')' ['AS' ident]
+    ['(' comma_list<ident> ')']
 
 
 rowset_function:
     containstable
-    | freetexttable
-    | opendatasource
-    | openquery
-    | openrowset
-    (*| openxml*)
+  | freetexttable
+  | opendatasource
+  | openquery
+  | openrowset
+  (*| openxml*)
 
 openrowset:
-    KW_OPENROWSET 
-    LPAREN (STRING_CONST COMMA (STRING_CONST SEMI STRING_CONST SEMI STRING_CONST 
-        | STRING_CONST) 
-        COMMA ((full_ident DOT)? (full_ident DOT)? full_ident 
-        | STRING_CONST 
-        ) 
-        | KW_BULK STRING_CONST COMMA 
-       (KW_FORMATFILE OP_EQ STRING_CONST bulk_options?
-       | KW_SINGLE_BLOB | KW_SINGLE_CLOB | KW_SINGLE_NCLOB)
-    ) RPAREN 
+    'OPENROWSET' 
+    '('
+    (
+        STRING_CONST ','
+        (STRING_CONST ';' STRING_CONST ';' STRING_CONST | STRING_CONST)
+        ','
+        ([ [full_ident '.'] full_ident '.'] full_ident | STRING_CONST)
+      | 'BULK' STRING_CONST ',' 
+        (
+            'FORMATFILE' '=' STRING_CONST bulk_options?
+          | 'SINGLE_BLOB'
+          | 'SINGLE_CLOB'
+          | 'SINGLE_NCLOB'
+        )
+    ) ')' 
 
 bulk_options:
-   (COMMA KW_CODEPAGE OP_EQ STRING_CONST)? 
-   (COMMA KW_ERRORFILE OP_EQ STRING_CONST)?
-   (COMMA KW_FIRSTROW OP_EQ DEC_NUMBER)?
-   (COMMA KW_LASTROW OP_EQ DEC_NUMBER)? 
-   (COMMA KW_MAXERRORS OP_EQ DEC_NUMBER)? 
-   (COMMA KW_ROWS_PER_BATCH OP_EQ DEC_NUMBER)?  
+   [',' 'CODEPAGE' '=' STRING_CONST]
+   [',' 'ERRORFILE' '=' STRING_CONST]
+   [',' 'FIRSTROW' '=' DEC_NUMBER]
+   [',' 'LASTROW' '=' DEC_NUMBER]
+   [',' 'MAXERRORS' '=' DEC_NUMBER]
+   [',' 'ROWS_PER_BATCH' '=' DEC_NUMBER]
     
 openquery:
-    KW_OPENQUERY LPAREN full_ident COMMA STRING_CONST RPAREN    
+    'OPENQUERY' '(' full_ident ',' STRING_CONST ')'    
     
 opendatasource: 
-    KW_OPENDATASOURCE LPAREN ident COMMA STRING_CONST RPAREN    
+    'OPENDATASOURCE' '(' ident ',' STRING_CONST ')'    
 
 freetexttable:
-    KW_FREETEXTTABLE LPAREN full_ident COMMA (full_ident | LPAREN comma_list<<full_ident>> RPAREN | STAR) 
-    COMMA STRING_CONST 
-    (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
-    (COMMA DEC_NUMBER)? RPAREN  
+    'FREETEXTTABLE' '(' full_ident ','
+    (
+        full_ident
+      | '(' comma_list<full_ident> ')'
+      | '*'
+    )
+    ',' STRING_CONST 
+    [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+    [',' DEC_NUMBER] ')'  
     
 containstable:
-    KW_CONTAINSTABLE LPAREN full_ident COMMA (ident | LPAREN comma_list<<ident>> RPAREN | STAR) COMMA "'" contains_search_condition "'" 
-    (COMMA KW_LANGUAGE (STRING_CONST|DEC_NUMBER))? 
-    (COMMA DEC_NUMBER)? 
-    RPAREN 
+    'CONTAINSTABLE'
+    '('
+      full_ident ','
+      (ident | '(' comma_list<ident> ')' | '*')
+      ',' '\'' contains_search_condition '\''
+      [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+      [',' DEC_NUMBER]
+    ')' 
     
 contains_search_condition: 
-    (simple_term 
-    | prefix_term 
-    | generation_term 
-    | proximity_term 
-    | weighted_term ) 
-    | (LPAREN contains_search_condition RPAREN 
-        ( ( KW_AND | "&" ) | ( KW_AND KW_NOT | "&!" ) | ( KW_OR | "|" ) ) 
-        contains_search_condition+ )
+    simple_term 
+  | prefix_term 
+  | generation_term 
+  | proximity_term 
+  | weighted_term
+  | '(' contains_search_condition ')' 
+    ('AND' | '&' | 'AND' 'NOT' | '&!' | 'OR' | '|' ) 
+    contains_search_condition+
         
 simple_term: 
     STRING_CONST
@@ -377,343 +429,376 @@ prefix_term:
     STRING_CONST 
     
 generation_term: 
-    KW_FORMSOF LPAREN (KW_INFLECTIONAL | KW_THESAURUS) COMMA comma_list<<simple_term>> RPAREN
+    'FORMSOF'
+    '('
+      ('INFLECTIONAL' | 'THESAURUS') ',' comma_list<simple_term>
+    ')'
     
 proximity_term: 
-     (simple_term | prefix_term) 
-     ((KW_NEAR | OP_TILDA) (simple_term | prefix_term))+
+    (simple_term | prefix_term) 
+    (('NEAR' | '~') (simple_term | prefix_term))+
      
 weighted_term: 
-    KW_ISABOUT
-        LPAREN comma_list<<(( 
-        simple_term 
+    'ISABOUT'
+    '(' comma_list<(
+      ( 
+          simple_term 
         | prefix_term 
         | generation_term 
-        | proximity_term ) 
-        (WEIGHT LPAREN DEC_NUMBER RPAREN)? )>>
-        RPAREN
+        | proximity_term
+      ) 
+      [WEIGHT '(' DEC_NUMBER ')']
+    )> ')'
         
 table_hint: 
-    (KW_NOEXPAND )? 
-    (KW_INDEX LPAREN comma_list<<ident>> RPAREN     
-        | KW_FASTFIRSTROW 
-        | KW_HOLDLOCK 
-        | KW_NOLOCK 
-        | KW_NOWAIT
-        | KW_PAGLOCK 
-        | KW_READCOMMITTED 
-        | KW_READCOMMITTEDLOCK 
-        | KW_READPAST 
-        | KW_READUNCOMMITTED 
-        | KW_REPEATABLEREAD 
-        | KW_ROWLOCK 
-        | KW_SERIALIZABLE 
-        | KW_TABLOCK 
-        | KW_TABLOCKX 
-        | KW_UPDLOCK 
-        | KW_XLOCK 
+    'NOEXPAND'?
+    (
+        'INDEX' '(' comma_list<ident> ')'     
+      | 'FASTFIRSTROW' 
+      | 'HOLDLOCK' 
+      | 'NOLOCK' 
+      | 'NOWAIT'
+      | 'PAGLOCK' 
+      | 'READCOMMITTED' 
+      | 'READCOMMITTEDLOCK' 
+      | 'READPAST' 
+      | 'READUNCOMMITTED' 
+      | 'REPEATABLEREAD' 
+      | 'ROWLOCK' 
+      | 'SERIALIZABLE' 
+      | 'TABLOCK' 
+      | 'TABLOCKX' 
+      | 'UPDLOCK' 
+      | 'XLOCK' 
     ) 
 
 table_hint_limited:
-    (
-        KW_KEEPIDENTITY 
-    | KW_KEEPDEFAULTS 
-    | KW_FASTFIRSTROW 
-    | KW_HOLDLOCK 
-    | KW_IGNORE_CONSTRAINTS 
-    | KW_IGNORE_TRIGGERS 
-    | KW_NOWAIT
-    | KW_PAGLOCK 
-    | KW_READCOMMITTED 
-    | KW_READCOMMITTEDLOCK 
-    | KW_READPAST 
-    | KW_REPEATABLEREAD 
-    | KW_ROWLOCK 
-    | KW_SERIALIZABLE 
-    | KW_TABLOCK 
-    | KW_TABLOCKX 
-    | KW_UPDLOCK 
-    | KW_XLOCK 
-    )?
+    'KEEPIDENTITY' 
+  | 'KEEPDEFAULTS' 
+  | 'FASTFIRSTROW' 
+  | 'HOLDLOCK' 
+  | 'IGNORE_CONSTRAINTS' 
+  | 'IGNORE_TRIGGERS' 
+  | 'NOWAIT'
+  | 'PAGLOCK' 
+  | 'READCOMMITTED' 
+  | 'READCOMMITTEDLOCK' 
+  | 'READPAST' 
+  | 'REPEATABLEREAD' 
+  | 'ROWLOCK' 
+  | 'SERIALIZABLE' 
+  | 'TABLOCK' 
+  | 'TABLOCKX' 
+  | 'UPDLOCK' 
+  | 'XLOCK' 
 
 tablesample_clause:
-    KW_TABLESAMPLE KW_SYSTEM? LPAREN sql_expr ( KW_PERCENT | KW_ROWS )? RPAREN  
-        (KW_REPEATABLE sql_expr)?                            
+    'TABLESAMPLE' 'SYSTEM'?
+    '(' sql_expr ['PERCENT' | 'ROWS'] ')'  
+    ['REPEATABLE' sql_expr]
 
 joined_table: 
-    table_source join_type table_source KW_ON search_condition 
-    | table_source KW_CROSS KW_JOIN table_source 
-    (*| left_table_source (KW_CROSS | KW_OUTER) KW_APPLY right_table_source  (*OOOOOOOOOOO*)*)
-    | LPAREN joined_table RPAREN
+    table_source join_type? 'JOIN' table_source 'ON' search_condition 
+  | table_source 'CROSS' 'JOIN' table_source 
+  (*| left_table_source ('CROSS' | 'OUTER') 'APPLY' right_table_source  (*OOOOOOOOOOO*)*)
+  | '(' joined_table ')'
     
 
 join_type: 
-    (KW_INNER | ((KW_LEFT | KW_RIGHT | KW_FULL) KW_OUTER?) (join_hint)?)?
-    KW_JOIN
+    'INNER'
+  | ('LEFT' | 'RIGHT' | 'FULL') 'OUTER'? join_hint?
+    
 
 join_hint: 
-      KW_LOOP 
-      | KW_HASH 
-      | KW_MERGE 
-      | KW_REMOTE 
+    'LOOP' 
+  | 'HASH' 
+  | 'MERGE' 
+  | 'REMOTE' 
 
 pivoted_table:
-        table_source KW_PIVOT pivot_clause full_ident
+    table_source 'PIVOT' pivot_clause full_ident
 
 pivot_clause:
-        LPAREN sql_expr+  
-        KW_FOR sql_expr 
-        KW_IN LPAREN comma_list<<ident>> RPAREN      
-        RPAREN
+    '('
+      sql_expr+  
+      'FOR' sql_expr 
+      'IN' '(' comma_list<ident> ')'      
+    ')'
 
 unpivoted_table:
-        table_source KW_UNPIVOT unpivot_clause full_ident
+    table_source 'UNPIVOT' unpivot_clause full_ident
 
 unpivot_clause:
-        LPAREN ident KW_FOR sql_expr KW_IN LPAREN comma_list<<full_ident>> RPAREN RPAREN
+    '('
+      ident 'FOR' sql_expr 'IN'
+      '(' comma_list<full_ident> ')'
+    ')'
  
    
 case:
-    KW_CASE sql_expr?
-        (KW_WHEN sql_expr KW_THEN sql_expr)*
-        ( KW_ELSE sql_expr )? 
-    KW_END 
+    'CASE' sql_expr?
+    ('WHEN' sql_expr 'THEN' sql_expr)*
+    ['ELSE' sql_expr]
+    'END' 
     
 
 (*****************************************CREATE TABLE****************************************************)
 create_table:
-    KW_CREATE KW_TABLE 
-        ( IDENT DOT IDENT? DOT? )? IDENT 
-            LPAREN ( comma_list<<(column_definition_create_table | computed_column_definition)>> )
-            comma_list<<table_constraint_create_table>> RPAREN 
-        ( KW_ON ( IDENT LPAREN IDENT RPAREN | IDENT 
-            | KW_DEFAULT ) )? 
-        ( KW_TEXTIMAGE_ON (IDENT | KW_DEFAULT) )?
-    SEMI?
+    'CREATE' 'TABLE' 
+    [IDENT '.' IDENT? '.'?] IDENT 
+    '('
+      comma_list<(column_definition_create_table | computed_column_definition)>
+      comma_list<table_constraint_create_table>
+    ')' 
+    ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+    ['TEXTIMAGE_ON' (IDENT | 'DEFAULT')]
+    ';'?
 
 column_definition_create_table:
     ident sql_datatype
-        (KW_COLLATE IDENT)? 
-        ( KW_NULL | KW_NOT KW_NULL )?
-        (( KW_CONSTRAINT IDENT )? KW_DEFAULT sql_expr )? 
-          | (KW_IDENTITY (LPAREN sql_expr COMMA sql_expr RPAREN)? (KW_NOT KW_FOR KW_REPLICATION)?)?
-        ( KW_ROWGUIDCOL )? column_constraint_create_table* 
+    ['COLLATE' IDENT]
+    ['NOT'? 'NULL']
+    [['CONSTRAINT' IDENT] 'DEFAULT' sql_expr]
+  | ['IDENTITY' ['(' sql_expr ',' sql_expr ')'] ['NOT' 'FOR' 'REPLICATION']]
+    ['ROWGUIDCOL'] column_constraint_create_table*
 
 column_constraint_create_table: 
-    (KW_CONSTRAINT IDENT)? 
-    ((KW_PRIMARY KW_KEY | KW_UNIQUE) 
-            (KW_CLUSTERED | KW_NONCLUSTERED)? 
-            ( 
-                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER  
-              | KW_WITH LPAREN comma_list<<index_option>> RPAREN 
-
-            )?
-            (KW_ON ( IDENT LPAREN IDENT RPAREN 
-                | IDENT | KW_DEFAULT))?
-      | (KW_FOREIGN KW_KEY)? 
-            KW_REFERENCES (IDENT DOT)? IDENT (LPAREN IDENT RPAREN)? 
-            delete_update*
-            (KW_NOT KW_FOR KW_REPLICATION)? 
-      | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? sql_expr 
+    ['CONSTRAINT' IDENT]
+    (
+        ('PRIMARY' 'KEY' | 'UNIQUE') 
+        ['CLUSTERED' | 'NONCLUSTERED']
+        [ 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER  
+          | 'WITH' '(' comma_list<index_option> ')' 
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | ['FOREIGN' 'KEY']
+        'REFERENCES' [IDENT '.'] IDENT ['(' IDENT ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
     ) 
 
 computed_column_definition:
-    IDENT KW_AS sql_expr 
-    (KW_PERSISTED (KW_NOT KW_NULL)?)?
-    ( 
-        (KW_CONSTRAINT IDENT)?
-        (KW_PRIMARY KW_KEY | KW_UNIQUE)
-            (KW_CLUSTERED | KW_NONCLUSTERED)?
-            ( 
-                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
-              | KW_WITH LPAREN comma_list<<index_option>> RPAREN
-            )?
-            (KW_ON (IDENT LPAREN IDENT RPAREN 
-                | IDENT | KW_DEFAULT))?
-        | (KW_FOREIGN KW_KEY)? 
-            KW_REFERENCES IDENT (LPAREN IDENT RPAREN)? 
-            delete_update*
-            (KW_NOT KW_FOR KW_REPLICATION)? 
-        | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? sql_expr 
-    )? 
+    IDENT 'AS' sql_expr 
+    ['PERSISTED' ['NOT' 'NULL']]
+    [ 
+        ['CONSTRAINT' IDENT]
+        ('PRIMARY' 'KEY' | 'UNIQUE')
+        ['CLUSTERED' | 'NONCLUSTERED']
+        [
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')'
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | ['FOREIGN' 'KEY']
+        'REFERENCES' IDENT ['(' IDENT ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
+    ] 
 (*-*)
 table_constraint_create_table:
-    (KW_CONSTRAINT IDENT)? 
+    ['CONSTRAINT' IDENT]
     ( 
-        (KW_PRIMARY KW_KEY | KW_UNIQUE) 
-            (KW_CLUSTERED | KW_NONCLUSTERED)? 
-                    LPAREN comma_list<<(IDENT (KW_ASC | KW_DESC)?)>> RPAREN 
-            ( 
-                KW_WITH KW_FILLFACTOR OP_EQ DEC_NUMBER 
-               |KW_WITH LPAREN comma_list<<index_option>> RPAREN 
-            )?
-            (KW_ON (IDENT LPAREN IDENT RPAREN
-                | IDENT | KW_DEFAULT))? 
-        | KW_FOREIGN KW_KEY 
-                    LPAREN comma_list<<IDENT>> RPAREN 
-            KW_REFERENCES IDENT (LPAREN comma_list<<IDENT>> RPAREN )? 
-            delete_update*
-            (KW_NOT KW_FOR KW_REPLICATION)? 
-        | KW_CHECK (KW_NOT KW_FOR KW_REPLICATION)? sql_expr
+        ('PRIMARY' 'KEY' | 'UNIQUE') 
+        ['CLUSTERED' | 'NONCLUSTERED']
+        '(' comma_list<(IDENT ['ASC' | 'DESC'])> ')' 
+        [ 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')' 
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | 'FOREIGN' 'KEY' 
+        '(' comma_list<IDENT> ')' 
+        'REFERENCES' IDENT ['(' comma_list<IDENT> ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr
     ) 
 	
 delete_update:
-    KW_ON (KW_DELETE | KW_UPDATE) delete_update_options
+    'ON' ('DELETE' | 'UPDATE') delete_update_options
    
 delete_update_options:
-    KW_NO KW_ACTION | KW_CASCADE | KW_SET KW_NULL | KW_SET KW_DEFAULT
+    'NO' 'ACTION' | 'CASCADE' | 'SET' 'NULL' | 'SET' 'DEFAULT'
    
 index_option:
     ( 
-        KW_PAD_INDEX OP_EQ (KW_ON | KW_OFF) 
-        | KW_FILLFACTOR OP_EQ DEC_NUMBER 
-        | KW_IGNORE_DUP_KEY OP_EQ (KW_ON | KW_OFF) 
-        | KW_STATISTICS_NORECOMPUTE OP_EQ (KW_ON | KW_OFF) 
-        | KW_ALLOW_ROW_LOCKS OP_EQ (KW_ON | KW_OFF) 
-        | KW_ALLOW_PAGE_LOCKS OP_EQ (KW_ON | KW_OFF) 
+        'PAD_INDEX' '=' ('ON' | 'OFF') 
+      | 'FILLFACTOR' '=' DEC_NUMBER 
+      | 'IGNORE_DUP_KEY' '=' ('ON' | 'OFF') 
+      | 'STATISTICS_NORECOMPUTE' '=' ('ON' | 'OFF') 
+      | 'ALLOW_ROW_LOCKS' '=' ('ON' | 'OFF') 
+      | 'ALLOW_PAGE_LOCKS' '=' ('ON' | 'OFF') 
     ) 
     
 insert:
-    (KW_WITH comma_list<<common_table_expression>>)?
-    KW_INSERT 
-        (KW_TOP sql_expr KW_PERCENT?)?
-        KW_INTO? 
-        (object | rowset_function 
-          (KW_WITH LPAREN table_hint* RPAREN)?
-        )
-    (
-        (LPAREN comma_list<<LOCALVAR>> RPAREN)? 
-        (output_clause)?
-        (KW_VALUES LPAREN comma_list<<(KW_DEFAULT | KW_NULL | sql_expr)>> RPAREN 
-        | batch_body
-        | KW_DEFAULT KW_VALUES
-        )?
-    )    
-    SEMI?
+    ['WITH' comma_list<common_table_expression>]
+    'INSERT' 
+    ['TOP' sql_expr 'PERCENT'?]
+    'INTO'? 
+    (object | rowset_function ['WITH' '(' table_hint* ')'] )
+    ['(' comma_list<LOCALVAR> ')']
+    output_clause?
+    [
+        'VALUES' '(' comma_list<('DEFAULT' | 'NULL' | sql_expr)> ')' 
+      | batch_body
+      | 'DEFAULT' 'VALUES'
+    ]
+    ';'?
 
 output_clause:
-        KW_OUTPUT dml_select_list KW_INTO (LOCALVAR | IDENT) (LPAREN comma_list<<LOCALVAR>> RPAREN)?
-        (KW_OUTPUT dml_select_list)?
+    'OUTPUT' dml_select_list 'INTO' (LOCALVAR | IDENT)
+    ['(' comma_list<LOCALVAR> ')']
+    ['OUTPUT' dml_select_list]
     
 dml_select_list:
-    (ident | sql_expr) (KW_AS? IDENT)? comma_list<<((ident | sql_expr) (KW_AS? IDENT)?)>>
+    (ident | sql_expr) ['AS'? IDENT]
+    comma_list<( (ident | sql_expr) ['AS'? IDENT])>
 
 column_name:
-    (KW_DELETED | KW_INSERTED | ident) DOT (STAR | ident)
+    ('DELETED' | 'INSERTED' | ident) '.' ('*' | ident)
 
 object:
-    ( IDENT DOT IDENT DOT IDENT DOT 
-      | IDENT DOT IDENT? DOT 
-      | IDENT DOT
-    )?
+    [
+        IDENT '.' IDENT '.' IDENT '.' 
+      | IDENT '.' IDENT? '.' 
+      | IDENT '.'
+    ]
     ident
        
 
 begin_transaction:
-    KW_BEGIN (KW_TRAN | KW_TRANSACTION) 
-        ((ident | LOCALVAR)
-          (KW_WITH KW_MARK STRING_CONST?)?
-        )?
-    SEMI?
+    'BEGIN' ('TRAN' | 'TRANSACTION') 
+    [
+      (ident | LOCALVAR)
+      ['WITH' 'MARK' STRING_CONST?]
+    ]
+    ';'?
 
 commit_transaction:
-    KW_COMMIT (KW_TRAN | KW_TRANSACTION) ( IDENT | LOCALVAR )? 
-    SEMI?
+    'COMMIT' ('TRAN' | 'TRANSACTION') [IDENT | LOCALVAR]
+    ';'?
     
 execute_stmnt:
     execute_proc
-    |execute_character_string
-    |execute_command
+  | execute_character_string
+  | execute_command
 
 execute_proc:
-    (KW_EXEC | KW_EXECUTE)?
-    (((LOCALVAR OP_EQ)?
-      (full_ident (SEMI DEC_NUMBER)? | LOCALVAR) 
-      brace_opt<<
-         LPAREN 
-         (comma_list<<((LOCALVAR OP_EQ)? 
-            (sql_expr
-			|LOCALVAR (KW_OUTPUT | KW_OUT)? 
-            | KW_DEFAULT?)
-         )?>>)
-        RPAREN>>
-      (KW_WITH KW_RECOMPILE)?
+    ['EXEC' | 'EXECUTE']
+    (
+        create_object '.' IDENT
+        '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
+      | [LOCALVAR '=']
+        (full_ident [';' DEC_NUMBER] | LOCALVAR) 
+        brace_opt<
+          '(' 
+            comma_list<[
+              [LOCALVAR '=']
+              (
+                  sql_expr
+                | LOCALVAR ['OUTPUT' | 'OUT']
+                | 'DEFAULT'?
+              )
+            ]>
+          ')'
+        >
+        ['WITH' 'RECOMPILE']
     )
-    | create_object DOT IDENT LPAREN comma_list<<((LOCALVAR OP_EQ)? sql_expr)>> RPAREN)
 
-create_object: STOREDPROCEDURE LPAREN comma_list<<sql_expr>> RPAREN
+create_object: STOREDPROCEDURE '(' comma_list<sql_expr> ')'
 
 execute_character_string:
-    (KW_EXEC | KW_EXECUTE) 
-    LPAREN (( LOCALVAR | STRING_CONST ) PLUS?)+ RPAREN    
-    (KW_AS (KW_LOGIN | KW_USER) OP_EQ STRING_CONST)?
-SEMI?
+    ('EXEC' | 'EXECUTE') 
+    '(' ((LOCALVAR | STRING_CONST) '+'?)+ ')'    
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ';'?
 
 execute_command:
-    (KW_EXEC | KW_EXECUTE)
-    LPAREN ( LOCALVAR | STRING_CONST "?"? PLUS?)+
-    (( COMMA sql_expr KW_OUTPUT?)+)?
-    RPAREN 
-    (KW_AS (KW_LOGIN | KW_USER) OP_EQ STRING_CONST)?
-    (KW_AT full_ident)?
-SEMI?
+    ('EXEC' | 'EXECUTE')
+    '('
+      (LOCALVAR | STRING_CONST '?'? '+'?)+
+      (',' sql_expr 'OUTPUT'?)*
+    ')' 
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ['AT' full_ident]
+    ';'?
 
-type_size : LPAREN (DEC_NUMBER | KW_MAX) RPAREN
+type_size : '(' (DEC_NUMBER | 'MAX') ')'
 
 sql_datatype:
-      KW_BIGINT | KW_NUMERIC | KW_BIT | KW_SMALLINT  | KW_DECIMAL | KW_DATETIME | KW_SMALLMONEY  | KW_SYSNAME
-    | "INT" | KW_TINYINT | KW_MONEY
-    | KW_FLOAT type_size?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
-    | KW_REAL
-    | KW_CHAR type_size?
-    | KW_VARCHAR type_size?
-    | KW_VARBINARY type_size?
-    | KW_NCHAR type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
-    | KW_NVARCHAR type_size?
-    | KW_SQL_VARIANT
+      'BIGINT'
+    | 'NUMERIC'
+    | 'BIT'
+    | 'SMALLINT'
+    | 'DECIMAL'
+    | 'DATETIME'
+    | 'SMALLMONEY'
+    | 'SYSNAME'
+    | 'INT'
+    | 'TINYINT'
+    | 'MONEY'
+    | 'FLOAT' type_size?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+    | 'REAL'
+    | 'CHAR' type_size?
+    | 'VARCHAR' type_size?
+    | 'VARBINARY' type_size?
+    | 'NCHAR' type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+    | 'NVARCHAR' type_size?
+    | 'SQL_VARIANT'
 
-execute_as: (KW_EXEC | KW_EXECUTE) KW_AS (KW_CALLER | KW_SELF | KW_OWNER |ident OP_EQ STRING_CONST) 
+execute_as:
+    ('EXEC' | 'EXECUTE')
+    'AS'
+    ('CALLER' | 'SELF' | 'OWNER' |ident '=' STRING_CONST) 
 
 binop:
-     OP_PLUS_EQ | OP_MINUS_EQ | OP_MUL_EQ | OP_DIV_EQ | OP_MOD_EQ | OP_AND_EQ | OP_XOR_EQ | OP_OR_EQ
-    | OP_EQ | OP_PLUS | OP_MINUS | STAR | OP_DIV | OP_MOD | OP_TILDA 
-    | OP_LT | OP_MT | (OP_LT OP_MT) | (OP_LT OP_EQ) | (OP_MT OP_EQ) | (OP_LT OP_GT)
+      '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '^=' | '|='
+    | '=' | '+' | '-' | '*' | '/' | '%' | '~'
+    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=')
 
 fetch_stmnt:    
-    KW_FETCH 
-              ((KW_NEXT | KW_PRIOR | KW_FIRST | KW_LAST 
-                        | KW_ABSOLUTE (dec_num | LOCALVAR) 
-                        | KW_RELATIVE (dec_num | LOCALVAR) 
-                   )? 
-                   KW_FROM 
-              )? 
-    ((KW_GLOBAL? IDENT) | LOCALVAR) 
-    (KW_INTO comma_list<<LOCALVAR>>)? 
+    'FETCH' 
+    [
+      [
+          'NEXT'
+        | 'PRIOR'
+        | 'FIRST'
+        | 'LAST' 
+        | 'ABSOLUTE' (dec_num | LOCALVAR) 
+        | 'RELATIVE' (dec_num | LOCALVAR) 
+      ] 
+      'FROM' 
+    ] 
+    ('GLOBAL'? IDENT | LOCALVAR) 
+    ('INTO' comma_list<LOCALVAR>)? 
     
 sql_expr:
     sql_value
-    | scalar_function
-    | LPAREN sql_expr RPAREN
-    | call_expr
-    | full_ident
-    | select_stmnt
-    | (KW_NOT | OP_PLUS_EQ | OP_MINUS_EQ | OP_TILDA) sql_expr 
-    | GLOBALVAR
-    | LOCALVAR
-	| STAR
-    | sql_expr binop sql_expr
-    | sql_expr KW_IS KW_NOT? KW_NULL
-    | ranking_windowed_function 
-    | aggregate_windowed_function
-    | sql_expr KW_COLLATE ident
-    | case
-    | begin_transaction
-    | KW_EXISTS sql_expr
-    | KW_IS_MEMBER LPAREN STRING_CONST RPAREN
-    | sql_expr ( KW_AND | KW_OR ) sql_expr
-    | KW_TYPE KW_FROM full_ident
-    | fetch_stmnt
-    | sql_expr KW_NOT? KW_IN LPAREN comma_list<<sql_expr>> RPAREN
-    | sql_expr KW_NOT? KW_LIKE sql_expr
+  | scalar_function
+  | '(' sql_expr ')'
+  | call_expr
+  | full_ident
+  | select_stmnt
+  | ('NOT' | '+=' | '-=' | '~') sql_expr 
+  | GLOBALVAR
+  | LOCALVAR
+  | '*'
+  | sql_expr binop sql_expr
+  | sql_expr 'IS' 'NOT'? 'NULL'
+  | ranking_windowed_function 
+  | aggregate_windowed_function
+  | sql_expr 'COLLATE' ident
+  | case
+  | begin_transaction
+  | 'EXISTS' sql_expr
+  | 'IS_MEMBER' '(' STRING_CONST ')'
+  | sql_expr ('AND' | 'OR') sql_expr
+  | 'TYPE' 'FROM' full_ident
+  | fetch_stmnt
+  | sql_expr 'NOT'? 'IN' '(' comma_list<sql_expr> ')'
+  | sql_expr 'NOT'? 'LIKE' sql_expr
      
-call_expr: full_ident LPAREN comma_list<<(sql_datatype|sql_expr)>> RPAREN
+call_expr: full_ident '(' comma_list<(sql_datatype|sql_expr)> ')'

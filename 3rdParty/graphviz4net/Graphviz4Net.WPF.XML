@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Graphviz4Net.WPF</name>
+    </assembly>
+    <members>
+        <member name="T:Graphviz4Net.WPF.WPFLayoutBuilder">
+            <summary>
+            Builds the graph layout out of WPF elements, which are positioned into the WPF canvas.
+            The WPF elements used are determined by the <see cref="T:Graphviz4Net.WPF.IWPFLayoutElementsFactory"/> abstract factory object.
+            </summary>
+        </member>
+    </members>
+</doc>

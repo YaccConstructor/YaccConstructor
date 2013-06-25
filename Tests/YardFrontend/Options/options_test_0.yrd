@@ -1,4 +1,7 @@
-[<Start>]
-s:
-#set a = "smth"
-A;
+options {
+    first="Some name"
+    second = ololo
+}
+
+[<Start>] // Start rule attribute
+s: A;

@@ -31,8 +31,8 @@ type TargetLanguage =
 
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
-    (tokenType : string) (res : System.Text.StringBuilder) targetLanguage 
-    _class =
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
+    _class positionType caseSensitive =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -161,11 +161,47 @@ let printTables
 
         printBr "type Token ="
         let indexator = grammar.indexator
+        let defaultType = tokenType.TryFind "_"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s%s" (indexator.indexToTerm i)
-            <|  match tokenType with
-                | "" -> ""
-                | s -> " of " + s
+            let name = indexator.indexToTerm i
+            let type' =
+                match tokenType.TryFind name with
+                | Some t -> t
+                | None ->
+                    match defaultType with
+                    | Some t -> t
+                    | None -> failwithf "Type of token %s in not defined" name
+
+            printBrInd 1 "| %s%s" name 
+            <|  match type' with
+                | None -> ""
+                | Some s -> " of (" + s + ")"
+
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            if positionType = "" then
+                failwith "RNGLR: Unspecified position type"
+            printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
+
+        let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
+
+        printBr ""
+        printBr "let genLiteral (str : string) posStart posEnd ="
+        if caseSensitive then "str"
+        else "str.ToLower()"
+        |> printBrInd 1 "match %s with"
+            
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (escapeQuotes <| indexator.indexToLiteral i) i
+        printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
+        //
+
+        printBr "let tokenData = function"
+
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
+
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` x -> box x" i
 
         printBr ""
         printBr "let numToString = function"
@@ -176,11 +212,30 @@ let printTables
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %d -> \"%s\"" i (indexator.indexToTerm i)
 
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| %d -> \"'%s'\"" i (escapeQuotes <| indexator.indexToLiteral i)
+
         printBrInd 1 "| _ -> \"\""
+        printBr ""
 
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> %d" i i
+        printBr ""
+
+        printBrInd 0 "let isLiteral = function"
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> true" i
+        printBr ""
+
+        printInd 0 "let getLiteralNames = ["
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            print "\"%s\";" <| indexator.indexToLiteral i
+        print "]"
         printBr ""
 
         printBr "let mutable private cur = 0"
@@ -277,11 +332,21 @@ let printTables
 
         printBr "abstract class Token"        
         let indexator = grammar.indexator
+        let defaultType = tokenType.TryFind "_"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 0 "case class %s%s extends Token" (indexator.indexToTerm i)
-            <|  match tokenType with
-                | "" -> ""
-                | s -> " ( v:" + s + ")"
+            let name = indexator.indexToTerm i
+            let type' =
+                match tokenType.TryFind name with
+                | Some t -> t
+                | None ->
+                    match defaultType with
+                    | Some t -> t
+                    | None -> failwithf "Type of token %s in not defined" name
+
+            printBrInd 0 "case class %s%s extends Token" name
+            <|  match type' with
+                | None -> ""
+                | Some s -> " ( v:" + s + ")"
 
         printBr ""
         printBr "class %s {" _class

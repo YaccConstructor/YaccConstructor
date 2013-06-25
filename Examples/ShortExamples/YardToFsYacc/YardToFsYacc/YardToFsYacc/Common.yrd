@@ -1,9 +1,0 @@
-list <<item separator>>: {[]}| hd=item tl=(separator itm=item {itm})* {hd::tl};
-
-not_empty_list<<item separator>>:
-    hd=item tl=(separator itm=item {itm})* {hd::tl}
-    ;
-
-brace_opt<<o_br block cl_br>>: block | -o_br block -cl_br ;
-
- 

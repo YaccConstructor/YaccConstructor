@@ -1,5 +1,5 @@
 [<Start>]
-s : a<<NUMBER>> ;
+s : a<NUMBER> ;
 
-a<<b>> : (b | b a<<b>>) ;
+a<b> : (b | b a<b>) ;
 

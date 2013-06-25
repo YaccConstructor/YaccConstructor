@@ -1,7 +1,7 @@
 [<Start>]
-s: a=do<<b>>[c] {a};
+s: a=do<b><<c>> {a};
 
-do<<b>>[c] : res=(go)* {res};
+do<b><<c>> : res=(go)* {res};
 
 go: NUMBER;
 

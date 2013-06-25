@@ -12,8 +12,11 @@ let getTag token =
   | PLUS -> 1us
   | NUM -> 2us
 let rules = 
-  [ 281483566841856UL; 844429225099264UL; 562958543355904UL; 562962838454272UL ]
-  |> Array.ofList
+  [| 281483566841856UL; 844429225099264UL; 562958543355904UL; 562962838454272UL
+  |]
+let lblName = 
+  [|
+  |]
 let StartNTerm = 1
 let CodeTokenStream (stream:seq<CYKToken<cykToken,_>>) = 
   stream

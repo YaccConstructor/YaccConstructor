@@ -365,7 +365,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     stateToVertex.[vertex] <- null
                 usedStates.Clear()
 
-                let containsRecState (oldVertices : Stack<Vertex * 'a list>) =
+                let containsRecState (oldVertices : Stack<Vertex * _ list>) =
                     let oldVert = oldVertices.ToArray()
                     for vertex, path in oldVert do
                         if pushes.Count <> recVertNumber then
@@ -540,8 +540,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 printfn "Parse error in %d position in %s token. " <| fst errorList.[i] <| tokenToString (snd errorList.[i])
             //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
         if !isError then 
-            Error (!curInd , Unchecked.defaultof<'TokenType> ,
-                        "There is no accepting state. Check this: grammar can contain ERROR token.", debugFuns ())
+            Error (!curInd , !curToken , "Parse Error", debugFuns ())
         else
             let root = ref None
             let addTreeTop res =
@@ -554,8 +553,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd , Unchecked.defaultof<'TokenType> ,
-                            "There is no accepting state. Check this: grammar can't contain RNGLR_EOF token.", debugFuns ())
+            | None -> Error (!curInd, !curToken, "Input was fully processed, but it's not complete correct string.", debugFuns ())
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
                 Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)

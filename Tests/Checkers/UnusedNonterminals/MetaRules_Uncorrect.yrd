@@ -1,11 +1,11 @@
-e<<f>> : d f;
+e<f> : d f;
 [<Start>]
 s : b;
-b : NUMBER | e<<x>> a<<z z z>>;
+b : NUMBER | e<x> a<z z z>;
 d : s;
-z : e<<(x|y)>> w<<s>>;
-w<<g>> : a<<g s d>>;
+z : e<(x|y)> w<s>;
+w<g> : a<g s d>;
 x : y;
 y : PLUS;
 unused : s;
-a<<b c d>> : c;
+a<b c d> : c;

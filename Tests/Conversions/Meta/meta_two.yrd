@@ -1,4 +1,4 @@
 [<Start>]
-s : do<<b>> do<<c>>;
+s : do<b> do<c>;
 
-do<<a>> : a;
+do<a> : a;

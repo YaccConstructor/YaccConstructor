@@ -37,11 +37,7 @@ let ParseFile fileName : t<Source.t, Source.t> =
             (fun acc (KeyValue(k,v)) -> acc + (sprintf "%s :\n%s\n\n"  k v))
             "(*\nYou need to describe following terminals in lexer:\n"
         |> (fun x -> x + "*)")
-    {info = {new Definition.info with fileName = ""}
-     head = Some <| new Source.t(terminalsDescr)
-     grammar = grammar
-     foot = None
-     options = Map.empty}
+    {empty with head = Some <| new Source.t(terminalsDescr); grammar = grammar}
 
 let run () =
     let testPath = ref @"..\..\..\..\Tests\ANTLR"

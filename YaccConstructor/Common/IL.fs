@@ -200,9 +200,10 @@ module Definition = begin
      grammar : Grammar.t<'patt,'expr>;
      /// Text after a grammar description, what will be simply copied
      foot    :'expr option;
-     options : Map<Rule.t<'patt, 'expr>, Map<string, string>>
+     options : Map<string, string>
+     tokens : Map<string, string option>
     }    
     
     /// Empty grammar
-    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty}
+    let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty; tokens = Map.empty}
 end

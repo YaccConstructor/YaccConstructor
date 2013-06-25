@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets  -g YardPrinter -i "D:\projects\YC\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
+    <StartArguments>-c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets -c Linearize  -g YardPrinter -i "C:\projects\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <StartAction>Project</StartAction>

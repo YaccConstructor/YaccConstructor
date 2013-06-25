@@ -11,10 +11,8 @@ let run path astBuilder =
     let tokens = LexCommon.tokens(path)
     astBuilder tokens, tokens
 
-let dir = @"../../../../Tests/RNGLR/"
-
 let parser = RNGLR.ParseCalc.buildAst
-let path = dir + "Calc.txt"
+let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with

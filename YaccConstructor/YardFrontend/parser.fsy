@@ -23,6 +23,7 @@ open Yard.Core
 open Yard.Core.IL.Production
 open Yard.Core.IL.Grammar
 open Yard.Core.IL.Definition
+open System.Text.RegularExpressions
  
 type Range = struct
     val Start: Lexing.Position
@@ -31,13 +32,16 @@ type Range = struct
     new (start,end_) = {Start = start; End = end_}
 end
 
-exception Parse_error
+exception ParseError of Source.t * string
 let parseFile = ref Unchecked.defaultof<_>
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let allPublic = ref false
 let o2l = function Some x -> [x] | None -> []
 let getList = function Some x -> x | None -> []
+let fst_ (x,_,_) = x
+let snd_ (_,x,_) = x
+let trd_ (_,_,x) = x
 
 let joinMaps (p:Map<'a,'b>) (q:Map<'a,'b>) = 
     Map(Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ])
@@ -57,8 +61,6 @@ let makeNewSeq seq (lbl:Source.t) (w:Option<Source.t>) =
 let missing name = System.Console.WriteLine("Missing " + name)
 let createSeqElem bnd omitted r check =
     { binding = bnd; omit = omitted; rule = r; checker = check }
-
-let concatModOpt a b = fst a :: fst b, joinMaps (snd a) (snd b)
 
 let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
     let oldFileName = !currentFilename
@@ -88,8 +90,8 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 %token EXCLAMATION
 %token <Range> LPAREN
 %token <Range> RPAREN
-%token DGREAT
-%token DLESS
+%token GREAT
+%token LESS
 %token COMMUT
 %token INCLUDE
 %token SET
@@ -105,8 +107,10 @@ let parseRules (filename:string) : Definition.t<Source.t, Source.t> =
 
 %%
 
+kw : MODULE {$1} | INCLUDE {$1} | OPEN {$1} | PUBLIC {$1} | PRIVATE {$1}
+
 file: action_opt
-      includes
+      includes_or_options_or_tokens
       unnamed_module_opt
       modules
       foot_opt
@@ -115,21 +119,70 @@ file: action_opt
         {
             info = { fileName = !currentFilename }
             head = $1
-            grammar = fst $2 @ fst $3 @ fst $4
+            grammar = fst_ $2 @ $3 @ $4
             foot = $5
-            options = (snd $4) |> joinMaps (snd $3) |> joinMaps (snd $2)
+            options = snd_ $2
+            tokens = trd_ $2
         }
       }
 
+includes_or_options_or_tokens : 
+    /* rules, options,   tokens   */
+    {  [],    Map.empty, Map.empty }
+  | include_ includes_or_options_or_tokens       { ($1 @ fst_ $2), snd_ $2, trd_ $2}
+  | option_block includes_or_options_or_tokens   { fst_ $2, joinMaps $1 (snd_ $2), trd_ $2}
+  | tokens_block includes_or_options_or_tokens { fst_ $2, snd_ $2, joinMaps $1 (trd_ $2)}
+
+tokens_block : TOKENS_BLOCK
+  {
+    let block = $1.text
+    let inner = block.[block.IndexOf '{' + 1 .. block.LastIndexOf '}' - 1]
+    inner.Split [|'|'|]
+    |> Array.map (fun s -> s.Trim())
+    |> Array.filter ((<>) "")
+    |> Array.map (fun s ->
+        let genError msg = raise <| ParseError (new Source.t(s, fst parserRange, snd parserRange, !currentFilename),
+                                                "Error in tokens block: " + msg)
+        if Regex.IsMatch(s, @"^(_|[A-Z][A-Za-z0-9_]*)$") then s, None
+        else
+            let m = Regex.Match(s, @"^(_|[A-Z][A-Za-z0-9_]*)\s*of\s*(.*)$")
+            if m.Success then
+                m.Groups.[1].Value, Some m.Groups.[2].Value
+            else
+                if not (System.Char.IsUpper s.[0]) && not (s.[0] = '_' && s.Length > 1 && System.Char.IsWhiteSpace s.[1])
+                then genError "Terminal must start from upper letter"
+                else genError "Token type description is incorrect"
+            
+    ) |> Map.ofArray
+  }
+
+include_:
+    INCLUDE STRING 
+    {
+        let grammar = (parseRules $2.text).grammar
+        if grammar |> List.exists (fun m -> m.name.IsNone) then
+            eprintfn "Error %s: Grammar in included files must be inside modules" $2.text
+        grammar
+    } 
+
+option_block: OPTIONS_START opts BLOCK_END { Map.ofList $2 : Map<_,_>}
+
+opts: option opts { $1::$2 } | { [] }
+
+option: option_l_value EQUAL option_value { ($1 : Source.t).text, ($3 : Source.t).text }
+
+option_value: ident { $1 } | STRING { $1 } | kw { $1 }
+
+option_l_value: ident { $1 } | kw { $1 }
+
 unnamed_module_opt : rule_nlist
     {
-        match fst $1 with
-        | [] -> [], Map.empty
-        | x ->  defaultModules x, snd $1
+        match $1 with
+        | [] -> []
+        | x ->  defaultModules x
     }
 
-modules : module_ modules { concatModOpt $1 $2 }
-        | { [], Map.empty }
+modules : module_ modules { $1 :: $2 } | { [] }
 
 module_ : module_header ident openings rule_nlist
     {
@@ -137,9 +190,8 @@ module_ : module_header ident openings rule_nlist
             allPublic = $1
             name = Some $2
             openings = $3
-            rules = fst $4
+            rules = $4
         }
-        , snd $4
     }
 
 ident : UIDENT { $1 } | LIDENT { $1 }
@@ -159,45 +211,27 @@ action_opt: { None } | ACTION { Some $1 }
 
 foot_opt: { None } | SEMICOLON ACTION { Some $2 }
 
-includes : include_ includes { fst $1 @ fst $2, joinMaps (snd $1) (snd $2) } | { [], Map.empty }
-
-include_:
-    INCLUDE STRING 
-    {
-        let def = parseRules $2.text in
-        if def.grammar |> List.exists (fun m -> m.name.IsNone) then
-            eprintfn "Error %s: Grammar in included files must be inside modules" $2.text
-        def.grammar, def.options
-    } 
-
-
 rule_nlist: rule semi_opt rule_nlist 
-      { concatModOpt $1 $3 }
-    | { [], Map.empty }
-    | rule error { missing "SEMI"; raise Parse_error  }
+      { $1::$3 }
+    | { [] }
 
-rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON option_opt alts
-      { 
-        let newRule =
-            {
-                Rule.isStart = $1
-                Rule.isPublic = $2
-                Rule.name = $3
-                Rule.metaArgs = getList $4
-                Rule.body = $8
-                Rule.args = $5
-            }
-        in
-        match $7 with
-        | Some m -> newRule, Map.empty.Add (newRule, m)
-        | None -> newRule, Map.empty
-       }
+rule: start_rule_sign_opt access_modifier_opt LIDENT formal_meta_param_opt param_list COLON alts
+    { 
+        {
+            Rule.isStart = $1
+            Rule.isPublic = $2
+            Rule.name = $3
+            Rule.metaArgs = getList $4
+            Rule.body = $7
+            Rule.args = $5
+        }
+    }
 
 start_rule_sign_opt: {false} | START_RULE_SIGN {true}
 
 access_modifier_opt: PUBLIC { true } | PRIVATE { false } | { !allPublic }
 
-formal_meta_param_opt: { None } | DLESS formal_meta_list DGREAT {Some $2}
+formal_meta_param_opt: { None } | LESS formal_meta_list GREAT {Some $2}
 
 formal_meta_list: LIDENT {[$1]}
                 | LIDENT formal_meta_list {$1::$2}
@@ -206,7 +240,7 @@ param_opt: { None } | PARAM {Some $1}
 
 param_list: { [] } | PARAM param_list {$1::$2}
 
-weight_opt: { None } | PARAM { Some $1}
+weight_opt: { None } | SQR_LBR NUMBER SQR_RBR { Some $2}
 
 alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 
@@ -233,22 +267,23 @@ predicate_opt: { None } | PREDICATE { Some $1 }
 bound: patt EQUAL prim { createSeqElem (Some $1) false $3 None }
      | prim            { createSeqElem None false $1 None      }
 
-patt: LIDENT {$1} | PATTERN {$1}
+patt: LIDENT {$1} | ACTION {$1}
 
-prim: prim STAR           {PMany $1}
-    | prim PLUS           {PSome $1}
-    | prim QUESTION       {POpt $1}
-    | LPAREN alts RPAREN  {$2}
-    | call                {$1}
-    | lbl_seq             {$1}
-    | STRING              {PLiteral $1}
+prim: prim STAR            {PMany $1}
+    | prim PLUS            {PSome $1}
+    | prim QUESTION        {POpt $1}
+    | SQR_LBR alts SQR_RBR {POpt $2}
+    | LPAREN alts RPAREN   {$2}
+    | call                 {$1}
+    | lbl_seq              {$1}
+    | LITERAL              {PLiteral $1}
 
 meta_param: prim {$1}
 
 meta_params: meta_param {[$1]}
            | meta_param meta_params {$1 :: $2}
 
-meta_param_opt: { None } | DLESS meta_params DGREAT {Some $2}
+meta_param_opt: { None } | LESS meta_params GREAT {Some $2}
 
 call: UIDENT {PToken $1}
     | LIDENT meta_param_opt param_opt  
@@ -257,11 +292,4 @@ call: UIDENT {PToken $1}
         | Some x -> PMetaRef ($1,$3,x)
       }
 
-option_opt: { None } | SET option_params { Some $2 }
-    
-option_params: option_param { Map.empty.Add $1}
-             | option_param COMMA option_params {($3).Add $1}
-
-option_param: LIDENT EQUAL STRING { Source.toString $1, Source.toString $3 }
-
-tada_rule : SHARPLINE {} | EOF {};
+tada_rule : SHARPLINE {} | EOF {} 

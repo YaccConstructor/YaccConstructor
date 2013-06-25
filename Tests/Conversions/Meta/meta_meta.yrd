@@ -1,6 +1,6 @@
 [<Start>]
-s : d<<a b>>;
+s : d<a b>;
 
-d<<a1 b1>> : a<<b1>>;
+d<a1 b1> : a<b1>;
 
-a<<r>> : r*;
+a<r> : r*;

@@ -20,6 +20,9 @@ Tests/CYK/basic_term_noLBL.yrd.CYK.fs
 Examples/CYK/yc/*
 *.psess
 *.vsp
+*/UpgradeReport*
+*/UpgradeLog*
+*/UpgradeReport*
 Builder/SolutionTemplate/*.fsl
 Builder/SolutionTemplate/*/*.fs
 Builder/SolutionTemplate/*/*.fsl
@@ -54,3 +57,5 @@ Examples/RNGLR/MSSql/stack.dot
 Examples/RNGLR/MSSql/*.dot.*
 Examples/RNGLR/MSSql/MsParser.fs
 ppush.txt
+Examples/RNGLR/MSSql/FsYard.log
+YaccConstructor/RNGLRParser.ErrorRecoveryTest/log*.txt

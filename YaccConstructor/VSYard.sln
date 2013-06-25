@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSYard", "VSYard\VSYard.csproj", "{709FCBF0-4A6F-4C34-A250-8E95B7003EA8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A090E3B0-0516-44F3-9FBA-6EF8CB21926E} = {A090E3B0-0516-44F3-9FBA-6EF8CB21926E}

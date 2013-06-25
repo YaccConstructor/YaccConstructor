@@ -8,7 +8,7 @@
     <ProjectGuid>99d2f7e1-07c5-4d45-890c-880e36cb8905</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractFsLex.Test</RootNamespace>
-    <AssemblyName>AbstractFsLex.Test</AssemblyName>
+    <AssemblyName>AbstractLexer.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>AbstractLexer.Test</Name>
   </PropertyGroup>

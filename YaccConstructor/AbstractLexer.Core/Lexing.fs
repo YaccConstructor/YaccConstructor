@@ -121,71 +121,7 @@ namespace AbstractLexer.Core
                 Array.blit buffer bufferScanStart repl bufferScanStart bufferScanLength;
                 buffer <- repl
 
-        static member FromReadFunctions (syncRead : ('char[] * int * int -> int) option, asyncRead : ('char[] * int * int -> Async<int>) option) : LexBuffer<'char> = 
-            let extension= Array.zeroCreate 4096
-            let fillers = 
-                { fillSync = 
-                    match syncRead with 
-                    | None -> None
-                    | Some read -> 
-                         Some (fun lexBuffer -> 
-                             let n = read(extension,0,extension.Length)
-                             lexBuffer.EnsureBufferSize n;
-                             Array.blit extension 0 lexBuffer.Buffer lexBuffer.BufferScanPos n;
-                             lexBuffer.BufferMaxScanLength <- lexBuffer.BufferScanLength + n); 
-                  fillAsync = 
-                    match asyncRead with 
-                    | None -> None
-                    | Some read -> 
-                         Some (fun lexBuffer -> 
-                                  async { 
-                                      let! n = read(extension,0,extension.Length)
-                                      lexBuffer.EnsureBufferSize n;
-                                      Array.blit extension 0 lexBuffer.Buffer lexBuffer.BufferScanPos n;
-                                      lexBuffer.BufferMaxScanLength <- lexBuffer.BufferScanLength + n }) }
-            new LexBuffer<_>(fillers)
-
-        // A full type signature is required on this method because it is used at more specific types within its own scope
-        static member FromFunction (f : 'char[] * int * int -> int) : LexBuffer<'char> =  LexBuffer<_>.FromReadFunctions(Some(f),None)
-        static member FromAsyncFunction (f : 'char[] * int * int -> Async<int>) : LexBuffer<'char> =  LexBuffer<_>.FromReadFunctions(None,Some(f))
-              
-        static member FromCharFunction f : LexBuffer<char> = 
-            LexBuffer<char>.FromFunction(fun (buff,start,len) -> 
-                let buff2 = Array.zeroCreate len
-                let n = f buff2 len 
-                Array.blit buff2 0 buff start len
-                n)
-        static member FromByteFunction f : LexBuffer<byte> = 
-            LexBuffer<byte>.FromFunction(fun (buff,start,len) -> 
-                let buff2 = Array.zeroCreate len
-                let n = f buff2 len 
-                Array.blit buff2 0 buff start len
-                n)
-
-        // A full type signature is required on this method because it is used at more specific types within its own scope
-        static member FromArray (s: 'char[]) : LexBuffer<'char> = 
-            let lexBuffer = 
-                new LexBuffer<_> 
-                    { fillSync = Some (fun _ -> ()); 
-                      fillAsync = Some (fun _ -> async { return () }) }
-            let buffer = Array.copy s 
-            lexBuffer.Buffer <- buffer;
-            lexBuffer.BufferMaxScanLength <- buffer.Length;
-            lexBuffer
-
-        static member FromBytes    (arr) = LexBuffer<byte>.FromArray(arr)
-        static member FromChars    (arr) = LexBuffer<char>.FromArray(arr) 
-        static member FromString (s:string) = LexBuffer<char>.FromChars (s.ToCharArray())
-
-        static member FromTextReader (tr:System.IO.TextReader)  : LexBuffer<char> = 
-           LexBuffer<char>.FromFunction(tr.Read) 
-
-        static member FromBinaryReader (br:System.IO.BinaryReader)  : LexBuffer<byte> = 
-           LexBuffer<byte>.FromFunction(br.Read) 
-
-        static member FromStream (stream:System.IO.Stream)  : LexBuffer<byte> = 
-           LexBuffer<byte>.FromReadFunctions(Some(stream.Read),Some(fun (buf,offset,len) -> stream.AsyncRead(buf,offset=offset,count=len))) 
-
+        
     module GenericImplFragments = 
         let startInterpret(lexBuffer:LexBuffer<_>)= 
             lexBuffer.BufferScanStart <- lexBuffer.BufferScanStart + lexBuffer.LexemeLength;

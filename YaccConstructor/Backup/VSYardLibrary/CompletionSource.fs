@@ -1,4 +1,4 @@
-﻿namespace VSYardNS
+namespace VSYardNS
 
 open System.Collections.Generic
 open System

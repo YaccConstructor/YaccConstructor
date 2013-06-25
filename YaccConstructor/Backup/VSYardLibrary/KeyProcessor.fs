@@ -1,4 +1,4 @@
-﻿namespace VSYardNS
+namespace VSYardNS
 
 open System
 open System.ComponentModel.Composition

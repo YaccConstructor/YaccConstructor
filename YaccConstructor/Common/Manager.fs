@@ -24,7 +24,7 @@ type IComponent = interface
 end
 
 type Manager<'T when 'T :> IComponent> () = 
-    let collection = 
+    let collection =
         new ResizeArray<'T>(ComponentsLoader.LoadComponents(typeof<'T>) |> Seq.cast)
 
     let available = ResizeArray.map (fun x -> (x:>IComponent).Name) collection

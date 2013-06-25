@@ -3,33 +3,18 @@
 #nowarn "47" // recursive initialization of LexBuffer
 
 
-#if INTERNALIZED_POWER_PACK
-namespace Internal.Utilities.Text.Lexing
-
-#else
 namespace AbstractLexer.Core
-#endif
 
     open System.Collections.Generic
 
     // REVIEW: This type showed up on a parsing-intensive performance measurement. Consider whether it can be a struct-record later when we have this feature. -jomo
-#if INTERNALIZED_POWER_PACK
-    type internal Position = 
-#else
     type Position = 
-#endif
         { pos_fname : string;
           pos_lnum : int;
-#if INTERNALIZED_POWER_PACK
-          pos_orig_lnum : int;
-#endif
           pos_bol : int;
           pos_cnum : int; }
         member x.FileName = x.pos_fname
         member x.Line = x.pos_lnum
-#if INTERNALIZED_POWER_PACK
-        member x.OriginalLine = x.pos_orig_lnum
-#endif
         member x.Char = x.pos_cnum
         member x.AbsoluteOffset = x.pos_cnum
         member x.StartOfLine = x.pos_bol
@@ -37,9 +22,6 @@ namespace AbstractLexer.Core
         member x.Column = x.pos_cnum - x.pos_bol
         member pos.NextLine = 
             { pos with 
-#if INTERNALIZED_POWER_PACK
-                    pos_orig_lnum = pos.OriginalLine + 1;
-#endif
                     pos_lnum = pos.Line+1; 
                     pos_bol = pos.AbsoluteOffset }
         member pos.EndOfToken(n) = {pos with pos_cnum=pos.pos_cnum + n }
@@ -48,34 +30,20 @@ namespace AbstractLexer.Core
         static member Empty = 
             { pos_fname=""; 
               pos_lnum= 0; 
-#if INTERNALIZED_POWER_PACK
-              pos_orig_lnum = 0;
-#endif
               pos_bol= 0; 
               pos_cnum=0 }
         static member FirstLine(filename) = 
             { pos_fname=filename; 
-#if INTERNALIZED_POWER_PACK
-              pos_orig_lnum = 1;
-#endif
               pos_lnum= 1; 
               pos_bol= 0; 
               pos_cnum=0 }
 
-#if INTERNALIZED_POWER_PACK
-    type internal LexBufferFiller<'char> = 
-#else
     type LexBufferFiller<'char> = 
-#endif
         { fillSync : (LexBuffer<'char> -> unit) option
           fillAsync : (LexBuffer<'char> -> Async<unit>) option } 
         
     and [<Sealed>]
-#if INTERNALIZED_POWER_PACK
-        internal LexBuffer<'char>(filler: LexBufferFiller<'char>) as this = 
-#else
         LexBuffer<'char>(filler: LexBufferFiller<'char>) as this = 
-#endif
         let context = new Dictionary<string,obj>(1) in 
         let extendBufferSync = (fun () -> match filler.fillSync with Some refill -> refill this | None -> invalidOp "attempt to read synchronously from an asynchronous lex buffer")
         let extendBufferAsync = (fun () -> match filler.fillAsync with Some refill -> refill this | None -> invalidOp "attempt to read asynchronously from a synchronous lex buffer")
@@ -247,11 +215,7 @@ namespace AbstractLexer.Core
     open GenericImplFragments
 
     [<Sealed>]
-#if INTERNALIZED_POWER_PACK
-    type internal AsciiTables(trans: uint16[] array, accept: uint16[]) =
-#else
     type AsciiTables(trans: uint16[] array, accept: uint16[]) =
-#endif
         let rec scanUntilSentinel(lexBuffer, state) =
             let sentinel = 255 * 256 + 255 
             // Return an endOfScan after consuming the input 
@@ -315,11 +279,7 @@ namespace AbstractLexer.Core
         static member Create(trans,accept) = new AsciiTables(trans,accept)
 
     [<Sealed>]
-#if INTERNALIZED_POWER_PACK
-    type internal UnicodeTables(trans: uint16[] array, accept: uint16[]) = 
-#else
     type UnicodeTables(trans: uint16[] array, accept: uint16[]) = 
-#endif
         let sentinel = 255 * 256 + 255 
         let numUnicodeCategories = 30 
         let numLowUnicodeChars = 128 

@@ -9,8 +9,8 @@ let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
-| whitespace { MULT "-" }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER  "N" }
+| whitespace { MULT lexeme }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER  lexeme }
 | '-' { MINUS "-" }
 | '(' { LBRACE "(" }
 | ')' { RBRACE ")" }

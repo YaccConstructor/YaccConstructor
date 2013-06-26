@@ -209,45 +209,81 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let startState = new State<_>(0,-1,new ResizeArray<_>([|new StateInfo<_>(0,new ResizeArray<_>())|]))
         states.Add(g.StartVertex, new ResizeArray<_>([startState]))
         let sorted = g.TopologicalSort() |> Array.ofSeq
+        let filterStates v =
+            states.[v]
+            |> Seq.groupBy (fun x -> x.AcceptAction,x.StateID)
+            |> Seq.map 
+                (fun (gn,gv) -> 
+                    let a = gv |> Array.ofSeq
+                    a.[1..] |> Array.iter (fun x -> a.[0].Info.AddRange x.Info)
+                    a.[0])
+            |> fun s -> states.[v] <- ResizeArray.ofSeq s
+
         for v in sorted do
+           let reduced = ref false
            for e in g.OutEdges v do
             printfn "%A" e.Label
             let ch = e.Label
-            let add newStt =
+            let add (newStt:State<_>) =
                 if states.ContainsKey e.Target
-                then states.[e.Target].Add newStt
-                else states.Add(e.Target,new ResizeArray<_>([newStt]))
-            for stt in states.[v] do
+                then
+                    match states.[e.Target] 
+                          |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
+                      with
+                    | Some x -> x.Info.AddRange newStt.Info
+                    | None -> states.[e.Target].Add newStt
+                else states.Add(e.Target,new ResizeArray<_>([newStt]))            
+            for stt in states.[v] do                
                 match ch with
                 | Some x ->
                     let rec go stt =
                         let reduce, onAccept, news = scanUntilSentinel x stt
                         if reduce
-                        then                            
-                            actions onAccept |> printfn "%A"
-                            let newStt = new State<_>(0,-1,new ResizeArray<_>())
-                            go newStt
+                        then
+                            stt.Info
+                            |> ResizeArray.iter
+                                (fun (i:StateInfo<_>) -> 
+                                    new string(i.AccumulatedString |> Array.ofSeq)
+                                    |> actions onAccept  
+                                    |> printfn "%A")
+
+                            if not !reduced
+                            then
+                                let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
+                                go newStt
+                            reduced := true
                         else 
                             let acc = 
-                                stt.Info
-                                |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch])]))
+                                if stt.Info.Count > 0
+                                then
+                                    stt.Info
+                                    |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch.Value])]))
+                                else new ResizeArray<_>([new StateInfo<_>(v, new ResizeArray<_>([ch.Value]))])
+                            (*if not !reduced
+                            then*)
                             let newStt = new State<_>(news,onAccept,acc)
                             add newStt
                     go stt
-                | None -> ()            
-        states.[sorted.[sorted.Length-1]] |> ResizeArray.map(fun x -> actions (if x.AcceptAction > -1 then x.AcceptAction else int accept.[x.StateID]))
-        |> Seq.iter (printfn "%A")
+                | None -> ()
+
+        let ac = states.[sorted.[sorted.Length-1]] 
+        ac
+        |> ResizeArray.iter(
+            fun x ->
+                printfn "%A" x.AcceptAction
+                printfn "%A" x.StateID
+                x.Info
+                |> ResizeArray.iter
+                    (fun (i:StateInfo<_>) ->                        
+                        new string(i.AccumulatedString |> Array.ofSeq)
+                        |> actions (if x.AcceptAction > -1 then x.AcceptAction else int accept.[x.StateID])
+                        |> printfn "%A"))        
                           
     // Each row for the Unicode table has format 
     //      128 entries for ASCII characters
     //      A variable number of 2*UInt16 entries for SpecificUnicodeChars 
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
-
-    member tables.Interpret(initialState,lexBuffer) = 
-        startInterpret(lexBuffer)
-        //scanUntilSentinel(lexBuffer, initialState)
-        1
         
 
     member tables.Tokenize actions g =

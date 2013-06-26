@@ -53,16 +53,16 @@ let actions : uint16[] = [|65535us; 0us; 1us; 2us; 3us; 4us; 5us; 6us; 8us; 9us;
 let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-let fslex_actions_token  _fslex_state =
+let fslex_actions_token  _fslex_state lexeme =
   match _fslex_state with
   | 0 -> ( 
 # 12 "Lexer.fsl"
-                              MULT "-" 
+                              MULT lexeme 
 # 61 "Lexer.fs"
           )
   | 1 -> ( 
 # 13 "Lexer.fsl"
-                                                                  NUMBER  "N" 
+                                                                  NUMBER  lexeme 
 # 66 "Lexer.fs"
           )
   | 2 -> ( 

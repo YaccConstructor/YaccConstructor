@@ -165,6 +165,14 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Edges |> Seq.length, 5)
         Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
+    [<Test>]
+    member this.``Calc. test 100`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_100.dot"
+        let start = System.DateTime.Now
+        for i in 1..1000 do Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph |> ignore
+        printfn "Time = %A" ((System.DateTime.Now - start).TotalMilliseconds / 1000.0)
+        Assert.True(true)
+
 
 //[<EntryPoint>]
 //let f x =

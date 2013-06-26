@@ -1,20 +1,34 @@
 
 # 2 "Parser.fs"
-module Calc.Parse
+module Calc.Parser
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
-    | DIV of string
-    | LBRACE of string
-    | MINUS of string
-    | MULT of string
-    | NUMBER of string
-    | PLUS of string
-    | POW of string
-    | RBRACE of string
-    | RNGLR_EOF of string
+    | DIV of (string)
+    | LBRACE of (string)
+    | MINUS of (string)
+    | MULT of (string)
+    | NUMBER of (string)
+    | PLUS of (string)
+    | POW of (string)
+    | RBRACE of (string)
+    | RNGLR_EOF of (string)
+
+let genLiteral (str : string) posStart posEnd =
+    match str.ToLower() with
+    | x -> failwithf "Literal %s undefined" x
+let tokenData = function
+    | DIV x -> box x
+    | LBRACE x -> box x
+    | MINUS x -> box x
+    | MULT x -> box x
+    | NUMBER x -> box x
+    | PLUS x -> box x
+    | POW x -> box x
+    | RBRACE x -> box x
+    | RNGLR_EOF x -> box x
 
 let numToString = function
     | 0 -> "error"
@@ -25,12 +39,12 @@ let numToString = function
     | 5 -> "powOp"
     | 6 -> "term"
     | 7 -> "termOp"
-    | 8 -> "yard_many_1"
-    | 9 -> "yard_many_2"
-    | 10 -> "yard_many_3"
-    | 11 -> "yard_rule_binExpr_1"
-    | 12 -> "yard_rule_binExpr_2"
-    | 13 -> "yard_rule_binExpr_3"
+    | 8 -> "yard_rule_binExpr_1"
+    | 9 -> "yard_rule_binExpr_3"
+    | 10 -> "yard_rule_binExpr_5"
+    | 11 -> "yard_rule_yard_many_1_2"
+    | 12 -> "yard_rule_yard_many_1_4"
+    | 13 -> "yard_rule_yard_many_1_6"
     | 14 -> "yard_start_rule"
     | 15 -> "DIV"
     | 16 -> "LBRACE"
@@ -42,6 +56,7 @@ let numToString = function
     | 22 -> "RBRACE"
     | 23 -> "RNGLR_EOF"
     | _ -> ""
+
 let tokenToNumber = function
     | DIV _ -> 15
     | LBRACE _ -> 16
@@ -53,9 +68,21 @@ let tokenToNumber = function
     | RBRACE _ -> 22
     | RNGLR_EOF _ -> 23
 
+let isLiteral = function
+    | DIV _ -> false
+    | LBRACE _ -> false
+    | MINUS _ -> false
+    | MULT _ -> false
+    | NUMBER _ -> false
+    | PLUS _ -> false
+    | POW _ -> false
+    | RBRACE _ -> false
+    | RNGLR_EOF _ -> false
+
+let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|1; 14; 11; 8; 8; 7; 7; 6; 12; 9; 9; 3; 3; 2; 13; 10; 10; 5; 4; 4|]
-let private rules = [|11; 1; 6; 8; 7; 6; 8; 17; 20; 12; 2; 9; 3; 2; 9; 15; 18; 13; 4; 10; 5; 4; 10; 21; 16; 1; 22; 19|]
+let leftSide = [|1; 14; 8; 11; 11; 7; 7; 6; 9; 12; 12; 3; 3; 2; 10; 13; 13; 5; 4; 4|]
+let private rules = [|8; 1; 6; 11; 7; 6; 11; 17; 20; 9; 2; 12; 3; 2; 12; 15; 18; 10; 4; 13; 5; 4; 13; 21; 16; 1; 22; 19|]
 let private rulesStart = [|0; 1; 2; 4; 7; 7; 8; 9; 10; 12; 15; 15; 16; 17; 18; 20; 23; 23; 24; 27; 28|]
 let startRule = 1
 
@@ -66,7 +93,7 @@ let defaultAstToDot =
 
 let private lists_gotos = [|1; 2; 8; 20; 28; 26; 18; 13; 16; 3; 19; 6; 7; 4; 5; 9; 17; 12; 10; 11; 14; 15; 21; 27; 24; 25; 22; 23|]
 let private small_gotos =
-        [|9; 65536; 131073; 262146; 393219; 720900; 786437; 851974; 1048583; 1245192; 131076; 196617; 589834; 983051; 1179660; 196613; 131085; 262146; 851974; 1048583; 1245192; 262148; 196617; 589838; 983051; 1179660; 524291; 327695; 655376; 1376273; 589827; 262162; 1048583; 1245192; 655363; 327695; 655379; 1376273; 851977; 65556; 131073; 262146; 393219; 720900; 786437; 851974; 1048583; 1245192; 917505; 1441813; 1310724; 458774; 524311; 1114136; 1310745; 1376263; 131073; 262146; 393242; 786437; 851974; 1048583; 1245192; 1441796; 458774; 524315; 1114136; 1310745|]
+        [|9; 65536; 131073; 262146; 393219; 524292; 589829; 655366; 1048583; 1245192; 131076; 196617; 786442; 983051; 1179660; 196613; 131085; 262146; 655366; 1048583; 1245192; 262148; 196617; 786446; 983051; 1179660; 524291; 327695; 851984; 1376273; 589827; 262162; 1048583; 1245192; 655363; 327695; 851987; 1376273; 851977; 65556; 131073; 262146; 393219; 524292; 589829; 655366; 1048583; 1245192; 917505; 1441813; 1310724; 458774; 720919; 1114136; 1310745; 1376263; 131073; 262146; 393242; 589829; 655366; 1048583; 1245192; 1441796; 458774; 720923; 1114136; 1310745|]
 let gotos = Array.zeroCreate 29
 for i = 0 to 28 do
         gotos.[i] <- Array.zeroCreate 24
@@ -123,14 +150,14 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null; null; null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null; null; null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_factor * '_rnglr_type_factorOp * '_rnglr_type_powExpr * '_rnglr_type_powOp * '_rnglr_type_term * '_rnglr_type_termOp * '_rnglr_type_yard_many_1 * '_rnglr_type_yard_many_2 * '_rnglr_type_yard_many_3 * '_rnglr_type_yard_rule_binExpr_1 * '_rnglr_type_yard_rule_binExpr_2 * '_rnglr_type_yard_rule_binExpr_3 * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_factor * '_rnglr_type_factorOp * '_rnglr_type_powExpr * '_rnglr_type_powOp * '_rnglr_type_term * '_rnglr_type_termOp * '_rnglr_type_yard_rule_binExpr_1 * '_rnglr_type_yard_rule_binExpr_3 * '_rnglr_type_yard_rule_binExpr_5 * '_rnglr_type_yard_rule_yard_many_1_2 * '_rnglr_type_yard_rule_yard_many_1_4 * '_rnglr_type_yard_rule_yard_many_1_6 * '_rnglr_type_yard_start_rule>), 
   [|
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -139,50 +166,50 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (res) -> 
               _rnglr_cycle_res := (
                 
-# 6 "calc.yrd"
-                                                   res 
+# 19 "calc.yrd"
+                                                 res 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 6 "calc.yrd"
+# 19 "calc.yrd"
                : '_rnglr_type_expr) 
-# 150 "Parser.fs"
+# 177 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
             )
-# 6 "calc.yrd"
+# 19 "calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 160 "Parser.fs"
+# 187 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_term) 
              |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_1) l
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2) l
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 3 "calc.yrd"
+# 16 "calc.yrd"
                      List.fold (fun l (op,r) -> op l r) l r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "calc.yrd"
+# 14 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_1) 
-# 182 "Parser.fs"
+# 209 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
@@ -195,45 +222,45 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (r) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "calc.yrd"
+# 15 "calc.yrd"
                                                         op,r 
                       )::!_rnglr_cycle_res ) )
               !_rnglr_cycle_res
             ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_many_1) l
+              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2) l
                |> List.iter (fun (yard_tail) -> 
                 _rnglr_cycle_res := (
                   
-# 6 "calc.yrd"
-                                          yard_head::yard_tail
+# 15 "calc.yrd"
+                                    yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 6 "calc.yrd"
-               : '_rnglr_type_yard_many_1) 
-# 215 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_2) 
+# 242 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 6 "calc.yrd"
-                                      []
+# 15 "calc.yrd"
+                                []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 6 "calc.yrd"
-               : '_rnglr_type_yard_many_1) 
-# 233 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_2) 
+# 260 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -242,18 +269,18 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 8 "calc.yrd"
+# 21 "calc.yrd"
                                                (-) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 8 "calc.yrd"
+# 21 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 253 "Parser.fs"
+# 280 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -262,60 +289,60 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 8 "calc.yrd"
+# 21 "calc.yrd"
                                (+) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 8 "calc.yrd"
+# 21 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 273 "Parser.fs"
+# 300 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_2) 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_3) 
              |> List.iter (fun (res) -> 
               _rnglr_cycle_res := (
                 
-# 10 "calc.yrd"
-                                                       res 
+# 23 "calc.yrd"
+                                                     res 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 10 "calc.yrd"
+# 23 "calc.yrd"
                : '_rnglr_type_term) 
-# 293 "Parser.fs"
+# 320 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_factor) 
              |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_2) l
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4) l
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 3 "calc.yrd"
+# 16 "calc.yrd"
                      List.fold (fun l (op,r) -> op l r) l r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "calc.yrd"
-               : '_rnglr_type_yard_rule_binExpr_2) 
-# 315 "Parser.fs"
+# 14 "calc.yrd"
+               : '_rnglr_type_yard_rule_binExpr_3) 
+# 342 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
@@ -328,45 +355,45 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (r) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "calc.yrd"
+# 15 "calc.yrd"
                                                         op,r 
                       )::!_rnglr_cycle_res ) )
               !_rnglr_cycle_res
             ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_many_2) l
+              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4) l
                |> List.iter (fun (yard_tail) -> 
                 _rnglr_cycle_res := (
                   
-# 10 "calc.yrd"
-                                            yard_head::yard_tail
+# 15 "calc.yrd"
+                                    yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 10 "calc.yrd"
-               : '_rnglr_type_yard_many_2) 
-# 348 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_4) 
+# 375 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 10 "calc.yrd"
-                                        []
+# 15 "calc.yrd"
+                                []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 10 "calc.yrd"
-               : '_rnglr_type_yard_many_2) 
-# 366 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_4) 
+# 393 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -375,18 +402,18 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 12 "calc.yrd"
+# 25 "calc.yrd"
                                                  (/) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 12 "calc.yrd"
+# 25 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 386 "Parser.fs"
+# 413 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -395,60 +422,60 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 12 "calc.yrd"
+# 25 "calc.yrd"
                                  ( * ) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 12 "calc.yrd"
+# 25 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 406 "Parser.fs"
+# 433 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_3) 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_5) 
              |> List.iter (fun (res) -> 
               _rnglr_cycle_res := (
                 
-# 14 "calc.yrd"
-                                                       res 
+# 27 "calc.yrd"
+                                                     res 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
+# 27 "calc.yrd"
                : '_rnglr_type_factor) 
-# 426 "Parser.fs"
+# 453 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_powExpr) 
              |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_3) l
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_6) l
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 3 "calc.yrd"
+# 16 "calc.yrd"
                      List.fold (fun l (op,r) -> op l r) l r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 1 "calc.yrd"
-               : '_rnglr_type_yard_rule_binExpr_3) 
-# 448 "Parser.fs"
+# 14 "calc.yrd"
+               : '_rnglr_type_yard_rule_binExpr_5) 
+# 475 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
@@ -461,45 +488,45 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (r) -> 
                   _rnglr_cycle_res := (
                     
-# 2 "calc.yrd"
+# 15 "calc.yrd"
                                                         op,r 
                       )::!_rnglr_cycle_res ) )
               !_rnglr_cycle_res
             ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_many_3) l
+              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_6) l
                |> List.iter (fun (yard_tail) -> 
                 _rnglr_cycle_res := (
                   
-# 14 "calc.yrd"
-                                               yard_head::yard_tail
+# 15 "calc.yrd"
+                                    yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
-               : '_rnglr_type_yard_many_3) 
-# 481 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_6) 
+# 508 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( fun l ->
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
               
-# 14 "calc.yrd"
-                                           []
+# 15 "calc.yrd"
+                                []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
-               : '_rnglr_type_yard_many_3) 
-# 499 "Parser.fs"
+# 15 "calc.yrd"
+               : '_rnglr_type_yard_rule_yard_many_1_6) 
+# 526 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -508,18 +535,18 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 16 "calc.yrd"
+# 29 "calc.yrd"
                              ( ** ) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 16 "calc.yrd"
+# 29 "calc.yrd"
                : '_rnglr_type_powOp) 
-# 519 "Parser.fs"
+# 546 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -532,18 +559,18 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                  |> List.iter (fun (_) -> 
                   _rnglr_cycle_res := (
                     
-# 18 "calc.yrd"
+# 31 "calc.yrd"
                                                                                          e 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
-# 18 "calc.yrd"
+# 31 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 543 "Parser.fs"
+# 570 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -552,18 +579,18 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (n) -> 
               _rnglr_cycle_res := (
                 
-# 18 "calc.yrd"
+# 31 "calc.yrd"
                                     System.Double.Parse n 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 18 "calc.yrd"
+# 31 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 563 "Parser.fs"
+# 590 "Parser.fs"
       );
   (
-    fun (_rnglr_children : array<_>) (parserRange : (Microsoft.FSharp.Text.Lexing.Position * Microsoft.FSharp.Text.Lexing.Position)) -> 
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
         ( 
           (
@@ -578,7 +605,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 581 "Parser.fs"
+# 608 "Parser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 
@@ -606,23 +633,23 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_termOp)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
-      box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_1)  l ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_2)  l ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_3)  l ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_1)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_2)   ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_3)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_3)   ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_5)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_2)  l ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_4)  l ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_6)  l ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));

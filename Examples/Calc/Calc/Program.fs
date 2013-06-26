@@ -9,7 +9,7 @@ let tokens =
 
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR.AST
-open Calc.Parse
+open Calc.Parser
 
 match buildAst tokens with
 | Error (pos, token, msg, debugFuns) ->

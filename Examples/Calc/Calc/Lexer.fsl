@@ -1,6 +1,6 @@
 ﻿{
 module Calc.Lexer
-open Calc.Parse
+open Calc.Parser
 open Microsoft.FSharp.Text.Lexing
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf

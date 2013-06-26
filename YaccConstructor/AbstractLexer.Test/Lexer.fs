@@ -2,11 +2,10 @@
  
 module Calc.Lexer
 open AbstractLexer.Test.Calc.Parser
-open Microsoft.FSharp.Text.Lexing
+open AbstractLexer.Core
 
-let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
-# 9 "Lexer.fs"
+# 8 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -51,70 +50,68 @@ let trans : uint16[] array =
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 19us; 19us; 19us; 19us; 19us; 19us; 19us; 19us; 19us; 19us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
 let actions : uint16[] = [|65535us; 0us; 1us; 2us; 3us; 4us; 5us; 6us; 8us; 9us; 10us; 7us; 1us; 65535us; 65535us; 1us; 1us; 1us; 1us; 1us; |]
-let _fslex_tables = Microsoft.FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
+let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  0 lexbuf
-(* Rule token *)
-and _fslex_token  _fslex_state lexbuf =
-  match _fslex_tables.Interpret(_fslex_state,lexbuf) with
+let fslex_actions_token  _fslex_state =
+  match _fslex_state with
   | 0 -> ( 
-# 13 "Lexer.fsl"
-                              token lexbuf 
-# 64 "Lexer.fs"
+# 12 "Lexer.fsl"
+                              MULT "-" 
+# 61 "Lexer.fs"
           )
   | 1 -> ( 
-# 14 "Lexer.fsl"
-                                                                  NUMBER <| lexeme lexbuf 
-# 69 "Lexer.fs"
+# 13 "Lexer.fsl"
+                                                                  NUMBER  "N" 
+# 66 "Lexer.fs"
           )
   | 2 -> ( 
-# 15 "Lexer.fsl"
-                       MINUS <| lexeme lexbuf 
-# 74 "Lexer.fs"
+# 14 "Lexer.fsl"
+                       MINUS "-" 
+# 71 "Lexer.fs"
           )
   | 3 -> ( 
-# 16 "Lexer.fsl"
-                       LBRACE <| lexeme lexbuf 
-# 79 "Lexer.fs"
+# 15 "Lexer.fsl"
+                       LBRACE "(" 
+# 76 "Lexer.fs"
           )
   | 4 -> ( 
-# 17 "Lexer.fsl"
-                       RBRACE <| lexeme lexbuf 
-# 84 "Lexer.fs"
+# 16 "Lexer.fsl"
+                       RBRACE ")" 
+# 81 "Lexer.fs"
           )
   | 5 -> ( 
-# 18 "Lexer.fsl"
-                       DIV <| lexeme lexbuf 
-# 89 "Lexer.fs"
+# 17 "Lexer.fsl"
+                       DIV "/" 
+# 86 "Lexer.fs"
           )
   | 6 -> ( 
-# 19 "Lexer.fsl"
-                       PLUS <| lexeme lexbuf 
-# 94 "Lexer.fs"
+# 18 "Lexer.fsl"
+                       PLUS "+" 
+# 91 "Lexer.fs"
           )
   | 7 -> ( 
-# 20 "Lexer.fsl"
-                        POW <| lexeme lexbuf 
-# 99 "Lexer.fs"
+# 19 "Lexer.fsl"
+                        POW "**" 
+# 96 "Lexer.fs"
           )
   | 8 -> ( 
-# 21 "Lexer.fsl"
-                       MULT <| lexeme lexbuf 
-# 104 "Lexer.fs"
+# 20 "Lexer.fsl"
+                       MULT "*" 
+# 101 "Lexer.fs"
           )
   | 9 -> ( 
-# 22 "Lexer.fsl"
-                       RNGLR_EOF <| lexeme lexbuf 
-# 109 "Lexer.fs"
+# 21 "Lexer.fsl"
+                       RNGLR_EOF "" 
+# 106 "Lexer.fs"
           )
   | 10 -> ( 
-# 23 "Lexer.fsl"
-                     failwithf "unexpected input: %s" <| lexeme lexbuf 
-# 114 "Lexer.fs"
+# 22 "Lexer.fsl"
+                     failwithf "unexpected input: %s" <| "-" 
+# 111 "Lexer.fs"
           )
   | _ -> failwith "token"
 
-# 24 "Lexer.fsl"
+# 23 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

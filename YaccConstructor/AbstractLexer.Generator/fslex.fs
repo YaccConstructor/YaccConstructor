@@ -42,7 +42,7 @@ let out = ref None
 let inputCodePage = ref None
 let light = ref None
 
-let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
+let mutable lexlib = "AbstractLexer.Core"
 
 let usage =
   [ ArgInfo ("-o", ArgType.String (fun s -> out := Some s), "Name the output file."); 
@@ -193,13 +193,13 @@ let main() =
     // These actions push the additional start state and come first, because they are then typically inlined into later
     // rules. This means more tailcalls are taken as direct branches, increasing efficiency and 
     // improving stack usage on platforms that do not take tailcalls.
+//    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+//        cfprintfn os "(* Rule %s *)" ident;
+//        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
     for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
         cfprintfn os "(* Rule %s *)" ident;
-        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
-    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
-        cfprintfn os "(* Rule %s *)" ident;
-        cfprintfn os "and _fslex_%s %s _fslex_state lexbuf =" ident (String.Join(" ",Array.ofList args));
-        cfprintfn os "  match _fslex_tables.Interpret(_fslex_state,lexbuf) with" ;
+        cfprintfn os "let fslex_actions_%s %s _fslex_state =" ident (String.Join(" ",Array.ofList args));
+        cfprintfn os "  match _fslex_state with" ;
         actions |> Seq.iteri (fun i (code,pos) -> 
             cfprintfn os "  | %d -> ( " i;
             cfprintfn os "# %d \"%s\"" pos.Line pos.FileName;

@@ -1,6 +1,4 @@
-// (c) Microsoft Corporation 2005-2009.
-
-#nowarn "47" // recursive initialization of LexBuffer
+//#nowarn "47" // recursive initialization of LexBuffer
 
 
 namespace AbstractLexer.Core
@@ -8,24 +6,28 @@ namespace AbstractLexer.Core
 open System.Collections.Generic
 open AbstractLexer.Common
 open QuickGraph.Algorithms
+open Microsoft.FSharp.Collections
 
 [<Struct>]
 type StateInfo<'a> =
     val StartV: int
     val AccumulatedString: 'a
+    new (startV, str) = {StartV = startV; AccumulatedString = str}
 
 [<Struct>]
 type State<'a> =
     val StateID: int
+    val AcceptAction: int
     val Info: ResizeArray<StateInfo<'a>>
+    new (stateId:int, acceptAction, info) =  {StateID = stateId; AcceptAction = acceptAction; Info = info}
 
 
 // REVIEW: This type showed up on a parsing-intensive performance measurement. Consider whether it can be a struct-record later when we have this feature. -jomo
-type Position = 
-    { pos_fname : string;
-        pos_lnum : int;
-        pos_bol : int;
-        pos_cnum : int; }
+//type Position = 
+//    { pos_fname : string;
+//        pos_lnum : int;
+//        pos_bol : int;
+//        pos_cnum : int; }
   //  member x.FileName = x.pos_fname
   //  member x.Line = x.pos_lnum
   //  member x.Char = x.pos_cnum
@@ -191,30 +193,50 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             loop 0
     let eofPos    = numLowUnicodeChars + 2*numSpecificUnicodeChars + numUnicodeCategories 
         
-    let rec scanUntilSentinel(lexBuffer,state) =
+    let rec scanUntilSentinel inp (state:State<_>) =
         // Return an endOfScan after consuming the input 
-        let a = int accept.[state] 
-        if a <> sentinel then ()
-            //onAccept(lexBuffer,a)
-            
-        // read a character - end the scan if there are no further transitions 
-        let inp = 'c'//lexBuffer.Buffer.[lexBuffer.BufferScanPos]
+        let a = int accept.[state.StateID]
+        let onAccept = if a <> sentinel then a else state.AcceptAction
                 
         // Find the new state
-        let snew = lookupUnicodeCharacters (state,inp)
+        let snew = lookupUnicodeCharacters (state.StateID,inp)                
+        snew = sentinel, onAccept, snew
 
-        if snew = sentinel then ()
-            //lexBuffer.EndOfScan()
-        else 
-            //lexBuffer.BufferScanLength <- lexBuffer.BufferScanLength + 1;
-            scanUntilSentinel(lexBuffer,snew)
-
-    let tokenize (inG:LexerInputGraph<_>) =
+    let tokenize actions (inG:LexerInputGraph<_>) =
         let g = new LexerInnerGraph<_>(inG)
-        let newEdges = new ResizeArray<_>()        
-        for v in g.TopologicalSort() do
+        let newEdges = new ResizeArray<_>()
+        let states = new Dictionary<_,_>(g.VertexCount)
+        let startState = new State<_>(0,-1,new ResizeArray<_>([|new StateInfo<_>(0,new ResizeArray<_>())|]))
+        states.Add(g.StartVertex, new ResizeArray<_>([startState]))
+        let sorted = g.TopologicalSort() |> Array.ofSeq
+        for v in sorted do
            for e in g.OutEdges v do
-            ()
+            printfn "%A" e.Label
+            let ch = e.Label
+            let add newStt =
+                if states.ContainsKey e.Target
+                then states.[e.Target].Add newStt
+                else states.Add(e.Target,new ResizeArray<_>([newStt]))
+            for stt in states.[v] do
+                match ch with
+                | Some x ->
+                    let rec go stt =
+                        let reduce, onAccept, news = scanUntilSentinel x stt
+                        if reduce
+                        then                            
+                            actions onAccept |> printfn "%A"
+                            let newStt = new State<_>(0,-1,new ResizeArray<_>())
+                            go newStt
+                        else 
+                            let acc = 
+                                stt.Info
+                                |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch])]))
+                            let newStt = new State<_>(news,onAccept,acc)
+                            add newStt
+                    go stt
+                | None -> ()            
+        states.[sorted.[sorted.Length-1]] |> ResizeArray.map(fun x -> actions (if x.AcceptAction > -1 then x.AcceptAction else int accept.[x.StateID]))
+        |> Seq.iter (printfn "%A")
                           
     // Each row for the Unicode table has format 
     //      128 entries for ASCII characters
@@ -224,7 +246,12 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
 
     member tables.Interpret(initialState,lexBuffer) = 
         startInterpret(lexBuffer)
-        scanUntilSentinel(lexBuffer, initialState)
+        //scanUntilSentinel(lexBuffer, initialState)
+        1
+        
+
+    member tables.Tokenize actions g =
+        tokenize actions g
 
     static member Create(trans,accept) = new UnicodeTables(trans,accept)
 

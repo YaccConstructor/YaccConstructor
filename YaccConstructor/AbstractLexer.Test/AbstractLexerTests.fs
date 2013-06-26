@@ -6,6 +6,7 @@ open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
 open AbstractLexer.Common
+open AbstractLexer.Core
 open QuickGraph.Algorithms
 
 let loadGraphFromDOT filePath = 
@@ -31,6 +32,13 @@ type ``Abstract lexer tests`` () =
                 qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
         qGraph
 
+    let loadLexerInputGraph gFile =
+        let qGraph = loadDotToQG "test_0.dot"
+        let lexerInputG = new LexerInputGraph<_>()
+        lexerInputG.StartVertex <- 0
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
+        lexerInputG
+
     [<Test>]
     member this.``Load graph test from DOT`` () =
         let g = loadGraphFromDOT(path "test_1.dot")
@@ -54,17 +62,20 @@ type ``Abstract lexer tests`` () =
 
     [<Test>]
     member this.``Load graph test from DOT to lexer inner graph`` () =
-        let qGraph = loadDotToQG "test_1.dot"
-        let lexerInputG = new LexerInputGraph<_>()
-        lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
-        let lexerInnerGraph = new LexerInnerGraph<_>(lexerInputG)
+        let lexerInnerGraph = new LexerInnerGraph<_>(loadLexerInputGraph "test_1.dot")
         Assert.AreEqual(lexerInnerGraph.StartVertex, 0)
         Assert.AreEqual(lexerInnerGraph.Edges |> Seq.length, 7)
         Assert.AreEqual(lexerInnerGraph.Vertices |> Seq.length, 7)
 
-//[<EntryPoint>]
-//let f x =
-//    let t = new ``Abstract lexer tests`` () 
-//    t.``Load graph test from DOT to lexer inner graph``()
-//    1
+    [<Test>]
+    member this.``Calc. Simple number.`` () =        
+        let lexerInputGraph = loadLexerInputGraph "test_0.dot"        
+        Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph         
+
+
+
+[<EntryPoint>]
+let f x =
+    let t = new ``Abstract lexer tests`` () 
+    t.``Calc. Simple number.``()
+    1

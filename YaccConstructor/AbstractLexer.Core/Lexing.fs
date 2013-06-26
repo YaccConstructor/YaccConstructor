@@ -102,16 +102,25 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 match states.[e.Target] 
                         |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
                     with
-                | Some x -> x.Info.AddRange newStt.Info
+                | Some x -> 
+                    newStt.Info 
+                    |> ResizeArray.iter(
+                        fun i -> 
+                            if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
+                                                      && ResizeArray.forall2 (fun i j -> i=j) i.AccumulatedString j.AccumulatedString) 
+                               |> not
+                            then x.Info.Add i)
                 | None -> states.[e.Target].Add newStt
             else states.Add(e.Target,new ResizeArray<_>([newStt]))           
         let sorted = g.TopologicalSort() |> Array.ofSeq
         for v in sorted do
-            let reduced = ref false
-            for e in g.OutEdges v do                
-                printfn "%A" e.Label
-                let ch = e.Label                
-                for stt in states.[v] do                     
+            //
+            
+            for stt in states.[v] do    
+                let reduced = ref false            
+                for e in g.OutEdges v do
+                    printfn "%A" e.Label
+                    let ch = e.Label
                     match ch with
                     | Some x ->
                         let rec go stt =
@@ -124,22 +133,20 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                         new string(i.AccumulatedString |> Array.ofSeq)
                                         |> actions onAccept  
                                         |> fun x -> 
-                                            newEdges.Add(i.StartV,x,v)
-                                            printfn "%A" x)
+                                            if not !reduced then newEdges.Add(i.StartV,x,v)
+                                            printfn "%A" x
+                                            reduced := true)
                                 let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
-                                go newStt                            
+                                go newStt
                             else 
                                 let acc = 
                                     if stt.Info.Count > 0
                                     then
                                         stt.Info
                                         |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch.Value])]))
-                                    else new ResizeArray<_>([new StateInfo<_>(v, new ResizeArray<_>([ch.Value]))])
-                                if not !reduced
-                                then
-                                    let newStt = new State<_>(news,onAccept,acc)
-                                    add e newStt
-                                reduced := true
+                                    else new ResizeArray<_>([new StateInfo<_>(v, new ResizeArray<_>([ch.Value]))])                                
+                                let newStt = new State<_>(news,onAccept,acc)
+                                add e newStt
                         go stt
                     | None -> ()
 

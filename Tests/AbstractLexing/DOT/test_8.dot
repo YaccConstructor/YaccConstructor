@@ -4,5 +4,4 @@ digraph g
 1 -> 2 [label="+"]
 2 -> 3 [label="3"]
 0 -> 3 [label="4"]
-3 -> 4 [label="$"]
 }

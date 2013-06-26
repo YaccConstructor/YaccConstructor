@@ -42,7 +42,7 @@ let out = ref None
 let inputCodePage = ref None
 let light = ref None
 
-let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
+let mutable lexlib = "AbstractLexer.Core"
 
 let usage =
   [ ArgInfo ("-o", ArgType.String (fun s -> out := Some s), "Name the output file."); 
@@ -58,8 +58,8 @@ let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "m
 let outputInt (os: TextWriter) (n:int) = os.Write(string n)
 
 let outputCodedUInt16 (os: #TextWriter)  (n:int) = 
-  os.Write n;
-  os.Write "us; ";
+  os.Write n
+  os.Write "us; "
 
 let sentinel = 255 * 256 + 255 
 
@@ -80,14 +80,14 @@ let main() =
           printf "%s(%d,%d): error: %s" filename lexbuf.StartPos.Line lexbuf.StartPos.Column 
               (match e with 
                | Failure s -> s 
-               | _ -> e.Message);
+               | _ -> e.Message)
           exit 1
     printfn "compiling to dfas (can take a while...)";
     let perRuleData, dfaNodes = AST.Compile spec
     let dfaNodes = dfaNodes |> List.sortBy (fun n -> n.Id) 
 
-    printfn "%d states" dfaNodes.Length;
-    printfn "writing output"; 
+    printfn "%d states" dfaNodes.Length
+    printfn "writing output"
     
     let output = 
         match !out with 
@@ -97,21 +97,21 @@ let main() =
     use os = System.IO.File.CreateText output
 
     if (!light = Some(false)) || (!light = None && (Path.HasExtension(output) && Path.GetExtension(output) = ".ml")) then
-        cfprintfn os "#light \"off\"";
+        cfprintfn os "#light \"off\""
     
     let printLinesIfCodeDefined (code,pos:Position) =
         if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
         then 
-            cfprintfn os "# %d \"%s\"" pos.Line pos.FileName;
-            cfprintfn os "%s" code;
+            cfprintfn os "# %d \"%s\"" pos.Line pos.FileName
+            cfprintfn os "%s" code
 
     printLinesIfCodeDefined spec.TopCode
     let code = fst spec.TopCode
-    lineCount := !lineCount + code.Replace("\r","").Split([| '\n' |]).Length;
-    cfprintfn os "# %d \"%s\"" !lineCount output;
+    lineCount := !lineCount + code.Replace("\r","").Split([| '\n' |]).Length
+    cfprintfn os "# %d \"%s\"" !lineCount output
     
-    cfprintfn os "let trans : uint16[] array = ";
-    cfprintfn os "    [| ";
+    cfprintfn os "let trans : uint16[] array = "
+    cfprintfn os "    [| "
     if !unicode then 
         let specificUnicodeChars = GetSpecificUnicodeChars()
         // This emits a (numLowUnicodeChars+NumUnicodeCategories+(2*#specificUnicodeChars)+1) * #states array of encoded UInt16 values
@@ -126,8 +126,8 @@ let main() =
         //
         // For the SpecificUnicodeChars the entries are char/next-state pairs.
         for state in dfaNodes do
-            cfprintfn os "    (* State %d *)" state.Id;
-            fprintf os "     [| ";
+            cfprintfn os "    (* State %d *)" state.Id
+            fprintf os "     [| "
             let trans = 
                 let dict = new Dictionary<_,_>()
                 state.Transitions |> List.iter dict.Add
@@ -139,15 +139,15 @@ let main() =
                   outputCodedUInt16 os sentinel
             for i = 0 to numLowUnicodeChars-1 do 
                 let c = char i
-                emit (EncodeChar c);
+                emit (EncodeChar c)
             for c in specificUnicodeChars do 
-                outputCodedUInt16 os (int c); 
-                emit (EncodeChar c);
+                outputCodedUInt16 os (int c)
+                emit (EncodeChar c)
             for i = 0 to NumUnicodeCategories-1 do 
-                emit (EncodeUnicodeCategoryIndex i);
-            emit Eof;
+                emit (EncodeUnicodeCategoryIndex i)
+            emit Eof
             cfprintfn os "|];"
-        done;
+        done
     
     else
         // Each row for the ASCII table has format 
@@ -171,35 +171,35 @@ let main() =
                   outputCodedUInt16 os sentinel
             for i = 0 to 255 do 
                 let c = char i
-                emit (EncodeChar c);
-            emit Eof;
+                emit (EncodeChar c)
+            emit Eof
             cfprintfn os "|];"
-        done;
+        done
     
-    cfprintfn os "    |] ";
+    cfprintfn os "    |] "
     
-    fprintf os "let actions : uint16[] = [|";
+    fprintf os "let actions : uint16[] = [|"
     for state in dfaNodes do
         if state.Accepted.Length > 0 then 
           outputCodedUInt16 os (snd state.Accepted.Head)
         else
           outputCodedUInt16 os sentinel
-    done;
-    cfprintfn os "|]";
-    cfprintfn os "let _fslex_tables = %s.%sTables.Create(trans,actions)" lexlib domain;
+    done
+    cfprintfn os "|]"
+    cfprintfn os "let _fslex_tables = %s.%sTables.Create(trans,actions)" lexlib domain
     
-    cfprintfn os "let rec _fslex_dummy () = _fslex_dummy() ";
+    cfprintfn os "let rec _fslex_dummy () = _fslex_dummy() "
 
     // These actions push the additional start state and come first, because they are then typically inlined into later
     // rules. This means more tailcalls are taken as direct branches, increasing efficiency and 
     // improving stack usage on platforms that do not take tailcalls.
+//    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+//        cfprintfn os "(* Rule %s *)" ident;
+//        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
     for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
         cfprintfn os "(* Rule %s *)" ident;
-        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
-    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
-        cfprintfn os "(* Rule %s *)" ident;
-        cfprintfn os "and _fslex_%s %s _fslex_state lexbuf =" ident (String.Join(" ",Array.ofList args));
-        cfprintfn os "  match _fslex_tables.Interpret(_fslex_state,lexbuf) with" ;
+        cfprintfn os "let fslex_actions_%s %s _fslex_state lexeme =" ident (String.Join(" ",Array.ofList args));
+        cfprintfn os "  match _fslex_state with" ;
         actions |> Seq.iteri (fun i (code,pos) -> 
             cfprintfn os "  | %d -> ( " i;
             cfprintfn os "# %d \"%s\"" pos.Line pos.FileName;

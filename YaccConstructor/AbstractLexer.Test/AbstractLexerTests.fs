@@ -124,12 +124,46 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
     [<Test>]
-    member this.``Calc. Branched binop sum.`` () =
+    member this.``Calc. Branched binop.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_5.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
         Assert.AreEqual(res.Edges |> Seq.length, 4)
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
+    [<Test>]
+    member this.``Calc. Branched binop or negation.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_6.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_7.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_8.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 3.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_9.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 6)
+        Assert.AreEqual(res.Vertices |> Seq.length, 6)
+
+    [<Test>]
+    member this.``Calc. Complex 0`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_12.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
 
 //[<EntryPoint>]

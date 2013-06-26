@@ -7,5 +7,4 @@ digraph g
 2 -> 3 [label="3"]
 2 -> 3 [label="56"]
 2 -> 3 [label="789"]
-3 -> 4 [label="$"]
 }

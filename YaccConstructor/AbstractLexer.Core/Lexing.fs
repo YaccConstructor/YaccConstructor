@@ -94,8 +94,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let g = new LexerInnerGraph<_>(inG)
         let res = new DAG<_,_>()
         let states = new Dictionary<_,_>(g.VertexCount)
-        let startState = new State<_>(0,-1,new ResizeArray<_>([|new StateInfo<_>(0,new ResizeArray<_>())|]))
-        states.Add(g.StartVertex, new ResizeArray<_>([startState]))
+        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
+        states.Add(g.StartVertex, ResizeArray.singleton startState)
         let add (e:AEdge<_,_>) (newStt:State<_>) =
             if states.ContainsKey e.Target
             then
@@ -111,11 +111,11 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                |> not
                             then x.Info.Add i)
                 | None -> states.[e.Target].Add newStt
-            else states.Add(e.Target,new ResizeArray<_>([newStt]))           
+            else states.Add(e.Target,ResizeArray.singleton newStt)
         let sorted = g.TopologicalSort() |> Array.ofSeq
         for v in sorted do
-            for stt in states.[v] do    
-                let reduced = ref false            
+            for stt in states.[v] do
+                let reduced = ref false
                 for e in g.OutEdges v do
                     let ch = e.Label
                     match ch with
@@ -139,8 +139,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                     if stt.Info.Count > 0
                                     then
                                         stt.Info
-                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch.Value])]))
-                                    else new ResizeArray<_>([new StateInfo<_>(v, new ResizeArray<_>([ch.Value]))])                                
+                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]))
+                                    else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
                                 let newStt = new State<_>(news,onAccept,acc)
                                 add e newStt
                         go stt

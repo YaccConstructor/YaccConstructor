@@ -29,7 +29,6 @@ type LexerInputGraph<'br> () =
 type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
     inherit DAG<char,'br>()
     let convert () =
-        let edges = g.Edges |> Array.ofSeq
         let counter = g.Vertices |> Seq.max |> ref
         let splitEdge (edg:AEdge<_,_>) =
             let start = edg.Source
@@ -41,17 +40,17 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
             | None -> [|new AEdge<_,_> (start,_end,(None,None))|]
             | Some(s) ->
                 let l = s.Length
-                s |> Seq.mapi (fun i ch ->
+                let ss = s.ToCharArray()
+                Array.init l 
+                    (fun i ->
                         match i with
-                        | 0 when (l = 1)     -> new AEdge<_,_>(start,_end,(Some ch,br))
-                        | 0                  -> new AEdge<_,_>(start,(incr counter; !counter),(Some ch,br))
-                        | i when (i = l - 1) -> new AEdge<_,_>(!counter,_end,(Some ch,br))
-                        | i                  -> new AEdge<_,_>(!counter,(incr counter; !counter),(Some ch,br))
-                        ) 
-                |> Array.ofSeq
-        let newEdges = edges |> Array.collect splitEdge
+                        | 0 when (l = 1)     -> new AEdge<_,_>(start,_end,(Some ss.[i],br))
+                        | 0                  -> new AEdge<_,_>(start,(incr counter; !counter),(Some ss.[i],br))
+                        | i when (i = l - 1) -> new AEdge<_,_>(!counter,_end,(Some ss.[i],br))
+                        | i                  -> new AEdge<_,_>(!counter,(incr counter; !counter),(Some ss.[i],br))
+                    )
+        let newEdges = g.Edges |> Array.ofSeq |> Array.collect splitEdge
         this.AddEdgesForsed(newEdges)
-        //if res <> newEdges.Length then failfith ""
         this.StartVertex <- g.StartVertex
 
     do convert()

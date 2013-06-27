@@ -76,8 +76,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     then int trans.[state].[baseForSpecificUnicodeChars+i*2+1]
                     else loop(i+1)
                 
-            loop 0
-    let eofPos    = numLowUnicodeChars + 2*numSpecificUnicodeChars + numUnicodeCategories 
+            loop 0    
         
     let rec scanUntilSentinel inp (state:State<_>) =
         // Return an endOfScan after consuming the input 
@@ -159,8 +158,6 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      1 entry for EOF
         
 
-    member tables.Tokenize actions g =
-        tokenize actions g
-
+    member tables.Tokenize actions g = tokenize actions g
     static member Create(trans,accept) = new UnicodeTables(trans,accept)
 

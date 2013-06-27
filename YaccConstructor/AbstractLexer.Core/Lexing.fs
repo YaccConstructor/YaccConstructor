@@ -92,26 +92,32 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
 
     let tokenize actions (inG:LexerInputGraph<_>) =
         let g = new LexerInnerGraph<_>(inG)
-        let newEdges = new ResizeArray<_>()
+        let res = new DAG<_,_>()
         let states = new Dictionary<_,_>(g.VertexCount)
-        let startState = new State<_>(0,-1,new ResizeArray<_>([|new StateInfo<_>(0,new ResizeArray<_>())|]))
-        states.Add(g.StartVertex, new ResizeArray<_>([startState]))
+        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
+        states.Add(g.StartVertex, ResizeArray.singleton startState)
         let add (e:AEdge<_,_>) (newStt:State<_>) =
             if states.ContainsKey e.Target
             then
                 match states.[e.Target] 
                         |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
                     with
-                | Some x -> x.Info.AddRange newStt.Info
+                | Some x -> 
+                    newStt.Info 
+                    |> ResizeArray.iter(
+                        fun i -> 
+                            if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
+                                                      && ResizeArray.forall2 (fun i j -> i=j) i.AccumulatedString j.AccumulatedString) 
+                               |> not
+                            then x.Info.Add i)
                 | None -> states.[e.Target].Add newStt
-            else states.Add(e.Target,new ResizeArray<_>([newStt]))           
+            else states.Add(e.Target,ResizeArray.singleton newStt)
         let sorted = g.TopologicalSort() |> Array.ofSeq
         for v in sorted do
-            let reduced = ref false
-            for e in g.OutEdges v do                
-                printfn "%A" e.Label
-                let ch = e.Label                
-                for stt in states.[v] do                     
+            for stt in states.[v] do
+                let reduced = ref false
+                for e in g.OutEdges v do
+                    let ch = e.Label
                     match ch with
                     | Some x ->
                         let rec go stt =
@@ -124,27 +130,23 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                         new string(i.AccumulatedString |> Array.ofSeq)
                                         |> actions onAccept  
                                         |> fun x -> 
-                                            newEdges.Add(i.StartV,x,v)
-                                            printfn "%A" x)
+                                            if not !reduced then res.AddEdgeForsed(new AEdge<_,_>(i.StartV,v,(Some x,None)))
+                                            reduced := true)
                                 let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
-                                go newStt                            
+                                go newStt
                             else 
                                 let acc = 
                                     if stt.Info.Count > 0
                                     then
                                         stt.Info
-                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; new ResizeArray<_>([ch.Value])]))
-                                    else new ResizeArray<_>([new StateInfo<_>(v, new ResizeArray<_>([ch.Value]))])
-                                if not !reduced
-                                then
-                                    let newStt = new State<_>(news,onAccept,acc)
-                                    add e newStt
-                                reduced := true
+                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]))
+                                    else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
+                                let newStt = new State<_>(news,onAccept,acc)
+                                add e newStt
                         go stt
                     | None -> ()
 
-        let ac = states.[sorted.[sorted.Length-1]] 
-        ac
+        states.[sorted.[sorted.Length-1]]
         |> ResizeArray.iter(
             fun x ->
                 x.Info
@@ -152,13 +154,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     (fun (i:StateInfo<_>) ->                        
                         new string(i.AccumulatedString |> Array.ofSeq)
                         |> actions (if x.AcceptAction > -1 then x.AcceptAction else int accept.[x.StateID])
-                        |> fun x -> 
-                            newEdges.Add(i.StartV,x,sorted.[sorted.Length-1])
-                            printfn "%A" x))
-        newEdges |> Seq.iter (printfn "%A")
-        let res = new DAG<_,_>()
-        newEdges |> Seq.map (fun (s,t,e) -> new AEdge<_,_>(s,e,(Some t,None)))
-        |> res.AddEdgesForsed
+                        |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
         res
                           
     // Each row for the Unicode table has format 

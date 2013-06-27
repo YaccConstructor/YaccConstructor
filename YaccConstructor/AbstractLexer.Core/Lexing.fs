@@ -78,7 +78,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 
             loop 0    
         
-    let rec scanUntilSentinel inp (state:State<_>) =
+    let scanUntilSentinel inp (state:State<_>) =
         // Return an endOfScan after consuming the input 
         let a = int accept.[state.StateID]
         let onAccept = if a <> sentinel then a else state.AcceptAction
@@ -146,8 +146,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 x.Info
                 |> ResizeArray.iter
                     (fun (i:StateInfo<_>) ->                        
-                        new string(i.AccumulatedString |> Array.ofSeq)
-                        |> actions (if x.AcceptAction > -1 then x.AcceptAction else int accept.[x.StateID])
+                        new string(i.AccumulatedString.ToArray())
+                        |> actions ((*if x.AcceptAction > -1 then x.AcceptAction else*) int accept.[x.StateID])
                         |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
         res
                           

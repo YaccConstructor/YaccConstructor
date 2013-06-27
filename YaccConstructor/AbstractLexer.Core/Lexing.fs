@@ -16,7 +16,7 @@ type State<'a> =
     val StateID: int
     val AcceptAction: int
     val Info: ResizeArray<StateInfo<'a>>
-    new (stateId:int, acceptAction, info) =  {StateID = stateId; AcceptAction = acceptAction; Info = info}
+    new (stateId:int, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
 
 [<Sealed>]
 type AsciiTables(trans: uint16[] array, accept: uint16[]) =
@@ -102,7 +102,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 |> ResizeArray.iter(
                     fun i -> 
                         if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
-                                                    && ResizeArray.forall2 (fun i j -> i=j) i.AccumulatedString j.AccumulatedString) 
+                                                    && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
                             |> not
                         then x.Info.Add i)
             | None -> states.[e.Target].Add newStt
@@ -156,7 +156,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      A variable number of 2*UInt16 entries for SpecificUnicodeChars 
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
-        
+
 
     member tables.Tokenize actions g = tokenize actions g
     static member Create(trans,accept) = new UnicodeTables(trans,accept)

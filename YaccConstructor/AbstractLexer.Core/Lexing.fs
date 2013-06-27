@@ -1,6 +1,3 @@
-//#nowarn "47" // recursive initialization of LexBuffer
-
-
 namespace AbstractLexer.Core
 
 open System.Collections.Generic
@@ -93,26 +90,24 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     let tokenize actions (inG:LexerInputGraph<_>) =
         let g = new LexerInnerGraph<_>(inG)
         let res = new DAG<_,_>()
-        let states = new Dictionary<_,_>(g.VertexCount)
-        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
-        states.Add(g.StartVertex, ResizeArray.singleton startState)
-        let add (e:AEdge<_,_>) (newStt:State<_>) =
-            if states.ContainsKey e.Target
-            then
-                match states.[e.Target] 
-                        |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
-                    with
-                | Some x -> 
-                    newStt.Info 
-                    |> ResizeArray.iter(
-                        fun i -> 
-                            if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
-                                                      && ResizeArray.forall2 (fun i j -> i=j) i.AccumulatedString j.AccumulatedString) 
-                               |> not
-                            then x.Info.Add i)
-                | None -> states.[e.Target].Add newStt
-            else states.Add(e.Target,ResizeArray.singleton newStt)
         let sorted = g.TopologicalSort() |> Array.ofSeq
+        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
+        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
+        states.[g.StartVertex] <- ResizeArray.singleton startState
+        let add (e:AEdge<_,_>) (newStt:State<_>) =
+            match states.[e.Target]
+                  |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
+                with
+            | Some x ->
+                newStt.Info
+                |> ResizeArray.iter(
+                    fun i -> 
+                        if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
+                                                    && ResizeArray.forall2 (fun i j -> i=j) i.AccumulatedString j.AccumulatedString) 
+                            |> not
+                        then x.Info.Add i)
+            | None -> states.[e.Target].Add newStt
+
         for v in sorted do
             for stt in states.[v] do
                 let reduced = ref false

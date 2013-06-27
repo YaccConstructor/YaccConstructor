@@ -144,7 +144,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                 let newStt = new State<_>(news,onAccept,acc)
                                 add e newStt
                         go stt
-                    | None -> ()
+                    | None -> add e stt
 
         states.[sorted.[sorted.Length-1]]
         |> ResizeArray.iter(

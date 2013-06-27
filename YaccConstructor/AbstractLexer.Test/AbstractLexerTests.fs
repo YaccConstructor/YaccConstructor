@@ -173,6 +173,19 @@ type ``Abstract lexer tests`` () =
         printfn "Time = %A" ((System.DateTime.Now - start).TotalMilliseconds / 1000.0)
         Assert.True(true)
 
+    [<Test>]
+    member this.``Calc. Epsilon edge 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_10_1.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 1)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Calc. Epsilon edge 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_10_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
 //[<EntryPoint>]
 //let f x =

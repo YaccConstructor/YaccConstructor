@@ -187,8 +187,38 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Edges |> Seq.length, 2)
         Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
+    [<Test>]
+    member this.``Literals. Simple.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_simple.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 1)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Inner branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_inner_branch.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Outer branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_outer_branch.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Splitted.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_splitted.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
 //[<EntryPoint>]
 //let f x =
+//    
 //    let t = new ``Abstract lexer tests`` () 
-//    t.``Calc. Branched multy-digit numbers sum 2.``()
+//    t.``Literals. Simple.``()
+//    let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
+//    printfn "%A" t
 //    1

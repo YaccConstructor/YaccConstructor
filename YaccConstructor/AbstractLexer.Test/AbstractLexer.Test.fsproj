@@ -42,8 +42,9 @@
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <None Include="Lexer.fsl" />
-    <!--OtherFlags>unicode</OtherFlags>
-    </FsLex-->
+    <Compile Include="LiteralsParser.fs" />
+    <None Include="LiteralsLexer.fsl" />
+    <Compile Include="LiteralsLexer.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="AbstractLexerTests.fs" />
     <None Include="packages.config" />

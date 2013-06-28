@@ -1,0 +1,12 @@
+﻿{
+module Literals.Lexer
+open AbstractLexer.Test.Literals.Parser
+open AbstractLexer.Core
+
+}
+
+let smbs = ['0'-'9']
+
+rule token = parse
+| '\'' smbs+ '\'' { LITERAL "" }
+| _ { failwithf "unexpected input: %s" <| "" }

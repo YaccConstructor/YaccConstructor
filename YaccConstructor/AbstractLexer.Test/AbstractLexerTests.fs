@@ -94,46 +94,131 @@ type ``Abstract lexer tests`` () =
         let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
-//
-//    [<Test>]
-//    member this.``Calc. Branched multy-digit numbers.`` () =
-//        let lexerInputGraph = loadLexerInputGraph "test_4_1.dot"
-//        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
-//        Assert.AreEqual(res.Edges |> Seq.length, 2)
-//        Assert.AreEqual(res.Vertices |> Seq.length, 2)
-//
-//    [<Test>]
-//    member this.``Calc. Branched multy-digit numbers with Binop.`` () =
-//        let lexerInputGraph = loadLexerInputGraph "test_4_2.dot"
-//        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
-//        Assert.AreEqual(res.Edges |> Seq.length, 3)
-//        Assert.AreEqual(res.Vertices |> Seq.length, 3)
-//
-//    [<Test>]
-//    member this.``Calc. Branched multy-digit numbers sum 1.`` () =
-//        let lexerInputGraph = loadLexerInputGraph "test_4_3.dot"
-//        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
-//        Assert.AreEqual(res.Edges |> Seq.length, 4)
-//        Assert.AreEqual(res.Vertices |> Seq.length, 4)
-//
-//    [<Test>]
-//    member this.``Calc. Branched multy-digit numbers sum 2.`` () =
-//        let lexerInputGraph = loadLexerInputGraph "test_4_4.dot"
-//        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
-//        Assert.AreEqual(res.Edges |> Seq.length, 5)
-//        Assert.AreEqual(res.Vertices |> Seq.length, 4)
-//
-//    [<Test>]
-//    member this.``Calc. Branched binop sum.`` () =
-//        let lexerInputGraph = loadLexerInputGraph "test_5.dot"
-//        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
-//        Assert.AreEqual(res.Edges |> Seq.length, 4)
-//        Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
+    [<Test>]
+    member this.``Calc. Branched multy-digit numbers.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_1.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
+    [<Test>]
+    member this.``Calc. Branched multy-digit numbers with Binop.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
+    [<Test>]
+    member this.``Calc. Branched multy-digit numbers sum 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Branched multy-digit numbers sum 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_4.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Branched binop.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_5.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Branched binop or negation.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_6.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_7.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_8.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Complex branched 3.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_9.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 6)
+        Assert.AreEqual(res.Vertices |> Seq.length, 6)
+
+    [<Test>]
+    member this.``Calc. Complex 0`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_12.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
+
+    [<Test>]
+    member this.``Calc. test 100`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_100.dot"
+        let start = System.DateTime.Now
+        for i in 1..1000 do Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph |> ignore
+        printfn "Time = %A" ((System.DateTime.Now - start).TotalMilliseconds / 1000.0)
+        Assert.True(true)
+
+    [<Test>]
+    member this.``Calc. Epsilon edge 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_10_1.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 1)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Calc. Epsilon edge 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_10_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Simple.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_simple.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 1)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Inner branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_inner_branch.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Outer branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_outer_branch.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Literals. Splitted.`` () =
+        let lexerInputGraph = loadLexerInputGraph "literals_splitted.dot"
+        let res = Literals.Lexer._fslex_tables.Tokenize Literals.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
 //[<EntryPoint>]
 //let f x =
+//    
 //    let t = new ``Abstract lexer tests`` () 
-//    t.``Calc. Branched multy-digit numbers sum 2.``()
+//    t.``Literals. Simple.``()
+//    let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
+//    printfn "%A" t
 //    1

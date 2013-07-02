@@ -65,6 +65,7 @@
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
+    <None Include="calc.yrd" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>

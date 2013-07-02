@@ -59,62 +59,60 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 13 "Lexer.fsl"
+# 15 "Lexer.fsl"
                               token lexbuf 
 # 64 "Lexer.fs"
           )
   | 1 -> ( 
-# 14 "Lexer.fsl"
+# 16 "Lexer.fsl"
                                                                   NUMBER <| lexeme lexbuf 
 # 69 "Lexer.fs"
           )
   | 2 -> ( 
-# 15 "Lexer.fsl"
+# 17 "Lexer.fsl"
                        MINUS <| lexeme lexbuf 
 # 74 "Lexer.fs"
           )
   | 3 -> ( 
-# 16 "Lexer.fsl"
+# 18 "Lexer.fsl"
                        LBRACE <| lexeme lexbuf 
 # 79 "Lexer.fs"
           )
   | 4 -> ( 
-# 17 "Lexer.fsl"
+# 19 "Lexer.fsl"
                        RBRACE <| lexeme lexbuf 
 # 84 "Lexer.fs"
           )
   | 5 -> ( 
-# 18 "Lexer.fsl"
+# 20 "Lexer.fsl"
                        DIV <| lexeme lexbuf 
 # 89 "Lexer.fs"
           )
   | 6 -> ( 
-# 19 "Lexer.fsl"
+# 21 "Lexer.fsl"
                        PLUS <| lexeme lexbuf 
 # 94 "Lexer.fs"
           )
   | 7 -> ( 
-# 20 "Lexer.fsl"
+# 22 "Lexer.fsl"
                         POW <| lexeme lexbuf 
 # 99 "Lexer.fs"
           )
   | 8 -> ( 
-# 21 "Lexer.fsl"
+# 23 "Lexer.fsl"
                        MULT <| lexeme lexbuf 
 # 104 "Lexer.fs"
           )
   | 9 -> ( 
-# 22 "Lexer.fsl"
+# 24 "Lexer.fsl"
                        RNGLR_EOF <| lexeme lexbuf 
 # 109 "Lexer.fs"
           )
   | 10 -> ( 
-# 23 "Lexer.fsl"
+# 25 "Lexer.fsl"
                      failwithf "unexpected input: %s" <| lexeme lexbuf 
 # 114 "Lexer.fs"
           )
   | _ -> failwith "token"
-
-# 24 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

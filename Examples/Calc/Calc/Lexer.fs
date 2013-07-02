@@ -1,5 +1,5 @@
 # 1 "Lexer.fsl"
- 
+  
 module Calc.Lexer
 open Calc.Parser
 open Microsoft.FSharp.Text.Lexing
@@ -114,5 +114,7 @@ and _fslex_token  _fslex_state lexbuf =
 # 114 "Lexer.fs"
           )
   | _ -> failwith "token"
+
+# 26 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

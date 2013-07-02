@@ -1,4 +1,4 @@
-﻿{
+﻿ {
 module Calc.Lexer
 open Calc.Parser
 open Microsoft.FSharp.Text.Lexing

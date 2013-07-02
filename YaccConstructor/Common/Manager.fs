@@ -19,6 +19,8 @@
 
 module Yard.Core.Manager
 
+open Microsoft.FSharp.Collections
+
 type IComponent = interface
     abstract Name : string
 end

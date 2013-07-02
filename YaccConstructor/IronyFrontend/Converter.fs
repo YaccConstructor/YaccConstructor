@@ -44,7 +44,7 @@ module Converter =
             )
             termName
 
-    let formatNontermName = String.uncapitalize
+    let formatNontermName = fun (s :string) -> s.ToLowerInvariant()
             
     let Convert (ironyGrammar : Irony.Parsing.Grammar) = 
         let refTerms = ref [ironyGrammar.Root :> BnfTerm]

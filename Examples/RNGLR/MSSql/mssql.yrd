@@ -353,6 +353,8 @@ table_source:
 
 
 rowset_function:
+
+
     containstable
   | freetexttable
   | opendatasource

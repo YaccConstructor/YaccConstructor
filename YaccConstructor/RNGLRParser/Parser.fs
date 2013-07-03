@@ -350,11 +350,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 addSimpleEdge vertex newAstNode simpleEdges.[state]
         
         let recovery() =
-            let recVertNumber = 2
-            if usedStates.Count <> 0 then 
-                
-                // on case if curToken is RNGLR_EOF
-                let errorInd = parserSource.ErrorIndex
+            let recVertNumber = 1
+            if usedStates.Count <> 0 
+            then 
+                let prevNum = !curNum
+                curNum := parserSource.ErrorIndex
                 let temp = new Queue<_>()
             
                 let curVertices = new Stack<_> (statesCount)
@@ -368,69 +368,99 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let containsRecState (oldVertices : Stack<Vertex * _ list>) =
                     let oldVert = oldVertices.ToArray()
                     for vertex, path in oldVert do
-                        if pushes.Count <> recVertNumber then
-                            let push = parserSource.Gotos.[vertex.State].[errorInd]
-                            if push <> 0 then
-                                if pushes.Count <> 0 then
+                        if pushes.Count <> recVertNumber 
+                        then
+                            //if reduce is possible
+                            let arr = parserSource.Reduces.[vertex.State].[!curNum]
+                            if arr <> null
+                            then 
+                                for (prod, pos) in arr do
+                                    let edgeOpt = Some (vertex.OutEdges.first.Dest, vertex.OutEdges.first.Ast)
+                                    reductions.Push (vertex, prod, pos, edgeOpt)
+                                makeReductions !curInd
+                                temp.Enqueue path
+                            //if shift is possible
+                            let push = parserSource.Gotos.[vertex.State].[!curNum]
+                            if push <> 0 
+                            then
+                                if pushes.Count <> 0 
+                                then
                                     let recVert = fst <| pushes.Peek()
-                                    if recVert.State <> vertex.State then 
+                                    if recVert.State <> vertex.State 
+                                    then 
                                         pushes.Push (vertex, push)
                                         temp.Enqueue path
                                 else 
                                     pushes.Push (vertex, push)
                                     temp.Enqueue path
-                    pushes.Count = recVertNumber
+                    pushes.Count + reductions.Count >= recVertNumber
 
                 let searchRecSymbol (unbrowsed : obj[]) = 
                     let makeErrReductions (vertex : Vertex) state (unbrowsed : obj[]) = 
                         let prodNumber = parserSource.Rules.Length
-                        let pos = !curInd
-                        let edgeOpt = vertex, vertex.OutEdges.first.Ast
-                        let nonTerm = parserSource.ErrorIndex
-
+                        let pos = unbrowsed.Length
+                        
                         let family = new Family(prodNumber, new Nodes(unbrowsed))
-                        if not <| containsEdge vertex family edges.[state] then
+                        if not <| containsEdge vertex family edges.[state] 
+                        then
                             let isCreated, edgeLabel = addEdge vertex family edges.[state]
-                            if (pos > 0 && isCreated) then
+                            if isCreated
+                            then
                                 let arr = parserSource.Reduces.[state].[!curNum]
-                                if arr <> null then
+                                if arr <> null 
+                                then
                                     for (prod, pos) in arr do
                                         reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
-                
-                    let oldPushes = pushes.ToArray()
-                    for state in usedStates do
-                        stateToVertex.[state] <- null
-                    pushes.Clear()
-                    usedStates.Clear()
-                
-                    for vertex, state in oldPushes do
-                        //let arr = parserSource.Reduces.[state].[!curNum]
-                        makeErrReductions vertex state unbrowsed
+                    
+                    let state = snd <| pushes.Peek()
 
-                        let astNode = box tokens.Count
-                        tokens.Add !curToken
-                        addVertex state !curInd None |> ignore       
+                    if parserSource.Reduces.[state].[!curNum] <> null
+                    then // reductions is possible
+                        let vertex = fst <| pushes.Peek()
+                        makeErrReductions vertex state unbrowsed
+                        (*let arr = parserSource.Reduces.[state].[!curNum]
+                        for (prod, pos) in arr do
+                            reductions.Push (vertex, prod, pos, Some (vertex, vertex.OutEdges.first.Ast))*)
+                    
+                    // maybe it will never occurs
+                    else // if shift is possible
+                        let oldPushes = pushes.ToArray()
+                        for state in usedStates do
+                            stateToVertex.[state] <- null
+                        pushes.Clear()
+                        usedStates.Clear()
+                
+                        for vertex, state in oldPushes do
+                            makeErrReductions vertex state unbrowsed
+
+                            let astNode = box tokens.Count
+                            tokens.Add !curToken
+                            addVertex state !curInd None |> ignore
 
                 let getPrevVertices() = 
                     let isNewVertex (v : Vertex) = 
                         let flag = ref true
                         for vert, _ in curVertices do
-                            if !flag && vert.Level = v.Level && vert.State = v.State then
+                            if !flag && vert.Level = v.Level && vert.State = v.State 
+                            then
                                 flag := false
                         !flag
                 
                     let oldVertices = curVertices.ToArray()
                     curVertices.Clear()
                     for vertex, path in oldVertices do
-                        if vertex.OutEdges.first.Dest <> null then
-                            if vertex.OutEdges.other <> null then
+                        if vertex.OutEdges.first.Dest <> null 
+                        then
+                            if vertex.OutEdges.other <> null 
+                            then
                                 for edge in vertex.OutEdges.other do 
-                                    let isNew = isNewVertex edge.Dest
-                                    if  isNew  then
+                                    if  isNewVertex edge.Dest
+                                    then
                                         let newPath = edge.Ast :: path 
                                         curVertices.Push (edge.Dest, newPath)
-                            let isNew = isNewVertex vertex.OutEdges.first.Dest
-                            if isNew  then
+
+                            if isNewVertex vertex.OutEdges.first.Dest
+                            then
                                 let newPath = vertex.OutEdges.first.Ast :: path
                                 curVertices.Push (vertex.OutEdges.first.Dest, newPath)
             
@@ -448,24 +478,27 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 for i in 0..oldPushes.Length-1 do
                     let vertex = fst oldPushes.[i]
                     let state = snd oldPushes.[i]
-                    Array.set recVertex i vertex
-                    Array.set recPush i state
-                    Array.set recoveryTokens i <| parserSource.GetExpectedTokens state      
-                    
+                    recVertex.[i] <- vertex
+                    recPush.[i] <- state
+                    recoveryTokens.[i] <- parserSource.GetExpectedTokens state      
+
                 let isRecToken num = 
                     let res = ref -1
                     for i in 0..recoveryTokens.Length-1 do
-                        if !res < 0 && recoveryTokens.[i] |> Array.exists ((=) num) then
+                        if !res < 0 && recoveryTokens.[i] |> Array.exists ((=) num) 
+                        then
                             res := i
                     !res
 
+                curNum := prevNum
                 let var = ref <| isRecToken !curNum
 
                 while !var = -1 && !curNum <> parserSource.EofIndex do
                     let newAstNode = box tokens.Count
                     tokens.Add !curToken
                     skipped.Enqueue newAstNode
-                    if enum.MoveNext() then
+                    if enum.MoveNext() 
+                    then
                         curToken := enum.Current
                         curNum := parserSource.TokenToNumber enum.Current
                         incr curInd
@@ -473,39 +506,40 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         curNum := parserSource.EofIndex
                     var := isRecToken !curNum
 
-            //printfn "%A" <| unbrowsed.ToArray()      
-                if  !var >= 0 then 
+                if  !var >= 0
+                then 
                     let path = temp.ToArray()
                     let need = List.toArray path.[!var]
                     let skippedArray = skipped.ToArray()
                     let unbrowsed = Array.append need skippedArray
                     pushes.Push (recVertex.[!var], recPush.[!var])
-                    searchRecSymbol unbrowsed 
+                    searchRecSymbol unbrowsed             
 
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
-        let mutable isError = ref false
+        let mutable wasError = ref false
         let lastErr = ref -1
 
-        while not !isEnd && not !isError do
-            if usedStates.Count = 0 then
+        while not !isEnd && not !wasError do
+            if usedStates.Count = 0 && reductions.Count = 0
+            then
                 let errInfo =  !curInd, !curToken 
                 errorList <- errInfo :: errorList
-                //if errorRuleExist then recovery()
-                //printfn "used states 0!"
-                isError <- ref true
+                wasError <- ref true
             else
                 makeReductions !curInd
                 attachEdges()
                 if !curNum = parserSource.EofIndex then isEnd := true
                 elif pushes.Count = 0 then 
-                    if !curInd - !lastErr > 1 then
+                    if !curInd - !lastErr > 1 
+                    then
                         let errInfo =  !curInd, !curToken
                         errorList <- errInfo :: errorList
-                    if errorRuleExist then 
+                    if errorRuleExist 
+                    then 
                         recovery()
                         lastErr := !curInd
-                    else isError <- ref true
+                    else wasError <- ref true
                 else
                     incr curInd
                     shift !curInd
@@ -513,12 +547,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let isAcceptState() = 
             let flag = ref false
             for state in usedStates do
-                if not !flag then
+                if not !flag 
+                then
                     flag := parserSource.AccStates.[state]
             !flag                    
 
         // if finish isn't accepting state then error
-        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() then
+        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
+        then
             recovery()
             makeReductions !curInd
             attachEdges()
@@ -533,13 +569,15 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 lastTokens = lastTokens
             }
                     
-        if not errorList.IsEmpty then
+        if not errorList.IsEmpty 
+        then
             errorList <- List.rev errorList
             let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
             for i = 0 to errorList.Length-1 do
                 printfn "Parse error in %d position in %s token. " <| fst errorList.[i] <| tokenToString (snd errorList.[i])
             //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
-        if !isError then 
+        if !wasError 
+        then 
             Error (!curInd , !curToken , "Parse Error", debugFuns ())
         else
             let root = ref None
@@ -547,7 +585,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let children = new Family(parserSource.StartRule,  new Nodes(res, null, null))
                 new AST(children, null)
             for vertex in usedStates do
-                if parserSource.AccStates.[vertex] then
+                if parserSource.AccStates.[vertex] 
+                then
                     root :=
                         stateToVertex.[vertex].OutEdges.first.Ast
                         |> addTreeTop

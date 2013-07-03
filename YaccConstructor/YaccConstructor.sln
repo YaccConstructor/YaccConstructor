@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{62D91EA2-A776-44C2-8891-2CA45A01A365}"
@@ -73,7 +73,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator.Test", "GLLGen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GLL", "GLL", "{11E0A5E6-3D2D-48CC-91E1-09EF624786A6}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParserErrorRecoveryTest", "RNGLRParser.ErrorRecoveryTest\RNGLRParserErrorRecoveryTest.fsproj", "{E33864E1-96DA-4838-B088-A61901A1ECA0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParser.ErrorRecoveryTest", "RNGLRParser.ErrorRecoveryTest\RNGLRParser.ErrorRecoveryTest.fsproj", "{E33864E1-96DA-4838-B088-A61901A1ECA0}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Constraints", "Constraints\Constraints.fsproj", "{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}"
 EndProject

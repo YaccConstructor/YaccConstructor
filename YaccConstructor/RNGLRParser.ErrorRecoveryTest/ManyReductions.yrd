@@ -1,0 +1,5 @@
+[<Start>]
+a : A b C
+b : B | d
+d: errRule
+errRule: error

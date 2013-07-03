@@ -71,10 +71,8 @@ rule tokens = parse
  | "*"      { getLiteral id lexbuf "*" }
  //| "$"      { getLiteral lexbuf "$" } 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
-            let hasdot = l.IndexOf '.' <> -1
-            match makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 
-                                     new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)) with
-            | x -> x
+            makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 
+                                     new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
          }
  | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
  | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }

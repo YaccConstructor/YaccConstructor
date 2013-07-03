@@ -83,8 +83,6 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="AntlrToYard.fs" />
     <Compile Include="AntlrFrontend.fs" />
-    <None Include="Lexer.fsl" />
-    <None Include="Parser.fsy" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

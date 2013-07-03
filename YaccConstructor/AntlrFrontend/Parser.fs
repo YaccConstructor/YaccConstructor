@@ -366,7 +366,7 @@ let _fsyacc_immediateActions = [|65535us; 49152us; 65535us; 65535us; 16385us; 65
 let _fsyacc_reductions ()  =    [| 
 # 367 "Parser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
-            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>)) in
+            let _1 = (let data = parseState.GetInput(1) in (Microsoft.FSharp.Core.Operators.unbox data : (Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary)) in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -384,7 +384,7 @@ let _fsyacc_reductions ()  =    [|
                                                                 (defaultModules (_2), terminals)  
                    )
 # 105 "Parser.fsy"
-                 : Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>));
+                 : (Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary));
 # 388 "Parser.fs"
         (fun (parseState : Microsoft.FSharp.Text.Parsing.IParseState) ->
             let _2 = (let data = parseState.GetInput(2) in (Microsoft.FSharp.Core.Operators.unbox data : Source.t)) in
@@ -1121,5 +1121,5 @@ let tables () : Microsoft.FSharp.Text.Parsing.Tables<_> =
     numTerminals = 29;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = (tables ()).Interpret(lexer, lexbuf, startState)
-let ParseAntlr lexer lexbuf : Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string> =
+let ParseAntlr lexer lexbuf : (Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary =
     Microsoft.FSharp.Core.Operators.unbox ((tables ()).Interpret(lexer, lexbuf, 0))

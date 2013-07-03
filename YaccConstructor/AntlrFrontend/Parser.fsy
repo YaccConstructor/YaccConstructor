@@ -95,7 +95,7 @@ let makeToken (src : Source.t) descr =
 %token HENCE
 
 %start ParseAntlr
-%type <Grammar.t<Source.t, Source.t> * System.Collections.Generic.Dictionary<string, string>> ParseAntlr
+%type <(Source.t, Source.t)Grammar.t * (string, string)System.Collections.Generic.Dictionary> ParseAntlr
 
 
 %%

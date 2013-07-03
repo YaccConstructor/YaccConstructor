@@ -74,11 +74,15 @@
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <ItemGroup>
-    <FsYard Include="mssql.yrd" />
+    <FsYard Include="..\common_grammars\mssql.yrd">
+      <Link>mssql.yrd</Link>
+    </FsYard>
+    <FsYard Include="..\common_grammars\MsCommon.yrd">
+      <Link>MsCommon.yrd</Link>
+    </FsYard>
     <FsYard Include="../../../GrammarTemplates/Common.yrd">
       <Link>Common.yrd</Link>
     </FsYard>
-    <FsYard Include="MsCommon.yrd" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
@@ -86,9 +90,6 @@
     <Compile Include="LexerHelper.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Driver.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

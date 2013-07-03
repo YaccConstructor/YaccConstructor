@@ -58,6 +58,7 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
+	 |stmt_block
   
 rollback_transaction:
     'ROLLBACK'

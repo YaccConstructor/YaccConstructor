@@ -90,7 +90,7 @@ let justParse (path:string) =
         filterEpsilons = true
     }
 
-    let xx = allTokens |> Array.ofSeq
+  //  let xx = allTokens |> Array.ofSeq
 
     let res = buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
@@ -118,7 +118,7 @@ let Parse (srcFilePath:string) =
             else (d :?> SourceText).text
         let name = tok |> tokenToNumber |> numToString
         printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
-        //dbg.lastTokens(10) |> printfn "%A"
+        dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
         let GC_Collect () = 
@@ -143,7 +143,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"C:\yc\recursive-ascent\Tests\materials\ms-sql\sysprocs\sp_help.sql"  
+    let inPath = ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
     //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

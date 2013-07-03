@@ -72,9 +72,10 @@
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <FsYard Include="plsql.yrd" />
-    <FsYard Include="PlCommon.yrd" />
+    <FsYard Include="plsql.yrd"/>
+    <FsYard Include="..\common_grammars\MsCommon.yrd">
+      <Link>PlCommon.yrd</Link>
+    </FsYard>
     <FsYard Include="..\..\..\GrammarTemplates\Common.yrd">
       <Link>Common.yrd</Link>
     </FsYard>

@@ -34,6 +34,3 @@ type Pair =
     val AbsoluteOffset : int64<symbol>
     new (i : int<id>, o : int64<symbol>)  = { Id = i; AbsoluteOffset = o }
 
-
-
-

@@ -37,6 +37,7 @@ type UtilsTest () =
         let offset = p.GetAbsoluteOffset packTrinity
         let packPair = PackPair 1<id> offset
         let actual = p.GetCoordinates packPair
+        Assert.AreEqual(id, actual.Id)
         Assert.AreEqual(line, actual.Line)
         Assert.AreEqual(column, actual.Column)
 
@@ -103,7 +104,8 @@ type UtilsTest () =
     [<Test>]
     member test.``Test for line and column in received Map`` () =
         let basePass = @"../../../../Tests/SourceText/Map.txt"
-        let map = p.GetMap basePass
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
         p.AddLine 2<id> map
         let line = 6<line>
         let column = 5<symbol>
@@ -131,15 +133,17 @@ type UtilsTest () =
     [<Test>]
     member test.``Test for get right Map`` () =
         let basePass = @"../../../../Tests/SourceText/LittleMap.txt"
-        let map = p.GetMap basePass
-        let actual : int64<symbol>[] = [| 0L<symbol>; 10L<symbol>; 11L<symbol>; 28L<symbol>; 
-                                        29L<symbol>; 43L<symbol>; 48L<symbol> |]
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
+        let actual : int64<symbol>[] = [| 0L<symbol>; 11L<symbol>; 13L<symbol>; 31L<symbol>; 33L<symbol>; 
+                                        48L<symbol>; 52L<symbol>;|]
         Assert.AreEqual(map, actual)
 
     [<Test>]
     member test.``Test for get right empty Map`` () =
         let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
-        let map = p.GetMap basePass
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
         let actual : int64<symbol>[] = [| 0L<symbol> |]
         Assert.AreEqual(map, actual)
 
@@ -147,8 +151,59 @@ type UtilsTest () =
     member test.``Test for empty Map`` () =
         try
             let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
-            let map = p.GetMap basePass
+            let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+            let map = p.GetMap StreamElement
             p.AddLine 3<id> map
+            let line = 4<line>
+            let column = 5<symbol>
+            let packTrinity = Pack 2<id> line column         
+            let offset = p.GetAbsoluteOffset packTrinity
+            let packPair = PackPair 2<id> offset
+            let actual = p.GetCoordinates packPair
+            Assert.AreEqual(line, actual.Line)
+            Assert.AreEqual(column, actual.Column)
+        with 
+        | ex -> ()
+
+    [<Test>]
+    member test.``Test for line and column in received Map (Unix style)`` () =
+        let basePass = @"../../../../Tests/SourceText/Map (Unix style).txt"
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
+        p.AddLine 4<id> map
+        let line = 6<line>
+        let column = 5<symbol>
+        let packTrinity = Pack 2<id> line column         
+        let offset = p.GetAbsoluteOffset packTrinity
+        let packPair = PackPair 2<id> offset
+        let actual = p.GetCoordinates packPair
+        Assert.AreEqual(line, actual.Line)
+        Assert.AreEqual(column, actual.Column)
+
+    [<Test>]
+    member test.``Test for get right Map (Unix style)`` () =
+        let basePass = @"../../../../Tests/SourceText/LittleMap (Unix style).txt"
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
+        let actual : int64<symbol>[] = [| 0L<symbol>; 10L<symbol>; 11L<symbol>; 28L<symbol>; 29L<symbol>; 
+                                        43L<symbol>; 47L<symbol>;|]
+        Assert.AreEqual(map, actual)
+
+    [<Test>]
+    member test.``Test for get right empty Map (Unix style)`` () =
+        let basePass = @"../../../../Tests/SourceText/EmptyMap (Unix style).txt"
+        let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
+        let actual : int64<symbol>[] = [| 0L<symbol> |]
+        Assert.AreEqual(map, actual)
+
+    [<Test>]
+    member test.``Test for empty Map (Unix style)`` () =
+        try
+            let basePass = @"../../../../Tests/SourceText/EmptyMap (Unix style).txt"
+            let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
+            let map = p.GetMap StreamElement
+            p.AddLine 5<id> map
             let line = 4<line>
             let column = 5<symbol>
             let packTrinity = Pack 2<id> line column         

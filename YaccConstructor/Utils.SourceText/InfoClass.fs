@@ -19,18 +19,21 @@ let rec getLine (map : array<_>) id offset left right = //BinarySearch
 type ProjInfo () =
     let FilesMap : Dictionary<_,_>  = new Dictionary<_,_> () //Dictionary<int/*id файла*/, string/*имя файла*/>
     let LinesMap : Dictionary<int<id>, array<int64<symbol>>> = new Dictionary<_,_>() //Dictionary<int /*id*/, /*array<_>*/
-    member this.AddLine id lineMap = LinesMap.Add(id,lineMap) 
-    member public this.GetMap path = 
+    member this.AddLine id lineMap = LinesMap.Add(id, lineMap)    
+    member public this.GetMap (streamElement : StreamReader) = 
         try
-            let lines = File.ReadLines path
-            let sum = ref 0L<symbol>
-            let res = seq { yield 0L<symbol>
-                            yield! (lines |> Seq.map(fun str -> 
-                                                        let r = sum.Value + (int64 str.Length)*_symbolL + 1L<symbol>
-                                                        sum := r
-                                                        r))                                                   
-                          }
-            res |> Seq.toArray
+            let mutable sum = 0L<symbol>
+            let mutable beg = false
+            let list = new ResizeArray<_>()
+            if (streamElement.Peek() >= 0)
+            then list.Add(sum)
+            while streamElement.Peek() >= 0 do
+                let num = streamElement.Read()
+                sum <- sum + 1L<symbol>
+                if num = 10
+                then list.Add(sum)
+            list.Add(sum)    
+            list.ToArray()
         with
         | :? DriveNotFoundException
         | :? DirectoryNotFoundException
@@ -51,7 +54,7 @@ type ProjInfo () =
         let map = LinesMap.[id]
         if line > (map.Length - 1) * _line  || line < 1<line>
         then failwith ("Value of Line is out of Map's range")    
-        if (int64 column) * _symbolL> map.[int line] - map.[int line - 1] - 1L * _symbolL|| column < 1<symbol> 
+        if (int64 column) * _symbolL > map.[int line] - map.[int line - 1] - 1L * _symbolL || column < 1<symbol> 
         then failwith ("Column is out of Map's range")       
         let res = Some(map.[int line - 1] + (int64 column)*_symbolL - 1L<symbol>)
         if res |> Option.isSome
@@ -63,6 +66,6 @@ type ProjInfo () =
         let id = repack.Id
         let offset = repack.AbsoluteOffset
         let map = LinesMap.[id]
-        let inLine = getLine map id offset 0 (map.Length - 1) + 1
+        let inLine = (getLine map id offset 0 (map.Length - 1)) + 1
         let inColumn = offset - map.[inLine - 1] + 1L<symbol>
         new Trinity(id, (int inColumn) * _symbol, inLine * _line)

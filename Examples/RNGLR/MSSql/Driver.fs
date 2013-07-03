@@ -27,6 +27,7 @@ open Yard.Utils.SourceText
 open Yard.Utils.StructClass
 open Yard.Utils.InfoClass
 open System
+open System.IO
 
 let lastTokenNum = ref 0L
 let traceStep = 50000L
@@ -95,8 +96,10 @@ let justParse (path:string) =
 let p = new ProjInfo()
 let mutable counter = 1<id>
 
-let Parse (srcFilePath:string) =   
-    let map = p.GetMap srcFilePath
+let Parse (srcFilePath:string) = 
+    let StreamElement = new StreamReader(srcFilePath, System.Text.Encoding.UTF8)  
+    let map = p.GetMap StreamElement
+    //Array.iter (printfn "%A") map
     Lexer.id <- counter
     p.AddLine counter map
     counter <- counter + 1<id>
@@ -107,7 +110,7 @@ let Parse (srcFilePath:string) =
             let x,y = tokenPos tok
             let x = p.GetCoordinates x
             let y = p.GetCoordinates y
-            sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+            sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
         let data =
             let d = tokenData tok
             if isLiteral tok then ""

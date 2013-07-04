@@ -111,7 +111,13 @@ let Parse (srcFilePath:string) =
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
         let coordinates = 
             let x,y = tokenPos tok
-            let x = p.GetCoordinates x
+            
+            (*let repackX = RePackPair x
+            printfn "Offset x: %A" repackX.AbsoluteOffset
+            let repackY = RePackPair x
+            printfn "Offset y: %A" repackY.AbsoluteOffset*)
+
+            let x = p.GetCoordinates x 
             let y = p.GetCoordinates y
             sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
         let data =
@@ -149,7 +155,7 @@ do
         //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
         ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
         //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
-    //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
+        //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> inPath := s), "Input file."

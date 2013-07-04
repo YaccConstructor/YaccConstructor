@@ -354,6 +354,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if usedStates.Count <> 0 
             then 
                 let prevNum = !curNum
+
                 curNum := parserSource.ErrorIndex
                 let temp = new Queue<_>()
             
@@ -364,7 +365,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     curVertices.Push (stateToVertex.[vertex], path)
                     stateToVertex.[vertex] <- null
                 usedStates.Clear()
-
+                
+                //pushes.count may be equal to 1
+                //if parser finished in the non-accepting state and it generates the recovery
+                pushes.Clear()
+                
                 let containsRecState (oldVertices : Stack<Vertex * _ list>) =
                     let oldVert = oldVertices.ToArray()
                     for vertex, path in oldVert do
@@ -393,6 +398,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                 else 
                                     pushes.Push (vertex, push)
                                     temp.Enqueue path
+
                     pushes.Count + reductions.Count >= recVertNumber
 
                 let searchRecSymbol (unbrowsed : obj[]) = 
@@ -411,17 +417,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                 then
                                     for (prod, pos) in arr do
                                         reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
-                    
                     let state = snd <| pushes.Peek()
 
                     if parserSource.Reduces.[state].[!curNum] <> null
                     then // reductions is possible
                         let vertex = fst <| pushes.Peek()
                         makeErrReductions vertex state unbrowsed
-                        (*let arr = parserSource.Reduces.[state].[!curNum]
-                        for (prod, pos) in arr do
-                            reductions.Push (vertex, prod, pos, Some (vertex, vertex.OutEdges.first.Ast))*)
-                    
+                                            
                     // maybe it will never occurs
                     else // if shift is possible
                         let oldPushes = pushes.ToArray()
@@ -466,7 +468,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             
                 while curVertices.Count <> 0 && not <| containsRecState curVertices do
                     getPrevVertices()
-                    
+                
                 let skipped = Queue<_>()
                 let oldPushes = pushes.ToArray() |> Array.rev
                 pushes.Clear()
@@ -481,7 +483,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     recVertex.[i] <- vertex
                     recPush.[i] <- state
                     recoveryTokens.[i] <- parserSource.GetExpectedTokens state      
-
+                
                 let isRecToken num = 
                     let res = ref -1
                     for i in 0..recoveryTokens.Length-1 do
@@ -505,7 +507,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     else             
                         curNum := parserSource.EofIndex
                     var := isRecToken !curNum
-
                 if  !var >= 0
                 then 
                     let path = temp.ToArray()

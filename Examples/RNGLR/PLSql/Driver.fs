@@ -27,6 +27,7 @@ open Yard.Utils.SourceText
 open Yard.Utils.StructClass
 open Yard.Utils.InfoClass
 open System
+open System.IO
 
 let lastTokenNum = ref 0L
 let traceStep = 50000L
@@ -99,8 +100,9 @@ let justParse (path:string) =
 let p = new ProjInfo()
 let mutable counter = 1<id>
 
-let Parse (srcFilePath:string) =   
-    let map = p.GetMap srcFilePath
+let Parse (srcFilePath:string) =
+    let StreamElement = new StreamReader(srcFilePath, System.Text.Encoding.UTF8)
+    let map = p.GetMap StreamElement
     Lexer.id <- counter
     p.AddLine counter map
     counter <- counter + 1<id>

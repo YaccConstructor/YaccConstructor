@@ -27,14 +27,15 @@ open Yard.Utils.StructClass
 open Yard.Utils.SourceText
 open Yard.Utils.InfoClass
 open Yard.Examples.MSParser
+open System.IO
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
-    let runParserTest file = 
+    let runParserTest (file:string) = 
         let p = new ProjInfo()
         let mutable counter = 1<id>
-
-        let map = p.GetMap file
+        let StreamElement = new StreamReader(file, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
         Lexer.id <- counter
         p.AddLine counter map
         counter <- counter + 1<id>

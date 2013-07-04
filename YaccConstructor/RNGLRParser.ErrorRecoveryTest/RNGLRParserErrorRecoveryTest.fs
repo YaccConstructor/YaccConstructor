@@ -159,5 +159,8 @@ type ``RNGLR error recovery tests`` () =
 (*[<EntryPoint>]
 (new ``RNGLR error recovery tests``()).``Many reductions before error``()*)
 
+(*[<EntryPoint>]
+(new ``RNGLR error recovery tests``()).``Calc no operand in the end``()*)
+
 [<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc missing left brace``()
+(new ``RNGLR error recovery tests``()).``Calc missing operator``()

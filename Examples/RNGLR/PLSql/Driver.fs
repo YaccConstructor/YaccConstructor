@@ -147,7 +147,7 @@ let ParseAllDirectory (directoryName:string) =
 do 
     let inPath = 
         //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
-        ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
+        ref @"C:\Source\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql"  
     //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

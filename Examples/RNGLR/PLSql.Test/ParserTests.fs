@@ -62,6 +62,17 @@ type ``MS-SQL parser tests`` () =
     let file name = System.IO.Path.Combine (basePath,name)
 
     [<Test>]
-    member test.``Top level set.`` () =
+    member test.``Exucute procedure with assosiation operation.`` () =
         file "exec_proc_1.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Exucute procedure with two parametres.`` () =
+        file "exec_proc_2.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Exucute procedure with one parametr.`` () =
+        file "exec_proc_3.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Exucute procedure without parametres.`` () =
+        file "exec_proc_4.sql" |> runParserTest

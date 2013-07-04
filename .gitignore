@@ -63,3 +63,4 @@ Examples/RNGLR/MSSql/mssql.yrd.*
 YaccConstructor/AbstractLexer.Test/log.txt
 YaccConstructor/AbstractLexer.Test/out
 Examples/RNGLR/MSSql/Lexer.fs
+NuGet/*.nupkg

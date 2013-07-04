@@ -134,7 +134,7 @@ let Parse (srcFilePath:string) =
         |> Seq.iter (fun (prods, gv) -> 
             printfn "conf# %i  prods: %A" (Seq.length gv) prods
             gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
-        //defaultAstToDot ast @"..\..\ast.dot"
+        defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated
@@ -145,7 +145,9 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
+    let inPath = 
+        //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
+        ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
     //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

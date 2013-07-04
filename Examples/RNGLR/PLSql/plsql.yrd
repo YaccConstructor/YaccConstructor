@@ -58,7 +58,7 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
-	 |stmt_block
+	 | stmt_block
   
 rollback_transaction:
     'ROLLBACK'
@@ -145,6 +145,7 @@ proc_body_stmnt:
    | insert
    | fetch_stmnt
    | print_stmt
+   | error
 
 (***********************************STATEMENTS******************************************************)
 

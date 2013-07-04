@@ -6,7 +6,7 @@ open Yard.Utils.StructClass
 open Yard.Utils.SourceText
 
 
-let rec getLine (map : array<_>) id offset left right = //BinarySearch             
+let rec getLine (map : array<_>) id offset left right = //BinarySearch         
     let center = (left + right) / 2
     if offset >= map.[center] && offset < map.[center + 1] 
     then center        
@@ -64,7 +64,7 @@ type ProjInfo () =
         let id = repack.Id
         let offset = repack.AbsoluteOffset
         let map = LinesMap.[id]
-        if offset > map.[map.Length - 1] - 1L<symbol>
+        if offset > map.[map.Length] - 1L<symbol>
         then failwith ("Offset is too big")
         let inLine = (getLine map id offset 0 (map.Length - 1)) + 1
         let inColumn = offset - map.[inLine - 1] + 1L<symbol>

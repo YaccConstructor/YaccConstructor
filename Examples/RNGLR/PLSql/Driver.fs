@@ -134,7 +134,7 @@ let Parse (srcFilePath:string) =
         |> Seq.iter (fun (prods, gv) -> 
             printfn "conf# %i  prods: %A" (Seq.length gv) prods
             gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
-        //defaultAstToDot ast @"..\..\ast.dot"
+        defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated

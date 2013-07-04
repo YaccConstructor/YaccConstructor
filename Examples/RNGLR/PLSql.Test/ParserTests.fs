@@ -59,7 +59,9 @@ type ``MS-SQL parser tests`` () =
             Assert.Pass()
 
     let basePath = "../../../../../Tests/PlSqlParser"
+    let filePath = "../../../../../Tests/materials/pl-sql/jrxml2pdf-release/install"
     let file name = System.IO.Path.Combine (basePath,name)
+    let file_1 name = System.IO.Path.Combine (filePath,name)
 
     [<Test>]
     member test.``Exucute procedure with assosiation operation.`` () =
@@ -76,3 +78,11 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``Exucute procedure without parametres.`` () =
         file "exec_proc_4.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with some procudure.`` () =
+        file_1 "ACL_FOR_GOOGLE_MAPS.sql" |> runParserTest
+
+        
+
+

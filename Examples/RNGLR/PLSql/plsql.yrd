@@ -43,7 +43,7 @@ module Main
 open Common, MsCommon
 
 [<Start>]
-root_rule: (batch_body 'GO'?)*
+root_rule: (batch_body '/'?)*
 
 batch_body: 
        create_proc
@@ -58,13 +58,40 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
-	 |stmt_block
+	 | stmt_block
+	 | 'commit'
   
 rollback_transaction:
     'ROLLBACK'
     ['TRAN' | 'TRANSACTION']
     [IDENT | LOCALVAR]
     ';'?
+
+(**************************************EXCEPTION****************************************************)
+exception:
+      'WHEN' 
+       (not_empty_list<ident 'OR'>
+	  |'OTHERS') 
+      'THEN' list<proc_body_stmnt ';'>';'
+
+(*statement:
+      ('<<' label_name '>>')*
+	  assignment_statement | close_statement | continue_statement | execute_immediate_statement 
+	  | exit_statement | fetch_statement | forall_statement | goto_statement | if_statement
+	  | loop_statement | null_statement | open_statement | open_for_statement | plsql_block
+	  | raise_statement | return_statement | sql_statement 
+
+sql_statement:
+      commit_statement
+	  | delete_statement
+	  | insert_statement
+	  | lock_table_statement
+	  | rollback_statement
+	  | savepoint_statement
+	  | select_statement
+	  | set_transaction_statement
+	  | update_statement
+	  *)
 (*****************************************SET****************************************************)
 
 set_stmnt:
@@ -128,6 +155,7 @@ procedure_option:
   ]
 
 proc_body_stmnt:
+  ('<<' ident '>>')*
      select_stmnt
    | set_stmnt
    | execute_stmnt   
@@ -145,13 +173,15 @@ proc_body_stmnt:
    | insert
    | fetch_stmnt
    | print_stmt
+   | null_stmt
 
+null_stmt: 'null'
 (***********************************STATEMENTS******************************************************)
 
 print_stmt: 'PRINT' sql_expr ';'?
 while_stmt: 'WHILE' sql_expr proc_body_stmnt
 
-stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* 'END'
+stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* exception? 'END' ';'
 
 if_stmt: 'IF' sql_expr proc_body_stmnt ['ELSE' proc_body_stmnt]                
 

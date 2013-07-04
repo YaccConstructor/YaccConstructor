@@ -27,14 +27,15 @@ open Yard.Utils.StructClass
 open Yard.Utils.SourceText
 open Yard.Utils.InfoClass
 open Yard.Examples.MSParser
+open System.IO
 
 [<TestFixture>]
 type ``MS-SQL parser tests`` () =
-    let runParserTest file = 
+    let runParserTest (file:string) = 
         let p = new ProjInfo()
         let mutable counter = 1<id>
-
-        let map = p.GetMap file
+        let StreamElement = new StreamReader(file, System.Text.Encoding.UTF8)
+        let map = p.GetMap StreamElement
         Lexer.id <- counter
         p.AddLine counter map
         counter <- counter + 1<id>
@@ -61,6 +62,17 @@ type ``MS-SQL parser tests`` () =
     let file name = System.IO.Path.Combine (basePath,name)
 
     [<Test>]
-    member test.``Top level set.`` () =
+    member test.``Exucute procedure with assosiation operation.`` () =
         file "exec_proc_1.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Exucute procedure with two parametres.`` () =
+        file "exec_proc_2.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Exucute procedure with one parametr.`` () =
+        file "exec_proc_3.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Exucute procedure without parametres.`` () =
+        file "exec_proc_4.sql" |> runParserTest

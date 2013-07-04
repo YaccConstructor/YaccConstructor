@@ -72,7 +72,7 @@
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <ItemGroup>
-    <FsYard Include="plsql.yrd"/>
+    <FsYard Include="plsql.yrd" />
     <FsYard Include="..\common_grammars\MsCommon.yrd">
       <Link>PlCommon.yrd</Link>
     </FsYard>

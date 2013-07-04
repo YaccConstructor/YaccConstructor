@@ -113,7 +113,7 @@ let Parse (srcFilePath:string) =
             let x,y = tokenPos tok
             let x = p.GetCoordinates x
             let y = p.GetCoordinates y
-            sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+            sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
         let data =
             let d = tokenData tok
             if isLiteral tok then ""
@@ -147,8 +147,8 @@ let ParseAllDirectory (directoryName:string) =
 do 
     let inPath = 
         //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
-        ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
-    //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
+        ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
+        //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =

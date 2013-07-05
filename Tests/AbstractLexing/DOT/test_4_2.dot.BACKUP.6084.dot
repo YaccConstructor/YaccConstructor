@@ -1,0 +1,17 @@
+<<<<<<< HEAD
+digraph g
+{
+0;1;2;
+0 -> 1 [label="1"]
+0 -> 1 [label="245"]
+1 -> 2 [label="+"]
+}
+=======
+digraph g
+{
+0;1;2;
+0 -> 1 [label="1"]
+0 -> 1 [label="245"]
+1 -> 2 [label="+"]
+}
+>>>>>>> origin/master

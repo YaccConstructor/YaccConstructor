@@ -179,17 +179,15 @@ let posTo2D (source:string) pos =
         )
         (1,0)
 
-let ParseText (s:string) path =
-    let buf = bufFromString s    
+let ParseText (s:string) path =    
     let userDefs = [||]
     GrammarParser.currentFilename := path
     Lexer.currentFile := path
-    try
-        parse buf userDefs
+    try parse (bufFromString s) userDefs
     with
-    | Lexer.Lexical_error (msg, pos) ->
-        let pos2D = posTo2D s pos
-        failwith <| sprintf "Lexical error in line %d position %d: %s" (fst pos2D) (snd pos2D) msg
+        Lexer.Lexical_error (msg, pos) ->
+            let line,col = posTo2D s pos
+            failwith <| sprintf "Lexical error in line %d position %d: %s" line col msg
 
 let rec ParseFile (args:string) =
     Yard.Frontends.YardFrontend.GrammarParser.parseFile := ParseFile

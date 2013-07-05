@@ -1,0 +1,5 @@
+digraph GSS {
+    rankdir=RL
+    0 [label="0"]
+    {rank=same; 0}
+}

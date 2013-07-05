@@ -35,16 +35,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\RNGLR.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="FSharp.PowerPack">
-      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="Graph.fs" />
     <Compile Include="Indexator.fs" />
@@ -58,8 +52,23 @@
     <Compile Include="PrintTables.fs" />
     <Compile Include="PrintTranslator.fs" />
     <Compile Include="RNGLRGenerator.fs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Text.StructuredFormat">
+      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.31\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -81,10 +90,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">

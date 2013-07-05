@@ -1,4 +1,4 @@
-Problem origin.
+﻿Problem origin.
 Often in reengineering we must know a position of cpecified token. 
 Usually (the most convinient) it is a trinity (file name, line, column). But this structure is too memory-hungry, because:
 

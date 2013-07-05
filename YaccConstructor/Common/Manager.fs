@@ -19,12 +19,14 @@
 
 module Yard.Core.Manager
 
+open Microsoft.FSharp.Collections
+
 type IComponent = interface
     abstract Name : string
 end
 
 type Manager<'T when 'T :> IComponent> () = 
-    let collection = 
+    let collection =
         new ResizeArray<'T>(ComponentsLoader.LoadComponents(typeof<'T>) |> Seq.cast)
 
     let available = ResizeArray.map (fun x -> (x:>IComponent).Name) collection

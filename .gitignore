@@ -59,3 +59,8 @@ Examples/RNGLR/MSSql/MsParser.fs
 ppush.txt
 Examples/RNGLR/MSSql/FsYard.log
 YaccConstructor/RNGLRParser.ErrorRecoveryTest/log*.txt
+Examples/RNGLR/MSSql/mssql.yrd.*
+YaccConstructor/AbstractLexer.Test/log.txt
+YaccConstructor/AbstractLexer.Test/out
+Examples/RNGLR/MSSql/Lexer.fs
+NuGet/*.nupkg

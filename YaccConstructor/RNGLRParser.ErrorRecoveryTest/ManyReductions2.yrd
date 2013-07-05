@@ -1,0 +1,5 @@
+[<Start>]
+a: b c A
+b: B
+c: C | d
+d: error 

@@ -1,6 +1,4 @@
-﻿include "../../../GrammarTemplates/Common.yrd"
-
-[<AllPublic>]
+﻿[<AllPublic>]
 module MsCommon
 
 open Common

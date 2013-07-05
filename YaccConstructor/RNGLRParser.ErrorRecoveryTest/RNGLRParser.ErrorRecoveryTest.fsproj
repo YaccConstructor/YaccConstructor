@@ -10,7 +10,7 @@
     <RootNamespace>RNGLRParserErrorRecoveryTest</RootNamespace>
     <AssemblyName>RNGLRParserErrorRecoveryTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>RNGLRParserErrorRecoveryTest</Name>
+    <Name>RNGLRParser.ErrorRecoveryTest</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
     <Compile Include="CalcErrorAmb.yrd.fs" />
+    <Compile Include="ManyReductions.yrd.fs" />
+    <Compile Include="ManyReductions2.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
     <None Include="calcErrorAmb.yrd" />
   </ItemGroup>

@@ -25,7 +25,6 @@ open Constraints
 open Yard.Generators.RNGLR
 open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
-open Yard.Generators.YardPrinter
 open States
 open Printer
 open TranslatorPrinter

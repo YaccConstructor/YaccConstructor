@@ -6,4 +6,4 @@ https://code.google.com/p/recursive-ascent (main Web-page of project)
 https://code.google.com/p/recursive-ascent/source/browse (Utils.SourceText Web-page)
 
 NuGet Web-page:
-http://nuget.org/packages/Utils.SourceText
+http://nuget.org/packages/YC.Utils.SourceText

@@ -1,6 +1,5 @@
 ﻿module Yard.Utils.SourceText
 
-open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.StructClass
 
 (*

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Utils.SourceText</id>
+    <id>YC.Utils.SourceText</id>
     <version>$version$</version>
     <title>$title$</title>
     <authors>Ilya Orlov</authors>

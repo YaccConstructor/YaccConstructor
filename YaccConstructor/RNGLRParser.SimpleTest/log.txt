@@ -103,6 +103,16 @@ Source without filename: parserRange
 Source without filename: error
 <null>
 rules:
+   0: expr = num 
+   1: expr = expr MUL expr 
+   2: expr = expr ADD expr 
+   3: yard_start_rule = expr 
+   4: num = B 
+   5: num = A 
+Source without filename: parserRange
+Source without filename: error
+<null>
+rules:
    0: s = 
    1: s = A 
    2: s = B t s s 

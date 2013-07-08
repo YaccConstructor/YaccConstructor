@@ -28,24 +28,26 @@ let numToString = function
     | 0 -> "error"
     | 1 -> "expr"
     | 2 -> "list"
-    | 3 -> "yard_opt_1"
-    | 4 -> "yard_opt_2"
-    | 5 -> "yard_start_rule"
-    | 6 -> "A"
-    | 7 -> "ADD"
-    | 8 -> "LBRACE"
-    | 9 -> "RBRACE"
-    | 10 -> "RNGLR_EOF"
-    | 11 -> "SEMICOLON"
+    | 3 -> "yard_exp_brackets_1"
+    | 4 -> "yard_exp_brackets_2"
+    | 5 -> "yard_exp_brackets_3"
+    | 6 -> "yard_opt_1"
+    | 7 -> "yard_start_rule"
+    | 8 -> "A"
+    | 9 -> "ADD"
+    | 10 -> "LBRACE"
+    | 11 -> "RBRACE"
+    | 12 -> "RNGLR_EOF"
+    | 13 -> "SEMICOLON"
     | _ -> ""
 
 let tokenToNumber = function
-    | A _ -> 6
-    | ADD _ -> 7
-    | LBRACE _ -> 8
-    | RBRACE _ -> 9
-    | RNGLR_EOF _ -> 10
-    | SEMICOLON _ -> 11
+    | A _ -> 8
+    | ADD _ -> 9
+    | LBRACE _ -> 10
+    | RBRACE _ -> 11
+    | RNGLR_EOF _ -> 12
+    | SEMICOLON _ -> 13
 
 let isLiteral = function
     | A _ -> false
@@ -57,22 +59,22 @@ let isLiteral = function
 
 let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|2; 2; 5; 3; 3; 4; 4; 1; 1; 1; 1|]
-let private rules = [|0; 4; 1; 3; 2; 11; 2; 11; 2; 6; 8; 0; 9; 8; 1; 9; 1; 7; 1|]
-let private rulesStart = [|0; 2; 4; 5; 7; 7; 9; 9; 10; 13; 16; 19|]
-let startRule = 2
+let leftSide = [|2; 7; 6; 6; 1; 1; 1; 3; 3; 4; 5; 5|]
+let private rules = [|3; 6; 2; 4; 8; 10; 5; 11; 1; 9; 1; 0; 1; 13; 2; 0; 1|]
+let private rulesStart = [|0; 2; 3; 4; 4; 5; 8; 11; 12; 13; 15; 16; 17|]
+let startRule = 1
 
 let acceptEmptyInput = false
 
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 4; 17; 8; 9; 2; 3; 16; 5; 6; 14; 7; 10; 12; 11; 13; 15|]
+let private lists_gotos = [|1; 2; 11; 12; 5; 6; 3; 4; 7; 8; 9; 10; 13; 14; 15; 16|]
 let private small_gotos =
-        [|5; 0; 65537; 131074; 393219; 524292; 65538; 262149; 720902; 196613; 0; 65537; 131079; 393219; 524292; 262147; 196616; 458761; 720906; 393219; 65547; 393219; 524292; 458753; 458761; 589828; 12; 65549; 393219; 524292; 655361; 589838; 786434; 458761; 589839; 917509; 0; 65537; 131088; 393219; 524292|]
-let gotos = Array.zeroCreate 18
-for i = 0 to 17 do
-        gotos.[i] <- Array.zeroCreate 12
+        [|6; 0; 65537; 131074; 196611; 524292; 655365; 131073; 589830; 196611; 65543; 524292; 655365; 262145; 589830; 393221; 8; 65545; 327690; 524292; 655365; 524289; 589830; 589825; 720907; 786435; 262156; 393229; 851982; 983046; 0; 65537; 131087; 196611; 524292; 655365|]
+let gotos = Array.zeroCreate 17
+for i = 0 to 16 do
+        gotos.[i] <- Array.zeroCreate 14
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -83,12 +85,12 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|0,2|]; [|1,1|]; [|1,2|]; [|10,3|]; [|7,1|]; [|8,3|]; [|9,3|]; [|3,2|]; [|5,2|]|]
+let private lists_reduces = [|[|7,1|]; [|8,1|]; [|6,3|]; [|4,1|]; [|10,1|]; [|11,1|]; [|5,3|]; [|0,1|]; [|2,1|]; [|0,2|]; [|9,2|]|]
 let private small_reduces =
-        [|65537; 655360; 131073; 655361; 262145; 655362; 327681; 655363; 458756; 458756; 589828; 655364; 720900; 524292; 458757; 589829; 655365; 720901; 720900; 458758; 589830; 655366; 720902; 851972; 458759; 589831; 655367; 720903; 983041; 655368; 1048577; 655369|]
-let reduces = Array.zeroCreate 18
-for i = 0 to 17 do
-        reduces.[i] <- Array.zeroCreate 12
+        [|65538; 786432; 851968; 131074; 786433; 851969; 262148; 589826; 720898; 786434; 851970; 327684; 589827; 720899; 786435; 851971; 458753; 720900; 524289; 720901; 655364; 589830; 720902; 786438; 851974; 786433; 786439; 851969; 786440; 917505; 786441; 1048577; 786442|]
+let reduces = Array.zeroCreate 17
+for i = 0 to 16 do
+        reduces.[i] <- Array.zeroCreate 14
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -99,12 +101,12 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|6|]; [|4|]|]
+let private lists_zeroReduces = [|[|3|]|]
 let private small_zeroReduces =
-        [|65537; 655360; 262145; 655361|]
-let zeroReduces = Array.zeroCreate 18
-for i = 0 to 17 do
-        zeroReduces.[i] <- Array.zeroCreate 12
+        [|786433; 786432|]
+let zeroReduces = Array.zeroCreate 17
+for i = 0 to 16 do
+        zeroReduces.[i] <- Array.zeroCreate 14
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -115,11 +117,11 @@ while cur < small_zeroReduces.Length do
         let x = small_zeroReduces.[cur + k] &&& 65535
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
-let private small_acc = [17]
-let private accStates = Array.zeroCreate 18
-for i = 0 to 17 do
+let private small_acc = [11]
+let private accStates = Array.zeroCreate 17
+for i = 0 to 16 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 10
+let eofIndex = 12
 let errorIndex = 0
 let errorRulesExists = true
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)

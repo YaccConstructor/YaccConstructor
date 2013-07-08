@@ -79,7 +79,7 @@ let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex 
 
 /// Add or extend edge with specified destination and family.
 /// All edges are sorted by destination ascending.
-let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) =
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) (isError : bool) =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
     while i >= 0 && less (fst3 out.[i]) v do
@@ -87,7 +87,11 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
 
     let isCreated = not (i >= 0 && eq (fst3 out.[i]) v)
 
-    let ast = if not isCreated 
+    let ast = 
+        if isError
+        then new AST(family, null)
+        else 
+            if not isCreated 
               then let _,_,n = out.[i] in n
               else new AST (Unchecked.defaultof<_>, null)
 
@@ -229,7 +233,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
-                        let isCreated, edgeLabel = addEdge final family edges.[state]
+                        let isCreated, edgeLabel = addEdge final family edges.[state] false
                         if (pos > 0 && isCreated) then
                             let arr = parserSource.Reduces.[state].[!curNum]
                             if arr <> null then
@@ -342,9 +346,17 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 curNum := parserSource.EofIndex
             for vertex in usedStates do
                 stateToVertex.[vertex] <- null
-            usedStates.Clear()
+            (*usedStates.Clear()
             let oldPushes = pushes.ToArray()
+            pushes.Clear()*)
+            let oldPushes = Stack()
+            for vertex, state in pushes do
+                if vertex.State |> usedStates.Contains 
+                then 
+                    oldPushes.Push (vertex, state)
             pushes.Clear()
+            usedStates.Clear()
+
             for (vertex, state) in oldPushes do
                 let newVertex = addVertex state num <| Some (vertex, newAstNode)
                 addSimpleEdge vertex newAstNode simpleEdges.[state]
@@ -406,17 +418,30 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         let prodNumber = parserSource.Rules.Length
                         let pos = unbrowsed.Length
                         
-                        let family = new Family(prodNumber, new Nodes(unbrowsed))
-                        if not <| containsEdge vertex family edges.[state] 
-                        then
-                            let isCreated, edgeLabel = addEdge vertex family edges.[state]
-                            if isCreated
+                        if pos = 0 
+                        then 
+                            let ast = getEpsilon parserSource.ErrorIndex
+                            if not <| containsSimpleEdge vertex ast simpleEdges.[state] 
                             then
+                                addSimpleEdge vertex ast simpleEdges.[state]
                                 let arr = parserSource.Reduces.[state].[!curNum]
                                 if arr <> null 
                                 then
                                     for (prod, pos) in arr do
-                                        reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
+                                        reductions.Push (vertex, prod, pos, Some (vertex, ast))
+                        else    
+                            let family = new Family(prodNumber, new Nodes(unbrowsed))
+                            if not <| containsEdge vertex family edges.[state] 
+                            then
+                                let isCreated, edgeLabel = addEdge vertex family edges.[state] true
+                                if isCreated
+                                then
+                                    let arr = parserSource.Reduces.[state].[!curNum]
+                                    if arr <> null 
+                                    then
+                                        for (prod, pos) in arr do
+                                            reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
+                    
                     let state = snd <| pushes.Peek()
 
                     if parserSource.Reduces.[state].[!curNum] <> null
@@ -424,7 +449,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         let vertex = fst <| pushes.Peek()
                         makeErrReductions vertex state unbrowsed
                                             
-                    // maybe it will never occurs
                     else // if shift is possible
                         let oldPushes = pushes.ToArray()
                         for state in usedStates do
@@ -556,9 +580,18 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
-            recovery()
-            makeReductions !curInd
-            attachEdges()
+            if !curInd - !lastErr > 1 
+            then
+               let errInfo =  !curInd, !curToken
+               errorList <- errInfo :: errorList
+            if errorRuleExist 
+            then 
+                 recovery()
+                 makeReductions <| !curInd + 1
+                 attachEdges()
+                 lastErr := !curInd
+                 isAcceptState() |> ignore
+            else wasError <- ref true
 
         let lastTokens count =
             [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do

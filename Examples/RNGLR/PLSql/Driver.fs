@@ -54,7 +54,7 @@ let justParse (path:string) =
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep / mSeconds)
                     if int64 chan.CurrentQueueLength > 3L then                        
                         int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
@@ -63,7 +63,7 @@ let justParse (path:string) =
         }   
 
     let start = System.DateTime.Now
-    //use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
+    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
     let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let lastTokenNum = ref 0L    
     let timeOfIteration = ref System.DateTime.Now
@@ -71,17 +71,17 @@ let justParse (path:string) =
     let allTokens = 
         seq{
             while true do
-                //let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + 1L // int64 arr.Length
+                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
+                lastTokenNum := !lastTokenNum + int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
                     printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                //yield! arr
-                let tok =  Lexer.tokens lexbuf
+                yield! arr
+                //let tok =  Lexer.tokens lexbuf
                 //printfn "%A" tok
-                yield  tok
+                //yield  tok
                 }
 
     let translateArgs = {
@@ -153,7 +153,7 @@ let ParseAllDirectory (directoryName:string) =
 do 
     let inPath = 
         //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
-        ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\demodata.sql "  
+        ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\demodata_big.sql"  
         //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
         //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

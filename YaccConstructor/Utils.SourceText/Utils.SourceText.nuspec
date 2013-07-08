@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Utils.SourceText</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Ilya Orlov</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/YaccConstructor/Utils.SourceText/LICENSE.txt</licenseUrl>
+    <projectUrl>https://code.google.com/p/recursive-ascent/wiki/Source_Text_Utils</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes> First version. </releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>Parsing Reengineering SourceCode SourceText Navigation Utils .NET F# FSharp</tags>																																								
+  </metadata>
+<files>
+    <file src="README.txt" target="README.txt" /> 
+    <file src="LICENSE.txt" target="LICENSE.txt" /> 
+</files>
+</package>

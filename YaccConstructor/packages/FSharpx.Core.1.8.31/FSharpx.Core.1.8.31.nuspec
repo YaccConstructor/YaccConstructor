@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>FSharpx.Core</id>
     <version>1.8.31</version>
@@ -33,5 +33,9 @@ It currently implements:
 * Functions to make C# - F# interop easier.</summary>
     <language>en-US</language>
     <tags>fsharp csharp interop monad iteratee validation bytestring testing</tags>
+    <references>
+      <reference file="FSharpx.Core.dll" />
+      <reference file="_._" />
+    </references>
   </metadata>
 </package>

@@ -56,10 +56,6 @@
     <DocumentationFile>bin\Release\CYK.Test.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-<PropertyGroup>
-    <FsYaccToolPath>..\..\3rdParty\FsPowerPack\</FsYaccToolPath>
-    <FsLexToolPath>..\..\3rdParty\FsPowerPack\</FsLexToolPath>
-  </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

@@ -58,13 +58,31 @@ batch_body:
      | create_table
      | insert
 	 | stmt_block
+	 | update_stmnt 
 	 | 'commit' ';'?
+	 | alter_table
   
 rollback_transaction:
     'ROLLBACK'
     ['TRAN' | 'TRANSACTION']
     [IDENT | LOCALVAR]
     ';'?
+
+(**************************************ALTER TABLE**************************************************)
+alter_table: 
+      'ALTER' 'TABLE'
+	  [IDENT '.'] IDENT
+	  [constraint_clauses]
+	  ';'?
+
+constraint_clauses: 
+      'ADD' 
+	    out_of_line_constraint
+	   
+out_of_line_constraint:
+	    ['CONSTRAINT' ident]
+		 ('UNIQUE' | ('PRIMARY' 'KEY'))
+		 '(' comma_list<IDENT> ')'
 
 (**************************************EXCEPTION****************************************************)
 exception:
@@ -156,6 +174,7 @@ proc_body_stmnt:
    | print_stmt
    | null_stmt
    | update_stmnt 
+   | assign_var
   (* | error *)
    
 null_stmt: 'null'
@@ -181,15 +200,19 @@ update_stmnt:
 	IDENT '=' sql_expr
 	['WHERE' search_condition]
 	';'?
-   
+
+assign_var:
+     ident sql_datatype? [':' '=' sql_expr] 
+  
 (***********************************DECLARE**********************************************************)
 
 
 declare:  
     'DECLARE' 
-    (execute_stmnt)*
+    list<assign_var ';'>
 	(*| error*)
-	';'?
+	';'
+
 
 table_type_definition: 
      'TABLE' '(' (column_definition | table_constraint)* ')' 
@@ -574,6 +597,7 @@ create_table:
 column_definition_create_table:
     ident sql_datatype
     ['COLLATE' IDENT]
+	['DEFAULT' sql_expr]
     ['NOT'? 'NULL']
     [['CONSTRAINT' IDENT] 'DEFAULT' sql_expr]
   | ['IDENTITY' ['(' sql_expr ',' sql_expr ')'] ['NOT' 'FOR' 'REPLICATION']]
@@ -700,8 +724,6 @@ execute_stmnt:
     execute_proc
   | execute_character_string
   | execute_command
-  | assign_var
-
 
 execute_proc:
 
@@ -733,9 +755,6 @@ execute_command:
     ['AT' full_ident]
     ';'?
 
-assign_var:
-     ident sql_datatype? [':' '=' sql_expr] ';'?
-
 type_size : '(' (DEC_NUMBER | 'MAX') ')'
 
 sql_datatype:
@@ -762,6 +781,7 @@ sql_datatype:
 	| 'CLOB'
 	| 'RAW' type_size?
 	| 'BLOB'
+	| 'NUMBER'
 
 execute_as:
     ('EXEC' | 'EXECUTE')

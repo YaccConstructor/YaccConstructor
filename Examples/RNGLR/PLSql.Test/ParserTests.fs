@@ -111,6 +111,14 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with insert.`` () =
         file_1 "INSERT_NLS_DATA.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Programm with update.`` () =
+        file_1 "progr_with_update.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table.`` () =
+        file_1 "JRXML_APEX2PDF_TEMPLATES.sql" |> runParserTest
+
         
 
 

@@ -17,6 +17,7 @@ let rec getLine (map : array<_>) id offset left right = //BinarySearch
 type ProjInfo () =
     let FilesMap : Dictionary<_,_>  = new Dictionary<_,_> () //Dictionary<int/*id файла*/, string/*имя файла*/>
     let LinesMap : Dictionary<int<id>, array<int64<symbol>>> = new Dictionary<_,_>() //Dictionary<int /*id*/, /*array<_>*/
+    member this.AddFile id filePath = LinesMap.Add(id, filePath)
     member this.AddLine id lineMap = LinesMap.Add(id, lineMap)    
     member public this.GetMap (streamElement : StreamReader) = 
         try

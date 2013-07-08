@@ -18,3 +18,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Yard.Generators.RNGLR.AbstractParser
+
+open QuickGraph
+open QuickGraph.Algorithms
+
+type Parser() =
+
+    let parse (inGraph:AdjacencyGraph<_,_>) = 
+        for v in inGraph.TopologicalSort() do
+            ()

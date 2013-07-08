@@ -278,7 +278,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let curInd = ref 0
         let isEnd = ref false
         let attachEdges () =
-            let inline trd (_,_,x) = x
             let inline snd3 (_,x,_) = x
             for vertex in usedStates do
                 let mutable i = 0

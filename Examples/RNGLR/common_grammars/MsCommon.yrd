@@ -1,5 +1,4 @@
-﻿
-[<AllPublic>]
+﻿[<AllPublic>]
 module MsCommon
 
 open Common

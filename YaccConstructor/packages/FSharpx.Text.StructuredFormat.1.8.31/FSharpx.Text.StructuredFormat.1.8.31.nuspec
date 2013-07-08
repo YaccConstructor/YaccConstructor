@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>FSharpx.Text.StructuredFormat</id>
     <version>1.8.31</version>
@@ -20,5 +20,9 @@ This library provides data structures and functoins for pretty printers.</summar
     <dependencies>
       <dependency id="FSharpx.Core" version="[1.8.31]" />
     </dependencies>
+    <references>
+      <reference file="FSharpx.Text.StructuredFormat.dll" />
+      <reference file="_._" />
+    </references>
   </metadata>
 </package>

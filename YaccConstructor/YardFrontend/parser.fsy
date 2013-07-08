@@ -34,7 +34,6 @@ end
 
 exception ParseError of Source.t * string
 let parseFile = ref Unchecked.defaultof<_>
-let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()  
 let currentFilename = ref ""
 let allPublic = ref false
 let o2l = function Some x -> [x] | None -> []

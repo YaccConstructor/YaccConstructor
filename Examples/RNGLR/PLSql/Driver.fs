@@ -80,7 +80,7 @@ let justParse (path:string) =
                     printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
                 //yield! arr
                 let tok =  Lexer.tokens lexbuf
-                printfn "%A" tok
+                //printfn "%A" tok
                 yield  tok
                 }
 
@@ -145,7 +145,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
+    let inPath = ref @"C:\yc\recursive-ascent\Tests\materials\pl-sql\jrxml2pdf-release\install\INSERT_TEMPLATES.sql "  
     //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

@@ -83,6 +83,10 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with some procudure.`` () =
         file_1 "ACL_FOR_GOOGLE_MAPS.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Big programm.`` () =
+        file_1 "INSERT_TEMPLATES.sql" |> runParserTest
+
         
 
 

@@ -48,7 +48,6 @@ root_rule: (batch_body '/'?)*
 batch_body: 
        create_proc
      | set_stmnt
-     | 'USE' '[' 'mdw_control' ']'
      | begin_transaction
      | commit_transaction
      | declare
@@ -74,24 +73,6 @@ exception:
 	  |'OTHERS') 
       'THEN' list<proc_body_stmnt ';'>';'
 
-(*statement:
-      ('<<' label_name '>>')*
-	  assignment_statement | close_statement | continue_statement | execute_immediate_statement 
-	  | exit_statement | fetch_statement | forall_statement | goto_statement | if_statement
-	  | loop_statement | null_statement | open_statement | open_for_statement | plsql_block
-	  | raise_statement | return_statement | sql_statement 
-
-sql_statement:
-      commit_statement
-	  | delete_statement
-	  | insert_statement
-	  | lock_table_statement
-	  | rollback_statement
-	  | savepoint_statement
-	  | select_statement
-	  | set_transaction_statement
-	  | update_statement
-	  *)
 (*****************************************SET****************************************************)
 
 set_stmnt:
@@ -174,7 +155,7 @@ proc_body_stmnt:
    | fetch_stmnt
    | print_stmt
    | null_stmt
-
+   
 null_stmt: 'null'
 (***********************************STATEMENTS******************************************************)
 
@@ -193,14 +174,10 @@ raiserror_stmnt:
    
 (***********************************DECLARE**********************************************************)
 
+
 declare:  
     'DECLARE' 
-    comma_list<(
-        LOCALVAR 'AS'? sql_datatype
-      | ident 'CURSOR' 'LOCAL'? 'STATIC'? 'FOR'? sql_expr
-      | ident 'AS'? table_type_definition
-    )>
-    ';'?
+    (ident sql_datatype ';'?)*
 
 table_type_definition: 
      'TABLE' '(' (column_definition | table_constraint)* ')' 
@@ -325,6 +302,7 @@ select_list:
 scalar_function:
       'LOWER' sql_expr
     | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
+	| 'UNISTR' '(' sql_value ')'
     
 aggregate_windowed_function:
     'OVER' '(' comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause ')'
@@ -660,22 +638,20 @@ index_option:
     ( 
         'PAD_INDEX' '=' ('ON' | 'OFF') 
       | 'FILLFACTOR' '=' DEC_NUMBER 
-      | 'IGNORE_DUP_KEY' '=' ('ON' | 'OFF') 
+      | 'IGNORE_DUP_KEY' '=' ('ON' | 'OFF')
       | 'STATISTICS_NORECOMPUTE' '=' ('ON' | 'OFF') 
       | 'ALLOW_ROW_LOCKS' '=' ('ON' | 'OFF') 
       | 'ALLOW_PAGE_LOCKS' '=' ('ON' | 'OFF') 
     ) 
     
 insert:
-    ['WITH' comma_list<common_table_expression>]
     'INSERT' 
-    ['TOP' sql_expr 'PERCENT'?]
     'INTO'? 
     (object | rowset_function ['WITH' '(' table_hint* ')'] )
-    ['(' comma_list<LOCALVAR> ')']
+    ['(' comma_list<ident> ')']
     output_clause?
     [
-        'VALUES' '(' comma_list<('DEFAULT' | 'NULL' | sql_expr)> ')' 
+        'VALUES' '(' comma_list<('DEFAULT' | sql_expr)> ')' 
       | batch_body
       | 'DEFAULT' 'VALUES'
     ]
@@ -718,6 +694,7 @@ execute_stmnt:
     execute_proc
   | execute_character_string
   | execute_command
+  | assign_var
 
 
 execute_proc:
@@ -750,6 +727,9 @@ execute_command:
     ['AT' full_ident]
     ';'?
 
+assign_var:
+     ident ':' '=' sql_expr
+
 type_size : '(' (DEC_NUMBER | 'MAX') ')'
 
 sql_datatype:
@@ -772,6 +752,7 @@ sql_datatype:
     | 'NCHAR' type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
     | 'NVARCHAR' type_size?
     | 'SQL_VARIANT'
+	| 'CLOB'
 
 execute_as:
     ('EXEC' | 'EXECUTE')
@@ -781,7 +762,7 @@ execute_as:
 binop:
       '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '^=' | '|='
     | '=' | '+' | '-' | '*' | '/' | '%' | '~'
-    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=')
+    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') | ('|' '|')
 
 fetch_stmnt:    
     'FETCH' 

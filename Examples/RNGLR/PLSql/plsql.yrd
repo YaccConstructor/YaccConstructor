@@ -58,7 +58,7 @@ batch_body:
      | create_table
      | insert
 	 | stmt_block
-	 | 'commit'
+	 | 'commit' ';'?
   
 rollback_transaction:
     'ROLLBACK'
@@ -155,6 +155,8 @@ proc_body_stmnt:
    | fetch_stmnt
    | print_stmt
    | null_stmt
+   | update_stmnt 
+  (* | error *)
    
 null_stmt: 'null'
 (***********************************STATEMENTS******************************************************)
@@ -171,13 +173,23 @@ raiserror_stmnt:
     (',' dec_num ',' dec_num)
     [',' comma_list<sql_expr>] ')'
     ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
+
+update_stmnt:
+    'UPDATE'
+	[IDENT '.'] IDENT
+	'SET'
+	IDENT '=' sql_expr
+	['WHERE' search_condition]
+	';'?
    
 (***********************************DECLARE**********************************************************)
 
 
 declare:  
     'DECLARE' 
-    (ident sql_datatype ';'?)*
+    (execute_stmnt)*
+	(*| error*)
+	';'?
 
 table_type_definition: 
      'TABLE' '(' (column_definition | table_constraint)* ')' 
@@ -212,7 +224,15 @@ select_stmnt:
       comma_list<( ('AVG' | 'COUNT' | 'MAX' | 'MIN' | 'SUM') sql_expr)>
       ['BY' comma_list<sql_expr>]
     ] 
-    for? ['OPTION' '(' comma_list<query_hint> ')']
+    for?
+	';'? 
+	
+for: 'FOR' 'UPDATE' ['OF' comma_list<colomn_id>]
+
+colomn_id: [[IDENT '.'] IDENT '.'] IDENT
+	
+	(* 
+	for? ['OPTION' '(' comma_list<query_hint> ')']
     ';'?
     
 for: 'FOR' ('BROWSE' | xml)
@@ -252,6 +272,7 @@ query_hint:
   | 'EXPAND' 'VIEWS' 
   | 'MAXRECURSION' DEC_NUMBER 
   | 'USE' 'PLAN' STRING_CONST    
+ *)
     
 common_table_expression:
     (full_ident | ident)
@@ -268,7 +289,7 @@ query_expression:
     ]
         
 query_specification: 
-    'SELECT' ['ALL' | 'DISTINCT']
+    'SELECT' ['ALL' | 'DISTINCT' | 'UNIQUE']
     ['TOP' sql_expr 'PERCENT'? ['WITH' 'TIES'] ]
     select_list                                          
     ['INTO' full_ident]
@@ -298,11 +319,6 @@ select_list:
         ) 
       | ident '=' sql_expr
     )>
-    
-scalar_function:
-      'LOWER' sql_expr
-    | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
-	| 'UNISTR' '(' sql_value ')'
     
 aggregate_windowed_function:
     'OVER' '(' comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause ')'
@@ -362,8 +378,6 @@ table_source:
 
 
 rowset_function:
-
-
     containstable
   | freetexttable
   | opendatasource
@@ -545,14 +559,6 @@ unpivot_clause:
       '(' comma_list<full_ident> ')'
     ')'
  
-   
-case:
-    'CASE' sql_expr?
-    ('WHEN' sql_expr 'THEN' sql_expr)*
-    ['ELSE' sql_expr]
-    'END' 
-    
-
 (*****************************************CREATE TABLE****************************************************)
 create_table:
     'CREATE' 'TABLE' 
@@ -728,7 +734,7 @@ execute_command:
     ';'?
 
 assign_var:
-     ident ':' '=' sql_expr
+     ident sql_datatype? [':' '=' sql_expr] ';'?
 
 type_size : '(' (DEC_NUMBER | 'MAX') ')'
 
@@ -748,11 +754,14 @@ sql_datatype:
     | 'REAL'
     | 'CHAR' type_size?
     | 'VARCHAR' type_size?
+	| 'VARCHAR2' type_size?
     | 'VARBINARY' type_size?
     | 'NCHAR' type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
     | 'NVARCHAR' type_size?
     | 'SQL_VARIANT'
 	| 'CLOB'
+	| 'RAW' type_size?
+	| 'BLOB'
 
 execute_as:
     ('EXEC' | 'EXECUTE')
@@ -807,3 +816,15 @@ sql_expr:
   | sql_expr 'NOT'? 'LIKE' sql_expr
      
 call_expr: full_ident '(' comma_list<(sql_datatype|sql_expr)> ')'
+
+scalar_function:
+      'LOWER' sql_expr
+    | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
+	| 'UNISTR' '(' sql_value ')'
+	| 'HEXTORAW' '(' sql_value ')'
+
+case:
+    'CASE' sql_expr?
+    ('WHEN' sql_expr 'THEN' sql_expr)*
+    ['ELSE' sql_expr]
+    'END'

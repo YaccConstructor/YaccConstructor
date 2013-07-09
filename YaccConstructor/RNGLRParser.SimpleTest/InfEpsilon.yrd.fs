@@ -38,7 +38,7 @@ let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 4; 3; 3; 2; 2|]
 let private rules = [|2; 1; 5; 3; 2|]
-let private rulesStart = [|0; 1; 2; 3; 3; 5; 5|]
+let private rulesStart = [|0; 1; 2; 2; 3; 3; 5|]
 let startRule = 1
 
 let acceptEmptyInput = true
@@ -62,7 +62,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|4,1|]; [|4,2|]; [|2,1|]|]
+let private lists_reduces = [|[|0,1|]; [|5,1|]; [|5,2|]; [|3,1|]|]
 let private small_reduces =
         [|131073; 393216; 196609; 393217; 262145; 393218; 327682; 327683; 393219|]
 let reduces = Array.zeroCreate 6
@@ -78,7 +78,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|3|]; [|5; 4; 3; 1; 0|]; [|5; 4; 3|]|]
+let private lists_zeroReduces = [|[|2|]; [|5; 4; 2; 1; 0|]; [|5; 4; 2|]|]
 let private small_zeroReduces =
         [|2; 327680; 393217; 196610; 327680; 393218|]
 let zeroReduces = Array.zeroCreate 6
@@ -105,8 +105,8 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(5, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(5, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(5, new Nodes([||])), null))|])), null))|])), null)), null)|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(5, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(5, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(5, new Nodes([||])), null))|])), null))|])), null)), null)|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_s * '_rnglr_type_yard_many_1 * '_rnglr_type_yard_opt_1 * '_rnglr_type_yard_start_rule>), 
@@ -147,6 +147,24 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 2 "InfEpsilon.yrd"
+                  None
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 2 "InfEpsilon.yrd"
+               : '_rnglr_type_yard_opt_1) 
+# 160 "InfEpsilon.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (yard_elem) -> 
               _rnglr_cycle_res := (
@@ -159,7 +177,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "InfEpsilon.yrd"
                : '_rnglr_type_yard_opt_1) 
-# 162 "InfEpsilon.yrd.fs"
+# 180 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -170,14 +188,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             _rnglr_cycle_res := (
               
 # 2 "InfEpsilon.yrd"
-                  None
+                  []
                 )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )
 # 2 "InfEpsilon.yrd"
-               : '_rnglr_type_yard_opt_1) 
-# 180 "InfEpsilon.yrd.fs"
+               : '_rnglr_type_yard_many_1) 
+# 198 "InfEpsilon.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -194,24 +212,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 # 2 "InfEpsilon.yrd"
                       yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
-            !_rnglr_cycle_res
-          )
-            )
-# 2 "InfEpsilon.yrd"
-               : '_rnglr_type_yard_many_1) 
-# 202 "InfEpsilon.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 2 "InfEpsilon.yrd"
-                  []
-                )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )

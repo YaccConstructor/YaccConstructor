@@ -87,6 +87,30 @@ type ``MS-SQL parser tests`` () =
     member test.``Big programm.`` () =
         file_1 "INSERT_TEMPLATES.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Programm with select.`` () =
+        file_1 "demodata.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm demodata2.`` () =
+        file_1 "demodata2.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm demodata3.`` () =
+        file_1 "demodata3.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm demodata4.`` () =
+        file_1 "demodata4.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm demodata5.`` () =
+        file_1 "demodata5.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with insert.`` () =
+        file_1 "INSERT_NLS_DATA.sql" |> runParserTest
+
         
 
 

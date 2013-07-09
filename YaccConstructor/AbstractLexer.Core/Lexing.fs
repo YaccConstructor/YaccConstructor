@@ -101,9 +101,10 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 newStt.Info
                 |> ResizeArray.iter(
                     fun i -> 
-                        if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
-                                                    && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
-                            |> not
+                        if x.Info.Exists(fun j -> j.StartV = i.StartV
+                                                  && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
+                                                  && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
+                           |> not
                         then x.Info.Add i)
             | None -> states.[e.Target].Add newStt
 
@@ -132,8 +133,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                 let acc = 
                                     if stt.Info.Count > 0
                                     then
-                                        stt.Info
-                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]))
+                                        let newBuf (i:StateInfo<_>) = ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]
+                                        stt.Info |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, newBuf i))
                                     else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
                                 let newStt = new State<_>(news,onAccept,acc)
                                 add e newStt
@@ -147,7 +148,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 |> ResizeArray.iter
                     (fun (i:StateInfo<_>) ->                        
                         new string(i.AccumulatedString.ToArray())
-                        |> actions ((*if x.AcceptAction > -1 then x.AcceptAction else*) int accept.[x.StateID])
+                        |> actions (int accept.[x.StateID])
                         |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
         res
                           

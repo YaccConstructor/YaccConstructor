@@ -25,12 +25,17 @@ open System.IO
 open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
+open AbstractParsing.Common
+open RNGLR.ParseSimpleCalc
+open Yard.Generators.RNGLR.AbstractParser
 
 let loadGraphFromDOT filePath = 
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
 let baseInputGraphsPath = "../../../../Tests/AbstractRNGLR/DOT"
+
+let lbl tokenId = new AbstractParsing.Common.EdgeLabel<_,_>(tokenId,[||]) 
 
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
@@ -54,3 +59,39 @@ type ``RNGLR abstract parser tests`` () =
                 qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
         Assert.AreEqual(qGraph.Edges |> Seq.length, 29)
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 25)
+
+    [<Test>]
+    member this.``Simple calc. Sequence input.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AEdge<_,_>(0,1,lbl <| NUM 1)
+             new AEdge<_,_>(1,2,lbl <| PLUS 0)
+             new AEdge<_,_>(2,3,lbl <| NUM 2)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        printfn "%A" r
+        Assert.Pass()
+
+
+    [<Test>]
+    member this.``Simple calc. Branch binop input.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AEdge<_,_>(0,1,lbl <| NUM 1)
+             new AEdge<_,_>(1,2,lbl <| PLUS 0)
+             new AEdge<_,_>(1,2,lbl <| PLUS 3)
+             new AEdge<_,_>(2,3,lbl <| NUM 2)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        printfn "%A" r
+        Assert.Pass()
+
+[<EntryPoint>]
+let f x =
+    let t = new ``RNGLR abstract parser tests`` () 
+    t.``Simple calc. Branch binop input.``  ()
+    1

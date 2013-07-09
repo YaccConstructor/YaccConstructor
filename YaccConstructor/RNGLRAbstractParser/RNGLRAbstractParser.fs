@@ -21,9 +21,16 @@ module Yard.Generators.RNGLR.AbstractParser
 
 open QuickGraph
 open QuickGraph.Algorithms
+open AbstractParsing.Common
 
-type Parser() =
+type Parser<'token>() =
 
-    let parse (inGraph:AdjacencyGraph<_,_>) = 
-        for v in inGraph.TopologicalSort() do
-            ()
+    let parse pSources (inGraph:ParserInputGraph<'token,_>) = 
+        let tokens = 
+            seq {
+                    for v in inGraph.TopologicalSort() do
+                        yield! inGraph.OutEdges v |> Seq.map (fun e -> e.Tag.Token)
+                }
+        AParser.buildAst pSources tokens
+
+    member this.Parse = parse

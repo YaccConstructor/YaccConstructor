@@ -51,8 +51,8 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 1; 3; 2; 2|]
-let private rules = [|2; 1; 7; 1; 1; 5; 1; 1; 6; 4|]
-let private rulesStart = [|0; 1; 4; 7; 8; 9; 10|]
+let private rules = [|1; 5; 1; 1; 7; 1; 2; 1; 4; 6|]
+let private rulesStart = [|0; 3; 6; 7; 8; 9; 10|]
 let startRule = 3
 
 let acceptEmptyInput = false
@@ -76,7 +76,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|2,3|]; [|1,3|]; [|0,1|]; [|5,1|]; [|4,1|]|]
+let private lists_reduces = [|[|0,3|]; [|1,3|]; [|2,1|]; [|4,1|]; [|5,1|]|]
 let private small_reduces =
         [|196611; 327680; 458752; 524288; 327683; 327681; 458753; 524289; 393219; 327682; 458754; 524290; 458755; 327683; 458755; 524291; 524291; 327684; 458756; 524292|]
 let reduces = Array.zeroCreate 9
@@ -131,19 +131,23 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_num) 
-             |> List.iter (fun (n) -> 
-              _rnglr_cycle_res := (
-                
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
+             |> List.iter (fun (a) -> 
+              (match ((unbox _rnglr_children.[1]) : Token) with ADD _rnglr_val -> [_rnglr_val] | a -> failwith "ADD expected, but %A found" a )
+               |> List.iter (fun (_) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_expr) 
+                 |> List.iter (fun (b) -> 
+                  _rnglr_cycle_res := (
+                    
 # 2 "LolCalc.yrd"
-                                                                                      n
-                  )::!_rnglr_cycle_res )
+                                              a + b
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
 # 2 "LolCalc.yrd"
                : '_rnglr_type_expr) 
-# 146 "LolCalc.yrd.fs"
+# 150 "LolCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -167,7 +171,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "LolCalc.yrd"
                : '_rnglr_type_expr) 
-# 170 "LolCalc.yrd.fs"
+# 174 "LolCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -175,17 +179,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
-             |> List.iter (fun (a) -> 
-              (match ((unbox _rnglr_children.[1]) : Token) with ADD _rnglr_val -> [_rnglr_val] | a -> failwith "ADD expected, but %A found" a )
-               |> List.iter (fun (_) -> 
-                ((unbox _rnglr_children.[2]) : '_rnglr_type_expr) 
-                 |> List.iter (fun (b) -> 
-                  _rnglr_cycle_res := (
-                    
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_num) 
+             |> List.iter (fun (n) -> 
+              _rnglr_cycle_res := (
+                
 # 2 "LolCalc.yrd"
-                                              a + b
-                      )::!_rnglr_cycle_res ) ) )
+                                                                                      n
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
@@ -209,12 +209,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 3 "LolCalc.yrd"
-                                5
+                         3
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -229,12 +229,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+            (match ((unbox _rnglr_children.[0]) : Token) with B _rnglr_val -> [_rnglr_val] | a -> failwith "B expected, but %A found" a )
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 3 "LolCalc.yrd"
-                         3
+                                5
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )

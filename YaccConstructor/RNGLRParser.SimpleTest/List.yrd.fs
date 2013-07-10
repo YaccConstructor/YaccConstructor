@@ -46,8 +46,8 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|2; 2; 3; 0; 0|]
-let private rules = [|0; 2; 6; 0; 2; 5; 4|]
-let private rulesStart = [|0; 1; 4; 5; 6; 7|]
+let private rules = [|2; 6; 0; 0; 2; 4; 5|]
+let private rulesStart = [|0; 3; 4; 5; 6; 7|]
 let startRule = 2
 
 let acceptEmptyInput = false
@@ -71,7 +71,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|1,3|]; [|4,1|]; [|3,1|]|]
+let private lists_reduces = [|[|1,1|]; [|0,3|]; [|3,1|]; [|4,1|]|]
 let private small_reduces =
         [|65538; 393216; 458752; 262146; 393217; 458753; 327682; 393218; 458754; 393218; 393219; 458755|]
 let reduces = Array.zeroCreate 7

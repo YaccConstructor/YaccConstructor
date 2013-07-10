@@ -38,7 +38,7 @@ let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 4; 2; 2; 3; 3|]
 let private rules = [|2; 3; 1; 5; 2; 5; 3|]
-let private rulesStart = [|0; 2; 3; 5; 5; 7; 7|]
+let private rulesStart = [|0; 2; 3; 3; 5; 5; 7|]
 let startRule = 1
 
 let acceptEmptyInput = true
@@ -62,7 +62,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|0,2|]; [|4,1|]; [|4,2|]; [|2,1|]; [|2,2|]|]
+let private lists_reduces = [|[|0,1|]; [|0,2|]; [|5,1|]; [|5,2|]; [|3,1|]; [|3,2|]|]
 let private small_reduces =
         [|131073; 393216; 196609; 393217; 262145; 393218; 327681; 393219; 393218; 327684; 393220; 458754; 327685; 393221|]
 let reduces = Array.zeroCreate 8
@@ -78,7 +78,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|3|]; [|3; 1; 0|]; [|5|]|]
+let private lists_zeroReduces = [|[|2|]; [|2; 1; 0|]; [|4|]|]
 let private small_zeroReduces =
         [|2; 327680; 393217; 131073; 393218; 262145; 393218; 393218; 327680; 393216|]
 let zeroReduces = Array.zeroCreate 8
@@ -105,8 +105,8 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(3, new Nodes([||])), null)); box (new AST(new Family(5, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(5, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(3, new Nodes([||])), null)); box (new AST(new Family(5, new Nodes([||])), null))|])), null))|])), null)), null)|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(3, new Nodes([||])), null)); box (new AST(new Family(5, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(5, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(3, new Nodes([||])), null)); box (new AST(new Family(5, new Nodes([||])), null))|])), null))|])), null)), null)|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(0, new Nodes([|box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(1, new Nodes([|box (new AST(new Family(0, new Nodes([|box (new AST(new Family(2, new Nodes([||])), null)); box (new AST(new Family(4, new Nodes([||])), null))|])), null))|])), null)), null)|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_s * '_rnglr_type_yard_many_1 * '_rnglr_type_yard_many_2 * '_rnglr_type_yard_start_rule>), 
@@ -149,6 +149,24 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 2 "Longest.yrd"
+                    []
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 2 "Longest.yrd"
+               : '_rnglr_type_yard_many_1) 
+# 162 "Longest.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (yard_head) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_1) 
@@ -163,12 +181,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "Longest.yrd"
                : '_rnglr_type_yard_many_1) 
-# 166 "Longest.yrd.fs"
+# 184 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
-        ( 
+        ( fun l ->
           (
             let _rnglr_cycle_res = ref []
             _rnglr_cycle_res := (
@@ -180,8 +198,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           )
             )
 # 2 "Longest.yrd"
-               : '_rnglr_type_yard_many_1) 
-# 184 "Longest.yrd.fs"
+               : '_rnglr_type_yard_many_2) 
+# 202 "Longest.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -198,24 +216,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 # 2 "Longest.yrd"
                              yard_head::yard_tail
                     )::!_rnglr_cycle_res ) )
-            !_rnglr_cycle_res
-          )
-            )
-# 2 "Longest.yrd"
-               : '_rnglr_type_yard_many_2) 
-# 206 "Longest.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( fun l ->
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 2 "Longest.yrd"
-                    []
-                )::!_rnglr_cycle_res
             !_rnglr_cycle_res
           )
             )

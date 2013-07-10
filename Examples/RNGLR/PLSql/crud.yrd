@@ -1,0 +1,41 @@
+﻿[<AllPublic>]
+module Crud
+
+open MsCommon, Expr, Select_crud
+
+insert:
+    'INSERT' 
+    'INTO'? 
+    (object | rowset_function ['WITH' '(' table_hint* ')'] )
+    ['(' comma_list<ident> ')']
+    output_clause?
+    [
+        'VALUES' '(' comma_list<('DEFAULT' | sql_expr)> ')' 
+      | 'DEFAULT' 'VALUES'
+    ]
+    ';'?
+
+output_clause:
+    'OUTPUT' dml_select_list 'INTO' (LOCALVAR | IDENT)
+    ['(' comma_list<LOCALVAR> ')']
+    ['OUTPUT' dml_select_list]
+    
+dml_select_list:
+    (ident | sql_expr) ['AS'? IDENT]
+    comma_list<( (ident | sql_expr) ['AS'? IDENT])>
+
+object:
+    [
+        IDENT '.' IDENT '.' IDENT '.' 
+      | IDENT '.' IDENT? '.' 
+      | IDENT '.'
+    ]
+    ident
+
+update_stmnt:
+    'UPDATE'
+	[IDENT '.'] IDENT
+	'SET'
+	IDENT '=' sql_expr
+	['WHERE' search_condition]
+	';'?

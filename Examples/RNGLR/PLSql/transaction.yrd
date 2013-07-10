@@ -1,0 +1,12 @@
+﻿[<AllPublic>]
+module Transaction
+
+rollback_transaction:
+    'ROLLBACK'
+    ['TRAN' | 'TRANSACTION']
+    [IDENT | LOCALVAR]
+    ';'?
+
+commit_transaction:
+    'COMMIT' 
+    ';'?

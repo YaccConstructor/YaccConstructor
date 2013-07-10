@@ -1,0 +1,17 @@
+digraph GSS {
+    rankdir=RL
+    0 [label="11"]
+    1 [label="21"]
+    2 [label="0"]
+    1 -> 2 [label="yard_exp_brackets_5152"]
+    0 -> 1 [label="ident"]
+    3 [label="23"]
+    3 -> 1 [label="yard_rule_brace_opt_5092"]
+    4 [label="20"]
+    4 -> 1 [label="yard_exp_brackets_5149"]
+    5 [label="24"]
+    5 -> 1 [label="IDENT"]
+    {rank=same; 5 4 3 0}
+    {rank=same; 1}
+    {rank=same; 2}
+}

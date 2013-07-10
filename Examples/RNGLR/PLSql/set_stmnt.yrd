@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Set_stmnt
 
-open Expr, MsCommon, Datatype, Select_stmnt
+open Expr, MsCommon, Datatype, Select_crud
 
 set_stmnt:
     'SET' (

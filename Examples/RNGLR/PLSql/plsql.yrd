@@ -26,18 +26,18 @@ open Yard.Utils.SourceText
 
 include "../../../GrammarTemplates/Common.yrd"
 include "../common_grammars/MsCommon.yrd"
-(*include "expr.yrd"
+include "expr.yrd"
 include "datatype.yrd"
-include "../PLSql/stmnt.yrd"
-include "../PLSql/execute_stmnt.yrd"
-include "../PLSql/set_stmnt.yrd"
-include "../PLSql/loop_stmnt.yrd"
-include "../PLSql/crud.yrd"
-include "../PLSql/select_crud.yrd"
-include "../PLSql/create_table.yrd"
-include "../PLSql/create_proce.yrd"
-include "../PLSql/alter_table.yrd"
-include "../PLSql/transaction.yrd"*)
+include "stmnt.yrd"
+include "execute_stmnt.yrd"
+include "set_stmnt.yrd"
+include "loop_stmnt.yrd"
+include "crud.yrd"
+include "select_crud.yrd"
+include "create_table.yrd"
+include "create_proc.yrd"
+include "alter_table.yrd"
+include "transaction.yrd"
 
 tokens {
     _ of SourceText

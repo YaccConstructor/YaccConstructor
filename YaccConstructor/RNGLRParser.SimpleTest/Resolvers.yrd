@@ -1,4 +1,4 @@
 [<Start>]
 list:
-    a=list =>{a.Length = 1}=> b=list {a @ b}
+    a=list =>{(a : list<_>).Length = 1}=> b=list {a @ b}
   | A {[1]}

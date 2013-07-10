@@ -82,6 +82,7 @@ let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex 
 let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) (isError : bool) =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
+    let inline snd3 (_,x,_) = x
     while i >= 0 && less (fst3 out.[i]) v do
         i <- i - 1
 
@@ -92,10 +93,17 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
         then new AST(family, null)
         else 
             if not isCreated 
-              then let _,_,n = out.[i] in n
-              else new AST (Unchecked.defaultof<_>, null)
-
-    out.Insert (i+1, (v, family, ast))
+            then let _,_,n = out.[i] in n
+            else new AST (Unchecked.defaultof<_>, null)
+    let newVal = v, family, ast
+    if isCreated || family.prod = (snd3 out.[i]).prod then
+        out.Insert (i+1, newVal)
+    elif family.prod < (snd3 out.[i]).prod then
+        out.[i] <- newVal
+        let mutable j = i-1
+        while j >= 0 && eq (fst3 out.[j])  (fst3 out.[i]) do
+            j <- j-1
+        out.RemoveRange(j+1, i-j-1)
     isCreated, ast
 
 /// Check if edge with specified destination and family already exists
@@ -233,6 +241,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
+                        //printfn "%d %d %d %d" state family.prod final.Level final.State
                         let isCreated, edgeLabel = addEdge final family edges.[state] false
                         if (pos > 0 && isCreated) then
                             let arr = parserSource.Reduces.[state].[!curNum]
@@ -433,6 +442,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             let family = new Family(prodNumber, new Nodes(unbrowsed))
                             if not <| containsEdge vertex family edges.[state] 
                             then
+                                //printfn "%d %d %d %d" state family.prod vertex.Level vertex.State
                                 let isCreated, edgeLabel = addEdge vertex family edges.[state] true
                                 if isCreated
                                 then
@@ -602,7 +612,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                 lastTokens = lastTokens
             }
-                    
+        //(debugFuns ()).drawGSSDot "stack.dot"
         if not errorList.IsEmpty 
         then
             errorList <- List.rev errorList

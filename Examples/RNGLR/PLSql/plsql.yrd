@@ -26,6 +26,17 @@ open Yard.Utils.SourceText
 
 include "../../../GrammarTemplates/Common.yrd"
 include "../common_grammars/MsCommon.yrd"
+include "expr.yrd"
+include "stmnt.yrd"
+include "execute_stmnt.yrd"
+include "set_stmnt.yrd"
+include "loop_stmnt.yrd"
+include "crud.yrd"
+include "select_crud.yrd"
+include "create_table.yrd"
+include "create_proc.yrd"
+include "alter_table.yrd"
+include "transaction.yrd"
 
 tokens {
     _ of SourceText

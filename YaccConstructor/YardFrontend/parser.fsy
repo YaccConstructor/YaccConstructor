@@ -246,7 +246,7 @@ alts: seq { $1 } | seq bar_seq_nlist {PAlt ($1,$2)}
 bar_seq_nlist : BAR seq bar_seq_nlist {PAlt($2,$3) }  
               | BAR seq {$2}
 
-seq: no_lbl_seq {$1} | lbl_seq {$1}
+seq: lbl_seq {$1} | no_lbl_seq {$1}
 
 no_lbl_seq: seq_elem seq_elem_list action_opt { PSeq ($1::$2, $3, None)}
           | ACTION { PSeq([], Some $1, None) }

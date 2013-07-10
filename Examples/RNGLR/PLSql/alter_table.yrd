@@ -1,0 +1,20 @@
+﻿[<AllPublic>]
+module Alter_table
+
+open MsCommon
+
+alter_table: 
+      'ALTER' 'TABLE'
+	  [IDENT '.'] IDENT
+	  [constraint_clauses]
+	  ';'?
+
+constraint_clauses: 
+      'ADD' 
+	    out_of_line_constraint
+	   
+out_of_line_constraint:
+	    ['CONSTRAINT' ident]
+		 ('UNIQUE' | ('PRIMARY' 'KEY'))
+		 '(' comma_list<IDENT> ')'
+

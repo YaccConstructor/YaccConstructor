@@ -23,7 +23,7 @@ proc_body_stmnt:
    | print_stmt
    | null_stmt
    | update_stmnt 
-   | assign_var
+   | assign_var 
  
 declare:  
     'DECLARE' 

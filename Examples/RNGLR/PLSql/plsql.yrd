@@ -37,7 +37,6 @@ include "create_table.yrd"
 include "create_proc.yrd"
 include "alter_table.yrd"
 include "transaction.yrd"
-include "../PLSql/transaction.yrd"*)
 
 tokens {
     _ of SourceText

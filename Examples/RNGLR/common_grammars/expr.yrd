@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Expr
 
-open Datatype, MsCommon, Select_crud, Loop_stmnt
+open Datatype, MsCommon, Select_crud, Loop_stmnt, Select_crud
 
 sql_expr:
     sql_value
@@ -9,6 +9,7 @@ sql_expr:
   | '(' sql_expr ')'
   | call_expr
   | full_ident
+  | select_stmnt
   | ('NOT' | '+=' | '-=' | '~') sql_expr 
   | GLOBALVAR
   | LOCALVAR

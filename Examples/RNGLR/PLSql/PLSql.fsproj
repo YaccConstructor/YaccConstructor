@@ -43,6 +43,9 @@
   <Import Project="..\..\yc\FsYard.targets" />
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
+    <NeedTranslate>false</NeedTranslate>
+    <Module>Yard.Examples.MSParser</Module>
+    <EpsilonPath>epsilons</EpsilonPath>
     <OutFile>MsParser.fs</OutFile>
     <Token>SourceText</Token>
   </PropertyGroup>
@@ -51,16 +54,24 @@
   </PropertyGroup>
   <ItemGroup>
     <FsYard Include="plsql.yrd" />
-    <FsYard Include="expr.yrd" />
+    <FsYard Include="..\common_grammars\expr.yrd">
+      <Link>expr.yrd</Link>
+    </FsYard>
     <FsYard Include="datatype.yrd" />
     <FsYard Include="stmnt.yrd" />
     <FsYard Include="execute_stmnt.yrd" />
-    <FsYard Include="set_stmnt.yrd" />
-    <FsYard Include="loop_stmnt.yrd" />
+    <FsYard Include="..\common_grammars\set_stmnt.yrd">
+      <Link>set_stmnt.yrd</Link>
+    </FsYard>
+    <FsYard Include="..\common_grammars\loop_stmnt.yrd">
+      <Link>loop_stmnt.yrd</Link>
+    </FsYard>
     <FsYard Include="crud.yrd" />
     <FsYard Include="select_crud.yrd" />
     <FsYard Include="create_table.yrd" />
-    <FsYard Include="create_proc.yrd" />
+    <FsYard Include="..\common_grammars\create_proc.yrd">
+      <Link>create_proc.yrd</Link>
+    </FsYard>
     <FsYard Include="alter_table.yrd" />
     <FsYard Include="transaction.yrd" />
     <FsYard Include="..\common_grammars\MsCommon.yrd">

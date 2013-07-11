@@ -40,4 +40,5 @@ set_localvar:
 proc_formal_param:
     LOCALVAR [full_ident '.'] sql_datatype?
     ['VARYING'] ['=' ('NULL' | DEC_NUMBER | STRING_CONST)]
-    ['OUT' | 'OUTPUT'] 'READONLY'? 
+    ['OUT' | 'OUTPUT'] 'READONLY'?  
+

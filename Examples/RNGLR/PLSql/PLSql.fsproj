@@ -69,7 +69,7 @@
     <NeedTranslate>false</NeedTranslate>
     <Token>SourceText</Token>
     <Module>Yard.Examples.MSParser</Module>
-    <EpsilonPath>epsilons</EpsilonPath>
+    <EpsilonPath>epsilons</EpsilonPath><RLiterals>KW_%s</RLiterals>
   </PropertyGroup>
   <ItemGroup>
     <FsYard Include="plsql.yrd" />

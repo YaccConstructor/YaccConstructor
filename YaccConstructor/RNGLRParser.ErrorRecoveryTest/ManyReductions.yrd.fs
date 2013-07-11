@@ -44,7 +44,7 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|0; 6; 1; 2; 3; 3; 4|]
-let private rules = [|1; 3; 7; 0; 2; 7; 4; 8; 5|]
+let private rules = [|1; 3; 7; 0; 2; 7; 8; 4; 5|]
 let private rulesStart = [|0; 3; 4; 5; 6; 7; 8; 9|]
 let startRule = 1
 
@@ -69,9 +69,9 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,3|]; [|4,1|]; [|6,1|]; [|5,1|]; [|2,1|]; [|3,1|]|]
+let private lists_reduces = [|[|0,3|]; [|5,1|]; [|6,1|]; [|4,1|]; [|2,1|]; [|3,1|]|]
 let private small_reduces =
-        [|262145; 589824; 327681; 458753; 393217; 458754; 458753; 458755; 524290; 327684; 524292; 589826; 327685; 524293|]
+        [|262145; 589824; 327681; 458753; 393217; 458754; 458753; 458755; 524291; 327684; 458756; 524292; 589827; 327685; 458757; 524293|]
 let reduces = Array.zeroCreate 10
 for i = 0 to 9 do
         reduces.[i] <- Array.zeroCreate 10
@@ -85,9 +85,9 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [||]
+let private lists_zeroReduces = [|[|6; 5|]|]
 let private small_zeroReduces =
-        [||]
+        [|131073; 458752|]
 let zeroReduces = Array.zeroCreate 10
 for i = 0 to 9 do
         zeroReduces.[i] <- Array.zeroCreate 10

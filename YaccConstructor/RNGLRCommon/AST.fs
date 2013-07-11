@@ -37,7 +37,7 @@ type UsualOne<'T> =
 
 /// Non-terminal expansion: production, family of children
 /// All nodes are stored in array, so there is a correspondence between integer and node.
-/// Family of children - For one nonTerminal there can be a lot of dirivation trees.
+/// Family of children - For one nonTerminal there can be a lot of derivation trees.
 [<AllowNullLiteral>]
 type AST =
     val mutable first : Family
@@ -388,6 +388,9 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 family.[2]
                             else family.snd
                         else family.fst*)
+                    (*if nodes.Length > 1 
+                    then*)
+
                     while isEpsilon nodes.[j] do
                         j <- j + 1
                     while isEpsilon nodes.[k] do
@@ -396,6 +399,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     let rightRange = getRanges nodes.[k]
                     ranges.Add (fst leftRange, snd rightRange)
                     f i ranges
+                
                     let inline clear (x : obj) =
                         match x with
                         | :? AST as ast ->
@@ -425,13 +429,21 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         for i = 0 to order.Length-1 do
             let x = order.[i]
             let children = x
-            if x.pos <> -1 then
+            if x.pos <> -1 
+            then
                 result.[i] <- 
-                    let firstRes = funs.[children.first.prod]
-                                        (children.first.nodes.map (fun j -> result.[getPos j])) range
-                    if children.other = null then
+                    let arr = children.first.nodes.map (fun j -> result.[getPos j])
+                    let firstRes = funs.[children.first.prod] arr range
+                    if children.other = null 
+                    then
                         firstRes
                     else
+                        (*let nonTerm = 
+                            if children.first.prod < leftSides.GetLength(0) 
+                            then 
+                               leftSides.[children.first.prod]
+                            else*)
+                                 
                         children.other
                         |> Array.map (
                             fun family ->
@@ -445,7 +457,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
                             (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) clearAST =
 
-        if isEpsilon then epsilons.[-(getSingleNode root)-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
+        if isEpsilon 
+        then epsilons.[-(getSingleNode root)-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
         else
             let result = new BlockResizeArray<_>()
             let inline dispose i =
@@ -466,14 +479,16 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
             this.TraverseWithRanges tokenToRange dispose reportCycleError <| fun i ranges ->
                 let inline getRes prevRange : (obj -> _) = function
-                    | :? int as i when i < 0 -> epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                    | :? int as i when i < 0 -> 
+                        epsilons.[-i-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                     | :? int as t ->
                         prevRange := snd <| tokenToRange tokens.[t]
                         box tokens.[t]
                     | :? AST as ch ->
-                        prevRange := snd ranges.[ch.pos]
+                        prevRange := snd ranges.[ch.pos]    
                         result.[ch.pos]
                     | _ -> failwith ""
+
                 let x = order.[i]
                 if x.pos = -1 then result.Add Unchecked.defaultof<_>
                 else
@@ -481,18 +496,33 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     result.Add <|
                         let inline translateFamily (fam : Family) =
                             let prevRange = fst ranges.[i] |> ref
-                            let res = Array.zeroCreate rules.[fam.prod].Length
+                            let length = 
+                                if fam.prod < rules.GetLength(0)
+                                then 
+                                    rules.[fam.prod].Length
+                                else
+                                    fam.nodes.Length
+                            let res = Array.zeroCreate length
+                        
                             let k = ref 0
                             fam.nodes.doForAll <| fun x ->
                                 res.[!k] <- getRes prevRange x
                                 incr k
-                            for i = !k to rules.[fam.prod].Length-1 do
+                            
+                            for i = !k to length-1 do
                                 res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                             funs.[fam.prod] res ranges.[i]
+
                         let firstRes = translateFamily children.first
                         if children.other = null then
                             firstRes
                         else
+                            (*let nonTerm = 
+                            if children.first.prod < leftSides.GetLength(0)
+                            then
+                                leftSides.[children.first.prod]
+                            else
+                                errInd*)
                             children.other
                             |> Array.map translateFamily
                             |> Array.toList

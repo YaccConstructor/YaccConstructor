@@ -1,4 +1,4 @@
 [<Start>]
 start : e
-e : red | A { 1 }
+e : A { 1 } | red
 red : e

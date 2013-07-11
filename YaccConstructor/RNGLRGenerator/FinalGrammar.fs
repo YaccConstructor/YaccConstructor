@@ -23,7 +23,6 @@ open Yard.Core.IL
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.Epsilon
 open Yard.Generators.RNGLR.SymbolSets
-//open Yard.Generators.RNGLR.Error
 
 
 type FinalGrammar (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =

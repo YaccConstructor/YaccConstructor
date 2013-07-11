@@ -3,7 +3,7 @@ module Expr
 
 open Datatype, MsCommon, Select_crud, Loop_stmnt, Select_crud
 
-sql_expr:
+sql_expr_not_concat:
     sql_value
   | scalar_function
   | '(' sql_expr ')'
@@ -27,6 +27,10 @@ sql_expr:
   | fetch_stmnt
   | sql_expr 'NOT'? 'IN' '(' comma_list<sql_expr> ')'
   | sql_expr 'NOT'? 'LIKE' sql_expr
+  
+sql_expr: 
+   sql_expr_not_concat 
+  | sql_expr_not_concat '|' '|' sql_expr
 
 scalar_function:
       'LOWER' sql_expr
@@ -55,7 +59,7 @@ order_by_clause:
 binop:
       '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '^=' | '|='
     | '=' | '+' | '-' | '*' | '/' | '%' | '~'
-    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') | ('|' '|')
+    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') 
 
 fetch_stmnt:    
     'FETCH' 

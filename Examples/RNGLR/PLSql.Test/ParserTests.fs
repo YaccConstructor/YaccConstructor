@@ -80,6 +80,10 @@ type ``MS-SQL parser tests`` () =
         file "exec_proc_4.sql" |> runParserTest
 
     [<Test>]
+    member test.``Concat.`` () =
+        file "concat.sql" |> runParserTest
+
+    [<Test>]
     member test.``Programm with some procudure.`` () =
         file_1 "ACL_FOR_GOOGLE_MAPS.sql" |> runParserTest
 

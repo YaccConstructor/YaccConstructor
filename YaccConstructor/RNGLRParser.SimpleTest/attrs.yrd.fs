@@ -35,8 +35,8 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 2|]
-let private rules = [|3; 1; 3; 1|]
-let private rulesStart = [|0; 1; 3; 4|]
+let private rules = [|1; 3; 3; 1|]
+let private rulesStart = [|0; 2; 3; 4|]
 let startRule = 2
 
 let acceptEmptyInput = false
@@ -60,7 +60,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|1,2|]; [|0,1|]|]
+let private lists_reduces = [|[|0,2|]; [|1,1|]|]
 let private small_reduces =
         [|131074; 196608; 262144; 196610; 196609; 262145|]
 let reduces = Array.zeroCreate 4
@@ -115,26 +115,6 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( fun arg ->
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 2 "Attrs.yrd"
-                                                      arg
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 2 "Attrs.yrd"
-               : '_rnglr_type_s) 
-# 130 "Attrs.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( fun arg ->
-          (
-            let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_s) (arg * 2)
              |> List.iter (fun (r) -> 
               (match ((unbox _rnglr_children.[1]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
@@ -144,6 +124,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 # 2 "Attrs.yrd"
                                                  r
                     )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 2 "Attrs.yrd"
+               : '_rnglr_type_s) 
+# 132 "Attrs.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( fun arg ->
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 2 "Attrs.yrd"
+                                                      arg
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )

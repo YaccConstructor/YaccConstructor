@@ -59,6 +59,7 @@
     <Compile Include="Longest.yrd.fs" />
     <Compile Include="Order.yrd.fs" />
     <Compile Include="LongCycle.yrd.fs" />
+    <Compile Include="LolCalc.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
     <None Include="ComplexRightNull.yrd" />
@@ -74,6 +75,7 @@
     <None Include="Longest.yrd" />
     <None Include="Order.yrd" />
     <None Include="LongCycle.yrd" />
+    <None Include="LolCalc.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />

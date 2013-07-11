@@ -35,8 +35,8 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 2|]
-let private rules = [|3; 3; 1; 1|]
-let private rulesStart = [|0; 1; 3; 4|]
+let private rules = [|3; 1; 3; 1|]
+let private rulesStart = [|0; 2; 3; 4|]
 let startRule = 2
 
 let acceptEmptyInput = false
@@ -60,7 +60,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|1,2|]|]
+let private lists_reduces = [|[|1,1|]; [|0,2|]|]
 let private small_reduces =
         [|131073; 262144; 196609; 262145|]
 let reduces = Array.zeroCreate 4
@@ -117,17 +117,19 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_s) 
+               |> List.iter (fun (v) -> 
+                _rnglr_cycle_res := (
+                  
 # 2 "Counter.yrd"
-                                       1
-                  )::!_rnglr_cycle_res )
+                             1 + v
+                    )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
 # 2 "Counter.yrd"
                : '_rnglr_type_s) 
-# 130 "Counter.yrd.fs"
+# 132 "Counter.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -137,13 +139,11 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_s) 
-               |> List.iter (fun (v) -> 
-                _rnglr_cycle_res := (
-                  
+              _rnglr_cycle_res := (
+                
 # 2 "Counter.yrd"
-                             1 + v
-                    )::!_rnglr_cycle_res ) )
+                                       1
+                  )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )

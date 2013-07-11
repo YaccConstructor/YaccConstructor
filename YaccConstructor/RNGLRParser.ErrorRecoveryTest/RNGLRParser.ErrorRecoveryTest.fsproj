@@ -42,9 +42,11 @@
     <Compile Include="LexCommon.fs" />
     <Compile Include="CalcErrorAmb.yrd.fs" />
     <Compile Include="ManyReductions.yrd.fs" />
-    <Compile Include="ManyReductions2.yrd.fs" />
+    <Compile Include="ErrorToEps.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
     <None Include="calcErrorAmb.yrd" />
+    <None Include="ErrorToEps.yrd" />
+    <None Include="ManyReductions.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

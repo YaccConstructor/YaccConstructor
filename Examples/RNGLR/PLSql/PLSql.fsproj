@@ -44,10 +44,7 @@
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
-    <NeedTranslate>false</NeedTranslate>
     <Token>SourceText</Token>
-    <Module>Yard.Examples.MSParser</Module>
-    <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

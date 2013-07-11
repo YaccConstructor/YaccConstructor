@@ -41,7 +41,7 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|2; 3; 1; 1|]
-let private rules = [|1; 5; 2; 1; 4|]
+let private rules = [|1; 5; 2; 4; 1|]
 let private rulesStart = [|0; 2; 3; 4; 5|]
 let startRule = 1
 
@@ -66,7 +66,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|2,1|]; [|0,2|]; [|3,1|]|]
+let private lists_reduces = [|[|3,1|]; [|0,2|]; [|2,1|]|]
 let private small_reduces =
         [|65537; 327680; 131073; 393217; 262145; 327682|]
 let reduces = Array.zeroCreate 5
@@ -153,12 +153,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
-             |> List.iter (fun (v) -> 
+            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
+             |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
 # 3 "Cycle.yrd"
-                                  v+1
+                        0
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -173,12 +173,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
-             |> List.iter (fun (_) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
+             |> List.iter (fun (v) -> 
               _rnglr_cycle_res := (
                 
 # 3 "Cycle.yrd"
-                        0
+                                  v+1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )

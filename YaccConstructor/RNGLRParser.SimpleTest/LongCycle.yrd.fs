@@ -152,7 +152,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 3 "LongCycle.yrd"
-                              1 
+                        1 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -172,7 +172,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 3 "LongCycle.yrd"
-                    S1
+                              S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )

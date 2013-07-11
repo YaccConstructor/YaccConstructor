@@ -378,7 +378,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
                 curNum := parserSource.ErrorIndex
                 let temp = new Queue<_>()
-            
                 let curVertices = new Stack<_> (statesCount)
 
                 for vertex in usedStates do
@@ -426,7 +425,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let makeErrReductions (vertex : Vertex) state (unbrowsed : obj[]) = 
                         let prodNumber = parserSource.Rules.Length
                         let pos = unbrowsed.Length
-                        
                         if pos = 0 
                         then 
                             let ast = getEpsilon parserSource.ErrorIndex
@@ -442,15 +440,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             let family = new Family(prodNumber, new Nodes(unbrowsed))
                             if not <| containsEdge vertex family edges.[state] 
                             then
-                                //printfn "%d %d %d %d" state family.prod vertex.Level vertex.State
                                 let isCreated, edgeLabel = addEdge vertex family edges.[state] true
-                                if isCreated
+                                let arr = parserSource.Reduces.[state].[!curNum]
+                                if arr <> null 
                                 then
-                                    let arr = parserSource.Reduces.[state].[!curNum]
-                                    if arr <> null 
-                                    then
-                                        for (prod, pos) in arr do
-                                            reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
+                                    for (prod, pos) in arr do
+                                        reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
                     
                     let state = snd <| pushes.Peek()
 

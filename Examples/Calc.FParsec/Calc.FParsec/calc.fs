@@ -3,7 +3,7 @@ module calc
 open FParsec.Primitives
 let rec public expr   = yard_rule_binExpr_1  |>> fun (res) -> ( res )   
 
- and private yard_rule_binExpr_1    = term  >>= fun (l ) -> (many ( attempt(termOp  >>= fun (op ) -> (term  |>> fun (r) -> ( op,r ) )  )) |>> fun (r) -> (List.fold (fun l (op,r) -> op l r) l r ) )  
+ and private yard_rule_binExpr_1   = term  >>= fun (l ) -> (many ( attempt(termOp  >>= fun (op ) -> (term  |>> fun (r) -> ( op,r ) )  )) |>> fun (r) -> (List.fold (fun l (op,r) -> op l r) l r ) )  
 
  and private termOp   = (attempt (Lexer.pPLUS |>> fun (_) -> ( (+) )   )) <|> (Lexer.pMINUS |>> fun (_) -> ( (-) )   )
 

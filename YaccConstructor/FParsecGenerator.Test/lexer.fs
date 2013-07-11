@@ -37,7 +37,7 @@ let pLBRACE: Parser<string, unit> = str "("
 let pRBRACE : Parser<string, unit> = str ")"
 
 
-let literal s = pstring s .>> ws
+let literal s : Parser<string, unit>= pstring s .>> ws
 
 
 let (pVAR : Parser<string, unit>)  =

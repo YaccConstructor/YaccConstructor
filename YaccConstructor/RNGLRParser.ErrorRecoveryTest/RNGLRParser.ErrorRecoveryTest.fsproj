@@ -40,13 +40,18 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
+    <Compile Include="Ambiguous.yrd.fs" />
     <Compile Include="CalcErrorAmb.yrd.fs" />
     <Compile Include="ManyReductions.yrd.fs" />
     <Compile Include="ErrorToEps.yrd.fs" />
+    <Compile Include="ErrorToEpsilonTranslate.yrd.fs" />
+    <Compile Include="PrimitiveErrorTranslate.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
-    <None Include="calcErrorAmb.yrd" />
+    <None Include="Ambiguous.yrd" />
+    <None Include="CalcErrorAmb.yrd" />
     <None Include="ErrorToEps.yrd" />
     <None Include="ManyReductions.yrd" />
+    <None Include="PrimitiveErrorTranslate.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

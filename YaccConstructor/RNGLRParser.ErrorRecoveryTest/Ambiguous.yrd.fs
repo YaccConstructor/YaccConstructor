@@ -1,13 +1,12 @@
 
-# 2 "ErrorToEps.yrd.fs"
-module RNGLR.ParseErrorToEps
+# 2 "Ambiguous.yrd.fs"
+module RNGLR.ParseAmbiguous
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
     | A of (int)
-    | B of (int)
     | RNGLR_EOF of (int)
 
 let genLiteral (str : string) posStart posEnd =
@@ -15,45 +14,42 @@ let genLiteral (str : string) posStart posEnd =
     | x -> failwithf "Literal %s undefined" x
 let tokenData = function
     | A x -> box x
-    | B x -> box x
     | RNGLR_EOF x -> box x
 
 let numToString = function
     | 0 -> "a"
     | 1 -> "error"
-    | 2 -> "yard_start_rule"
-    | 3 -> "A"
-    | 4 -> "B"
+    | 2 -> "start"
+    | 3 -> "yard_start_rule"
+    | 4 -> "A"
     | 5 -> "RNGLR_EOF"
     | _ -> ""
 
 let tokenToNumber = function
-    | A _ -> 3
-    | B _ -> 4
+    | A _ -> 4
     | RNGLR_EOF _ -> 5
 
 let isLiteral = function
     | A _ -> false
-    | B _ -> false
     | RNGLR_EOF _ -> false
 
 let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|0; 0; 2|]
-let private rules = [|3; 1; 3; 4; 0|]
-let private rulesStart = [|0; 2; 4; 5|]
-let startRule = 2
+let leftSide = [|2; 3; 0; 0|]
+let private rules = [|4; 0; 4; 2; 1|]
+let private rulesStart = [|0; 3; 4; 5; 5|]
+let startRule = 1
 
 let acceptEmptyInput = false
 
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 2; 3; 4|]
+let private lists_gotos = [|1; 2; 3; 5; 4|]
 let private small_gotos =
-        [|2; 0; 196609; 131074; 65538; 262147|]
-let gotos = Array.zeroCreate 5
-for i = 0 to 4 do
+        [|2; 131072; 262145; 131074; 2; 65539; 196609; 262148|]
+let gotos = Array.zeroCreate 6
+for i = 0 to 5 do
         gotos.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_gotos.Length do
@@ -65,11 +61,11 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|0,2|]; [|1,2|]|]
+let private lists_reduces = [|[|0,3|]; [|2,1|]|]
 let private small_reduces =
-        [|131073; 327680; 196609; 327681; 262145; 327682|]
-let reduces = Array.zeroCreate 5
-for i = 0 to 4 do
+        [|262145; 327680; 327681; 262145|]
+let reduces = Array.zeroCreate 6
+for i = 0 to 5 do
         reduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_reduces.Length do
@@ -81,11 +77,11 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [||]
+let private lists_zeroReduces = [|[|3; 2|]|]
 let private small_zeroReduces =
-        [||]
-let zeroReduces = Array.zeroCreate 5
-for i = 0 to 4 do
+        [|131073; 262144|]
+let zeroReduces = Array.zeroCreate 6
+for i = 0 to 5 do
         zeroReduces.[i] <- Array.zeroCreate 6
 cur <- 0
 while cur < small_zeroReduces.Length do
@@ -98,8 +94,8 @@ while cur < small_zeroReduces.Length do
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
 let private small_acc = [1]
-let private accStates = Array.zeroCreate 5
-for i = 0 to 4 do
+let private accStates = Array.zeroCreate 6
+for i = 0 to 5 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 5
 let errorIndex = 1

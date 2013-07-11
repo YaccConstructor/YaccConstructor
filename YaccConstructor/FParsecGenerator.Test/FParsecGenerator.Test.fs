@@ -54,3 +54,24 @@ type ``FParsec generator tests`` () =
             | Failure (msg, err, _) -> printf "%s" msg; failwith msg
         ( gogo  "2+2*3**(2+1)" ) |> checkInPut 
 
+    [<Test>]
+    member test.``Test for literals`` () =
+        let inFile = "literals.yrd"
+        let resultFile = System.IO.Path.GetFileNameWithoutExtension inFile + ".fs"
+        let inFullPath = Path.Combine(basePath, inFile)
+        let resultFullPath = Path.Combine(basePath, resultFile)
+        let expectedFullPath = Path.Combine [|basePath; generated; resultFile|]
+        let il = parser.ParseGrammar inFullPath |> fixIl
+        let code = iGenerator.Generate il
+        System.IO.File.Exists resultFullPath |> Assert.IsTrue
+        filesAreEqual resultFullPath expectedFullPath
+
+    [<Test>]
+    member test.``Right calculation for literals`` () = 
+        let compCalc = ws >>. literals.s  .>> eof
+        let gogo s = run compCalc s
+        let checkInPut =
+            function
+            | Success (v, _, _)  -> Assert.AreEqual(v.ToString(), "aaaa")
+            | Failure (msg, err, _) -> printf "%s" msg; failwith msg
+        ( gogo  "aaaa" ) |> checkInPut 

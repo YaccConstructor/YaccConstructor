@@ -55,8 +55,8 @@ type ``MS-SQL parser tests`` () =
             printfn "%s" msg
             dbg.drawGSSDot @"..\..\stack.dot"
             Assert.Fail msg
-        | Yard.Generators.RNGLR.Parser.Success ast ->
-            Assert.Pass()
+        | Yard.Generators.RNGLR.Parser.Success ast -> ()
+            //Assert.Pass()
 
     let basePath = "../../../../../Tests/PlSqlParser"
     let filePath = "../../../../../Tests/materials/pl-sql/jrxml2pdf-release/install"
@@ -122,3 +122,10 @@ type ``MS-SQL parser tests`` () =
         
 
 
+
+[<EntryPoint>]
+let f x =
+    let tests = new ``MS-SQL parser tests`` ()
+    tests.``Exucute procedure with assosiation operation.``()
+    tests.``Exucute procedure with assosiation operation.``()
+    0 

@@ -29,10 +29,9 @@ open Yard.Utils.InfoClass
 open System
 open System.IO
 
-let lastTokenNum = ref 0L
-let traceStep = 50000L
-
 let justParse (path:string) =
+    let lastTokenNum = ref 0L
+    let traceStep = 50000L
     use reader = new System.IO.StreamReader(path)
 
     let tokenizerFun = 
@@ -54,7 +53,7 @@ let justParse (path:string) =
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep / mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep / (mSeconds + 1L))
                     if int64 chan.CurrentQueueLength > 3L then                        
                         int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
@@ -77,7 +76,7 @@ let justParse (path:string) =
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep / (mSeconds + 1L ))
                 yield! arr
                 //let tok =  Lexer.tokens lexbuf
                 //printfn "%A" tok

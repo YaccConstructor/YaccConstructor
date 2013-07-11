@@ -43,7 +43,7 @@ query_specification:
     ['TOP' sql_expr 'PERCENT'? ['WITH' 'TIES'] ]
     select_list                                          
     ['INTO' full_ident]
-    from? aggregate_windowed_function
+    from? 
     ['WHERE' search_condition]
     [
       'GROUP' 'BY' 'ALL'? comma_list<sql_expr>

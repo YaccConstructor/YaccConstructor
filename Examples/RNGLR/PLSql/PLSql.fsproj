@@ -66,10 +66,7 @@
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
-    <NeedTranslate>false</NeedTranslate>
     <Token>SourceText</Token>
-    <Module>Yard.Examples.MSParser</Module>
-    <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <ItemGroup>
     <FsYard Include="plsql.yrd" />

@@ -131,7 +131,7 @@ type ``RNGLR error recovery tests`` () =
         | Parser.Success mAst -> 
             mAst.PrintAst()
             RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc no operand in the end.dot"
-
+        
     [<Test>]
     member test.``Many reductions before error``() = 
         let parser = RNGLR.ParseManyReductions.buildAst
@@ -143,24 +143,18 @@ type ``RNGLR error recovery tests`` () =
         | Parser.Success mAst ->
             mAst.PrintAst()
             RNGLR.ParseManyReductions.defaultAstToDot mAst "Many reductions.dot"
-    
+
     [<Test>]
-    member test.``Many reductions before error2``()=
-        let parser = RNGLR.ParseManyReductions2.buildAst
-        let path = dir + "Many reductions before error2.txt"
+    member test.``Eps error in the end``() = 
+        let parser = RNGLR.ParseErrorToEps.buildAst
+        let path = dir + "Eps error in the end.txt"
 
         match run path parser with 
         | Parser.Error (num, tok, err, debugs) ->
             printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            RNGLR.ParseManyReductions2.defaultAstToDot mAst "Many reductions2.dot"
-
-(*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Many reductions before error``()*)
-
-(*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc no operand in the end``()*)
+            RNGLR.ParseErrorToEps.defaultAstToDot mAst "Eps error in the end.dot"
 
 [<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc missing operator``()
+(new ``RNGLR error recovery tests``()).``Many reductions before error``()

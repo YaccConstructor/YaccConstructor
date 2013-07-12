@@ -1,10 +1,10 @@
 ﻿//this lexer is used for checking test101
 module Lexer
 
+open FParsec
 open FParsec.Primitives
 open FParsec.CharParsers
 open FParsec.Error
-open FParsec
 
 
 
@@ -32,12 +32,15 @@ let pPOW: Parser<string, unit> = str "**"
 
 let pEQUAL: Parser<string, unit> = str ":="
 
-let pLBRACE: Parser<string, unit> = str "("
+let pLEFT: Parser<string, unit> = str "("
 
-let pRBRACE : Parser<string, unit> = str ")"
+let (pRIGHT : Parser<string, unit>) = str ")"
+let (pDOUBLE_COLON : Parser<string, unit>) = str ":"
 
+let (pLOCALVAR : Parser<string, unit>) = 
+    
 
-let literal s : Parser<string, unit>= pstring s .>> ws
+let literal s = pstring s .>> ws
 
 
 let (pVAR : Parser<string, unit>)  =
@@ -48,12 +51,7 @@ let (pVAR : Parser<string, unit>)  =
 
     fun state -> // we define our own "primitive" that checks that the parsed id is no keyword
         let reply = idStr state
-        if reply.Status = Ok then
-            let id = reply.Result
-            
-            Reply(reply.Status, reply.Result, reply.Error)
+        Reply(reply.Status, reply.Result, reply.Error)
 
-        else // reconstruct error
-            Reply(reply.Status, reply.Result, reply.Error)
 
 

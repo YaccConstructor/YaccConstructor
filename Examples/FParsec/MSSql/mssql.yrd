@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
-
+(*Вопрос про execute*)
 {
 open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.SourceText
@@ -58,8 +58,8 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
-	 |stmt_block
-  
+	 | error 
+	 
 rollback_transaction:
     'ROLLBACK'
     ['TRAN' | 'TRANSACTION']
@@ -354,8 +354,6 @@ table_source:
 
 
 rowset_function:
-
-
     containstable
   | freetexttable
   | opendatasource

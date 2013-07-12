@@ -66,3 +66,7 @@ Examples/RNGLR/MSSql/Lexer.fs
 NuGet/*.nupkg
 demo_picts/*
 demo_picts_bu/*
+YaccConstructor/YardFrontend/out
+YaccConstructor/RNGLRAbstractParser.Test/out
+YaccConstructor/RNGLRAbstractParser.Test/Lexer.fs
+YaccConstructor/RNGLRAbstractParser.Test/log.txt

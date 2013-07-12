@@ -64,3 +64,5 @@ YaccConstructor/AbstractLexer.Test/log.txt
 YaccConstructor/AbstractLexer.Test/out
 Examples/RNGLR/MSSql/Lexer.fs
 NuGet/*.nupkg
+demo_picts/*
+demo_picts_bu/*

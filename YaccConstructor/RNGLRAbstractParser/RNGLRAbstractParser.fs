@@ -30,8 +30,9 @@ type Parser<'token>() =
         let ids = dict (ts |> Array.mapi (fun i v -> v,i))
         let tokens = 
             ts
-            |> Seq.mapi (fun i v -> inGraph.OutEdges v |> Seq.map (fun e -> e.Tag.Token,(i,ids.[e.Target])))
-            |> Seq.concat
+            |> Seq.mapi (fun i v -> i,(inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag.Token,(ids.[e.Target]))) |> Array.ofSeq))
+            //|> Seq.filter (fun (_,a) -> a.Length > 0)
+            //|> Seq.concat
                 
         AParser.buildAst pSources tokens
 

@@ -106,7 +106,7 @@ let eofIndex = 5
 let errorIndex = 0
 let errorRulesExists = false
 let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAst : (seq<Token*(int*int)> -> ParseResult<Token>) =
+let buildAst : (seq<int*array<Token*int>> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null|]

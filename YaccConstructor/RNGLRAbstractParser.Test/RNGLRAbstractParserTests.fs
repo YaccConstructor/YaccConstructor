@@ -107,20 +107,20 @@ type ``RNGLR abstract parser tests`` () =
         Assert.Pass()
 
 
-    [<Test>]
-    member this.``Simple calc. Sequence input. Full.`` () =
-        let lexerInputGraph = loadLexerInputGraph "test_8.dot"
-        let qGraph = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph 
-        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
-        printfn "%A" r
-        match r with
-        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
-            printfn "Error in position %d on Token %A: %s" num tok message
-            debug.drawGSSDot "out.dot"
-        | Yard.Generators.RNGLR.AParser.Success tree ->
-            tree.PrintAst()
-            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
-        Assert.Pass()
+//    [<Test>]
+//    member this.``Simple calc. Sequence input. Full.`` () =
+//        let lexerInputGraph = loadLexerInputGraph "test_8.dot"
+//        let qGraph = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph 
+//        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+//        printfn "%A" r
+//        match r with
+//        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+//            printfn "Error in position %d on Token %A: %s" num tok message
+//            debug.drawGSSDot "out.dot"
+//        | Yard.Generators.RNGLR.AParser.Success tree ->
+//            tree.PrintAst()
+//            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
+//        Assert.Pass()
 
     [<Test>]
     member this.``Simple calc. Branch binop input.`` () =

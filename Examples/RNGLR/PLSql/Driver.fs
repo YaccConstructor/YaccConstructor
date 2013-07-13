@@ -70,7 +70,7 @@ let justParse (path:string) =
     let allTokens = 
         seq{
             while true do
-                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
+                let arr = tokenizer.Receive 10000 |> Async.RunSynchronously
                 lastTokenNum := !lastTokenNum + int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
@@ -106,8 +106,15 @@ let Parse (srcFilePath:string) =
     p.AddLine counter map
     counter <- counter + 1<id>
     //Lexer.id <- from (ProjInfo)
-    match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
+    let res =
+        try 
+            Some <| justParse srcFilePath
+        with e -> 
+            printfn "error: %s" e.Message
+            printfn "File: %s" srcFilePath
+            None
+    match res  with
+    | Some(Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg)) ->
         let coordinates = 
             let x,y = tokenPos tok
             
@@ -127,7 +134,7 @@ let Parse (srcFilePath:string) =
         printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
         dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
-    | Yard.Generators.RNGLR.Parser.Success ast ->
+    | Some (Yard.Generators.RNGLR.Parser.Success ast) ->
         let GC_Collect () = 
             GC.Collect()    
             GC.WaitForPendingFinalizers()
@@ -144,6 +151,7 @@ let Parse (srcFilePath:string) =
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated
         //translated.Head  
+    | _ -> ()
         
 let ParseAllDirectory (directoryName:string) =
     System.IO.Directory.GetFiles directoryName

@@ -87,10 +87,7 @@ predicate:
     | sql_expr binop ('ALL' | 'SOME' | 'ANY')
       '(' query_expression ')'            
     | 'EXISTS' '(' query_expression ')'  
-    | IDENT ['.' IDENT] ['(' ')'] 'IN'
-      '('
-        (dec_num | STRING_CONST) ',' (dec_num | STRING_CONST)
-      ')'
+    | ident 'IN' '(' comma_list<ident> ')' 
 
 from:
     'FROM' comma_list<table_source>

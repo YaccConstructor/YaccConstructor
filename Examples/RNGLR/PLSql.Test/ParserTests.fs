@@ -84,6 +84,10 @@ type ``MS-SQL parser tests`` () =
         file "concat.sql" |> runParserTest
 
     [<Test>]
+    member test.``Programm with update.`` () =
+        file "program_with_update.sql" |> runParserTest
+
+    [<Test>]
     member test.``Programm with some procudure.`` () =
         file_1 "ACL_FOR_GOOGLE_MAPS.sql" |> runParserTest
 
@@ -116,14 +120,32 @@ type ``MS-SQL parser tests`` () =
         file_1 "INSERT_NLS_DATA.sql" |> runParserTest
 
     [<Test>]
-    member test.``Programm with update.`` () =
-        file_1 "progr_with_update.sql" |> runParserTest
-
-    [<Test>]
     member test.``Programm with create and alter table.`` () =
         file_1 "JRXML_APEX2PDF_TEMPLATES.sql" |> runParserTest
 
-        
+    [<Test>]
+    member test.``Programm with create and alter table_2.`` () =
+        file_1 "JRXML_REPORT_DEFINITIONS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with alter table.`` () =
+        file_1 "ALTER_JRXML_FONTS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_3.`` () =
+        file_1 "JRXML_LOGGING.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_4.`` () =
+        file_1 "JRXML_NLS_PARAMETERS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_5.`` () =
+        file_1 "JRXML_FONTS.sql" |> runParserTest    
+
+    [<Test>]
+    member test.``Programm with create and alter table_6.`` () =
+        file_1 "JRXML_RESOURCE_ENTRIES.sql" |> runParserTest    
 
 
 

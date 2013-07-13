@@ -15,7 +15,7 @@ sql_expr_not_concat:
   | LOCALVAR
   | '*'
   | sql_expr binop sql_expr
-  | sql_expr 'IS' 'NOT'? 'NULL'
+  | sql_expr 'IS'? 'NOT'? 'NULL'
   | ranking_windowed_function 
   | aggregate_windowed_function
   | sql_expr 'COLLATE' ident

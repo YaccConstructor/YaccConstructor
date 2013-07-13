@@ -25,7 +25,8 @@ sql_datatype:
 	| 'CLOB'
 	| 'RAW' type_size?
 	| 'BLOB'
-	| 'NUMBER'
+	| 'NUMBER' type_size?
+	| 'TIMESTAMP'
 
 type_size : 
      '(' (DEC_NUMBER | 'MAX') ')'

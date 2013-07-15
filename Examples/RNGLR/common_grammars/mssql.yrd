@@ -28,8 +28,8 @@ include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
 include "expr.yrd"
 include "set_stmnt.yrd"
-include "create_proc.yrd"
-include "loop_stmnt.yrd"
+include "../mssql/create_proc.yrd"
+include "../mssql/cycles_stmnt.yrd"
 include "../mssql/datatype.yrd"
 include "../mssql/stmnt.yrd"
 include "../mssql/execute_stmnt.yrd"
@@ -51,7 +51,7 @@ options {
 
 module Main
 
-open Create_proc, Set_stmnt, Transaction, Loop_stmnt, Create_table, Crud, Stmnt
+open Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt
 
 [<Start>]
 root_rule: (batch_body 'GO'?)*

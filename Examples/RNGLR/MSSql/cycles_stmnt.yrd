@@ -1,5 +1,5 @@
 ﻿[<AllPublic>]
-module Loop_stmnt
+module Cycles_stmnt
 
 open Expr, Stmnt
 

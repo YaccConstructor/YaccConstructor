@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Create_proc
 
-open MsCommon, Common, Stmnt, Set_stmnt
+open MsCommon, Common, Stmnt, Set_stmnt, Select_crud
 
 create_proc:
     'CREATE' ('PROCEDURE' | 'PROC')
@@ -16,3 +16,4 @@ execute_as:
     ('EXEC' | 'EXECUTE')
     'AS'
     ('CALLER' | 'SELF' | 'OWNER' |ident '=' STRING_CONST) 
+

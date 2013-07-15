@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Stmnt
 
-open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Loop_stmnt
+open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Cycles_stmnt
 
 proc_body_stmnt:
      select_stmnt

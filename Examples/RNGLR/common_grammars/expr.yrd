@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Expr
 
-open Datatype, MsCommon, Select_crud, Loop_stmnt, Select_crud
+open Datatype, MsCommon, Select_crud, Cycles_stmnt, Select_crud
 
 sql_expr_not_concat:
     sql_value

@@ -1,11 +1,11 @@
 ﻿[<AllPublic>]
 module Stmnt
 
-open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Loop_stmnt
+open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Cycles_stmnt, Pl-ddl
 
 proc_body_stmnt:
   ('<<' ident '>>')*
-     select_stmnt
+     (select_stmnt
    | set_stmnt
    | execute_stmnt   
    | declare
@@ -20,10 +20,11 @@ proc_body_stmnt:
    | create_table
    | insert
    | fetch_stmnt
-   | print_stmt
    | null_stmt
    | update_stmnt 
-   | assign_var 
+   | create_trigger
+   | assign_var )
+   ';'
  
 declare:  
     'DECLARE' 
@@ -31,7 +32,7 @@ declare:
 	';'
 
 assign_var:
-     ident sql_datatype? [':' '=' sql_expr] 
+     full_ident sql_datatype? [':' '=' sql_expr] 
 	 
 raiserror_stmnt:
     'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
@@ -39,18 +40,16 @@ raiserror_stmnt:
     [',' comma_list<sql_expr>] ')'
     ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
 	
-stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* exception? 'END' ';'
+stmt_block: 'BEGIN' proc_body_stmnt* exception? 'END' ';'
 
 exception:
       'WHEN' 
        (not_empty_list<ident 'OR'>
 	  |'OTHERS') 
-      'THEN' list<proc_body_stmnt ';'>';'
+      'THEN' proc_body_stmnt*
 
-drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') ([ident '.'] ident)+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') full_ident+
   
-print_stmt: 'PRINT' sql_expr ';'?
-
 null_stmt: 'null'
 
 

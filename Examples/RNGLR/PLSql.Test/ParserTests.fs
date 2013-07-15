@@ -41,6 +41,8 @@ type ``MS-SQL parser tests`` () =
         counter <- counter + 1<id>
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+            dbg.drawGSSDot @"..\..\stack.dot"
+            dbg.lastTokens 5 |> printfn "%A"
             let coordinates = 
                 let x,y = tokenPos tok
                 let x = p.GetCoordinates x
@@ -53,7 +55,7 @@ type ``MS-SQL parser tests`` () =
             let name = tok |> tokenToNumber |> numToString
             printfn "Error in file %s at position %s on Token %s %s: %s" file coordinates name data msg
             printfn "%s" msg
-            dbg.drawGSSDot @"..\..\stack.dot"
+           // dbg.drawGSSDot @"..\..\stack.dot"
             Assert.Fail msg
         | Yard.Generators.RNGLR.Parser.Success ast -> ()
             //Assert.Pass()
@@ -147,11 +149,24 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with create and alter table_6.`` () =
         file_1 "JRXML_RESOURCE_ENTRIES.sql" |> runParserTest    
 
+    [<Test>]
+    member test.``Programm with create trigger_1.`` () =
+        file_1 "ALTER_JRXML_REPORT_IMAGES.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create trigger_2.`` () =
+        file_1 "JRXML_REPORT_IMAGES.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create trigger_3.`` () =
+        file_1 "JRXML_RESOURCE_FILES.sql" |> runParserTest
+
+
 
 
 [<EntryPoint>]
 let f x =
     let tests = new ``MS-SQL parser tests`` ()
-    tests.``Exucute procedure with assosiation operation.``()
-    tests.``Exucute procedure with assosiation operation.``()
+    tests.``Programm with create trigger_1.``()
+    tests.``Programm with create trigger_1.``()
     0 

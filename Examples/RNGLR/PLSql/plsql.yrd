@@ -27,9 +27,9 @@ open Yard.Utils.SourceText
 include "../../../GrammarTemplates/Common.yrd"
 include "../common_grammars/MsCommon.yrd"
 include "../common_grammars/expr.yrd"
-include "../common_grammars/create_proc.yrd"
 include "../common_grammars/set_stmnt.yrd"
-include "../common_grammars/loop_stmnt.yrd"
+include "pl_ddl.yrd"
+include "cycles_stmnt.yrd"
 include "datatype.yrd"
 include "stmnt.yrd"
 include "execute_stmnt.yrd"
@@ -52,7 +52,7 @@ options {
 
 module Main
 
-open Create_proc, Set_stmnt, Transaction, Loop_stmnt, Create_table, Crud, Alter_table, Stmnt
+open Pl-ddl, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Alter_table, Stmnt
 
 [<Start>]
 root_rule: (batch_body '/'?)*
@@ -71,3 +71,4 @@ batch_body:
 	 | stmt_block
 	 | update_stmnt 
 	 | alter_table
+	 | create_trigger

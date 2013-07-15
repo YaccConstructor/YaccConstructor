@@ -86,15 +86,11 @@
     <FsYard Include="..\common_grammars\set_stmnt.yrd">
       <Link>set_stmnt.yrd</Link>
     </FsYard>
-    <FsYard Include="..\common_grammars\loop_stmnt.yrd">
-      <Link>loop_stmnt.yrd</Link>
-    </FsYard>
     <FsYard Include="crud.yrd" />
     <FsYard Include="select_crud.yrd" />
+    <FsYard Include="cycles_stmnt.yrd" />
+    <FsYard Include="create_proc.yrd" />
     <FsYard Include="create_table.yrd" />
-    <FsYard Include="..\common_grammars\create_proc.yrd">
-      <Link>create_proc.yrd</Link>
-    </FsYard>
     <FsYard Include="transaction.yrd" />
     <FsYard Include="..\common_grammars\MsCommon.yrd">
       <Link>MsCommon.yrd</Link>

@@ -52,23 +52,16 @@ options {
 
 module Main
 
-open Pl-ddl, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Alter_table, Stmnt
+open Pl-ddl, Cycles_stmnt, Alter_table, Stmnt, Transaction
 
 [<Start>]
 root_rule: (batch_body '/'?)*
 
 batch_body: 
-       create_proc
-     | set_stmnt
-     | commit_transaction
-     | declare
-     | case (**&&&***)
-     | rollback_transaction
-     | if_stmt 
-     | drop_procedure 
-     | create_table
-     | insert
-	 | stmt_block
-	 | update_stmnt 
+       proc_body_stmnt
+     | create_proc
+     | case 
 	 | alter_table
 	 | create_trigger
+	 | commit_transaction
+	 | rollback_transaction

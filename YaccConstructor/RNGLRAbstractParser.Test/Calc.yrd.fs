@@ -147,7 +147,7 @@ let eofIndex = 23
 let errorIndex = 0
 let errorRulesExists = false
 let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAst : (seq<int*array<Token*int>> -> ParseResult<Token>) =
+let buildAst : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null|]
@@ -536,7 +536,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 29 "Calc.yrd"
-                             (fun x y -> float x ** float y |> int) 
+                             (fun x y -> (float x ** float y) |> int) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
@@ -560,7 +560,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   _rnglr_cycle_res := (
                     
 # 31 "Calc.yrd"
-                                                                                         e 
+                                                                     e 
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )

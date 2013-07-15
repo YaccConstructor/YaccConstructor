@@ -43,6 +43,7 @@
     <None Include="Lexer.fsl" />
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="SimpleCalc.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />

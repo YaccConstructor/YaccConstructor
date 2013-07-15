@@ -227,6 +227,52 @@ type ``RNGLR abstract parser tests`` () =
             
         Assert.Pass()
 
+    [<Test>]
+    member this.``Simple calc with nterm. Seq input.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
+             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 0)
+             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerm.parserSource qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+        | Yard.Generators.RNGLR.AParser.Success tree ->
+            tree.PrintAst()
+            RNGLR.SimpleCalcWithNTerm.defaultAstToDot tree "ast.dot"
+            
+        Assert.Pass()
+
+
+    [<Test>]
+    member this.``Simple calc with nterm. Branch binop and first arg.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
+             new AbstractParsing.Common.AEdge<_,_>(0,2,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
+             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 3)
+             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 4)
+             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 5)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerm.parserSource qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+        | Yard.Generators.RNGLR.AParser.Success tree ->
+            tree.PrintAst()
+            RNGLR.SimpleCalcWithNTerm.defaultAstToDot tree "ast.dot"
+            
+        Assert.Pass()
 
 [<EntryPoint>]
 let f x =
@@ -234,6 +280,7 @@ let f x =
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
     //t.``Simple calc. Branch binop and first arg.``()
-    t.``Simple calc. Branch binop and second arg.``()
-    //t.``Simple calc. Sequence input.``()
+    //t.``Simple calc. Branch binop and second arg.``()
+    //t.``Simple calc with nterm. Seq input.``()
+    t.``Simple calc. Sequence input.``()
     0

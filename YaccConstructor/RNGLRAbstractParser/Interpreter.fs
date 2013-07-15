@@ -375,27 +375,31 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             else
                 //curNum := parserSource.EofIndex
                 isEOF := true
-            for vertex in usedStates do
-                stateToVertex.[vertex] <- null
-            usedStates.Clear()
+//            for vertex in usedStates do
+//                stateToVertex.[vertex] <- null
+//            usedStates.Clear()
             let oldPushes = !pushes |> Array.map (fun p -> p.ToArray())
-//            if pushesMap.ContainsKey num
-//            then 
-//                pushesMap.[num].Add((oldPushes,newAstNode)) 
-//            else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
-            pushesInitFun curTokens.Value.Tokens.Length
-            let vertecesData = oldPushes |> Array.sumBy (fun p -> p.Length) |> Array.zeroCreate 
-            let pCount = ref 0
             for i in 0..oldTokens.Tokens.Length-1 do
                 let newAstNode = newAstNodes.[i]
                 let oldPushes = oldPushes.[i]
                 let num = oldTokens.Tokens.[i].NxtLvl                
-                for (vertex, state) in oldPushes do
-                    vertecesData.[!pCount] <- state, num, Some (vertex, newAstNode)
-                    incr pCount
-                    addSimpleEdge vertex newAstNode simpleEdges.[state]
-
-            addVertex vertecesData |> ignore
+                if pushesMap.ContainsKey num
+                then 
+                    pushesMap.[num].Add((oldPushes,newAstNode)) 
+                else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
+            pushesInitFun curTokens.Value.Tokens.Length
+//            let vertecesData = oldPushes |> Array.sumBy (fun p -> p.Length) |> Array.zeroCreate 
+//            let pCount = ref 0
+//            for i in 0..oldTokens.Tokens.Length-1 do
+//                let newAstNode = newAstNodes.[i]
+//                let oldPushes = oldPushes.[i]
+//                let num = oldTokens.Tokens.[i].NxtLvl                
+//                for (vertex, state) in oldPushes do
+//                    vertecesData.[!pCount] <- state, num, Some (vertex, newAstNode)
+//                    incr pCount
+//                    addSimpleEdge vertex newAstNode simpleEdges.[state]
+//
+//            addVertex vertecesData |> ignore
  
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
@@ -415,14 +419,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 attachEdges()
                 if !isEOF
                 then
-//                    for vertex in usedStates do
-//                        stateToVertex.[vertex] <- null
-//                    usedStates.Clear()
-//                    for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-//                        for (vertex, state) in oldPushes do
-//                            let newVertex = addVertex state !curLvl <| Some (vertex, newAstNode)
-//                            addSimpleEdge vertex newAstNode simpleEdges.[state]
-//                    pushesMap.Remove(!curLvl) |> ignore 
+                    for vertex in usedStates do
+                        stateToVertex.[vertex] <- null
+                    usedStates.Clear()
+                    for  oldPushes,newAstNode in pushesMap.[!curLvl] do
+                        for (vertex, state) in oldPushes do
+                            let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                            addSimpleEdge vertex newAstNode simpleEdges.[state]
+                    pushesMap.Remove(!curLvl) |> ignore 
                     isEnd := true
                 (*elif pushes.Count = 0 then 
                     if !curLvl - !lastErr > 1 
@@ -438,31 +442,31 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                                 <| sprintf "stack_%d.dot" !curLvl
-//                    if !curLvl > 0
-//                    then
-                        //let newAstNode = box tokens.Count            
-//                        if pushesMap.ContainsKey !curLvl
-//                        then
-//                            printfn "_____%A________" !curLvl
-//                            Array.iter (printfn "%A") vertices
-//                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                                <| sprintf "stack_%d.dot" !curLvl    
-//                            for vertex in usedStates do
-//                                stateToVertex.[vertex] <- null
-//                            usedStates.Clear()
-//                            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-//                                for (vertex, state) in oldPushes do
-//                                    let newVertex = addVertex state !curLvl <| Some (vertex, newAstNode)
-//                                    addSimpleEdge vertex newAstNode simpleEdges.[state]
-//                            pushesMap.Remove(!curLvl) |> ignore
-//                            printfn "_____%A_1________" !curLvl
-//                            Array.iter (printfn "%A") vertices
-//                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                                <| sprintf "stack_%d_1.dot" !curLvl
-//                        else
-//                            for vertex in usedStates do
-//                                stateToVertex.[vertex] <- null
-                            //usedStates.Clear()
+                    if !curLvl > 0
+                    then
+                        let newAstNode = box tokens.Count            
+                        if pushesMap.ContainsKey !curLvl
+                        then
+                            printfn "_____%A________" !curLvl
+                            Array.iter (printfn "%A") vertices
+                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                                <| sprintf "stack_%d.dot" !curLvl    
+                            for vertex in usedStates do
+                                stateToVertex.[vertex] <- null
+                            usedStates.Clear()
+                            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
+                                for (vertex, state) in oldPushes do
+                                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                                    addSimpleEdge vertex newAstNode simpleEdges.[state]
+                            pushesMap.Remove(!curLvl) |> ignore
+                            printfn "_____%A_1________" !curLvl
+                            Array.iter (printfn "%A") vertices
+                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                                <| sprintf "stack_%d_1.dot" !curLvl
+                        else
+                            for vertex in usedStates do
+                                stateToVertex.[vertex] <- null
+                            usedStates.Clear()
 
                     //curLvl := !nxtLvl
                     

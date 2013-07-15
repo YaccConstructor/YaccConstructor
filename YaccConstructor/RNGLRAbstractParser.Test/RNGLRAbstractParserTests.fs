@@ -233,6 +233,7 @@ let f x =
     let t = new ``RNGLR abstract parser tests`` () 
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
-    t.``Simple calc. Branch binop and first arg.``()
+    //t.``Simple calc. Branch binop and first arg.``()
+    t.``Simple calc. Branch binop and second arg.``()
     //t.``Simple calc. Sequence input.``()
     0

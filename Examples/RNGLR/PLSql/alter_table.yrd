@@ -1,0 +1,42 @@
+﻿[<AllPublic>]
+module Alter_table
+
+open MsCommon, Datatype, Expr, Select_crud
+
+alter_table: 
+      'ALTER' 'TABLE'
+	  [IDENT '.'] IDENT
+	  [
+	   constraint_clauses 
+	   |alter_table_properties
+	  ]
+	  ';'?
+
+constraint_clauses: 
+      'ADD' 
+	    out_of_line_constraint
+	   
+out_of_line_constraint:
+	    ['CONSTRAINT' ident]
+		 ('UNIQUE' | ('PRIMARY' 'KEY') | 'CHECK' | ('FOREIGN' 'KEY'))
+		  ( 
+		    '(' comma_list<IDENT>')'
+		   | search_condition 
+		  )
+		  (references_clause)? 
+		  (constraint_state)?
+
+alter_table_properties:
+       'ADD'
+	     '(' column_definition ')'
+
+constraint_state:
+         'ENABLE'
+
+column_definition:
+        IDENT sql_datatype
+        ['DEFAULT' sql_expr] 
+
+ references_clause:
+        'REFERENCES'
+		 [IDENT '.'] IDENT '(' comma_list<IDENT> ')'

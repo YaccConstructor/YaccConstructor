@@ -41,6 +41,8 @@ type ``MS-SQL parser tests`` () =
         counter <- counter + 1<id>
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+            dbg.drawGSSDot @"..\..\stack.dot"
+            dbg.lastTokens 5 |> printfn "%A"
             let coordinates = 
                 let x,y = tokenPos tok
                 let x = p.GetCoordinates x
@@ -53,10 +55,10 @@ type ``MS-SQL parser tests`` () =
             let name = tok |> tokenToNumber |> numToString
             printfn "Error in file %s at position %s on Token %s %s: %s" file coordinates name data msg
             printfn "%s" msg
-            dbg.drawGSSDot @"..\..\stack.dot"
+           // dbg.drawGSSDot @"..\..\stack.dot"
             Assert.Fail msg
-        | Yard.Generators.RNGLR.Parser.Success ast ->
-            Assert.Pass()
+        | Yard.Generators.RNGLR.Parser.Success ast -> ()
+            //Assert.Pass()
 
     let basePath = "../../../../../Tests/PlSqlParser"
     let filePath = "../../../../../Tests/materials/pl-sql/jrxml2pdf-release/install"
@@ -78,6 +80,14 @@ type ``MS-SQL parser tests`` () =
     [<Test>]
     member test.``Exucute procedure without parametres.`` () =
         file "exec_proc_4.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Concat.`` () =
+        file "concat.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with update.`` () =
+        file "program_with_update.sql" |> runParserTest
 
     [<Test>]
     member test.``Programm with some procudure.`` () =
@@ -111,6 +121,52 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with insert.`` () =
         file_1 "INSERT_NLS_DATA.sql" |> runParserTest
 
-        
+    [<Test>]
+    member test.``Programm with create and alter table.`` () =
+        file_1 "JRXML_APEX2PDF_TEMPLATES.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_2.`` () =
+        file_1 "JRXML_REPORT_DEFINITIONS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with alter table.`` () =
+        file_1 "ALTER_JRXML_FONTS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_3.`` () =
+        file_1 "JRXML_LOGGING.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_4.`` () =
+        file_1 "JRXML_NLS_PARAMETERS.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create and alter table_5.`` () =
+        file_1 "JRXML_FONTS.sql" |> runParserTest    
+
+    [<Test>]
+    member test.``Programm with create and alter table_6.`` () =
+        file_1 "JRXML_RESOURCE_ENTRIES.sql" |> runParserTest    
+
+    [<Test>]
+    member test.``Programm with create trigger_1.`` () =
+        file_1 "ALTER_JRXML_REPORT_IMAGES.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create trigger_2.`` () =
+        file_1 "JRXML_REPORT_IMAGES.sql" |> runParserTest
+
+    [<Test>]
+    member test.``Programm with create trigger_3.`` () =
+        file_1 "JRXML_RESOURCE_FILES.sql" |> runParserTest
 
 
+
+
+[<EntryPoint>]
+let f x =
+    let tests = new ``MS-SQL parser tests`` ()
+    tests.``Programm with create trigger_1.``()
+    tests.``Programm with create trigger_1.``()
+    0 

@@ -1,0 +1,22 @@
+﻿[<AllPublic>]
+module Transaction
+
+open MsCommon 
+
+rollback_transaction:
+    'ROLLBACK'
+    ['TRAN' | 'TRANSACTION']
+    [IDENT | LOCALVAR]
+    ';'?
+
+begin_transaction:
+    'BEGIN' ('TRAN' | 'TRANSACTION') 
+    [
+      (ident | LOCALVAR)
+      ['WITH' 'MARK' STRING_CONST?]
+    ]
+    ';'?
+
+commit_transaction:
+    'COMMIT' ('TRAN' | 'TRANSACTION') [IDENT | LOCALVAR]
+    ';'?

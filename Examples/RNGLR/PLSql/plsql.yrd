@@ -23,9 +23,21 @@
 open Microsoft.FSharp.Text.Lexing
 open Yard.Utils.SourceText
 }
-
+ 
 include "../../../GrammarTemplates/Common.yrd"
 include "../common_grammars/MsCommon.yrd"
+include "../common_grammars/expr.yrd"
+include "../common_grammars/set_stmnt.yrd"
+include "pl_ddl.yrd"
+include "cycles_stmnt.yrd"
+include "datatype.yrd"
+include "stmnt.yrd"
+include "execute_stmnt.yrd"
+include "crud.yrd"
+include "select_crud.yrd"
+include "create_table.yrd"
+include "alter_table.yrd"
+include "transaction.yrd"
 
 tokens {
     _ of SourceText
@@ -40,48 +52,16 @@ options {
 
 module Main
 
-open Common, MsCommon
+open Pl-ddl, Cycles_stmnt, Alter_table, Stmnt, Transaction
 
 [<Start>]
 root_rule: (batch_body '/'?)*
 
 batch_body: 
-       create_proc
-     | set_stmnt
-     | begin_transaction
-     | commit_transaction
-     | declare
-     | case (**&&&***)
-     | rollback_transaction
-     | if_stmt 
-     | drop_procedure 
-     | create_table
-     | insert
-	 | stmt_block
-	 | 'commit' ';'?
-	 | e=error {printfn "Error in position %A" }
-  
-(*********************************PROCEDURE************************************************************)    
-
-
-proc_formal_param:
-    LOCALVAR [full_ident '.'] sql_datatype?
-    ['VARYING'] ['=' ('NULL' | DEC_NUMBER | STRING_CONST)]
-    ['OUT' | 'OUTPUT'] 'READONLY'?  
-  
-create_proc:
-    'CREATE' ('PROCEDURE' | 'PROC')
-    [ident '.'] ident [';' DEC_NUMBER]
-    brace_opt<'(' comma_list<proc_formal_param> ')'>
-    ['WITH' (execute_as)+]
-    ['FOR' 'REPLICATION']
-    'AS' (proc_body_stmnt ';'?)*
-    ';'?
-
-procedure_option: 
-  [
-      'ENCRYPTION'
-    | 'RECOMPILE'
-    | 'EXECUTE_AS_Clause'
-  ]
-
+       proc_body_stmnt
+     | create_proc
+     | case 
+	 | alter_table
+	 | create_trigger
+	 | commit_transaction
+	 | rollback_transaction

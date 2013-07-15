@@ -164,9 +164,9 @@ type ``MS-SQL parser tests`` () =
 
 
 
-[<EntryPoint>]
-let f x =
-    let tests = new ``MS-SQL parser tests`` ()
-    tests.``Programm with create trigger_1.``()
-    tests.``Programm with create trigger_1.``()
-    0 
+//[<EntryPoint>]
+//let f x =
+    //let tests = new ``MS-SQL parser tests`` ()
+    //tests.``Programm with create trigger_1.``()
+    //tests.``Programm with create trigger_1.``()
+    //0 

@@ -31,7 +31,7 @@ type TargetLanguage =
 
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
-    (tokenType : string) (res : System.Text.StringBuilder) (attendedPushes : (Option<array<int>>)) targetLanguage
+    (tokenType : string) (res : System.Text.StringBuilder) (attendedPushes : (Option<array<int * int>>))  (attendedReduces : (Option<array<int*int>>)) targetLanguage
     _class =
     
     let inline print (x : 'a) =
@@ -186,7 +186,7 @@ let printTables
         if attendedPushes.IsSome then
             printBr "let numToToken = function"
             for i = indexator.termsStart to indexator.termsEnd do
-                printBrInd 1 "| %d -> %s 0" i (indexator.indexToTerm i)
+                printBrInd 1 "| %d -> %s \"\"" i (indexator.indexToTerm i)
             printBrInd 1 "| _ -> EOF 0 "
             printBr ""
         printBr "let mutable private cur = 0"
@@ -217,7 +217,9 @@ let printTables
             "gotos"
         if attendedPushes.IsSome then
             print "let attendedPushes = "
-            printArr attendedPushes.Value (print "%d")
+            printArr attendedPushes.Value (fun l -> print "%d, %d" (fst l) (snd l))
+            print "let attendedReduces = "
+            printArr attendedReduces.Value (fun l -> print "%d,%d" (fst l) (snd l))
         print2DArrList reduces
             (fun l -> not l.IsEmpty)
             (fun l -> printListAsArray l (fun (x,y) -> print "%d,%d" x y))
@@ -238,7 +240,7 @@ let printTables
         printBrInd 0 "let eofIndex = %d" grammar.indexator.eofIndex
 
         if attendedPushes.IsSome then
-            printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, attendedPushes, numToToken)"
+            printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, attendedPushes, attendedReduces, numToToken)"
         else
             printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString)"
 

@@ -63,6 +63,7 @@ type RelaxedTables(grammar : FinalGrammar, states : StatesInterpreter) =
     let mutable newGotos = base.gotos
     let mutable newReduces = base.reduces
     let mutable _attendedPushes : array<int * int list>  =  Array.create states.count (0, List.Empty)
+    let mutable _attendedReduces : array<int*int> = Array.create states.count (0,0)
     let fillReduces(reduce : list<int*int>, i:int) = 
         for j in grammar.indexator.termsStart..grammar.indexator.termsEnd do
             newReduces.[i,j] <- reduce
@@ -71,27 +72,27 @@ type RelaxedTables(grammar : FinalGrammar, states : StatesInterpreter) =
             newGotos.[i,j] <- push
     let caclulateReduces(ar:list<int * int>[,]) =
         let rec walk i (ar:list<int * int>[,]) =
-            let rec inspectRow i j (ar:list<int * int>[,])(lastReduce:Option<list<int*int>>) =
-                match ar.[i,j], lastReduce with
-                | value, opt when value <> List.Empty  && opt.IsSome && opt.Value = List.Empty
+            let rec inspectRow i j (ar:list<int * int>[,])(lastReduce:Option<list<int*int>>)(lastReduceInd:int) =
+                match ar.[i,j], lastReduce, lastReduceInd with
+                | value, opt, ind when value <> List.Empty  && opt.IsSome && opt.Value = List.Empty
                     -> if j< grammar.indexator.termsEnd then
-                        inspectRow i (j+1) ar (Some(ar.[i,j]))
+                        inspectRow i (j+1) ar (Some(ar.[i,j])) j
                        else 
-                        if (not lastReduce.Value.IsEmpty) then  fillReduces(lastReduce.Value, i)
+                        if (not lastReduce.Value.IsEmpty) then  fillReduces(lastReduce.Value, i); _attendedReduces.[i] <- lastReduce.Value.Head
                         if (i < newGotos.GetLength(0) - 1) then walk (i+1) ar
-                | value, opt when value <> List.Empty && opt.IsSome && opt.Value <> List.Empty
-                    -> fillReduces(lastReduce.Value, i);
+                | value, opt, ind when value <> List.Empty && opt.IsSome && opt.Value <> List.Empty
+                    -> fillReduces(lastReduce.Value, i); _attendedReduces.[i] <- lastReduce.Value.Head;
                         if(i < newReduces.GetLength(0) - 1) then
                             walk (i+1) ar
-                | value, opt when (opt.IsSome && value = opt.Value) || value = List.Empty
+                | value, opt, ind when (opt.IsSome && value = opt.Value) || value = List.Empty
                     -> if j < grammar.indexator.termsEnd then
-                        inspectRow i (j+1) ar lastReduce
+                        inspectRow i (j+1) ar lastReduce ind
                        else
-                        if (not lastReduce.Value.IsEmpty) then fillReduces(lastReduce.Value, i)
+                        if (not lastReduce.Value.IsEmpty) then fillReduces(lastReduce.Value, i); _attendedReduces.[i] <- lastReduce.Value.Head
                         if (i < newGotos.GetLength(0) - 1) then walk (i+1) ar
                 | _ -> if (i < newReduces.GetLength(0) - 1) then
                         walk (i+1) ar
-            inspectRow i grammar.indexator.termsStart ar (Some(List.Empty))
+            inspectRow i grammar.indexator.termsStart ar (Some(List.Empty)) 0
         walk 0 newReduces
     let result = caclulateReduces(newReduces)
 
@@ -104,7 +105,7 @@ type RelaxedTables(grammar : FinalGrammar, states : StatesInterpreter) =
                     -> if j < grammar.indexator.termsEnd then 
                         inspectRow i (j+1) ar (Some(ar.[i,j])) j // init lastShift, go to next elem in row
                        else
-                        fillPushes(value, i); _attendedPushes.[i] <- (ind, lastShift.Value)
+                        fillPushes(value, i); _attendedPushes.[i] <- (j, value)
                         if (i < newGotos.GetLength(0) - 1) then  walk (i+1) ar
                 | value, opt, ind when value <> List.Empty && opt.IsSome
                     -> if (i < newGotos.GetLength(0) - 1 ) then
@@ -125,5 +126,6 @@ type RelaxedTables(grammar : FinalGrammar, states : StatesInterpreter) =
     
     member this.attendedPushes = _attendedPushes
     member this.attendedGotos = newGotos
-    member this.attendedReduces = newReduces
+    member this.attendedRed = newReduces
+    member this.attendedReduces = _attendedReduces
 

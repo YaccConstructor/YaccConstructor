@@ -151,7 +151,12 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
 
 
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
-    let enum = tokens.GetEnumerator()
+    let enum = ref <| tokens.GetEnumerator()
+    let attended = ref false
+    let f = [1;3;4]
+    let e = (seq f).GetEnumerator()
+    //e.MoveNext()
+    let x = (seq {yield -1 ; while e.MoveNext() do yield e.Current} ).GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
     let startState = 0
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
@@ -161,7 +166,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         fun i -> epsilons.[i]
 
     // If input stream is empty or consists only of EOF token
-    if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
+    if not <| (!enum).MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber (!enum).Current then
         if parserSource.AcceptEmptyInput then
             Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
         else
@@ -172,8 +177,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     })
     else
         // Currently processed token
-        let curToken = ref enum.Current
-        let curNum = ref (parserSource.TokenToNumber enum.Current)
+        let curToken = ref (!enum).Current
+        let curNum = ref (parserSource.TokenToNumber (!enum).Current)
         /// Here all tokens from the input will be collected
         let tokens = new BlockResizeArray<_>()
         let reductions = new Stack<_>(10)
@@ -190,6 +195,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         let addVertex state level (edgeOpt : option<Vertex * obj>) =
             let dict = stateToVertex
+            let mutable nothing = true
             if dict.[state] = null then
                 let v = new Vertex(state, level)
                 dict.[state] <- v
@@ -197,8 +203,9 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 // Push to init state is impossible
                 if push <> 0 then
                     pushes.Push (v, push)
-                    if parserSource.AttendedPushes.IsSome && parserSource.AttendedPushes.Value.[state] <> 0 
-                    && parserSource.AttendedPushes.Value.[state] <> curNum.Value then
+                    nothing <- false
+                    (*if parserSource.AttendedPushes.IsSome && parserSource.AttendedPushes.Value.[state] <> 0 
+                    && parserSource.AttendedPushes.Value.[state] <> curNum.Value  && parserSource.AttendedPushes.Value.GetLength 0 < curNum.Value then
                         let i = parserSource.AttendedPushes.Value.[state]
                         let a = parserSource.NumToToken.Value i 
                         tokens.Add(a)
@@ -206,10 +213,21 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             curToken := a
                             curNum := parserSource.TokenToNumber a
                         else
-                            curNum := parserSource.EofIndex
-
+                            curNum := parserSource.EofIndex *)
+                (*elif parserSource.AttendedPushes.IsSome then
+                    let psh = parserSource.AttendedPushes.Value.[state]
+                    if psh <> 0 then
+                        pushes.Push(v, psh)
+                        let a = parserSource.NumToToken.Value psh 
+                        tokens.Add(a)
+                        if enum.MoveNext() then
+                            curToken := a
+                            curNum := parserSource.TokenToNumber a
+                        //else
+                         //   curNum := parserSource.EofIndex *)
                 let arr = parserSource.ZeroReduces.[state].[!curNum]
                 if arr <> null then
+                    nothing <- false
                     for prod in arr do
                         reductions.Push (v, prod, 0, None)
                 usedStates.Push state
@@ -217,8 +235,42 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if edgeOpt.IsSome then 
                 let arr = parserSource.Reduces.[state].[!curNum]
                 if arr <> null then
+                    nothing <- false
                     for (prod, pos) in arr do
                         reductions.Push (v, prod, pos, edgeOpt)
+                (*elif parserSource.AttendedReduces.IsSome then
+                    let red = parserSource.AttendedReduces.Value.[state]
+                    if red <> (0, 0) then
+                        reductions.Push(v, fst red, snd red, edgeOpt) *)
+            if nothing then
+                if parserSource.AttendedPushes.IsSome then
+                    let psh = parserSource.AttendedPushes.Value.[state]
+                    let tokenNumber = parserSource.TokenToNumber (!enum).Current
+                    
+                    if fst psh <> 0 && tokenNumber <> parserSource.EofIndex then
+                        pushes.Push(v, snd psh)
+                        let a = parserSource.NumToToken.Value (fst psh )
+                        let arr = [|while enum.Value.MoveNext() do yield enum.Value.Current|]
+                        enum := (seq {yield a ; yield! arr} ).GetEnumerator();
+                        attended  := true
+                        //if (!enum).MoveNext() then
+                        //    ()
+                        //tokens.Add(a)
+
+                        //enum.Current <- a
+                        //enum.[i] <- a
+                        //usedStates.Push state
+                        //if (!enum).MoveNext() then
+                        //    ()
+                        //    curToken := a
+                        //    curNum := parserSource.TokenToNumber a
+                        //else
+                        //    curNum := parserSource.EofIndex
+                elif parserSource.AttendedReduces.IsSome then
+                    let red = parserSource.AttendedReduces.Value.[state]
+                    if red <> (0, 0) then
+                        reductions.Push(v, fst red, snd red, edgeOpt)
+
             v
 
         ignore <| addVertex startState 0 None
@@ -236,7 +288,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         let isCreated, edgeLabel = addEdge final family edges.[state]
                         if (pos > 0 && isCreated) then
                             let arr = parserSource.Reduces.[state].[!curNum]
-                            if arr <> null then
+                            if arr <> null then                             
                                 for (prod, pos) in arr do
                                     reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
 
@@ -250,7 +302,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                         path.[remainLength - 1] <- e.Ast
                                         walk (remainLength - 1) e.Dest path)
                             path.[remainLength - 1] <- vertex.OutEdges.first.Ast
-                            walk (remainLength - 1) vertex.OutEdges.first.Dest path
+                            if vertex.OutEdges.first.Dest <> null then
+                                walk (remainLength - 1) vertex.OutEdges.first.Dest path
                         else
                             simpleEdges.[vertex.State] |> ResizeArray.iter(fun (v,a) ->
                                     path.[remainLength - 1] <- a
@@ -338,10 +391,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         let shift num =
             let newAstNode = box tokens.Count
-            tokens.Add enum.Current
-            if enum.MoveNext() then
-                curToken := enum.Current
-                curNum := parserSource.TokenToNumber enum.Current
+            if !attended then 
+                let a = (!enum).MoveNext()
+                tokens.Add (!enum).Current
+                attended := false
+            else tokens.Add (!enum).Current
+            if (!enum).MoveNext() then
+                curToken := (!enum).Current
+                curNum := parserSource.TokenToNumber (!enum).Current
             else
                 curNum := parserSource.EofIndex
             for vertex in usedStates do

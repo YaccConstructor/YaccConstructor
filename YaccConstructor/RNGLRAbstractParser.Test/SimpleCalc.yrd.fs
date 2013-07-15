@@ -2,7 +2,6 @@
 # 2 "SimpleCalc.yrd.fs"
 module RNGLR.ParseSimpleCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-//open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR.AParser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST

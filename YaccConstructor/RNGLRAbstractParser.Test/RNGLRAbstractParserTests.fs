@@ -106,6 +106,26 @@ type ``RNGLR abstract parser tests`` () =
             RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
         Assert.Pass()
 
+    [<Test>]
+    member this.``Calc. Sequence input.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
+             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
+             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.parserSource qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+        | Yard.Generators.RNGLR.AParser.Success tree ->
+            tree.PrintAst()
+            RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
+        Assert.Pass()
 
 //    [<Test>]
 //    member this.``Simple calc. Sequence input. Full.`` () =
@@ -158,9 +178,61 @@ type ``RNGLR abstract parser tests`` () =
 
         Assert.Pass()
 
+
+    [<Test>]
+    member this.``Simple calc. Branch binop and second arg.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| PLUS 0)
+             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| PLUS 3)
+             new AbstractParsing.Common.AEdge<_,_>(2,4,lbl <| NUM 2)
+             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| NUM 4)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+        | Yard.Generators.RNGLR.AParser.Success tree ->
+            tree.PrintAst()
+            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
+            
+        Assert.Pass()
+
+    [<Test>]
+    member this.``Simple calc. Branch binop and first arg.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.AEdge<_,_>(0,2,lbl <| NUM 2)
+             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| PLUS 3)
+             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| PLUS 4)
+             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| NUM 5)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.AParser.Error (num, tok, message, debug) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+        | Yard.Generators.RNGLR.AParser.Success tree ->
+            tree.PrintAst()
+            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
+            
+        Assert.Pass()
+
+
 [<EntryPoint>]
 let f x =
     let t = new ``RNGLR abstract parser tests`` () 
-    t.``Simple calc. Branch binop input.``  ()
+    //t.``Simple calc. Branch binop input.``  ()
+    //t.``Calc. Sequence input.``()
+    t.``Simple calc. Branch binop and first arg.``()
     //t.``Simple calc. Sequence input.``()
     0

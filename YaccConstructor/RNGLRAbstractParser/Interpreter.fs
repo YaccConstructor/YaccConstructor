@@ -219,7 +219,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         let addVertex vertData =
             [|
-            for (state, level, (edgeOpt : option<Vertex * obj>)) in vertData do
+            for (state, level, (edgeOpt : option<Vertex * obj>)) in vertData |> Array.sortBy (fun (_,x,_) -> -x) do
                 let curNums = if !isEOF then [|parserSource.EofIndex|] else curTokens.Value.Tokens |> Array.map (fun t -> t.CurNum)
                 if stateToVertex.[state] = null then
                     let v = new Vertex(state, level)
@@ -234,8 +234,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         if arr <> null then
                             for prod in arr do
                                 reductions.Push (v, prod, 0, None)
-                        usedStates.Push state
                     )
+                    usedStates.Push state
                 let v = stateToVertex.[state]
                 if edgeOpt.IsSome then
                     for curNum in curNums do
@@ -310,7 +310,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let isEnd = ref false
         let attachEdges () =
             let inline snd3 (_,x,_) = x
-            for vertex in usedStates |> Set.ofSeq do
+            for vertex in usedStates (*|> Set.ofSeq*) do
                 let mutable i = 0
                 let edges = edges.[vertex]
                 let mutable count = -1

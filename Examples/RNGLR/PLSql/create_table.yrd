@@ -1,0 +1,95 @@
+﻿[<AllPublic>]
+module Create_table
+
+open Expr, Datatype, MsCommon
+
+create_table:
+    'CREATE' 'TABLE' 
+    [IDENT '.' IDENT? '.'?] IDENT 
+    '('
+      comma_list<(column_definition_create_table | computed_column_definition)>
+      comma_list<table_constraint_create_table>
+    ')' 
+    ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+    ['TEXTIMAGE_ON' (IDENT | 'DEFAULT')]
+    ';'?
+
+column_definition_create_table:
+    ident sql_datatype
+    ['COLLATE' IDENT]
+	['DEFAULT' sql_expr]
+    ['NOT'? 'NULL']
+    [['CONSTRAINT' IDENT] 'DEFAULT' sql_expr]
+  | ['IDENTITY' ['(' sql_expr ',' sql_expr ')'] ['NOT' 'FOR' 'REPLICATION']]
+    ['ROWGUIDCOL'] column_constraint_create_table*
+
+column_constraint_create_table: 
+    ['CONSTRAINT' IDENT]
+    (
+        ('PRIMARY' 'KEY' | 'UNIQUE') 
+        ['CLUSTERED' | 'NONCLUSTERED']
+        [ 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER  
+          | 'WITH' '(' comma_list<index_option> ')' 
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | ['FOREIGN' 'KEY']
+        'REFERENCES' [IDENT '.'] IDENT ['(' IDENT ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
+    ) 
+
+computed_column_definition:
+    IDENT 'AS' sql_expr 
+    ['PERSISTED' ['NOT' 'NULL']]
+    [ 
+        ['CONSTRAINT' IDENT]
+        ('PRIMARY' 'KEY' | 'UNIQUE')
+        ['CLUSTERED' | 'NONCLUSTERED']
+        [
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')'
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | ['FOREIGN' 'KEY']
+        'REFERENCES' IDENT ['(' IDENT ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 
+    ] 
+
+table_constraint_create_table:
+    ['CONSTRAINT' IDENT]
+    ( 
+        ('PRIMARY' 'KEY' | 'UNIQUE') 
+        ['CLUSTERED' | 'NONCLUSTERED']
+        '(' comma_list<(IDENT ['ASC' | 'DESC'])> ')' 
+        [ 
+            'WITH' 'FILLFACTOR' '=' DEC_NUMBER 
+          | 'WITH' '(' comma_list<index_option> ')' 
+        ]
+        ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
+      | 'FOREIGN' 'KEY' 
+        '(' comma_list<IDENT> ')' 
+        'REFERENCES' IDENT ['(' comma_list<IDENT> ')']
+        delete_update*
+        ['NOT' 'FOR' 'REPLICATION']
+      | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr
+    ) 
+	
+delete_update:
+    'ON' ('DELETE' | 'UPDATE') delete_update_options
+   
+delete_update_options:
+    'NO' 'ACTION' | 'CASCADE' | 'SET' 'NULL' | 'SET' 'DEFAULT'
+   
+index_option:
+    ( 
+        'PAD_INDEX' '=' ('ON' | 'OFF') 
+      | 'FILLFACTOR' '=' DEC_NUMBER 
+      | 'IGNORE_DUP_KEY' '=' ('ON' | 'OFF')
+      | 'STATISTICS_NORECOMPUTE' '=' ('ON' | 'OFF') 
+      | 'ALLOW_ROW_LOCKS' '=' ('ON' | 'OFF') 
+      | 'ALLOW_PAGE_LOCKS' '=' ('ON' | 'OFF') 
+    ) 

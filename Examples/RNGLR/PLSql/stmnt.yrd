@@ -1,0 +1,51 @@
+﻿[<AllPublic>]
+module Stmnt
+
+open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Cycles_stmnt, Pl-ddl
+
+proc_body_stmnt:
+  ('<<' ident '>>')*
+     (select_stmnt
+   | set_stmnt
+   | execute_stmnt   
+   | declare
+   | 'RETURN' sql_expr
+   | if_stmt
+   | raiserror_stmnt
+   | stmt_block
+   | drop_procedure
+   | while_stmt
+   | create_table
+   | insert
+   | fetch_stmnt
+   | null_stmt
+   | update_stmnt 
+   | assign_var )
+   ';'
+ 
+declare:  
+    'DECLARE' 
+    list<assign_var ';'>
+
+assign_var:
+     full_ident sql_datatype? [':' '=' sql_expr] 
+	 
+raiserror_stmnt:
+    'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
+    (',' dec_num ',' dec_num)
+    [',' comma_list<sql_expr>] ')'
+    ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
+	
+stmt_block: 'BEGIN' proc_body_stmnt* exception? 'END'
+
+exception:
+      'EXCEPTION' 'WHEN' 
+       (not_empty_list<ident 'OR'>
+	  |'OTHERS') 
+      'THEN' proc_body_stmnt*
+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') full_ident+
+  
+null_stmt: 'null'
+
+

@@ -49,7 +49,7 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
   //else if prefix = "##" then GLOBALTEMPOBJ name
   elif name.[0] = '@' then LOCALVAR defaultSourceText
   //else if name.[0] = '#' then TEMPOBJ name
-  elif prefix = "%%" then STOREDPROCEDURE defaultSourceText
+  //elif prefix = "%%" then STOREDPROCEDURE defaultSourceText
   elif notKeyWord then IDENT defaultSourceText
   else getKwTokenOrIdent name defaultSourceText
 

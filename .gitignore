@@ -70,3 +70,4 @@ Examples/RNGLR/PLSql/FsYard.log
 Examples/RNGLR/PLSql/MsParser.fs
 Examples/RNGLR/PLSql/epsilons/*.dot
 Examples/RNGLR/PLSql/Lexer.fs
+YaccConstructor/RNGLRParser.ErrorRecoveryTest/res.dot

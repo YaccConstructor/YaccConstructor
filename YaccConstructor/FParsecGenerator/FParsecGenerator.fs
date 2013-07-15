@@ -26,4 +26,4 @@ type FParsecGenerator() =
     inherit Generator()
         override this.Name = "FParsecGenerator"
         override this.Generate t = Program.generate t :> obj
-        override this.Constraints = [|noMeta|]
+        override this.Constraints = [|noMeta; singleModule|]

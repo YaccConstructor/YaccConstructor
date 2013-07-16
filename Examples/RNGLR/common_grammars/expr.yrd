@@ -35,7 +35,8 @@ sql_expr:
 scalar_function:
       'LOWER' sql_expr
     | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
-	| 'UNISTR' '(' sql_value ')'
+	| ( 'UNISTR'|'TRUNC'|'EXTRACT') '(' sql_expr ')'
+	| ('HOUR'|'MINUTE'|'SECOND') 'FROM' sql_expr
 	| 'HEXTORAW' '(' sql_value ')'
 
 call_expr: 
@@ -62,17 +63,4 @@ binop:
     | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') 
 
 fetch_stmnt:    
-    'FETCH' 
-    [
-      [
-          'NEXT'
-        | 'PRIOR'
-        | 'FIRST'
-        | 'LAST' 
-        | 'ABSOLUTE' (dec_num | LOCALVAR) 
-        | 'RELATIVE' (dec_num | LOCALVAR) 
-      ] 
-      'FROM' 
-    ] 
-    ('GLOBAL'? IDENT | LOCALVAR) 
-    ('INTO' comma_list<LOCALVAR>)? 
+    'FETCH' ident  'INTO' comma_list<ident> 

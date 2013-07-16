@@ -161,6 +161,10 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with create trigger_3.`` () =
         file_1 "JRXML_RESOURCE_FILES.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Programm with create package.`` () =
+        file_1 "PK_JRXML2PDF_LOG.pls" |> runParserTest
+
 
 
 

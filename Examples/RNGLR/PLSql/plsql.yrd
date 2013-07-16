@@ -38,6 +38,9 @@ include "select_crud.yrd"
 include "create_table.yrd"
 include "alter_table.yrd"
 include "transaction.yrd"
+include "create_package.yrd"
+include "declare_stmnt.yrd"
+include "create_package_body.yrd"
 
 tokens {
     _ of SourceText
@@ -52,7 +55,7 @@ options {
 
 module Main
 
-open Pl-ddl, Cycles_stmnt, Alter_table, Stmnt, Transaction
+open Pl-ddl, Cycles_stmnt, Alter_table, Stmnt, Transaction, Create_package, Create_package_body
 
 [<Start>]
 root_rule: (batch_body '/'?)*
@@ -65,3 +68,5 @@ batch_body:
 	 | create_trigger
 	 | commit_transaction
 	 | rollback_transaction
+	 | create_package
+	 | create_package_body

@@ -70,6 +70,9 @@
     <FsYard Include="create_table.yrd" />
     <FsYard Include="alter_table.yrd" />
     <FsYard Include="transaction.yrd" />
+    <FsYard Include="create_package.yrd" />
+    <FsYard Include="create_package_body.yrd" />
+    <FsYard Include="declare_stmnt.yrd" />
     <FsYard Include="..\common_grammars\MsCommon.yrd">
       <Link>PlCommon.yrd</Link>
     </FsYard>

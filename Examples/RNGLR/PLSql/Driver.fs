@@ -139,7 +139,15 @@ let Parse (srcFilePath:string) =
             GC.Collect()    
             GC.WaitForPendingFinalizers()
             GC.GetTotalMemory(true)
-        GC_Collect() |> printfn "%A" 
+        GC_Collect() |> printfn "%A"
+        
+        let errors = ast.collectErrors (tokenPos)
+        for x, y, tok in errors do
+            let x = p.GetCoordinates x
+            let y = p.GetCoordinates y
+            let name = tok |> tokenToNumber |> numToString
+            printfn "Error on position (%A, %A) - (%A, %A) on token %s" x.Line x.Column y.Line y.Column name
+
         ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))

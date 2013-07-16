@@ -72,7 +72,7 @@ type ProjInfo () =
             new Trinity(
                 id
                 , (int (map.[map.Length - 1] - map.[map.Length - 2] + 1L<symbol>)) * _symbol
-                , map.Length * _line )
+                , (map.Length - 1) * _line )
         else
             let inLine = (getLine map id offset 0 (map.Length - 1)) + 1
             let inColumn = offset - map.[inLine - 1] + 1L<symbol>

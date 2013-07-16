@@ -70,3 +70,5 @@ YaccConstructor/YardFrontend/out
 YaccConstructor/RNGLRAbstractParser.Test/out
 YaccConstructor/RNGLRAbstractParser.Test/Lexer.fs
 YaccConstructor/RNGLRAbstractParser.Test/log.txt
+Examples/RNGLR/PLSql/MsParser.fs
+Examples/RNGLR/PLSql/MsParser.fs

@@ -45,9 +45,10 @@ type ``MS-SQL parser tests`` () =
             dbg.lastTokens 5 |> printfn "%A"
             let coordinates = 
                 let x,y = tokenPos tok
+
                 let x = p.GetCoordinates x
                 let y = p.GetCoordinates y
-                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+                sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
             let data =
                 let d = tokenData tok
                 if isLiteral tok then ""

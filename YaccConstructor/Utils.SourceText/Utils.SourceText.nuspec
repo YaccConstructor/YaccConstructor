@@ -10,7 +10,7 @@
     <projectUrl>https://code.google.com/p/recursive-ascent/wiki/Source_Text_Utils</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes> First version. </releaseNotes>
+    <releaseNotes> Problems with positioning at the end of file are fixed. </releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>Parsing Reengineering SourceCode SourceText Navigation Utils .NET F# FSharp</tags>																																								
   </metadata>

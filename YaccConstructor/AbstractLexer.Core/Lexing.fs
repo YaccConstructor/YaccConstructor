@@ -6,17 +6,18 @@ open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
 
 [<Struct>]
-type StateInfo<'a> =
+type StateInfo<'a, 'b> =
     val StartV: int
     val AccumulatedString: 'a
-    new (startV, str) = {StartV = startV; AccumulatedString = str}
+    val BackRefs: 'b
+    new (startV, str, brs) = {StartV = startV; AccumulatedString = str; BackRefs = brs}
 
 [<Struct>]
-type State<'a> =
+type State<'a, 'b> =
     val StateID: int
     val AcceptAction: int
-    val Info: ResizeArray<StateInfo<'a>>
-    new (stateId:int, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
+    val Info: ResizeArray<StateInfo<'a, 'b>>
+    new (stateId, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
 
 [<Sealed>]
 type AsciiTables(trans: uint16[] array, accept: uint16[]) =
@@ -78,7 +79,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 
             loop 0    
         
-    let scanUntilSentinel inp (state:State<_>) =
+    let scanUntilSentinel inp (state:State<_,_>) =
         // Return an endOfScan after consuming the input 
         let a = int accept.[state.StateID]
         let onAccept = if a <> sentinel then a else state.AcceptAction
@@ -91,9 +92,9 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let res = new DAG<_,_>()
         let sorted = g.TopologicalSort() |> Array.ofSeq
         let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
+        let startState = new State<_,_>(0,-1, ResizeArray.singleton (new StateInfo<_,_>(0,new ResizeArray<_>(), new ResizeArray<_>())))
         states.[g.StartVertex] <- ResizeArray.singleton startState
-        let add (e:AEdge<_,_>) (newStt:State<_>) =
+        let add (e:AEdge<_,_>) (newStt:State<_,_>) =
             match states.[e.Target]
                   |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
                 with
@@ -120,22 +121,29 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             then
                                 stt.Info
                                 |> ResizeArray.iter
-                                    (fun (i:StateInfo<_>) -> 
-                                        new string(i.AccumulatedString |> Array.ofSeq)
-                                        |> actions onAccept  
+                                    (fun (i:StateInfo<_,_>) -> 
+                                        actions onAccept (new string(i.AccumulatedString |> Array.ofSeq)) (i.BackRefs |> Array.ofSeq)
                                         |> fun x -> 
                                             if not !reduced then res.AddEdgeForsed(new AEdge<_,_>(i.StartV,v,(Some x,None)))
                                             reduced := true)
-                                let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
+                                let newStt = new State<_,_>(0,-1,new ResizeArray<_>())                            
                                 go newStt
                             else 
                                 let acc = 
                                     if stt.Info.Count > 0
                                     then
                                         stt.Info
-                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]))
-                                    else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
-                                let newStt = new State<_>(news,onAccept,acc)
+                                        |> ResizeArray.map 
+                                            (
+                                                fun i -> 
+                                                    new StateInfo<_,_>(i.StartV
+                                                    , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]
+                                                    , ResizeArray.concat [i.BackRefs; ResizeArray.singleton e.BackRef])
+                                            )
+                                    else 
+                                        new StateInfo<_,_>(v, ResizeArray.singleton ch.Value, ResizeArray.singleton e.BackRef)
+                                        |> ResizeArray.singleton
+                                let newStt = new State<_,_>(news,onAccept,acc)
                                 add e newStt
                         go stt
                     | None -> add e stt
@@ -145,9 +153,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             fun x ->
                 x.Info
                 |> ResizeArray.iter
-                    (fun (i:StateInfo<_>) ->                        
-                        new string(i.AccumulatedString.ToArray())
-                        |> actions ((*if x.AcceptAction > -1 then x.AcceptAction else*) int accept.[x.StateID])
+                    (fun (i:StateInfo<_,_>) ->                        
+                         actions (int accept.[x.StateID]) (new string(i.AccumulatedString.ToArray())) (i.BackRefs.ToArray()) 
                         |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
         res
                           
@@ -161,3 +168,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     member tables.Tokenize actions g = tokenize actions g
     static member Create(trans,accept) = new UnicodeTables(trans,accept)
 
+//    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
+//    let DB = new MS_DB("")
+//    let res = DB.exec query
+//    res |> Seq.iter (printfn "%A")

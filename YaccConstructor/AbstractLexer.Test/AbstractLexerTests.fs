@@ -8,6 +8,7 @@ open NUnit.Framework
 open AbstractLexer.Common
 open AbstractLexer.Core
 open QuickGraph.Algorithms
+open AbstractLexer.Test.Calc.Parser
 
 let loadGraphFromDOT filePath = 
     let parser = AntlrParserAdapter<string>.GetParser()
@@ -36,8 +37,23 @@ type ``Abstract lexer tests`` () =
         let qGraph = loadDotToQG gFile
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some (e.Tag+"|"))))
         lexerInputG
+
+    let check_brs = 
+       Seq.iter
+        (fun (e:AEdge<_,_>) -> 
+                match e.Label with
+                | Some v ->
+                    match v with
+                    | NUMBER (n,brs) 
+                    | PLUS (n,brs)->
+                    //n.EndsWith("5") 
+                        Assert.AreEqual(brs.Length,n.Length)
+                        Assert.IsTrue(brs |> Array.forall Option.isSome)
+                        Assert.IsTrue(brs |> Array.map (fun i -> i.Value)|>Array.forall((=) (n + "|")))
+                    | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
+                | None -> Assert.Fail("Lbl is empty!"))
 
     [<Test>]
     member this.``Load graph test from DOT`` () =
@@ -82,6 +98,14 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
     [<Test>]
+    member this.``Calc. Simple sum. Check back refs.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_1.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        check_brs res.Edges
+
+    [<Test>]
     member this.``Calc. Start from PLUS.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_2.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
@@ -94,6 +118,39 @@ type ``Abstract lexer tests`` () =
         let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Two-digit numbers sum. Check back refs.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        check_brs res.Edges
+
+    [<Test>]
+    member this.``Multi-digit with branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_14.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        res.Edges 
+          |> Seq.iter
+              (fun e -> 
+                match e.Label with
+                | Some v ->
+                    match v with
+                    | NUMBER (n,brs) 
+                    | PLUS (n,brs)->
+                    //n.EndsWith("5") 
+                        Assert.AreEqual(brs.Length,n.Length)
+                        Assert.IsTrue(brs |> Array.forall Option.isSome)
+                        //Assert.IsTrue(brs |> Array.map (fun i -> i.Value)|>Array.forall((=) (n + "|")))
+                        Assert.IsTrue(brs.[0].Value = "12|")
+                        Assert.IsTrue(brs.[1].Value = "12|")
+                        Assert.IsTrue(brs.[2].Value = string n.[2] + "|")
+                    | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
+                | None -> Assert.Fail("Lbl is empty!"))
+
 
     [<Test>]
     member this.``Calc. Branched multy-digit numbers.`` () =

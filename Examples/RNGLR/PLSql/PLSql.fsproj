@@ -54,9 +54,7 @@
   </PropertyGroup>
   <ItemGroup>
     <FsYard Include="plsql.yrd" />
-    <FsYard Include="..\common_grammars\expr.yrd">
-      <Link>expr.yrd</Link>
-    </FsYard>
+    <FsYard Include="expr.yrd" />
     <FsYard Include="datatype.yrd" />
     <FsYard Include="stmnt.yrd" />
     <FsYard Include="execute_stmnt.yrd" />

@@ -63,4 +63,17 @@ binop:
     | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') 
 
 fetch_stmnt:    
-    'FETCH' ident  'INTO' comma_list<ident> 
+    'FETCH' 
+    [
+      [
+          'NEXT'
+        | 'PRIOR'
+        | 'FIRST'
+        | 'LAST' 
+        | 'ABSOLUTE' (dec_num | LOCALVAR) 
+        | 'RELATIVE' (dec_num | LOCALVAR) 
+      ] 
+      'FROM' 
+    ] 
+    ('GLOBAL'? IDENT | LOCALVAR) 
+    ('INTO' comma_list<LOCALVAR>)? 

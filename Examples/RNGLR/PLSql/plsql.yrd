@@ -26,8 +26,8 @@ open Yard.Utils.SourceText
  
 include "../../../GrammarTemplates/Common.yrd"
 include "../common_grammars/MsCommon.yrd"
-include "../common_grammars/expr.yrd"
 include "../common_grammars/set_stmnt.yrd"
+include "expr.yrd"
 include "pl_ddl.yrd"
 include "cycles_stmnt.yrd"
 include "datatype.yrd"

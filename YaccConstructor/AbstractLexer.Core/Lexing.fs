@@ -162,7 +162,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         go stt
                     | None -> add edg stt
 
-                    printG res <| sprintf "res_%A_%s_%A" edg.Source (string edg.Label.Value) edg.Target 
+                    //printG res <| sprintf "res_%A_%s_%A" edg.Source (match edg.Label with Some x -> string x | _ -> "epsilon") edg.Target 
 
         states.[lastVId]
         |> ResizeArray.iter(
@@ -184,6 +184,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                               yield g.OutEdges v |> Array.ofSeq
                                   
                            }
+                        |> Seq.filter (fun x -> x.Length > 0)
         tokenize actions states edgesSeq sorted.[sorted.Length-1] printG
                           
     // Each row for the Unicode table has format 

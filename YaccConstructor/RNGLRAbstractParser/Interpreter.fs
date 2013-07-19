@@ -383,41 +383,37 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     pushesMap.[num].Add((oldPushes,newAstNode)) 
                 else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
             pushesInitFun curTokens.Value.Tokens.Length
-             
+
+        let applyStashedPushes () =
+            for vertex in usedStates do
+                stateToVertex.[vertex] <- null
+            usedStates.Clear()
+            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
+                for (vertex, state) in oldPushes do
+                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                    addSimpleEdge vertex newAstNode simpleEdges.[state]
+            pushesMap.Remove(!curLvl) |> ignore
+            makeReductions ()
+            attachEdges()
+            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                        <| sprintf "dot/stack_%d_4.dot" !curLvl             
+
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
         let mutable wasError = ref false
         let lastErr = ref -1
 
-        while not !isEnd && not !wasError do
-        
+        while not !isEnd && not !wasError do        
             if usedStates.Count = 0 && reductions.Count = 0
             then
                 let errInfo = !curTokens
                 errorList <- errInfo :: errorList
                 wasError <- ref true
             else
-                let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                            <| sprintf "dot/stack_%d_0.dot" !curLvl
                 if !isEOF
-                then
-                    try 
-                        
-                        for vertex in usedStates do
-                            stateToVertex.[vertex] <- null
-                        usedStates.Clear()
-                        for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-                            for (vertex, state) in oldPushes do
-                                let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                                addSimpleEdge vertex newAstNode simpleEdges.[state]
-                        pushesMap.Remove(!curLvl) |> ignore
-                        makeReductions ()
-                        attachEdges()
-                        let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                        drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                    <| sprintf "dot/stack_%d_4.dot" !curLvl
-                    with _ -> () 
+                then 
+                    applyStashedPushes ()
                     isEnd := true
                 (*elif pushes.Count = 0 then 
                     if !curLvl - !lastErr > 1 
@@ -430,24 +426,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         lastErr := !curLvl
                     else wasError <- ref true*)
                 else
-                    let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl
-                        then
-                            for vertex in usedStates do
-                                stateToVertex.[vertex] <- null
-                            usedStates.Clear()
-                            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-                                for (vertex, state) in oldPushes do
-                                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                                    addSimpleEdge vertex newAstNode simpleEdges.[state]
-                            pushesMap.Remove(!curLvl) |> ignore
-                            makeReductions ()
-                            attachEdges()
-                            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                <| sprintf "dot/stack_%d_3.dot" !curLvl
+                        then applyStashedPushes ()
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null

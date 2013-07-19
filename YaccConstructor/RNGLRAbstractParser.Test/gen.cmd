@@ -7,3 +7,5 @@
 ..\YaccConstructor\bin\Release\YaccConstructor.exe -i simpleCalc_with_Nterms.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.SimpleCalcWithNTerm -translate true -table LR -o simpleCalc_with_Nterms.yrd.fs" >> log.txt
 
+..\YaccConstructor\bin\Release\YaccConstructor.exe -i simpleCalc_with_Nterms_2.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.SimpleCalcWithNTerms_2 -translate true -table LR -o simpleCalc_with_Nterms_2.yrd.fs" >> log.txt

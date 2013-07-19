@@ -8,11 +8,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Utils.SourceText")>]
+[<assembly: AssemblyTitle("YC.Utils.SourceText")>]
 [<assembly: AssemblyDescription("Utils.SourceText is a library for F# that allows you to store coordinates of different parts of code on the usefull way")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Ilya Orlov")>]
-[<assembly: AssemblyProduct("Utils.SourceText")>]
+[<assembly: AssemblyProduct("YC.Utils.SourceText")>]
 [<assembly: AssemblyCopyright("Copyright © 2013. Semyon Grigorev <rsdpisuy@gmail.com>")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

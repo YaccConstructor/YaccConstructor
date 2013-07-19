@@ -36,7 +36,6 @@ type ``RNGLR error recovery tests`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            //debugs.drawGSSDot "res.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst() 
@@ -49,7 +48,6 @@ type ``RNGLR error recovery tests`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            //debugs.drawGSSDot "res.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst() 
@@ -62,7 +60,6 @@ type ``RNGLR error recovery tests`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            //debugs.drawGSSDot "Calc error_in_middle3.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst() 
@@ -94,19 +91,6 @@ type ``RNGLR error recovery tests`` () =
             mAst.PrintAst() 
             RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operand.dot"
 
-    [<Test>]
-    member test.``Calc missing operator``() =
-        let parser = RNGLR.ParseCalcErrorAmb.buildAst
-        let path = dir + "Calc missing operator.txt"
-
-        match run path parser with
-        | Parser.Error (num, tok, err, debugs) -> 
-            //debugs.drawGSSDot "Calc error_in_middle6.dot"
-            printErr (num, tok, err)
-        | Parser.Success mAst -> 
-            mAst.PrintAst() 
-            RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc missing operator.dot"
-
     //[<Test>]
     member test.``Calc missing right brace``() = 
         let parser = RNGLR.ParseCalcErrorAmb.buildAst
@@ -126,12 +110,11 @@ type ``RNGLR error recovery tests`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err, debugs) -> 
-            //debugs.drawGSSDot "CCalc no operand in the end.dot"
             printErr (num, tok, err)
         | Parser.Success mAst -> 
             mAst.PrintAst()
             RNGLR.ParseCalcErrorAmb.defaultAstToDot mAst "Calc no operand in the end.dot"
-
+        
     [<Test>]
     member test.``Many reductions before error``() = 
         let parser = RNGLR.ParseManyReductions.buildAst
@@ -143,24 +126,78 @@ type ``RNGLR error recovery tests`` () =
         | Parser.Success mAst ->
             mAst.PrintAst()
             RNGLR.ParseManyReductions.defaultAstToDot mAst "Many reductions.dot"
-    
+
     [<Test>]
-    member test.``Many reductions before error2``()=
-        let parser = RNGLR.ParseManyReductions2.buildAst
-        let path = dir + "Many reductions before error2.txt"
+    member test.``Eps error in the end``() = 
+        let parser = RNGLR.ParseErrorToEps.buildAst
+        let path = dir + "Eps error in the end.txt"
 
         match run path parser with 
         | Parser.Error (num, tok, err, debugs) ->
             printErr (num, tok, err)
         | Parser.Success mAst ->
             mAst.PrintAst()
-            RNGLR.ParseManyReductions2.defaultAstToDot mAst "Many reductions2.dot"
+            RNGLR.ParseErrorToEps.defaultAstToDot mAst "Eps error in the end.dot"
+    
+    [<Test>]
+    member test.``Error to epsilon translate``() = 
+        let parser = RNGLR.ParseErrorToEpsilonTranslate.buildAst
+        let path = dir + "Error to epsilon translate.txt"
 
-(*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Many reductions before error``()*)
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs) ->
+            printErr (num, tok, err)
+        | Parser.Success mAst ->
+            mAst.PrintAst()
+            RNGLR.ParseErrorToEpsilonTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
+            let res = translate RNGLR.ParseErrorToEpsilonTranslate.translate mAst
+            printfn "res %A" res
+            Assert.AreEqual([-1], res)
+    
+    [<Test>]
+    member test.``Primitive translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate.txt"
 
-(*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc no operand in the end``()*)
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs) ->
+            printErr (num, tok, err)
+        | Parser.Success mAst ->
+            mAst.PrintAst()
+            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Eps error in the end.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)
+
+    (*[<Test>]
+    member test.``Error to epsilon translate``() = 
+        let parser = RNGLR.ParsePrimitiveErrorTranslate.buildAst
+        let path = dir + "Primitive translate2.txt"
+
+        match run path parser with 
+        | Parser.Error (num, tok, err, debugs) ->
+            printErr (num, tok, err)
+        | Parser.Success mAst ->
+            mAst.PrintAst()
+            RNGLR.ParsePrimitiveErrorTranslate.defaultAstToDot mAst "Error to epsilon translate.dot"
+            let res = translate RNGLR.ParsePrimitiveErrorTranslate.translate mAst
+            printfn "res : %A" res
+            Assert.AreEqual([-1], res)*)
+
+    [<Test>]
+    member test.``Ambiguous``() = 
+        let parser = RNGLR.ParseAmbiguous.buildAst
+        let path = dir + "Ambiguous.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err, debugs) ->
+            printErr (num, tok, err)
+        | Parser.Success mAst ->
+            mAst.PrintAst()
+            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Ambiguous.dot"
 
 [<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc missing operator``()
+(new ``RNGLR error recovery tests``()).``Error to epsilon translate``()
+
+(*[<EntryPoint>]
+(new ``RNGLR error recovery tests``()).``Ambiguous``()*)

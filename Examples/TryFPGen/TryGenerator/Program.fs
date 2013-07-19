@@ -24,7 +24,7 @@ let checkInPut =
 
 
 
-let test4() = (gogo  " a := 3 + (1 * 4)
+let test4() = (gogo  "  a := 3 + (1 * 4)
                         b := 5**1
                         a + b   " ) |> checkInPut 
 

@@ -1,0 +1,269 @@
+﻿[<AllPublic>]
+module Select_crud
+
+open Expr, MsCommon
+
+select_stmnt:  
+    ['WITH' comma_list<common_table_expression>]
+    query_expression 
+    ['ORDER' 'BY' comma_list<((ident | DEC_NUMBER) ['ASC' | 'DESC'])>]
+    [
+      'COMPUTE' 
+      comma_list<( ('AVG' | 'COUNT' | 'MAX' | 'MIN' | 'SUM') sql_expr)>
+      ['BY' comma_list<sql_expr>]
+    ] 
+    for?
+	';'? 
+
+for: 'FOR' 'UPDATE' ['OF' comma_list<colomn_id>]
+
+colomn_id:
+    [
+	  [IDENT '.'] 
+	  IDENT '.'
+	] 
+	  IDENT
+
+common_table_expression:
+    (full_ident | ident)
+    ['(' comma_list<ident> ')']
+    'AS' '(' select_stmnt ')'
+    ';'?
+    
+query_expression: 
+    (query_specification | '(' query_expression ')')
+    [
+        ('UNION' 'ALL'? | 'EXCEPT' | 'INTERSECT')
+        query_specification
+      | comma_list<('(' query_expression ')')>
+    ]
+        
+query_specification: 
+    'SELECT' ['ALL' | 'DISTINCT' | 'UNIQUE']
+    ['TOP' sql_expr 'PERCENT'? ['WITH' 'TIES'] ]
+    select_list                                          
+    ['INTO' full_ident]
+    from? 
+    ['WHERE' search_condition]
+    [
+      'GROUP' 'BY' 'ALL'? comma_list<sql_expr>
+      ['WITH' ('CUBE' | 'ROLLUP')]
+    ]
+    ['HAVING' search_condition]
+
+select_list:
+    comma_list<(
+        '*' 
+      | full_ident '.' '*' 
+      | (
+            [ident '.']
+            (ident | 'IDENTITY' | 'ROWGUID')
+            [ ('.' | DOUBLE_COLON)
+              (
+                  STRING_CONST
+                | ident
+                | ident '(' comma_list<sql_expr> ')'
+              )
+            ] 
+          | sql_expr ['AS'? ident]
+        ) 
+      | ident '=' sql_expr
+    )>
+        
+search_condition: 
+    (
+        'NOT'? predicate
+      | '(' search_condition ')'
+    )
+    (
+      ('AND' | 'OR')
+      'NOT'? (predicate | '(' search_condition ')')
+    )*
+    
+predicate: 
+      sql_expr ['ESCAPE' STRING_CONST]
+    | sql_expr 'NOT'? 'BETWEEN' sql_expr 'AND' sql_expr 
+    | sql_expr 'IS' 'NOT'? 'NULL'  
+    | sql_expr binop ('ALL' | 'SOME' | 'ANY')
+      '(' query_expression ')'            
+    | 'EXISTS' '(' query_expression ')'  
+    | ident 'IN' '(' comma_list<ident> ')' 
+
+from:
+    'FROM' comma_list<table_source>
+
+table_source: 
+    full_ident 'AS'?  full_ident tablesample_clause? 
+    ['WITH' '(' table_hint ','* ')']
+  | (rowset_function | sql_expr)
+    ['AS'? ident]
+    ['(' comma_list<ident> ')']
+  | ident 'AS'? ident ['(' comma_list<ident> ')']
+  | joined_table 
+  | pivoted_table 
+  | unpivoted_table                                                     
+  | LOCALVAR ['AS'? full_ident]
+  | LOCALVAR '.' ident
+    '(' comma_list<sql_expr> ')' ['AS' ident]
+    ['(' comma_list<ident> ')']
+
+
+rowset_function:
+    containstable
+  | freetexttable
+  | opendatasource
+  | openquery
+  | openrowset
+
+openrowset:
+    'OPENROWSET' 
+    '('
+    (
+        STRING_CONST ','
+        (STRING_CONST ';' STRING_CONST ';' STRING_CONST | STRING_CONST)
+        ','
+        ([ [full_ident '.'] full_ident '.'] full_ident | STRING_CONST)
+      | 'BULK' STRING_CONST ',' 
+        (
+            'FORMATFILE' '=' STRING_CONST bulk_options?
+          | 'SINGLE_BLOB'
+          | 'SINGLE_CLOB'
+          | 'SINGLE_NCLOB'
+        )
+    ) ')' 
+
+bulk_options:
+   [',' 'CODEPAGE' '=' STRING_CONST]
+   [',' 'ERRORFILE' '=' STRING_CONST]
+   [',' 'FIRSTROW' '=' DEC_NUMBER]
+   [',' 'LASTROW' '=' DEC_NUMBER]
+   [',' 'MAXERRORS' '=' DEC_NUMBER]
+   [',' 'ROWS_PER_BATCH' '=' DEC_NUMBER]
+    
+openquery:
+    'OPENQUERY' '(' full_ident ',' STRING_CONST ')'    
+    
+opendatasource: 
+    'OPENDATASOURCE' '(' ident ',' STRING_CONST ')'    
+
+freetexttable:
+    'FREETEXTTABLE' '(' full_ident ','
+    (
+        full_ident
+      | '(' comma_list<full_ident> ')'
+      | '*'
+    )
+    ',' STRING_CONST 
+    [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+    [',' DEC_NUMBER] ')'  
+    
+containstable:
+    'CONTAINSTABLE'
+    '('
+      full_ident ','
+      (ident | '(' comma_list<ident> ')' | '*')
+      ',' '\'' contains_search_condition '\''
+      [',' 'LANGUAGE' (STRING_CONST|DEC_NUMBER)]
+      [',' DEC_NUMBER]
+    ')' 
+    
+contains_search_condition: 
+    simple_term 
+  | prefix_term 
+  | generation_term 
+  | proximity_term 
+  | weighted_term
+  | '(' contains_search_condition ')' 
+    ('AND' | '&' | 'AND' 'NOT' | '&!' | 'OR' | '|' ) 
+    contains_search_condition+
+        
+simple_term: 
+    STRING_CONST
+          
+prefix_term:
+    STRING_CONST 
+    
+generation_term: 
+    'FORMSOF'
+    '('
+      ('INFLECTIONAL' | 'THESAURUS') ',' comma_list<simple_term>
+    ')'
+    
+proximity_term: 
+    (simple_term | prefix_term) 
+    (('NEAR' | '~') (simple_term | prefix_term))+
+     
+weighted_term: 
+    'ISABOUT'
+    '(' comma_list<(
+      ( 
+          simple_term 
+        | prefix_term 
+        | generation_term 
+        | proximity_term
+      ) 
+      [WEIGHT '(' DEC_NUMBER ')']
+    )> ')'
+        
+table_hint: 
+    'NOEXPAND'?
+    (
+        'INDEX' '(' comma_list<ident> ')'     
+      | 'FASTFIRSTROW' 
+      | 'HOLDLOCK' 
+      | 'NOLOCK' 
+      | 'NOWAIT'
+      | 'PAGLOCK' 
+      | 'READCOMMITTED' 
+      | 'READCOMMITTEDLOCK' 
+      | 'READPAST' 
+      | 'READUNCOMMITTED' 
+      | 'REPEATABLEREAD' 
+      | 'ROWLOCK' 
+      | 'SERIALIZABLE' 
+      | 'TABLOCK' 
+      | 'TABLOCKX' 
+      | 'UPDLOCK' 
+      | 'XLOCK' 
+    ) 
+
+tablesample_clause:
+    'TABLESAMPLE' 'SYSTEM'?
+    '(' sql_expr ['PERCENT' | 'ROWS'] ')'  
+    ['REPEATABLE' sql_expr]
+
+joined_table: 
+    table_source join_type? 'JOIN' table_source 'ON' search_condition 
+  | table_source 'CROSS' 'JOIN' table_source 
+  | '(' joined_table ')'
+    
+
+join_type: 
+    'INNER'
+  | ('LEFT' | 'RIGHT' | 'FULL') 'OUTER'? join_hint?
+    
+
+join_hint: 
+    'LOOP' 
+  | 'HASH' 
+  | 'MERGE' 
+  | 'REMOTE' 
+
+pivoted_table:
+    table_source 'PIVOT' pivot_clause full_ident
+
+pivot_clause:
+    '('
+      sql_expr+  
+      'FOR' sql_expr 
+      'IN' '(' comma_list<ident> ')'      
+    ')'
+
+unpivoted_table:
+    table_source 'UNPIVOT' unpivot_clause full_ident
+
+unpivot_clause:
+    '('
+      ident 'FOR' sql_expr 'IN'
+      '(' comma_list<full_ident> ')'
+    ')'

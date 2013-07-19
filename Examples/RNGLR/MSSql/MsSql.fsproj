@@ -77,6 +77,19 @@
     <FsYard Include="..\common_grammars\mssql.yrd">
       <Link>mssql.yrd</Link>
     </FsYard>
+    <FsYard Include="datatype.yrd" />
+    <FsYard Include="stmnt.yrd" />
+    <FsYard Include="expr.yrd" />
+    <FsYard Include="execute_stmnt.yrd" />
+    <FsYard Include="..\common_grammars\set_stmnt.yrd">
+      <Link>set_stmnt.yrd</Link>
+    </FsYard>
+    <FsYard Include="crud.yrd" />
+    <FsYard Include="select_crud.yrd" />
+    <FsYard Include="cycles_stmnt.yrd" />
+    <FsYard Include="create_proc.yrd" />
+    <FsYard Include="create_table.yrd" />
+    <FsYard Include="transaction.yrd" />
     <FsYard Include="..\common_grammars\MsCommon.yrd">
       <Link>MsCommon.yrd</Link>
     </FsYard>

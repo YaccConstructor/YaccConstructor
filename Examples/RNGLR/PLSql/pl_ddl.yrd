@@ -1,0 +1,35 @@
+﻿[<AllPublic>]
+module Pl-ddl
+
+open MsCommon, Common, Stmnt, Set_stmnt, Select_crud
+
+create_proc:
+    'CREATE' ('PROCEDURE' | 'PROC')
+    full_ident [';' DEC_NUMBER]
+    brace_opt<'(' comma_list<proc_formal_param> ')'>
+    ['WITH' (execute_as)+]
+    ['FOR' 'REPLICATION']
+    'AS' (proc_body_stmnt ';'?)*
+    ';'?
+
+execute_as:
+    ('EXEC' | 'EXECUTE')
+    'AS'
+    ('CALLER' | 'SELF' | 'OWNER' |ident '=' STRING_CONST) 
+
+create_trigger:
+     'CREATE' ['OR' 'REPLACE'] 'TRIGGER'
+	  full_ident 
+	  ( 
+	  'BEFORE' 
+	  |'ALTER'
+	  |('INSTEAD' 'OF')
+	  )
+	  dml_event_clause
+	  ['WHEN' search_condition]
+	  proc_body_stmnt
+
+dml_event_clause: 
+     not_empty_list< ( 'DELETE' | 'INSERT' | ('UPDATE' ['OF' comma_list<ident>]) ) 'OR'>
+	 'ON' full_ident
+	 ['FOR' 'EACH' 'ROW']

@@ -39,11 +39,12 @@ let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
 let whitespaces = [' '  '\t']+
-let idenstarchar  = ['A'-'Z' 'a'-'z' 'а'-'я' 'А'-'Я' ] 
+let idenstarchar  = ['A'-'Z' 'a'-'z' 'а'-'я' 'А'-'Я'] 
 let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '#' '$' 'а'-'я' 'А'-'Я' ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 //let with_dot = '.' | idenbody_char
 let ident = idenstarchar idenbody_char*
+let trg_sys_tbl_name  = (':' ident)
 let decnumber = ['0'-'9']+ 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
 let floae = 'e' | 'E'
@@ -56,6 +57,7 @@ rule tokens = parse
  | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
                   DEC_NUMBER(defaultSourceText id lexbuf <| LexBuffer<_>.LexemeString(lexbuf)) }
  | whitespaces  { tokens lexbuf }
+ | trg_sys_tbl_name 
  | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
             let hasdot = l.IndexOf '.' <> -1
             match makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 

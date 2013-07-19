@@ -1,0 +1,44 @@
+﻿[<AllPublic>]
+module Set_stmnt
+
+open Expr, MsCommon, Datatype, Select_crud
+
+set_stmnt:
+    'SET' (
+        'ANSI_NULLS' | 'ANSI_DEFAULTS' | 'ANSI_NULL_DFLT' 
+      | 'ANSI_PADDING' | 'ANSI_WARNINGS' | 'CONCAT_NULL_YIELDS_NULL'
+      | 'CURSOR_CLOSE_ON_COMMIT' | 'QUOTED_IDENTIFIER' 
+      | 'FMTONLY' | 'FORCEPLAN' | 'IMPLICIT_TRANSACTIONS'
+      | 'NOCOUNT' | 'NOEXEC' | 'NUMERIC_ROUNDABORT' | 'PARSEONLY'
+      | 'REMOTE_PROC_TRANSACTIONS' | 'SHOWPLAN_ALL' | 'SHOWPLAN_TEXT'
+      | 'SHOWPLAN_XML' | 'STATISTICS' ('IO' | 'PROFILE' | 'TIME' | 'XML')
+      | 'XACT_ABORT'
+    )
+    ('ON' | 'OFF')
+  | set_localvar
+
+set_localvar:
+    'SET' ( 
+        LOCALVAR 
+        [DOUBLE_COLON ident] '=' sql_expr
+      | STRING_CONST ('.' | DOUBLE_COLON) ident
+        '(' comma_list<proc_formal_param> ')' 
+    )
+  | LOCALVAR '=' LOCALVAR
+  | ident
+  | 'CURSOR' ['FORWARD_ONLY' | 'SCROLL']
+    ['STATIC' | 'KEYSET' | 'DYNAMIC' | 'FAST_FORWARD']
+    ['READ_ONLY' | 'SCROLL_LOCKS' | 'OPTIMISTIC']
+    'TYPE_WARNING'?
+    'FOR' select_stmnt 
+    [ 'FOR' (
+          'READ' 'ONLY'
+        | 'UPDATE' ['OF' comma_list<ident>]
+      )
+    ]
+
+proc_formal_param:
+    LOCALVAR [full_ident '.'] sql_datatype?
+    ['VARYING'] ['=' ('NULL' | DEC_NUMBER | STRING_CONST)]
+    ['OUT' | 'OUTPUT'] 'READONLY'?  
+

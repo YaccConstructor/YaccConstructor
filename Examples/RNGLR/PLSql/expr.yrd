@@ -1,0 +1,66 @@
+﻿[<AllPublic>]
+module Expr
+
+open Datatype, MsCommon, Select_crud, Cycles_stmnt, Select_crud
+
+sql_expr_not_concat:
+    sql_value
+  | scalar_function
+  | '(' sql_expr ')'
+  | call_expr
+  | full_ident
+  | select_stmnt
+  | ('NOT' | '+=' | '-=' | '~') sql_expr 
+  | GLOBALVAR
+  | LOCALVAR
+  | '*'
+  | sql_expr binop sql_expr
+  | sql_expr 'IS'? 'NOT'? 'NULL'
+  | ranking_windowed_function 
+  | aggregate_windowed_function
+  | sql_expr 'COLLATE' ident
+  | case
+  | 'EXISTS' sql_expr
+  | 'IS_MEMBER' '(' STRING_CONST ')'
+  | sql_expr ('AND' | 'OR') sql_expr
+  | 'TYPE' 'FROM' full_ident
+  | fetch_stmnt
+  | sql_expr 'NOT'? 'IN' '(' comma_list<sql_expr> ')'
+  | sql_expr 'NOT'? 'LIKE' sql_expr
+  
+sql_expr: 
+   sql_expr_not_concat 
+  | sql_expr_not_concat '|' '|' sql_expr
+
+scalar_function:
+      'LOWER' sql_expr
+    | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
+	| ( 'UNISTR'|'TRUNC'|'EXTRACT') '(' sql_expr ')'
+	| ('HOUR'|'MINUTE'|'SECOND') 'FROM' sql_expr
+	| 'HEXTORAW' '(' sql_value ')'
+
+call_expr: 
+     full_ident '(' comma_list<(sql_datatype|sql_expr)> ')'
+
+ranking_windowed_function:
+    ('RANK' | 'DENSE_RANK' | 'ROW_NUMBER' | 'NTILE')
+    '(' sql_expr? ')'
+    'OVER'
+    '(' 
+      [('PARTITION' 'BY' LOCALVAR|select_stmnt|full_ident)*]
+      order_by_clause
+    ')'
+
+aggregate_windowed_function:
+    'OVER' '(' comma_list<['PARTITION' 'BY' LOCALVAR | select_stmnt]> order_by_clause ')'
+  
+order_by_clause:
+    ['ORDER' 'BY' comma_list<(sql_expr ['ASC' | 'DESC'])>]
+
+binop:
+      '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '^=' | '|='
+    | '=' | '+' | '-' | '*' | '/' | '%' | '~'
+    | '<' | '>' | ('<' '>') | ('<' '=') | ('>' '=') 
+
+fetch_stmnt:    
+    'FETCH' ident  'INTO' comma_list<ident> 

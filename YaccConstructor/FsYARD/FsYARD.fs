@@ -11,13 +11,14 @@ let generate inFile rnglrArgs =
       { ilTree with  grammar = conv.ConvertGrammar (ilTree.grammar, parameters) }
     let conversions =
         [
+            new Linearize.Linearize() :> Yard.Core.Conversion ,[||]
             new ExpandMeta.ExpandMeta() :> Yard.Core.Conversion ,[||]
             new ExpandEbnfStrict.ExpandEbnf() :> Yard.Core.Conversion ,[||] 
             //new ReplaceLiterals.ReplaceLiterals() :> Yard.Core.Conversion ,[|replLit|]
             new ExpandInnerAlt.ExpandInnerAlt() :> Yard.Core.Conversion ,[||]
             new ExpandBrackets.ExpandBrackets() :> Yard.Core.Conversion ,[||]
             new LeaveLast.LeaveLast() :> Yard.Core.Conversion ,[||]
-            new Linearize.Linearize() :> Yard.Core.Conversion ,[||]
+            
         ]
         |> List.map (fun (x,y) -> fun (il:Definition.t<_,_>) -> applyConversion x y il)
     fe.ParseGrammar inFile 

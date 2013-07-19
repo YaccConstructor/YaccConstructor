@@ -29,10 +29,9 @@ open Yard.Utils.InfoClass
 open System
 open System.IO
 
-let lastTokenNum = ref 0L
-let traceStep = 50000L
-
 let justParse (path:string) =
+    let lastTokenNum = ref 0L
+    let traceStep = 50000L
     use reader = new System.IO.StreamReader(path)
 
     let tokenizerFun = 
@@ -54,7 +53,7 @@ let justParse (path:string) =
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep / (mSeconds + 1L))
                     if int64 chan.CurrentQueueLength > 3L then                        
                         int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
@@ -63,7 +62,7 @@ let justParse (path:string) =
         }   
 
     let start = System.DateTime.Now
-    //use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
+    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
     let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let lastTokenNum = ref 0L    
     let timeOfIteration = ref System.DateTime.Now
@@ -71,17 +70,17 @@ let justParse (path:string) =
     let allTokens = 
         seq{
             while true do
-                //let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + 1L // int64 arr.Length
+                let arr = tokenizer.Receive 10000 |> Async.RunSynchronously
+                lastTokenNum := !lastTokenNum + int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                //yield! arr
-                let tok =  Lexer.tokens lexbuf
-                printfn "%A" tok
-                yield  tok
+                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep / (mSeconds + 1L ))
+                yield! arr
+                //let tok =  Lexer.tokens lexbuf
+                //printfn "%A" tok
+                //yield  tok
                 }
 
     let translateArgs = {
@@ -107,8 +106,15 @@ let Parse (srcFilePath:string) =
     p.AddLine counter map
     counter <- counter + 1<id>
     //Lexer.id <- from (ProjInfo)
-    match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
+    let res =
+        try 
+            Some <| justParse srcFilePath
+        with e -> 
+            printfn "error: %s" e.Message
+            printfn "File: %s" srcFilePath
+            None
+    match res  with
+    | Some(Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg)) ->
         let coordinates = 
             let x,y = tokenPos tok
             
@@ -128,12 +134,20 @@ let Parse (srcFilePath:string) =
         printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
         dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
-    | Yard.Generators.RNGLR.Parser.Success ast ->
+    | Some (Yard.Generators.RNGLR.Parser.Success ast) ->
         let GC_Collect () = 
             GC.Collect()    
             GC.WaitForPendingFinalizers()
             GC.GetTotalMemory(true)
-        GC_Collect() |> printfn "%A" 
+        GC_Collect() |> printfn "%A"
+        
+        let errors = ast.collectErrors (tokenPos)
+        for x, y, tok in errors do
+            let x = p.GetCoordinates x
+            let y = p.GetCoordinates y
+            let name = tok |> tokenToNumber |> numToString
+            printfn "Error on position (%A, %A) - (%A, %A) on token %s" x.Line x.Column y.Line y.Column name
+
         ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
@@ -145,6 +159,7 @@ let Parse (srcFilePath:string) =
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated
         //translated.Head  
+    | _ -> ()
         
 let ParseAllDirectory (directoryName:string) =
     System.IO.Directory.GetFiles directoryName
@@ -153,7 +168,7 @@ let ParseAllDirectory (directoryName:string) =
 do 
     let inPath = 
         //ref @"C:\yc\recursive-ascent\Tests\PLSqlParser\exec_proc_2.sql"         
-        ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\ACL_FOR_GOOGLE_MAPS.sql "  
+        ref @"..\..\..\..\..\Tests\materials\pl-sql\jrxml2pdf-release\install\demodata_big.sql"  
         //ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
         //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false

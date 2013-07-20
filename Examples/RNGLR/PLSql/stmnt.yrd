@@ -1,13 +1,14 @@
 ﻿[<AllPublic>]
 module Stmnt
 
-open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Cycles_stmnt, Pl-ddl
+open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Declare_stmnt, Cycles_stmnt, Pl-ddl
 
 proc_body_stmnt:
   ('<<' ident '>>')*
      (select_stmnt
    | set_stmnt
-   | execute_stmnt   
+   | execute_stmnt 
+   | commit_transaction  
    | declare
    | 'RETURN' sql_expr
    | if_stmt
@@ -20,23 +21,35 @@ proc_body_stmnt:
    | fetch_stmnt
    | null_stmt
    | update_stmnt 
-   | assign_var )
+   | open_stmnt
+   | close_stmnt
+   | declare_section)
    ';'
  
 declare:  
     'DECLARE' 
-    list<assign_var ';'>
+    list<(declare_section) ';'>
 
-assign_var:
-     full_ident sql_datatype? [':' '=' sql_expr] 
-	 
+open_stmnt:
+     'OPEN' full_ident ['(' list<ident ';'> ')']
+
+close_stmnt:
+     'CLOSE' full_ident ['(' list<ident ';'> ')']
+
+declare_section:
+        declare_stmnt
+	   |definition_stmnt
+	   |pragma
+
+pragma: 'PRAGMA' 'AUTONOMOUS_TRANSACTION' 
+
 raiserror_stmnt:
     'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
     (',' dec_num ',' dec_num)
     [',' comma_list<sql_expr>] ')'
     ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
 	
-stmt_block: 'BEGIN' proc_body_stmnt* exception? 'END'
+stmt_block: 'BEGIN' proc_body_stmnt* exception? 'END' [ident]
 
 exception:
       'EXCEPTION' 'WHEN' 

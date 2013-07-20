@@ -189,6 +189,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
     member this.Order = order
     member this.Root = root
+    member this.RulesCount = rules.GetLength(0)
 
     static member inline private smaller pos : (obj -> _) = function
         | :? int -> true
@@ -388,18 +389,19 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 family.[2]
                             else family.snd
                         else family.fst*)
-                    (*if nodes.Length > 1 
-                    then*)
-
                     while isEpsilon nodes.[j] do
                         j <- j + 1
-                    while isEpsilon nodes.[k] do
+                    while k > 0 && isEpsilon nodes.[k] do
                         k <- k - 1
-                    let leftRange = getRanges nodes.[j]
-                    let rightRange = getRanges nodes.[k]
-                    ranges.Add (fst leftRange, snd rightRange)
+                    if j <= k 
+                    then
+                        let leftRange = getRanges nodes.[j]
+                        let rightRange = getRanges nodes.[k]
+                        ranges.Add (fst leftRange, snd rightRange)
+                    else 
+                        let rang = ranges.[ranges.Count-1]
+                        ranges.Add (snd rang, snd rang)
                     f i ranges
-                
                     let inline clear (x : obj) =
                         match x with
                         | :? AST as ast ->
@@ -424,6 +426,41 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
+    member this.collectErrors tokenToRange = 
+        let res = new ResizeArray< 'Position * 'Position * 'TokenType>()
+        if not isEpsilon 
+        then
+            this.TraverseWithRanges tokenToRange ignore ignore <| fun i ranges ->
+                let children = order.[i]
+                
+                let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
+                let inline isToken x = match x : obj with | :? int as x when x > 0 -> true | _ -> false
+                                     
+
+                let rec getTokenFromFamily (fam : Family) = 
+                    let mutable j = 0
+                    while isEpsilon fam.nodes.[j] do
+                        j <- j + 1
+                    
+                    match fam.nodes.[j] with
+                    | :? int as t when t > 0 -> tokens.[t]
+                    | :? AST as ast -> getTokenFromFamily ast.first
+                    | _ -> failwith ""
+
+                if children.first.prod = this.RulesCount
+                then 
+                    let token = getTokenFromFamily children.first
+                    res.Add(fst ranges.[i], snd ranges.[i], token)
+
+                if children.other <> null
+                then
+                    for other in children.other do
+                        if other.prod = this.RulesCount
+                        then
+                            let token = getTokenFromFamily other
+                            res.Add(fst ranges.[i], snd ranges.[i], token)
+        res
+                    
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
         let result = Array.zeroCreate order.Length
         for i = 0 to order.Length-1 do

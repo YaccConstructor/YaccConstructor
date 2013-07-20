@@ -26,8 +26,8 @@ open Yard.Utils.SourceText
 
 include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
-include "expr.yrd"
 include "set_stmnt.yrd"
+include "../mssql/expr.yrd"
 include "../mssql/create_proc.yrd"
 include "../mssql/cycles_stmnt.yrd"
 include "../mssql/datatype.yrd"

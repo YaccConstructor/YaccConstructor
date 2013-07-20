@@ -83,8 +83,8 @@ let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
             |> Array.fold (fun res v -> res && canInferEpsilon.[v]) true
     result
 
-let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilonError : bool[]) =
-    let allEpsilon = epsilonRules rules indexator canInferEpsilonError
+let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
+    let allEpsilon = epsilonRules rules indexator canInferEpsilon
     (*
     printfn "%A" allEpsilon
     for i in 0..indexator.nonTermCount-1 do
@@ -95,7 +95,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
     let pos = Array.zeroCreate indexator.nonTermCount
     for u = 0 to indexator.nonTermCount-1 do
-        if canInferEpsilonError.[u] then
+        if canInferEpsilon.[u] then
             let order = new ResizeArray<_>()
             let res = new ResizeArray<_>()
             for j = 0 to indexator.nonTermCount-1 do

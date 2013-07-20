@@ -27,6 +27,7 @@ sql_datatype:
 	| 'BLOB'
 	| 'NUMBER' type_size?
 	| 'TIMESTAMP'
+	| 'BOOLEAN'
 
 type_size : 
      '(' (DEC_NUMBER | 'MAX') ')'

@@ -441,12 +441,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                             if not <| containsEdge vertex family edges.[state] 
                             then
                                 let isCreated, edgeLabel = addEdge vertex family edges.[state] true
+                                //printfn "isCreated %b" isCreated
                                 let arr = parserSource.Reduces.[state].[!curNum]
                                 if arr <> null 
                                 then
                                     for (prod, pos) in arr do
                                         reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
-                    
+                           
                     let state = snd <| pushes.Peek()
 
                     if parserSource.Reduces.[state].[!curNum] <> null
@@ -561,7 +562,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 attachEdges()
                 if !curNum = parserSource.EofIndex then isEnd := true
                 elif pushes.Count = 0 then 
-                    if !curInd - !lastErr > 1 
+                    if !curInd - !lastErr > 0
                     then
                         let errInfo =  !curInd, !curToken
                         errorList <- errInfo :: errorList
@@ -585,7 +586,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
-            if !curInd - !lastErr > 1 
+            if !curInd - !lastErr > 0
             then
                let errInfo =  !curInd, !curToken
                errorList <- errInfo :: errorList
@@ -608,13 +609,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 lastTokens = lastTokens
             }
         //(debugFuns ()).drawGSSDot "stack.dot"
-        if not errorList.IsEmpty 
+        (*if not errorList.IsEmpty 
         then
             errorList <- List.rev errorList
             let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
             for i = 0 to errorList.Length-1 do
                 printfn "Parse error in %d position in %s token. " <| fst errorList.[i] <| tokenToString (snd errorList.[i])
-            //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
+            printfn "errorList(parser).count = %d" errorList.Length*)
         if !wasError 
         then 
             Error (!curInd , !curToken , "Parse Error", debugFuns ())

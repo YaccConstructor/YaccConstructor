@@ -35,7 +35,8 @@ sql_expr:
 scalar_function:
       'LOWER' sql_expr
     | 'SUM' '(' ['ALL' | 'DISTINCT'] sql_expr ')'
-	| 'UNISTR' '(' sql_value ')'
+	| ( 'UNISTR'|'TRUNC'|'EXTRACT') '(' sql_expr ')'
+	| ('HOUR'|'MINUTE'|'SECOND') 'FROM' sql_expr
 	| 'HEXTORAW' '(' sql_value ')'
 
 call_expr: 

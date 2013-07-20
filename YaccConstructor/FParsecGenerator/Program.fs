@@ -27,19 +27,29 @@ open Yard.Generators.FParsecGenerator.WriteToFile
 
 open System.Text.RegularExpressions
 
+let keyWords = [|"abstract"; "and"; "as"; "assert"; "base"; "begin"; "class"; "default"; "delegate"; 
+                 "do"; "don"; "downcast"; "downto"; "elif"; "else"; "end"; "exception"; "extern"; 
+                 "false"; "finally"; "for"; "fun"; "function"; "global"; "if"; "in"; "inherit"; "inline"; 
+                 "interface"; "internal"; "lazy"; "let"; "match"; "member"; "module"; "mutable"; 
+                 "namespace"; "new"; "null"; "of"; "open"; "or"; "override"; "private"; "public"; "rec"; 
+                 "return"; "sig"; "static"; "struct"; "then"; "to"; "true"; "try"; "type"; "upcast"; "use"; 
+                 "val"; "void"; "when"; "while"; "with"; "yield"; "atomic"; "break"; "checked"; "component"; 
+                 "const"; "constraint"; "constructor"; "continue"; "eager"; "fixed"; "fori"; "functor"; 
+                 "include"; "measure"; "method"; "mixin"; "object"; "parallel"; "params"; "process";
+                 "protected"; "pure"; "recursive"; "sealed"; "tailcall"; "trait"; "virtual"; "volatile"|];
+
 let repr x = (x : Source.t).text
 let printArgs indent = List.map repr  >> String.concat " " >> (+) indent
 let printBinding = function None -> "_" | Some patt -> repr patt
 let printArg = function None -> "" | Some arg -> repr arg
 
     
-
-let rec printBody indent body  =
+let rec printBody indent body  =    
     match body with
-    |PAlt(a,b)  -> sprintf "(attempt (%s)) <|> (%s)" (printBody (indent) a) (printBody (indent) b) 
+    |PAlt (a,b)  -> sprintf "(attempt (%s)) <|> (%s)" (printBody (indent) a) (printBody (indent) b) 
     |PSeq (elems,Some a,_) ->  
       match  List.rev elems with
-        | [] -> sprintf "preturn %s" (repr a)
+        | [] -> sprintf "preturn (%s)" (repr a)
         | lastElem::otherElems -> 
             let lastRepr = sprintf "%s |>> fun (%s) -> (%s) " (printBody indent lastElem.rule) (printBinding lastElem.binding) (repr a)
             let list = List.fold (fun r e -> printElem indent e + ") -> (" + r + ")" ) (lastRepr  ) otherElems 
@@ -58,7 +68,15 @@ let rec printBody indent body  =
        
             sprintf "%s -> (%s "  (snd beg) (String.concat "," <| fst beg) + String.replicate elems.Length ")"
     |PToken a ->  "Lexer.p" + Source.toString a
-    |PRef (r,arg)->  sprintf "%s %s" (Source.toString r)  (printArg arg)
+    |PRef (r,arg)-> 
+                let asd = Source.toString r
+                let isKeyWord = Array.exists(fun el -> el = asd)
+                sprintf "%s %s" (if (isKeyWord(keyWords))  
+                                 then "``" + asd + "``"
+                                 else asd) 
+                                (printArg arg)
+                                
+                               
     |PMany a -> sprintf "many ( attempt(%s))" <| printBody (indent +  "") a
 //    |PMetaRef (a,b,c)->sprintf "%s %s %s" (Source.toString a) (printArgs " " c) ( printArg b)   
     |PLiteral a -> "Lexer.literal " + "\"" + Source.toString a + "\""  
@@ -70,16 +88,18 @@ let rec printBody indent body  =
 and printElem indent e = sprintf "%s >>= fun (%s " (printBody indent e.rule) (printBinding e.binding )
 
 
-let grammarName filename =
-    Regex.Match(filename, @"(^|\\)([^\\]+)\.yrd$").Groups.Item(2).Value
+let grammarName = System.IO.Path.GetFileNameWithoutExtension
 
 let generate (input_grammar:Definition.t<Source.t,Source.t>) = 
-    
     let header = printArg input_grammar.head 
     let functions =
         input_grammar.grammar.Head.rules |> List.map (fun e ->
+            let isKeyWord = Array.exists(fun el -> el = e.name.text)
             (if e.isStart then "public " else "private " ) 
-            + e.name.text + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
+            + (if isKeyWord(keyWords)
+               then "``" + e.name.text + "``"
+               else e.name.text)
+            + (printArgs " " e.metaArgs) + (printArgs " " e.args) + " = " 
             + printBody "" e.body ) 
                          
 

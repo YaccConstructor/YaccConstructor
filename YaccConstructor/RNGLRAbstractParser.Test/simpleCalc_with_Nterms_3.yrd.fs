@@ -2,7 +2,7 @@
 # 2 "simpleCalc_with_Nterms_3.yrd.fs"
 module RNGLR.SimpleCalcWithNTerms_3
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-open Yard.Generators.RNGLR.AParser
+open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
@@ -106,8 +106,11 @@ for i = 0 to 6 do
 let eofIndex = 7
 let errorIndex = 1
 let errorRulesExists = false
-let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAst : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
+let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+    buildAstAbstract<Token> parserSource
+
+let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null|]
@@ -138,7 +141,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "simpleCalc_with_Nterms_3.yrd"
                : '_rnglr_type_s) 
-# 141 "simpleCalc_with_Nterms_3.yrd.fs"
+# 144 "simpleCalc_with_Nterms_3.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -149,7 +152,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 # 2 "simpleCalc_with_Nterms_3.yrd"
                : '_rnglr_type_yard_start_rule)
                
-# 152 "simpleCalc_with_Nterms_3.yrd.fs"
+# 155 "simpleCalc_with_Nterms_3.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -169,7 +172,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 3 "simpleCalc_with_Nterms_3.yrd"
                : '_rnglr_type_e) 
-# 172 "simpleCalc_with_Nterms_3.yrd.fs"
+# 175 "simpleCalc_with_Nterms_3.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -189,7 +192,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "simpleCalc_with_Nterms_3.yrd"
                : '_rnglr_type_pl) 
-# 192 "simpleCalc_with_Nterms_3.yrd.fs"
+# 195 "simpleCalc_with_Nterms_3.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -207,7 +210,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 210 "simpleCalc_with_Nterms_3.yrd.fs"
+# 213 "simpleCalc_with_Nterms_3.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

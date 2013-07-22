@@ -268,9 +268,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             pushesMap.Remove(!curLvl) |> ignore
             makeReductions ()
             attachEdges()
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                        <| sprintf "dot/stack_%d_4.dot" !curLvl             
+//            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+//            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+//                        <| sprintf "dot/stack_%d_4.dot" !curLvl             
 
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists

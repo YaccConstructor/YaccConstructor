@@ -23,12 +23,12 @@ type ``Abstract lexer tests`` () =
 
     let printG res (fName:string) =
         let f = GraphvizAlgorithm(res)
-        let printEdg (e:AEdge<_,_>) =
+        let printEdg (e:AbstractParsing.Common.ParserEdge<_>) =
             let printBrs brs =
                 "["
                 + (brs |> Array.map (function Some x -> string x | None -> "None") |> String.concat "; ")
                 + "]"
-            match e.Label.Value with
+            match e.Tag with
             | NUMBER(v,br) -> "NUM: " + v + "; br= " + printBrs br
             | PLUS(v,br)   -> "+: " + v  + printBrs br
             | MULT(v,br)   ->  "*: " + v  + printBrs br
@@ -63,18 +63,16 @@ type ``Abstract lexer tests`` () =
 
     let check_brs = 
        Seq.iter
-        (fun (e:AEdge<_,_>) -> 
-                match e.Label with
-                | Some v ->
-                    match v with
-                    | NUMBER (n,brs) 
-                    | PLUS (n,brs)->
-                    //n.EndsWith("5") 
-                        Assert.AreEqual(brs.Length,n.Length)
-                        Assert.IsTrue(brs |> Array.forall Option.isSome)
-                        Assert.IsTrue(brs |> Array.map (fun i -> i.Value)|>Array.forall((=) (n + "|")))
-                    | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
-                | None -> Assert.Fail("Lbl is empty!"))
+        (fun (e:AbstractParsing.Common.ParserEdge<_>) -> 
+                match e.Tag with
+                | NUMBER (n,brs) 
+                | PLUS (n,brs)->
+                //n.EndsWith("5") 
+                    Assert.AreEqual(brs.Length,n.Length)
+                    Assert.IsTrue(brs |> Array.forall Option.isSome)
+                    Assert.IsTrue(brs |> Array.map (fun i -> i.Value)|>Array.forall((=) (n + "|")))
+                | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
+                )
 
     [<Test>]
     member this.``Load graph test from DOT`` () =
@@ -157,22 +155,18 @@ type ``Abstract lexer tests`` () =
         res.Edges 
           |> Seq.iter
               (fun e -> 
-                match e.Label with
-                | Some v ->
-                    match v with
-                    | NUMBER (n,brs) 
-                    | PLUS (n,brs)->
-                    //n.EndsWith("5") 
-                        Assert.AreEqual(brs.Length,n.Length)
-                        Assert.IsTrue(brs |> Array.forall Option.isSome)
-                        let brs' = brs |> Array.map (fun i -> i.Value)
-                        Assert.IsTrue(brs'.[0] = "12|")
-                        Assert.IsTrue(brs'.[1] = "12|")
-                        Assert.IsTrue(brs'.[2] = string n.[2] + "|")
-                    | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
-                | None -> Assert.Fail("Lbl is empty!"))
-
-
+                match e.Tag with
+                | NUMBER (n,brs) 
+                | PLUS (n,brs)->
+                //n.EndsWith("5") 
+                    Assert.AreEqual(brs.Length,n.Length)
+                    Assert.IsTrue(brs |> Array.forall Option.isSome)
+                    let brs' = brs |> Array.map (fun i -> i.Value)
+                    Assert.IsTrue(brs'.[0] = "12|")
+                    Assert.IsTrue(brs'.[1] = "12|")
+                    Assert.IsTrue(brs'.[2] = string n.[2] + "|")
+                | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
+               
     [<Test>]
     member this.``Print info on edges.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_15.dot"

@@ -25,12 +25,12 @@ open AbstractParsing.Common
 
 type Parser<'token>() =
 
-    let parse buildAst (inGraph:ParserInputGraph<'token,_>): Parser.ParseResult<'token> =
+    let parse buildAst (inGraph:ParserInputGraph<'token>): Parser.ParseResult<'token> =
         let ts =  inGraph.TopologicalSort() |> Array.ofSeq
         let ids = dict (ts |> Array.mapi (fun i v -> v,i))
         let tokens = 
             ts
-            |> Seq.mapi (fun i v -> i,(inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag.Token,(ids.[e.Target]))) |> Array.ofSeq))
+            |> Seq.mapi (fun i v -> i,(inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag,(ids.[e.Target]))) |> Array.ofSeq))
             //|> Seq.filter (fun (_,a) -> a.Length > 0)
             //|> Seq.concat
                 

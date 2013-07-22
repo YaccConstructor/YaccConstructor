@@ -5,6 +5,7 @@ open AbstractLexer.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
 open QuickGraph.Graphviz
+open AbstractParsing.Common
 
 [<Struct>]
 type StateInfo<'a, 'b> =
@@ -132,7 +133,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         for i in stt.Info do 
                             actions onAccept (new string(i.AccumulatedString |> Array.ofSeq)) (i.BackRefs |> Array.ofSeq)
                             |> fun x -> 
-                                if not !reduced then acc.Add(new AEdge<_,_>(i.StartV,edg.Source,(Some x,None)))
+                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, x))
                                 reduced := true
                         let newStt = new State<_,_>(0,-1,new ResizeArray<_>())                            
                         go newStt
@@ -158,7 +159,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             for x in states.[lastVId] do
                 for i in x.Info do                        
                     let x = actions (int accept.[x.StateID]) (new string(i.AccumulatedString.ToArray())) (i.BackRefs.ToArray()) 
-                    yield (new AEdge<_,_>(i.StartV,lastVId,(Some x,None)))
+                    yield (new ParserEdge<_>(i.StartV,lastVId, x))
         }
         
 
@@ -174,7 +175,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                            }
                        |> Seq.filter (fun x -> x.Length > 0)
         let newEdgs = tokenize actions states edgesSeq sorted.[sorted.Length-1] printG |> Array.ofSeq
-        let res = new DAG<_,_>()
+        let res = new ParserInputGraph<_>()
         let r = newEdgs
         res.AddVerticesAndEdgeRange r
         |> ignore

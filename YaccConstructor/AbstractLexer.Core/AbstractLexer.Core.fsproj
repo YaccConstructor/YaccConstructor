@@ -54,6 +54,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
+      <Name>AbstractParsing.Common</Name>
+      <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>

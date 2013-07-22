@@ -50,17 +50,17 @@ let loadDotToQG gFile =
             qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
     qGraph
 
-let loadLexerInputGraph gFile =
-    let qGraph = loadDotToQG gFile
-    let lexerInputG = new LexerInputGraph<_>()
-    lexerInputG.StartVertex <- 0
-    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
-    lexerInputG
+//let loadLexerInputGraph gFile =
+//    let qGraph = loadDotToQG gFile
+//    let lexerInputG = new LexerInputGraph<_>()
+//    lexerInputG.StartVertex <- 0
+//    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new ParserEdge<_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
+//    lexerInputG
 
 
 
 
-let lbl tokenId = new AbstractParsing.Common.EdgeLabel<_,_>(tokenId,[||]) 
+let lbl tokenId = tokenId
 
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
@@ -87,12 +87,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc. Sequence input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -108,12 +108,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Calc. Sequence input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
@@ -129,16 +129,16 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Calc. Branched input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
-             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| RNGLR.ParseCalc.MULT 3)
-             new AbstractParsing.Common.AEdge<_,_>(4,5,lbl <| RNGLR.ParseCalc.NUMBER 4)
-             new AbstractParsing.Common.AEdge<_,_>(3,6,lbl <| RNGLR.ParseCalc.DIV 5)
-             new AbstractParsing.Common.AEdge<_,_>(6,5,lbl <| RNGLR.ParseCalc.NUMBER 6)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.ParseCalc.MULT 3)
+             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| RNGLR.ParseCalc.NUMBER 4)
+             new AbstractParsing.Common.ParserEdge<_>(3,6,lbl <| RNGLR.ParseCalc.DIV 5)
+             new AbstractParsing.Common.ParserEdge<_>(6,5,lbl <| RNGLR.ParseCalc.NUMBER 6)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
@@ -154,18 +154,18 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Calc. Branched input 2.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
-             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| RNGLR.ParseCalc.MULT 3)
-             new AbstractParsing.Common.AEdge<_,_>(4,5,lbl <| RNGLR.ParseCalc.NUMBER 4)
-             new AbstractParsing.Common.AEdge<_,_>(3,6,lbl <| RNGLR.ParseCalc.MINUS 5)
-             new AbstractParsing.Common.AEdge<_,_>(6,5,lbl <| RNGLR.ParseCalc.NUMBER 6)
-             new AbstractParsing.Common.AEdge<_,_>(5,7,lbl <| RNGLR.ParseCalc.MULT 3)
-             new AbstractParsing.Common.AEdge<_,_>(7,8,lbl <| RNGLR.ParseCalc.NUMBER 4)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseCalc.NUMBER  1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseCalc.NUMBER 2)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.ParseCalc.MULT 3)
+             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| RNGLR.ParseCalc.NUMBER 4)
+             new AbstractParsing.Common.ParserEdge<_>(3,6,lbl <| RNGLR.ParseCalc.MINUS 5)
+             new AbstractParsing.Common.ParserEdge<_>(6,5,lbl <| RNGLR.ParseCalc.NUMBER 6)
+             new AbstractParsing.Common.ParserEdge<_>(5,7,lbl <| RNGLR.ParseCalc.MULT 3)
+             new AbstractParsing.Common.ParserEdge<_>(7,8,lbl <| RNGLR.ParseCalc.NUMBER 4)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
@@ -196,13 +196,13 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc. Branch binop input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| PLUS 3)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -233,14 +233,14 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc. Branch binop and second arg.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| PLUS 3)
-             new AbstractParsing.Common.AEdge<_,_>(2,4,lbl <| NUM 2)
-             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| NUM 4)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,4,lbl <| NUM 2)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| NUM 4)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -257,14 +257,14 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc. Branch binop and first arg.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(0,2,lbl <| NUM 2)
-             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| PLUS 3)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| PLUS 4)
-             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| NUM 5)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(0,2,lbl <| NUM 2)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| NUM 5)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -281,12 +281,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm. Seq input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerm.buildAstAbstract qGraph
@@ -304,14 +304,14 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm. Branch binop and first arg.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(0,2,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
-             new AbstractParsing.Common.AEdge<_,_>(1,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 3)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 4)
-             new AbstractParsing.Common.AEdge<_,_>(3,4,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 5)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(0,2,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerm.PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 5)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerm.buildAstAbstract qGraph
@@ -328,12 +328,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm 2. Seq input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerms_2.buildAstAbstract qGraph
@@ -351,13 +351,13 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm 2. Brabch first operand.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 3)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 3)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerms_2.buildAstAbstract qGraph
@@ -374,15 +374,15 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm 2. Fully brabched.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(0,4,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 3)
-             new AbstractParsing.Common.AEdge<_,_>(4,5,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 4)
-             new AbstractParsing.Common.AEdge<_,_>(5,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 5)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(0,4,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 3)
+             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(5,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 5)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_2.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_2.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerms_2.buildAstAbstract qGraph
@@ -399,12 +399,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm 3. Seq input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_3.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_3.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_3.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_3.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_3.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_3.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerms_3.buildAstAbstract qGraph
@@ -421,12 +421,12 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Simple calc with nterm 4. Seq input.`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_,_>()
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.AEdge<_,_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_4.NUM 1)
-             new AbstractParsing.Common.AEdge<_,_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_4.PLUS 0)
-             new AbstractParsing.Common.AEdge<_,_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_4.NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerms_4.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.SimpleCalcWithNTerms_4.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.SimpleCalcWithNTerms_4.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.SimpleCalcWithNTerms_4.buildAstAbstract qGraph

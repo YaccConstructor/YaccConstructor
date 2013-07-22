@@ -2,25 +2,10 @@
 
 open QuickGraph
 
-//[<CustomEquality;NoComparison>]
 type AEdge<'l ,'br  when 'l: equality> (s,e,t) =
     inherit TaggedEdge<int,Option<'l>*Option<'br>>(s,e,t)
     member this.BackRef = snd t
     member this.Label = fst t
-    override x.Equals yobj =
-        match yobj with
-        | :? AEdge<'l,'br> as y -> 
-            x.Source = y.Source && x.Target=y.Target
-            && x.Label = y.Label
-        | _ -> false
-
-    //override x.GetHashCode() = hash x
-
-    interface System.IComparable with
-      member x.CompareTo yobj =
-          match yobj with
-          | :? AEdge<'l,'br> as y -> if x.Equals y then 0 else -1
-          | _ -> invalidArg "yobj" "cannot compare values of different types"
 
 type DAG<'l,'br  when 'l: equality> () =
     inherit AdjacencyGraph<int, AEdge<'l,'br>>()

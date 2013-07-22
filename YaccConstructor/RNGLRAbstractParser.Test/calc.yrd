@@ -26,7 +26,7 @@ factorOp: MULT { ( * ) } | DIV { (/) }
 
 factor: res=binExpr<powExpr powOp> { res }
 
-powOp: POW { ( ** ) }
+powOp: POW { (fun x y -> (float x ** float y) |> int) }
 
 powExpr: n=NUMBER { n } | LBRACE e=expr RBRACE { e }
 

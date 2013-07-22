@@ -79,7 +79,7 @@ let containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) 
 
 /// Add or extend edge with specified destination and family.
 /// All edges are sorted by destination ascending.
-let addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) =
+let addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) isError =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
     let inline snd3 (_,x,_) = x

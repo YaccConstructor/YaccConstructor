@@ -130,7 +130,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
-                        let isCreated, edgeLabel = addEdge final family edges.[state]
+                        let isCreated, edgeLabel = addEdge final family edges.[state] false
                         let curNums = 
                             if (pos > 0 && isCreated) 
                             then [|parserSource.EofIndex|]

@@ -286,13 +286,16 @@ let printTables
         printBrInd 0 "let errorIndex = %d" grammar.errorIndex
         printBrInd 0 "let errorRulesExists = %b" grammar.errorRulesExists
         
-        printBrInd 0 "let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
 
-        printBr "let buildAst : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) ="
+        printBr "let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAstAbstract<Token> parserSource"
+        printBr ""
+        
+        printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()
-        
 
     let printTablesToScala () =    
         let printArr (arr : 'a[]) printer = printArr "Array" "(" ")" ", " (arr : 'a[]) printer

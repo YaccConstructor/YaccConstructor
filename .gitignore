@@ -72,3 +72,12 @@ YaccConstructor/RNGLRAbstractParser.Test/Lexer.fs
 YaccConstructor/RNGLRAbstractParser.Test/log.txt
 Examples/RNGLR/PLSql/MsParser.fs
 Examples/RNGLR/PLSql/MsParser.fs
+YaccConstructor/AbstractLexer.Test/*.dot
+YaccConstructor/AbstractLexer.Test/*.dot.pdf
+Examples/RNGLR/PLSql.Test/*.pdf
+Examples/RNGLR/PLSql.Test/*.dot
+Examples/RNGLR/PLSql/*.dot
+Examples/RNGLR/PLSql/*.pdf
+Examples/RNGLR/PLSql/epsilons/*.dot
+Examples/RNGLR/PLSql/*.svg
+Examples/RNGLR/PLSql/FsYard.log

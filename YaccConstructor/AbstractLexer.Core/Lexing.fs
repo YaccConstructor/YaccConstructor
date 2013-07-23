@@ -188,7 +188,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      1 entry for EOF
 
 
-    member tables.Tokenize(actions,g, ?printG) = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
+    member tables.Tokenize(actions,g ,?printG) = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
     static member Create(trans,accept) = new UnicodeTables(trans,accept)
 
 //    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"

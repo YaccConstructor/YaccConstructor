@@ -121,6 +121,9 @@
     <Reference Include="RNGLR">
       <HintPath>..\..\yc\RNGLR.dll</HintPath>
     </Reference>
+    <Reference Include="RNGLRAbstractParser">
+      <HintPath>..\..\yc\RNGLRAbstractParser.dll</HintPath>
+    </Reference>
     <Reference Include="RNGLRCommon">
       <HintPath>..\..\yc\RNGLRCommon.dll</HintPath>
     </Reference>

@@ -226,16 +226,16 @@ type ``RNGLR abstract parser tests`` () =
              new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| NUM 2)
              ] |> ignore
 
-        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
         printfn "%A" r
         Assert.Pass()
 
     [<Test>]
     member this.``Lexer and parser`` () =
         let lexerInputGraph = loadLexerInputGraph "lexer_and_parser_simple_test.dot"
-        let qGraph = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
+        let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
 
-        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
+        let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         printfn "%A" r
         match r with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug) ->
@@ -243,21 +243,7 @@ type ``RNGLR abstract parser tests`` () =
             debug.drawGSSDot "out.dot"
         | Yard.Generators.RNGLR.Parser.Success tree ->
             tree.PrintAst()
-            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
-            //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
-            //printfn "%A" tree.Order
-//            let args = {
-//                tokenToRange = fun _ -> 0,0
-//                zeroPosition = 0
-//                clearAST = false
-//                filterEpsilons = true
-//            }
-//
-//
-//            printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
-//            tree.ChooseSingleAst()
-//            tree.PrintAst()
-
+            RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
         Assert.Pass()
 
 

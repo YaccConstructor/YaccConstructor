@@ -1,0 +1,19 @@
+﻿[<AllPublic>]
+module MsCommon
+
+open Common
+
+comma_list<item>: list<item ','>
+
+dec_num: '-'? DEC_NUMBER
+
+sql_value:
+     STRING_CONST  (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
+   | dec_num
+   | ident
+   | 'NULL'
+
+(* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)
+ident: brace_opt<'[' (IDENT | 'TYPE' | 'CLASS' | 'STATE' | 'OWNER' | 'IGNORE_DUP_KEY' | 'COUNT' | 'ENABLE' | 'OPEN' | 'CLOSE') ']'>
+
+full_ident: not_empty_list<ident '.'>

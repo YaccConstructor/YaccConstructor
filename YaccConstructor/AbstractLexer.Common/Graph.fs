@@ -2,12 +2,12 @@
 
 open QuickGraph
 
-type AEdge<'l,'br> (s,e,t) =
+type AEdge<'l ,'br  when 'l: equality> (s,e,t) =
     inherit TaggedEdge<int,Option<'l>*Option<'br>>(s,e,t)
     member this.BackRef = snd t
     member this.Label = fst t
 
-type DAG<'l,'br> () =
+type DAG<'l,'br  when 'l: equality> () =
     inherit AdjacencyGraph<int, AEdge<'l,'br>>()
     let mutable startV = None
 

@@ -30,6 +30,7 @@ let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
 let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
     let result : bool[] = Array.zeroCreate indexator.fullCount
     let mutable modified = true
+    result.[indexator.errorIndex] <- true
     while modified do
         modified <- false
         for i in 0..rules.rulesCount-1 do
@@ -43,7 +44,6 @@ let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
                 if checkEpsilon (rules.length i - 1) then
                     modified <- true
                     result.[rules.leftSide i] <- true
-
     result
 
 let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
@@ -119,6 +119,10 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         res.Add (new AST (Unchecked.defaultof<_>, null))
                                     box res.[pos.[w]])
                         children.Add <| new Family(rule, new Nodes(nodes))
+                if v = indexator.errorIndex 
+                then
+                    let nodes = Array.zeroCreate 0
+                    children.Add <| new Family(rules.rulesCount, new Nodes(nodes))
                 let first = children.[0]
                 children.RemoveAt 0
                 res.[i].first <- first

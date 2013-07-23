@@ -2,8 +2,7 @@
 # 2 "SimpleCalc.yrd.fs"
 module RNGLR.ParseSimpleCalc
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
-//open Yard.Generators.RNGLR.Parser
-open Yard.Generators.RNGLR.AParser
+open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 type Token =
@@ -105,12 +104,15 @@ for i = 0 to 4 do
 let eofIndex = 5
 let errorIndex = 0
 let errorRulesExists = false
-let parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAst : (seq<Token> -> ParseResult<Token>) =
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
+let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+    buildAstAbstract<Token> parserSource
+
+let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(2, new Nodes([||])), null)), null); null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
   (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
@@ -137,7 +139,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "SimpleCalc.yrd"
                : '_rnglr_type_s) 
-# 139 "SimpleCalc.yrd.fs"
+# 142 "SimpleCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -147,7 +149,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 2 "SimpleCalc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 149 "SimpleCalc.yrd.fs"
+# 152 "SimpleCalc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -165,7 +167,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 167 "SimpleCalc.yrd.fs"
+# 170 "SimpleCalc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

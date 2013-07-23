@@ -72,9 +72,17 @@ let getRulesMap (grammar : Grammar.t<_,_>) =
         let rMap = new System.Collections.Generic.Dictionary<_,_>()
         module'.openings
         |> List.iter (fun op ->
-            publicRules.[op.text] |> List.iter (fun r ->
-                rMap.[r.name.text] <- op.text
-            )
+            try 
+                publicRules.[op.text] |> List.iter (fun r ->
+                    try 
+                        rMap.[r.name.text] <- op.text
+                    with
+                    | e -> printfn "Get rules error: rule name: %A;" r.name.text
+
+                        )
+            with
+            | e -> printfn "Get rules error: open: %A;" op.text  
+            
         )
         module'.rules |> List.iter (fun r -> rMap.[r.name.text] <- getModuleName module')
         getModuleName module', rMap

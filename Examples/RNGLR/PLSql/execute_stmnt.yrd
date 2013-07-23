@@ -1,0 +1,35 @@
+﻿[<AllPublic>]
+module Execute_stmnt
+
+open MsCommon, Expr, Datatype
+
+execute_stmnt:
+    execute_proc
+  | execute_character_string
+  | execute_command
+
+execute_proc:
+        full_ident    
+          '(' 
+            comma_list<[
+              [ident '=' '>']
+              (sql_expr  ['OUTPUT' | 'OUT' | 'IN'])
+            ]>
+          ')'
+
+execute_character_string:
+    ('EXEC' | 'EXECUTE') 
+    '(' ((LOCALVAR | STRING_CONST) '+'?)+ ')'    
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ';'?
+
+execute_command:
+    ('EXEC' | 'EXECUTE')
+    '('
+      (LOCALVAR | STRING_CONST '?'? '+'?)+
+      (',' sql_expr 'OUTPUT'?)*
+    ')' 
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ['AT' full_ident]
+    ';'?
+

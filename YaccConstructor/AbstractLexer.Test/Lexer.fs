@@ -53,56 +53,56 @@ let actions : uint16[] = [|65535us; 0us; 1us; 2us; 3us; 4us; 5us; 6us; 8us; 9us;
 let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-let fslex_actions_token  _fslex_state lexeme =
+let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
 # 12 "Lexer.fsl"
-                              MULT lexeme 
+                              MULT(lexeme,brs) 
 # 61 "Lexer.fs"
           )
   | 1 -> ( 
 # 13 "Lexer.fsl"
-                                                                  NUMBER  lexeme 
+                                                                  NUMBER(lexeme,brs) 
 # 66 "Lexer.fs"
           )
   | 2 -> ( 
 # 14 "Lexer.fsl"
-                       MINUS "-" 
+                       MINUS(lexeme,brs) 
 # 71 "Lexer.fs"
           )
   | 3 -> ( 
 # 15 "Lexer.fsl"
-                       LBRACE "(" 
+                       LBRACE(lexeme,brs) 
 # 76 "Lexer.fs"
           )
   | 4 -> ( 
 # 16 "Lexer.fsl"
-                       RBRACE ")" 
+                       RBRACE(lexeme,brs) 
 # 81 "Lexer.fs"
           )
   | 5 -> ( 
 # 17 "Lexer.fsl"
-                       DIV "/" 
+                       DIV(lexeme,brs) 
 # 86 "Lexer.fs"
           )
   | 6 -> ( 
 # 18 "Lexer.fsl"
-                       PLUS "+" 
+                       PLUS(lexeme,brs) 
 # 91 "Lexer.fs"
           )
   | 7 -> ( 
 # 19 "Lexer.fsl"
-                        POW "**" 
+                        POW(lexeme,brs) 
 # 96 "Lexer.fs"
           )
   | 8 -> ( 
 # 20 "Lexer.fsl"
-                       MULT "*" 
+                       MULT(lexeme,brs) 
 # 101 "Lexer.fs"
           )
   | 9 -> ( 
 # 21 "Lexer.fsl"
-                       RNGLR_EOF "" 
+                       RNGLR_EOF ("",[||]) 
 # 106 "Lexer.fs"
           )
   | 10 -> ( 

@@ -4,19 +4,22 @@ open System.Collections.Generic
 open AbstractLexer.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
+open QuickGraph.Graphviz
+open AbstractParsing.Common
 
 [<Struct>]
-type StateInfo<'a> =
+type StateInfo<'a, 'b> =
     val StartV: int
-    val AccumulatedString: 'a
-    new (startV, str) = {StartV = startV; AccumulatedString = str}
+    val AccumulatedString: ResizeArray<'a>
+    val BackRefs: 'b
+    new (startV, str, brs) = {StartV = startV; AccumulatedString = str; BackRefs = brs}
 
 [<Struct>]
-type State<'a> =
+type State<'a, 'b> =
     val StateID: int
     val AcceptAction: int
-    val Info: ResizeArray<StateInfo<'a>>
-    new (stateId:int, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
+    val Info: ResizeArray<StateInfo<'a, 'b>>
+    new (stateId, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
 
 [<Sealed>]
 type AsciiTables(trans: uint16[] array, accept: uint16[]) =
@@ -78,7 +81,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 
             loop 0    
         
-    let scanUntilSentinel inp (state:State<_>) =
+    let scanUntilSentinel inp (state:State<_,_>) =
         // Return an endOfScan after consuming the input 
         let a = int accept.[state.StateID]
         let onAccept = if a <> sentinel then a else state.AcceptAction
@@ -86,69 +89,96 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let snew = lookupUnicodeCharacters (state.StateID,inp)
         snew = sentinel, onAccept, snew
 
-    let tokenize actions (inG:LexerInputGraph<_>) =
-        let g = new LexerInnerGraph<_>(inG)
-        let res = new AbstractParsing.Common.ParserInputGraph<_,_>()
-        let sorted = g.TopologicalSort() |> Array.ofSeq
-        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
-        states.[g.StartVertex] <- ResizeArray.singleton startState
-        let add (e:AEdge<_,_>) (newStt:State<_>) =
-            match states.[e.Target]
-                  |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
+    let tokenize actions (states:array<_>) edgesSeq lastVId printG =
+        let edgesSeq = edgesSeq |> Array.ofSeq
+        let add (edg:AEdge<_,_>) (newStt:State<_,_>) =
+            match states.[edg.Target]
+                  |> ResizeArray.tryFind(fun (x:State<_,_>) -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
                 with
             | Some x ->
                 newStt.Info
                 |> ResizeArray.iter(
                     fun i -> 
-                        if x.Info.Exists(fun j -> j.StartV = i.StartV && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
-                                                    && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
-                            |> not
+                        if x.Info.Exists(fun j -> j.StartV = i.StartV
+                                                  && i.AccumulatedString.Count = j.AccumulatedString.Count
+                                                  && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
+                           |> not
                         then x.Info.Add i)
-            | None -> states.[e.Target].Add newStt
+            | None -> states.[edg.Target].Add newStt
+ 
+        let mkNewString (edg:AEdge<_,_>) (stt:State<_,_>) =
+            let ch = edg.Label.Value
+            if stt.Info.Count > 0
+            then
+                stt.Info
+                |> ResizeArray.map 
+                    (
+                        fun i -> 
+                            new StateInfo<_,_>(i.StartV
+                            , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
+                            , ResizeArray.concat [i.BackRefs; ResizeArray.singleton edg.BackRef])
+                    )
+            else 
+                new StateInfo<_,_>(edg.Source, ResizeArray.singleton ch, ResizeArray.singleton edg.BackRef)
+                |> ResizeArray.singleton
 
-        for v in sorted do
-            for stt in states.[v] do
-                let reduced = ref false
-                for e in g.OutEdges v do
-                    let ch = e.Label
-                    match ch with
-                    | Some x ->
-                        let rec go stt =
-                            let reduce, onAccept, news = scanUntilSentinel x stt
-                            if reduce
-                            then
-                                stt.Info
-                                |> ResizeArray.iter
-                                    (fun (i:StateInfo<_>) -> 
-                                        new string(i.AccumulatedString |> Array.ofSeq)
-                                        |> actions onAccept  
-                                        |> fun x -> 
-                                            if not !reduced then res.AddEdgeForsed(new AbstractParsing.Common.AEdge<_,_>(i.StartV,v,new AbstractParsing.Common.EdgeLabel<_,_>(Some x,Array.empty)))
-                                            reduced := true)
-                                let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
-                                go newStt
-                            else 
-                                let acc = 
-                                    if stt.Info.Count > 0
-                                    then
-                                        stt.Info
-                                        |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]))
-                                    else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
-                                let newStt = new State<_>(news,onAccept,acc)
-                                add e newStt
-                        go stt
-                    | None -> add e stt
+        let processEdg (edg:AEdge<_,_>) stt reduced =
+            let acc = new ResizeArray<_>(10) 
+            match edg.Label with
+            | Some x ->
+                let rec go stt =
+                    let reduce, onAccept, news = scanUntilSentinel x stt
+                    if reduce
+                    then
+                        for i in stt.Info do 
+                            actions onAccept (new string(i.AccumulatedString |> Array.ofSeq)) (i.BackRefs |> Array.ofSeq)
+                            |> fun x -> 
+                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, x))
+                                reduced := true
+                        let newStt = new State<_,_>(0,-1,new ResizeArray<_>())                            
+                        go newStt
+                    else 
+                        let acc = mkNewString edg stt
+                        let newStt = new State<_,_>(news,onAccept,acc)
+                        add edg newStt
+                go stt      
+            | None -> add edg stt
 
-        states.[sorted.[sorted.Length-1]]
-        |> ResizeArray.iter(
-            fun x ->
-                x.Info
-                |> ResizeArray.iter
-                    (fun (i:StateInfo<_>) ->                        
-                        new string(i.AccumulatedString.ToArray())
-                        |> actions ((*if x.AcceptAction > -1 then x.AcceptAction else*) int accept.[x.StateID])
-                        |> fun x -> res.AddEdgeForsed(new AbstractParsing.Common.AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],new AbstractParsing.Common.EdgeLabel<_,_>(Some x,Array.empty)))))
+            acc 
+
+        let res_edg_seq = 
+            seq{
+                for (edgs:array<AEdge<_,_>>) in edgesSeq do
+                    for stt in states.[edgs.[0].Source] do
+                        let reduced = ref false
+                        for edg in edgs do
+                            yield! processEdg edg stt reduced
+                }
+        seq{
+            yield! res_edg_seq
+            for x in states.[lastVId] do
+                for i in x.Info do                        
+                    let x = actions (int accept.[x.StateID]) (new string(i.AccumulatedString.ToArray())) (i.BackRefs.ToArray()) 
+                    yield (new ParserEdge<_>(i.StartV,lastVId, x))
+        }
+        
+
+    let inputGraph actions (inG:LexerInputGraph<_>) printG = 
+        let g = new LexerInnerGraph<_>(inG)
+        let sorted = g.TopologicalSort() |> Array.ofSeq
+        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
+        let startState = new State<_,_>(0,-1, ResizeArray.singleton (new StateInfo<_,_>(0,new ResizeArray<_>(), new ResizeArray<_>())))
+        states.[g.StartVertex] <- ResizeArray.singleton startState
+        let edgesSeq = seq{ for v in sorted do
+                              yield g.OutEdges v |> Array.ofSeq
+                                  
+                           }
+                       |> Seq.filter (fun x -> x.Length > 0)
+        let newEdgs = tokenize actions states edgesSeq sorted.[sorted.Length-1] printG |> Array.ofSeq
+        let res = new ParserInputGraph<_>()
+        let r = newEdgs
+        res.AddVerticesAndEdgeRange r
+        |> ignore
         res
                           
     // Each row for the Unicode table has format 
@@ -158,6 +188,10 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      1 entry for EOF
 
 
-    member tables.Tokenize actions g = tokenize actions g
+    member tables.Tokenize(actions,g, ?printG) = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
     static member Create(trans,accept) = new UnicodeTables(trans,accept)
 
+//    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
+//    let DB = new MS_DB("")
+//    let res = DB.exec query
+//    res |> Seq.iter (printfn "%A")

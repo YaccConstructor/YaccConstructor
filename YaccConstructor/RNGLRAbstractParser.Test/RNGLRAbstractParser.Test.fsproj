@@ -40,7 +40,14 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <None Include="simpleCalc.yrd" />
+    <None Include="Lexer.fsl" />
+    <Compile Include="Calc.yrd.fs" />
     <Compile Include="SimpleCalc.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
+    <!--Compile Include="Lexer.fs" /-->
+    <Compile Include="simpleCalc_with_Nterms_3.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
+    <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="Lexer.fsl" />
@@ -79,6 +86,16 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
+      <Name>AbstractLexer.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
+      <Name>AbstractLexer.Core</Name>
+      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
       <Name>AbstractParsing.Common</Name>
       <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
@@ -92,6 +109,11 @@
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
+      <Name>RNGLRParser</Name>
+      <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -2,18 +2,12 @@
 
 open QuickGraph
 
-[<Struct>]
-type EdgeLabel<'token,'br>=
-    val Token : 'token
-    val BackRefs : array<'br>
 
-    new (token,brs) = {Token = token; BackRefs = brs}
+type ParserEdge<'token>(s,e,t)=
+    inherit TaggedEdge<int, 'token>(s,e,t)
 
-type AEdge<'token,'br>(s,e,t)=
-    inherit TaggedEdge<int,EdgeLabel<'token,'br>>(s,e,t)
-
-type ParserInputGraph<'token,'br>() =
-    inherit AdjacencyGraph<int,AEdge<'token,'br>>()
+type ParserInputGraph<'token>() =
+    inherit AdjacencyGraph<int,ParserEdge<'token>>()
 
     member this.AddEdgeForsed (e:AEdge<_,_>) =
         this.AddVertex e.Source |> ignore

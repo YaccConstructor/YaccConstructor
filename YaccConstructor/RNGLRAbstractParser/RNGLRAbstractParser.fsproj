@@ -80,9 +80,7 @@
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\RNGLRCommon\bin\Release\RNGLRCommon.dll</HintPath>
-    </Reference>
+    <Reference Include="RNGLRCommon" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

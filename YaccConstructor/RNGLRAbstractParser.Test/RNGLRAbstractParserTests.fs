@@ -40,6 +40,27 @@ let lbl tokenId = new AbstractParsing.Common.EdgeLabel<_,_>(tokenId,[||])
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
     let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
+
+    let loadDotToQG gFile =
+        let g = loadGraphFromDOT(path gFile)
+        let qGraph = new AdjacencyGraph<int, TaggedEdge<_,string>>()
+        g.Edges 
+        |> Seq.iter(
+            fun e -> 
+                let edg = e :?> DotEdge<string>
+                qGraph.AddVertex(int edg.Source.Id) |> ignore
+                qGraph.AddVertex(int edg.Destination.Id) |> ignore
+                qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
+        qGraph
+
+    let loadLexerInputGraph gFile =
+        let qGraph = loadDotToQG gFile
+        let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
+        lexerInputG.StartVertex <- 0
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
+        lexerInputG
+
+
     [<Test>]
     member this.``Load graph test from DOT`` () =
         let g = loadGraphFromDOT(path "IFExists_lex.dot")
@@ -85,6 +106,15 @@ type ``RNGLR abstract parser tests`` () =
              new AEdge<_,_>(1,2,lbl <| PLUS 3)
              new AEdge<_,_>(2,3,lbl <| NUM 2)
              ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
+        printfn "%A" r
+        Assert.Pass()
+
+    [<Test>]
+    member this.``Lexer and parser`` () =
+        let lexerInputGraph = loadLexerInputGraph "lexer_and_parser_simple_test.dot"
+        let qGraph = Calc.Lexer._fslex_tables.Tokenize Calc.Lexer.fslex_actions_token lexerInputGraph
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.parserSource qGraph
         printfn "%A" r

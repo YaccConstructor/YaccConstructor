@@ -43,8 +43,12 @@
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
+    <None Include="Lexer.fsl" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AbstractLexer.Common">
+      <HintPath>..\AbstractLexer.Common\bin\Debug\AbstractLexer.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net-beta\Antlr3.Runtime.dll</HintPath>
     </Reference>

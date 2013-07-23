@@ -1,0 +1,19 @@
+﻿{
+module Calc.Lexer
+open AbstractLexer.Test.Calc.Parser
+open AbstractLexer.Core
+
+}
+
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\r' '\n']
+
+rule token = parse
+| whitespace { MULT lexeme }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUM int(lexeme : string) }
+| '-' { MINUS "-" }
+| '/' { DIV "/" }
+| '+' { PLUS "+" }
+| '*' { MULT "*" }
+| _ { failwithf "unexpected input: %s" <| "-" }
+

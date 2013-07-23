@@ -88,7 +88,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
 
     let tokenize actions (inG:LexerInputGraph<_>) =
         let g = new LexerInnerGraph<_>(inG)
-        let res = new DAG<_,_>()
+        let res = new AbstractParsing.Common.ParserInputGraph<_,_>()
         let sorted = g.TopologicalSort() |> Array.ofSeq
         let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
         let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
@@ -124,7 +124,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                                         new string(i.AccumulatedString |> Array.ofSeq)
                                         |> actions onAccept  
                                         |> fun x -> 
-                                            if not !reduced then res.AddEdgeForsed(new AEdge<_,_>(i.StartV,v,(Some x,None)))
+                                            if not !reduced then res.AddEdgeForsed(new AbstractParsing.Common.AEdge<_,_>(i.StartV,v,new AbstractParsing.Common.EdgeLabel<_,_>(Some x,Array.empty)))
                                             reduced := true)
                                 let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
                                 go newStt
@@ -148,7 +148,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     (fun (i:StateInfo<_>) ->                        
                         new string(i.AccumulatedString.ToArray())
                         |> actions ((*if x.AcceptAction > -1 then x.AcceptAction else*) int accept.[x.StateID])
-                        |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
+                        |> fun x -> res.AddEdgeForsed(new AbstractParsing.Common.AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],new AbstractParsing.Common.EdgeLabel<_,_>(Some x,Array.empty)))))
         res
                           
     // Each row for the Unicode table has format 

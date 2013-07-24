@@ -41,7 +41,7 @@ type ``MS-SQL parser tests`` () =
         p.AddLine counter map
         counter <- counter + 1<id>
         match MSSqlParser.justParse file with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg, _) ->
             let coordinates = 
                 let x,y = tokenPos tok
                 let x = p.GetCoordinates x
@@ -56,7 +56,7 @@ type ``MS-SQL parser tests`` () =
             printfn "%s" msg
             dbg.drawGSSDot @"..\..\stack.dot"
             Assert.Fail msg
-        | Yard.Generators.RNGLR.Parser.Success ast ->
+        | Yard.Generators.RNGLR.Parser.Success (ast, _) ->
             Assert.Pass()
 
     let basePath = "../../../../../Tests/MSSqlParser"

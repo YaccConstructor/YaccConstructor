@@ -5,16 +5,22 @@ module AbstractLexer.Test.Calc.Parser
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
+
+# 1 "calc.yrd"
+
+open AbstractLexer.Core
+
+# 13 "Parser.fs"
 type Token =
-    | DIV of (string*array<Option<string>>)
-    | LBRACE of (string*array<Option<string>>)
-    | MINUS of (string*array<Option<string>>)
-    | MULT of (string*array<Option<string>>)
-    | NUMBER of (string*array<Option<string>>)
-    | PLUS of (string*array<Option<string>>)
-    | POW of (string*array<Option<string>>)
-    | RBRACE of (string*array<Option<string>>)
-    | RNGLR_EOF of (string*array<Option<string>>)
+    | DIV of (string*array<Position<string>>)
+    | LBRACE of (string*array<Position<string>>)
+    | MINUS of (string*array<Position<string>>)
+    | MULT of (string*array<Position<string>>)
+    | NUMBER of (string*array<Position<string>>)
+    | PLUS of (string*array<Position<string>>)
+    | POW of (string*array<Position<string>>)
+    | RBRACE of (string*array<Position<string>>)
+    | RNGLR_EOF of (string*array<Position<string>>)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -147,7 +153,10 @@ let eofIndex = 23
 let errorIndex = 0
 let errorRulesExists = false
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
-let buildAst : (seq<Token> -> ParseResult<Token>) =
+let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
+    buildAstAbstract<Token> parserSource
+
+let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
 

@@ -2,21 +2,26 @@
 
 open QuickGraph
 
-type AEdge<'l ,'br  when 'l: equality> (s,e,t) =
-    inherit TaggedEdge<int,Option<'l>*Option<'br>>(s,e,t)
-    member this.BackRef = snd t
-    member this.Label = fst t
+type LexerEdge<'l ,'br  when 'l: equality> (s,e,t) =
+    inherit TaggedEdge<int,Option<'l*'br>>(s,e,t)
+    let l,br =
+        match t with
+        | Some (l,br) -> Some l, Some br
+        | None -> None, None
+
+    member this.BackRef = br
+    member this.Label = l
 
 type DAG<'l,'br  when 'l: equality> () =
-    inherit AdjacencyGraph<int, AEdge<'l,'br>>()
+    inherit AdjacencyGraph<int, LexerEdge<'l,'br>>()
     let mutable startV = None
 
-    member this.AddEdgeForsed (e:AEdge<_,_>) =        
+    member this.AddEdgeForsed (e:LexerEdge<'l,'br>) =        
         this.AddVertex e.Source |> ignore
         this.AddVertex e.Target |> ignore
         this.AddEdge e |> ignore
 
-    member this.AddEdgesForsed (edges:#seq<AEdge<_,_>>) =
+    member this.AddEdgesForsed (edges:#seq<LexerEdge<_,_>>) =
         Seq.iter this.AddEdgeForsed edges
 
     member this.StartVertex 
@@ -30,24 +35,24 @@ type LexerInnerGraph<'br> (g:LexerInputGraph<'br>) as this =
     inherit DAG<char,'br>()
     let convert () =
         let counter = g.Vertices |> Seq.max |> ref
-        let splitEdge (edg:AEdge<_,_>) =
+        let splitEdge (edg:LexerEdge<_,'br>) =
             let start = edg.Source
             let _end = edg.Target
             let str = edg.Label
             let br = edg.BackRef
             match str with
-            | Some("") -> [|new AEdge<_,_> (start,_end,(None,None))|]
-            | None -> [|new AEdge<_,_> (start,_end,(None,None))|]
+            | Some("") -> [|new LexerEdge<_,_> (start,_end,None)|]
+            | None -> [|new LexerEdge<_,_> (start,_end,None)|]
             | Some(s) ->
                 let l = s.Length
                 let ss = s.ToCharArray()
                 Array.init l 
                     (fun i ->
                         match i with
-                        | 0 when (l = 1)     -> new AEdge<_,_>(start,_end,(Some ss.[i],br))
-                        | 0                  -> new AEdge<_,_>(start,(incr counter; !counter),(Some ss.[i],br))
-                        | i when (i = l - 1) -> new AEdge<_,_>(!counter,_end,(Some ss.[i],br))
-                        | i                  -> new AEdge<_,_>(!counter,(incr counter; !counter),(Some ss.[i],br))
+                        | 0 when (l = 1)     -> new LexerEdge<_,_>(start,_end, Some(ss.[i],br.Value))
+                        | 0                  -> new LexerEdge<_,_>(start,(incr counter; !counter),Some(ss.[i],br.Value))
+                        | i when (i = l - 1) -> new LexerEdge<_,_>(!counter,_end,Some(ss.[i],br.Value))
+                        | i                  -> new LexerEdge<_,_>(!counter,(incr counter; !counter),Some(ss.[i],br.Value))
                     )
         let newEdges = g.Edges |> Array.ofSeq |> Array.collect splitEdge
         this.AddEdgesForsed(newEdges)

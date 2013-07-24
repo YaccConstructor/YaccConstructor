@@ -62,14 +62,14 @@ let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.Stat
 
 /// Add edges, what must be unique (after shift or epsilon-edges).
 /// All edges are sorted by destination ascending.
-let addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
+let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
     out.Insert (i+1, (v, ast))
 
 /// Check if edge with specified destination and AST already exists
-let containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
+let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
@@ -79,7 +79,7 @@ let containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) 
 
 /// Add or extend edge with specified destination and family.
 /// All edges are sorted by destination ascending.
-let addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) isError =
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) isError =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
     let inline snd3 (_,x,_) = x
@@ -107,7 +107,7 @@ let addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * 
     isCreated, ast
 
 /// Check if edge with specified destination and family already exists
-let containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
+let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
     let inline fst3 (x,_,_) = x
     let mutable i = out.Count - 1
     while i >= 0 && less (fst3 out.[i]) v do

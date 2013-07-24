@@ -50,10 +50,10 @@ let justParse (path:string) =
                     let buf = int traceStep |> Array.zeroCreate
                     while !count < traceStep && not lexbuf.IsPastEndOfStream do
                         lastTokenNum := 1L + !lastTokenNum                        
-                        buf.[int !count] <- 
-                            let r = !c,[|Lexer.tokens lexbuf, !c+1|]
-                            incr c
-                            r
+                        buf.[int !count] <- Lexer.tokens lexbuf
+//                            let r = !c,[|Lexer.tokens lexbuf, !c+1|]
+//                            incr c
+//                            r
                         count := !count + 1L                    
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
@@ -67,23 +67,22 @@ let justParse (path:string) =
         }   
 
     let start = System.DateTime.Now
-    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
-    //let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
+    //use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
     let lastTokenNum = ref 0L    
     let timeOfIteration = ref System.DateTime.Now
-    //let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
+    let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
     let allTokens = 
         seq{
             while true do
-                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + int64 arr.Length
+                //let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
+                lastTokenNum := !lastTokenNum + 1L //int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
                     printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                yield! arr
-                //yield Lexer.tokens lexbuf
+                //yield! arr
+                yield Lexer.tokens lexbuf
                 }
 
     let translateArgs = {
@@ -93,8 +92,10 @@ let justParse (path:string) =
         filterEpsilons = true
     }
     
-    let res = buildAstAbstract  allTokens
-    //(allTokens |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c; r))
+    let res = 
+        buildAstAbstract 
+        //  allTokens
+            (allTokens |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c; r))
        // buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res

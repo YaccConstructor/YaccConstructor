@@ -229,7 +229,6 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
  
         let mkNewString (edg:LexerEdge<_,'br>) (stt:State<_,_>) =
             let ch = edg.Label.Value
-            //let mutable count_pos_line = 0
             let newPos (p:Option<Position<_>>) =
                 match p with
                 | Some x when x.back_ref = edg.BackRef.Value->
@@ -237,7 +236,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             pos_fname = ""
                             pos_lnum = 0
                             pos_bol = 0
-                            pos_cnum = x.pos_cnum + 1 //!lexbuf.CountPosLine
+                            pos_cnum = x.pos_cnum + 1
                             back_ref = edg.BackRef.Value
                     }
 
@@ -246,7 +245,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         pos_fname = ""
                         pos_lnum = 0
                         pos_bol = 0
-                        pos_cnum = 0//!lexbuf.CountPosLine
+                        pos_cnum = 0
                         back_ref = edg.BackRef.Value
                     }
             
@@ -264,7 +263,6 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
                             , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
                     )
-
             else 
                 new StateInfo<_,'br>(edg.Source, ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
                 |> ResizeArray.singleton
@@ -290,7 +288,6 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         add edg newStt
                 go stt      
             | None -> add edg stt
-
             acc 
 
         let res_edg_seq = 
@@ -312,19 +309,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
 
     let inputGraph actions (inG:LexerInputGraph<'br>) printG =
         let lexbuf = new LexBuffer<_,'br>(inG) 
-//        let g = new LexerInnerGraph<_>(inG)   
-//        let sorted = g.TopologicalSort() |> Array.ofSeq
-//        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-//        let startState = new State<_,_>(0,-1, ResizeArray.singleton (new StateInfo<_,_>(0,new ResizeArray<_>(), new ResizeArray<_>())))
-//        states.[g.StartVertex] <- ResizeArray.singleton startState
-//        let edgesSeq = seq{ for v in sorted do
-//                              yield g.OutEdges v |> Array.ofSeq
-//                                  
-//                           }
-//                       |> Seq.filter (fun x -> x.Length > 0)
         let newEdgs = 
             tokenize actions lexbuf printG
-        //states edgesSeq sorted.[sorted.Length-1] printG 
             |> Array.ofSeq
         let res = new ParserInputGraph<_>()
         let r = newEdgs
@@ -338,7 +324,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
 
-
+    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) =
+        0
     member tables.Tokenize(actions,g, ?printG) =
         inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
     static member Create(trans,accept) = new UnicodeTables(trans,accept)

@@ -24,7 +24,7 @@ open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
-
+open Yard.Generators.RNGLR.ErrorInfo
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]
@@ -52,9 +52,8 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType>
-    | Error of int * 'TokenType * string * ParserDebugFuns<'TokenType>
-
+    | Success of Tree<'TokenType> * Dictionary<Family, ErrorInfo>
+    | Error of int * 'TokenType * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorInfo>
 
 /// Compare vertex like a pair: (level, state)
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
@@ -175,17 +174,21 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     let getEpsilon =
         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
         fun i -> epsilons.[i]
-                          
-    // If input stream is empty or consists only of EOF token
+    /// info about errors
+    let errDict = new Dictionary<Family, ErrorInfo>()
+                              
+    // If input stream is empty or consists only of RNGLR_EOF token
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
-        if parserSource.AcceptEmptyInput then
-            Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
+        if parserSource.AcceptEmptyInput 
+        then
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
         else
             Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string",
                     {
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
-                    })
+                    }, 
+                    errDict)
     else                                     
         // Currently processed token
         let curToken = ref enum.Current
@@ -203,8 +206,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         /// Stores states, used on current level. Instead statesCount must be number of non-terminals, but doesn't matter
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
-
-        //let newRules = new BlockResizeArray<_>()
 
         let addVertex state level (edgeOpt : option<Vertex * obj>) =
             let dict = stateToVertex
@@ -241,7 +242,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
-                        //printfn "%d %d %d %d" state family.prod final.Level final.State
                         let isCreated, edgeLabel = addEdge final family edges.[state] false
                         if (pos > 0 && isCreated) then
                             let arr = parserSource.Reduces.[state].[!curNum]
@@ -375,6 +375,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if usedStates.Count <> 0 
             then 
                 let prevNum = !curNum
+                let errorOn = parserSource.NumToString prevNum
 
                 curNum := parserSource.ErrorIndex
                 let temp = new Queue<_>()
@@ -411,7 +412,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                 if pushes.Count <> 0 
                                 then
                                     let recVert = fst <| pushes.Peek()
-                                    if recVert.State <> vertex.State 
+                                    if  recVert.State <> vertex.State 
                                     then 
                                         pushes.Push (vertex, push)
                                         temp.Enqueue path
@@ -420,9 +421,66 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                     temp.Enqueue path
 
                     pushes.Count + reductions.Count >= recVertNumber
+                
+                let getPrevVertices() = 
+                    let isOldVertex (v : Vertex) = 
+                        curVertices.ToArray() 
+                        |> Array.exists (fun (x, y) -> x.Level = v.Level && x.State = v.State) 
+                
+                    let rec astToTokens (x : obj) =
+                        let mutable res = []
+                        match x : obj with 
+                        | :? int as t when t >= 0 -> res <- x :: res
+                        | :? AST as ast ->
+                            if ast.other <> null 
+                            then
+                                for family in ast.other do
+                                    if family.prod = parserSource.LeftSide.Length
+                                    then 
+                                        res <- res @ [ast]
+                                    else
+                                        let tmp = astToTokens family
+                                        res <- res @ tmp
+                            
+                            if ast.first.prod = parserSource.LeftSide.Length
+                            then 
+                                res <- [ast] @ res
+                            else
+                                res <- astToTokens ast.first @ res
 
-                let searchRecSymbol (unbrowsed : obj[]) = 
-                    let makeErrReductions (vertex : Vertex) state (unbrowsed : obj[]) = 
+                        | :? Family as fam ->
+                            for i=0 to fam.nodes.Length-1 do
+                                res <- res @ astToTokens fam.nodes.[i]
+                        | _ -> ()
+                        res
+                                
+                    let oldVertices = curVertices.ToArray()
+                    curVertices.Clear()
+                    for vertex, path in oldVertices do
+                        if vertex.OutEdges.first.Dest <> null 
+                        then
+                            if vertex.OutEdges.other <> null 
+                            then
+                                for edge in vertex.OutEdges.other do 
+                                    if  not <| isOldVertex edge.Dest
+                                    then
+                                        let tmp = astToTokens edge.Ast
+                                        let newPath = tmp @ path 
+                                        curVertices.Push (edge.Dest, newPath)
+
+                            if  not <| isOldVertex vertex.OutEdges.first.Dest
+                            then
+                                let tmp = astToTokens vertex.OutEdges.first.Ast
+                                let newPath = tmp @ path 
+                                curVertices.Push (vertex.OutEdges.first.Dest, newPath)
+            
+                let searchRecSymbol (unbrowsed : obj[]) (expected : int[])= 
+                    let inline collectErrorInfo (errFamily : Family) (expected : int[]) = 
+                        let exp = 
+                            expected |> Array.map (fun i -> parserSource.NumToString i)
+                        errDict.Add (errFamily, new ErrorInfo (0, exp, errorOn))
+                    
+                    let reduceToError (vertex : Vertex) state (unbrowsed : obj[]) = 
                         let prodNumber = parserSource.Rules.Length
                         let pos = unbrowsed.Length
                         if pos = 0 
@@ -438,10 +496,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                         reductions.Push (vertex, prod, pos, Some (vertex, ast))
                         else    
                             let family = new Family(prodNumber, new Nodes(unbrowsed))
+                            collectErrorInfo family expected
                             if not <| containsEdge vertex family edges.[state] 
                             then
                                 let isCreated, edgeLabel = addEdge vertex family edges.[state] true
-                                //printfn "isCreated %b" isCreated
                                 let arr = parserSource.Reduces.[state].[!curNum]
                                 if arr <> null 
                                 then
@@ -453,7 +511,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     if parserSource.Reduces.[state].[!curNum] <> null
                     then // reductions is possible
                         let vertex = fst <| pushes.Peek()
-                        makeErrReductions vertex state unbrowsed
+                        reduceToError vertex state unbrowsed
                                             
                     else // if shift is possible
                         let oldPushes = pushes.ToArray()
@@ -463,39 +521,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         usedStates.Clear()
                 
                         for vertex, state in oldPushes do
-                            makeErrReductions vertex state unbrowsed
+                            reduceToError vertex state unbrowsed
 
                             let astNode = box tokens.Count
                             tokens.Add !curToken
                             addVertex state !curInd None |> ignore
 
-                let getPrevVertices() = 
-                    let isNewVertex (v : Vertex) = 
-                        let flag = ref true
-                        for vert, _ in curVertices do
-                            if !flag && vert.Level = v.Level && vert.State = v.State 
-                            then
-                                flag := false
-                        !flag
-                
-                    let oldVertices = curVertices.ToArray()
-                    curVertices.Clear()
-                    for vertex, path in oldVertices do
-                        if vertex.OutEdges.first.Dest <> null 
-                        then
-                            if vertex.OutEdges.other <> null 
-                            then
-                                for edge in vertex.OutEdges.other do 
-                                    if  isNewVertex edge.Dest
-                                    then
-                                        let newPath = edge.Ast :: path 
-                                        curVertices.Push (edge.Dest, newPath)
-
-                            if isNewVertex vertex.OutEdges.first.Dest
-                            then
-                                let newPath = vertex.OutEdges.first.Ast :: path
-                                curVertices.Push (vertex.OutEdges.first.Dest, newPath)
-            
                 while curVertices.Count <> 0 && not <| containsRecState curVertices do
                     getPrevVertices()
                 
@@ -537,6 +568,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     else             
                         curNum := parserSource.EofIndex
                     var := isRecToken !curNum
+                
                 if  !var >= 0
                 then 
                     let path = temp.ToArray()
@@ -544,60 +576,41 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let skippedArray = skipped.ToArray()
                     let unbrowsed = Array.append need skippedArray
                     pushes.Push (recVertex.[!var], recPush.[!var])
-                    searchRecSymbol unbrowsed             
+                    searchRecSymbol unbrowsed recoveryTokens.[!var]            
 
-        let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
-        let mutable wasError = ref false
-        let lastErr = ref -1
+        let wasError = ref false
 
         while not !isEnd && not !wasError do
             if usedStates.Count = 0 && reductions.Count = 0
             then
-                let errInfo =  !curInd, !curToken 
-                errorList <- errInfo :: errorList
-                wasError <- ref true
+                wasError := true
             else
                 makeReductions !curInd
                 attachEdges()
                 if !curNum = parserSource.EofIndex then isEnd := true
                 elif pushes.Count = 0 then 
-                    if !curInd - !lastErr > 0
-                    then
-                        let errInfo =  !curInd, !curToken
-                        errorList <- errInfo :: errorList
                     if errorRuleExist 
                     then 
                         recovery()
-                        lastErr := !curInd
-                    else wasError <- ref true
+                    else wasError := true
                 else
                     incr curInd
                     shift !curInd
         
-        let isAcceptState() = 
-            let flag = ref false
-            for state in usedStates do
-                if not !flag 
-                then
-                    flag := parserSource.AccStates.[state]
-            !flag                    
+        let isAcceptState() =                
+            usedStates.ToArray()
+            |> Array.exists (fun state -> parserSource.AccStates.[state])
 
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
-            if !curInd - !lastErr > 0
-            then
-               let errInfo =  !curInd, !curToken
-               errorList <- errInfo :: errorList
             if errorRuleExist 
             then 
                  recovery()
                  makeReductions <| !curInd + 1
                  attachEdges()
-                 lastErr := !curInd
-                 isAcceptState() |> ignore
-            else wasError <- ref true
+            else wasError := true
 
         let lastTokens count =
             [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do
@@ -608,17 +621,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                 lastTokens = lastTokens
             }
-        //(debugFuns ()).drawGSSDot "stack.dot"
-        (*if not errorList.IsEmpty 
-        then
-            errorList <- List.rev errorList
-            let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
-            for i = 0 to errorList.Length-1 do
-                printfn "Parse error in %d position in %s token. " <| fst errorList.[i] <| tokenToString (snd errorList.[i])
-            printfn "errorList(parser).count = %d" errorList.Length*)
+        (*let errors = new Dictionary<_,_>(errDict)
+        errDict.Clear()*)
+        
         if !wasError 
         then 
-            Error (!curInd , !curToken , "Parse Error", debugFuns ())
+            Error (!curInd , !curToken , "Parse Error", debugFuns (), errDict)
         else
             let root = ref None
             let addTreeTop res =
@@ -632,7 +640,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, !curToken, "Input was fully processed, but it's not complete correct string.", debugFuns ())
+            | None -> Error (!curInd, !curToken, "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success <| new Tree<_>(tokens.ToArray(), res, parserSource.Rules)
+                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)

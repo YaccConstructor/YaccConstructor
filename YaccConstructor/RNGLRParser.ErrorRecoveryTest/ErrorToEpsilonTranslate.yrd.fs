@@ -174,7 +174,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_error) 
+            ((unbox _rnglr_children.[0]) : list<ErrorNode>)
              |> List.iter (fun (r) -> 
               _rnglr_cycle_res := (
                 
@@ -220,5 +220,5 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
   |] 
-let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
-  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats (if args.filterEpsilons then _rnglr_filtered_epsilons else _rnglr_epsilons) args.tokenToRange args.zeroPosition args.clearAST) : '_rnglr_type_yard_start_rule
+let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) (dict : _ ) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats (if args.filterEpsilons then _rnglr_filtered_epsilons else _rnglr_epsilons) args.tokenToRange args.zeroPosition args.clearAST dict) : '_rnglr_type_yard_start_rule

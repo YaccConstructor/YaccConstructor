@@ -151,7 +151,12 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | PRef (name, args) ->
             incr num
             let name = Source.toString name
-            let value = sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
+            let value = 
+                if name <> "error" 
+                then
+                    sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
+                else 
+                    sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 
@@ -225,17 +230,17 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let aboveArrayL = List.ofArray >> aboveListL
     let concats =
-        let getConcat i = 
-            let typeName = "'_rnglr_type_" + indexator.indexToNonTerm i
-            let called = printArgsCallList args.[i] ""
-            let args = printArgsDeclare args.[i]
-            let listName = "_rnglr_list"
-            let itemName = "_rnglr_item"
-            wordL ("(fun (" + listName + " : list<_>) -> ")
-            @@-- (wordL "box (" -- args)
-            @@-- (wordL <| listName + " |> List.map (fun " + itemName
-                            + " -> ((unbox " + itemName + ") : " + typeName + ") " + called
-                            + " ) |> List.concat));")
+        let getConcat i =
+                let typeName = "'_rnglr_type_" + indexator.indexToNonTerm i
+                let called = printArgsCallList args.[i] ""
+                let args = printArgsDeclare args.[i]
+                let listName = "_rnglr_list"
+                let itemName = "_rnglr_item"
+                wordL ("(fun (" + listName + " : list<_>) -> ")
+                @@-- (wordL "box (" -- args)
+                @@-- (wordL <| listName + " |> List.map (fun " + itemName
+                                + " -> ((unbox " + itemName + ") : " + typeName + ") " + called
+                                + " ) |> List.concat));")
         [|for i = 0 to args.Length - 1 do 
             yield getConcat i|]
         |> aboveArrayL
@@ -271,11 +276,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let funRes =
         let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
-        let funHead = wordL ("let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : " + typeName + " = ")
+        let funHead = wordL ("let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) (dict : _ ) : " + typeName + " = ")
         let body =
             [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName
                             + " (if args.filterEpsilons then " + epsilonNameFiltered + " else " + epsilonName + ")"
-                            + " args.tokenToRange args.zeroPosition args.clearAST) : " + typeName)
+                            + " args.tokenToRange args.zeroPosition args.clearAST dict) : " + typeName)
             ] |> aboveListL
         funHead @@-- body
 

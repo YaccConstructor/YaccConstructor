@@ -30,7 +30,7 @@ let initialConvert (def : Definition.t<_,_>) =
         let wasStart = ref false
         ruleList
         |> List.fold
-            (fun res rule ->
+            (fun res rule->
                 if not rule.isStart then rule::res
                 else
                     if !wasStart then failwith "More than one start rule"
@@ -52,8 +52,8 @@ let initialConvert (def : Definition.t<_,_>) =
     let splitAlters ruleList =
         let rec splitRule (curRule : Rule.t<_,_>) res = function
             | PAlt (l, r) ->
-                let leftRes = splitRule curRule res l
-                splitRule curRule leftRes r
+                let rightRes = splitRule curRule res r
+                splitRule curRule rightRes l
             |  x -> {curRule with body = x}::res
         List.fold (fun res rule -> splitRule rule res rule.body) [] ruleList
 

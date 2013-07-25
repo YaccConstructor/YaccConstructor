@@ -226,7 +226,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         if x.Info.Exists(fun j -> j.StartV = i.StartV
                                                   && i.AccumulatedString.Count = j.AccumulatedString.Count
                                                   && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
-                            |> not
+                           |> not
                         then x.Info.Add i)
             | None -> lexbuf.States.[edg.Target].Add newStt
  

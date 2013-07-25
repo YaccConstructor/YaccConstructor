@@ -1,0 +1,3 @@
+[<Start>]
+a: A res=b{res}
+b: B{1} | r=error{-1}

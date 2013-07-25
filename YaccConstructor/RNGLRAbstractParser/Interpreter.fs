@@ -24,7 +24,7 @@ open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
-open Yard.Generators.RNGLR.Parser
+open Yard.Generators.RNGLR.Parser 
 
 
 [<Struct>]
@@ -39,6 +39,105 @@ type TokensInfo<'token> =
     val Tokens  : array<TokenWithInfo<'token>>
     val CurLvl : int
     new (ts,cl) = {Tokens=ts;CurLvl=cl}
+
+// Custom graph structure. For optimization and needed (by algorithm) relation with AST
+
+/// Compare vertex like a pair: (level, state)
+let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
+let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && v'.State = v.State
+
+/// Add edges, what must be unique (after shift or epsilon-edges).
+/// All edges are sorted by destination ascending.
+let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
+    let mutable i = out.Count - 1
+    while i >= 0 && less (fst out.[i]) v do
+        i <- i - 1
+    out.Insert (i+1, (v, ast))
+
+/// Check if edge with specified destination and AST already exists
+let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
+    let mutable i = out.Count - 1
+    while i >= 0 && less (fst out.[i]) v do
+        i <- i - 1
+    while i >= 0 && (let v',f' = out.[i] in eq v' v && f <> f') do
+        i <- i - 1
+    i >= 0 && (let v',f' = out.[i] in eq v' v && f = f')
+
+/// Add or extend edge with specified destination and family.
+/// All edges are sorted by destination ascending.
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) =
+    let mutable i = out.Count - 1
+    let inline fst3 (x,_,_) = x
+    while i >= 0 && less (fst3 out.[i]) v do
+        i <- i - 1
+
+    let isCreated = not (i >= 0 && eq (fst3 out.[i]) v)
+
+    let ast = if not isCreated 
+              then let _,_,n = out.[i] in n
+              else new AST (Unchecked.defaultof<_>, null)
+
+    out.Insert (i+1, (v, family, ast))
+    isCreated, ast
+
+/// Check if edge with specified destination and family already exists
+let private containsEdge (v : Vertex) (f : Family) (out : ResizeArray<Vertex * Family * AST>) =
+    let inline fst3 (x,_,_) = x
+    let mutable i = out.Count - 1
+    while i >= 0 && less (fst3 out.[i]) v do
+        i <- i - 1
+    while i >= 0 && (let v',f',_ = out.[i] in eq v' v && f <> f') do
+        i <- i - 1
+    i >= 0 && (let v',f',_ = out.[i] in eq v' v && f = f')
+
+let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide : int[])
+        (initNodes : seq<Vertex>) (numToString : int -> string) (errInd: int) (path : string) =
+    use out = new System.IO.StreamWriter (path)
+    let was = new Dictionary<_,_>()
+    let levels = new Dictionary<_,_>()
+    out.WriteLine "digraph GSS {"
+    let print s = out.WriteLine ("    " + s)
+    let curNum = ref 0
+    print "rankdir=RL"
+    let getAstString (ast : obj) =
+        match ast with
+        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"    
+        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
+        | :? AST as ast -> 
+            let nonT = 
+                if ast.first.prod < leftSide.Length then ast.first.prod
+                else errInd
+            numToString leftSide.[nonT]
+        | _ -> failwith "Unexpected ast"
+
+    let rec dfs (u : Vertex) =
+        was.Add (u, !curNum)
+        if not <| levels.ContainsKey u.Level then
+            levels.[u.Level] <- [!curNum]
+        else
+            levels.[u.Level] <- !curNum :: levels.[u.Level]
+        print <| sprintf "%d [label=\"%d\"]" !curNum u.State
+        incr curNum
+        if u.OutEdges.first <> Unchecked.defaultof<_> then
+            handleEdge u u.OutEdges.first
+            if u.OutEdges.other <> null then
+                u.OutEdges.other |> Array.iter (handleEdge u)
+
+    and handleEdge u (e : Edge) =
+        let v = e.Dest
+        if not <| was.ContainsKey v then
+            dfs v
+        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+
+    for v in initNodes do
+        if not <| was.ContainsKey v then
+            dfs v
+    
+    for level in levels do
+        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+
+    out.WriteLine "}"
+    out.Close()
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<int*array<'TokenType*int>>) =
     let processChunk (cl,ts) =
@@ -86,8 +185,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let usedStates = new Stack<_>(statesCount)
         let stateToVertex : Vertex[] = Array.zeroCreate statesCount
 
-        //let newRules = new BlockResizeArray<_>()
-
         let addVertex vertData =
             [|
             for (state, level, (edgeOpt : option<Vertex * obj>)) in vertData |> Array.sortBy (fun (_,x,_) -> -x) do
@@ -131,15 +228,19 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     let family = new Family(prod, new Nodes(Array.copy path))
                     if not <| containsEdge final family edges.[state] then
                         let isCreated, edgeLabel = addEdge final family edges.[state]
-                        let curNums = 
-                            if (pos > 0 && isCreated) 
-                            then [|parserSource.EofIndex|]
-                            else curTokens.Value.Tokens |> Array.map (fun x -> x.CurNum )                            
-                        for curNum in curNums do 
-                            let arr = parserSource.Reduces.[state].[curNum]
-                            if arr <> null then
-                                for (prod, pos) in arr do
-                                    reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
+                        if (pos > 0 && isCreated) then
+                            if curTokens.Value.Tokens.Length = 0
+                                then
+                                    let arr = parserSource.Reduces.[state].[parserSource.EofIndex]
+                                    if arr <> null then
+                                        for (prod, pos) in arr do
+                                            reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
+                                else
+                                    for tok in curTokens.Value.Tokens do 
+                                        let arr = parserSource.Reduces.[state].[tok.CurNum]
+                                        if arr <> null then
+                                            for (prod, pos) in arr do
+                                                reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
@@ -256,28 +357,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     pushesMap.[num].Add((oldPushes,newAstNode)) 
                 else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
             pushesInitFun curTokens.Value.Tokens.Length
-
-        let applyStashedPushes () =
-            for vertex in usedStates do
-                stateToVertex.[vertex] <- null
-            usedStates.Clear()
-            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-                for (vertex, state) in oldPushes do
-                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                    addSimpleEdge vertex newAstNode simpleEdges.[state]
-            pushesMap.Remove(!curLvl) |> ignore
-            makeReductions ()
-            attachEdges()
-//            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-//            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                        <| sprintf "dot/stack_%d_4.dot" !curLvl             
-
+ 
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
         let mutable wasError = ref false
         let lastErr = ref -1
-
-        while not !isEnd && not !wasError do        
+        let NeadSh = ref true
+        while not !isEnd && not !wasError do
+        
             if usedStates.Count = 0 && reductions.Count = 0
             then
                 let errInfo = !curTokens
@@ -285,8 +372,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 wasError <- ref true
             else
                 if !isEOF
-                then 
-                    applyStashedPushes ()
+                then
+                    try 
+                        
+                        for vertex in usedStates do
+                            stateToVertex.[vertex] <- null
+                        usedStates.Clear()
+                        for  oldPushes,newAstNode in pushesMap.[!curLvl] do
+                            for (vertex, state) in oldPushes do
+                                let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                                addSimpleEdge vertex newAstNode simpleEdges.[state]
+                        pushesMap.Remove(!curLvl) |> ignore
+                        makeReductions ()
+                        attachEdges()
+                    with _ -> () 
                     isEnd := true
                 (*elif pushes.Count = 0 then 
                     if !curLvl - !lastErr > 1 
@@ -299,16 +398,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         lastErr := !curLvl
                     else wasError <- ref true*)
                 else
+                    let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl
-                        then applyStashedPushes ()
+                        then
+                            for vertex in usedStates do
+                                stateToVertex.[vertex] <- null
+                            usedStates.Clear()
+                            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
+                                for (vertex, state) in oldPushes do
+                                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                                    addSimpleEdge vertex newAstNode simpleEdges.[state]
+                            pushesMap.Remove(!curLvl) |> ignore
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
-                            usedStates.Clear()                                        
+                            usedStates.Clear()
+                    makeReductions ()
+                    attachEdges()
+
                     shift ()
-        
+
         let isAcceptState() = 
             let flag = ref false
             for state in usedStates do
@@ -321,7 +432,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
             //recovery()
-            makeReductions ()
+            makeReductions () //!curInd
             attachEdges()
 
         let lastTokens count =

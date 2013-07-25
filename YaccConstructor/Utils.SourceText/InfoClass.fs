@@ -17,6 +17,7 @@ let rec getLine (map : array<_>) id offset left right = //BinarySearch
 type ProjInfo () =
     let FilesMap : Dictionary<_,_>  = new Dictionary<_,_> () //Dictionary<int/*id файла*/, string/*имя файла*/>
     let LinesMap : Dictionary<int<id>, array<int64<symbol>>> = new Dictionary<_,_>() //Dictionary<int /*id*/, /*array<_>*/
+    member this.AddFile id filePath = LinesMap.Add(id, filePath)
     member this.AddLine id lineMap = LinesMap.Add(id, lineMap)    
     member public this.GetMap (streamElement : StreamReader) = 
         try
@@ -66,6 +67,13 @@ type ProjInfo () =
         let map = LinesMap.[id]
         if offset > map.[map.Length - 1]
         then failwith ("Offset is too big")
-        let inLine = (getLine map id offset 0 (map.Length - 1)) + 1
-        let inColumn = offset - map.[inLine - 1] + 1L<symbol>
-        new Trinity(id, (int inColumn) * _symbol, inLine * _line)
+        if offset = map.[map.Length - 1]
+        then 
+            new Trinity(
+                id
+                , (int (map.[map.Length - 1] - map.[map.Length - 2] + 1L<symbol>)) * _symbol
+                , (map.Length - 1) * _line )
+        else
+            let inLine = (getLine map id offset 0 (map.Length - 1)) + 1
+            let inColumn = offset - map.[inLine - 1] + 1L<symbol>
+            new Trinity(id, (int inColumn) * _symbol, inLine * _line)

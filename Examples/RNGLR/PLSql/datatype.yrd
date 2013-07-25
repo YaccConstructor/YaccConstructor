@@ -1,0 +1,33 @@
+﻿[<AllPublic>]
+module Datatype
+
+sql_datatype:
+      'BIGINT'
+    | 'NUMERIC'
+    | 'BIT'
+    | 'SMALLINT'
+    | 'DECIMAL'
+    | 'DATETIME'
+    | 'SMALLMONEY'
+    | 'SYSNAME'
+    | 'INT'
+    | 'TINYINT'
+    | 'MONEY'
+    | 'FLOAT' type_size?
+    | 'REAL'
+    | 'CHAR' type_size?
+    | 'VARCHAR' type_size?
+	| 'VARCHAR2' type_size?
+    | 'VARBINARY' type_size?
+    | 'NCHAR' type_size?  
+    | 'NVARCHAR' type_size?
+    | 'SQL_VARIANT'
+	| 'CLOB'
+	| 'RAW' type_size?
+	| 'BLOB'
+	| 'NUMBER' type_size?
+	| 'TIMESTAMP'
+	| 'BOOLEAN'
+
+type_size : 
+     '(' (DEC_NUMBER | 'MAX') ')'

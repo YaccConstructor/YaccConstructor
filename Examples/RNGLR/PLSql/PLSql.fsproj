@@ -41,6 +41,50 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <Import Project="..\..\yc\FsYard.targets" />
+  <PropertyGroup>
+    <RLiterals>KW_%s</RLiterals>
+    <NeedTranslate>false</NeedTranslate>
+    <Module>Yard.Examples.MSParser</Module>
+    <EpsilonPath>epsilons</EpsilonPath>
+    <OutFile>MsParser.fs</OutFile>
+    <Token>SourceText</Token>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <FsYard Include="plsql.yrd" />
+    <FsYard Include="expr.yrd" />
+    <FsYard Include="datatype.yrd" />
+    <FsYard Include="stmnt.yrd" />
+    <FsYard Include="execute_stmnt.yrd" />
+    <FsYard Include="..\common_grammars\set_stmnt.yrd">
+      <Link>set_stmnt.yrd</Link>
+    </FsYard>
+    <FsYard Include="crud.yrd" />
+    <FsYard Include="select_crud.yrd" />
+    <FsYard Include="pl_ddl.yrd" />
+    <FsYard Include="cycles_stmnt.yrd" />
+    <FsYard Include="create_table.yrd" />
+    <FsYard Include="alter_table.yrd" />
+    <FsYard Include="transaction.yrd" />
+    <FsYard Include="create_package.yrd" />
+    <FsYard Include="create_package_body.yrd" />
+    <FsYard Include="declare_stmnt.yrd" />
+    <FsYard Include="..\common_grammars\MsCommon.yrd">
+      <Link>PlCommon.yrd</Link>
+    </FsYard>
+    <FsYard Include="..\..\..\GrammarTemplates\Common.yrd">
+      <Link>Common.yrd</Link>
+    </FsYard>
+    <FsLex Include="Lexer.fsl">
+      <OtherFlags>--unicode</OtherFlags>
+    </FsLex>
+    <Compile Include="MsParser.fs" />
+    <Compile Include="LexerHelper.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="Driver.fs" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
@@ -63,33 +107,6 @@
       <HintPath>..\..\yc\Utils.SourceText.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <PropertyGroup>
-    <RLiterals>KW_%s</RLiterals>
-    <OutFile>MsParser.fs</OutFile>
-    <NeedTranslate>false</NeedTranslate>
-    <Token>SourceText</Token>
-    <Module>Yard.Examples.MSParser</Module>
-    <EpsilonPath>epsilons</EpsilonPath>
-  </PropertyGroup>
-  <ItemGroup>
-    <FsYard Include="plsql.yrd" />
-    <FsYard Include="..\common_grammars\MsCommon.yrd">
-      <Link>PlCommon.yrd</Link>
-    </FsYard>
-    <FsYard Include="..\..\..\GrammarTemplates\Common.yrd">
-      <Link>Common.yrd</Link>
-    </FsYard>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags>--unicode</OtherFlags>
-    </FsLex>
-    <Compile Include="MsParser.fs" />
-    <Compile Include="LexerHelper.fs" />
-    <Compile Include="Lexer.fs" />
-    <Compile Include="Driver.fs" />
-  </ItemGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

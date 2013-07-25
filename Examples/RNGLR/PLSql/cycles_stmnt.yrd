@@ -1,0 +1,17 @@
+﻿[<AllPublic>]
+module Cycles_stmnt
+
+open Expr, Stmnt
+
+while_stmt: 'WHILE' sql_expr proc_body_stmnt
+
+case:
+    'CASE' sql_expr?
+    ('WHEN' sql_expr 'THEN' sql_expr)*
+    ['ELSE' sql_expr]
+    'END'
+
+if_stmt: 'IF' sql_expr 'THEN' (proc_body_stmnt)+ 
+         ('ELSEIF' sql_expr 'THEN' (proc_body_stmnt)+)*
+		 ['ELSE' (proc_body_stmnt)+]
+		 'END' 'IF' 

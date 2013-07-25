@@ -1,0 +1,49 @@
+﻿[<AllPublic>]
+module Execute_stmnt
+
+open MsCommon, Expr, Common
+
+execute_stmnt:
+    execute_proc
+  | execute_character_string
+  | execute_command
+
+execute_proc:
+    ['EXEC' | 'EXECUTE']
+    (
+        create_object '.' IDENT
+        '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
+      | [LOCALVAR '=']
+        (full_ident [';' DEC_NUMBER] | LOCALVAR) 
+        (* brace_opt<
+          '(' *) 
+            comma_list<[
+              [LOCALVAR '=']
+              (
+                  sql_expr
+                | LOCALVAR ['OUTPUT' | 'OUT']
+                | 'DEFAULT'?
+              )
+            ]>
+          (* ')'
+        > *)
+        ['WITH' 'RECOMPILE']
+    )
+
+create_object: STOREDPROCEDURE '(' comma_list<sql_expr> ')'
+
+execute_character_string:
+    ('EXEC' | 'EXECUTE') 
+    '(' ((LOCALVAR | STRING_CONST) '+'?)+ ')'    
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ';'?
+
+execute_command:
+    ('EXEC' | 'EXECUTE')
+    '('
+      (LOCALVAR | STRING_CONST '?'? '+'?)+
+      (',' sql_expr 'OUTPUT'?)*
+    ')' 
+    ['AS' ('LOGIN' | 'USER') '=' STRING_CONST]
+    ['AT' full_ident]
+    ';'?

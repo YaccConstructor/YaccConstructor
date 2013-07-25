@@ -1,0 +1,64 @@
+﻿[<AllPublic>]
+module Stmnt
+
+open Select_crud, Set_stmnt, Execute_stmnt, Expr, MsCommon, Datatype, Create_table, Crud, Common, Transaction, Declare_stmnt, Cycles_stmnt, Pl-ddl
+
+proc_body_stmnt:
+  ('<<' ident '>>')*
+     (select_stmnt
+   | set_stmnt
+   | execute_stmnt 
+   | commit_transaction  
+   | declare
+   | 'RETURN' sql_expr
+   | if_stmt
+   | raiserror_stmnt
+   | stmt_block
+   | drop_procedure
+   | while_stmt
+   | create_table
+   | insert
+   | fetch_stmnt
+   | null_stmt
+   | update_stmnt 
+   | open_stmnt
+   | close_stmnt
+   | declare_section)
+   ';'
+ 
+declare:  
+    'DECLARE' 
+    list<(declare_section) ';'>
+
+open_stmnt:
+     'OPEN' full_ident ['(' list<ident ';'> ')']
+
+close_stmnt:
+     'CLOSE' full_ident ['(' list<ident ';'> ')']
+
+declare_section:
+        declare_stmnt
+	   |definition_stmnt
+	   |pragma
+
+pragma: 'PRAGMA' 'AUTONOMOUS_TRANSACTION' 
+
+raiserror_stmnt:
+    'RAISERROR' '(' (dec_num | STRING_CONST | LOCALVAR)
+    (',' dec_num ',' dec_num)
+    [',' comma_list<sql_expr>] ')'
+    ['WITH' comma_list<('LOG' | 'NOWAIT' | 'SETERROR')>]
+	
+stmt_block: 'BEGIN' proc_body_stmnt* exception? 'END' [ident]
+
+exception:
+      'EXCEPTION' 'WHEN' 
+       (not_empty_list<ident 'OR'>
+	  |'OTHERS') 
+      'THEN' proc_body_stmnt*
+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') full_ident+
+  
+null_stmt: 'null'
+
+

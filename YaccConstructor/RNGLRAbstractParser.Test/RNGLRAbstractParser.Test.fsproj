@@ -42,6 +42,7 @@
     <None Include="simpleCalc.yrd" />
     <None Include="Lexer.fsl" />
     <Compile Include="Calc.yrd.fs" />
+    <Compile Include="Lexer.fs" />
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
     <!--Compile Include="Lexer.fs" /-->
@@ -50,8 +51,12 @@
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
+    <None Include="Lexer.fsl" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AbstractLexer.Common">
+      <HintPath>..\AbstractLexer.Common\bin\Debug\AbstractLexer.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net-beta\Antlr3.Runtime.dll</HintPath>
     </Reference>

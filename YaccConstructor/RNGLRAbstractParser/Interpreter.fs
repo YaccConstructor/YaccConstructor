@@ -454,9 +454,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         if pushesMap.ContainsKey !curLvl
                         then
 //                            printfn "_____%A________" !curLvl
-//                            Array.iter (printfn "%A") vertices
-//                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                                <| sprintf "dot/stack_%d_2.dot" !curLvl    
+                            //Array.iter (printfn "%A") vertices
+                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                                <| sprintf "dot/stack_%d_2.dot" !curLvl    
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
@@ -469,15 +469,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //                            Array.iter (printfn "%A") vertices
 //                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
 //                                <| sprintf "stack_%d_1.dot" !curLvl
-                            makeReductions ()
-                            attachEdges()
-//                            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-//                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                                <| sprintf "dot/stack_%d_3.dot" !curLvl
+                        //    makeReductions ()
+                          //  attachEdges()
+                            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                                <| sprintf "dot/stack_%d_3.dot" !curLvl
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
+                    makeReductions ()
+                    attachEdges()
 
                     //curLvl := !nxtLvl
                     

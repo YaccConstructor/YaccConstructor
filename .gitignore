@@ -91,3 +91,4 @@ Examples/RNGLR/PLSql/FsYard.log
 Examples/AbstractAnalysis/AbstractAnalysis/log.txt
 Examples/AbstractAnalysis/AbstractAnalysis/out
 YaccConstructor/RNGLRParser.SimpleTest/out
+Examples/AbstractAnalysis/SQL/LogsTrees/*

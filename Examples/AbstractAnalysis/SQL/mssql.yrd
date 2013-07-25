@@ -27,16 +27,16 @@ open Yard.Utils.SourceText
 include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
 include "set_stmnt.yrd"
-include "../mssql/expr.yrd"
-include "../mssql/create_proc.yrd"
-include "../mssql/cycles_stmnt.yrd"
-include "../mssql/datatype.yrd"
-include "../mssql/stmnt.yrd"
-include "../mssql/execute_stmnt.yrd"
-include "../mssql/crud.yrd"
-include "../mssql/select_crud.yrd"
-include "../mssql/create_table.yrd"
-include "../mssql/transaction.yrd"
+include "expr.yrd"
+include "create_proc.yrd"
+include "cycles_stmnt.yrd"
+include "datatype.yrd"
+include "stmnt.yrd"
+include "execute_stmnt.yrd"
+include "crud.yrd"
+include "select_crud.yrd"
+include "create_table.yrd"
+include "transaction.yrd"
 
 tokens {
     _ of SourceText
@@ -54,7 +54,7 @@ module Main
 open Select_crud, Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt
 
 [<Start>]
-root_rule: (batch_body 'GO'?)*
+root_rule: batch_body
 
 batch_body: 
        create_proc

@@ -44,6 +44,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
@@ -51,9 +61,6 @@
     </ProjectReference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net-beta\Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Common">
-      <HintPath>..\RNGLRParser\bin\Release\Common.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
@@ -84,9 +91,6 @@
     <Reference Include="QuickGraph.Serialization">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\RNGLRCommon\bin\Release\RNGLRCommon.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

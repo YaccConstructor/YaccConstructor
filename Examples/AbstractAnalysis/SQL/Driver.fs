@@ -19,6 +19,7 @@
 
 module MSSqlParser
 
+open AbstractParsing.Common
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
 open Yard.Examples.MSParser
@@ -28,83 +29,58 @@ open Yard.Utils.StructClass
 open Yard.Utils.InfoClass
 open System
 open System.IO
+open QuickGraph.Algorithms
+open QuickGraph.Graphviz
+open Graphviz4Net.Dot
+open QuickGraph
+open Graphviz4Net.Dot.AntlrParser
 
 let lastTokenNum = ref 0L
 let traceStep = 50000L
-let c = ref 0
 
-let i = ref 0
-let convert (token : Token) = 
-    
-    let converted = !i, [| token, !i + 1 |]
-    incr i
-    converted
+let loadGraphFromDOT filePath = 
+    let parser = AntlrParserAdapter<string>.GetParser()
+    parser.Parse(new StreamReader(File.OpenRead filePath))
+
+let baseInputGraphsPath = "../../tests"
+let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
+
+let loadDotToQG gFile =
+    let g = loadGraphFromDOT(path gFile)
+    let qGraph = ParserInputGraph()
+        //new AdjacencyGraph<int, TaggedEdge<_,_>>()
+    let getTkn str =
+        try
+            Yard.Examples.MSParser.genLiteral str 0UL 0UL
+        with 
+        | _ -> IDENT(new SourceText(str, new SourceRange(0UL,0UL)))
+    g.Edges 
+    |> Seq.iter(
+        fun e -> 
+            let edg = e :?> DotEdge<string>
+            qGraph.AddVertex(int edg.Source.Id) |> ignore
+            qGraph.AddVertex(int edg.Destination.Id) |> ignore
+            qGraph.AddEdge(new ParserEdge<_>(int edg.Source.Id,int edg.Destination.Id, getTkn edg.Label)) |> ignore)
+    //qGraph.AddVerticesAndEdge(new ParserEdge<_>(4,5, RNGLR_EOF(new SourceText("", new SourceRange(0UL,0UL))))) |> ignore
+    qGraph
+//    let pGraph = 
+//    pGraph.AddVerticesAndEdgeRange(qGraph.Edges)
 
 let justParse (path:string) =
     use reader = new System.IO.StreamReader(path)
-
-    let tokenizerFun = 
-        let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
-        lexbuf.EndPos <- { pos_bol = 0; pos_fname=""; pos_cnum=0; pos_lnum=1 }    
-        let prevToken = ref None            
-        let timeOfIteration = ref System.DateTime.Now
-        fun (chan:MailboxProcessor<array<_>>) ->
-        let post = chan.Post
-        async {
-            try                    
-                while not lexbuf.IsPastEndOfStream do
-                    let count = ref 0L
-                    let buf = int traceStep |> Array.zeroCreate
-                    while !count < traceStep && not lexbuf.IsPastEndOfStream do
-                        lastTokenNum := 1L + !lastTokenNum                        
-                        buf.[int !count] <- Lexer.tokens lexbuf
-//                            let r = !c,[|Lexer.tokens lexbuf, !c+1|]
-//                            incr c
-//                            r
-                        count := !count + 1L                    
-                    let oldTime = !timeOfIteration
-                    timeOfIteration := System.DateTime.Now
-                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                    if int64 chan.CurrentQueueLength > 3L then                        
-                        int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
-                    post buf
-                            
-            with e -> printfn "LexerError:%A" e.Message
-        }   
-
-    let start = System.DateTime.Now
-    use tokenizer =  MailboxProcessor<_>.Start(tokenizerFun)
-    let lastTokenNum = ref 0L    
-    let timeOfIteration = ref System.DateTime.Now
-    //let lexbuf = Lexing.LexBuffer<_>.FromTextReader reader
-    let allTokens = 
-        seq{
-            while true do
-                let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + 1L //int64 arr.Length
-                if (!lastTokenNum % (traceStep)) = 0L then                 
-                    let oldTime = !timeOfIteration
-                    timeOfIteration := System.DateTime.Now
-                    let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
-                yield! arr
-                //yield Lexer.tokens lexbuf
-                }
-
     let translateArgs = {
         tokenToRange = fun x -> 0,0
         zeroPosition = 0
         clearAST = false
         filterEpsilons = true
     }
-    
-    let res = 
-        buildAstAbstract 
-        //  allTokens
-            (allTokens |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c; r))
-       // buildAst allTokens
-    printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
+    let allTokens = seq []
+    let res =
+        let g = loadDotToQG "s4.dot"
+        (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse buildAstAbstract g
+        //buildAstAbstract 
+    //buildAst allTokens
+    //printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 
 let p = new ProjInfo()
@@ -114,23 +90,23 @@ let Parse (srcFilePath:string) =
     let StreamElement = new StreamReader(srcFilePath, System.Text.Encoding.UTF8)  
     let map = p.GetMap StreamElement
     //Array.iter (printfn "%A") map
-    Lexer.id <- counter
+    //Lexer.id <- counter
     p.AddLine counter map
     counter <- counter + 1<id>
     //Lexer.id <- from (ProjInfo)
     match justParse srcFilePath with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
-        let coordinates = 
-            let x,y = tokenPos tok
-            let x = p.GetCoordinates x
-            let y = p.GetCoordinates y
-            sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
+        //let coordinates = 
+//            let x,y = tokenPos tok
+//            let x = p.GetCoordinates x
+//            let y = p.GetCoordinates y
+//            sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
         let data =
             let d = tokenData tok
             if isLiteral tok then ""
             else (d :?> SourceText).text
         let name = tok |> tokenToNumber |> numToString
-        printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
+        printfn "Error in file %s on position  on Token %s %s: %s" srcFilePath name data msg
         //dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
     | Yard.Generators.RNGLR.Parser.Success ast ->
@@ -145,7 +121,7 @@ let Parse (srcFilePath:string) =
         |> Seq.iter (fun (prods, gv) -> 
             printfn "conf# %i  prods: %A" (Seq.length gv) prods
             gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
-        //defaultAstToDot ast @"..\..\ast.dot"
+        defaultAstToDot ast @"..\..\ast.dot"
         //ast.ChooseLongestMatch()
         //let translated = translate translateArgs ast : list<Script>            
         //printfn "%A" translated

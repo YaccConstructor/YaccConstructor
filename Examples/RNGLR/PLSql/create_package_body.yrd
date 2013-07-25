@@ -1,0 +1,12 @@
+﻿[<AllPublic>]
+module Create_package_body
+
+open Common, MsCommon, Stmnt, Declare_stmnt
+
+create_package_body:
+      'CREATE' ['OR' 'REPLACE'] 'PACKAGE' 'BODY'
+	  full_ident
+	  ('IS' | 'AS')
+	  (declare_section ';')*
+	   (stmt_block ';'
+	   | 'END' [ident] ';')

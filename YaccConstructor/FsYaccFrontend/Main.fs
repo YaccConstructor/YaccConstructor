@@ -68,7 +68,7 @@ let ParseFile fileName =
         let (res : System.Tuple<Source.t option, Source.t list, Source.t list, Grammar.t<Source.t, Source.t>>) = Parser.s Lexer.token lexbuf
         let defHead = res.Item1
         { Definition.empty
-            with info = {fileName = ""}
+            with info = {fileName = fileName}
                  head = defHead
                  grammar = addBindings <| addStarts res.Item3 res.Item4
             }

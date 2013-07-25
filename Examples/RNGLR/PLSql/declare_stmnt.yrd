@@ -1,0 +1,60 @@
+﻿[<AllPublic>]
+module Declare_stmnt
+
+open MsCommon, Expr, Datatype, Stmnt, Select_crud
+
+declare_stmnt:
+      declare_proc
+	 |declare_funct
+	 |declare_const
+	 |declare_var
+	 |declare_cursor
+
+declare_const:
+     full_ident 'CONSTANT' sql_datatype ['NOT' 'NULL'] ((':' '=') | 'DEFAULT') sql_expr
+
+declare_proc:
+         'PROCEDURE'
+          full_ident    
+          ['(' 
+		      comma_list<parametr_declaration>
+		  ')']
+
+declare_funct:
+         'FUNCTION'
+          full_ident    
+          ['(' 
+		      comma_list<parametr_declaration>
+		  ')']
+		  'RETURN' sql_datatype
+
+parametr_declaration:
+           ident  
+		   ['IN'|'OUT'|('IN' 'OUT')] 
+		   sql_datatype 
+		   [(':' '=') | 'DEFAULT' sql_expr]
+
+declare_var:
+     full_ident sql_datatype? [':' '=' sql_expr] 
+
+declare_cursor:
+       'CURSOR' full_ident 'IS'  select_stmnt
+
+definition_stmnt:
+      definition_proc
+	 |definition_funct
+
+definition_proc:
+      declare_proc
+	  ('AS'|'IS')
+	  (declare_section ';')*
+	  stmt_block
+
+definition_funct:
+      declare_funct
+	  ('AS'|'IS')
+	  (declare_section ';')*
+	  stmt_block
+
+     
+  

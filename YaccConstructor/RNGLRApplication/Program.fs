@@ -16,10 +16,10 @@ let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with
-| Parser.Error (num, tok, message, debug),_ ->
+| Parser.Error (num, tok, message, debug, _),_ ->
     printfn "Error in position %d on Token %A: %s" num tok message
     debug.drawGSSDot "out.dot"
-| Parser.Success tree, tokens ->
+| Parser.Success (tree, _), tokens ->
     tree.PrintAst()
     RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
     //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)

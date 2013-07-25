@@ -1,0 +1,15 @@
+﻿[<AllPublic>]
+module Create_package
+
+open Common, MsCommon, Stmnt, Declare_stmnt
+
+create_package:
+      'CREATE' ['OR' 'REPLACE'] 'PACKAGE'
+	  full_ident
+	  ('IS' | 'AS')
+	  (list<declare_stmnt ';'>) ';' 
+	  'END'
+	  [ident]
+	  ';'
+
+

@@ -40,14 +40,15 @@ type ``MS-SQL parser tests`` () =
         p.AddLine counter map
         counter <- counter + 1<id>
         match MSSqlParser.justParse file with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg,dbg) ->
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg, _) ->
             dbg.drawGSSDot @"..\..\stack.dot"
             dbg.lastTokens 5 |> printfn "%A"
             let coordinates = 
                 let x,y = tokenPos tok
+
                 let x = p.GetCoordinates x
                 let y = p.GetCoordinates y
-                sprintf "(%A,%A) - (%A,%A)" (x.Line + 1<line>) x.Column (y.Line + 1<line>) y.Column
+                sprintf "(%A,%A) - (%A,%A)" x.Line x.Column y.Line y.Column
             let data =
                 let d = tokenData tok
                 if isLiteral tok then ""
@@ -57,7 +58,7 @@ type ``MS-SQL parser tests`` () =
             printfn "%s" msg
            // dbg.drawGSSDot @"..\..\stack.dot"
             Assert.Fail msg
-        | Yard.Generators.RNGLR.Parser.Success ast -> ()
+        | Yard.Generators.RNGLR.Parser.Success (ast, _) -> ()
             //Assert.Pass()
 
     let basePath = "../../../../../Tests/PlSqlParser"
@@ -161,12 +162,16 @@ type ``MS-SQL parser tests`` () =
     member test.``Programm with create trigger_3.`` () =
         file_1 "JRXML_RESOURCE_FILES.sql" |> runParserTest
 
+    [<Test>]
+    member test.``Programm with create package.`` () =
+        file_1 "PK_JRXML2PDF_LOG.pls" |> runParserTest
 
 
 
-[<EntryPoint>]
-let f x =
-    let tests = new ``MS-SQL parser tests`` ()
-    tests.``Programm with create trigger_1.``()
-    tests.``Programm with create trigger_1.``()
-    0 
+
+//[<EntryPoint>]
+//let f x =
+    //let tests = new ``MS-SQL parser tests`` ()
+    //tests.``Programm with create trigger_1.``()
+    //tests.``Programm with create trigger_1.``()
+    //0 

@@ -114,7 +114,7 @@ let Parse (srcFilePath:string) =
             printfn "File: %s" srcFilePath
             None
     match res  with
-    | Some(Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg)) ->
+    | Some(Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg, _)) ->
         let coordinates = 
             let x,y = tokenPos tok
             
@@ -134,12 +134,22 @@ let Parse (srcFilePath:string) =
         printfn "Error in file %s on position %s on Token %s %s: %s" srcFilePath coordinates name data msg
         dbg.lastTokens(10) |> printfn "%A"
         dbg.drawGSSDot @"..\..\stack.dot"
-    | Some (Yard.Generators.RNGLR.Parser.Success ast) ->
+    | Some (Yard.Generators.RNGLR.Parser.Success (ast, _)) ->
         let GC_Collect () = 
             GC.Collect()    
             GC.WaitForPendingFinalizers()
             GC.GetTotalMemory(true)
-        GC_Collect() |> printfn "%A" 
+        GC_Collect() |> printfn "%A"
+        
+        let errors = ast.collectErrors (tokenPos)
+        for x, y, toks in errors do
+            let x = p.GetCoordinates x
+            let y = p.GetCoordinates y
+            let tokToString token = token |> tokenToNumber |> numToString
+            printf "Error on position (%A, %A) - (%A, %A) on token(s):   " x.Line x.Column y.Line y.Column
+            toks |> Array.map tokToString |> Array.iter (printfn " %s ")
+            printfn ""
+
         ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
         |> Seq.groupBy snd
         |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))

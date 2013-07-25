@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Execute_stmnt
 
-open MsCommon, Expr
+open MsCommon, Expr, Datatype
 
 execute_stmnt:
     execute_proc
@@ -13,7 +13,7 @@ execute_proc:
           '(' 
             comma_list<[
               [ident '=' '>']
-              (sql_expr  ['OUTPUT' | 'OUT'])
+              (sql_expr  ['OUTPUT' | 'OUT' | 'IN'])
             ]>
           ')'
 

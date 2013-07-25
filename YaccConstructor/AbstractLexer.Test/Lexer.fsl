@@ -9,14 +9,14 @@ let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
-| whitespace { MULT(lexeme,brs) }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lexeme,brs) }
-| '-' { MINUS(lexeme,brs) }
-| '(' { LBRACE(lexeme,brs) }
-| ')' { RBRACE(lexeme,brs) }
-| '/' { DIV(lexeme,brs) }
-| '+' { PLUS(lexeme,brs) }
-| "**" { POW(lexeme,brs) }
-| '*' { MULT(lexeme,brs) }
-| eof { RNGLR_EOF ("",[||]) }
+| whitespace { None }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lexeme,brs) |> Some }
+| '-' { MINUS(lexeme,brs) |> Some }
+| '(' { LBRACE(lexeme,brs) |> Some }
+| ')' { RBRACE(lexeme,brs) |> Some }
+| '/' { DIV(lexeme,brs)|> Some }
+| '+' { PLUS(lexeme,brs)|> Some }
+| "**" { POW(lexeme,brs)|> Some }
+| '*' { MULT(lexeme,brs)|> Some }
+| eof { RNGLR_EOF ("",[||]) |> Some }
 | _ { failwithf "unexpected input: %s" <| "-" }

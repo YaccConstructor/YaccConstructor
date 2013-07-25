@@ -44,16 +44,20 @@ type Position<'br> =
 [<Struct>]
 type StateInfo<'a, 'br> =
     val StartV: int
+    val PreviousV: int
     val AccumulatedString: ResizeArray<'a>
     val Positions: ResizeArray<Position<'br>>
-    new (startV, str, positions) = {StartV = startV; AccumulatedString = str; Positions = positions}
+    new (startV, previousV, str, positions) = {StartV = startV; PreviousV = previousV; AccumulatedString = str; Positions = positions}
 
 [<Struct>]
 type State<'a, 'br> =
     val StateID: int
     val AcceptAction: int
+    val PreviousV: Option<int>
     val Info: ResizeArray<StateInfo<'a, 'br>>
-    new (stateId, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
+    new (stateId, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info ; PreviousV = None}
+    new (stateId, acceptAction, info, previousV) = 
+        {StateID = stateId; AcceptAction = acceptAction; Info = info ; PreviousV = previousV}
 
 type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let context = new Dictionary<string,obj>(1) in
@@ -69,13 +73,14 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         /// action related to the last accepting state
         let mutable bufferAcceptAction=0;
         let mutable eof = false
+        let mutable prevV = 0
         let mutable startPos = Position.Empty
         let mutable endPos = Position.Empty
         let count_pos_line = ref 0
         let g = new LexerInnerGraph<'br>(inGraph)   
         let sorted = g.TopologicalSort() |> Array.ofSeq
         let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0,new ResizeArray<_>(), new ResizeArray<_>())))
+        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, 0, new ResizeArray<_>(), new ResizeArray<_>())))
         do states.[g.StartVertex] <- ResizeArray.singleton startState
         let edgesSeq = seq{ for v in sorted do
                                 yield g.OutEdges v |> Array.ofSeq
@@ -116,6 +121,7 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         member lexbuf.BufferLocalStore = (context :> IDictionary<_,_>)
         member lexbuf.LexemeLength with get() : int = lexemeLength and set v = lexemeLength <- v
         member x.CountPosLine = count_pos_line
+        member x. PreviousV =  prevV
         member x.States = states
         member x.Edges = edgesSeq
         member x.LastVId = sorted.[sorted.Length-1]
@@ -227,7 +233,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         then x.Info.Add i)
             | None -> lexbuf.States.[edg.Target].Add newStt
  
-        let mkNewString (edg:LexerEdge<_,'br>) (stt:State<_,_>) =
+        let mkNewString (edg:LexerEdge<_,'br>) (stt:State<_,_>) = 
             let ch = edg.Label.Value
             let newPos (p:Option<Position<_>>) =
                 match p with
@@ -259,13 +265,16 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             let pos = 
                                 if i.Positions.Count = 0 then None else Some i.Positions.[0] 
                                 |> newPos
-                            new StateInfo<_,'br>(i.StartV
+                            new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> i.StartV), i.PreviousV
                             , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
                             , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
                     )
             else 
-                new StateInfo<_,'br>(edg.Source, ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
+                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source), lexbuf.PreviousV, ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
                 |> ResizeArray.singleton
+
+        let processToken onAccept (p: StateInfo<_,_>) =
+            actions onAccept (new string(p.AccumulatedString |> Array.ofSeq)) (p.Positions |> Array.ofSeq |> Array.rev)                          
 
         let processEdg (edg:LexerEdge<_,_>) stt reduced =
             let acc = new ResizeArray<_>(10) 
@@ -275,16 +284,26 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     let reduce, onAccept, news = scanUntilSentinel x stt
                     if reduce
                     then
+                        let f1 = ref 0
+                        let f2 = ref false
                         for i in stt.Info do
-                            actions onAccept (new string(i.AccumulatedString |> Array.ofSeq)) (i.Positions |> Array.ofSeq |> Array.rev)
-                            |> fun x -> 
+                            match processToken onAccept i with
+                            | Some x -> 
                                 if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, x))
-                                reduced := true
-                        let newStt = new State<_,_>(0,-1,new ResizeArray<_>())                            
+                                //f1 := true 
+                            | None -> 
+                                f2 := true
+                                f1 := i.StartV
+                            reduced := true
+                        let newStt = 
+                            if !f2 
+                            then 
+                                new State<_,_>(0,-1,new ResizeArray<_>(),Some (!f1))
+                            else new State<_,_>(0,-1,new ResizeArray<_>())
                         go newStt
                     else 
                         let acc = mkNewString edg stt
-                        let newStt = new State<_,_>(news,onAccept,acc)
+                        let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
                 go stt      
             | None -> add edg stt
@@ -302,8 +321,9 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             yield! res_edg_seq
             for x in lexbuf.States.[lexbuf.LastVId] do
                 for i in x.Info do                        
-                    let x = actions (int accept.[x.StateID]) (new string(i.AccumulatedString.ToArray())) (i.Positions.ToArray() |> Array.rev) 
-                    yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, x))
+                    match processToken (int accept.[x.StateID]) i with
+                    | Some x -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, x))
+                    | None -> ()
         }
         
 

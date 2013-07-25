@@ -44,10 +44,9 @@ type Position<'br> =
 [<Struct>]
 type StateInfo<'a, 'br> =
     val StartV: int
-    val PreviousV: int
     val AccumulatedString: ResizeArray<'a>
     val Positions: ResizeArray<Position<'br>>
-    new (startV, previousV, str, positions) = {StartV = startV; PreviousV = previousV; AccumulatedString = str; Positions = positions}
+    new (startV, str, positions) = {StartV = startV; AccumulatedString = str; Positions = positions}
 
 [<Struct>]
 type State<'a, 'br> =
@@ -73,14 +72,13 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         /// action related to the last accepting state
         let mutable bufferAcceptAction=0;
         let mutable eof = false
-        let mutable prevV = 0
         let mutable startPos = Position.Empty
         let mutable endPos = Position.Empty
         let count_pos_line = ref 0
         let g = new LexerInnerGraph<'br>(inGraph)   
         let sorted = g.TopologicalSort() |> Array.ofSeq
         let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, 0, new ResizeArray<_>(), new ResizeArray<_>())))
+        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, new ResizeArray<_>(), new ResizeArray<_>())))
         do states.[g.StartVertex] <- ResizeArray.singleton startState
         let edgesSeq = seq{ for v in sorted do
                                 yield g.OutEdges v |> Array.ofSeq
@@ -121,7 +119,6 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         member lexbuf.BufferLocalStore = (context :> IDictionary<_,_>)
         member lexbuf.LexemeLength with get() : int = lexemeLength and set v = lexemeLength <- v
         member x.CountPosLine = count_pos_line
-        member x. PreviousV =  prevV
         member x.States = states
         member x.Edges = edgesSeq
         member x.LastVId = sorted.[sorted.Length-1]
@@ -265,12 +262,12 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             let pos = 
                                 if i.Positions.Count = 0 then None else Some i.Positions.[0] 
                                 |> newPos
-                            new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> i.StartV), i.PreviousV
+                            new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> i.StartV)
                             , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
                             , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
                     )
             else 
-                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source), lexbuf.PreviousV, ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
+                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source), ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
                 |> ResizeArray.singleton
 
         let processToken onAccept (p: StateInfo<_,_>) =

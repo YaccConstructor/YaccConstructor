@@ -132,7 +132,7 @@ let Parse (srcFilePath:string) =
             let y = p.GetCoordinates y
             let tokToString token = token |> tokenToNumber |> numToString
             printf "Error on position (%A, %A) - (%A, %A) on token(s) : " x.Line x.Column y.Line y.Column
-            toks |> Array.map tokToString |> Array.iter (printfn " %s ")
+            toks |> Array.map (fun x -> unbox x |> tokToString) |> Array.iter (printfn " %s ")
             printfn ""
 
         ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)

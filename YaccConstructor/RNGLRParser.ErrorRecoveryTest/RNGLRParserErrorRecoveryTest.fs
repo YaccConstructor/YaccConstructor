@@ -207,11 +207,24 @@ type ``RNGLR error recovery tests`` () =
            let res = translate RNGLR.ParsePrintErrorInfo.translate mAst errors
            Assert.AreEqual([-3], res)
             
+    //[<Test>]
+    member test.``PrintErrorInfoEOF``() = 
+        let parser = RNGLR.ParsePrintErrorInfoEOF.buildAst
+        let path = dir + "PrintErrorInfoEOF.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, errors) ->
+           mAst.PrintAst()
+           RNGLR.ParsePrintErrorInfoEOF.defaultAstToDot mAst "PrintErrorInfo.dot"
+           let res = translate RNGLR.ParsePrintErrorInfo.translate mAst errors
+           Assert.AreEqual([-1], res)
+
 (*[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``Calc missing operand``()*)
+(new ``RNGLR error recovery tests``()).Ambiguous()*)
 
 (*[<EntryPoint>]
 (new ``RNGLR error recovery tests``()).``Calc error inside in braces2``()*)
 
-[<EntryPoint>]
-(new ``RNGLR error recovery tests``()).``PrintErrorInfo``()
+(*[<EntryPoint>]
+(new ``RNGLR error recovery tests``()).``PrintErrorInfoEOF``()*)

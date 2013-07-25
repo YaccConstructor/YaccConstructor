@@ -21,7 +21,6 @@ module Yard.Generators.RNGLR.AST
 open System
 open System.Collections.Generic
 open Yard.Generators.RNGLR.DataStructures
-open Yard.Generators.RNGLR.ErrorInfo
 
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {
@@ -153,13 +152,21 @@ let private emptyArr = [||]
 type private DotNodeType = Prod | AstNode
 
 type ErrorNode = 
-    val tokens : array<obj>       //skipped tokens during error recovery
-    val production : int     
-    val errorOn : obj // token on which error occurs
-    val expected : array<string>  // parser was look for these tokens
-    //val mutable position : 'Position * 'Position
-    new (skipped, info : ErrorInfo) = 
-        {tokens = skipped; production = info.production; errorOn = info.errorOn; expected = info.expected}
+    val errorOn : obj     // token on which error occurs
+    val production : int  // now it doesn't work. Production number where error occured
+    val expected : array<string>  // parser was expecting one of the these tokens
+
+    val mutable tokens : array<obj>  //skipped tokens during error recovery
+    val recTokens : array<string> // parser was look for one of these tokens during recovery
+
+    new (errOn, prod, exp, (*skip,*) recToks) = 
+        {
+            errorOn = errOn; 
+            production = prod; 
+            expected = exp; 
+            tokens = Unchecked.defaultof<_>;(*skip;*)
+            recTokens = recToks
+        }
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
@@ -437,42 +444,43 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
+    member private this.getTokensFromFamily (family : Family) =
+        let rec func (fam : Family) = 
+            let mutable res = []
+            for j = 0 to fam.nodes.Length-1 do
+                match fam.nodes.[j] with
+                | :? int as t when t >= 0 -> 
+                    res <- res @ [box tokens.[t]]
+                | :? AST as ast -> 
+                    if ast.other <> null 
+                    then
+                        for other in ast.other do
+                            res <- res @ func other
+                    res <- func ast.first @ res
+                | _ -> ()
+            res
+        func family
+
     member this.collectErrors tokenToRange = 
-        let res = new ResizeArray<'Position * 'Position * 'TokenType[]>()
+        let res = new ResizeArray<'Position * 'Position * array<obj>>()
         if not isEpsilon 
         then
             this.TraverseWithRanges tokenToRange ignore ignore <| fun i ranges ->
                 let inline isEpsilon x = match x : obj with | :? int as x when x < 0 -> true | _ -> false
                 let children = order.[i]
-                
-                let rec getTokenFromFamily (fam : Family)(result : ResizeArray<'TokenType>) =
-                    for j = 0 to fam.nodes.Length-1 do
-                        if not <| isEpsilon fam.nodes.[j]
-                        then 
-                            match fam.nodes.[j] with
-                            | :? int as t when t > 0 -> result.Add tokens.[t]
-                            | :? AST as ast -> 
-                                getTokenFromFamily ast.first result
-                                if ast.other <> null 
-                                then
-                                    for other in ast.other do
-                                        getTokenFromFamily other result
-                            | _ -> ()
 
                 if children.first.prod = this.RulesCount //i.e. error production
                 then 
-                    let result = new ResizeArray<'TokenType>()
-                    getTokenFromFamily children.first result
-                    res.Add(fst ranges.[i], snd ranges.[i], result.ToArray())
+                    let result = this.getTokensFromFamily children.first
+                    res.Add(fst ranges.[i], snd ranges.[i], List.toArray result)
 
                 if children.other <> null
                 then
                     for other in children.other do
                         if other.prod = this.RulesCount //i.e. error production
                         then
-                            let result = new ResizeArray<'TokenType>()
-                            getTokenFromFamily other result
-                            res.Add(fst ranges.[i], snd ranges.[i], result.ToArray())
+                            let result = this.getTokensFromFamily other
+                            res.Add(fst ranges.[i], snd ranges.[i], List.toArray result)
         res
         
     member private this.TranslateEpsilon (funs : array<_>) (leftSides : array<_>) (concat : array<_>) (range : 'Position * 'Position) : obj =
@@ -488,14 +496,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     if children.other = null 
                     then
                         firstRes
-                    else
-                        (*let nonTerm = 
-                            if children.first.prod < leftSides.Length
-                            then 
-                               leftSides.[children.first.prod]
-                            else
-                                this.ErrInd*)
-                                 
+                    else         
                         children.other
                         |> Array.map (
                             fun family ->
@@ -508,7 +509,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     
     member this.Translate (funs : array<obj[] -> 'Position * 'Position -> obj>) (leftSides : array<_>)
                             (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) 
-                            clearAST (errDict : Dictionary<Family, ErrorInfo>) =
+                            clearAST (errDict : Dictionary<Family, ErrorNode>) =
 
         if isEpsilon 
         then epsilons.[-(getSingleNode root)-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
@@ -543,32 +544,28 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | _ -> failwith ""
 
                 let inline getFamilyWithError (fam : Family) = 
-                    let res = new ResizeArray<Family>()
-                    for i = 0 to fam.nodes.Length - 1 do
-                        match fam.nodes.[i] with
-                        | :? AST as ast ->
-                            let errAst = ast.findFamily(fun x -> x.prod = this.RulesCount)
-                            if errAst.IsSome 
-                            then 
-                                res.Add errAst.Value
-                        | _ -> ()
-                    res
+                    let res = ref None
+                    fam.nodes.doForAll <| fun x ->
+                        if x :? AST 
+                        then 
+                            let ast = (unbox x) : AST
+                            if res.Value.IsNone
+                            then res := ast.findFamily(fun x -> x.prod = this.RulesCount)
+                    !res
 
                 let x = order.[i]
                 if x.pos = -1 then result.Add Unchecked.defaultof<_>
                 else
                     let children = x
                     result.Add <|
-                        let inline translateFamily (fam : Family) =
+                        let  translateFamily (fam : Family) =
                             let prevRange = fst ranges.[i] |> ref
                             let length = 
                                 if fam.prod < this.RulesCount
-                                then 
-                                    rules.[fam.prod].Length
-                                else
-                                    fam.nodes.Length
+                                then rules.[fam.prod].Length
+                                else fam.nodes.Length
+                            
                             let res = Array.zeroCreate length
-                        
                             let k = ref 0
                             fam.nodes.doForAll <| fun x ->
                                 res.[!k] <- getRes prevRange x
@@ -578,35 +575,23 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                             
                             let errFamily = getFamilyWithError fam
-                            
-                            if errFamily.Count > 0
+                            if errFamily.IsSome
                             then 
-                                let errFam = errFamily.[0]
-                                let info = errDict.[errFam]
+                                let info = errDict.[errFamily.Value]
+                                let arr = List.toArray <| this.getTokensFromFamily errFamily.Value
+                                info.tokens <- arr
                                 let errNodes = Array.zeroCreate 1
-                                let k = ref 0
-                                let skipped = Array.zeroCreate errFam.nodes.Length
-                                errFam.nodes.doForAll <| fun x ->
-                                    skipped.[!k] <- getRes prevRange x
-                                    incr k 
-                                let list = ref []
-                                list :=  new ErrorNode (skipped, info) :: !list
-                                errNodes.[0] <- box !list
+                                let list = info :: []
+                                errNodes.[0] <- box list
                                 funs.[fam.prod] errNodes ranges.[i]
                             else
                                 funs.[fam.prod] res ranges.[i]
                             //funs.[fam.prod] res ranges.[i]
                             
                         let firstRes = translateFamily children.first
-                        if children.other = null then
-                            firstRes
+                        if children.other = null 
+                        then firstRes
                         else
-                            (*let nonTerm = 
-                                if children.first.prod < leftSides.Length
-                                then
-                                    leftSides.[children.first.prod]
-                                else
-                                    this.ErrInd*)
                             children.other
                             |> Array.map translateFamily
                             |> Array.toList
@@ -690,7 +675,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     
                     let label = 
                         if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
-                        else "error" // indToString this.ErrInd
+                        else "error"
                      
                     createNode i (children.other <> null) AstNode ("n " + label)
                      

@@ -371,9 +371,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 errorList <- errInfo :: errorList
                 wasError <- ref true
             else
-                let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                            <| sprintf "dot/stack_%d_0.dot" !curLvl
                 if !isEOF
                 then
                     try 
@@ -388,12 +385,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         pushesMap.Remove(!curLvl) |> ignore
                         makeReductions ()
                         attachEdges()
-                        let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                        drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                    <| sprintf "dot/stack_%d_4.dot" !curLvl
-                        let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                        drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                    <| sprintf "dot/stack_%d_5.dot" !curLvl
                     with _ -> () 
                     isEnd := true
                 (*elif pushes.Count = 0 then 
@@ -412,8 +403,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     then
                         if pushesMap.ContainsKey !curLvl
                         then
-                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                <| sprintf "dot/stack_%d_2.dot" !curLvl    
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
@@ -422,9 +411,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                     let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
                                     addSimpleEdge vertex newAstNode simpleEdges.[state]
                             pushesMap.Remove(!curLvl) |> ignore
-                            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                                <| sprintf "dot/stack_%d_3.dot" !curLvl
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null

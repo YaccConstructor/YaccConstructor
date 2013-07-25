@@ -1,3 +1,7 @@
+{
+open AbstractLexer.Core
+}
+
 tokens {
     _ of string
 }
@@ -5,7 +9,7 @@ tokens {
 options {
     translate = false
     module = "AbstractLexer.Test.Calc.Parser"
-    token = "string*array<Option<string>>"
+    token = "string*array<Position<string>>"
     infEpsPath = epsilons
     pos = uint64
 }

@@ -82,7 +82,7 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = loadDotToQG gFile
         let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.AEdge<_,_>(e.Source,e.Target,(Some e.Tag, Some e.Tag)))
+        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
         lexerInputG
 
 

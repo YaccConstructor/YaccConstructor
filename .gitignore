@@ -94,3 +94,6 @@ YaccConstructor/RNGLRParser.SimpleTest/out
 Examples/AbstractAnalysis/SQL/LogsTrees/*
 Examples/AbstractAnalysis/SQL/*.dot
 Examples/AbstractAnalysis/SQL/*.pdf
+Examples/AbstractAnalysis/SQL/tests/results/*
+Examples/AbstractAnalysis/AbstractAnalysisTests/*.ast.dot*
+Examples/AbstractAnalysis/SQL/result/*

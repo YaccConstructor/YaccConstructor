@@ -72,7 +72,9 @@ let justParse (path:string) =
     }
     let allTokens = seq []
     let res =
-        let g = loadDotToQG path
+        let ing = Helpers.loadLexerInputGraph path
+        let g = Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing)
+            //loadDotToQG path
         (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse buildAstAbstract g
     res
 

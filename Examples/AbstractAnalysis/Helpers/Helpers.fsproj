@@ -5,13 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>54ef97d3-dcde-4257-b6c3-17103e770fd3</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>AbstractAnalysis</RootNamespace>
-    <AssemblyName>AbstractAnalysis</AssemblyName>
+    <ProjectGuid>99b80db1-1985-4581-9201-7d9659fd71e0</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Helpers</RootNamespace>
+    <AssemblyName>Helpers</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Calculator</Name>
-    <TargetFrameworkProfile />
+    <Name>Helpers</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,9 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\AbstractAnalysis.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\Helpers.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,27 +29,15 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\AbstractAnalysis.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\Helpers.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\..\..\YaccConstructor\AbstractLexer.Common\bin\Release\AbstractLexer.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="AbstractLexer.Core">
-      <HintPath>..\..\..\YaccConstructor\AbstractLexer.Core\bin\Release\AbstractLexer.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="AbstractLexer.Generator">
-      <HintPath>..\..\..\YaccConstructor\AbstractLexer.Generator\bin\Release\AbstractLexer.Generator.exe</HintPath>
-    </Reference>
-    <Reference Include="AbstractParsing.Common">
-      <HintPath>..\..\..\YaccConstructor\AbstractParsing.Common\bin\Release\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\..\yc\AbstractLexer.Common.dll</HintPath>
     </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
@@ -60,50 +45,24 @@
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph.Data">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph.Serialization">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\..\..\YaccConstructor\RNGLRAbstractParser\bin\Release\RNGLRAbstractParser.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\..\yc\RNGLRCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLRParser">
-      <HintPath>..\..\yc\RNGLRParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="calc.yrd" />
-    <None Include="Lexer.fsl" />
-    <None Include="packages.config" />
-    <Compile Include="Calc.yrd.fs" />
-    <Compile Include="Lexer.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Helpers\Helpers.fsproj">
-      <Name>Helpers</Name>
-      <Project>{99b80db1-1985-4581-9201-7d9659fd71e0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="Helpers.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

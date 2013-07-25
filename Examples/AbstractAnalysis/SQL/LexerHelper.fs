@@ -38,13 +38,13 @@ let str_buf = new System.Text.StringBuilder()
 let appendBuf (str:string) = str_buf.Append(str) |> ignore
 let clearBuf () = str_buf.Clear() |> ignore
   
-let makeIdent notKeyWord (name:string) (startPos, endPos) =
+let makeIdent notKeyWord (name:string) (stratPos,endPos) =
   let prefix = 
     if String.length name >= 2 
     then name.[0..1] 
     else ""
   let defaultSourceText =  
-    new SourceText(name, SourceRange.ofTuple (startPos,endPos))
+    new SourceText(name, new SourceRange(0UL, 0UL))// . ofTuple (startPos,endPos))
   if prefix = "@@" then GLOBALVAR defaultSourceText
   //else if prefix = "##" then GLOBALTEMPOBJ name
   elif name.[0] = '@' then LOCALVAR defaultSourceText
@@ -54,16 +54,16 @@ let makeIdent notKeyWord (name:string) (startPos, endPos) =
   else getKwTokenOrIdent name defaultSourceText
 
 
-let defaultSourceText id (lexbuf : LexBuffer<_>) value =
+let defaultSourceText id brs value =
     new SourceText(value
-        , SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
-                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
+        , SourceRange.ofTuple(new Pair (id,int64 1 * _symbolL)
+                               , new Pair(id, int64 1 * _symbolL)))
 
-let getLiteral id (lexbuf : LexBuffer<_>) value =
-    let range = 
-        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
-                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
-    genLiteral value range.start range.End
+let getLiteral id brs (*lexbuf : LexBuffer<_>*) value =
+//    let range = 
+//        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
+//                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
+    genLiteral value 0UL 0UL
         
 let tokenPos token =
     let data = tokenData token

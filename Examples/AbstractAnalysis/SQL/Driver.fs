@@ -44,6 +44,9 @@ let loadGraphFromDOT filePath =
 
 let baseInputGraphsPath = "../../tests"
 let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
+let parserOnly = ref false
+let printLexerOutput = ref false
+
 
 let loadDotToQG gFile =
     let g = loadGraphFromDOT gFile
@@ -62,6 +65,12 @@ let loadDotToQG gFile =
             qGraph.AddEdge(new ParserEdge<_>(int edg.Source.Id,int edg.Destination.Id, getTkn edg.Label)) |> ignore)
     qGraph
 
+
+let printTag tag printBrs =
+    match tag with
+    | IDENT x -> x.Text
+    | x -> string x 
+
 let justParse (path:string) =
     printfn "Parse file %A" path
     let translateArgs = {
@@ -73,8 +82,12 @@ let justParse (path:string) =
     let allTokens = seq []
     let res =
         let ing = Helpers.loadLexerInputGraph path
-        let g = Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing)
-            //loadDotToQG path
+        let g = 
+            if !parserOnly
+            then loadDotToQG path
+            else Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing)
+        if !printLexerOutput
+        then Helpers.printTokenizedGraph g printTag "..\..\out.lex.dot" 
         (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse buildAstAbstract g
     res
 
@@ -128,7 +141,10 @@ do
     let inPath = ref @"..\..\tests\s2.dot"
     let parseDir = ref false
     let commandLineSpecs =
-        ["-f", ArgType.String (fun s -> inPath := path s), "Input file."
+        [
+         "-p", ArgType.Unit (fun _ -> parserOnly := true), "Scip lexing. Input graph is ready for parsing."
+         "-ol",ArgType.Unit (fun _ -> printLexerOutput := true), "Print tokenization result."
+         "-f", ArgType.String (fun s -> inPath := path s), "Input file."
          "-d", ArgType.String (fun s -> parseDir := true; inPath := s), "Input dir. Use for parse all files in specified directory."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs

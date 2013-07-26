@@ -462,6 +462,16 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
         printG res "test_with_space_1"
 
+    [<Test>]
+    member this.``Test with space at the end of previous tokens at the end of branch.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_with_space_at_end_of_prev_token.dot."
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "test_with_space_at_end_of_prev_token"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        
+
+
 //[<EntryPoint>]
 //let f x =
 //    
@@ -474,7 +484,7 @@ type ``Abstract lexer tests`` () =
 [<EntryPoint>]
 let f x =
       let t = new ``Abstract lexer tests`` () 
-      t.``Test with space and idents on edg.``()
+      t.``Test with space at the end of previous tokens at the end of branch.``()
       //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
      // printfn "%A" t
       1

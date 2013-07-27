@@ -98,3 +98,4 @@ Examples/AbstractAnalysis/SQL/tests/results/*
 Examples/AbstractAnalysis/AbstractAnalysisTests/*.ast.dot*
 Examples/AbstractAnalysis/SQL/result/*
 Tests/SimpleHTMLGenerator/*.html
+YaccConstructor/RNGLRParser.ErrorRecoveryTest/*.yrd.fs

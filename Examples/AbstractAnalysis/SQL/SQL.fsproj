@@ -77,6 +77,7 @@
     </FsYard>
     <Compile Include="MsParser.fs" />
     <Compile Include="LexerHelper.fs" />
+    <Compile Include="Lexer.fs" />
     <!--Compile Include="Lexer.fs" / -->
     <Compile Include="Driver.fs" />
     <None Include="packages.config" />
@@ -144,6 +145,13 @@
     <Reference Include="Utils.SourceText">
       <HintPath>..\..\yc\Utils.SourceText.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Helpers\Helpers.fsproj">
+      <Name>Helpers</Name>
+      <Project>{99b80db1-1985-4581-9201-7d9659fd71e0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

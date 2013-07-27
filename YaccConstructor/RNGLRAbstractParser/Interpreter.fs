@@ -164,7 +164,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
                     })
-    else
+    else                                     
         // Currently processed token
         let curTokens = processChunk enum.Current |> ref
         let curLvl = ref (!curTokens).CurLvl
@@ -371,12 +371,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 errorList <- errInfo :: errorList
                 wasError <- ref true
             else
-                
-                //makeReductions ()
-                //attachEdges()
-//                let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-//                drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-//                            <| sprintf "dot/stack_%d_0.dot" !curLvl
                 if !isEOF
                 then
                     try 
@@ -417,14 +411,13 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                     let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
                                     addSimpleEdge vertex newAstNode simpleEdges.[state]
                             pushesMap.Remove(!curLvl) |> ignore
-                            makeReductions ()
-                            attachEdges()
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
+                    makeReductions ()
+                    attachEdges()
 
-                    
                     shift ()
 
         let isAcceptState() = 

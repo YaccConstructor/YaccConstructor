@@ -10,7 +10,6 @@ dec_num: '-'? DEC_NUMBER
 sql_value:
      STRING_CONST  (* http://msdn.microsoft.com/en-us/library/ms179899.aspx *)
    | dec_num
-   | ident
    | 'NULL'
 
 (* http://msdn.microsoft.com/en-us/library/ms175874.aspx *)

@@ -99,6 +99,13 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Helpers\Helpers.fsproj">
+      <Name>Helpers</Name>
+      <Project>{99b80db1-1985-4581-9201-7d9659fd71e0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

@@ -5,7 +5,7 @@ open Expr, Datatype, MsCommon
 
 create_table:
     'CREATE' 'TABLE' 
-    [IDENT '.' IDENT? '.'?] IDENT 
+    full_ident
     '('
       comma_list<(column_definition_create_table | computed_column_definition)>
       comma_list<table_constraint_create_table>
@@ -33,7 +33,7 @@ column_constraint_create_table:
         ]
         ['ON' (IDENT '(' IDENT ')' | IDENT | 'DEFAULT')]
       | ['FOREIGN' 'KEY']
-        'REFERENCES' [IDENT '.'] IDENT ['(' IDENT ')']
+        'REFERENCES' full_ident ['(' IDENT ')']
         delete_update*
         ['NOT' 'FOR' 'REPLICATION']
       | 'CHECK' ['NOT' 'FOR' 'REPLICATION'] sql_expr 

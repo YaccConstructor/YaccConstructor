@@ -25,7 +25,6 @@ set_localvar:
         '(' comma_list<proc_formal_param> ')' 
     )
   | LOCALVAR '=' LOCALVAR
-  | ident
   | 'CURSOR' ['FORWARD_ONLY' | 'SCROLL']
     ['STATIC' | 'KEYSET' | 'DYNAMIC' | 'FAST_FORWARD']
     ['READ_ONLY' | 'SCROLL_LOCKS' | 'OPTIMISTIC']

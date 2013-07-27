@@ -15,8 +15,8 @@ execute_proc:
         '(' comma_list<([LOCALVAR '='] sql_expr)> ')'
       | [LOCALVAR '=']
         (full_ident [';' DEC_NUMBER] | LOCALVAR) 
-        brace_opt<
-          '(' 
+        (* brace_opt<
+          '(' *) 
             comma_list<[
               [LOCALVAR '=']
               (
@@ -25,8 +25,8 @@ execute_proc:
                 | 'DEFAULT'?
               )
             ]>
-          ')'
-        >
+          (* ')'
+        > *)
         ['WITH' 'RECOMPILE']
     )
 

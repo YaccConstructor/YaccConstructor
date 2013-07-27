@@ -1,7 +1,7 @@
 ﻿[<AllPublic>]
 module Select_crud
 
-open Expr, MsCommon
+open Expr, MsCommon, Common
 
 select_stmnt:  
     ['WITH' comma_list<common_table_expression>]
@@ -85,16 +85,15 @@ select_list:
         '*' 
       | full_ident '.' '*' 
       | (
-            [ident '.']
+            (* [ident '.']
             (ident | 'IDENTITY' | 'ROWGUID')
             [ ('.' | DOUBLE_COLON)
               (
                   STRING_CONST
-                | ident
-                | ident '(' comma_list<sql_expr> ')'
+                | ident ['(' comma_list<sql_expr> ')']
               )
             ] 
-          | sql_expr ['AS'? ident]
+          | *) sql_expr ['AS'? ident]
         ) 
       | ident '=' sql_expr
     )>
@@ -122,7 +121,7 @@ predicate:
       ')'
 
 from:
-    'FROM' comma_list<table_source>
+    'FROM' not_empty_list<table_source ','>
 
 table_source: 
     full_ident 'AS'?  full_ident tablesample_clause? 
@@ -156,7 +155,7 @@ openrowset:
         STRING_CONST ','
         (STRING_CONST ';' STRING_CONST ';' STRING_CONST | STRING_CONST)
         ','
-        ([ [full_ident '.'] full_ident '.'] full_ident | STRING_CONST)
+        ( full_ident | STRING_CONST)
       | 'BULK' STRING_CONST ',' 
         (
             'FORMATFILE' '=' STRING_CONST bulk_options?

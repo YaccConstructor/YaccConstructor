@@ -1,5 +1,9 @@
-﻿tokens {
-    _ of string*array<Option<string>>
+﻿{
+open AbstractLexer.Core
+}
+
+tokens {
+    _ of string*array<Position<string>>
 }
 
 options {

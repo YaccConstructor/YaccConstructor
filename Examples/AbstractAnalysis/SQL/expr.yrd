@@ -10,7 +10,7 @@ sql_expr_not_concat:
   | call_expr
   | full_ident
   | select_stmnt
-  | ('NOT' | '+=' | '-=' | '~') sql_expr 
+  | ('NOT' | '+=' | '-=' | '~') sql_expr
   | GLOBALVAR
   | LOCALVAR
   | '*'

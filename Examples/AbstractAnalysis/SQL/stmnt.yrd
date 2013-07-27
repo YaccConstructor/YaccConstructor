@@ -61,7 +61,7 @@ raiserror_stmnt:
 	
 stmt_block: 'BEGIN' (proc_body_stmnt ';'?)* 'END'
 
-drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') ([ident '.'] ident)+
+drop_procedure: 'DROP' ('PROC' | 'PROCEDURE') (full_ident)+
   
 print_stmt: 'PRINT' sql_expr ';'?
 

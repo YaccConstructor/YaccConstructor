@@ -27,10 +27,11 @@ dml_select_list:
     (ident | sql_expr) ['AS'? IDENT]
     comma_list<( (ident | sql_expr) ['AS'? IDENT])>
 
-object:
-    [
+object: full_ident
+   (* [
         IDENT '.' IDENT '.' IDENT '.' 
       | IDENT '.' IDENT? '.' 
       | IDENT '.'
     ]
     ident
+	*)

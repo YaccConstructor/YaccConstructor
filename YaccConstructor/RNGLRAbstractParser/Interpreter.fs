@@ -374,9 +374,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 
                 //makeReductions ()
                 //attachEdges()
-                let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-                drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                            <| sprintf "dot/stack_%d_0.dot" !curLvl
+//                let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+//                drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+//                            <| sprintf "dot/stack_%d_0.dot" !curLvl
                 if !isEOF
                 then
                     try 
@@ -404,7 +404,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         lastErr := !curLvl
                     else wasError <- ref true*)
                 else
-                    let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+                    //let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl

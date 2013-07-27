@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2012 for Web
+VisualStudioVersion = 12.0.20617.1 PREVIEW
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Calculator", "AbstractAnalysis\Calculator.fsproj", "{54EF97D3-DCDE-4257-B6C3-17103E770FD3}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SQL", "SQL\SQL.fsproj", "{8A4BA69D-D25C-42FB-A880-9BD0CC3E12D3}"

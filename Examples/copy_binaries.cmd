@@ -15,11 +15,11 @@ xcopy /Y ..\YaccConstructor\Constraints\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\Utils.SourceText\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\FsYard\bin\Release\*.exe yc
 xcopy /Y ..\YaccConstructor\FsYard\bin\Release\*.targets yc
+xcopy /Y ..\YaccConstructor\AbstractLexer.Generator\bin\Release\*.exe yc
 xcopy /Y ..\YaccConstructor\AbstractLexer.Common\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\AbstractLexer.Core\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\AbstractParsing.Common\bin\Release\*.dll yc
 xcopy /Y ..\YaccConstructor\RNGLRAbstractParser\bin\Release\*.dll yc
-xcopy /Y ..\YaccConstructor\AbstractLexer.Generator\bin\Release\*.exe yc
 
 
 

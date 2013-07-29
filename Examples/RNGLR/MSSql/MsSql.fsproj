@@ -106,6 +106,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AbstractParsing.Common">
+      <HintPath>..\..\yc\AbstractParsing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>

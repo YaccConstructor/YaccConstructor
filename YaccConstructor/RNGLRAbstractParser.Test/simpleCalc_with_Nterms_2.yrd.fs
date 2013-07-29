@@ -19,9 +19,9 @@ let tokenData = function
     | RNGLR_EOF x -> box x
 
 let numToString = function
-    | 0 -> "e"
-    | 1 -> "error"
-    | 2 -> "s"
+    | 0 -> "error"
+    | 1 -> "expr"
+    | 2 -> "subexpr"
     | 3 -> "yard_start_rule"
     | 4 -> "NUM"
     | 5 -> "PLUS"
@@ -40,8 +40,8 @@ let isLiteral = function
 
 let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|2; 3; 0|]
-let private rules = [|0; 5; 4; 2; 4|]
+let leftSide = [|1; 3; 2|]
+let private rules = [|2; 5; 4; 1; 4|]
 let private rulesStart = [|0; 3; 4; 5|]
 let startRule = 1
 
@@ -50,9 +50,9 @@ let acceptEmptyInput = false
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 4; 5; 2; 3|]
+let private lists_gotos = [|1; 2; 5; 3; 4|]
 let private small_gotos =
-        [|3; 0; 131073; 262146; 65537; 327683; 131073; 262148|]
+        [|3; 65536; 131073; 262146; 131073; 327683; 196609; 262148|]
 let gotos = Array.zeroCreate 6
 for i = 0 to 5 do
         gotos.[i] <- Array.zeroCreate 7
@@ -68,7 +68,7 @@ while cur < small_gotos.Length do
     cur <- cur + length
 let private lists_reduces = [|[|0,3|]; [|2,1|]|]
 let private small_reduces =
-        [|196609; 393216; 327681; 327681|]
+        [|262145; 393216; 327681; 327681|]
 let reduces = Array.zeroCreate 6
 for i = 0 to 5 do
         reduces.[i] <- Array.zeroCreate 7
@@ -98,12 +98,12 @@ while cur < small_zeroReduces.Length do
         let x = small_zeroReduces.[cur + k] &&& 65535
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
-let private small_acc = [4]
+let private small_acc = [1]
 let private accStates = Array.zeroCreate 6
 for i = 0 to 5 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 6
-let errorIndex = 1
+let errorIndex = 0
 let errorRulesExists = false
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
 let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
@@ -112,11 +112,11 @@ let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
 let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); null; null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); null; null|]
+let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(3, new Nodes([||])), null)), null); null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_e * '_rnglr_type_error * '_rnglr_type_s * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_subexpr * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -124,7 +124,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_e) 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_subexpr) 
              |> List.iter (fun (S1) -> 
               (match ((unbox _rnglr_children.[1]) : Token) with PLUS _rnglr_val -> [_rnglr_val] | a -> failwith "PLUS expected, but %A found" a )
                |> List.iter (fun (S2) -> 
@@ -133,20 +133,20 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   _rnglr_cycle_res := (
                     
 # 2 "simpleCalc_with_Nterms_2.yrd"
-                       S1, S2, S3
+                          S1, S2, S3
                       )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
 # 2 "simpleCalc_with_Nterms_2.yrd"
-               : '_rnglr_type_s) 
+               : '_rnglr_type_expr) 
 # 143 "simpleCalc_with_Nterms_2.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
       box (
         ( 
-          ((unbox _rnglr_children.[0]) : '_rnglr_type_s) 
+          ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
             )
 # 2 "simpleCalc_with_Nterms_2.yrd"
                : '_rnglr_type_yard_start_rule)
@@ -164,13 +164,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 # 2 "simpleCalc_with_Nterms_2.yrd"
-                          S1
+                                   S1
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 # 3 "simpleCalc_with_Nterms_2.yrd"
-               : '_rnglr_type_e) 
+               : '_rnglr_type_subexpr) 
 # 174 "simpleCalc_with_Nterms_2.yrd.fs"
       );
   (
@@ -194,13 +194,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
   |] , [|
     (fun (_rnglr_list : list<_>) -> 
       box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_e)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_error)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_s)   ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_expr)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_subexpr)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));

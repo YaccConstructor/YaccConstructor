@@ -467,7 +467,7 @@ let f x =
     let t = new ``RNGLR abstract parser tests`` () 
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
-    t.``Calc. Branched input 2.``()
+    //t.``Calc. Branched input 2.``()
     //t.``Simple calc. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and second arg.``()
     //t.``Simple calc with nterm. Seq input.``()
@@ -475,6 +475,6 @@ let f x =
     //t.``Simple calc with nterm 3. Seq input.``()
     //t.``Simple calc with nterm 4. Seq input.``()
     //t.``Simple calc. Sequence input.``()
-    //t.``Simple calc with nterm 2. Brabch first operand.``()
+    t.``Simple calc with nterm 2. Brabch first operand.``()
     //t.``Simple calc with nterm 2. Fully brabched.``()
     0

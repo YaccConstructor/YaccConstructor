@@ -30,7 +30,7 @@ let private loadByType (desiredType:Type) =
         |> Seq.choose (fun x -> try Reflection.Assembly.Load x |> Some with _ -> None)
    
     assemblies
-    |> Seq.collect (fun assembly -> assembly.GetTypes())
+    |> Seq.collect (fun assembly -> try assembly.GetTypes() with _ -> printfn "Assambly %s could not de loaded." assembly.FullName; [||] )
     |> Seq.filter (fun _type -> desiredType.IsAssignableFrom(_type))
 
 let private isRealClass (cls:Type) =
@@ -40,5 +40,6 @@ let private isRealClass (cls:Type) =
 
 let LoadComponents (desiredType:Type) =
     loadByType desiredType
-    |> Seq.filter isRealClass
-    |> Seq.map Activator.CreateInstance
+    |> ResizeArray.ofSeq
+    |> ResizeArray.filter isRealClass
+    |> ResizeArray.choose (fun x -> try  Activator.CreateInstance x |> Some with _ -> None)

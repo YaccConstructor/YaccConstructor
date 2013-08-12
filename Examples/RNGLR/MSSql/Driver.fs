@@ -29,18 +29,13 @@ open Yard.Utils.InfoClass
 open System
 open System.IO
 
-let lastTokenNum = ref 0L
-let traceStep = 50000L
-let c = ref 0
 
-let i = ref 0
-let convert (token : Token) = 
-    
-    let converted = !i, [| token, !i + 1 |]
-    incr i
-    converted
 
 let justParse (path:string) =
+    let lastTokenNum = ref 0L
+    let traceStep = 50000L
+    let c = ref 0
+
     use reader = new System.IO.StreamReader(path)
 
     let tokenizerFun = 
@@ -65,7 +60,7 @@ let justParse (path:string) =
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - l" lastTokenNum.Value (1000L * traceStep/ (mSeconds + 1L))
                     if int64 chan.CurrentQueueLength > 3L then                        
                         int (int64 chan.CurrentQueueLength * mSeconds)  |> System.Threading.Thread.Sleep
                     post buf
@@ -82,12 +77,12 @@ let justParse (path:string) =
         seq{
             while true do
                 let arr = tokenizer.Receive 100000 |> Async.RunSynchronously
-                lastTokenNum := !lastTokenNum + 1L //int64 arr.Length
+                lastTokenNum := !lastTokenNum + int64 arr.Length
                 if (!lastTokenNum % (traceStep)) = 0L then                 
                     let oldTime = !timeOfIteration
                     timeOfIteration := System.DateTime.Now
                     let mSeconds = int64 ((!timeOfIteration - oldTime).Duration().TotalMilliseconds)
-                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ mSeconds)
+                    printfn "tkn# %10d Tkns/s:%8d - p" lastTokenNum.Value (1000L * traceStep/ (mSeconds + 1L))
                 yield! arr
                 //yield Lexer.tokens lexbuf
                 }

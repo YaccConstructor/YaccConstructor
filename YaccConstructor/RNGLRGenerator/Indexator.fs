@@ -44,7 +44,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
                     
         rules
         |> Array.map (fun rule -> rule.body)
-        |> Array.fold collectTermsAndLits (["RNGLR_EOF"(*; "ERROR"*)], [])
+        |> Array.fold collectTermsAndLits (["RNGLR_EOF"], [])
         |> (fun (x, y) -> unique x, unique y)
 
     let nonTermsConnect = 
@@ -53,6 +53,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
         |> Array.append ([|"error"|])
         |> unique
         |> connect
+
     let termsConnect = connect terms
     let literalsConnect = connect literals
     

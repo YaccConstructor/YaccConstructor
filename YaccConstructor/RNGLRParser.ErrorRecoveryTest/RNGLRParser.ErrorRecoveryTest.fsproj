@@ -47,6 +47,7 @@
     <Compile Include="PrimitiveErrorTranslate.yrd.fs" />
     <Compile Include="ErrorToEpsilonTranslate.yrd.fs" />
     <Compile Include="PrintErrorInfo.yrd.fs" />
+    <Compile Include="PrintErrorInfoEOF.yrd.fs" />
     <Compile Include="RNGLRParserErrorRecoveryTest.fs" />
     <None Include="Ambiguous.yrd" />
     <None Include="CalcErrorAmb.yrd" />

@@ -46,13 +46,6 @@ type ParserSource<'TokenType> (gotos : int[][]
         for j = 0 to length.[i]-1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
 
-    let getExpectedTokens state = 
-        let mutable expected = []
-        for i = 0 to gotos.[0].GetLength(0)-1 do
-            if gotos.[state].[i] <> 0 || reduces.[state].[i] <> null then
-               expected <- i :: expected
-        expected |> List.rev |> List.toArray
-
     member this.Reduces = reduces
     member this.ZeroReduces = zeroReduces
     member this.Gotos = gotos
@@ -68,4 +61,3 @@ type ParserSource<'TokenType> (gotos : int[][]
     member this.NumToString = numToString
     member this.ErrorIndex = errorIndex
     member this.ErrorRulesExists = errorRulesExists
-    member this.GetExpectedTokens state = getExpectedTokens state

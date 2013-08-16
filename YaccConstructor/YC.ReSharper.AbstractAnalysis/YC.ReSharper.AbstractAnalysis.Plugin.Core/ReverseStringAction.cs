@@ -12,6 +12,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.TextControl;
 using JetBrains.Util;
+using YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
 {
@@ -34,7 +35,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
         {
             var literal = _provider.GetSelectedElement<ILiteralExpression>(true, true);
             var sourceFile = _provider.SourceFile;
-            var file = _provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;            
+            var file = _provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            var graph = (new Approximator(file)).Approximate();
             if (literal != null && literal.IsConstantValue() && literal.ConstantValue.IsString())
             {
                 var s = literal.ConstantValue.Value as string;

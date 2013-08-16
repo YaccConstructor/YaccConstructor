@@ -101,3 +101,4 @@ Tests/SimpleHTMLGenerator/*.html
 YaccConstructor/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 YaccConstructor/YardFrontend/Parser.fs
 Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
+YaccConstructor/RNGLRAbstractParser.Test/*.yrd.fs

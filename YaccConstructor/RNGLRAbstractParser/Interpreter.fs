@@ -157,13 +157,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     // If input stream is empty or consists only of EOF token
     if not <| enum.MoveNext() || Array.forall (fun t -> parserSource.EofIndex = parserSource.TokenToNumber (fst t)) (snd enum.Current) then
         if parserSource.AcceptEmptyInput then
-            Success <| new Tree<_>(null, getEpsilon startNonTerm, null)
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), new Dictionary<_,_>())
         else
             Error (0, Unchecked.defaultof<_>, "This grammar cannot accept empty string",
                     {
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
-                    })
+                    }
+                    , new Dictionary<_,_>())
     else                                     
         // Currently processed token
         let curTokens = processChunk enum.Current |> ref
@@ -460,7 +461,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
         if !wasError 
         then 
-            Error (!curInd , curTokens.Value.Tokens.[0].Token , "Parse Error", debugFuns ())
+            Error (!curInd , curTokens.Value.Tokens.[0].Token , "Parse Error", debugFuns (), new Dictionary<_,_>())
         else
             let root = ref None
             let addTreeTop res =
@@ -474,7 +475,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, curTokens.Value.Tokens.[0].Token, "Input was fully processed, but it's not complete correct string.", debugFuns ())
+            | None -> Error (!curInd, curTokens.Value.Tokens.[0].Token, "Input was fully processed, but it's not complete correct string.", debugFuns (), new Dictionary<_,_>())
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success <| new Tree<_>(tokens.ToArray() , res, parserSource.Rules)
+                Success(new Tree<_>(tokens.ToArray() , res, parserSource.Rules), new Dictionary<_,_>())

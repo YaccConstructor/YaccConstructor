@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>fc9a166c-780d-4d15-b366-ca06277c803d</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Helper</RootNamespace>
-    <AssemblyName>Helper</AssemblyName>
+    <ProjectGuid>7aff9abd-2fb2-4f83-ac78-ba511546d277</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>YardFrontend.FParsec</RootNamespace>
+    <AssemblyName>YardFrontend.FParsec</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Helper</Name>
+    <Name>YardFrontend.FParsec</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,9 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Helper.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\YardFrontend.FParsec.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,23 +31,38 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Helper.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\YardFrontend.FParsec.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Common">
-      <HintPath>..\Common\bin\Release\Common.dll</HintPath>
+      <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
+    <Reference Include="FParsec">
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net45\FParsec.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FParsecCS">
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net45\FParsecCS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helper.fs" />
+    <None Include="parser.fsy" />
+    <Compile Include="lexer.fs" />
+    <Compile Include="parser.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

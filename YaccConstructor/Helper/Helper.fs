@@ -1,4 +1,4 @@
-﻿module Yard.Core.Helper
+﻿module Yard.Tests.Helper
 
 open Yard.Core
 open Yard.Core.IL

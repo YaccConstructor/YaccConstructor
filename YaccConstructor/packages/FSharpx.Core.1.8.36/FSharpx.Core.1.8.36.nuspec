@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FSharpx.Core</id>
-    <version>1.8.31</version>
+    <version>1.8.36</version>
     <authors>Steffen Forkmann,  Daniel Mohl,  Tomas Petricek,  Ryan Riley,  Mauricio Scheffer,  Phil Trelford</authors>
     <owners>Steffen Forkmann,  Daniel Mohl,  Tomas Petricek,  Ryan Riley,  Mauricio Scheffer,  Phil Trelford</owners>
     <licenseUrl>http://github.com/fsharp/fsharpx/raw/master/LICENSE.md</licenseUrl>

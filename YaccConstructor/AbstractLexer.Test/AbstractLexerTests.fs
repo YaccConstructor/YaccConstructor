@@ -240,6 +240,31 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[4] = 0)
 
     [<Test>]
+    member this.``Positions. Simple binop.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_6.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printfn "1"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        printfn "2"
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        printfn "3"
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)
+                    | MULT (n,brs) ->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,3)
+        Assert.AreEqual(0, positons.[0])
+        Assert.AreEqual(1, positons.[1])
+        Assert.AreEqual(2, positons.[2])
+
+
+    [<Test>]
     member this.``Calc. Simple sum.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_1.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)

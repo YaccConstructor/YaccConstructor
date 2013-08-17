@@ -1,6 +1,9 @@
 using System;
+using System.Drawing;
+using System.Linq;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
+using JetBrains.ReSharper.Daemon.CSharp.Stages;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Feature.Services.LinqTools;
@@ -11,8 +14,13 @@ using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.TextControl;
+using JetBrains.TextControl.DocumentMarkup;
+using JetBrains.TextControl.Impl;
+using JetBrains.UI.ActionSystem.Actions.CloseAll;
+using JetBrains.UI.RichText;
 using JetBrains.Util;
 using YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
+//using ;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
 {
@@ -37,8 +45,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
             var sourceFile = _provider.SourceFile;
             var file = _provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
             var graphs = (new Approximator(file)).Approximate();
-
-            Console.WriteLine(graphs);
+            var tokenized = (from g in graphs select YS.Resharper.AbstractAnalysis.Languages.Calc.tokenize(g)).ToArray();
+            var parserRes = (from g in tokenized select YS.Resharper.AbstractAnalysis.Languages.Calc.parse(g)).ToArray(); 
+            //var style = new TextStyle(FontStyle.Italic, Color.Aqua, Color.Bisque);
+            //var t =  CSharpHighlightingConsumerExtension.AddHighlighting()
+            //t.
+            //ITextControl
+            //var t = _provider.Document. // TextControl;
+            //t.Document.
+            //var h = new TextControlMarkup.HighlighterProcessor();
+            //var gg = HighlighterLayer.
+            //var tt = highli
+            //ITextControl.
+            Console.WriteLine(parserRes);
             if (literal != null && literal.IsConstantValue() && literal.ConstantValue.IsString())
             {
                 var s = literal.ConstantValue.Value as string;
@@ -72,3 +91,5 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
         }
     }
 }
+//Error	13	Argument 1: cannot convert from 'AbstractLexer.Common.LexerInputGraph<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>' to 'AbstractLexer.Common.LexerInputGraph<string>'	D:\projects\yc\recursive-ascent\YaccConstructor\YC.ReSharper.AbstractAnalysis\YC.ReSharper.AbstractAnalysis.Plugin.Core\ReverseStringAction.cs	46	103	YC.ReSharper.AbstractAnalysis.Plugin
+

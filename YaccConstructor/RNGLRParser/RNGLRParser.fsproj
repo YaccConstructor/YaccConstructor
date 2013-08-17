@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParser</RootNamespace>
     <AssemblyName>RNGLRParser</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RNGLRParser</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

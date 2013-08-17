@@ -21,7 +21,7 @@ type Approximator(file:ICSharpFile) =
                 go a.LeftOperand 
                 go a.RightOperand
             | :? ICSharpLiteralExpression as l -> 
-                new LexerEdge<_,_>(!count,(incr count; !count),Some(l.Literal.GetText(),l))
+                new LexerEdge<_,_>(!count,(incr count; !count),Some(l.Literal.GetText().Trim[|'"'|],l))
                 |> edges.Add
             | _ -> ()
 
@@ -42,9 +42,6 @@ type Approximator(file:ICSharpFile) =
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)
         processor.Process file
-
-        hotspots |> Seq.map propagate |> Array.ofSeq |> printfn "%A"
-        //hotspots |> Seq.map string |> String.concat "; "
         let graphs = ResizeArray.map propagate hotspots
         graphs
 

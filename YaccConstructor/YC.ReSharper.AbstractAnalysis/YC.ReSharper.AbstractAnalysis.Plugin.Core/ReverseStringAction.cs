@@ -36,7 +36,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
             var literal = _provider.GetSelectedElement<ILiteralExpression>(true, true);
             var sourceFile = _provider.SourceFile;
             var file = _provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
-            var graph = (new Approximator(file)).Approximate();
+            var graphs = (new Approximator(file)).Approximate();
+
+            Console.WriteLine(graphs);
             if (literal != null && literal.IsConstantValue() && literal.ConstantValue.IsString())
             {
                 var s = literal.ConstantValue.Value as string;

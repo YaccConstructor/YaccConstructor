@@ -49,7 +49,7 @@
     <Compile Include="ReverseStringExecuteTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.csproj">
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj">
       <Project>{bc086b93-fa4b-41bd-9e95-3ed442592a01}</Project>
       <Name>YC.ReSharper.AbstractAnalysis.Plugin</Name>
     </ProjectReference>

@@ -98,6 +98,10 @@
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Name>RNGLRParser</Name>
     </ProjectReference>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
+      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

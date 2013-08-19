@@ -1,6 +1,6 @@
 
-# 2 "ErrorToEpsilonTranslate.yrd.fs"
-module RNGLR.ParseErrorToEpsilonTranslate
+# 2 "PrintErrorInfoEOF.yrd.fs"
+module RNGLR.ParsePrintErrorInfoEOF
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
@@ -20,7 +20,7 @@ let tokenData = function
 
 let numToString = function
     | 0 -> "a"
-    | 1 -> "b"
+    | 1 -> "e"
     | 2 -> "error"
     | 3 -> "yard_start_rule"
     | 4 -> "A"
@@ -41,7 +41,7 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|0; 3; 1; 1|]
-let private rules = [|4; 1; 0; 5; 2|]
+let private rules = [|4; 1; 0; 2; 5|]
 let private rulesStart = [|0; 2; 3; 4; 5|]
 let startRule = 1
 
@@ -66,7 +66,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,1|]; [|0,2|]; [|3,1|]; [|2,1|]|]
+let private lists_reduces = [|[|0,1|]; [|0,2|]; [|2,1|]; [|3,1|]|]
 let private small_reduces =
         [|131073; 393216; 196609; 393217; 262145; 393218; 327681; 393219|]
 let reduces = Array.zeroCreate 6
@@ -82,7 +82,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|3|]|]
+let private lists_zeroReduces = [|[|2|]|]
 let private small_zeroReduces =
         [|131073; 393216|]
 let zeroReduces = Array.zeroCreate 6
@@ -109,11 +109,11 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(3, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(3, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(2, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(2, new Nodes([|box (new AST(new Family(4, new Nodes([||])), null))|])), null)), null); new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_a * '_rnglr_type_b * '_rnglr_type_error * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_a * '_rnglr_type_e * '_rnglr_type_error * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -123,19 +123,19 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             let _rnglr_cycle_res = ref []
             (match ((unbox _rnglr_children.[0]) : Token) with A _rnglr_val -> [_rnglr_val] | a -> failwith "A expected, but %A found" a )
              |> List.iter (fun (_) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_b) 
-               |> List.iter (fun (res) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_e) 
+               |> List.iter (fun (e) -> 
                 _rnglr_cycle_res := (
                   
-# 2 "ErrorToEpsilonTranslate.yrd"
-                             res
+# 2 "PrintErrorInfoEOF.yrd"
+                            e
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 2 "ErrorToEpsilonTranslate.yrd"
+# 2 "PrintErrorInfoEOF.yrd"
                : '_rnglr_type_a) 
-# 138 "ErrorToEpsilonTranslate.yrd.fs"
+# 138 "PrintErrorInfoEOF.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -143,10 +143,29 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           ((unbox _rnglr_children.[0]) : '_rnglr_type_a) 
             )
-# 2 "ErrorToEpsilonTranslate.yrd"
-               : '_rnglr_type_yard_start_rule)
-               
-# 149 "ErrorToEpsilonTranslate.yrd.fs"
+# 2 "PrintErrorInfoEOF.yrd"
+               : '_rnglr_type_yard_start_rule) 
+# 148 "PrintErrorInfoEOF.yrd.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : list<ErrorNode>)
+             |> List.iter (fun (e) -> 
+              _rnglr_cycle_res := (
+                
+# 3 "PrintErrorInfoEOF.yrd"
+                            printfn "e1: skipped %A " e.tokens; printfn "e1: errorOn %A" e.errorOn;-1
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 3 "PrintErrorInfoEOF.yrd"
+               : '_rnglr_type_e) 
+# 168 "PrintErrorInfoEOF.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -158,35 +177,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
              |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 3 "ErrorToEpsilonTranslate.yrd"
-                     1
+# 3 "PrintErrorInfoEOF.yrd"
+                                                                                                            0
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 3 "ErrorToEpsilonTranslate.yrd"
-               : '_rnglr_type_b) 
-# 169 "ErrorToEpsilonTranslate.yrd.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : list<ErrorNode>)
-             |> List.iter (fun (r) -> 
-              _rnglr_cycle_res := (
-                
-# 3 "ErrorToEpsilonTranslate.yrd"
-                                  -1
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 3 "ErrorToEpsilonTranslate.yrd"
-               : '_rnglr_type_b) 
-# 189 "ErrorToEpsilonTranslate.yrd.fs"
+# 3 "PrintErrorInfoEOF.yrd"
+               : '_rnglr_type_e) 
+# 188 "PrintErrorInfoEOF.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (int * int)) -> 
@@ -204,7 +203,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 207 "ErrorToEpsilonTranslate.yrd.fs"
+# 206 "PrintErrorInfoEOF.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 
@@ -212,7 +211,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_a)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_b)   ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_e)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_error)   ) |> List.concat));

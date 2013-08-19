@@ -22,9 +22,9 @@ open Calc.Parser
 
 match buildAst tokens with
 //match buildAst tokens with
-| Error (pos, token, msg, debugFuns) ->
+| Error (pos, token, msg, debugFuns, _) ->
     printfn "Error on position %d, token %A: %s" pos token msg
-| Success ast ->
+| Success (ast, _) ->
     ast.PrintAst()
     let args = {
         tokenToRange = fun _ -> Unchecked.defaultof<_>, Unchecked.defaultof<_>

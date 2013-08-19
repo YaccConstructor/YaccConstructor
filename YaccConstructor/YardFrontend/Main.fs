@@ -148,7 +148,7 @@ let private parse buf userDefs =
     //let tokens = List.ofSeq (filterByDefs buf userDefs)
     //tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
     match GrammarParser.buildAst (filterByDefs buf userDefs) with
-    | Parser.Success ast ->
+    | Parser.Success (ast, dict) ->
         ast.collectWarnings tokenToRange
         |> ResizeArray.iter (fun (x,y) -> fprintfn stderr "Ambiguity: %s %A" (rangeToString x) y)
         let args = {
@@ -159,12 +159,12 @@ let private parse buf userDefs =
             }
         ast.ChooseLongestMatch()
         try
-            (GrammarParser.translate args ast : Definition.t<Source.t, Source.t> list).Head
+            (GrammarParser.translate args ast dict : Definition.t<Source.t, Source.t> list).Head
         with
         | ParseError (src, msg) ->
             failwithf "Parse error on position %s:%s. %s: %s" src.file
                         (rangeToString (src.startPos, src.endPos)) msg src.text
-    | Parser.Error (_, token, msg, debugs) -> 
+    | Parser.Error (_, token, msg, debugs, _) -> 
         debugs.drawGSSDot "res.dot"
         failwithf "Parse error on position %s on token %A: %s"  (token |> tokenToRange |> rangeToString) token msg
     

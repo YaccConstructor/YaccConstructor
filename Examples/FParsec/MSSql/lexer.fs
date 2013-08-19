@@ -37,8 +37,16 @@ let pLEFT: Parser<string, unit> = str "("
 let (pRIGHT : Parser<string, unit>) = str ")"
 let (pDOUBLE_COLON : Parser<string, unit>) = str ":"
 
-let (pLOCALVAR : Parser<string, unit>) = 
     
+let pSTRING_CONST : Parser<_, unit> = str "\"" .>> many (letter <|> digit <|> anyOf [' '; '\n'; '\r' ]) .>> str "\""
+
+let pDEC_NUMBER : Parser<_, unit> = pfloat 
+
+let pIDENT : Parser<_, unit> = attempt(letter .>> many (letter <|> digit) |>> string)
+let pLOCALVAR : Parser<_, unit> = attempt(str "@" .>> pIDENT)
+let pGLOBALVAR : Parser<_, unit> = str "@@" .>> pIDENT
+let pSTOREDPROCEDURE : Parser<_, unit> = str "%" .>> pIDENT
+let pWEIGHT : Parser<_, unit> = str "MIN" <|> str "MAX"
 
 let literal s = pstring s .>> ws
 

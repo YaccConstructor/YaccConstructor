@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>YardFrontend</RootNamespace>
     <AssemblyName>YardFrontend</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>YardFrontend</Name>
     <SccProjectName>
     </SccProjectName>

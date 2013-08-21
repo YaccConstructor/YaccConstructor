@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions</RootNamespace>
     <AssemblyName>Conversions</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Conversions</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

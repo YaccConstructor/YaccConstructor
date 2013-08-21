@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>YaccConstructor_prod</RootNamespace>
     <AssemblyName>YaccConstructor_prod</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>YaccConstructor_prod</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -58,6 +58,11 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

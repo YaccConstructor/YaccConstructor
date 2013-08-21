@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FsYaccFrontend</RootNamespace>
     <AssemblyName>FsYaccFrontend</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>FsYaccFrontend</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

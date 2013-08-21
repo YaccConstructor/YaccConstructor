@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>YaccConstructor_min_base</RootNamespace>
     <AssemblyName>YaccConstructor_min_base</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>YaccConstructor_min_base</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -85,6 +85,11 @@
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

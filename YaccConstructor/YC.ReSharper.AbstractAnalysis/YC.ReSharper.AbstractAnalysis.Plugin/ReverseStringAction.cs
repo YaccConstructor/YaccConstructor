@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using FSharpx;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Daemon.CSharp.Stages;
@@ -19,10 +20,10 @@ using JetBrains.TextControl.Impl;
 using JetBrains.UI.ActionSystem.Actions.CloseAll;
 using JetBrains.UI.RichText;
 using JetBrains.Util;
-using YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
+//using YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
 //using ;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
+namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
     /// <summary>
     /// This is an example context action. The test project demonstrates tests for
@@ -42,21 +43,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
         public override bool IsAvailable(IUserDataHolder cache)
         {
             var literal = _provider.GetSelectedElement<ILiteralExpression>(true, true);
-            var sourceFile = _provider.SourceFile;
-            var file = _provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
-            var graphs = (new Approximator(file)).Approximate();
-            var tokenized = (from g in graphs select YS.Resharper.AbstractAnalysis.Languages.Calc.tokenize(g)).ToArray();
-            var parserRes = (from g in tokenized select YS.Resharper.AbstractAnalysis.Languages.Calc.parse(g)).ToArray(); 
-            //var style = new TextStyle(FontStyle.Italic, Color.Aqua, Color.Bisque);
-            //var t =  CSharpHighlightingConsumerExtension.AddHighlighting()
-            //t.
-            //ITextControl
-            //var t = _provider.Document. // TextControl;
-            //t.Document.
-            //var h = new TextControlMarkup.HighlighterProcessor();
-            //var gg = HighlighterLayer.
-            //var tt = highli
-            //ITextControl.
+            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(_provider);
+            var parserRes = processor.Process();
+            //parserRes.
+            ////var style = new TextStyle(FontStyle.Italic, Color.Aqua, Color.Bisque);
+            ////var t =  CSharpHighlightingConsumerExtension.AddHighlighting()
+            ////t.
+            ////ITextControl
+            ////var t = _provider.Document. // TextControl;
+            ////t.Document.
+            ////var h = new TextControlMarkup.HighlighterProcessor();
+            ////var gg = HighlighterLayer.
+            ////var tt = highli
+            ////ITextControl.
             Console.WriteLine(parserRes);
             if (literal != null && literal.IsConstantValue() && literal.ConstantValue.IsString())
             {

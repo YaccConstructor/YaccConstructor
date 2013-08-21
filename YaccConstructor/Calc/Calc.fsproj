@@ -36,6 +36,10 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <PropertyGroup>
+    <ReSharperSdkTargets Condition=" '$(ReSharperSdkTargets)' == '' ">$(MSBuildExtensionsPath)\JetBrains\ReSharper.SDK\v8.0</ReSharperSdkTargets>
+  </PropertyGroup>
+  <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
   <ItemGroup>
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="Lexer.fs" />
@@ -97,12 +101,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <PropertyGroup>
-    <ReSharperSdkTargets Condition=" '$(ReSharperSdkTargets)' == '' ">$(MSBuildExtensionsPath)\JetBrains\ReSharper.SDK\v8.0</ReSharperSdkTargets>
-  </PropertyGroup>
- 
-  <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
-
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

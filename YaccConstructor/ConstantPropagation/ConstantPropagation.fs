@@ -1,4 +1,4 @@
-﻿namespace YS.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
+﻿namespace YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
 open JetBrains.ReSharper.Psi.CSharp;
 open JetBrains.ReSharper.Psi.CSharp.Tree;

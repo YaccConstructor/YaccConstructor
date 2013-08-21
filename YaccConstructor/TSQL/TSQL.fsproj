@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>TSQL</RootNamespace>
     <AssemblyName>TSQL</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>TSQL</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

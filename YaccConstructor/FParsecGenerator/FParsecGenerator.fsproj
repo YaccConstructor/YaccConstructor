@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FParsecGenerator</RootNamespace>
     <AssemblyName>FParsecGenerator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>FParsecGenerator</Name>

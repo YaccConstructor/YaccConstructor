@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>FsYARD</RootNamespace>
     <AssemblyName>FsYARD</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>FsYARD</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

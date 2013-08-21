@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FsYaccPrinter</RootNamespace>
     <AssemblyName>FsYaccPrinter</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>FsYaccPrinter</Name>
@@ -44,18 +44,9 @@
   <ItemGroup>
     <Compile Include="Generator.fs" />
     <Compile Include="FsYaccPrinter.fs" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.31\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
@@ -73,10 +64,10 @@
     </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

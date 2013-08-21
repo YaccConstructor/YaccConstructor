@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRAbstractParser.Tests</RootNamespace>
     <AssemblyName>RNGLRAbstractParser.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RNGLRAbstractParser.Test</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -116,10 +116,10 @@
     </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

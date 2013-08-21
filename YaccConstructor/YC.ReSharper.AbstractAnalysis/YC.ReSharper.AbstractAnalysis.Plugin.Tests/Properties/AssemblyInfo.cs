@@ -22,7 +22,7 @@ public class TestEnvironmentAssembly : ReSharperTestEnvironmentAssembly
     yield return Assembly.GetExecutingAssembly();
 
     #warning you need specify a type from the assembly being tested
-    yield return typeof(YC.ReSharper.AbstractAnalysis.Plugin.Core.ReverseStringAction).Assembly;
+    yield return typeof(YC.ReSharper.AbstractAnalysis.Plugin.ReverseStringAction).Assembly;
   }
 
   public override void SetUp()

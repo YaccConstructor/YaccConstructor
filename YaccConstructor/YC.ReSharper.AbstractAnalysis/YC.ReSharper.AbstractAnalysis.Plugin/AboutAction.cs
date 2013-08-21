@@ -2,9 +2,9 @@ using System.Windows.Forms;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
+namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
-  [ActionHandler("YC.ReSharper.AbstractAnalysis.Plugin.Core.About")]
+  [ActionHandler("YC.ReSharper.AbstractAnalysis.Plugin.About")]
   public class AboutAction : IActionHandler
   {
     public bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate)

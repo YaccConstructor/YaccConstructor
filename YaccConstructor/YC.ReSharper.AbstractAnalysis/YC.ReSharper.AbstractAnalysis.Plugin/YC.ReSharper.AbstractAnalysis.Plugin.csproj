@@ -8,8 +8,8 @@
     <ProjectGuid>{BC086B93-FA4B-41BD-9E95-3ED442592A01}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YC.ReSharper.AbstractAnalysis.Plugin.Core</RootNamespace>
-    <AssemblyName>YC.ReSharper.AbstractAnalysis.Plugin.Core</AssemblyName>
+    <RootNamespace>YC.ReSharper.AbstractAnalysis.Plugin</RootNamespace>
+    <AssemblyName>YC.ReSharper.AbstractAnalysis.Plugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -33,6 +33,11 @@
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="FSharpx.Core, Version=1.8.31.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -77,6 +82,10 @@
     <ProjectReference Include="..\..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Name>AbstractLexer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
+      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+      <Name>AbstractLexer.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
       <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>

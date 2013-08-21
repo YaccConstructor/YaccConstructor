@@ -1,4 +1,4 @@
-﻿module YS.Resharper.AbstractAnalysis.Languages.Calc
+﻿module YC.Resharper.AbstractAnalysis.Languages.Calc
 
 //open Graphviz4Net.Dot.AntlrParser
 open System.IO
@@ -27,6 +27,7 @@ let printTag tag printBrs =
 
 let tokenize lexerInputGraph =
     Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-    
-let parse parserInputGraph = (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse  buildAstAbstract parserInputGraph
+
+let private parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()    
+let parse parserInputGraph = parser.Parse  buildAstAbstract parserInputGraph
     

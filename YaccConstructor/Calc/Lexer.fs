@@ -4,8 +4,11 @@ module Calc.Lexer
 open Calc.AbstractParser
 open AbstractLexer.Core
 
+//type eInfo<'brs> = 
 
-# 8 "Lexer.fs"
+exception LexerError of string*obj
+
+# 11 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -56,62 +59,62 @@ let rec _fslex_dummy () = _fslex_dummy()
 let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
-# 12 "Lexer.fsl"
+# 15 "Lexer.fsl"
                               None 
-# 61 "Lexer.fs"
+# 64 "Lexer.fs"
           )
   | 1 -> ( 
-# 13 "Lexer.fsl"
+# 16 "Lexer.fsl"
                                                                   NUMBER(lexeme,brs) |> Some 
-# 66 "Lexer.fs"
+# 69 "Lexer.fs"
           )
   | 2 -> ( 
-# 14 "Lexer.fsl"
+# 17 "Lexer.fsl"
                        MINUS(lexeme,brs) |> Some 
-# 71 "Lexer.fs"
+# 74 "Lexer.fs"
           )
   | 3 -> ( 
-# 15 "Lexer.fsl"
+# 18 "Lexer.fsl"
                        LBRACE(lexeme,brs) |> Some 
-# 76 "Lexer.fs"
+# 79 "Lexer.fs"
           )
   | 4 -> ( 
-# 16 "Lexer.fsl"
+# 19 "Lexer.fsl"
                        RBRACE(lexeme,brs)|> Some  
-# 81 "Lexer.fs"
+# 84 "Lexer.fs"
           )
   | 5 -> ( 
-# 17 "Lexer.fsl"
+# 20 "Lexer.fsl"
                        DIV(lexeme,brs) |> Some 
-# 86 "Lexer.fs"
+# 89 "Lexer.fs"
           )
   | 6 -> ( 
-# 18 "Lexer.fsl"
+# 21 "Lexer.fsl"
                        PLUS(lexeme,brs) |> Some 
-# 91 "Lexer.fs"
+# 94 "Lexer.fs"
           )
   | 7 -> ( 
-# 19 "Lexer.fsl"
+# 22 "Lexer.fsl"
                         POW(lexeme,brs) |> Some 
-# 96 "Lexer.fs"
+# 99 "Lexer.fs"
           )
   | 8 -> ( 
-# 20 "Lexer.fsl"
+# 23 "Lexer.fsl"
                        MULT(lexeme,brs) |> Some 
-# 101 "Lexer.fs"
+# 104 "Lexer.fs"
           )
   | 9 -> ( 
-# 21 "Lexer.fsl"
+# 24 "Lexer.fsl"
                        RNGLR_EOF ("",[||]) |> Some 
-# 106 "Lexer.fs"
+# 109 "Lexer.fs"
           )
   | 10 -> ( 
-# 22 "Lexer.fsl"
-                     failwithf "unexpected input: %s" <| string lexeme 
-# 111 "Lexer.fs"
+# 25 "Lexer.fsl"
+                     raise (LexerError(lexeme,box brs)) (* failwithf "unexpected input: %s" <| string lexeme*) 
+# 114 "Lexer.fs"
           )
   | _ -> failwith "token"
 
-# 23 "Lexer.fsl"
+# 26 "Lexer.fsl"
 
 # 3000000 "Lexer.fs"

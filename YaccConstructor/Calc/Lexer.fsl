@@ -3,6 +3,9 @@ module Calc.Lexer
 open Calc.AbstractParser
 open AbstractLexer.Core
 
+//type eInfo<'brs> = 
+
+exception LexerError of string*obj
 }
 
 let digit = ['0'-'9']
@@ -19,4 +22,4 @@ rule token = parse
 | "**" { POW(lexeme,brs) |> Some }
 | '*' { MULT(lexeme,brs) |> Some }
 | eof { RNGLR_EOF ("",[||]) |> Some }
-| _ { failwithf "unexpected input: %s" <| string lexeme }
+| _ { raise (LexerError(lexeme,box brs)) (* failwithf "unexpected input: %s" <| string lexeme*) }

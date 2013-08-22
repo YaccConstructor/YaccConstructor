@@ -22,10 +22,22 @@ type Processor(file) =
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
+        let lexerErrors = new ResizeArray<_>()
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate()
-        let tokenized = graphs |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize
+        let tokenize g =
+            try 
+                YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize g
+                |> Some 
+            with
+            | Calc.Lexer.LexerError(t,brs) ->
+                (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
+                |> lexerErrors.Add
+                None
+        let tokenized = 
+            graphs 
+            |> ResizeArray.choose tokenize
         let parserRes = tokenized |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.parse
         let addError tok =
             match tok with
@@ -40,7 +52,7 @@ type Processor(file) =
             | Calc.AbstractParser.MULT (l,br) -> parserErrors.Add <| br.[0].back_ref.GetDocumentRange() 
         parserRes 
         |> ResizeArray.iter (function Yard.Generators.RNGLR.Parser.Success(_,_) -> () | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> addError tok) 
-        tokenized,parserErrors
+        lexerErrors,parserErrors
 
 //
 //        <?xml version="1.0" encoding="utf-8" ?>

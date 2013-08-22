@@ -51,7 +51,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
       if (myDaemonProcess.InterruptFlag)
         throw new ProcessCancelledException();
 
-      var highlightings = from e in parserRes.Item2 select new HighlightingInfo(e, new ComplexityWarning("Syntax error."));
+      var highlightings = (from e in parserRes.Item2 select new HighlightingInfo(e, new ComplexityWarning("Syntax error."))).Concat(
+                           from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ComplexityWarning("Unexpected symbol: " + e.Item1 + ".")));
       // Commit the result into document
       commiter(new DaemonStageResult(highlightings.ToArray()));
     }

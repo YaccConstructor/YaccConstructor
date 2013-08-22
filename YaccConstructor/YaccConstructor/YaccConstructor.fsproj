@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Main</RootNamespace>
     <AssemblyName>YaccConstructor</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>YaccConstructor</Name>
@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend -c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets -c Linearize  -g YardPrinter -i "C:\projects\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
+    <StartArguments>-i D:\projects\yc\recursive-ascent\YaccConstructor\Calc\calc.yrd  -c ExpandEbnf -c ExpandMeta       -g "RNGLRGenerator -o Calc.yrd.fs"</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>
@@ -56,6 +56,9 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="Program.fs" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

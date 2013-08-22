@@ -22,9 +22,9 @@ module Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
-open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
 open Yard.Generators.RNGLR.Parser 
+open Microsoft.FSharp.Collections
 
 
 [<Struct>]

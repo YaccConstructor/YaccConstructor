@@ -47,3 +47,27 @@ rules:
 Source without filename: parserRange
 Source without filename: error
 <null>
+rules:
+   0: expr = yard_rule_binExpr_1 
+   1: yard_start_rule = expr 
+   2: yard_rule_binExpr_1 = term yard_rule_yard_many_1_2 
+   3: yard_rule_yard_many_1_2 = 
+   4: yard_rule_yard_many_1_2 = termOp term yard_rule_yard_many_1_2 
+   5: termOp = PLUS 
+   6: termOp = MINUS 
+   7: term = yard_rule_binExpr_3 
+   8: yard_rule_binExpr_3 = factor yard_rule_yard_many_1_4 
+   9: yard_rule_yard_many_1_4 = 
+  10: yard_rule_yard_many_1_4 = factorOp factor yard_rule_yard_many_1_4 
+  11: factorOp = MULT 
+  12: factorOp = DIV 
+  13: factor = yard_rule_binExpr_5 
+  14: yard_rule_binExpr_5 = powExpr yard_rule_yard_many_1_6 
+  15: yard_rule_yard_many_1_6 = 
+  16: yard_rule_yard_many_1_6 = powOp powExpr yard_rule_yard_many_1_6 
+  17: powOp = POW 
+  18: powExpr = NUMBER 
+  19: powExpr = LBRACE expr RBRACE 
+Source without filename: parserRange
+Source without filename: error
+<null>

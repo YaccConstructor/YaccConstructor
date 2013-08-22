@@ -107,7 +107,7 @@ let fslex_actions_token  _fslex_state lexeme brs =
           )
   | 10 -> ( 
 # 22 "Lexer.fsl"
-                     failwithf "unexpected input: %s" <| "-" 
+                     failwithf "unexpected input: %s" <| string lexeme 
 # 111 "Lexer.fs"
           )
   | _ -> failwith "token"

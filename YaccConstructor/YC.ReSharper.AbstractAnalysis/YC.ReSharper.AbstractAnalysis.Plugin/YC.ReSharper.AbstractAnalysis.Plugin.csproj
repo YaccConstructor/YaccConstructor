@@ -33,26 +33,20 @@
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="FSharpx.Core, Version=1.8.31.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\..\packages\FSharpx.Core.1.8.37\lib\40\FSharpx.Core.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
-    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="QuickGraph">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
     </Reference>
-    <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="QuickGraph.Data">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
     </Reference>
-    <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
     </Reference>
-    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="QuickGraph.Serialization">
       <HintPath>..\..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -95,13 +89,13 @@
       <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>
       <Name>Calc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ConstantPropagation\ConstantPropagation.fsproj">
-      <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
-      <Name>ConstantPropagation</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
       <Name>RNGLRAbstractParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Name>RNGLRCommon</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\RNGLRParser\RNGLRParser.fsproj">
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>

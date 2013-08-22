@@ -43,8 +43,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         public override bool IsAvailable(IUserDataHolder cache)
         {
             var literal = _provider.GetSelectedElement<ILiteralExpression>(true, true);
-            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(_provider);
-            var parserRes = processor.Process();
+            //var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(_provider);
+            //var parserRes = processor.Process();
             //parserRes.
             ////var style = new TextStyle(FontStyle.Italic, Color.Aqua, Color.Bisque);
             ////var t =  CSharpHighlightingConsumerExtension.AddHighlighting()
@@ -56,7 +56,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             ////var gg = HighlighterLayer.
             ////var tt = highli
             ////ITextControl.
-            Console.WriteLine(parserRes);
+            //Console.WriteLine(parserRes);
             if (literal != null && literal.IsConstantValue() && literal.ConstantValue.IsString())
             {
                 var s = literal.ConstantValue.Value as string;

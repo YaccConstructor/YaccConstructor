@@ -18,19 +18,29 @@ open Microsoft.FSharp.Collections
 
 //Метод не найден: "Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Core.FSharpFunc`2<System.Collections.Generic.IEnumerable`1<System.Tuple`2<Int32,System.Tuple`2<!0,Int32>[]>>,ParseResult`1<!0>>,Microsoft.FSharp.Core.FSharpFunc`2<AbstractParsing.Common.ParserInputGraph`1<!0>,ParseResult`1<!0>>> Parser`1.get_Parse()".
             //base {Microsoft.FSharp.Core.FSharpFunc<Microsoft.FSharp.Core.F...Generators.RNGLR.Parser.ParseResult<Calc.AbstractParser.Token>>>} = {Yard.Generators.RNGLR.AbstractParser.get_Parse@39<Calc.AbstractParser.Token>}
-type Processor(provider: ICSharpContextActionDataProvider) = 
+type Processor(file) =
+//(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
-        let sourceFile = provider.SourceFile
-        let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
+        let parserErrors = new ResizeArray<_>()
+        //let sourceFile = provider.SourceFile
+        //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate()
-        let tokenized = graphs |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize |> Array.ofSeq
-        //let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>() 
-        //let ttt= parser.xx()
-        //let t = parser.Parse_x()   
-        //YC.Resharper.AbstractAnalysis.Languages.Calc.parser()
-        //let _do = YC.Resharper.AbstractAnalysis.Languages.Calc.parse parser
-        let parserRes = tokenized |> Array.map YC.Resharper.AbstractAnalysis.Languages.Calc.parse |> Array.ofSeq
-        tokenized,parserRes
+        let tokenized = graphs |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize
+        let parserRes = tokenized |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.parse
+        let addError tok =
+            match tok with
+            | Calc.AbstractParser.MINUS (l,br)
+            | Calc.AbstractParser.DIV (l,br)
+            | Calc.AbstractParser.PLUS (l,br)
+            | Calc.AbstractParser.NUMBER (l,br)
+            | Calc.AbstractParser.LBRACE (l,br)
+            | Calc.AbstractParser.RBRACE (l,br)
+            | Calc.AbstractParser.POW (l,br)
+            | Calc.AbstractParser.RNGLR_EOF (l,br)
+            | Calc.AbstractParser.MULT (l,br) -> parserErrors.Add <| br.[0].back_ref.GetDocumentRange() 
+        parserRes 
+        |> ResizeArray.iter (function Yard.Generators.RNGLR.Parser.Success(_,_) -> () | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> addError tok) 
+        tokenized,parserErrors
 
 //
 //        <?xml version="1.0" encoding="utf-8" ?>

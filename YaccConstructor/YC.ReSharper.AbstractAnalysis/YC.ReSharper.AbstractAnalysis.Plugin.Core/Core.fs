@@ -24,10 +24,21 @@ type Processor(provider: ICSharpContextActionDataProvider) =
         let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate()
         let tokenized = graphs |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize |> Array.ofSeq
-        let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>() 
-        let ttt= parser.xx()
-        let t = parser.Parse_x()   
+        //let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>() 
+        //let ttt= parser.xx()
+        //let t = parser.Parse_x()   
         //YC.Resharper.AbstractAnalysis.Languages.Calc.parser()
-        let _do = YC.Resharper.AbstractAnalysis.Languages.Calc.parse parser
-        let parserRes = tokenized |> Array.map _do |> Array.ofSeq
+        //let _do = YC.Resharper.AbstractAnalysis.Languages.Calc.parse parser
+        let parserRes = tokenized |> Array.map YC.Resharper.AbstractAnalysis.Languages.Calc.parse |> Array.ofSeq
         tokenized,parserRes
+
+//
+//        <?xml version="1.0" encoding="utf-8" ?>
+//<configuration>
+//  <dependentAssembly>
+//    <assemblyIdentity name="FSharp.Core" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+//    <bindingRedirect oldVersion="0.0.0.0-4.3.0.0" newVersion="2.0.0.0" />
+//    <!--bindingRedirect oldVersion="2.3.5.0" newVersion="4.0.0.0" /-->
+//    <!--bindingRedirect oldVersion="4.0.0.0" newVersion="4.3.0.0" /-->
+//  </dependentAssembly>
+//</configuration>

@@ -28,9 +28,9 @@ let printTag tag printBrs =
 let tokenize lexerInputGraph =
     Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
 
-let parser () = 1
+let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
-let parse (parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>) =
+let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
     
-    fun parserInputGraph -> 1//parser.Parse (*buildAstAbstract (*parserInputGraph*)*)
+    fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
     

@@ -9,8 +9,8 @@ open AbstractLexer.Common
 open Microsoft.FSharp.Collections
 
 type Approximator(file:ICSharpFile) = 
-    let count = ref 0
     let propagate (hotspot:IInvocationExpression) =
+        let count = ref 0
         let args = hotspot.ArgumentList.Arguments |> Array.ofSeq
         //|> Seq.map (fun arg -> arg.)
         let start = args.[0].Value

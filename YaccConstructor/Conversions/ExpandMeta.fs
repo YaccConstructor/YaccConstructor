@@ -150,6 +150,8 @@ let expandRule body (module' : string) metaRules expanded =
                 let applyToRes f (a,b) = (f a, b)
 
                 let rec canUseBinding = function
+                    | PSeq(_,Some _,_) -> true
+                    | PSeq(s,_,_) -> s |> List.exists (fun elem -> canUseBinding elem.rule)
                     | PRef(_,None)
                     | PToken _
                     | PLiteral _ -> false
@@ -157,8 +159,6 @@ let expandRule body (module' : string) metaRules expanded =
                     | POpt r
                     | PSome r
                     | PMany r -> canUseBinding r
-                    | PSeq(_,Some _,_) -> true
-                    | PSeq(s,_,_) -> s |> List.exists (fun elem -> canUseBinding elem.rule)
                     | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
                     | x -> true
 
@@ -204,7 +204,7 @@ let expandRule body (module' : string) metaRules expanded =
                     //let newGlobalAttrs = getRuleBindings metaRule globalAttrs
                 
                     let metaExp = expandBody (replaceMetasInBody newFormalToAct metaRule.body) declModule metaRules expanded newRes
-                    let newRule = Rule.defaultRule name body
+                    let newRule = {Rule.defaultRule newRuleName (fst metaExp) with args = formalArgs}
                     (substitution, newRule::snd metaExp)
 
                 match body with
@@ -225,10 +225,11 @@ let expandRule body (module' : string) metaRules expanded =
                 | PLiteral _ as literal -> (literal, res)
                 | PToken _ as token -> (token, res)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
-                    if metaArgs.IsEmpty then (PRef(name, attrs), res)
+                    if metaArgs.IsEmpty then
+                        (PRef(name, attrs), res)
                     else expandMetaRef name attrs metaArgs 
                 | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
-                | PRepet _ -> failwith "Unrealised meta-expanding of permutation"
+                | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
             if not <| expanded.ContainsKey key then
                 expanded.Add(key, rule)
 //            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule res

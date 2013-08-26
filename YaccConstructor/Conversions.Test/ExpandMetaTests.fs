@@ -103,3 +103,9 @@ type ``Conversions expand metarules tests`` () =
     [<Test>]    
     member test.``Meta test two calls``()=runMetaTest("meta_two.yrd")
 
+    [<Test>]    
+    member test.``Meta test modules easy``()=runMetaTest("meta_modules_easy.yrd")
+
+    [<Test>]    
+    member test.``Meta test modules hard``()=runMetaTest("meta_modules_hard.yrd")
+

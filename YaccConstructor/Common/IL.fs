@@ -171,6 +171,9 @@ module Rule = begin
         /// List of meta-arguments - names of rules, parametrizing this rule.
         metaArgs: 'patt list
     }
+
+    let defaultRule name body =
+        {name = name; body = body; args = []; isStart = false; isPublic = false; metaArgs = []}
 end
 
 

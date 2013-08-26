@@ -56,6 +56,7 @@ let inline mapGrammar mapF grammar =
     grammar
     |> List.map (mapModule mapF)
 
+/// Map: module -> (list of public rules, declared in it)
 let getPublicRules (grammar : Grammar.t<_,_>) =
     grammar
     |> List.map (fun module' ->
@@ -64,7 +65,7 @@ let getPublicRules (grammar : Grammar.t<_,_>) =
         )
     |> dict
 
-/// For each module creates map: rule -> module, in which the rule is declared
+/// For each module creates map: rule -> (module, in which the rule is declared)
 let getRulesMap (grammar : Grammar.t<_,_>) =
     let publicRules = getPublicRules grammar
     grammar

@@ -33,8 +33,11 @@ type Approximator(file:ICSharpFile) =
                 //MultipleLocalVariableDeclaration
                     c.[decl] 
                     |> Seq.filter (fun kvp -> kvp.Value <> null && kvp.Value.Contains v) |> Seq.map (fun kvp -> 
-                      match kvp.Key.Parent with
-                      | :? IAssignmentExpression as ae -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
+                      match kvp.Key with
+                      | :? ILocalVariableDeclaration as lvDecl -> (lvDecl.Initial :?> IExpressionInitializer).Value
+                      | _ -> 
+                        match kvp.Key.Parent with 
+                        | :? IAssignmentExpression as ae -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
                       //| :? IMultipleLocalVariableDeclaration as vd -> vd.Declarators.[0] )
                       )
                     |> Array.ofSeq    
@@ -52,7 +55,7 @@ type Approximator(file:ICSharpFile) =
             | :? IReferenceExpression as re -> processVar start _end re
             | _ -> ()
 
-        
+        //base {JetBrains.ReSharper.Psi.CSharp.Impl.Tree.LocalVariableDeclarationStub} = {ILocalVariableDeclaration: x}
         //+		[JetBrains.ReSharper.Psi.CSharp.Impl.Resolve.ExpressionArgumentInfo]	{JetBrains.ReSharper.Psi.CSharp.Impl.Resolve.ExpressionArgumentInfo}	JetBrains.ReSharper.Psi.CSharp.Impl.Resolve.ExpressionArgumentInfo
 
         let start = args.[0].Value

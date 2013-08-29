@@ -7,7 +7,7 @@ tokens {
 }
 
 options {
-    translate = true
+    translate = false
     module = "Calc.AbstractParser"
     infEpsPath = epsilons
     pos = uint64
@@ -21,17 +21,18 @@ binExpr<operand binOp>:
 
 [<Start>]
 expr: res=binExpr<term termOp> { res }
+      | ERROR
 
 termOp: PLUS { (+) } | MINUS { (-) }
 
 term: res=binExpr<factor factorOp> { res }
-
+      | ERROR
 factorOp: MULT { ( * ) } | DIV { (/) }
 
 factor: res=binExpr<powExpr powOp> { res }
-
+        | ERROR
 powOp: POW {  ( ** ) }
 
 powExpr: n=NUMBER { fst n |> double } | LBRACE e=expr RBRACE { e }
-
+         | ERROR
 

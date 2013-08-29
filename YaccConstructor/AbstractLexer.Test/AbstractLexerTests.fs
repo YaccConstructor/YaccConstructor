@@ -32,6 +32,9 @@ type ``Abstract lexer tests`` () =
             | NUMBER(v,br) -> "NUM: " + v + "; br= " + printBrs br
             | PLUS(v,br)   -> "+: " + v  + printBrs br
             | MULT(v,br)   ->  "*: " + v  + printBrs br
+            | DIV(v,br)   ->  "/: " + v  + printBrs br
+            | LBRACE(v,br)   ->  "(: " + v  + printBrs br
+            | RBRACE(v,br)   ->  "): " + v  + printBrs br
             | e -> string e 
         f.FormatEdge.Add(fun e -> (e.EdgeFormatter.Label.Value <- printEdg e.Edge))
         let str = f.Generate()

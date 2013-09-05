@@ -20,7 +20,7 @@
 *)
 
 {
-open Microsoft.FSharp.Text.Lexing
+open AbstractLexer.Core
 open Yard.Utils.SourceText
 }
 
@@ -51,10 +51,10 @@ options {
 
 module Main
 
-open Select_crud, Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt
+open Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt, Select_crud
 
 [<Start>]
-root_rule: batch_body
+root_rule: (batch_body 'GO'?)*
 
 batch_body: 
        create_proc
@@ -69,5 +69,5 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
-     | select_stmnt
      | stmt_block
+     | select_stmnt

@@ -95,7 +95,7 @@ let fslex_actions_tokens  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
 # 55 "Lexer.fsl"
-                                 DEC_NUMBER(defaultSourceText id brs lexeme )|> Some 
+                                 DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some 
 # 99 "Lexer.fs"
           )
   | 1 -> ( 
@@ -186,7 +186,7 @@ let fslex_actions_tokens  _fslex_state lexeme brs =
           )
   | 18 -> ( 
 # 76 "Lexer.fsl"
-                        RNGLR_EOF(defaultSourceText id brs  "") |> Some 
+                        RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some 
 # 190 "Lexer.fs"
           )
   | 19 -> ( 

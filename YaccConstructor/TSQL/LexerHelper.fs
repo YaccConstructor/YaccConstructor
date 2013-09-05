@@ -21,9 +21,9 @@ exception IdentToken
 
 let getKwTokenOrIdent = 
     let kws = getLiteralNames |> List.map (fun s -> s.ToLower()) |> Set.ofList
-    fun (name:string) (defaultSourceText : SourceText) ->
+    fun (name:string) (defaultSourceText) ->
         if kws.Contains (name.ToLowerInvariant()) then
-            genLiteral name defaultSourceText.Range.start defaultSourceText.Range.end_
+            genLiteral name (snd defaultSourceText) (snd defaultSourceText)
         else
             IDENT defaultSourceText
 
@@ -38,13 +38,13 @@ let str_buf = new System.Text.StringBuilder()
 let appendBuf (str:string) = str_buf.Append(str) |> ignore
 let clearBuf () = str_buf.Clear() |> ignore
   
-let makeIdent notKeyWord (name:string) (stratPos,endPos) =
+let makeIdent notKeyWord (name:string) (startPos,endPos) =
   let prefix = 
     if String.length name >= 2 
     then name.[0..1] 
     else ""
   let defaultSourceText =  
-    new SourceText(name, new SourceRange(0UL, 0UL))// . ofTuple (startPos,endPos))
+    new SourceText(name, new SourceRange(0UL, 0UL)),startPos// . ofTuple (startPos,endPos))
   if prefix = "@@" then GLOBALVAR defaultSourceText
   //else if prefix = "##" then GLOBALTEMPOBJ name
   elif name.[0] = '@' then LOCALVAR defaultSourceText
@@ -63,7 +63,7 @@ let getLiteral id brs (*lexbuf : LexBuffer<_>*) value =
 //    let range = 
 //        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
 //                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
-    genLiteral value 0UL 0UL
+    genLiteral value brs brs
         
 let tokenPos token =
     let data = tokenData token

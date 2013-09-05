@@ -52,7 +52,7 @@ let label = ident ':'
 rule tokens = parse
 (* | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } *)
- | decnumber    { DEC_NUMBER(defaultSourceText id brs lexeme )|> Some }
+ | decnumber    { DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some }
  | whitespaces  { None }
  | "."          { getLiteral id brs "." |> Some }
  | ","          { getLiteral id brs "," |> Some }
@@ -73,7 +73,7 @@ rule tokens = parse
             Some tok }
  | "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)
- | eof  {RNGLR_EOF(defaultSourceText id brs  "") |> Some }
+ | eof  {RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some }
  | _    { failwith (sprintf "fucking shit received %s\n" lexeme ) }
 (* and literal = parse
   | "''" { appendBuf("'"); literal brs }

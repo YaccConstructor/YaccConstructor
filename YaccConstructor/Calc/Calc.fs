@@ -1,4 +1,4 @@
-﻿module YC.Resharper.AbstractAnalysis.Languages.Calc
+﻿module YC.ReSharper.AbstractAnalysis.Languages.Calc
 
 //open Graphviz4Net.Dot.AntlrParser
 open System.IO

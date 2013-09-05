@@ -14,28 +14,45 @@ open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Files
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
+open YC.ReSharper.AbstractAnalysis.Languages
+
+type SupportedLangs =
+    | Calc
+    | TSQL
 
 type Processor(file) =
+    let defLang (n:ITreeNode) =
+        match n with 
+        | :? IInvocationExpression as m ->
+            match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
+            | "executeimmediate" -> TSQL
+            | "eval" -> Calc
+            | _ -> failwith "Unsupported language for AA!"
+        | _ -> failwith "Unexpected information type for language specification!"
+    let porcessLang graph tokenize parse addLError addPError = 
+        let tokenize g =
+            try 
+               tokenize g
+               |> Some 
+            with
+            | Calc.Lexer.LexerError(t,brs) ->
+                (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
+                |> addLError
+                None
+        tokenize graph |> Option.map parse
+        |> Option.iter
+            (function 
+             | Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
+             | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> addPError tok
+            )
+            
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
-        let graphs = (new Approximator(file)).Approximate()
-        let tokenize g =
-            try 
-                YC.Resharper.AbstractAnalysis.Languages.Calc.tokenize g
-                |> Some 
-            with
-            | Calc.Lexer.LexerError(t,brs) ->
-                (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
-                |> lexerErrors.Add
-                None
-        let tokenized = 
-            graphs 
-            |> ResizeArray.choose tokenize
-        let parserRes = tokenized |> ResizeArray.map YC.Resharper.AbstractAnalysis.Languages.Calc.parse
+        let graphs = (new Approximator(file)).Approximate defLang
         let addError tok =
             let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = parserErrors.Add <| ((sprintf "%A(%A)" t l), br.[0].back_ref.GetDocumentRange())
             match tok with
@@ -49,10 +66,15 @@ type Processor(file) =
             | Calc.AbstractParser.RNGLR_EOF (l,br) -> e "EOF" l br
             | Calc.AbstractParser.ERROR (l,br) -> e "ERROR" l br
             | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
-        parserRes 
-        |> ResizeArray.iter (function Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
-                                    | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> 
-                                        addError tok
-                                        //errors.Values |> Seq.iter (fun e -> e.)
-                                    ) 
+        
+        let addErrorTSQL tok =  ()
+            //let data = Yard.Examples.MSParser.tokenData tok
+            //data.
+        graphs
+        |> ResizeArray.iter 
+            (fun (l,g) ->
+                match l with
+                | Calc -> porcessLang g Calc.tokenize Calc.parse lexerErrors.Add  addError
+                | TSQL -> porcessLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL  )
+
         lexerErrors,parserErrors

@@ -55,16 +55,16 @@ type Approximator(file:ICSharpFile) =
         res.StartVertex <- 0
         res
 
-    member this.Approximate () =
+    member this.Approximate (defineLang: ITreeNode -> 'a) =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
             match node with 
             | :? IInvocationExpression as m 
                 when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"|] 
-                -> hotspots.Add m
+                -> hotspots.Add (defineLang node , m)
             | _ -> ()
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)
         processor.Process file
-        let graphs = ResizeArray.map propagate hotspots
+        let graphs = ResizeArray.map (fun (l,h) -> l, propagate h) hotspots
         graphs

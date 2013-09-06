@@ -104,7 +104,7 @@ let Parse (srcFilePath:string) =
     p.AddLine counter map
     counter <- counter + 1<id>
     match justParse srcFilePath with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg) ->
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg,_) ->
         let data =
             let d = tokenData tok
             if isLiteral tok then ""
@@ -112,7 +112,7 @@ let Parse (srcFilePath:string) =
         let name = tok |> tokenToNumber |> numToString
         printfn "Error in file %s on position  on Token %s %s: %s" srcFilePath name data msg
         dbg.drawGSSDot (getResultFileName srcFilePath "stack_")
-    | Yard.Generators.RNGLR.Parser.Success ast ->
+    | Yard.Generators.RNGLR.Parser.Success(ast,_) ->
         let GC_Collect () = 
             GC.Collect()    
             GC.WaitForPendingFinalizers()

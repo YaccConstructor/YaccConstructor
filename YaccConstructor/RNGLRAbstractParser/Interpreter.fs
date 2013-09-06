@@ -405,7 +405,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     //let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     if !curLvl > 0
                     then
-                        print "dot/stack_%d_0.dot"
+//                        print "dot/stack_%d_0.dot"
                         if pushesMap.ContainsKey !curLvl
                         then
                             for vertex in usedStates do
@@ -420,10 +420,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
-                    print "dot/stack_%d_1.dot"
+  //                  print "dot/stack_%d_1.dot"
                     makeReductions ()
                     attachEdges()
-                    print "dot/stack_%d_2.dot"
+ //                   print "dot/stack_%d_2.dot"
 
                     shift ()
 

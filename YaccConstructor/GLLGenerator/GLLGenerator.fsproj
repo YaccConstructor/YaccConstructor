@@ -46,6 +46,10 @@
     <Compile Include="GLLGenerator.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="Tables.fs" />
+    <Compile Include="PrintTables.fs" />
+    <Compile Include="PrintTranslator.fs" />
+    <Compile Include="RNGLRGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

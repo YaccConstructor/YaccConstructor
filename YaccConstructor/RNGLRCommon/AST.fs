@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.RNGLR.AST
+module Yard.Generators.Common.AST
 open System
 open System.Collections.Generic
 open Yard.Generators.RNGLR.DataStructures

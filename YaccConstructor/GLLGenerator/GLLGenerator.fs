@@ -115,36 +115,35 @@ type GLL() =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
             let print (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
-  //          let package, _class  =
-  //                      match moduleName with
-  //                      | "" -> "RNGLR","Parse"
-  //                      | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
-  //                      | s -> "RNGLR",s
+  
             let printHeaders moduleName fullPath light output targetLanguage =
                 let fsHeaders() = 
                     println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
-                        | "" -> "RNGLR.Parse"
+                        | "" -> "GLL.Parse"
                         | s -> s
                     if not light then
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                    println "open Yard.Generators.RNGLR.Parser"
-                    println "open Yard.Generators.RNGLR"
-                    println "open Yard.Generators.RNGLR.AST"
+                    println "open Yard.Generators.GLL.Parser"
+                    println "open Yard.Generators.GLL"
+                    println "open Yard.Generators.GLL.AST"
 
                     match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->
                         println "%s" <| getPosFromSource fullPath dummyPos s
                         println "%s" <| s.text + getPosFromSource fullPath dummyPos (defaultSource output)
+                
+                fsHeaders()
+                
 
                
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
-            let res = if not needTranslate || targetLanguage = Scala then tables
+            let res = if not needTranslate then tables
                       else tables + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos caseSensitive
             let res = 
@@ -170,6 +169,5 @@ type GLL() =
             out.WriteLine res
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
-            //(new YardPrinter()).Generate newDefinition
             box ()
         override this.Generate definition = this.Generate (definition, "")

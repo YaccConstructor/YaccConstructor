@@ -31,11 +31,6 @@
     <Compile Include="YardFrontendTests.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
-      <Name>YardPrinter</Name>
-      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="Accessibility" />
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
@@ -52,11 +47,6 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YaccConstructor\YaccConstructor.fsproj">
-      <Name>YaccConstructor</Name>
-      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">

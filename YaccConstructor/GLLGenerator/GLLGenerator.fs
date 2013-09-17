@@ -105,9 +105,9 @@ type GLL() =
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            let statesInterpreter = buildStates table grammar
+            
   
-            let tables = new Tables(grammar, statesInterpreter)
+            let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
             let dummyPos = char 0

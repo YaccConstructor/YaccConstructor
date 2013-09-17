@@ -51,11 +51,16 @@ type Processor(file) =
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
+        let filterBrs (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+            let res = new ResizeArray<AbstractLexer.Core.Position<#ITreeNode>>(3)
+            brs |> Array.iter(fun br -> if res.Exists(fun x -> obj.ReferenceEquals(x.back_ref,br.back_ref)) |> not then res.Add br)
+            res.ToArray()
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
         let addError tok =
-            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = parserErrors.Add <| ((sprintf "%A(%A)" t l), br.[0].back_ref.GetDocumentRange())
+            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+                br |> filterBrs |> Array.iter(fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
             match tok with
             | Calc.AbstractParser.MINUS (l,br) -> e "MINUS" l br
             | Calc.AbstractParser.DIV (l,br) -> e "DIV" l br
@@ -70,7 +75,7 @@ type Processor(file) =
         
         let addErrorTSQL tok = 
             let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                 br |> Array.iter (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
+                 br |> filterBrs |> Array.iter (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
             match tok with
             | DEC_NUMBER (sourceText,brs) -> e "DEC_NUMBER" sourceText.text brs
             | DOUBLE_COLON (sourceText,brs) -> e "DOUBLE_COLON" sourceText.text brs

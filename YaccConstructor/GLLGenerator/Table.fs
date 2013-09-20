@@ -25,11 +25,13 @@ type Table (_grammar : FinalGrammar) =
      let grammar = _grammar
      let table = 
         let _table = Array2D.create grammar.indexator.nonTermCount grammar.indexator.termCount 0
-        for i = 0 to _table.Length - 1 do
-            for j = 0 to _table.Length - 1 do
-                let currentFirst = grammar.firstSet.[i]
-                let currentFollow = grammar.followSet.[j]
-                if currentFirst.Contains(i) then grammar.indexator.
+        for i = 0 to grammar.rules.rulesCount - 1 do
+            let curFst = grammar.chainFirstSet.[i] //wat
+            //let curFst = grammar.firstSet.[i]
+            let curTerm = grammar.rules.leftSide i
+            let curChain = grammar.rules.rightSide i
+            for j = 0 to curFst.Count do
+                _table.[]
 
         
 

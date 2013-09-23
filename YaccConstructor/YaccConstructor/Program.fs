@@ -42,7 +42,7 @@ let log (e:System.Exception) msg =
     "Message: " + msg
     |> printfn "%s"
 
-let () =    
+let () =
     let feName = ref None
     let generatorName = ref None
     let generatorParams = ref None

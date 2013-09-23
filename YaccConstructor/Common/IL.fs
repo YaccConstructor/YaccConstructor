@@ -140,10 +140,11 @@ module Production = begin
                 Source.toString name + metaArgsToString metaArgs + argsToString args
             |PLiteral src -> Source.toString src
             |PRepet _ -> failwith "Repetition was not realized yet"
-            |PPerm src -> "[|" + (src
-                                  |> List.map (fun x -> x.ToString())
-                                  |> String.concat " ")
-                                + "|]"
+            |PPerm src ->
+                src
+                |> List.map (fun x -> x.ToString())
+                |> String.concat " "
+                |> fun res -> "[|" + res + "|]"
             |PSome x -> "(" + x.ToString() + ")+"
             |POpt x -> "(" + x.ToString() + ")?"
 end

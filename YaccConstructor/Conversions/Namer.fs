@@ -129,7 +129,7 @@ let newName (n : string) =
 
 let newSource (old : Source.t) = new Source.t(newName old.text, old)
 
-let genNewSource (name : string) (body : t<_,_>) =
+let genNewSourceWithRange (name : string) (body : t<_,_>) =
     let rec getBegin = function
         | PSeq (s, ac,l) ->
             match s with

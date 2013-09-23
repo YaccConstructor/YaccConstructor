@@ -135,8 +135,8 @@ let removeImmediateRecursion (rule:Rule) =
     let changedRestProductions = restProductions |> List.map (function
         | PSeq (items,ac,dlabel) as p ->
             let newLastItem = { omit = false
-                                rule = PRef (genNewSource newNonTermName p, None)
-                                binding = genNewSource lstArgName p |> Some
+                                rule = PRef (genNewSourceWithRange newNonTermName p, None)
+                                binding = genNewSourceWithRange lstArgName p |> Some
                                 checker = None }//
             let newAc = ac |> Option.map (fun ac ->
                 let newText = wrapActionCode restPrefix restSuffix ac.text
@@ -148,8 +148,8 @@ let removeImmediateRecursion (rule:Rule) =
             if items.IsEmpty then 
                 failwith <| trivialReduceError ruleName
             let newLastItem = { omit = false
-                                rule = PRef (genNewSource newNonTermName p, None)
-                                binding = genNewSource lstArgName p |> Some
+                                rule = PRef (genNewSourceWithRange newNonTermName p, None)
+                                binding = genNewSourceWithRange lstArgName p |> Some
                                 checker = None }//
             let recCallBinding = 
                 match recCall with

@@ -48,12 +48,12 @@ let rec addAcToProduction neededRules ruleBody =
         let getBinding i elem =
             if elem.omit 
             then None
-            else Some <| genNewSource (sprintf "S%d" (i+1)) elem.rule
+            else Some <| genNewSourceWithRange (sprintf "S%d" (i+1)) elem.rule
         PSeq(
             elements |> List.mapi (fun i elem ->
                 {elem with binding=getBinding i elem; rule=addAcToProduction neededRules elem.rule} )
             , Some(elements |> List.mapi getBinding |> List.choose id
-                |> List.map (fun x -> x.text) |> String.concat ", "|> (fun n -> genNewSource n ruleBody))       
+                |> List.map (fun x -> x.text) |> String.concat ", "|> (fun n -> genNewSourceWithRange n ruleBody))       
             , l)
     | PAlt(left, right) -> PAlt(addAcToProduction neededRules left, addAcToProduction neededRules right)
     | PRef(ref, _) as x -> neededRules := ref.text::!neededRules; x

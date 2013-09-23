@@ -55,7 +55,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
         | x -> x
     let addedBnfRules = ref []
     //let sourceIf cond s = if cond then Some(s2source s) else None
-    let genAction ac oldBody = genNewSource ac oldBody |> Some
+    let genAction ac oldBody = genNewSourceWithRange ac oldBody |> Some
     let genBinding = genAction
     // if production is not binded then don't add semantic action in generated rules
     let rec replaceEbnf production attrs metaArgs = 
@@ -64,7 +64,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
             |> List.map (fun x -> PRef (x, None))
         let genRule generatedName src =
             let inner attrsHandler =
-                reduceMeta <| PMetaRef(genNewSource generatedName src, list2opt <| createParams (attrsHandler attrs), insideMetaArgs)
+                reduceMeta <| PMetaRef(genNewSourceWithRange generatedName src, list2opt <| createParams (attrsHandler attrs), insideMetaArgs)
             inner factList, inner formList
         match production with
         | PSeq(elem_list, ac, l) ->
@@ -100,7 +100,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {
-                    name = genNewSource generatedName p
+                    name = genNewSourceWithRange generatedName p
                     args = formList attrs 
                     body = newBody
                     isStart=false
@@ -129,7 +129,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {
-                 name= genNewSource generatedName p
+                 name= genNewSourceWithRange generatedName p
                  args = formList attrs
                  body= newBody
                  isStart=false
@@ -148,7 +148,7 @@ let convertToBnf (rule:(Rule.t<Source.t,Source.t>)) =
                 ) 
             addedBnfRules := (
                 {
-                 name= genNewSource generatedName p
+                 name= genNewSourceWithRange generatedName p
                  args = formList attrs
                  body= newBody
                  isStart=false

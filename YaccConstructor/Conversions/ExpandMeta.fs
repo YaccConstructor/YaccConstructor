@@ -35,25 +35,27 @@ let findMetaRule (tbl : IDictionary<string,Dictionary<string,string * Rule.t<Sou
         failwith <| sprintf "unable to find metarule %s in module %s" metaName module'
 
 let getKey module' key = 
-    let rec getKey (this : t<Source.t, Source.t>) =
-        let argsToString = function
-            | None -> ""
-            | Some x -> "[" + x.ToString() + "]"
+    let argsToString = function
+        | None -> ""
+        | Some x -> "[" + x.ToString() + "]"
+
                     
-        let metaArgsToString metaArgs =
-            if ((metaArgs : list<_>).IsEmpty) then ""
-            else "<<" + (metaArgs
-                            |> List.map getKey
-                            |> String.concat " ")
-                    + ">>"
+    let rec metaArgsToString metaArgs =
+        if ((metaArgs : list<_>).IsEmpty) then ""
+        else
+            metaArgs
+            |> List.map getProdKey
+            |> String.concat " "
+            |> fun res -> "<" + res + ">"
                     
+    and getProdKey this =
         match this with
-        |PAlt (x, y) -> getKey x + "|" + getKey y
+        |PAlt (x, y) -> getProdKey x + "|" + getProdKey y
         |PSeq (ruleSeq, attrs, l) ->
             let strAttrs =
                 match attrs with
                 | None -> ""
-                | Some x -> "{" + x.text + "}"
+                | Some x -> "{" + (x : Source.t).text + "}"
 
             let elemToString (x : elem<Source.t, Source.t>) =
                 let check =
@@ -65,49 +67,25 @@ let getKey module' key =
                     match x.binding with
                     | None -> ""
                     | Some var -> var.text + "="
-                check + omit + bind + getKey x.rule
+                check + omit + bind + getProdKey x.rule
             "<" + String.concat " " (List.map (fun x -> "(" + elemToString x + ")") ruleSeq) + ">" + strAttrs
         |PToken src -> src.text
         |PRef (name, args) ->
             name.text + argsToString args
-        |PMany x -> "(" + getKey x + ")*"
+        |PMany x -> "(" + getProdKey x + ")*"
         |PMetaRef (name, args, metaArgs) ->
             name.text + metaArgsToString metaArgs + argsToString args
         |PLiteral src -> src.text
         |PRepet _ -> failwith "Repetition was not realized yet"
-        |PPerm src -> "[|" + (src
-                                |> List.map getKey
-                                |> String.concat ";")
-                            + "|]"
-        |PSome x -> "(" + getKey x + ")+"
-        |POpt x -> "(" + getKey x + ")?"
-    module' + ":" + getKey key
+        |PPerm src ->
+            src
+            |> List.map getProdKey
+            |> String.concat ";"
+            |> fun res -> "[|" + res + "|]"
+        |PSome x -> "(" + getProdKey x + ")+"
+        |POpt x -> "(" + getProdKey x + ")?"
+    module' + ":" + getProdKey key
 
-(*
-/// Create pair (formal argument name, actual argument name)
-let addBindingPair attrs (*binding*) = function
-    | None -> attrs
-    | Some b -> if List.exists (fun x -> snd x = b) attrs  then attrs
-                else (createNewName ("arg", new Source.Position(), new Source.Position(), ""), b)::attrs
-
-let getFormals, getActuals = fst, snd
-
-/// Bind all heritable attributes of rule
-let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
-    let rec accBindings res = function
-    | (h : Source.t)::t ->
-        let splitted =
-            h.text.Split([|' '; '\t'; '\r'; '\n'|])
-            |> Array.toList
-            |> List.filter (fun s -> s <> "")
-        let curRes =
-            List.fold
-                (fun res x -> addBindingPair res (Some (x,(0,0,""))))
-                [] splitted
-        accBindings (curRes @ res) t
-    | [] -> res
-    accBindings init rule.args
-*)
 /// <summary>
 /// <para> Replace rule with new one, replacing references to metarules, </para>
 /// <para> and generate new rules for every such reference </para>
@@ -117,12 +95,52 @@ let getRuleBindings (rule : Rule.t<Source.t,Source.t>) init =
 /// <para> res: Rule.t list - currently generated rules </para>
 /// <para> returns (new body, generated rules + old rules) </para>
 /// </summary>
-let expandRule body (module' : string) metaRules expanded =
+let expandRule =
     /// Replace formal parameter with its actual value or (if it is not to be replaced) 
     let tryReplaceActual (formalToAct : (string * Production.t<_,_>) list) formal prev = 
         match List.tryFind (fun x -> fst x = formal) formalToAct with
         | None -> prev
         | Some res -> snd res
+
+    /// Applies function to the first element of result
+    let applyToRes f (a,b) = (f a, b)
+
+    let rec expandMetaRef (name : Source.t) attrs metaArgs key module' metaRules expanded resRuleList =
+        let (newMetaArgs, newRes) =
+            metaArgs
+            |> List.fold (fun (accMeta, accRes) body ->
+                //printfn "%A" body
+                expandBody body module' metaRules expanded accRes
+                |> (fun (newBody, newAccRes) ->
+                    (newBody::accMeta, newAccRes)
+                )
+            ) ([], resRuleList)
+            |> applyToRes List.rev
+        // TODO catch exception
+        let declModule, metaRule = findMetaRule metaRules module' name.text
+        let newRuleName = new Source.t(newName ("rule_" + name.text), metaRule.name)
+        let formalArgs = metaRule.args
+        let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
+        let newKey = getKey module' <| PMetaRef(name, attrs, newMetaArgs)
+        if not <| expanded.ContainsKey key then
+            expanded.Add(key, substitution)
+        if not <| expanded.ContainsKey newKey then
+            expanded.Add(newKey, substitution)
+        let newFormalToAct =
+            let expected = metaRule.metaArgs.Length
+            let actual = newMetaArgs.Length
+            if expected = actual then
+                List.zip (metaRule.metaArgs |> List.map Source.toString) newMetaArgs
+            else 
+                let pos (p:Source.Position) = string p.line + ":"  + string p.column
+                failwithf "%s - %s. Incorrect number of args. Metarule \"%s\" expected %i parameter(s) but get %i." 
+                    (pos name.startPos) (pos name.endPos) metaRule.name.text expected actual
+        // TODO There can be a bug
+        //let newGlobalAttrs = getRuleBindings metaRule globalAttrs
+                
+        let metaExp = expandBody (replaceMetasInBody newFormalToAct metaRule.body) declModule metaRules expanded newRes
+        let newRule = {Rule.defaultRule newRuleName (fst metaExp) with args = formalArgs}
+        (substitution, newRule::snd metaExp)
 
     /// <summary>
     /// <para> Replace rule body, expanding references to metarules, </para>
@@ -130,88 +148,27 @@ let expandRule body (module' : string) metaRules expanded =
     /// <para> body: t - production which can contain metareferences </para>
     /// <para> metaRules: TO_DO Dictionary&lt;string,Rule.t&lt;Source.t,Source.t&gt;&gt; - table, which contains expanding metareferences rules </para>
     /// <para> expanded: Dictionary&lt;string,Production.t&gt; - map of metareference with actual params to generated rule name </para>
-    /// <para> res: Rule.t list - currently generated rules </para>
+    /// <para> resRuleList: Rule.t list - currently generated rules </para>
     /// <para> returns (new body, generated rules + old rules) </para>
     /// </summary>
-    let rec expandBody body (module' : string) metaRules (expanded : Dictionary<_, Production.t<_,_>>) res =
+    and expandBody body (module' : string) metaRules (expanded : Dictionary<_, Production.t<_,_>>) resRuleList =
         //printfn "b: %A" body
         /// Returns key for table of expanded rules.
         /// It's better to use hash.
         let key = getKey module' body
         if expanded.ContainsKey key then 
-            // printfn "ok %A\n: \t%A\n\n:\t%A\n=========================\n" body (expanded.Item key) res
-            expanded.[key], res
+            // printfn "ok %A\n: \t%A\n\n:\t%A\n=========================\n" body (expanded.Item key) resRuleList
+            expanded.[key], resRuleList
         else
-            let rule, res =
+            let newRule, newResRuleList =
                 /// Expand rule with the previous parameters
-                let simpleExpand body = expandBody body module' metaRules expanded res
-
-                /// Applies function to the first element of result
-                let applyToRes f (a,b) = (f a, b)
-
-                let rec canUseBinding = function
-                    | PSeq(_,Some _,_) -> true
-                    | PSeq(s,_,_) -> s |> List.exists (fun elem -> canUseBinding elem.rule)
-                    | PRef(_,None)
-                    | PToken _
-                    | PLiteral _ -> false
-                    | PAlt(l,r) -> canUseBinding l || canUseBinding r
-                    | POpt r
-                    | PSome r
-                    | PMany r -> canUseBinding r
-                    | PMetaRef (_,_,_) -> failwith "Metaref must already be expanded"
-                    | x -> true
-
-                let expandMetaRef (name : Source.t) attrs metaArgs =
-                    let (newMetaArgs, newRes) =
-                        metaArgs
-                        |> List.fold
-                            (fun (accMeta, accRes) _body ->
-                                //printfn "%A" body
-                                expandBody _body module' metaRules expanded accRes
-                                |> (fun (newBody, newAccRes) ->
-                                    if not <| canUseBinding newBody then
-                                        (newBody::accMeta, newAccRes)
-                                    else
-                                        let newMetaArgName = genNewSource (newName "rule") _body
-                                        let newMetaArg = PRef(newMetaArgName, None)
-                                        let (newRule: Rule.t<_,_>) = Rule.defaultRule newMetaArgName newBody
-                                        (newMetaArg::accMeta, newRule::newAccRes)
-                                    )
-                            )
-                            ([], res)
-                        |> applyToRes (List.rev)
-                    // TODO catch exception
-                    let declModule, metaRule = findMetaRule metaRules module' name.text
-                    let newRuleName = new Source.t(newName ("rule_" + name.text), metaRule.name)
-                    let formalArgs = metaRule.args
-                    let substitution = PRef(new Source.t(newRuleName.text, name), attrs)
-                    let newKey = getKey module' <| PMetaRef(name, attrs, newMetaArgs)
-                    if not <| expanded.ContainsKey key then
-                        expanded.Add(key, substitution)
-                    if not <| expanded.ContainsKey newKey then
-                        expanded.Add(newKey, substitution)
-                    let newFormalToAct =
-                        let expected = metaRule.metaArgs.Length
-                        let actual = newMetaArgs.Length
-                        if expected = actual then
-                            List.zip (metaRule.metaArgs |> List.map Source.toString) newMetaArgs
-                        else 
-                            let pos (p:Source.Position) = string p.line + ":"  + string p.column
-                            failwithf "%s - %s. Incorrect number of args. Metarule \"%s\" expected %i parameter(s) but get %i." 
-                                (pos name.startPos) (pos name.endPos) metaRule.name.text expected actual
-                    // TODO There can be a bug
-                    //let newGlobalAttrs = getRuleBindings metaRule globalAttrs
-                
-                    let metaExp = expandBody (replaceMetasInBody newFormalToAct metaRule.body) declModule metaRules expanded newRes
-                    let newRule = {Rule.defaultRule newRuleName (fst metaExp) with args = formalArgs}
-                    (substitution, newRule::snd metaExp)
+                let simpleExpand body = expandBody body module' metaRules expanded resRuleList
 
                 match body with
                 | PSome body -> applyToRes PSome <| simpleExpand body
                 | POpt body  -> applyToRes POpt  <| simpleExpand body
                 | PMany body -> applyToRes PMany <| simpleExpand body
-                | PRef(name, attrs) as x -> (x, res)
+                | PRef(name, attrs) as x -> (x, resRuleList)
                 | PAlt (l, r) ->
                     let x,y = expandBody l module' metaRules expanded [], simpleExpand r
                     (PAlt (fst x, fst y), snd x @ snd y)
@@ -220,20 +177,20 @@ let expandRule body (module' : string) metaRules expanded =
                     |> List.fold (fun (curSeq, accRes) elem' ->
                         let bodyExp = expandBody elem'.rule module' metaRules expanded accRes
                         bodyExp |> applyToRes (fun h -> {elem' with rule = h}::curSeq)
-                    ) ([], res)
+                    ) ([], resRuleList)
                     |> applyToRes (fun x -> PSeq (List.rev x, actionCode, l))
-                | PLiteral _ as literal -> (literal, res)
-                | PToken _ as token -> (token, res)
+                | PLiteral _ as literal -> (literal, resRuleList)
+                | PToken _ as token -> (token, resRuleList)
                 | PMetaRef (name, attrs, metaArgs) as x -> 
                     if metaArgs.IsEmpty then
-                        (PRef(name, attrs), res)
-                    else expandMetaRef name attrs metaArgs 
+                        (PRef(name, attrs), resRuleList)
+                    else expandMetaRef name attrs metaArgs key module' metaRules expanded resRuleList
                 | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
                 | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
             if not <| expanded.ContainsKey key then
-                expanded.Add(key, rule)
-//            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule res
-            (rule, res)
+                expanded.Add(key, newRule)
+//            printfn "%A\n: \t%A\n\n:\t%A\n=========================\n" body rule resRuleList
+            (newRule, newResRuleList)
 
     /// <para> Replace all rules to be replaced (meta-arguments substitution) in production. </para>
     /// <para> formalToAct - list of (metaArg name, its actual value) </para>
@@ -259,21 +216,14 @@ let expandRule body (module' : string) metaRules expanded =
         | PPerm _ -> failwith "Unrealised meta-expanding of permutation"
         | PRepet _ -> failwith "Unrealised meta-expanding of repetition"
 
-    expandBody body module' metaRules expanded []
+    fun body (module' : string) metaRules expanded ->
+        expandBody body module' metaRules expanded []
 
-(** grammar processing:
- *  - collect metarules
- *  - expand metarules
- *  - call metarules expanding 
- *)
+/// if rule has metaArgs then it is a metarule
+let private isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
 
-(** main function 
- *  - create hash tables
- *  - call process grammar to expand metarules
- *)
-let expandMetaRules grammar =
-    /// if rule has metaArgs then it is a metarule
-    let isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
+/// hash table for metarules
+let private metaRulesTbl grammar =
 
     /// Map: using_module -> (rule_name -> (decl_module, rule_body));
     let collectMeta grammar = 
@@ -306,8 +256,23 @@ let expandMetaRules grammar =
         )
         |> dict
     
+    collectMeta grammar
+
+(** grammar processing:
+ *  - collect metarules
+ *  - expand metarules
+ *  - call metarules expanding 
+ *)
+
+(** main function 
+ *  - create hash tables
+ *  - call process grammar to expand metarules
+ *)
+let private expandMetaRules grammar =
+    /// hash table for references to expanded metarules
+    let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
     /// Replace existing meta-rules. Suppose that all high-level meta-rules are in metaRulesTbl
-    let rec replaceMetasInBody (grammar : Grammar.t<_,_>) metaRulesTbl refsTbl = 
+    let rec replaceMetasInGrammar (grammar : Grammar.t<_,_>) metaRulesTbl refsTbl = 
         grammar
         |> List.map (fun m ->
             m.rules
@@ -320,13 +285,7 @@ let expandMetaRules grammar =
             )
             |> (fun rules -> {m with rules = rules})
         )
-
-    /// hash table for metarules
-    let metaRulesTbl = collectMeta grammar
-    /// hash table for references to expanded metarules
-    let refsTbl = new Dictionary<_, Production.t<_,_> >(200)
-    
-    replaceMetasInBody grammar metaRulesTbl refsTbl
+    replaceMetasInGrammar grammar (metaRulesTbl grammar) refsTbl
 
 type ExpandMeta() = 
     inherit Conversion()

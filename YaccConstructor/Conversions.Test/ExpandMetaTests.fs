@@ -20,6 +20,7 @@
 
 module ExpandMetaTests
 
+open System.IO
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
@@ -37,20 +38,25 @@ type ``Conversions expand metarules tests`` () =
     let frontend = getFrontend "YardFrontend"    
 
     let runMetaTest srcFile =
-        let srcFile = System.IO.Path.Combine(basePath, srcFile)                                         
-        let ilTree = frontend.ParseGrammar srcFile                
+        let srcPathFile = System.IO.Path.Combine(basePath, srcFile)                                         
+        let ilTree = frontend.ParseGrammar srcPathFile                
         Namer.initNamer ilTree.grammar
         let ilTreeConverted = ConversionsManager.ApplyConversion conversion ilTree 
         let expected =
             try
-                srcFile + ".ans" |> frontend.ParseGrammar
+                srcPathFile + ".ans" |> frontend.ParseGrammar
             with
             | e -> printfn "%s" e.Message
                    failwith e.Message
         
         treeDump.Generate expected |> string |> printfn "%s"
         treeDump.Generate ilTreeConverted |> string |> printfn "%s"
-        Assert.IsTrue (ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar) 
+        if not <| ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar then
+            let text = (new Yard.Generators.YardPrinter.YardPrinter()).Generate { ilTree with grammar=ilTreeConverted.grammar }
+            Directory.CreateDirectory "out"
+            File.WriteAllText (Path.Combine ("out", srcFile + ".ans"), text :?> string)
+            Assert.Fail "Trees are not equal"
+            
 
     [<Test>]    
     member test.``Meta test 1``()=runMetaTest("meta_1.yrd")

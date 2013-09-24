@@ -73,6 +73,8 @@ let getKey module' key =
         |PRef (name, args) ->
             name.text + argsToString args
         |PMany x -> "(" + getProdKey x + ")*"
+        |PSome x -> "(" + getProdKey x + ")+"
+        |POpt x ->  "(" + getProdKey x + ")?"
         |PMetaRef (name, args, metaArgs) ->
             name.text + metaArgsToString metaArgs + argsToString args
         |PLiteral src -> src.text
@@ -82,8 +84,6 @@ let getKey module' key =
             |> List.map getProdKey
             |> String.concat ";"
             |> fun res -> "[|" + res + "|]"
-        |PSome x -> "(" + getProdKey x + ")+"
-        |POpt x -> "(" + getProdKey x + ")?"
     module' + ":" + getProdKey key
 
 /// <summary>
@@ -111,9 +111,7 @@ let expandRule =
             |> List.fold (fun (accMeta, accRes) body ->
                 //printfn "%A" body
                 expandBody body module' metaRules expanded accRes
-                |> (fun (newBody, newAccRes) ->
-                    (newBody::accMeta, newAccRes)
-                )
+                |> fun (newBody, newAccRes) -> (newBody::accMeta, newAccRes)
             ) ([], resRuleList)
             |> applyToRes List.rev
         // TODO catch exception
@@ -201,14 +199,14 @@ let expandRule =
         | PSome body -> PSome <| replace body
         | POpt body  -> POpt  <| replace body
         | PMany body -> PMany <| replace body
+        | PAlt (l, r) -> PAlt(replace l, replace r)
+        | PLiteral _ as literal -> literal
+        | PToken _ as token -> token
         | PRef(name, attrs) as prev ->
             prev |> tryReplaceActual formalToAct (Source.toString name)
-        | PAlt (l, r) -> PAlt(replace l, replace r)
         | PSeq (ruleList, actionCode, l) ->
             PSeq (ruleList |> List.map (fun x ->  {x with rule = replace x.rule})
                     , actionCode, l)
-        | PLiteral _ as literal -> literal
-        | PToken _ as token -> token
         | PMetaRef (name, attrs, metaArgs) -> 
             if metaArgs.IsEmpty then
                 PRef(name, attrs) |> tryReplaceActual formalToAct (Source.toString name)
@@ -222,41 +220,37 @@ let expandRule =
 /// if rule has metaArgs then it is a metarule
 let private isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
 
-/// hash table for metarules
+/// hash table for metarules. 
+/// Map: using_module -> (rule_name -> (decl_module, rule_body));
 let private metaRulesTbl grammar =
-
-    /// Map: using_module -> (rule_name -> (decl_module, rule_body));
-    let collectMeta grammar = 
-        let rulesMap = getRulesMap grammar
-        let publicRules = new Dictionary<_,_>(getPublicRules grammar)
-        /// Only public meta-rules present here
-        let publicMeta =
-            let map = new Dictionary<string,Rule.t<Source.t, Source.t> list>()
-            publicRules |> Seq.iter (fun item ->
-                map.[item.Key] <- List.filter isMetaRule item.Value
-            )
-            map
-
-        grammar
-        |> List.map (fun m ->
-            let res = new Dictionary<_,_>()
-            m.openings
-            |> List.iter (fun op ->
-                publicMeta.[op.text]
-                |> List.iter (fun rule ->
-                    res.[rule.name.text] <- (op.text, rule)
-                )
-            )
-            m.rules
-            |> List.filter isMetaRule
-            |> List.iter (fun rule ->
-                res.[rule.name.text] <- (getModuleName m, rule)
-            )
-            getModuleName m, res
+    let rulesMap = getRulesMap grammar
+    let publicRules = new Dictionary<_,_>(getPublicRules grammar)
+    /// Only public meta-rules present here
+    let publicMeta =
+        let map = new Dictionary<string,Rule.t<Source.t, Source.t> list>()
+        publicRules |> Seq.iter (fun item ->
+            map.[item.Key] <- List.filter isMetaRule item.Value
         )
-        |> dict
-    
-    collectMeta grammar
+        map
+
+    grammar
+    |> List.map (fun m ->
+        let res = new Dictionary<_,_>()
+        m.openings
+        |> List.iter (fun op ->
+            publicMeta.[op.text]
+            |> List.iter (fun rule ->
+                res.[rule.name.text] <- (op.text, rule)
+            )
+        )
+        m.rules
+        |> List.filter isMetaRule
+        |> List.iter (fun rule ->
+            res.[rule.name.text] <- (getModuleName m, rule)
+        )
+        getModuleName m, res
+    )
+    |> dict
 
 (** grammar processing:
  *  - collect metarules
@@ -291,4 +285,3 @@ type ExpandMeta() =
     inherit Conversion()
         override this.Name = "ExpandMeta"
         override this.ConvertGrammar (grammar,_) = expandMetaRules grammar
-

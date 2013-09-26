@@ -1,6 +1,6 @@
 ﻿//CHANGE IN STATES
 
-namespace Yard.Generators.RNGLR
+namespace Yard.Generators.GLL
 
 open Yard.Core
 open IL
@@ -8,6 +8,7 @@ open Constraints
 open Yard.Generators.RNGLR
 open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.GLL
 open States
 open Printer
 open TranslatorPrinter

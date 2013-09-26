@@ -76,10 +76,10 @@ let chainFirstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsil
              let cur = firstSet.[rules.symbol i k]
              for int h = 0 to cur.Count-1 do
                  curSet <- cur    //how can i do ADD&!
-                 if k < rules.length i - 1 then 
-                    k <- k + 1
-                    b <- canInferEpsilon.[rules.symbol i k]
-                    else b <- false
-                         chainCanInferEpsilon.[i] <- true
+             if k < rules.length i - 1 then 
+                k <- k + 1
+                b <- canInferEpsilon.[rules.symbol i k]
+                else b <- false
+                     chainCanInferEpsilon.[i] <- true
         result.[i] <- curSet
     result ///how return two differnt

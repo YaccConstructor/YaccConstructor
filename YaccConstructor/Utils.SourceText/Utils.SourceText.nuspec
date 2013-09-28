@@ -16,6 +16,7 @@
   </metadata>
 <files>
     <file src="README.txt" target="README.txt" /> 
-    <file src="LICENSE.txt" target="LICENSE.txt" /> 
+    <file src="../../LICENSE.txt" target="LICENSE.txt" /> 
+	<file src="../../NOTICE.txt" target="NOTICE.txt" />
 </files>
 </package>

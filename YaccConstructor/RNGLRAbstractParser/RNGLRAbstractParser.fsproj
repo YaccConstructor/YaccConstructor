@@ -48,9 +48,6 @@
     <Reference Include="Graphviz4Net.WPF">
       <HintPath>..\..\3rdParty\graphviz4net-beta\Graphviz4Net.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="Graphviz4Net.WPF.Example">
-      <HintPath>..\..\3rdParty\graphviz4net-beta\Example\Graphviz4Net.WPF.Example.exe</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="QuickGraph">

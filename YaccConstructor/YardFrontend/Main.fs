@@ -23,6 +23,7 @@ open Yard.Core.IL
 open Yard.Frontends.YardFrontend
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
+open Microsoft.FSharp.Collections
 
 module Lexer = Yard.Frontends.YardFrontend.GrammarLexer
 open GrammarParser

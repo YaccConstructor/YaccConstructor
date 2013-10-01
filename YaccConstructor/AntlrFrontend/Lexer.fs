@@ -361,12 +361,12 @@ and _fslex_action_code  _fslex_state lexbuf =
           )
   | 2 -> ( 
 # 96 "Lexer.fsl"
-                          literal lexbuf; action_code lexbuf 
+                          literal lexbuf |> ignore; action_code lexbuf 
 # 365 "Lexer.fs"
           )
   | 3 -> ( 
 # 97 "Lexer.fsl"
-                         literal2 lexbuf; action_code lexbuf 
+                         literal2 lexbuf |> ignore; action_code lexbuf 
 # 370 "Lexer.fs"
           )
   | 4 -> ( 

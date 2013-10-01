@@ -58,9 +58,6 @@
     <Reference Include="QuickGraph.Data">
       <HintPath>..\..\3rdParty\QuickGraph\QuickGraph.Data.dll</HintPath>
     </Reference>
-    <Reference Include="QuickGraph.Glee">
-      <HintPath>..\..\3rdParty\QuickGraph\QuickGraph.Glee.dll</HintPath>
-    </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\..\3rdParty\QuickGraph\QuickGraph.Graphviz.dll</HintPath>
     </Reference>

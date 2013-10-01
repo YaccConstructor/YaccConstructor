@@ -15,10 +15,10 @@
     <summary>Generic graph data structures and algorithms for .NET</summary>
     <tags>algorithms graph directed undirected dfs bfs graphviz graphml data structure</tags>
     <references>
-      <reference file="QuickGraph.Data.dll" />
       <reference file="QuickGraph.dll" />
-      <reference file="QuickGraph.Graphviz.dll" />
       <reference file="QuickGraph.Serialization.dll" />
+      <reference file="QuickGraph.Data.dll" />
+      <reference file="QuickGraph.Graphviz.dll" />
     </references>
   </metadata>
 </package>

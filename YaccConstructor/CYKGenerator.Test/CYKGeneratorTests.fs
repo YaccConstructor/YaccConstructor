@@ -77,7 +77,7 @@ type ``CYK generator tests`` () =
             ; "    let tag = getTag t.Tag"
             ; "    if tag <> 0us then Some tag else None)"
             ; "  |> Array.ofSeq"
-            ] |> String.concat "\n"
+            ] |> String.concat "\r\n"
 
         let code = generator.Generate il
         printfn "%s" expectedCode

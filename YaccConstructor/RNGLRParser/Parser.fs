@@ -24,6 +24,7 @@ open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
+open Microsoft.FSharp.Collections
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
 [<AllowNullLiteral>]

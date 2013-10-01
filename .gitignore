@@ -74,3 +74,4 @@ YaccConstructor/RNGLRParser.ErrorRecoveryTest/res.dot
 YaccConstructor/RNGLRParser.SimpleTest/*.yrd.fs
 YaccConstructor/RNGLRParser.SimpleTest/log.txt
 YaccConstructor/RNGLRParser.SimpleTest/out
+YaccConstructor/packages/*

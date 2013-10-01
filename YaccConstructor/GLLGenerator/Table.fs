@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Yard.Generators.GLL
+module Yard.Generators.GLL.Table
 
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR.States
@@ -23,22 +23,24 @@ open Yard.Generators.RNGLR
 
 type Table (_grammar : FinalGrammar) =
     let grammar = _grammar
-    let table = 
+    let i = grammar.indexator.nonTermCount
+    let j = grammar.indexator.termCount
+    let tabl = 
         let _table = Array2D.create grammar.indexator.nonTermCount grammar.indexator.termCount -1
         for i = 0 to grammar.rules.rulesCount - 1 do
-            let curFirst = grammar.chainFirstSet.[i]
+            let curFirst = grammar.firstSet.[i]
             let curNonTerm = grammar.rules.leftSide i
-            for j = 0 to curFirst.count do
-                let curTerm = grammar.chainFirstSet.[i].[j]
+            for j = 0 to curFirst.Count do
+                let curTerm = grammar..[i].[j]
                 table.[curNonTerm].[curTerm] <- i
- //*           if chain.canInferEpsilon.[i] then 
- //               for j = 0 to grammar.followSet i
- //                   let curTerm = grammar.followSet.[i].[j]
- //                   table.[curNoterm].[curTerm] <- i
- //                
-       table
+            if chain.canInferEpsilon.[i] then 
+                for j = 0 to grammar.followSet i do
+                    let curTerm = grammar.followSet.[i].[j]
+                    table.[curNoterm].[curTerm] <- i
+                 
+    table
         
-     member this.table = _table
- //    
-  //     
-//    
+    member this.table = _table
+     
+       
+    

@@ -18,7 +18,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.RNGLR.TranslatorPrinter
+module Yard.Generators.gll.TranslatorPrinter
 
 open System
 open Yard.Generators.RNGLR.FinalGrammar
@@ -53,15 +53,14 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let indexator = grammar.indexator
     let nonTermLim = indexator.nonTermCount - 1
 
-    let resCycleName = "_rnglr_cycle_res"
-    let nodeName = "_rnglr_node"
-    let tokenCall = "_rnglr_translate_token"
-    let ruleName = "_rnglr_rule_"
-    let epsilonName = "_rnglr_epsilons"
-    let epsilonNameFiltered = "_rnglr_filtered_epsilons"
-    let childrenName = "_rnglr_children"
-    let concatsName = "_rnglr_concats"
-    //let pathToModule = "Yard.Generators.RNGLR.AST."
+    let resCycleName = "_gll_cycle_res"
+    let nodeName = "_gll_node"
+    let tokenCall = "_gll_translate_token"
+    let ruleName = "_gll_rule_"
+    let epsilonName = "_gll_epsilons"
+    let epsilonNameFiltered = "_gll_filtered_epsilons"
+    let childrenName = "_gll_children"
+    let concatsName = "_gll_concats"
 
     let printArgsDeclare args= 
         args
@@ -153,21 +152,21 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             let name = Source.toString name
             let value = 
                 if name <> "error" 
-                then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
+                then sprintf "((unbox %s.[%d]) : '_gll_type_%s) " childrenName !num name
                 else sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 
             incr num
             let name = Source.toString name
-            sprintf "(match ((unbox %s.[%d]) : Token) with %s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+            sprintf "(match ((unbox %s.[%d]) : Token) with %s _gll_val -> [_gll_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num name name
             |> wordL
         | PLiteral name -> 
             incr num
             let name = Source.toString name
             let i = Indexator.transformLiteral caseSensitive name |> indexator.literalToIndex
-            sprintf "(match ((unbox %s.[%d]) : Token) with ``L %d`` _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+            sprintf "(match ((unbox %s.[%d]) : Token) with ``L %d`` _gll_val -> [_gll_val] | a -> failwith \"%s expected, but %%A found\" a )"
                 childrenName !num i name
             |> wordL
         | PSeq (s, ac, _) ->
@@ -186,7 +185,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 |> List.collect
                     (fun e ->
                         let var = 
-                            if e.binding.IsNone || e.omit then "_"//(sprintf "_rnglr_var_%d" <| !num + 1)
+                            if e.binding.IsNone || e.omit then "_"//(sprintf "_gll_var_%d" <| !num + 1)
                             else Source.toString e.binding.Value
                         let prod = getProductionLayout num e.rule
                         match e.checker with
@@ -210,13 +209,13 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         | x -> failwithf "unexpected construction: %A" x
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
         if positionType = "" then
-            failwith "RNGLR: Unspecified position type"
+            failwith "GLL: Unspecified position type"
         wordL (sprintf "fun (%s : array<_>) (parserRange : (%s * %s)) -> " childrenName positionType positionType)
         @@-- (wordL "box ("
               @@-- (wordL "(" ++ printArgsDeclare rule.args
                     @@-- getProductionLayout (ref -1) rule.body
                     @@-- wordL (")" + getPosFromSource fullPath dummyPos rule.name)
-                    @@-- wordL (" : '_rnglr_type_" + nonTermName + ")")
+                    @@-- wordL (" : '_gll_type_" + nonTermName + ")")
                     -- wordL (getPosFromSource fullPath dummyPos (defaultSource output))
                     //@@-- wordL ("")
                     )
@@ -229,11 +228,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let aboveArrayL = List.ofArray >> aboveListL
     let concats =
         let getConcat i =
-                let typeName = "'_rnglr_type_" + indexator.indexToNonTerm i
+                let typeName = "'_gll_type_" + indexator.indexToNonTerm i
                 let called = printArgsCallList args.[i] ""
                 let args = printArgsDeclare args.[i]
-                let listName = "_rnglr_list"
-                let itemName = "_rnglr_item"
+                let listName = "_gll_list"
+                let itemName = "_gll_item"
                 wordL ("(fun (" + listName + " : list<_>) -> ")
                 @@-- (wordL "box (" -- args)
                 @@-- (wordL <| listName + " |> List.map (fun " + itemName
@@ -246,7 +245,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     let rules =
         let allTypes =
             [for i = 0 to args.Length - 1 do
-                yield "'_rnglr_type_" + indexator.indexToNonTerm i ]
+                yield "'_gll_type_" + indexator.indexToNonTerm i ]
             |> List.reduce (fun l r -> l + " * " + r)
         let errorRule : Rule.t<_,_> = 
             {
@@ -257,7 +256,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 isPublic = false
                 metaArgs= []
             }
-        wordL ("let _rnglr_extra_array, " + ruleName + ", " + concatsName + " = ")
+        wordL ("let _gll_extra_array, " + ruleName + ", " + concatsName + " = ")
         @@--
            (wordL ("(Array.zeroCreate 0 : array<" + allTypes + ">), ")
             @@ wordL "[|"
@@ -273,7 +272,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             @@ wordL "|] ")
 
     let funRes =
-        let typeName = "'_rnglr_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
+        let typeName = "'_gll_type_" + indexator.indexToNonTerm (grammar.rules.leftSide grammar.startRule)
         let funHead = wordL ("let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) (dict : _ ) : " + typeName + " = ")
         let body =
             [yield wordL ("unbox (tree.Translate " + ruleName + " " + " leftSide " + concatsName

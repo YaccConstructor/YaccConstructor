@@ -116,6 +116,11 @@ type GLL() =
                 Printf.kprintf (fun s -> res.Append(s).Append "\n" |> ignore) x
             let print (x : 'a) =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
+            let package, _class  =
+                        match moduleName with
+                        | "" -> "GLL","Parse"
+                        | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
+                        | s -> "GLL",s
   
             let printHeaders moduleName fullPath light output targetLanguage =
                 let fsHeaders() = 
@@ -143,9 +148,9 @@ type GLL() =
 
                
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
-            let res = if not needTranslate then tables
-                      else tables + printTranslator grammar newDefinition.grammar.[0].rules
+            let table = printTables grammar definition.head table moduleName tokenType res targetLanguage _class positionType caseSensitive
+            let res = if not needTranslate then table
+                      else table + printTranslator grammar newDefinition.grammar.[0].rules
                                         positionType fullPath output dummyPos caseSensitive
             let res = 
                 match definition.foot with

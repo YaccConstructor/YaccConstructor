@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.PowerPack.Build.Tasks", "FSharp.PowerPack.Build.Tasks\FSharp.PowerPack.Build.Tasks.fsproj", "{A9566921-4193-4EC8-83FB-F5A0DC257678}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsYacc", "FsYacc\FsYacc.fsproj", "{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsLex", "FsLex\FsLex.fsproj", "{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9566921-4193-4EC8-83FB-F5A0DC257678}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9566921-4193-4EC8-83FB-F5A0DC257678}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9566921-4193-4EC8-83FB-F5A0DC257678}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9566921-4193-4EC8-83FB-F5A0DC257678}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,299 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>LayoutOpsModule - FSharpx.Text.StructuredFormat Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+    <script type="text/javascript" src="../js/example.js"></script>
+  </head>
+  <body><div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul>
+			<li>
+          <a href="../FSharpx.Text.StructuredFormat/index.htm">FSharpx.Text.StructuredFormat</a>
+      </li>
+			<li>
+          <a href="../Microsoft.FSharp.Text.StructuredFormat/index.htm" class="current">Microsoft.FSharp.Text.StructuredFormat</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in Microsoft.FSharp.Text.StructuredFormat</h2>
+	<div class="scroll">
+		<ul>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/DisplayModule.htm">DisplayModule</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/FormatOptions.htm">FormatOptions</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/IEnvironment.htm">IEnvironment</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/Joint.htm">Joint</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm" class="current">LayoutOpsModule</a>
+        </li>
+				<li>
+            <a href="../Microsoft.FSharp.Text.StructuredFormat/Tags.htm">Tags</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> LayoutOpsModule</p>
+		<p><strong>Namespace</strong> Microsoft.FSharp.Text.StructuredFormat</p>
+	</div>
+    <div class="sub-header">
+			<div id="summary">A layout is a sequence of strings which have been joined together.
+The strings are classified as words, separators and left and right parenthesis.
+This classification determines where spaces are inserted.
+A joint is either unbreakable, breakable or broken.
+If a joint is broken the RHS layout occurs on the next line with optional indentation.
+A layout can be squashed to for given width which forces breaks as required. 
+			</div>
+		
+		
+			<h3 class="section">Methods</h3>
+			<ul>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#aboveL">aboveL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#aboveListL">aboveListL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#braceL">braceL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#bracketL">bracketL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#commaListL">commaListL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#isEmptyL">isEmptyL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#leftL">leftL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#listL``1">listL&lt;T&gt;</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#objL">objL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#optionL``1">optionL&lt;T&gt;</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#rightL">rightL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#semiListL">semiListL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#sepL">sepL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#sepListL">sepListL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#spaceListL">spaceListL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#squareBracketL">squareBracketL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#tagAttrL">tagAttrL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#tupleL">tupleL</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#unfoldL``2">unfoldL&lt;T, State&gt;</a></li>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#wordL">wordL</a></li>
+			</ul>
+		
+			<h3 class="section">Properties</h3>
+			<ul>
+				<li><a href="../Microsoft.FSharp.Text.StructuredFormat/LayoutOpsModule.htm#emptyL">emptyL</a></li>
+			</ul>
+		
+	</div>
+	
+	
+	
+	<h3 class="section">Public static methods</h3>
+	
+	<div id="aboveL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>aboveL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout1, <a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout2)</h4>
+		<div class="content">Layout two vertically. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="aboveListL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>aboveListL</strong>(<span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Layout list vertically. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="braceL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>braceL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout)</h4>
+		<div class="content">Wrap braces around layout. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="bracketL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>bracketL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> Layout)</h4>
+		<div class="content">Wrap round brackets around Layout. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="commaListL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>commaListL</strong>(<span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Join layouts into a comma separated list. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="isEmptyL" class="method">
+		<h4><span title="System.bool">bool</span> <strong>isEmptyL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout)</h4>
+		<div class="content">Is it the empty layout? 
+
+
+
+      
+    </div>
+	</div>
+	<div id="leftL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>leftL</strong>(<span title="System.string">string</span> text)</h4>
+		<div class="content">An string which is left  parenthesis (no space on the right). 
+
+
+
+      
+    </div>
+	</div>
+	<div id="listL``1" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>listL&lt;T&gt;</strong>(<span title="Microsoft.FSharp.Core.FSharpFunc<T, Layout>">FSharpFunc&lt;T, Layout&gt;</span> selector, <span title="Microsoft.FSharp.Collections.FSharpList<T>">FSharpList&lt;T&gt;</span> value)</h4>
+		<div class="content">Layout like an F# list. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="objL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>objL</strong>(<span title="System.object">object</span> value)</h4>
+		<div class="content">An uninterpreted leaf, to be interpreted into a string
+by the layout engine. This allows leaf layouts for numbers, strings and
+other atoms to be customized according to culture. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="optionL``1" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>optionL&lt;T&gt;</strong>(<span title="Microsoft.FSharp.Core.FSharpFunc<T, Layout>">FSharpFunc&lt;T, Layout&gt;</span> selector, <span title="Microsoft.FSharp.Core.FSharpOption<T>">FSharpOption&lt;T&gt;</span> value)</h4>
+		<div class="content">Layout like an F# option. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="rightL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>rightL</strong>(<span title="System.string">string</span> text)</h4>
+		<div class="content">An string which is right parenthesis (no space on the left). 
+
+
+
+      
+    </div>
+	</div>
+	<div id="semiListL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>semiListL</strong>(<span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Join layouts into a semi-colon separated list. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="sepL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>sepL</strong>(<span title="System.string">string</span> text)</h4>
+		<div class="content">An string which requires no spaces either side. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="sepListL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>sepListL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout1, <span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Join layouts into a list separated using the given Layout. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="spaceListL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>spaceListL</strong>(<span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Join layouts into a space separated list. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="squareBracketL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>squareBracketL</strong>(<a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout)</h4>
+		<div class="content">Wrap square brackets around layout. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="tagAttrL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>tagAttrL</strong>(<span title="System.string">string</span> text, <span title="Microsoft.FSharp.Collections.FSharpList<Tuple<string, string>>">FSharpList&lt;Tuple&lt;string, string&gt;&gt;</span> maps, <a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> layout)</h4>
+		<div class="content">See tagL 
+
+
+
+      
+    </div>
+	</div>
+	<div id="tupleL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>tupleL</strong>(<span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> layouts)</h4>
+		<div class="content">Form tuple of layouts. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="unfoldL``2" class="method">
+		<h4><span title="Microsoft.FSharp.Collections.FSharpList<Layout>">FSharpList&lt;Layout&gt;</span> <strong>unfoldL&lt;T, State&gt;</strong>(<span title="Microsoft.FSharp.Core.FSharpFunc<T, Layout>">FSharpFunc&lt;T, Layout&gt;</span> selector, <span title="Microsoft.FSharp.Core.FSharpFunc<State, FSharpOption<Tuple<T, State>>>">FSharpFunc&lt;State, FSharpOption&lt;Tuple&lt;T, State&gt;&gt;&gt;</span> folder, <span title="Microsoft.FSharp.Text.StructuredFormat.State">State</span> state, <span title="System.int">int</span> count)</h4>
+		<div class="content">For limitting layout of list-like sequences (lists,arrays,etc).
+unfold a list of items using (project and z) making layout list via itemL.
+If reach maxLength (before exhausting) then truncate. 
+
+
+
+      
+    </div>
+	</div>
+	<div id="wordL" class="method">
+		<h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>wordL</strong>(<span title="System.string">string</span> text)</h4>
+		<div class="content">An string leaf 
+
+
+
+      
+    </div>
+	</div>
+	
+  <h3 class="section">Public properties</h3>
+
+  <div id="emptyL" class="method">
+    <h4><a href="../Microsoft.FSharp.Text.StructuredFormat/Layout.htm">Layout</a> <strong>emptyL</strong> get; </h4>
+    <div class="content">The empty layout 
+      
+    </div>
+  </div>
+	<div id="footer">
+  <p>Based on v1.8.41.0 of FSharpx.Text.StructuredFormat</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

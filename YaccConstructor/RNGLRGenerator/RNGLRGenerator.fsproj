@@ -55,12 +55,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharpx.Core, Version=1.8.31.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.31\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+    <Reference Include="FSharpx.Text.StructuredFormat, Version=1.8.31.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="FsYacc">

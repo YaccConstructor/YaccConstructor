@@ -7,6 +7,7 @@ open Yard.Generators.RNGLR.AST
 open NUnit.Framework
 open Yard.Generators
 open LexCommon
+open Microsoft.FSharp.Collections
 
 let run path astBuilder =
     let tokens = LexCommon.tokens(path)

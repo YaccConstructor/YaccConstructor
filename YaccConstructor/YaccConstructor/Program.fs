@@ -33,6 +33,8 @@ exception FEError of string
 exception GenError of string
 exception CheckerError of string
 
+let eol = System.Environment.NewLine
+
 let log (e:System.Exception) msg =
     printfn "ERROR!"
     "Stack trace: " + e.StackTrace
@@ -128,27 +130,33 @@ let () =
             Namer.initNamer ilTree.Value.grammar
 
             let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
-            if undeclaredRules.Length > 0 then
-                eprintfn  "Input grammar contains some undeclared nonterminals:"
-                undeclaredRules |> List.iter (fun (m, rules) ->
-                    eprintfn "Module %s: %s" (getModuleName m)
-                        (rules
-                            |> List.map (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
-                            |> String.concat "; ")
-                )
-            if repeatedInnerRules.Length > 0 then
-                eprintfn  "There are more then one rule in one module for some nonterminals:"
-                repeatedInnerRules |> List.iter (fun (m, rules) ->
-                    eprintfn "Module %s: %s" (getModuleName m) (String.concat ", " rules)
-                )
-            if repeatedExportRules.Length > 0 then
-                eprintfn  "There are rules, exported from different modules:"
-                repeatedExportRules |> List.iter (fun (m, rules) ->
-                    eprintfn "Module %s: %s" (getModuleName m)
-                        (rules
-                        |> List.map (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
-                        |> String.concat "; ")
-                )
+
+            let processErrors (errorList : (_ * 'a list) list) msg map delimiter =
+                if errorList.Length > 0 then
+                    eprintfn  "%s" msg
+                    errorList |> List.iter (fun (m,rules) ->
+                        rules
+                        |> List.map map
+                        |> String.concat delimiter
+                        |> eprintfn "Module %s:%s%s" (getModuleName m) eol
+                    )
+                    
+            processErrors undeclaredRules
+                "Input grammar contains some undeclared nonterminals:"
+                (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                "; "
+            processErrors repeatedInnerRules
+                "There are more then one rule in one module for some nonterminals:"
+                id
+                ", "
+            processErrors repeatedExportRules
+                "There are rules, exported from different modules:"
+                (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                "; "
+            processErrors (GetIncorrectMetaArgsCount !ilTree)
+                "Some meta-rules have incorrect arguments number:"
+                (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
+                eol
 //            printfn "%A" <| ilTree
             let lostSources = ref false
             // Let possible to know, after what conversion we lost reference to original code
@@ -158,7 +166,8 @@ let () =
                     | [] -> ()
                     | x ->
                         lostSources := true
-                        x |> List.map(fun s -> s.text) |> String.concat "\n"
+                        x
+                        |> List.map(fun s -> s.text) |> String.concat "\n"
                         |> printfn "Lost sources after frontend or conversion %s:\n %s" name
             checkSources fe.Name !ilTree
             // Apply Conversions

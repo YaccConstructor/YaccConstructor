@@ -1,6 +1,7 @@
 ﻿[<AutoOpen>]
 module Yard.Core.Helpers
 
+open System.Collections.Generic
 open Yard.Core.IL
 open Grammar
 open Production
@@ -87,6 +88,41 @@ let getRulesMap (grammar : Grammar.t<_,_>) =
         )
         module'.rules |> List.iter (fun r -> rMap.[r.name.text] <- getModuleName module')
         getModuleName module', rMap
+    )
+    |> dict
+
+/// if rule has metaArgs then it is a metarule
+let isMetaRule (r:Rule.t<Source.t,Source.t>) = r.metaArgs <> []
+
+/// hash table for metarules. 
+/// Map: using_module -> (rule_name -> (decl_module, rule_decl));
+let metaRulesTbl grammar =
+    let rulesMap = getRulesMap grammar
+    let publicRules = new Dictionary<_,_>(getPublicRules grammar)
+    /// Only public meta-rules present here
+    let publicMeta =
+        let map = new Dictionary<string,Rule.t<Source.t, Source.t> list>()
+        publicRules |> Seq.iter (fun item ->
+            map.[item.Key] <- List.filter isMetaRule item.Value
+        )
+        map
+
+    grammar
+    |> List.map (fun m ->
+        let res = new Dictionary<_,_>()
+        m.openings
+        |> List.iter (fun op ->
+            publicMeta.[op.text]
+            |> List.iter (fun rule ->
+                res.[rule.name.text] <- (op.text, rule)
+            )
+        )
+        m.rules
+        |> List.filter isMetaRule
+        |> List.iter (fun rule ->
+            res.[rule.name.text] <- (getModuleName m, rule)
+        )
+        getModuleName m, res
     )
     |> dict
 

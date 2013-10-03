@@ -192,3 +192,17 @@ type ``Checker test`` () =
         |> frontend.ParseGrammar
         |> IsUnusedRulesExists
         |> Assert.IsTrue
+
+    [<Test>]
+    member test.``Metarules arguments count.`` () =
+        let grammar = frontend.ParseGrammar <| Path.Combine(basePath, "Metarules_args_count.yrd")
+        match (GetIncorrectMetaArgsCount grammar) with
+        | [] -> Assert.Fail("Errors do exist!!")
+        | x ->
+            x |> List.iter (fun (m, r) ->
+                printfn "%s:" (getModuleName m)
+                r
+                |> List.map (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
+                |> String.concat System.Environment.NewLine
+                |> printfn "%s"
+            )

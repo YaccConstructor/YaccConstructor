@@ -34,13 +34,53 @@ let IsStartRuleExists def =
 let IsSingleStartRule def =
     startRulesCount def = 1
 
+let GetIncorrectMetaArgsCount (def:Yard.Core.IL.Definition.t<_,_>) =
+    let rules = metaRulesTbl def.grammar
+    let checkBody module' =
+        let map = rules.[module']
+        let check acc (name : Source.t) cnt =
+            let expected = 
+                if not <| map.ContainsKey name.text then 0
+                else (snd map.[name.text]).metaArgs.Length
+            if cnt = expected then acc
+            else (name, cnt, expected)::acc
+        let rec checkBody acc = function
+            | PRef (name,_) -> check acc name 0
+            | PMetaRef (name, _, metas) -> check acc name metas.Length
+            | PAlt (x, y) -> checkBody acc x |> fun acc' -> checkBody acc' y
+            | PSeq (list,_,_) -> list |> List.fold (fun acc elem -> checkBody acc elem.rule) acc
+            | PSome x
+            | PMany x
+            | POpt  x
+            | PRepet (x,_,_)
+                -> checkBody acc x
+            | PLiteral _
+            | PToken _
+                -> acc
+            | PPerm list -> list |> List.fold (fun acc elem -> checkBody acc elem) acc
+        checkBody
+
+    def.grammar
+    |> List.fold (fun badModules module' ->
+        let check = checkBody (getModuleName module')
+        let badRules = 
+            module'.rules
+            |> List.fold (fun acc r -> check acc r.body) []
+        match badRules with
+        | [] -> badModules
+        | list -> (module', List.rev list)::badModules
+    ) []
+
 let IsChomskyNormalForm (def:Yard.Core.IL.Definition.t<_,_>) =
-    def.grammar.All (fun module' ->
-        module'.rules.All (fun r ->
+    def.grammar
+    |> List.forall (fun module' ->
+        module'.rules
+        |> List.forall (fun r ->
                 match r.body with
-                | PSeq([{rule = PToken _; omit =_ ; binding =_; checker = _}],_,_)
-                | PSeq([{rule = PRef _; omit =_ ; binding =_; checker = _}
-                       ;{rule = PRef _; omit =_ ; binding =_; checker = _}],_,_) -> true 
+                | PSeq([elem],_,_) ->
+                    match elem.rule with PToken _ -> true | _ -> false
+                | PSeq([e1; e2],_,_) ->
+                    match e1.rule, e2.rule with PRef _, PRef _ -> true | _ -> false
                 | _ -> false
             )
         )
@@ -213,7 +253,9 @@ let reachableRulesInfo_of_grammar (grammar: Grammar.t<_,_>) =
             |> List.tryFind (fun r -> r.isStart)
             |> Option.map (fun r -> getModuleName m, r)
         )
-    (startModule, startRule.name.text) |> reachedRules.Add |> ignore
+    (startModule, startRule.name.text)
+    |> reachedRules.Add |> ignore
+
     getReachableRules startModule (getAdditionRules startRule) startRule.body
     reachedRules
 

@@ -18,5 +18,6 @@
     <file src="README" target="README" /> 
     <file src="..\..\LICENSE" target="LICENSE" /> 
     <file src="..\..\NOTICE" target="NOTICE" />
+    <file src="FsYard.targets" target="lib\net45\FsYard.targets" />
 </files>
 </package>

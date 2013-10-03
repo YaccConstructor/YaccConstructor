@@ -24,9 +24,9 @@ open System.Runtime.InteropServices
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("YC.FsYARD")>]
-[<assembly: AssemblyDescription("add")>]
+[<assembly: AssemblyDescription("FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("add")>]
+[<assembly: AssemblyCompany("YaccConstructor Software Foundation")>]
 [<assembly: AssemblyProduct("YC.FsYARD")>]
 [<assembly: AssemblyCopyright("Copyright © 2013. YaccConstructor Software Foundation https://code.google.com/p/recursive-ascent/")>]
 [<assembly: AssemblyTrademark("")>]

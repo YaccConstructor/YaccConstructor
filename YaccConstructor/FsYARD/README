@@ -1,9 +1,10 @@
-Utils.Source Text is a module that allows you to store coordinates of different parts of code on the usefull way. 
-Due to this module you can increase the runtime of your lexical analyzer programm and reduce the use of random access memory.
+FsYARD is a parser generator for F# based on RNGLR algorifm.
+FsYard is a slice of YaccConstructor which contains YardFrontend, RNGLR generator and necassary 3rd party stuff (Conversions, IL etc).
+
 	
 References:
 Main project Web-page: https://code.google.com/p/recursive-ascent
-Utils.SourceText Web-page: https://code.google.com/p/recursive-ascent/wiki/Source_Text_Utils
+YC.FsYARD Web-page: https://code.google.com/p/recursive-ascent/wiki/FsYard
 
 NuGet Web-page:
-http://nuget.org/packages/YC.Utils.SourceText
+http://nuget.org/packages/YC.FsYARD

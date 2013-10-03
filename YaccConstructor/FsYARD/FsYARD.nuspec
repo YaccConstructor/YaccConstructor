@@ -11,7 +11,7 @@
     <iconUrl>https://docs.google.com/file/d/0B2QL-2bhLX91OHFYZVVfZGVUeFk/edit?usp=sharing</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First versuin. Basic options are supported.</releaseNotes>
+    <releaseNotes>First version. Basic options are supported.</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>

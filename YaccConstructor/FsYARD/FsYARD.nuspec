@@ -20,5 +20,6 @@
     <file src="..\..\LICENSE" target="LICENSE" /> 
     <file src="..\..\NOTICE" target="NOTICE" />
     <file src="FsYard.targets" target="lib\net45\FsYard.targets" />
+    <file src="..\Tools\Release\bin\FsYacc.exe" target="lib\net45\FsYacc.exe" />
 </files>
 </package>

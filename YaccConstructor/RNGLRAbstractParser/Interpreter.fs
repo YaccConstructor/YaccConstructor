@@ -391,21 +391,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         attachEdges()
                     with _ -> () 
                     isEnd := true
-                (*elif pushes.Count = 0 then 
-                    if !curLvl - !lastErr > 1 
-                    then
-                        let errInfo =  !curLvl, !curToken
-                        errorList <- errInfo :: errorList
-                    if errorRuleExist 
-                    then 
-                        //recovery()
-                        lastErr := !curLvl
-                    else wasError <- ref true*)
                 else
-                    //let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
                     if !curLvl > 0
                     then
-//                        print "dot/stack_%d_0.dot"
                         if pushesMap.ContainsKey !curLvl
                         then
                             for vertex in usedStates do
@@ -420,11 +408,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
                             usedStates.Clear()
-  //                  print "dot/stack_%d_1.dot"
                     makeReductions ()
                     attachEdges()
- //                   print "dot/stack_%d_2.dot"
-
+                    if !pushes |> Array.exists (fun x -> x.Count = 0) then wasError := true
                     shift ()
 
         let isAcceptState() = 

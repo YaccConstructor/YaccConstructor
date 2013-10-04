@@ -32,6 +32,9 @@ type ``Abstract lexer tests`` () =
             | NUMBER(v,br) -> "NUM: " + v + "; br= " + printBrs br
             | PLUS(v,br)   -> "+: " + v  + printBrs br
             | MULT(v,br)   ->  "*: " + v  + printBrs br
+            | DIV(v,br)   ->  "/: " + v  + printBrs br
+            | LBRACE(v,br)   ->  "(: " + v  + printBrs br
+            | RBRACE(v,br)   ->  "): " + v  + printBrs br
             | e -> string e 
         f.FormatEdge.Add(fun e -> (e.EdgeFormatter.Label.Value <- printEdg e.Edge))
         let str = f.Generate()
@@ -238,6 +241,31 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[2] = 0)
         Assert.IsTrue(positons.[3] = 0)
         Assert.IsTrue(positons.[4] = 0)
+
+    [<Test>]
+    member this.``Positions. Simple binop.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_6.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printfn "1"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        printfn "2"
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        printfn "3"
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)
+                    | MULT (n,brs) ->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,3)
+        Assert.AreEqual(0, positons.[0])
+        Assert.AreEqual(1, positons.[1])
+        Assert.AreEqual(2, positons.[2])
+
 
     [<Test>]
     member this.``Calc. Simple sum.`` () =
@@ -469,6 +497,14 @@ type ``Abstract lexer tests`` () =
         printG res "test_with_space_at_end_of_prev_token"
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
+
+    //[<Test>]
+    member this.``Calc with braces.`` () =
+        let lexerInputGraph = loadLexerInputGraph "calc_1.dot."
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "calc_1"
+        Assert.AreEqual(res.Edges |> Seq.length, 13)
+        Assert.AreEqual(res.Vertices |> Seq.length, 14)
         
 
 
@@ -484,7 +520,7 @@ type ``Abstract lexer tests`` () =
 [<EntryPoint>]
 let f x =
       let t = new ``Abstract lexer tests`` () 
-      t.``Test with space at the end of previous tokens at the end of branch.``()
+      t.``Calc with braces.``()
       //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
      // printfn "%A" t
       1

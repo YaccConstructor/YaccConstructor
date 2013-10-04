@@ -36,10 +36,10 @@ let go file =
     let r = (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse  buildAstAbstract res
     printfn "%A" r
     match r with
-    | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug) ->
+    | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug,_) ->
         printfn "Error in position %d on Token %A: %s" num tok message
         debug.drawGSSDot (file + ".out.dot")
-    | Yard.Generators.RNGLR.Parser.Success tree ->
+    | Yard.Generators.RNGLR.Parser.Success(tree,_) ->
         tree.PrintAst()
         defaultAstToDot tree (file + ".ast.dot")
 

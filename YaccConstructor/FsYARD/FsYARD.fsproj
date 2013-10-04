@@ -48,6 +48,7 @@
     <RLiterals>KW_%s</RLiterals>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="FsYARD.fs" />
     <Compile Include="FsYARDBuildTask.fs" />
     <None Include="FsYard.targets">
@@ -55,7 +56,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FsYacc">
+      <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
@@ -85,6 +88,11 @@
     <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
       <Name>RNGLRGenerator</Name>
       <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
+      <Name>RNGLRParser</Name>
+      <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">

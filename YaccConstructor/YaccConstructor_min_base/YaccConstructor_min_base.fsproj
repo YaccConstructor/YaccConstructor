@@ -47,7 +47,9 @@
       <Project>{17103a48-db90-4101-92ee-7b2719db2cf0}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FsYacc">
+      <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

@@ -92,6 +92,7 @@ Examples/AbstractAnalysis/AbstractAnalysis/log.txt
 Examples/AbstractAnalysis/AbstractAnalysis/out
 YaccConstructor/RNGLRParser.SimpleTest/out
 Examples/AbstractAnalysis/SQL/LogsTrees/*
+YaccConstructor/packages/*
 Examples/AbstractAnalysis/SQL/*.dot
 Examples/AbstractAnalysis/SQL/*.pdf
 Examples/AbstractAnalysis/SQL/tests/results/*

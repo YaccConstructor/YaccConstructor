@@ -19,12 +19,13 @@
 module Yard.Frontends.FsYaccFrontend.Lexer
 
 open Yard.Frontends.FsYaccFrontend.Parser // using tokens type 
-open Microsoft.FSharp.Text.Lexing
+//open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
 open Yard.Core.IL
 
 let comment_depth = ref 0
 let source = ref ""
-let lexeme_start = ref Position.Empty
+let lexeme_start = ref Lexing.Position.Empty
 
 let offset (pos : Lexing.Position) = pos.AbsoluteOffset
 

@@ -281,22 +281,24 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     let reduce, onAccept, news = scanUntilSentinel x stt
                     if reduce
                     then
-                        let f1 = ref 0
-                        let f2 = ref false
+                        //let f1 = ref 0
+                        //let f2 = ref false
                         for i in stt.Info do
                             match processToken onAccept i with
                             | Some x -> 
-                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, x))
+                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, Some x))
                                 //f1 := true 
                             | None -> 
-                                f2 := true
-                                f1 := i.StartV
+                                //f2 := true
+                                //f1 := i.StartV
+                                acc.Add(new ParserEdge<_>(i.StartV,edg.Source, None))
                             reduced := true
                         let newStt = 
-                            if !f2 
-                            then 
-                                new State<_,_>(0,-1,new ResizeArray<_>(),Some (!f1))
-                            else new State<_,_>(0,-1,new ResizeArray<_>())
+                            //if !f2 
+                            //then 
+                               // new State<_,_>(0,-1,new ResizeArray<_>(),Some (!f1))
+                            //else new State<_,_>(0,-1,new ResizeArray<_>())
+                            new State<_,_>(0,-1,new ResizeArray<_>())
                         go newStt
                     else 
                         let acc = mkNewString edg stt
@@ -304,6 +306,9 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         add edg newStt
                 go stt      
             | None -> add edg stt
+//                      let acc = mkNewString edg stt
+//                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
+//                      add edg newStt
             acc 
 
         let res_edg_seq = 
@@ -319,8 +324,9 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             for x in lexbuf.States.[lexbuf.LastVId] do
                 for i in x.Info do                        
                     match processToken (int accept.[x.StateID]) i with
-                    | Some x -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, x))
-                    | None -> ()
+                    | Some x -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, Some x))
+                    | None -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, None)) 
+                    //()
         }
         
 
@@ -333,7 +339,10 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let r = newEdgs
         res.AddVerticesAndEdgeRange r
         |> ignore
-        res
+        //EpsClosure.NfaToDfa res
+        //|> ignore
+        let eps_res = EpsClosure.NfaToDfa res
+        eps_res
                           
     // Each row for the Unicode table has format 
     //      128 entries for ASCII characters

@@ -39,34 +39,37 @@ let numToString = function
     | 5 -> "powOp"
     | 6 -> "term"
     | 7 -> "termOp"
-    | 8 -> "yard_rule_binExpr_1"
-    | 9 -> "yard_rule_binExpr_3"
-    | 10 -> "yard_rule_binExpr_5"
-    | 11 -> "yard_rule_yard_many_1_2"
-    | 12 -> "yard_rule_yard_many_1_4"
-    | 13 -> "yard_rule_yard_many_1_6"
-    | 14 -> "yard_start_rule"
-    | 15 -> "DIV"
-    | 16 -> "LBRACE"
-    | 17 -> "MINUS"
-    | 18 -> "MULT"
-    | 19 -> "NUMBER"
-    | 20 -> "PLUS"
-    | 21 -> "POW"
-    | 22 -> "RBRACE"
-    | 23 -> "RNGLR_EOF"
+    | 8 -> "yard_exp_brackets_10"
+    | 9 -> "yard_exp_brackets_11"
+    | 10 -> "yard_exp_brackets_12"
+    | 11 -> "yard_many_4"
+    | 12 -> "yard_many_5"
+    | 13 -> "yard_many_6"
+    | 14 -> "yard_rule_binExpr_7"
+    | 15 -> "yard_rule_binExpr_8"
+    | 16 -> "yard_rule_binExpr_9"
+    | 17 -> "yard_start_rule"
+    | 18 -> "DIV"
+    | 19 -> "LBRACE"
+    | 20 -> "MINUS"
+    | 21 -> "MULT"
+    | 22 -> "NUMBER"
+    | 23 -> "PLUS"
+    | 24 -> "POW"
+    | 25 -> "RBRACE"
+    | 26 -> "RNGLR_EOF"
     | _ -> ""
 
 let tokenToNumber = function
-    | DIV _ -> 15
-    | LBRACE _ -> 16
-    | MINUS _ -> 17
-    | MULT _ -> 18
-    | NUMBER _ -> 19
-    | PLUS _ -> 20
-    | POW _ -> 21
-    | RBRACE _ -> 22
-    | RNGLR_EOF _ -> 23
+    | DIV _ -> 18
+    | LBRACE _ -> 19
+    | MINUS _ -> 20
+    | MULT _ -> 21
+    | NUMBER _ -> 22
+    | PLUS _ -> 23
+    | POW _ -> 24
+    | RBRACE _ -> 25
+    | RNGLR_EOF _ -> 26
 
 let isLiteral = function
     | DIV _ -> false
@@ -81,22 +84,22 @@ let isLiteral = function
 
 let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|1; 14; 8; 11; 11; 7; 7; 6; 9; 12; 12; 3; 3; 2; 10; 13; 13; 5; 4; 4|]
-let private rules = [|8; 1; 6; 11; 7; 6; 11; 17; 20; 9; 2; 12; 3; 2; 12; 15; 18; 10; 4; 13; 5; 4; 13; 21; 16; 1; 22; 19|]
-let private rulesStart = [|0; 1; 2; 4; 7; 7; 8; 9; 10; 12; 15; 15; 16; 17; 18; 20; 23; 23; 24; 27; 28|]
-let startRule = 1
+let leftSide = [|10; 9; 8; 4; 4; 5; 13; 13; 16; 2; 3; 3; 12; 12; 15; 6; 7; 7; 11; 11; 14; 1; 17|]
+let private rules = [|5; 4; 3; 2; 7; 6; 22; 19; 1; 25; 24; 10; 13; 4; 13; 16; 21; 18; 9; 12; 2; 12; 15; 23; 20; 8; 11; 6; 11; 14; 1|]
+let private rulesStart = [|0; 2; 4; 6; 7; 10; 11; 11; 13; 15; 16; 17; 18; 18; 20; 22; 23; 24; 25; 25; 27; 29; 30; 31|]
+let startRule = 22
 
 let acceptEmptyInput = false
 
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 2; 8; 20; 28; 26; 18; 13; 16; 3; 19; 6; 7; 4; 5; 9; 17; 12; 10; 11; 14; 15; 21; 27; 24; 25; 22; 23|]
+let private lists_gotos = [|1; 2; 5; 22; 31; 25; 16; 8; 11; 3; 17; 21; 19; 20; 4; 6; 12; 15; 14; 7; 9; 10; 13; 18; 23; 26; 30; 28; 29; 24; 27|]
 let private small_gotos =
-        [|9; 65536; 131073; 262146; 393219; 524292; 589829; 655366; 1048583; 1245192; 131076; 196617; 786442; 983051; 1179660; 196613; 131085; 262146; 655366; 1048583; 1245192; 262148; 196617; 786446; 983051; 1179660; 524291; 327695; 851984; 1376273; 589827; 262162; 1048583; 1245192; 655363; 327695; 851987; 1376273; 851977; 65556; 131073; 262146; 393219; 524292; 589829; 655366; 1048583; 1245192; 917505; 1441813; 1310724; 458774; 720919; 1114136; 1310745; 1376263; 131073; 262146; 393242; 589829; 655366; 1048583; 1245192; 1441796; 458774; 720923; 1114136; 1310745|]
-let gotos = Array.zeroCreate 29
-for i = 0 to 28 do
-        gotos.[i] <- Array.zeroCreate 24
+        [|9; 65536; 131073; 262146; 393219; 917508; 983045; 1048582; 1245191; 1441800; 131077; 196617; 589834; 786443; 1179660; 1376269; 196613; 131086; 262146; 1048582; 1245191; 1441800; 327684; 327695; 655376; 851985; 1572882; 393219; 262163; 1245191; 1441800; 524297; 65556; 131073; 262146; 393219; 917508; 983045; 1048582; 1245191; 1441800; 589825; 1638421; 786436; 327695; 655376; 851990; 1572882; 1114117; 196617; 589834; 786455; 1179660; 1376269; 1441797; 458776; 524313; 720922; 1310747; 1507356; 1507335; 131073; 262146; 393245; 983045; 1048582; 1245191; 1441800; 1703941; 458776; 524313; 720926; 1310747; 1507356|]
+let gotos = Array.zeroCreate 32
+for i = 0 to 31 do
+        gotos.[i] <- Array.zeroCreate 27
 cur <- 0
 while cur < small_gotos.Length do
     let i = small_gotos.[cur] >>> 16
@@ -107,12 +110,12 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|8,1|]; [|9,2|]; [|9,3|]; [|11,1|]; [|12,1|]; [|14,1|]; [|15,2|]; [|15,3|]; [|17,1|]; [|18,3|]; [|19,1|]; [|14,2|]; [|13,1|]; [|8,2|]; [|2,1|]; [|3,2|]; [|3,3|]; [|5,1|]; [|6,1|]; [|7,1|]; [|2,2|]; [|0,1|]|]
+let private lists_reduces = [|[|14,1|]; [|1,2|]; [|8,1|]; [|0,2|]; [|4,3|]; [|3,1|]; [|7,1|]; [|7,2|]; [|5,1|]; [|8,2|]; [|9,1|]; [|13,1|]; [|13,2|]; [|11,1|]; [|10,1|]; [|14,2|]; [|20,1|]; [|2,2|]; [|15,1|]; [|19,1|]; [|19,2|]; [|17,1|]; [|16,1|]; [|20,2|]; [|21,1|]|]
 let private small_reduces =
-        [|131076; 1114112; 1310720; 1441792; 1507328; 262148; 1114113; 1310721; 1441793; 1507329; 327684; 1114114; 1310722; 1441794; 1507330; 393218; 1048579; 1245187; 458754; 1048580; 1245188; 524294; 983045; 1114117; 1179653; 1310725; 1441797; 1507333; 655366; 983046; 1114118; 1179654; 1310726; 1441798; 1507334; 720902; 983047; 1114119; 1179655; 1310727; 1441799; 1507335; 786434; 1048584; 1245192; 983047; 983049; 1114121; 1179657; 1310729; 1376265; 1441801; 1507337; 1048583; 983050; 1114122; 1179658; 1310730; 1376266; 1441802; 1507338; 1114118; 983051; 1114123; 1179659; 1310731; 1441803; 1507339; 1179654; 983052; 1114124; 1179660; 1310732; 1441804; 1507340; 1245188; 1114125; 1310733; 1441805; 1507341; 1310722; 1441806; 1507342; 1441794; 1441807; 1507343; 1507330; 1441808; 1507344; 1572866; 1048593; 1245201; 1638402; 1048594; 1245202; 1703940; 1114131; 1310739; 1441811; 1507347; 1769474; 1441812; 1507348; 1835010; 1441813; 1507349|]
-let reduces = Array.zeroCreate 29
-for i = 0 to 28 do
-        reduces.[i] <- Array.zeroCreate 24
+        [|131076; 1310720; 1507328; 1638400; 1703936; 262150; 1179649; 1310721; 1376257; 1507329; 1638401; 1703937; 327686; 1179650; 1310722; 1376258; 1507330; 1638402; 1703938; 458759; 1179651; 1310723; 1376259; 1507331; 1572867; 1638403; 1703939; 655367; 1179652; 1310724; 1376260; 1507332; 1572868; 1638404; 1703940; 720903; 1179653; 1310725; 1376261; 1507333; 1572869; 1638405; 1703941; 786438; 1179654; 1310726; 1376262; 1507334; 1638406; 1703942; 851974; 1179655; 1310727; 1376263; 1507335; 1638407; 1703943; 917506; 1245192; 1441800; 983046; 1179657; 1310729; 1376265; 1507337; 1638409; 1703945; 1048582; 1179658; 1310730; 1376266; 1507338; 1638410; 1703946; 1114116; 1310731; 1507339; 1638411; 1703947; 1179652; 1310732; 1507340; 1638412; 1703948; 1245186; 1245197; 1441805; 1310722; 1245198; 1441806; 1376260; 1310735; 1507343; 1638415; 1703951; 1441794; 1638416; 1703952; 1572868; 1310737; 1507345; 1638417; 1703953; 1638404; 1310738; 1507346; 1638418; 1703954; 1703938; 1638419; 1703955; 1769474; 1638420; 1703956; 1835010; 1245205; 1441813; 1900546; 1245206; 1441814; 1966082; 1638423; 1703959; 2031618; 1638424; 1703960|]
+let reduces = Array.zeroCreate 32
+for i = 0 to 31 do
+        reduces.[i] <- Array.zeroCreate 27
 cur <- 0
 while cur < small_reduces.Length do
     let i = small_reduces.[cur] >>> 16
@@ -123,12 +126,12 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|10|]; [|16|]; [|4|]|]
+let private lists_zeroReduces = [|[|12|]; [|6|]; [|18|]|]
 let private small_zeroReduces =
-        [|131076; 1114112; 1310720; 1441792; 1507328; 262148; 1114112; 1310720; 1441792; 1507328; 524294; 983041; 1114113; 1179649; 1310721; 1441793; 1507329; 655366; 983041; 1114113; 1179649; 1310721; 1441793; 1507329; 1310722; 1441794; 1507330; 1441794; 1441794; 1507330|]
-let zeroReduces = Array.zeroCreate 29
-for i = 0 to 28 do
-        zeroReduces.[i] <- Array.zeroCreate 24
+        [|131076; 1310720; 1507328; 1638400; 1703936; 327686; 1179649; 1310721; 1376257; 1507329; 1638401; 1703937; 786438; 1179649; 1310721; 1376257; 1507329; 1638401; 1703937; 1114116; 1310720; 1507328; 1638400; 1703936; 1441794; 1638402; 1703938; 1703938; 1638402; 1703938|]
+let zeroReduces = Array.zeroCreate 32
+for i = 0 to 31 do
+        zeroReduces.[i] <- Array.zeroCreate 27
 cur <- 0
 while cur < small_zeroReduces.Length do
     let i = small_zeroReduces.[cur] >>> 16
@@ -140,73 +143,43 @@ while cur < small_zeroReduces.Length do
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
 let private small_acc = [1]
-let private accStates = Array.zeroCreate 29
-for i = 0 to 28 do
+let private accStates = Array.zeroCreate 32
+for i = 0 to 31 do
         accStates.[i] <- List.exists ((=) i) small_acc
-let eofIndex = 23
+let eofIndex = 26
 let errorIndex = 0
 let errorRulesExists = false
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(4, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(10, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(16, new Nodes([||])), null)), null); null|]
+let _rnglr_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(23, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(18, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(12, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(6, new Nodes([||])), null)), null); null; null; null; null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|new Tree<_>(null,box (new AST(new Family(23, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(18, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(12, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(6, new Nodes([||])), null)), null); null; null; null; null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_factor * '_rnglr_type_factorOp * '_rnglr_type_powExpr * '_rnglr_type_powOp * '_rnglr_type_term * '_rnglr_type_termOp * '_rnglr_type_yard_rule_binExpr_1 * '_rnglr_type_yard_rule_binExpr_3 * '_rnglr_type_yard_rule_binExpr_5 * '_rnglr_type_yard_rule_yard_many_1_2 * '_rnglr_type_yard_rule_yard_many_1_4 * '_rnglr_type_yard_rule_yard_many_1_6 * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_error * '_rnglr_type_expr * '_rnglr_type_factor * '_rnglr_type_factorOp * '_rnglr_type_powExpr * '_rnglr_type_powOp * '_rnglr_type_term * '_rnglr_type_termOp * '_rnglr_type_yard_exp_brackets_10 * '_rnglr_type_yard_exp_brackets_11 * '_rnglr_type_yard_exp_brackets_12 * '_rnglr_type_yard_many_4 * '_rnglr_type_yard_many_5 * '_rnglr_type_yard_many_6 * '_rnglr_type_yard_rule_binExpr_7 * '_rnglr_type_yard_rule_binExpr_8 * '_rnglr_type_yard_rule_binExpr_9 * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
       box (
-        ( 
+        ( fun l ->
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_1) 
-             |> List.iter (fun (res) -> 
-              _rnglr_cycle_res := (
-                
-# 19 "calc.yrd"
-                                                 res 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 19 "calc.yrd"
-               : '_rnglr_type_expr) 
-# 177 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
-            )
-# 19 "calc.yrd"
-               : '_rnglr_type_yard_start_rule) 
-# 187 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_term) 
-             |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2) l
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_powOp) 
+             |> List.iter (fun (op) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_powExpr) 
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 16 "calc.yrd"
-                     List.fold (fun l (op,r) -> op l r) l r 
+# 15 "calc.yrd"
+                                                      op,r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
-               : '_rnglr_type_yard_rule_binExpr_1) 
-# 209 "Parser.fs"
+
+               : '_rnglr_type_yard_exp_brackets_12) 
+# 182 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -214,132 +187,21 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( fun l ->
           (
             let _rnglr_cycle_res = ref []
-            (
-              let _rnglr_cycle_res = ref []
-              ((unbox _rnglr_children.[0]) : '_rnglr_type_termOp) 
-               |> List.iter (fun (op) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_term) 
-                 |> List.iter (fun (r) -> 
-                  _rnglr_cycle_res := (
-                    
-# 15 "calc.yrd"
-                                                        op,r 
-                      )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2) l
-               |> List.iter (fun (yard_tail) -> 
-                _rnglr_cycle_res := (
-                  
-# 15 "calc.yrd"
-                                    yard_head::yard_tail
-                    )::!_rnglr_cycle_res ) )
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 242 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( fun l ->
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 15 "calc.yrd"
-                                []
-                )::!_rnglr_cycle_res
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 260 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with MINUS _rnglr_val -> [_rnglr_val] | a -> failwith "MINUS expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 21 "calc.yrd"
-                                               (-) 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 21 "calc.yrd"
-               : '_rnglr_type_termOp) 
-# 280 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with PLUS _rnglr_val -> [_rnglr_val] | a -> failwith "PLUS expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 21 "calc.yrd"
-                               (+) 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 21 "calc.yrd"
-               : '_rnglr_type_termOp) 
-# 300 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_3) 
-             |> List.iter (fun (res) -> 
-              _rnglr_cycle_res := (
-                
-# 23 "calc.yrd"
-                                                     res 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 23 "calc.yrd"
-               : '_rnglr_type_term) 
-# 320 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_factor) 
-             |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4) l
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_factorOp) 
+             |> List.iter (fun (op) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_factor) 
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 16 "calc.yrd"
-                     List.fold (fun l (op,r) -> op l r) l r 
+# 15 "calc.yrd"
+                                                      op,r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
-               : '_rnglr_type_yard_rule_binExpr_3) 
-# 342 "Parser.fs"
+
+               : '_rnglr_type_yard_exp_brackets_11) 
+# 204 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -347,183 +209,21 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( fun l ->
           (
             let _rnglr_cycle_res = ref []
-            (
-              let _rnglr_cycle_res = ref []
-              ((unbox _rnglr_children.[0]) : '_rnglr_type_factorOp) 
-               |> List.iter (fun (op) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_factor) 
-                 |> List.iter (fun (r) -> 
-                  _rnglr_cycle_res := (
-                    
-# 15 "calc.yrd"
-                                                        op,r 
-                      )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4) l
-               |> List.iter (fun (yard_tail) -> 
-                _rnglr_cycle_res := (
-                  
-# 15 "calc.yrd"
-                                    yard_head::yard_tail
-                    )::!_rnglr_cycle_res ) )
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 375 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( fun l ->
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 15 "calc.yrd"
-                                []
-                )::!_rnglr_cycle_res
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 393 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with DIV _rnglr_val -> [_rnglr_val] | a -> failwith "DIV expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 25 "calc.yrd"
-                                                 (/) 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 25 "calc.yrd"
-               : '_rnglr_type_factorOp) 
-# 413 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with MULT _rnglr_val -> [_rnglr_val] | a -> failwith "MULT expected, but %A found" a )
-             |> List.iter (fun (_) -> 
-              _rnglr_cycle_res := (
-                
-# 25 "calc.yrd"
-                                 ( * ) 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 25 "calc.yrd"
-               : '_rnglr_type_factorOp) 
-# 433 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_5) 
-             |> List.iter (fun (res) -> 
-              _rnglr_cycle_res := (
-                
-# 27 "calc.yrd"
-                                                     res 
-                  )::!_rnglr_cycle_res )
-            !_rnglr_cycle_res
-          )
-            )
-# 27 "calc.yrd"
-               : '_rnglr_type_factor) 
-# 453 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( 
-          (
-            let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_powExpr) 
-             |> List.iter (fun (l) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_6) l
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_termOp) 
+             |> List.iter (fun (op) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_term) 
                |> List.iter (fun (r) -> 
                 _rnglr_cycle_res := (
                   
-# 16 "calc.yrd"
-                     List.fold (fun l (op,r) -> op l r) l r 
+# 15 "calc.yrd"
+                                                      op,r 
                     )::!_rnglr_cycle_res ) )
             !_rnglr_cycle_res
           )
             )
-# 14 "calc.yrd"
-               : '_rnglr_type_yard_rule_binExpr_5) 
-# 475 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( fun l ->
-          (
-            let _rnglr_cycle_res = ref []
-            (
-              let _rnglr_cycle_res = ref []
-              ((unbox _rnglr_children.[0]) : '_rnglr_type_powOp) 
-               |> List.iter (fun (op) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_powExpr) 
-                 |> List.iter (fun (r) -> 
-                  _rnglr_cycle_res := (
-                    
-# 15 "calc.yrd"
-                                                        op,r 
-                      )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) |> List.iter (fun (yard_head) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_6) l
-               |> List.iter (fun (yard_tail) -> 
-                _rnglr_cycle_res := (
-                  
-# 15 "calc.yrd"
-                                    yard_head::yard_tail
-                    )::!_rnglr_cycle_res ) )
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 508 "Parser.fs"
-      );
-  (
-    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
-      box (
-        ( fun l ->
-          (
-            let _rnglr_cycle_res = ref []
-            _rnglr_cycle_res := (
-              
-# 15 "calc.yrd"
-                                []
-                )::!_rnglr_cycle_res
-            !_rnglr_cycle_res
-          )
-            )
-# 15 "calc.yrd"
-               : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 526 "Parser.fs"
+
+               : '_rnglr_type_yard_exp_brackets_10) 
+# 226 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -531,19 +231,19 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with POW _rnglr_val -> [_rnglr_val] | a -> failwith "POW expected, but %A found" a )
-             |> List.iter (fun (_) -> 
+            (match ((unbox _rnglr_children.[0]) : Token) with NUMBER _rnglr_val -> [_rnglr_val] | a -> failwith "NUMBER expected, but %A found" a )
+             |> List.iter (fun (n) -> 
               _rnglr_cycle_res := (
                 
-# 29 "calc.yrd"
-                             ( ** ) 
+# 31 "calc.yrd"
+                                    System.Double.Parse n 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 29 "calc.yrd"
-               : '_rnglr_type_powOp) 
-# 546 "Parser.fs"
+# 31 "calc.yrd"
+               : '_rnglr_type_powExpr) 
+# 246 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -567,7 +267,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 31 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 570 "Parser.fs"
+# 270 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -575,19 +275,355 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (match ((unbox _rnglr_children.[0]) : Token) with NUMBER _rnglr_val -> [_rnglr_val] | a -> failwith "NUMBER expected, but %A found" a )
-             |> List.iter (fun (n) -> 
+            (match ((unbox _rnglr_children.[0]) : Token) with POW _rnglr_val -> [_rnglr_val] | a -> failwith "POW expected, but %A found" a )
+             |> List.iter (fun (_) -> 
               _rnglr_cycle_res := (
                 
-# 31 "calc.yrd"
-                                    System.Double.Parse n 
+# 29 "calc.yrd"
+                             ( ** ) 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
-# 31 "calc.yrd"
-               : '_rnglr_type_powExpr) 
-# 590 "Parser.fs"
+# 29 "calc.yrd"
+               : '_rnglr_type_powOp) 
+# 290 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 27 "calc.yrd"
+                                          []
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 27 "calc.yrd"
+               : '_rnglr_type_yard_many_6) 
+# 308 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_exp_brackets_12) l
+             |> List.iter (fun (yard_head) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_6) l
+               |> List.iter (fun (yard_tail) -> 
+                _rnglr_cycle_res := (
+                  
+# 27 "calc.yrd"
+                                              yard_head::yard_tail
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 27 "calc.yrd"
+               : '_rnglr_type_yard_many_6) 
+# 330 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_powExpr) 
+             |> List.iter (fun (l) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_6) l
+               |> List.iter (fun (r) -> 
+                _rnglr_cycle_res := (
+                  
+# 16 "calc.yrd"
+                     List.fold (fun l (op,r) -> op l r) l r 
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 14 "calc.yrd"
+               : '_rnglr_type_yard_rule_binExpr_9) 
+# 352 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_9) 
+             |> List.iter (fun (res) -> 
+              _rnglr_cycle_res := (
+                
+# 27 "calc.yrd"
+                                                     res 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 27 "calc.yrd"
+               : '_rnglr_type_factor) 
+# 372 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with MULT _rnglr_val -> [_rnglr_val] | a -> failwith "MULT expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 25 "calc.yrd"
+                                 ( * ) 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 25 "calc.yrd"
+               : '_rnglr_type_factorOp) 
+# 392 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with DIV _rnglr_val -> [_rnglr_val] | a -> failwith "DIV expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 25 "calc.yrd"
+                                                 (/) 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 25 "calc.yrd"
+               : '_rnglr_type_factorOp) 
+# 412 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 23 "calc.yrd"
+                                       []
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 23 "calc.yrd"
+               : '_rnglr_type_yard_many_5) 
+# 430 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_exp_brackets_11) l
+             |> List.iter (fun (yard_head) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_5) l
+               |> List.iter (fun (yard_tail) -> 
+                _rnglr_cycle_res := (
+                  
+# 23 "calc.yrd"
+                                           yard_head::yard_tail
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 23 "calc.yrd"
+               : '_rnglr_type_yard_many_5) 
+# 452 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_factor) 
+             |> List.iter (fun (l) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_5) l
+               |> List.iter (fun (r) -> 
+                _rnglr_cycle_res := (
+                  
+# 16 "calc.yrd"
+                     List.fold (fun l (op,r) -> op l r) l r 
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 14 "calc.yrd"
+               : '_rnglr_type_yard_rule_binExpr_8) 
+# 474 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_8) 
+             |> List.iter (fun (res) -> 
+              _rnglr_cycle_res := (
+                
+# 23 "calc.yrd"
+                                                     res 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 23 "calc.yrd"
+               : '_rnglr_type_term) 
+# 494 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with PLUS _rnglr_val -> [_rnglr_val] | a -> failwith "PLUS expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 21 "calc.yrd"
+                               (+) 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 21 "calc.yrd"
+               : '_rnglr_type_termOp) 
+# 514 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            (match ((unbox _rnglr_children.[0]) : Token) with MINUS _rnglr_val -> [_rnglr_val] | a -> failwith "MINUS expected, but %A found" a )
+             |> List.iter (fun (_) -> 
+              _rnglr_cycle_res := (
+                
+# 21 "calc.yrd"
+                                               (-) 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 21 "calc.yrd"
+               : '_rnglr_type_termOp) 
+# 534 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            _rnglr_cycle_res := (
+              
+# 19 "calc.yrd"
+                                     []
+                )::!_rnglr_cycle_res
+            !_rnglr_cycle_res
+          )
+            )
+# 19 "calc.yrd"
+               : '_rnglr_type_yard_many_4) 
+# 552 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( fun l ->
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_exp_brackets_10) l
+             |> List.iter (fun (yard_head) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_4) l
+               |> List.iter (fun (yard_tail) -> 
+                _rnglr_cycle_res := (
+                  
+# 19 "calc.yrd"
+                                         yard_head::yard_tail
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 19 "calc.yrd"
+               : '_rnglr_type_yard_many_4) 
+# 574 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_term) 
+             |> List.iter (fun (l) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_many_4) l
+               |> List.iter (fun (r) -> 
+                _rnglr_cycle_res := (
+                  
+# 16 "calc.yrd"
+                     List.fold (fun l (op,r) -> op l r) l r 
+                    )::!_rnglr_cycle_res ) )
+            !_rnglr_cycle_res
+          )
+            )
+# 14 "calc.yrd"
+               : '_rnglr_type_yard_rule_binExpr_7) 
+# 596 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          (
+            let _rnglr_cycle_res = ref []
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_7) 
+             |> List.iter (fun (res) -> 
+              _rnglr_cycle_res := (
+                
+# 19 "calc.yrd"
+                                                 res 
+                  )::!_rnglr_cycle_res )
+            !_rnglr_cycle_res
+          )
+            )
+# 19 "calc.yrd"
+               : '_rnglr_type_expr) 
+# 616 "Parser.fs"
+      );
+  (
+    fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
+      box (
+        ( 
+          ((unbox _rnglr_children.[0]) : '_rnglr_type_expr) 
+            )
+# 19 "calc.yrd"
+               : '_rnglr_type_yard_start_rule) 
+# 626 "Parser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -605,7 +641,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 608 "Parser.fs"
+# 644 "Parser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 
@@ -633,26 +669,35 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_termOp)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_1)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_3)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_5)   ) |> List.concat));
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_exp_brackets_10)  l ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_2)  l ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_exp_brackets_11)  l ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_4)  l ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_exp_brackets_12)  l ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( fun l ->
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_yard_many_1_6)  l ) |> List.concat));
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_4)  l ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_5)  l ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( fun l ->
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_many_6)  l ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_7)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_8)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_rule_binExpr_9)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_yard_start_rule)   ) |> List.concat));
   |] 
-let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) : '_rnglr_type_yard_start_rule = 
-  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats (if args.filterEpsilons then _rnglr_filtered_epsilons else _rnglr_epsilons) args.tokenToRange args.zeroPosition args.clearAST) : '_rnglr_type_yard_start_rule
+let translate (args : TranslateArguments<_,_>) (tree : Tree<_>) (dict : _ ) : '_rnglr_type_yard_start_rule = 
+  unbox (tree.Translate _rnglr_rule_  leftSide _rnglr_concats (if args.filterEpsilons then _rnglr_filtered_epsilons else _rnglr_epsilons) args.tokenToRange args.zeroPosition args.clearAST dict) : '_rnglr_type_yard_start_rule

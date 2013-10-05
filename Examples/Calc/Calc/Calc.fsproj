@@ -64,7 +64,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <Import Project="..\FsYard\FsYard.targets" />
-    <PropertyGroup>
+  <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>Parser.fs</OutFile>
     <NeedTranslate>true</NeedTranslate>
@@ -72,13 +72,11 @@
     <Module>Calc.Parser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
-
   <ItemGroup>
-        <FsYard Include="calc.yrd" />
+    <FsYard Include="calc.yrd" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
-
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Program.fs" />
@@ -88,37 +86,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\Constraints.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FsYARD">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\FsYARD.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="RNGLR">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\RNGLR.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="RNGLRCommon">
       <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
@@ -130,10 +104,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YardFrontend">
-      <HintPath>..\packages\YC.FsYARD.0.1.5025.0\lib\net45\YardFrontend.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

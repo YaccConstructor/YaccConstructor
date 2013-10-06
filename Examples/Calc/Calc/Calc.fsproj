@@ -79,12 +79,6 @@
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\yc\RNGLRCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLRParser">
-      <HintPath>..\yc\RNGLRParser.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

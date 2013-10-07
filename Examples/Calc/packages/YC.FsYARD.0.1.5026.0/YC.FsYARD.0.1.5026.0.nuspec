@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package >
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>YC.FsYARD</id>
     <version>0.1.5026.0</version>
@@ -13,6 +13,6 @@
     <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
     <releaseNotes>First version. Basic options are supported.</releaseNotes>
     <copyright>Copyright 2013</copyright>
-    <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
+    <tags>F# FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>
 </package>

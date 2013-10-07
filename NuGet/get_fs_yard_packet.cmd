@@ -26,6 +26,13 @@ copy ..\YaccConstructor\YardFrontend\bin\Release\YardFrontend.dll FsYardPacket\c
 copy ..\YaccConstructor\YardFrontend\bin\Release\YardFrontend.pdb FsYardPacket\content\FsYARD
 copy ..\YaccConstructor\YardFrontend\bin\Release\YardFrontend.XML FsYardPacket\content\FsYARD
 
+copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.exe FsYardPacket\content\FsYARD
+copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.pdb FsYardPacket\content\FsYARD
+copy ..\YaccConstructor\FsYARD\FsYard.targets FsYardPacket\content\FsYARD
+copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.XML FsYardPacket\content\FsYARD
+
+copy ..\YaccConstructor\Tools\FsYacc.exe FsYardPacket\content\FsYARD
+
 copy ..\YaccConstructor\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll FsYardPacket\content\FsYARD
 copy ..\YaccConstructor\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.pdb FsYardPacket\content\FsYARD
 copy ..\YaccConstructor\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.xml FsYardPacket\content\FsYARD
@@ -38,11 +45,6 @@ copy ..\NOTICE FsYardPacket\
 copy ..\YaccConstructor\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll FsYardPacket\lib
 copy ..\YaccConstructor\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.pdb FsYardPacket\lib
 copy ..\YaccConstructor\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.xml FsYardPacket\lib
-
-copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.exe FsYardPacket\lib
-copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.pdb FsYardPacket\lib
-copy ..\YaccConstructor\FsYARD\FsYard.targets FsYardPacket\lib
-copy ..\YaccConstructor\FsYARD\bin\Release\FsYARD.XML FsYardPacket\lib
 
 copy ..\YaccConstructor\RNGLRCommon\bin\Release\RNGLRCommon.dll FsYardPacket\lib
 copy ..\YaccConstructor\RNGLRCommon\bin\Release\RNGLRCommon.pdb FsYardPacket\lib

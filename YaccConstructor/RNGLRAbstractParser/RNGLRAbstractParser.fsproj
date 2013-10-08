@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRAbstractParser</RootNamespace>
     <AssemblyName>RNGLRAbstractParser</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RNGLRAbstractParser</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>

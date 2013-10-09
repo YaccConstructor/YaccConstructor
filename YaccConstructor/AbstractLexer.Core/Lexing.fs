@@ -271,6 +271,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 |> ResizeArray.singleton
 
         let processToken onAccept (p: StateInfo<_,_>) =
+            let s = (new string(p.AccumulatedString |> Array.ofSeq))
             actions onAccept (new string(p.AccumulatedString |> Array.ofSeq)) (p.Positions |> Array.ofSeq |> Array.rev)                          
 
         let processEdg (edg:LexerEdge<_,_>) stt reduced =
@@ -284,14 +285,15 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         //let f1 = ref 0
                         //let f2 = ref false
                         for i in stt.Info do
-                            match processToken onAccept i with
-                            | Some x -> 
-                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, Some x))
-                                //f1 := true 
-                            | None -> 
-                                //f2 := true
-                                //f1 := i.StartV
-                                acc.Add(new ParserEdge<_>(i.StartV,edg.Source, None))
+                            if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, processToken onAccept i))
+//                            match processToken onAccept i with
+//                            | Some x -> 
+//                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, Some x))
+//                                //f1 := true 
+//                            | None -> 
+//                                //f2 := true
+//                                //f1 := i.StartV
+//                                acc.Add(new ParserEdge<_>(i.StartV,edg.Source, None))
                             reduced := true
                         let newStt = 
                             //if !f2 
@@ -305,10 +307,10 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
                 go stt      
-            | None -> add edg stt
-//                      let acc = mkNewString edg stt
-//                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
-//                      add edg newStt
+            | None -> //add edg stt
+                      let acc = mkNewString edg stt
+                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
+                      add edg newStt
             acc 
 
         let res_edg_seq = 

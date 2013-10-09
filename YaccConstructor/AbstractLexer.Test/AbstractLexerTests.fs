@@ -483,21 +483,21 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Edges |> Seq.length, 1)
         Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
-    //[<Test>]
+    [<Test>]
     member this.``Literals. Inner branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_inner_branch.dot"
         let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
         Assert.AreEqual(res.Edges |> Seq.length, 2)
         Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
-    //[<Test>]
+    [<Test>]
     member this.``Literals. Outer branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_outer_branch.dot"
         let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
         Assert.AreEqual(res.Edges |> Seq.length, 2)
         Assert.AreEqual(res.Vertices |> Seq.length, 2)
 
-    //[<Test>]
+    [<Test>]
     member this.``Literals. Splitted.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_splitted.dot"
         let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
@@ -527,7 +527,7 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
-    //[<Test>]
+    [<Test>]
     member this.``Calc with braces.`` () =
         let lexerInputGraph = loadLexerInputGraph "calc_1.dot."
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
@@ -592,10 +592,10 @@ type ``Abstract lexer tests`` () =
         
 
 
-//[<EntryPoint>]
-//let f x =
-//      let t = new ``Abstract lexer tests`` () 
-//      t.``Eps_closure_5.``()
-//      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-//     // printfn "%A" t
-//      1
+[<EntryPoint>]
+let f x =
+      let t = new ``Abstract lexer tests`` () 
+      t.``Calc with braces.`` ()
+      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
+     // printfn "%A" t
+      1

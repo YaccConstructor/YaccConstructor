@@ -68,11 +68,13 @@ type internal NfaNodeIdSet(nodes: NfaNodeIdSetBuilder) =
 
 type NodeSetSet = Set<NfaNodeIdSet>
 
-let newDfaNodeId = 
+let newDfaNodeId, reset = 
     let i = ref 0 
     fun () -> let res = !i in incr i; res
+    , fun () -> i := 0
    
 let NfaToDfa (inGraph: AbstractParsing.Common.ParserInputGraph<_>)= 
+    reset ()
     let numNfaNodes = inGraph.VertexCount
     let rec EClosure1 (acc:NfaNodeIdSetBuilder) n = 
         if not (acc.Contains n) then 

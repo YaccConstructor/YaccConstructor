@@ -282,31 +282,16 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     let reduce, onAccept, news = scanUntilSentinel x stt
                     if reduce
                     then
-                        //let f1 = ref 0
-                        //let f2 = ref false
                         for i in stt.Info do
-                            if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, processToken onAccept i))
-//                            match processToken onAccept i with
-//                            | Some x -> 
-//                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, Some x))
-//                                //f1 := true 
-//                            | None -> 
-//                                //f2 := true
-//                                //f1 := i.StartV
-//                                acc.Add(new ParserEdge<_>(i.StartV,edg.Source, None))
-                            reduced := true
-                        let newStt = 
-                            //if !f2 
-                            //then 
-                               // new State<_,_>(0,-1,new ResizeArray<_>(),Some (!f1))
-                            //else new State<_,_>(0,-1,new ResizeArray<_>())
-                            new State<_,_>(0,-1,new ResizeArray<_>())
+                            if not !reduced then acc.Add(new ParserEdge<_>(i.StartV, edg.Source, processToken onAccept i))
+                        reduced := true
+                        let newStt = new State<_,_>(0,-1,new ResizeArray<_>())
                         go newStt
                     else 
                         let acc = mkNewString edg stt
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
-                go stt      
+                go stt
             | None -> //add edg stt
                       let acc = mkNewString edg stt
                       let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)

@@ -536,6 +536,14 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 9)
 
     [<Test>]
+    member this.``Calc with braces 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "calc_0.dot."
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "calc_0_res"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+
+    [<Test>]
     member this.``Example with eps.`` () =
         let lexerInputGraph = loadLexerInputGraph "example_eps.dot."
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)

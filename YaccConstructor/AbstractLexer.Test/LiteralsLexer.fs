@@ -29,7 +29,7 @@ let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
 # 11 "LiteralsLexer.fsl"
-                                   LITERAL "" |> Some 
+                                   LITERAL lexeme |> Some 
 # 33 "LiteralsLexer.fs"
           )
   | 1 -> ( 
@@ -38,7 +38,5 @@ let fslex_actions_token  _fslex_state lexeme brs =
 # 38 "LiteralsLexer.fs"
           )
   | _ -> failwith "token"
-
-# 13 "LiteralsLexer.fsl"
 
 # 3000000 "LiteralsLexer.fs"

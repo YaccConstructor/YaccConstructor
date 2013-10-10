@@ -21,6 +21,29 @@ let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    
 
+//    let printG res (fName:string) =
+//        let f = GraphvizAlgorithm(res)
+//        let printEdg (e:AbstractParsing.Common.ParserEdge<_>) =
+//            let printBrs brs =
+//                "["
+//                + (brs |> Array.map (fun (pos:Position<_>) -> pos.back_ref ) |> String.concat "; ")
+//                + "]"
+//            match e.Tag with
+//            | Some (NUMBER(v,br)) -> "NUM: " + v + "; br= " + printBrs br
+//            | Some (PLUS(v,br))   -> "+: " + v  + printBrs br
+//            | Some (MULT(v,br))   ->  "*: " + v  + printBrs br
+//            | Some (DIV(v,br))   ->  "/: " + v  + printBrs br
+//            | Some (LBRACE(v,br))   ->  "(: " + v  + printBrs br
+//            | Some (RBRACE(v,br))   ->  "): " + v  + printBrs br
+//            | None -> "None"
+//            | e -> string e 
+//        f.FormatEdge.Add(fun e -> (e.EdgeFormatter.Label.Value <- printEdg e.Edge))
+//        let str = f.Generate()
+//        let c = System.IO.Path.GetInvalidFileNameChars()
+//        let fName1 = c |> Array.fold (
+//                                       fun (name:string) ch -> name.Replace(ch,'_')) fName
+//        System.IO.File.WriteAllText(@"../../" + fName1 + ".dot" ,str)
+
     let printG res (fName:string) =
         let f = GraphvizAlgorithm(res)
         let printEdg (e:AbstractParsing.Common.ParserEdge<_>) =
@@ -185,6 +208,7 @@ type ``Abstract lexer tests`` () =
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        printG res "test_with_pos_3_res"
         let positons =
             res.Edges 
               |> Seq.collect
@@ -199,8 +223,8 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[0] = 0)
         Assert.IsTrue(positons.[1] = 1)
         Assert.IsTrue(positons.[2] = 0)
-        Assert.IsTrue(positons.[3] = 1)
-        Assert.IsTrue(positons.[4] = 0)
+        Assert.IsTrue(positons.[3] = 0)
+        Assert.IsTrue(positons.[4] = 1)
         Assert.IsTrue(positons.[5] = 0)  
 
     [<Test>]
@@ -242,7 +266,7 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[3] = 0)
         Assert.IsTrue(positons.[4] = 0)
 
-    [<Test>]
+    //[<Test>]
     member this.``Positions. Simple binop.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_6.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
@@ -314,7 +338,7 @@ type ``Abstract lexer tests`` () =
           |> Seq.iter
               (fun e -> 
                 match e.Tag with
-                | NUMBER (n,brs) 
+                | NUMBER (n,brs)
                 | PLUS (n,brs)->
                 //n.EndsWith("5") 
                     Assert.AreEqual(brs.Length,n.Length)
@@ -437,15 +461,20 @@ type ``Abstract lexer tests`` () =
     member this.``Calc. Epsilon edge 1.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_10_1.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+//        Assert.AreEqual(res.Edges |> Seq.length, 1)
+//        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Calc. Epsilon edge 2.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_10_2.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        printG res "test_10_2_res"
+        //Assert.AreEqual(res.Edges |> Seq.length, 2)
+        //Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Literals. Simple.`` () =
@@ -490,7 +519,7 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
         printG res "test_with_space_1"
 
-    [<Test>]
+    //[<Test>]
     member this.``Test with space at the end of previous tokens at the end of branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_space_at_end_of_prev_token.dot."
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
@@ -498,29 +527,83 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
-    //[<Test>]
+    [<Test>]
     member this.``Calc with braces.`` () =
         let lexerInputGraph = loadLexerInputGraph "calc_1.dot."
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        printG res "calc_1"
-        Assert.AreEqual(res.Edges |> Seq.length, 13)
-        Assert.AreEqual(res.Vertices |> Seq.length, 14)
+        printG res "calc_1_res"
+        Assert.AreEqual(res.Edges |> Seq.length, 9)
+        Assert.AreEqual(res.Vertices |> Seq.length, 9)
+
+    [<Test>]
+    member this.``Calc with braces 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "calc_0.dot."
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "calc_0_res"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+
+    [<Test>]
+    member this.``Example with eps.`` () =
+        let lexerInputGraph = loadLexerInputGraph "example_eps.dot."
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "example_eps"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        
+    [<Test>]
+    member this.``Eps_closure_1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "eps_closure_1.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "eps_closure_1"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Eps_closure_2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "eps_closure_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "eps_res_closure_2"
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Eps_closure_3.`` () =
+        let lexerInputGraph = loadLexerInputGraph "eps_closure_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        //printG res "eps_closure_3"
+        //let eps_res = EpsClosure.NfaToDfa res
+        //printGEps eps_res "eps_res_closure_3"
+        //Assert.AreEqual(res.Edges |> Seq.length, 2)
+        //Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        //Assert.AreEqual(eps_res.Edges |> Seq.length, 1)
+        //Assert.AreEqual(eps_res.Vertices |> Seq.length, 2)
+        printG res "eps_res_closure_3"
+        Assert.AreEqual(res.Edges |> Seq.length, 1)
+        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+
+    [<Test>]
+    member this.``Eps_closure_4.`` () =
+        let lexerInputGraph = loadLexerInputGraph "eps_closure_4.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "eps_res_closure_4"
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+
+    [<Test>]
+    member this.``Eps_closure_5.`` () =
+        let lexerInputGraph = loadLexerInputGraph "eps_closure_5.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        printG res "eps_res_closure_5"
+        Assert.AreEqual(res.Edges |> Seq.length, 0)
+        Assert.AreEqual(res.Vertices |> Seq.length, 0)
         
 
 
 //[<EntryPoint>]
 //let f x =
-//    
-//    let t = new ``Abstract lexer tests`` () 
-//    t.``Literals. Simple.``()
-//    let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-//    printfn "%A" t
-//    1
-
-[<EntryPoint>]
-let f x =
-      let t = new ``Abstract lexer tests`` () 
-      t.``Calc with braces.``()
-      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-     // printfn "%A" t
-      1
+//      let t = new ``Abstract lexer tests`` () 
+//      t.``Calc with braces.`` ()
+//      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
+//     // printfn "%A" t
+//      1

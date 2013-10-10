@@ -292,7 +292,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
                 go stt
-            | None -> //add edg stt
+            | None -> 
                       let acc = mkNewString edg stt
                       let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
                       add edg newStt
@@ -309,11 +309,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         seq{
             yield! res_edg_seq
             for x in lexbuf.States.[lexbuf.LastVId] do
-                for i in x.Info do                        
-                    match processToken (int accept.[x.StateID]) i with
-                    | Some x -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, Some x))
-                    | None -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, None)) 
-                    //()
+                for i in x.Info do                                            
+                    yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, processToken (int accept.[x.StateID]) i))                    
         }
         
 

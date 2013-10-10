@@ -600,10 +600,10 @@ type ``Abstract lexer tests`` () =
         
 
 
-[<EntryPoint>]
-let f x =
-      let t = new ``Abstract lexer tests`` () 
-      t.``Calc with braces.`` ()
-      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-     // printfn "%A" t
-      1
+//[<EntryPoint>]
+//let f x =
+//      let t = new ``Abstract lexer tests`` () 
+//      t.``Calc with braces.`` ()
+//      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
+//     // printfn "%A" t
+//      1

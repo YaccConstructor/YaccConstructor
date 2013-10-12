@@ -48,7 +48,7 @@ type ParserDebugFuns<'TokenType> = {
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType> * Dictionary<Family, ErrorNode>
-    | Error of int * 'TokenType * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
+    | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
@@ -178,7 +178,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         then
             Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
         else
-            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string",
+            Error (0, [||], "This grammar cannot accept empty string",
                     {
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
@@ -631,7 +631,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         
         if !wasError 
         then 
-            Error (!curInd , !curToken , "Parse Error", debugFuns (), errDict)
+            Error (!curInd , [|!curToken|] , "Parse Error", debugFuns (), errDict)
         else
             let root = ref None
             let addTreeTop res =
@@ -645,7 +645,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, !curToken, "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
+            | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
                 Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)

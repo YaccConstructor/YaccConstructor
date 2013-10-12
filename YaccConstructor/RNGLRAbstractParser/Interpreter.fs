@@ -370,7 +370,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let errorRuleExist = parserSource.ErrorRulesExists
         let mutable wasError = ref false
         let lastErr = ref -1
-        let NeadSh = ref true
+        let pushesBackup = ref [||]
         while not !isEnd && not !wasError do
         
             if usedStates.Count = 0 && reductions.Count = 0
@@ -413,7 +413,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             usedStates.Clear()
                     makeReductions ()
                     attachEdges()
-                    if !pushes |> Array.exists (fun x -> x.Count = 0) then wasError := true
+                    if !pushes |> Array.exists (fun x -> x.Count = 0)
+                    then 
+                        wasError := true
+                        pushesBackup := !pushes
                     shift ()
 
         let isAcceptState() = 
@@ -428,7 +431,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
             //recovery()
-            makeReductions () //!curInd
+            makeReductions ()
             attachEdges()
 
         let lastTokens count =
@@ -441,7 +444,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 lastTokens = lastTokens
             }
             
-        let erTok () = (try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
+        let erTok () = 
+            let shiftBase = tokens.Count - (!pushesBackup).Length
+            let x = !pushesBackup |> Array.mapi (fun i a -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
+            x |> Array.choose id
+            //(try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
         if not errorList.IsEmpty 
         then
             errorList <- List.rev errorList

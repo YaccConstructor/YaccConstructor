@@ -44,7 +44,7 @@ type Processor(file) =
         |> Option.iter
             (function 
              | Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
-             | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> addPError tok
+             | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
             
 //(provider: ICSharpContextActionDataProvider) = 
@@ -77,15 +77,15 @@ type Processor(file) =
             let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                  br |> filterBrs |> Array.iter (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
             match tok with
-            | DEC_NUMBER (sourceText,brs) -> e "DEC_NUMBER" sourceText.text brs
+            | DEC_NUMBER (sourceText,brs)   -> e "DEC_NUMBER" sourceText.text brs
             | DOUBLE_COLON (sourceText,brs) -> e "DOUBLE_COLON" sourceText.text brs
-            | GLOBALVAR (sourceText,brs) -> e "GLOBALVAR" sourceText.text brs
-            | IDENT (sourceText,brs) -> e "IDENT" sourceText.text brs
-            | LOCALVAR (sourceText,brs) -> e "LOCALVAR" sourceText.text brs
-            | RNGLR_EOF (sourceText,brs)
-            | STOREDPROCEDURE (sourceText,brs)
-            | STRING_CONST (sourceText,brs)
-            | WEIGHT (sourceText,brs) -> e "some sql token" "some value" brs
+            | GLOBALVAR (sourceText,brs)    -> e "GLOBALVAR" sourceText.text brs
+            | IDENT (sourceText,brs)        -> e "IDENT" sourceText.text brs
+            | LOCALVAR (sourceText,brs)     -> e "LOCALVAR" sourceText.text brs
+            | RNGLR_EOF (sourceText,brs)-> e "EOF" sourceText.text brs
+            | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
+            | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
+            | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
             | ``L 765`` (brs1,brs2)
             | ``L 766`` (brs1,brs2)
             | ``L 767`` (brs1,brs2)
@@ -402,7 +402,9 @@ type Processor(file) =
             | ``L 1078`` (brs1,brs2)
             | ``L 1079`` (brs1,brs2)
             | ``L 1080`` (brs1,brs2)
-            | ``L 1081`` (brs1,brs2) ->  e "some sql token" "some value" brs1
+            | ``L 1081`` (brs1,brs2) ->  
+                let name = TSQL.getTokenName tok
+                e name name brs1
 
 
         graphs

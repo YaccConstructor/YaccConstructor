@@ -16,6 +16,9 @@ let loadGraphFromDOT filePath =
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
+let eofToken = AbstractLexer.Test.Calc.Parser.RNGLR_EOF ("",[||])
+let literalEofToken = AbstractLexer.Test.Literals.Parser.RNGLR_EOF
+
 let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 
 [<TestFixture>]
@@ -69,11 +72,10 @@ type ``Abstract lexer tests`` () =
         (fun (e:AbstractParsing.Common.ParserEdge<_>) -> 
                 match e.Tag with
                 | NUMBER (n,brs) 
-                | PLUS (n,brs)->
-                //n.EndsWith("5") 
-                    Assert.AreEqual(brs.Length,n.Length)
-                    //Assert.IsTrue(brs |> Array.forall (fun x -> x.back_ref |> Option.isSome))
+                | PLUS (n,brs) ->
+                    Assert.AreEqual(brs.Length, n.Length)
                     Assert.IsTrue(brs |> Array.map (fun i -> i.back_ref)|>Array.forall((=) (n + "|")))
+                | RNGLR_EOF _ -> () 
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t) 
                 )
 
@@ -108,16 +110,16 @@ type ``Abstract lexer tests`` () =
     [<Test>]
     member this.``Calc. Simple number.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_0.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Test with position.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_0.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         res.Edges 
           |> Seq.iter
               (fun e -> 
@@ -131,14 +133,15 @@ type ``Abstract lexer tests`` () =
                     let pos' = brs |> Array.map (fun i -> i.pos_cnum)
                     Assert.IsTrue(pos'.[0] = 0)
                     Assert.IsTrue(pos'.[1] = 1)
+                | RNGLR_EOF _ -> ()
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
 
     [<Test>]
     member this.``Test with position. Ident on two edgs`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         res.Edges 
           |> Seq.iter
               (fun e -> 
@@ -154,14 +157,15 @@ type ``Abstract lexer tests`` () =
                     Assert.IsTrue(pos'.[0] = 0)
                     Assert.IsTrue(pos'.[1] = 1)
                     Assert.IsTrue(pos'.[2] = 0)
+                | RNGLR_EOF _ -> ()
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
 
     [<Test>]
     member this.``Test with position. Ident on edgs with branch`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_2.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         res.Edges 
           |> Seq.iter
               (fun e -> 
@@ -177,14 +181,15 @@ type ``Abstract lexer tests`` () =
                     Assert.IsTrue(pos'.[0] = 0)
                     Assert.IsTrue(pos'.[1] = 1)
                     Assert.IsTrue(pos'.[2] = 0)
+                | RNGLR_EOF _ -> ()
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
 
     [<Test>]
     member this.``Test with position. Ident and plus on edgs with branch`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_3.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
         let positons =
             res.Edges 
               |> Seq.collect
@@ -193,6 +198,7 @@ type ``Abstract lexer tests`` () =
                     | NUMBER (n,brs)
                     | PLUS (n,brs)->
                         brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
                     | t -> failwith (sprintf "Unexpected token: %A" t))
             |> Array.ofSeq
         Assert.AreEqual(positons.Length,6)
@@ -206,9 +212,9 @@ type ``Abstract lexer tests`` () =
     [<Test>]
     member this.``Test with position. Ident on edgs with branch in begin.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_4.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         res.Edges 
           |> Seq.iter
               (fun e -> 
@@ -218,14 +224,15 @@ type ``Abstract lexer tests`` () =
                     let pos' = brs |> Array.map (fun i -> i.pos_cnum)
                     Assert.IsTrue(pos'.[0] = 0)
                     Assert.IsTrue(pos'.[1] = 0)
+                | RNGLR_EOF _ -> ()
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
 
     [<Test>]
     member this.``Test with position. Ident on edgs with branch in begin_1.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_5.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         let positons =
             res.Edges 
               |> Seq.collect
@@ -233,6 +240,7 @@ type ``Abstract lexer tests`` () =
                     match e.Tag with
                     | NUMBER (n,brs)->
                         brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
                     | t -> failwith (sprintf "Unexpected token: %A" t))
             |> Array.ofSeq
         Assert.AreEqual(positons.Length,5)
@@ -242,14 +250,14 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[3] = 0)
         Assert.IsTrue(positons.[4] = 0)
 
-    [<Test>]
+    //[<Test>]
     member this.``Positions. Simple binop.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_6.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         printfn "1"
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
         printfn "2"
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
         printfn "3"
         let positons =
             res.Edges 
@@ -259,8 +267,10 @@ type ``Abstract lexer tests`` () =
                     | NUMBER (n,brs)
                     | MULT (n,brs) ->
                         brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
                     | t -> failwith (sprintf "Unexpected token: %A" t))
             |> Array.ofSeq
+        positons |> printfn "pos=%A"
         Assert.AreEqual(positons.Length,3)
         Assert.AreEqual(0, positons.[0])
         Assert.AreEqual(1, positons.[1])
@@ -270,46 +280,46 @@ type ``Abstract lexer tests`` () =
     [<Test>]
     member this.``Calc. Simple sum.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Simple sum. Check back refs.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
         check_brs res.Edges
 
     [<Test>]
     member this.``Calc. Start from PLUS.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_2.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
     [<Test>]
     member this.``Calc. Two-digit numbers sum.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_3.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Two-digit numbers sum. Check back refs.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_3.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
         check_brs res.Edges
 
     [<Test>]
     member this.``Multi-digit with branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_14.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         res.Edges 
           |> Seq.iter
               (fun e -> 
@@ -323,19 +333,20 @@ type ``Abstract lexer tests`` () =
                     Assert.IsTrue(brs'.[0] = "12|")
                     Assert.IsTrue(brs'.[1] = "12|")
                     Assert.IsTrue(brs'.[2] = string n.[2] + "|")
+                | RNGLR_EOF _ -> ()
                 | t -> Assert.Fail(sprintf "Unexpected token: %A" t)) 
                
     [<Test>]
     member this.``Print info on edges.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_15.dot"
         let ig = LexerInnerGraph lexerInputGraph
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         let prSeq = seq { for v in ig.TopologicalSort() do
                               for e in ig.OutEdges v do
                                   yield e.Label
                         }
-        Assert.AreEqual(res.Edges |> Seq.length, 6)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
         //printfn "%A" prSeq
         for x in prSeq do
             printfn "%A" x
@@ -343,49 +354,49 @@ type ``Abstract lexer tests`` () =
     [<Test>]
     member this.``Calc. Branched multy-digit numbers.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_4_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
-
-    [<Test>]
-    member this.``Calc. Branched multy-digit numbers with Binop.`` () =
-        let lexerInputGraph = loadLexerInputGraph "test_4_2.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         Assert.AreEqual(res.Edges |> Seq.length, 3)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
-    member this.``Calc. Branched multy-digit numbers sum 1.`` () =
-        let lexerInputGraph = loadLexerInputGraph "test_4_3.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+    member this.``Calc. Branched multy-digit numbers with Binop.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         Assert.AreEqual(res.Edges |> Seq.length, 4)
         Assert.AreEqual(res.Vertices |> Seq.length, 4)
+
+    [<Test>]
+    member this.``Calc. Branched multy-digit numbers sum 1.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_4_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Branched multy-digit numbers sum 2.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_4_4.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 5)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 6)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Branched binop.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_5.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 4)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Branched binop or negation.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_6.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 4)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Complex branched 1.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_7.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, printG)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken, printG)
 //        let f = GraphvizAlgorithm(res)
 //        let printEdg (e:LexerEdge<_,_>) =
 //            let printBrs brs =
@@ -401,110 +412,111 @@ type ``Abstract lexer tests`` () =
 //        let str = f.Generate()
         printG res @"../../res.dot"
         
-        Assert.AreEqual(res.Edges |> Seq.length, 7)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        Assert.AreEqual(res.Edges |> Seq.length, 8)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Complex branched 2.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_8.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 4)
-        Assert.AreEqual(res.Vertices |> Seq.length, 4)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 5)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
 
     [<Test>]
     member this.``Calc. Complex branched 3.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_9.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 6)
-        Assert.AreEqual(res.Vertices |> Seq.length, 6)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 7)
 
     [<Test>]
     member this.``Calc. Complex 0`` () =
         let lexerInputGraph = loadLexerInputGraph "test_12.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 5)
-        Assert.AreEqual(res.Vertices |> Seq.length, 5)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        printG res "../../out.dot"
+        Assert.AreEqual(res.Edges |> Seq.length, 6, "Wrong edges count")
+        Assert.AreEqual(res.Vertices |> Seq.length, 6, "Wrong verticies count")
 
     [<Test>]
     member this.``Calc. test 100`` () =
         let lexerInputGraph = loadLexerInputGraph "test_100.dot"
         let start = System.DateTime.Now
-        for i in 1..1000 do Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph) |> ignore
+        for i in 1..1000 do Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken) |> ignore
         printfn "Time = %A" ((System.DateTime.Now - start).TotalMilliseconds / 1000.0)
         Assert.True(true)
 
     [<Test>]
     member this.``Calc. Epsilon edge 1.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_10_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Calc. Epsilon edge 2.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_10_2.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Literals. Simple.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_simple.dot"
-        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 1)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph, literalEofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 2)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Literals. Inner branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_inner_branch.dot"
-        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph, literalEofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Literals. Outer branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_outer_branch.dot"
-        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph, literalEofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Literals. Splitted.`` () =
         let lexerInputGraph = loadLexerInputGraph "literals_splitted.dot"
-        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 2)
+        let res = Literals.Lexer._fslex_tables.Tokenize(Literals.Lexer.fslex_actions_token, lexerInputGraph, literalEofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 3)
 
     [<Test>]
     member this.``Test with space and idents on edg.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_space_0.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 2)
-        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 3)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
     [<Test>]
     member this.``Test with space with branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_space_1.dot"
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
         printG res "test_with_space_1"
 
-    [<Test>]
+    //[<Test>]
     member this.``Test with space at the end of previous tokens at the end of branch.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_space_at_end_of_prev_token.dot."
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         printG res "test_with_space_at_end_of_prev_token"
-        Assert.AreEqual(res.Edges |> Seq.length, 3)
-        Assert.AreEqual(res.Vertices |> Seq.length, 3)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 4)
 
     //[<Test>]
     member this.``Calc with braces.`` () =
         let lexerInputGraph = loadLexerInputGraph "calc_1.dot."
-        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
         printG res "calc_1"
-        Assert.AreEqual(res.Edges |> Seq.length, 13)
-        Assert.AreEqual(res.Vertices |> Seq.length, 14)
+        Assert.AreEqual(res.Edges |> Seq.length, 14)
+        Assert.AreEqual(res.Vertices |> Seq.length, 15)
         
 
 
@@ -520,7 +532,8 @@ type ``Abstract lexer tests`` () =
 [<EntryPoint>]
 let f x =
       let t = new ``Abstract lexer tests`` () 
-      t.``Calc with braces.``()
+      t.``Positions. Simple binop.``()
+      //``Test with space at the end of previous tokens at the end of branch.``()
       //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
      // printfn "%A" t
       1

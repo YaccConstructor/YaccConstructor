@@ -50,6 +50,7 @@
     <Compile Include="simpleCalc_with_Nterms_3.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
+    <Compile Include="PrettySimpleCalc.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="Lexer.fsl" />
     <None Include="packages.config" />

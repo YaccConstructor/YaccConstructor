@@ -345,7 +345,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             if enum.MoveNext() then
                 curTokens := processChunk enum.Current
                 curLvl := (!curTokens).CurLvl
-                isEOF := curTokens.Value.Tokens.Length = 0  
+                isEOF := 
+                    curTokens.Value.Tokens.Length = 0 
+                    || (curTokens.Value.Tokens.Length = 1 
+                        && parserSource.TokenToNumber curTokens.Value.Tokens.[0].Token = parserSource.EofIndex ) 
             else
                 isEOF := true
             let oldPushes = !pushes |> Array.map (fun p -> p.ToArray())

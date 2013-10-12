@@ -334,11 +334,21 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
 
-    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) =
+    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) = 
         0
-    member tables.Tokenize(actions,g, ?printG) =
-        inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
-    static member Create(trans,accept) = new UnicodeTables(trans,accept)
+
+    member tables.Tokenize(actions, g, eofToken, ?printG) =
+        let res = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
+        let endV, newEndV = 
+            if res.VertexCount = 0 
+            then 0, 1 
+            else 
+                res.Vertices |> Seq.find (fun v -> res.OutDegree v = 0)
+                , (res.Vertices |> Seq.max) + 1
+        res.AddVerticesAndEdge(new ParserEdge<_>(endV, newEndV, eofToken)) |> ignore
+        res
+
+    static member Create(trans, accept) = new UnicodeTables(trans, accept)
 
 //    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
 //    let DB = new MS_DB("")

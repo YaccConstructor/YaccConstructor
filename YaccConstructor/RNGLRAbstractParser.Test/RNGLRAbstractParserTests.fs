@@ -27,6 +27,7 @@ open QuickGraph
 open NUnit.Framework
 open AbstractParsing.Common
 open RNGLR.ParseSimpleCalc
+open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
 open AbstractLexer.Common
 
@@ -111,9 +112,9 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseSimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseSimpleCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseSimpleCalc.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -199,6 +200,78 @@ type ``RNGLR abstract parser tests`` () =
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Fail "!!!!"
+    
+    [<Test>]
+    member this.``Pretty Simple Calc. Error Handling Temp.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [
+             new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.PrettySimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.PrettySimpleCalc.PLUS 2)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.PrettySimpleCalc.NUM 3)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.PrettySimpleCalc.PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| RNGLR.PrettySimpleCalc.NUM 5)
+             new AbstractParsing.Common.ParserEdge<_>(5,6,lbl <| RNGLR.PrettySimpleCalc.RNGLR_EOF 6)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+            Assert.Fail "!!!!"
+        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+            tree.PrintAst()
+            RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
+            Assert.Pass() 
+
+    [<Test>]
+    member this.``Pretty Simple Calc. Error Is Not Handled Without EOF.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [
+             new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.PrettySimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.PrettySimpleCalc.PLUS 2)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.PrettySimpleCalc.NUM 3)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.PrettySimpleCalc.PLUS 4)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+            Assert.Fail "!!!!"
+        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+            tree.PrintAst()
+            RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
+            Assert.Pass() 
+
+    [<Test>]
+    member this.``Pretty Simple Calc. Error Is Handled With EOF.`` () =
+        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [
+             new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.PrettySimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.PrettySimpleCalc.PLUS 2)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.PrettySimpleCalc.NUM 3)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.PrettySimpleCalc.PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.PrettySimpleCalc.RNGLR_EOF 5)
+             ] |> ignore
+
+        let r = (new Parser<_>()).Parse  RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+        printfn "%A" r
+        match r with
+        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+            Assert.Pass()
+        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+            tree.PrintAst()
+            RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
+            Assert.Fail "!!!!" 
 
     [<Test>]
     member this.``Calc. Branched input 2.`` () =
@@ -248,10 +321,10 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 3)
-             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| NUM 2)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseSimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseSimpleCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseSimpleCalc.PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseSimpleCalc.NUM 2)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -269,7 +342,7 @@ type ``RNGLR abstract parser tests`` () =
     [<Test>]
     member this.``Lexer and parser`` () =
         let lexerInputGraph = loadLexerInputGraph "lexer_and_parser_simple_test.dot"
-        let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+        let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR.ParseCalc.RNGLR_EOF 0)
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         printfn "%A" r
@@ -289,11 +362,11 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| PLUS 0)
-             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| PLUS 3)
-             new AbstractParsing.Common.ParserEdge<_>(2,4,lbl <| NUM 2)
-             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| NUM 4)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseSimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| RNGLR.ParseSimpleCalc.PLUS 0)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.ParseSimpleCalc.PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,4,lbl <| RNGLR.ParseSimpleCalc.NUM 2)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.ParseSimpleCalc.NUM 4)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -313,11 +386,11 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| NUM 1)
-             new AbstractParsing.Common.ParserEdge<_>(0,2,lbl <| NUM 2)
-             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| PLUS 3)
-             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| PLUS 4)
-             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| NUM 5)
+            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.ParseSimpleCalc.NUM 1)
+             new AbstractParsing.Common.ParserEdge<_>(0,2,lbl <| RNGLR.ParseSimpleCalc.NUM 2)
+             new AbstractParsing.Common.ParserEdge<_>(1,3,lbl <| RNGLR.ParseSimpleCalc.PLUS 3)
+             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| RNGLR.ParseSimpleCalc.PLUS 4)
+             new AbstractParsing.Common.ParserEdge<_>(3,4,lbl <| RNGLR.ParseSimpleCalc.NUM 5)
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalc.buildAstAbstract qGraph
@@ -504,7 +577,8 @@ let f x =
     let t = new ``RNGLR abstract parser tests`` () 
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
-    t.``Calc. Branched input error.``()
+    //t.``Calc. Branched input error.``()
+    t.``Pretty Simple Calc. Error Handling Temp.``()
     //t.``Simple calc. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and second arg.``()
     //t.``Simple calc with nterm. Seq input.``()

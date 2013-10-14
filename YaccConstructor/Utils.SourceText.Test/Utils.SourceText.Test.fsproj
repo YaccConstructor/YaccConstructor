@@ -9,9 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Utils.SourceText.Test</RootNamespace>
     <AssemblyName>Utils.SourceText.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Utils.SourceText.Test</Name>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>

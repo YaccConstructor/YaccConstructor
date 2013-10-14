@@ -14,9 +14,6 @@
     <ProjectGuid>{bd2284a5-aa4d-442d-b4fb-e43b2fe7dd2a}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>AbstractLexer.Generator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <Name>AbstractLexer.Generator</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

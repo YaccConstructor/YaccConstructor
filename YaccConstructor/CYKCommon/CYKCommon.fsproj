@@ -9,9 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CYKCommon</RootNamespace>
     <AssemblyName>CYKCommon</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>CYKCommon</Name>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>

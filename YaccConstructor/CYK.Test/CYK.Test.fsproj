@@ -9,9 +9,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CYK.Test</RootNamespace>
     <AssemblyName>CYK.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <Name>CYK.Test</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

@@ -9,9 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CYKGenerator.Tests</RootNamespace>
     <AssemblyName>CYKGenerator.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>CYKGenerator.Test</Name>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>

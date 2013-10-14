@@ -9,9 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Common</RootNamespace>
     <AssemblyName>AbstractLexer.Common</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>AbstractLexer.Common</Name>
-    <TargetFrameworkProfile />
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

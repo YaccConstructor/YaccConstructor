@@ -9,9 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions.Test</RootNamespace>
     <AssemblyName>Conversions.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <Name>Conversions.Test</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

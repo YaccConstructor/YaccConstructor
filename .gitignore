@@ -66,6 +66,7 @@ Examples/RNGLR/MSSql/Lexer.fs
 Examples/RNGLR/PLSql/*.dot
 NuGet/*.nupkg
 NuGet/FsYard/*
+NuGet/FsYard
 Examples/RNGLR/PLSql/*.pdf
 Examples/RNGLR/PLSql/FsYard.log
 Examples/RNGLR/PLSql/MsParser.fs
@@ -82,3 +83,4 @@ Examples/Calc/FsYard/*
 Examples/Calc/packages/*
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/Calc/FsYARD/*
+NuGet/FsYardPacket/*

@@ -76,7 +76,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
-  <Import Project="FsYard\FsYard.targets" />
+  <Import Project="FsYard\FsYard.targets"/>
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>Parser.fs</OutFile>
@@ -85,6 +85,7 @@
     <Module>Calc.Parser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <FsYard Include="calc.yrd" />
     <FsLex Include="Lexer.fsl">
@@ -101,6 +102,9 @@
     <Content Include="FsYARD\YardFrontend.XML" />
     <None Include="FsYARD\YardFrontend.pdb" />
     <None Include="FsYARD\YardFrontend.dll" />
+    <Content Include="FsYARD\RNGLRCommon.xml" />
+    <None Include="FsYARD\RNGLRCommon.pdb" />
+    <None Include="FsYARD\RNGLRCommon.dll" />
     <Content Include="FsYARD\RNGLR.XML" />
     <None Include="FsYARD\RNGLR.pdb" />
     <None Include="FsYARD\RNGLR.dll" />
@@ -112,7 +116,9 @@
     <None Include="FsYARD\FsYacc.exe" />
     <Content Include="FsYARD\FSharpx.Text.StructuredFormat.xml" />
     <None Include="FsYARD\FSharpx.Text.StructuredFormat.pdb" />
-    <None Include="FsYARD\FSharpx.Text.StructuredFormat.dll" />
+    <Content Include="FsYARD\FSharpx.Core.xml" />
+    <None Include="FsYARD\FSharpx.Core.pdb" />
+    <None Include="FsYARD\FSharpx.Core.dll" />
     <Content Include="FsYARD\Conversions.XML" />
     <None Include="FsYARD\Conversions.pdb" />
     <None Include="FsYARD\Conversions.dll" />
@@ -122,12 +128,16 @@
     <Content Include="FsYARD\Common.XML" />
     <None Include="FsYARD\Common.pdb" />
     <None Include="FsYARD\Common.dll" />
+    <Content Include="FsYARD\RNGLRParser.XML" />
+    <None Include="FsYARD\RNGLRParser.pdb" />
+    <None Include="FsYARD\RNGLRParser.dll" />
+    <None Include="FsYARD\FSharpx.Text.StructuredFormat.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.5026.0\lib\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.5033.0\lib\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Text.StructuredFormat">
@@ -136,18 +146,17 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.FsYARD.0.1.5026.0\lib\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.5033.0\lib\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.5026.0\lib\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.5033.0\lib\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">

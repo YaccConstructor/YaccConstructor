@@ -77,13 +77,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Calc", "Calc\Calc.fsproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin", "Plugin", "{A20535F2-9BB0-42B6-8101-300091F179F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin", "YC.ReSharper.AbstractAnalysis\YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj", "{BC086B93-FA4B-41BD-9E95-3ED442592A01}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin.Tests", "YC.ReSharper.AbstractAnalysis\YC.ReSharper.AbstractAnalysis.Plugin.Tests\YC.ReSharper.AbstractAnalysis.Plugin.Tests.csproj", "{F67081A2-F11B-4203-B08C-FEFCB2EA924F}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Core", "YC.ReSharper.AbstractAnalysis\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj", "{5FBF733C-9F3D-4831-89F2-68A500A2916C}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText", "Utils.SourceText\Utils.SourceText.fsproj", "{F296356B-00C3-465C-9C97-7CFA279F5574}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin", "YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj", "{BC086B93-FA4B-41BD-9E95-3ED442592A01}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Core", "YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj", "{5FBF733C-9F3D-4831-89F2-68A500A2916C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin.Tests", "YC.ReSharper.AbstractAnalysis.Plugin.Tests\YC.ReSharper.AbstractAnalysis.Plugin.Tests.csproj", "{F67081A2-F11B-4203-B08C-FEFCB2EA924F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -249,30 +249,30 @@ Global
 		{016C2AFB-D8AA-4DD4-94F9-83E0E6C93F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{016C2AFB-D8AA-4DD4-94F9-83E0E6C93F72}.Release|Any CPU.Build.0 = Release|Any CPU
 		{016C2AFB-D8AA-4DD4-94F9-83E0E6C93F72}.Release|x86.ActiveCfg = Release|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|x86.ActiveCfg = Release|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|x86.ActiveCfg = Release|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|x86.ActiveCfg = Release|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F296356B-00C3-465C-9C97-7CFA279F5574}.Release|x86.ActiveCfg = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|x86.ActiveCfg = Release|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FBF733C-9F3D-4831-89F2-68A500A2916C}.Release|x86.ActiveCfg = Release|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -307,7 +307,7 @@ Global
 		{5C8B9089-F612-4761-B712-09ECB5317C76} = {241A2C93-1EEE-40C6-B729-0DB38F6D43F4}
 		{016C2AFB-D8AA-4DD4-94F9-83E0E6C93F72} = {C4B45CF5-EA74-41C6-8EFE-67C57201DEB6}
 		{BC086B93-FA4B-41BD-9E95-3ED442592A01} = {A20535F2-9BB0-42B6-8101-300091F179F2}
-		{F67081A2-F11B-4203-B08C-FEFCB2EA924F} = {A20535F2-9BB0-42B6-8101-300091F179F2}
 		{5FBF733C-9F3D-4831-89F2-68A500A2916C} = {A20535F2-9BB0-42B6-8101-300091F179F2}
+		{F67081A2-F11B-4203-B08C-FEFCB2EA924F} = {A20535F2-9BB0-42B6-8101-300091F179F2}
 	EndGlobalSection
 EndGlobal

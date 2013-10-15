@@ -78,31 +78,31 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Name>AbstractLexer.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
+    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
       <Name>AbstractLexer.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
+    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
       <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
       <Name>AbstractParsing.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Calc\Calc.fsproj">
+    <ProjectReference Include="..\Calc\Calc.fsproj">
       <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>
       <Name>Calc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
       <Name>RNGLRAbstractParser</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\RNGLRCommon\RNGLRCommon.fsproj">
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Name>RNGLRCommon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\RNGLRParser\RNGLRParser.fsproj">
+    <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Name>RNGLRParser</Name>
     </ProjectReference>

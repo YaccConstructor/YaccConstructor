@@ -33,6 +33,7 @@ type Approximator(file:ICSharpFile) =
                       | _ -> 
                         match kvp.Key.Parent with 
                         | :? IAssignmentExpression as ae -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
+                        | x -> failwithf "Unexpected parent type: %A" x
                       //| :? IMultipleLocalVariableDeclaration as vd -> vd.Declarators.[0] )
                       )
                     |> Array.ofSeq    
@@ -46,7 +47,10 @@ type Approximator(file:ICSharpFile) =
                 new LexerEdge<_,_>(start,_end,Some(l.Literal.GetText().Trim[|'"'|],l))
                 |> edges.Add
             | :? IReferenceExpression as re -> processVar start _end re
-            | _ -> ()
+            | :? IConditionalTernaryExpression as tern -> 
+                go start _end tern.ElseResult
+                go start _end tern.ThenResult
+            | x -> failwithf "Unexpected node type: %A" x
 
         go 0 (incr count; !count) args.[0].Value
 

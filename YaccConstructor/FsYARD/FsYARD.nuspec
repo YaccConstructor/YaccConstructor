@@ -2,24 +2,17 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>$version$</version>
-    <title>$title$</title>
+    <version>0.1.5033.0</version>
+    <title>YC.FsYARD</title>
     <authors>Semyon Grigorev, Dmitry Avdyukhin, Iakov Kirilenko, Ilia Chemodanov, Konstantin Ulitin, Andrey Ivanov</authors>
-    <owners>$author$</owners>
+    <owners>gsv</owners>
     <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
     <projectUrl>https://code.google.com/p/recursive-ascent/wiki/FsYard</projectUrl>
-    <iconUrl>https://docs.google.com/file/d/0B2QL-2bhLX91OHFYZVVfZGVUeFk/edit?usp=sharing</iconUrl>
+    <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
-    <releaseNotes>First version. Basic options are supported.</releaseNotes>
+    <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
+    <releaseNotes>Package structure was reworked.</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>
-<files>
-    <file src="README" target="README" /> 
-    <file src="..\..\LICENSE" target="LICENSE" /> 
-    <file src="..\..\NOTICE" target="NOTICE" />
-    <file src="FsYard.targets" target="lib\net45\FsYard.targets" />
-    <file src="..\Tools\Release\bin\FsYacc.exe" target="lib\net45\FsYacc.exe" />
-</files>
 </package>

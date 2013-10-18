@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>GLLGenerator</RootNamespace>
     <AssemblyName>GLLGenerator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>GLLGenerator</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

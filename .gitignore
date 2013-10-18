@@ -84,3 +84,6 @@ Examples/Calc/packages/*
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/Calc/FsYARD/*
 NuGet/FsYardPacket/*
+YaccConstructor/FParsecGenerator.Test/log.txt
+YaccConstructor/FParsecGenerator.Test/log1.txt
+YaccConstructor/FParsecGenerator.Test/out

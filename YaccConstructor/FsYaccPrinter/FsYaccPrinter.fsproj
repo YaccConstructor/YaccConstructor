@@ -9,9 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FsYaccPrinter</RootNamespace>
     <AssemblyName>FsYaccPrinter</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <Name>FsYaccPrinter</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

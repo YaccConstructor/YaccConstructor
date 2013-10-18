@@ -8,6 +8,7 @@
     <owners>$author$</owners>
     <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
     <projectUrl>https://code.google.com/p/recursive-ascent/wiki/Source_Text_Utils</projectUrl>
+    <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>New license "Apache License, Version 2.0"</releaseNotes>

@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Common</RootNamespace>
     <AssemblyName>Common</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Common</Name>
     <SccProjectName>
     </SccProjectName>
@@ -19,7 +18,6 @@
     </SccAuxPath>
     <SccLocalPath>
     </SccLocalPath>
-    <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>

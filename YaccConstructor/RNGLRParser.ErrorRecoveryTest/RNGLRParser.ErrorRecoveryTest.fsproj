@@ -9,9 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRParserErrorRecoveryTest</RootNamespace>
     <AssemblyName>RNGLRParserErrorRecoveryTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>RNGLRParser.ErrorRecoveryTest</Name>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>

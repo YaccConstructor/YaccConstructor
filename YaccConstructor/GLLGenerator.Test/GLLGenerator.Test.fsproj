@@ -9,7 +9,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>GLLGenerator.Test</RootNamespace>
     <AssemblyName>GLLGenerator.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>GLLGenerator.Test</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Core</RootNamespace>
     <AssemblyName>AbstractLexer.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>AbstractLexer.Core</Name>
     <TargetFrameworkProfile />
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>

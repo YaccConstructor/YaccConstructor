@@ -274,7 +274,7 @@ type ``Abstract lexer tests`` () =
         Assert.IsTrue(positons.[3] = 0)
         Assert.IsTrue(positons.[4] = 0)
 
-    //[<Test>]
+    [<Test>]
     member this.``Positions. Simple binop.`` () =
         let lexerInputGraph = loadLexerInputGraph "test_with_pos_6.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
@@ -300,6 +300,116 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(1, positons.[1])
         Assert.AreEqual(2, positons.[2])
 
+    [<Test>]
+    member this.``Test with position. Two tokens on the one edge.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_7.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 4)
+        Assert.AreEqual(res.Vertices |> Seq.length, 5)
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | PLUS (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,5)
+        Assert.IsTrue(positons.[0] = 0)
+        Assert.IsTrue(positons.[1] = 1)
+        Assert.IsTrue(positons.[2] = 0)
+        Assert.IsTrue(positons.[3] = 1)
+        Assert.IsTrue(positons.[4] = 2)
+
+    [<Test>]
+    member this.``Test with position. With branch and several tokens on the one edge``() =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_8.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 7)
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | PLUS (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,8)
+        Assert.IsTrue(positons.[0] = 0)
+        Assert.IsTrue(positons.[1] = 1)
+        Assert.IsTrue(positons.[2] = 0)
+        Assert.IsTrue(positons.[3] = 0)
+        Assert.IsTrue(positons.[4] = 1)
+        Assert.IsTrue(positons.[5] = 1)
+        Assert.IsTrue(positons.[6] = 0)
+        Assert.IsTrue(positons.[7] = 2)
+
+    [<Test>]
+    member this.``Test with position. Several tokens on the one edge``() =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_9.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 6)
+        Assert.AreEqual(res.Vertices |> Seq.length, 7)
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | PLUS (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | MULT (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,6)
+        Assert.IsTrue(positons.[0] = 0)
+        Assert.IsTrue(positons.[1] = 1)
+        Assert.IsTrue(positons.[2] = 0)
+        Assert.IsTrue(positons.[3] = 1)
+        Assert.IsTrue(positons.[4] = 2)
+        Assert.IsTrue(positons.[5] = 0)
+
+    //[<Test>]
+    member this.``Test with position. With branch and several tokens on the one edge_1``() =
+        let lexerInputGraph = loadLexerInputGraph "test_with_pos_10.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        Assert.AreEqual(res.Edges |> Seq.length, 7)
+        Assert.AreEqual(res.Vertices |> Seq.length, 7)
+        let positons =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | PLUS (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | MINUS (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        Assert.AreEqual(positons.Length,8)
+        Assert.IsTrue(positons.[0] = 0)
+        Assert.IsTrue(positons.[1] = 1)
+        Assert.IsTrue(positons.[2] = 0)
+        Assert.IsTrue(positons.[3] = 0)
+        Assert.IsTrue(positons.[4] = 1)
+        Assert.IsTrue(positons.[5] = 1)
+        Assert.IsTrue(positons.[6] = 0)
+        Assert.IsTrue(positons.[7] = 2)
 
     [<Test>]
     member this.``Calc. Simple sum.`` () =
@@ -578,13 +688,6 @@ type ``Abstract lexer tests`` () =
     member this.``Eps_closure_3.`` () =
         let lexerInputGraph = loadLexerInputGraph "eps_closure_3.dot"
         let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
-        //printG res "eps_closure_3"
-        //let eps_res = EpsClosure.NfaToDfa res
-        //printGEps eps_res "eps_res_closure_3"
-        //Assert.AreEqual(res.Edges |> Seq.length, 2)
-        //Assert.AreEqual(res.Vertices |> Seq.length, 2)
-        //Assert.AreEqual(eps_res.Edges |> Seq.length, 1)
-        //Assert.AreEqual(eps_res.Vertices |> Seq.length, 2)
         printG res "eps_res_closure_3"
         Assert.AreEqual(res.Edges |> Seq.length, 2)
         Assert.AreEqual(res.Vertices |> Seq.length, 3)
@@ -606,19 +709,11 @@ type ``Abstract lexer tests`` () =
         Assert.AreEqual(res.Vertices |> Seq.length, 2)
         Assert.AreEqual(eofToken, (res.Edges |> Seq.nth 0).Tag)
 
-//[<EntryPoint>]
-//let f x =
-//    
-//    let t = new ``Abstract lexer tests`` () 
-//    t.``Literals. Simple.``()
-//    let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-//    printfn "%A" t
-//    1
 
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Abstract lexer tests`` () 
-//      t.``Positions. Simple binop.``()
+//      t.``Test with position. With branch and several tokens on the one edge_1``()
 //      //``Test with space at the end of previous tokens at the end of branch.``()
 //      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
 //     // printfn "%A" t

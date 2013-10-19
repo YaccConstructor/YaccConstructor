@@ -103,3 +103,4 @@ YaccConstructor/YardFrontend/Parser.fs
 Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
 YaccConstructor/RNGLRAbstractParser.Test/*.yrd.fs
 YaccConstructor/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
+*.userprefs

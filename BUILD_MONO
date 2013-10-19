@@ -2,7 +2,7 @@ Building YaccConstructor with Mono
 ----------------------------------
 
 Prerequisites:
-    Mono >= 3.2.3, F# >= 3.0
+    Mono >= 3.2.3, F# >= 3.0, F# PowerPack >= 3.0
 
 Build commands:
     cd YaccConstructor

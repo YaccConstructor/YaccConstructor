@@ -93,12 +93,17 @@ let justParse (path:string) =
         clearAST = false
         filterEpsilons = true
     }
-    
+
     let res = 
-        //buildAstAbstract 
-        //  allTokens
-       //     (allTokens |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c; r))
-       buildAst allTokens
+        // Parse error on Token RNGLR_EOF
+//        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> box t <> null) 
+//                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
+        // Input was fully processed but it's not complete correct string
+//        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> match t with
+//                                                               | Token.RNGLR_EOF _ -> false
+//                                                               | _ -> true) 
+//                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
+        buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 
@@ -161,7 +166,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
+    let inPath = ref @"test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =

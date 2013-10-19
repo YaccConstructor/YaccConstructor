@@ -95,6 +95,8 @@ Examples/AbstractAnalysis/SQL/LogsTrees/*
 YaccConstructor/packages/*
 Examples/AbstractAnalysis/SQL/*.dot
 Examples/AbstractAnalysis/SQL/*.pdf
+YaccConstructor/YardFrontend/out
+YaccConstructor/out
 Examples/AbstractAnalysis/SQL/tests/results/*
 Examples/AbstractAnalysis/AbstractAnalysisTests/*.ast.dot*
 Examples/AbstractAnalysis/SQL/result/*
@@ -108,3 +110,6 @@ YaccConstructor/FsYaccFrontend/Parser.fs
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/packages/*
 NuGet/FsYardPacket/*
+YaccConstructor/FParsecGenerator.Test/log.txt
+YaccConstructor/FParsecGenerator.Test/log1.txt
+YaccConstructor/FParsecGenerator.Test/out

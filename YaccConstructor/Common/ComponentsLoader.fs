@@ -25,7 +25,7 @@ let private loadByType (desiredType:Type) =
         |> Seq.choose (fun x -> try Reflection.Assembly.Load x |> Some with _ -> None)
    
     assemblies
-    |> Seq.collect (fun assembly -> assembly.GetTypes())
+    |> Seq.collect (fun assembly -> try assembly.GetTypes() with _ -> printfn "Assambly %s could not de loaded." assembly.FullName; [||] )
     |> Seq.filter (fun _type -> desiredType.IsAssignableFrom(_type))
 
 let private isRealClass (cls:Type) =

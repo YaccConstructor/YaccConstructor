@@ -124,7 +124,7 @@ type ``YardFrontend lexer tests`` () =
 
 [<TestFixture>]
 type ``Yard frontend preprocessor tests`` () =
-    let basePath = "../../../../Tests/YardFrontend/Preprocessor"
+    let basePath = "../../../Tests/YardFrontend/Preprocessor"
     let cp file = System.IO.Path.Combine(basePath,file)
     [<Test>]
     member test.noUserDefs () =
@@ -365,7 +365,7 @@ type ``YardFrontend syntax tests`` () =
 
 [<TestFixture>]
 type ``YardFrontend options tests`` () =  
-    let basePath = "../../../../Tests/YardFrontend/Options"
+    let basePath = "../../../Tests/YardFrontend/Options"
     let cp file = System.IO.Path.Combine(basePath,file)  
 
     (*[<Test>]
@@ -442,7 +442,7 @@ type ``YardFrontend Complete tests`` () =
         
 [<TestFixture>]
 type ``Yardfrontend label tests`` () =
-    let basePath = "../../../../Tests/YardFrontend/Label"
+    let basePath = "../../../Tests/YardFrontend/Label"
     let cp file = System.IO.Path.Combine(basePath,file)
 
     [<Test>]
@@ -510,7 +510,7 @@ type ``Yardfrontend label tests`` () =
 
 [<TestFixture>]
 type ``Yardfrontend token tests`` () =
-    let basePath = "../../../../Tests/YardFrontend/Tokens"
+    let basePath = "../../../Tests/YardFrontend/Tokens"
     let cp file = System.IO.Path.Combine(basePath, file)
 
     [<Test>]

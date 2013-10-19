@@ -21,7 +21,7 @@ let generated = "Generated"
 type ``FParsec generator tests`` () =
     let iGenerator = new Yard.Generators.FParsecGenerator.FParsecGenerator()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
-    let basePath = "../../../../Tests/FParsec"
+    let basePath = "../../../Tests/FParsec"
 
     let fixIl ilTree =
         let ilTree = ref ilTree

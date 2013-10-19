@@ -13,7 +13,7 @@ let loadGraphFromDOT filePath =
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
-let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    

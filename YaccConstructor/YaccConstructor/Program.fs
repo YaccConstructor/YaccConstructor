@@ -219,7 +219,7 @@ let () =
         |> log e
     | EmptyArg argName as e ->
         sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
-YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../../Tests/Conversions/buildast_1.yrd \n
+YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
 List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
         |> log e
     | FEError error as e ->

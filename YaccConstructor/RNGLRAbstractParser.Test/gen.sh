@@ -17,3 +17,6 @@ mono ../YaccConstructor/bin/Release/YaccConstructor.exe -i simpleCalc_with_Nterm
 
 mono ../YaccConstructor/bin/Release/YaccConstructor.exe -i simpleCalc_with_Nterms_4.yrd -c ExpandEbnf -c ExpandMeta \
         -g "RNGLRGenerator -pos int -token int -module RNGLR.SimpleCalcWithNTerms_4 -translate true -table LR -o simpleCalc_with_Nterms_4.yrd.fs" >> log.txt
+
+mono ../YaccConstructor/bin/Release/YaccConstructor.exe -i PrettySimpleCalc.yrd -c ExpandEbnf -c ExpandMeta \
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.PrettySimpleCalc -translate false -table LR -o PrettySimpleCalc.yrd.fs" >> log.txt

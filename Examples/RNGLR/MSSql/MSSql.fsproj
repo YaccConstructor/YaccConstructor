@@ -77,7 +77,7 @@
     </FsYard>
     <FsYard Include="datatype.yrd" />
     <FsYard Include="stmnt.yrd" />
-    <FsYard Include="expr.yrd" />
+    <FsYard Include="expr.yrd"/>
     <FsYard Include="execute_stmnt.yrd" />
     <FsYard Include="..\common_grammars\set_stmnt.yrd">
       <Link>set_stmnt.yrd</Link>

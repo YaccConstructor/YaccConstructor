@@ -95,15 +95,9 @@ let justParse (path:string) =
     }
 
     let res = 
-        // Parse error on Token RNGLR_EOF
-//        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> box t <> null) 
-//                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
-        // Input was fully processed but it's not complete correct string
-//        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> match t with
-//                                                               | Token.RNGLR_EOF _ -> false
-//                                                               | _ -> true) 
-//                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
-        buildAst allTokens
+        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> box t <> null) 
+                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
+//        buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{62D91EA2-A776-44C2-8891-2CA45A01A365}"
@@ -108,6 +108,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{18DDFCA9-B6FF-40B5-8EBE-8CC4C03A2A00}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Core.Test", "AbstractLexer.Core.Test\AbstractLexer.Core.Test.fsproj", "{4ECDCE13-B8EB-4B36-84D1-7882F030A80C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BC0B3B1C-3AE6-4978-BE99-80784A78E6C4}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

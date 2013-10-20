@@ -16,6 +16,6 @@ You can find comprehensive documentation for FParsec at http://www.quanttec.com/
 This package uses a configuration of FParsec that supports very large input streams and is optimized for maximum performance in longer running processes. See www.quanttec.com/fparsec/download-and-installation.html for more information.</description>
     <releaseNotes>See http://www.quanttec.com/fparsec/about/changelog.html</releaseNotes>
     <copyright>Copyright © 2013 Stephan Tolksdorf</copyright>
-    <tags>parser, combinator, f#, fsharp, c#, csharp</tags>
+    <tags>parser combinator f# fsharp c# csharp</tags>
   </metadata>
 </package>

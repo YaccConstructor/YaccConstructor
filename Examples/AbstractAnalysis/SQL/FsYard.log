@@ -1516,4 +1516,4 @@ rules:
 1513: yard_opt_1 = - 
 1514: dec_num = yard_opt_1 DEC_NUMBER 
 States count: 2090
-Generation time: 00:00:22.8623076
+Generation time: 00:00:22.2857382

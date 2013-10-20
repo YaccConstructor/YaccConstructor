@@ -98,6 +98,10 @@
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="fsyacc">
+      <HintPath>..\..\..\YaccConstructor\Tools\Release\bin\FsYacc.exe</HintPath>
+    </Reference>
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
@@ -128,7 +132,6 @@
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
     <Reference Include="RNGLR">
       <HintPath>..\..\yc\RNGLR.dll</HintPath>

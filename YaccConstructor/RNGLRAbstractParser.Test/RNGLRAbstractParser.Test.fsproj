@@ -51,8 +51,8 @@
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="PrettySimpleCalc.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
-    <None Include="packages.config" />
     <None Include="Lexer.fsl" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Antlr3.Runtime">

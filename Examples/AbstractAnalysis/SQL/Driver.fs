@@ -85,7 +85,7 @@ let justParse (path:string) =
         let g = 
             if !parserOnly
             then loadDotToQG path
-            else Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing)
+            else Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing, RNGLR_EOF(SourceText.ofTuple("",(Pair(),Pair()))))
         if !printLexerOutput
         then Helpers.printTokenizedGraph g printTag "..\..\out.lex.dot" 
         (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse buildAstAbstract g
@@ -152,7 +152,7 @@ do
     let parseDir = ref false
     let commandLineSpecs =
         [
-         "-p", ArgType.Unit (fun _ -> parserOnly := true), "Scip lexing. Input graph is ready for parsing."
+         "-p", ArgType.Unit (fun _ -> parserOnly := true), "Skip lexing. Input graph is ready for parsing."
          "-ol",ArgType.Unit (fun _ -> printLexerOutput := true), "Print tokenization result."
          "-f", ArgType.String (fun s -> inPath := path s), "Input file."
          "-d", ArgType.String (fun s -> parseDir := true; inPath := s), "Input dir. Use for parse all files in specified directory."

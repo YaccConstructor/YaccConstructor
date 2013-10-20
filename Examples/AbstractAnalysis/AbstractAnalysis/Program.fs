@@ -31,7 +31,7 @@ let printTag tag printBrs =
 
 let go file =
     let lexerInputGraph = loadLexerInputGraph file
-    let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+    let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR_EOF("",[||]))
     printTokenizedGraph res printTag file
     let r = (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse  buildAstAbstract res
     printfn "%A" r

@@ -372,13 +372,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let lastErr = ref -1
         let NeadSh = ref true
         while not !isEnd && not !wasError do
-        
+            print "dot\stack_1_%A"
             if usedStates.Count = 0 && reductions.Count = 0
             then
                 let errInfo = !curTokens
                 errorList <- errInfo :: errorList
                 wasError <- ref true
             else
+                print "dot\stack_2_%A"
                 if !isEOF
                 then
                     try 
@@ -392,9 +393,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         pushesMap.Remove(!curLvl) |> ignore
                         makeReductions ()
                         attachEdges()
+                        print "dot\stack_5_%A"
                     with _ -> () 
                     isEnd := true
                 else
+                    print "dot\stack_3_%A"
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl

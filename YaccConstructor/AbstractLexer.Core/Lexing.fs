@@ -74,6 +74,7 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let mutable eof = false
         let mutable startPos = Position.Empty
         let mutable endPos = Position.Empty
+        let mutable curPos = Position.Empty: Position<'br>
         let count_pos_line = ref 0
         let g = new LexerInnerGraph<'br>(inGraph)
         let sorted = g.TopologicalSort() |> Array.ofSeq
@@ -81,9 +82,8 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, new ResizeArray<_>(), new ResizeArray<_>())))
         do states.[g.StartVertex] <- ResizeArray.singleton startState
         let edgesSeq = seq{ for v in sorted do
-                                yield g.OutEdges v |> Array.ofSeq
-                                  
-                            }
+                                yield g.OutEdges v |> Array.ofSeq    
+                          }
                         |> Seq.filter (fun x -> x.Length > 0)
 
         let discardInput () =
@@ -116,6 +116,10 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         member lexbuf.Lexeme = Array.sub buffer bufferScanStart lexemeLength
         member lexbuf.LexemeChar(n) = buffer.[n+bufferScanStart]
         
+        member lexbuf.CurrentPos  
+           with get() = curPos
+           and set(b) = curPos <- b
+
         member lexbuf.BufferLocalStore = (context :> IDictionary<_,_>)
         member lexbuf.LexemeLength with get() : int = lexemeLength and set v = lexemeLength <- v
         member x.CountPosLine = count_pos_line
@@ -234,13 +238,13 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             let ch = edg.Label.Value
             let newPos (p:Option<Position<_>>) =
                 match p with
-                | Some x when x.back_ref = edg.BackRef.Value->
+                | Some x when x.back_ref = edg.BackRef.Value ->
                     {
-                            pos_fname = ""
-                            pos_lnum = 0
-                            pos_bol = 0
-                            pos_cnum = x.pos_cnum + 1
-                            back_ref = edg.BackRef.Value
+                        pos_fname = ""
+                        pos_lnum = 0
+                        pos_bol = 0
+                        pos_cnum = x.pos_cnum + 1
+                        back_ref = edg.BackRef.Value
                     }
 
                 | _ ->
@@ -267,10 +271,13 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
                     )
             else 
-                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source), ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
+                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source)
+                , ResizeArray.singleton ch
+                , ResizeArray.singleton (newPos (Some lexbuf.CurrentPos)))
                 |> ResizeArray.singleton
 
         let processToken onAccept (p: StateInfo<_,_>) =
+            let s = (new string(p.AccumulatedString |> Array.ofSeq))
             actions onAccept (new string(p.AccumulatedString |> Array.ofSeq)) (p.Positions |> Array.ofSeq |> Array.rev)                          
 
         let processEdg (edg:LexerEdge<_,_>) stt reduced =
@@ -281,29 +288,21 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     let reduce, onAccept, news = scanUntilSentinel x stt
                     if reduce
                     then
-                        let f1 = ref 0
-                        let f2 = ref false
                         for i in stt.Info do
-                            match processToken onAccept i with
-                            | Some x -> 
-                                if not !reduced then acc.Add(new ParserEdge<_>(i.StartV,edg.Source, x))
-                                //f1 := true 
-                            | None -> 
-                                f2 := true
-                                f1 := i.StartV
-                            reduced := true
-                        let newStt = 
-                            if !f2 
-                            then 
-                                new State<_,_>(0,-1,new ResizeArray<_>(),Some (!f1))
-                            else new State<_,_>(0,-1,new ResizeArray<_>())
+                            if not !reduced then acc.Add(new ParserEdge<_>(i.StartV, edg.Source, processToken onAccept i))
+                            lexbuf.CurrentPos <- i.Positions.[0]
+                        reduced := true
+                        let newStt = new State<_,_>(0,-1,new ResizeArray<_>())
                         go newStt
                     else 
                         let acc = mkNewString edg stt
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
-                go stt      
-            | None -> add edg stt
+                go stt
+            | None -> 
+                      let acc = mkNewString edg stt
+                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
+                      add edg newStt
             acc 
 
         let res_edg_seq = 
@@ -313,14 +312,13 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let reduced = ref false
                         for edg in edgs do
                             yield! processEdg edg stt reduced
-                }
+                            }
+                 
         seq{
             yield! res_edg_seq
             for x in lexbuf.States.[lexbuf.LastVId] do
-                for i in x.Info do                        
-                    match processToken (int accept.[x.StateID]) i with
-                    | Some x -> yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, x))
-                    | None -> ()
+                for i in x.Info do                                            
+                    yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, processToken (int accept.[x.StateID]) i))                    
         }
         
 
@@ -333,7 +331,10 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let r = newEdgs
         res.AddVerticesAndEdgeRange r
         |> ignore
-        res
+        //EpsClosure.NfaToDfa res
+        //|> ignore
+        let eps_res = EpsClosure.NfaToDfa res
+        eps_res
                           
     // Each row for the Unicode table has format 
     //      128 entries for ASCII characters
@@ -341,11 +342,21 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
 
-    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) =
+    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) = 
         0
-    member tables.Tokenize(actions,g, ?printG) =
-        inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
-    static member Create(trans,accept) = new UnicodeTables(trans,accept)
+
+    member tables.Tokenize(actions, g, eofToken, ?printG) =
+        let res = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
+        let endV, newEndV = 
+            if res.VertexCount = 0 
+            then 0, 1 
+            else 
+                res.Vertices |> Seq.find (fun v -> res.OutDegree v = 0)
+                , (res.Vertices |> Seq.max) + 1
+        res.AddVerticesAndEdge(new ParserEdge<_>(endV, newEndV, eofToken)) |> ignore
+        res
+
+    static member Create(trans, accept) = new UnicodeTables(trans, accept)
 
 //    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
 //    let DB = new MS_DB("")

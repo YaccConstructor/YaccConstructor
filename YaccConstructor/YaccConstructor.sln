@@ -105,8 +105,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractParsing.Common", "A
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Helper", "Helper\Helper.fsproj", "{FC9A166C-780D-4D15-B366-CA06277C803D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{18DDFCA9-B6FF-40B5-8EBE-8CC4C03A2A00}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Core.Test", "AbstractLexer.Core.Test\AbstractLexer.Core.Test.fsproj", "{4ECDCE13-B8EB-4B36-84D1-7882F030A80C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BC0B3B1C-3AE6-4978-BE99-80784A78E6C4}"

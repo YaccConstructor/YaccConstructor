@@ -74,6 +74,7 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let mutable eof = false
         let mutable startPos = Position.Empty
         let mutable endPos = Position.Empty
+        let mutable curPos = Position.Empty: Position<'br>
         let count_pos_line = ref 0
         let g = new LexerInnerGraph<'br>(inGraph)
         let sorted = g.TopologicalSort() |> Array.ofSeq
@@ -81,9 +82,8 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, new ResizeArray<_>(), new ResizeArray<_>())))
         do states.[g.StartVertex] <- ResizeArray.singleton startState
         let edgesSeq = seq{ for v in sorted do
-                                yield g.OutEdges v |> Array.ofSeq
-                                  
-                            }
+                                yield g.OutEdges v |> Array.ofSeq    
+                          }
                         |> Seq.filter (fun x -> x.Length > 0)
 
         let discardInput () =
@@ -116,6 +116,10 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         member lexbuf.Lexeme = Array.sub buffer bufferScanStart lexemeLength
         member lexbuf.LexemeChar(n) = buffer.[n+bufferScanStart]
         
+        member lexbuf.CurrentPos  
+           with get() = curPos
+           and set(b) = curPos <- b
+
         member lexbuf.BufferLocalStore = (context :> IDictionary<_,_>)
         member lexbuf.LexemeLength with get() : int = lexemeLength and set v = lexemeLength <- v
         member x.CountPosLine = count_pos_line
@@ -234,13 +238,13 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
             let ch = edg.Label.Value
             let newPos (p:Option<Position<_>>) =
                 match p with
-                | Some x when x.back_ref = edg.BackRef.Value->
+                | Some x when x.back_ref = edg.BackRef.Value ->
                     {
-                            pos_fname = ""
-                            pos_lnum = 0
-                            pos_bol = 0
-                            pos_cnum = x.pos_cnum + 1
-                            back_ref = edg.BackRef.Value
+                        pos_fname = ""
+                        pos_lnum = 0
+                        pos_bol = 0
+                        pos_cnum = x.pos_cnum + 1
+                        back_ref = edg.BackRef.Value
                     }
 
                 | _ ->
@@ -267,7 +271,9 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                             , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
                     )
             else 
-                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source), ResizeArray.singleton ch, ResizeArray.singleton (newPos None))
+                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source)
+                , ResizeArray.singleton ch
+                , ResizeArray.singleton (newPos (Some lexbuf.CurrentPos)))
                 |> ResizeArray.singleton
 
         let processToken onAccept (p: StateInfo<_,_>) =
@@ -284,6 +290,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     then
                         for i in stt.Info do
                             if not !reduced then acc.Add(new ParserEdge<_>(i.StartV, edg.Source, processToken onAccept i))
+                            lexbuf.CurrentPos <- i.Positions.[0]
                         reduced := true
                         let newStt = new State<_,_>(0,-1,new ResizeArray<_>())
                         go newStt
@@ -305,7 +312,8 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let reduced = ref false
                         for edg in edgs do
                             yield! processEdg edg stt reduced
-                }
+                            }
+                 
         seq{
             yield! res_edg_seq
             for x in lexbuf.States.[lexbuf.LastVId] do

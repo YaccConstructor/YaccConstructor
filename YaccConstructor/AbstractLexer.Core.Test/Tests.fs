@@ -27,7 +27,7 @@ type Class1() =
         ]
         |> graph.AddVerticesAndEdgeRange
     member this.X () = 
-        init()
+        init()|>ignore
         EpsClosure.NfaToDfa graph
         
 let c = new Class1()

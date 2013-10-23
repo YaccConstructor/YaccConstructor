@@ -24,6 +24,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
+      <Name>AbstractParsing.Common</Name>
+      <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -70,11 +75,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
-      <Name>AbstractParsing.Common</Name>
-      <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

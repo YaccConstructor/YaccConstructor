@@ -10,9 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>YC.ReSharper.AbstractAnalysis.Plugin.Core.Tests</RootNamespace>
     <AssemblyName>YC.ReSharper.AbstractAnalysis.Plugin.Core.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
       <Import Project="../YC.targets" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

@@ -112,6 +112,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A0
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin", "YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj", "{BC086B93-FA4B-41BD-9E95-3ED442592A01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -378,6 +380,12 @@ Global
 		{78C84740-5F30-4AE3-B6B9-19F1AD56D4DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78C84740-5F30-4AE3-B6B9-19F1AD56D4DE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{78C84740-5F30-4AE3-B6B9-19F1AD56D4DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC086B93-FA4B-41BD-9E95-3ED442592A01}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

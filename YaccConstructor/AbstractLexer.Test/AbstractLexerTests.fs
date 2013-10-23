@@ -16,10 +16,10 @@ let loadGraphFromDOT filePath =
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
+let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 let eofToken = AbstractLexer.Test.Calc.Parser.RNGLR_EOF ("",[||])
 let literalEofToken = AbstractLexer.Test.Literals.Parser.RNGLR_EOF
 
-let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    

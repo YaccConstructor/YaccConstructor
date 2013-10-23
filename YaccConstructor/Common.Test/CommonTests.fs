@@ -80,7 +80,7 @@ type ``Components loader tests`` () =
 [<TestFixture>]
 type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
-    let basePath = @"..\..\..\..\Tests\Checkers\"
+    let basePath = @"..\..\..\Tests\Checkers\"
 
     let getUndecl path =
         path

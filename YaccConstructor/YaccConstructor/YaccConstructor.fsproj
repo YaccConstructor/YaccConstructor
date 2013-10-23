@@ -9,9 +9,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Main</RootNamespace>
     <AssemblyName>YaccConstructor</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <Name>YaccConstructor</Name>
     <SccProjectName>
     </SccProjectName>
@@ -24,34 +21,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-i D:\projects\yc\recursive-ascent\YaccConstructor\Calc\calc.yrd  -c ExpandEbnf -c ExpandMeta       -g "RNGLRGenerator -o Calc.yrd.fs"</StartArguments>
-    <OtherFlags>
-    </OtherFlags>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Main.XML</DocumentationFile>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-f YardFrontend -c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets -c Linearize  -g YardPrinter -i "C:\projects\recursive-ascent\Examples\RNGLR\MSSql\mssql.yrd "</StartArguments>
-    <StartWorkingDirectory>
-    </StartWorkingDirectory>
-    <StartAction>Project</StartAction>
-  </PropertyGroup>
+  <Import Project="../YC.targets" /> 
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />

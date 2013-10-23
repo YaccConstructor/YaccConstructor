@@ -24,7 +24,7 @@ match buildAst tokens with
 //match buildAst tokens with
 | Error (pos, token, msg, debugFuns, _) ->
     printfn "Error on position %d, token %A: %s" pos token msg
-| Success (ast, _) ->
+| Success (ast, errors) ->
     ast.PrintAst()
     let args = {
         tokenToRange = fun _ -> Unchecked.defaultof<_>, Unchecked.defaultof<_>
@@ -32,7 +32,7 @@ match buildAst tokens with
         clearAST = false
         filterEpsilons = false
     }
-    let result:List<double> = translate args ast
+    let result:List<double> = translate args ast errors
     //defaultAstToDot ast @"..\..\astFromSeq.dot"
     defaultAstToDot ast @"..\..\astFromDot.dot"
     printfn "%A" result

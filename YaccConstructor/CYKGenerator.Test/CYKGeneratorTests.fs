@@ -17,7 +17,7 @@ type ``CYK generator tests`` () =
     let generator = new Yard.Generators.CYKGenerator.CYKGeneartorImpl()
     let iGenerator = new Yard.Generators.CYKGenerator.CYKGenerator()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
-    let basePath = "../../../../Tests/CYK"
+    let basePath = "../../../Tests/CYK"
 
     [<Test>]
     member test.``Simple one rule without lable test`` () =        

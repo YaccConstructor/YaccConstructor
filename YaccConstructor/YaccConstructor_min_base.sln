@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20617.1 PREVIEW
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions", "Conversions\Conversions.fsproj", "{96AB0183-84E1-4A2E-8896-9EAD2C8CF6A4}"
@@ -57,12 +59,10 @@ Global
 		{1B09EACC-608A-4965-8B46-2746FAC220FC}.Release|x86.ActiveCfg = Release|Any CPU
 		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Debug|x86.ActiveCfg = Debug|x86
-		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Debug|x86.Build.0 = Debug|x86
+		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Release|x86.ActiveCfg = Release|x86
-		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Release|x86.Build.0 = Release|x86
+		{0F4580E0-A1E0-45A6-8062-5B5F08AD8E38}.Release|x86.ActiveCfg = Release|Any CPU
 		{B288C71C-EFA6-47D1-AE26-414E213D7042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B288C71C-EFA6-47D1-AE26-414E213D7042}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B288C71C-EFA6-47D1-AE26-414E213D7042}.Debug|x86.ActiveCfg = Debug|Any CPU

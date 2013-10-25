@@ -63,23 +63,3 @@ let followSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon :
                 else
                     curSet <- Set.union curSet firstSet.[value]
     result
-
-let chainFirstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) (firstSet : Set<int>[]) = 
-    let chainCanInferEpsilon : bool[] = Array.create rules.rulesCount false
-    let result : Set<int>[] = Array.zeroCreate rules.rulesCount
-    
-    for i = 0 to rules.rulesCount-1 do
-        let mutable curSet : Set<int> = Set.empty 
-        let mutable k = 0
-        let mutable b = true
-        while( b ) do 
-             let cur = firstSet.[rules.symbol i k]
-             for int h = 0 to cur.Count-1 do
-                 curSet <- cur    //how can i do ADD&!
-             if k < rules.length i - 1 then 
-                k <- k + 1
-                b <- canInferEpsilon.[rules.symbol i k]
-                else b <- false
-                     chainCanInferEpsilon.[i] <- true
-        result.[i] <- curSet
-    result ///how return two differnt

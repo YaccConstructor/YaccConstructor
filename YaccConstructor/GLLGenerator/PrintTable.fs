@@ -22,15 +22,19 @@ module Yard.Generators.RNGLR.Printer
 
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.GLL
-open Yard.Generators.GLL.Table
 open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
 
-let printTable (table : Table) = 
-    let mutable res = "[| "
-    for i = 0 to i < Table.i do
-        for j = 0 to j < Table.j do
-            res <- res + Table.table.[i].[j] + " "
-    res <- res + "|]"
-    res
+
+let printTables 
+    (table : Table) (moduleName : string) 
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
+    _class positionType caseSensitive =
+        for i = 0 to table.ll_table.Length1 do
+            for j = 0 to table.ll_table.Length2 do
+                print 
+
+    
+
+    

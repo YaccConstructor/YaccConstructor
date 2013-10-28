@@ -431,7 +431,6 @@ type ``RNGLR abstract parser tests`` () =
     [<Test>]
     member this.``Simple calc with nterm. Branch binop and first arg.`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 1)
              new AbstractParsing.Common.ParserEdge<_>(0,2,lbl <| RNGLR.SimpleCalcWithNTerm.NUM 2)
@@ -578,7 +577,7 @@ let f x =
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
     //t.``Calc. Branched input error.``()
-    t.``Pretty Simple Calc. Error Handling Temp.``()
+    t.``Simple calc with nterm. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and second arg.``()
     //t.``Simple calc with nterm. Seq input.``()

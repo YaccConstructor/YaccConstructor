@@ -85,7 +85,7 @@ let justParse (path:string) =
         let g = 
             if !parserOnly
             then loadDotToQG path
-            else Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing)
+            else Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens,ing, RNGLR_EOF(SourceText.ofTuple("",(Pair(),Pair()))))
         if !printLexerOutput
         then Helpers.printTokenizedGraph g printTag "..\..\out.lex.dot" 
         (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse buildAstAbstract g
@@ -93,10 +93,13 @@ let justParse (path:string) =
 
 let p = new ProjInfo()
 let mutable counter = 1<id>
-let resultDirectoryPath = ref @"../../result\"
+let resultDirectoryPath = ref @"../../result"
 
-let getResultFileName (path : string) pref  = 
-    !resultDirectoryPath + pref + path.Substring(path.LastIndexOf("\\") + 1)
+let getResultFileName path pref =
+    // 1) для получения имени файла есть  System.IO.Path.GetFileName
+    // 2) Собирать путь лучше через System.IO.Path.Combine Он сам отследит все слеши на границах и т.д.
+    System.IO.Path.Combine (!resultDirectoryPath, pref + System.IO.Path.GetFileName path)
+                                  //path.Substring(path.LastIndexOf("\\") + 1)
 
 let Parse (srcFilePath:string) = 
     let StreamElement = new StreamReader(srcFilePath, System.Text.Encoding.UTF8)  
@@ -125,15 +128,22 @@ let Parse (srcFilePath:string) =
             printfn "conf# %i  prods: %A" (Seq.length gv) prods
             gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
         defaultAstToDot ast (getResultFileName srcFilePath "ast_")
-       
-let CreateEmptyResultDirectory = 
-    if (System.IO.Directory.Exists(!resultDirectoryPath))
+
+// без параметров это не функция. Так как объявлене на верхнем уровне, то будет выполнена инициализация переменной на загрузку модуля.
+// Может, в данном случае это и не страшно, но судя по тому, что ниже есть "вызов", хотелось немного другого.
+let CreateEmptyResultDirectory () =
+    // скобочки у условия не нужны.
+    // скобочки у аргумента функции тоже не обязательны 
+    if System.IO.Directory.Exists !resultDirectoryPath
     then System.IO.Directory.Delete(!resultDirectoryPath, true)
-    System.IO.Directory.CreateDirectory(!resultDirectoryPath)
+    System.IO.Directory.CreateDirectory !resultDirectoryPath
+    // Если понятно, что результат никому не нужен, то игнорировать лучше прямо тут.
+    |> ignore
         
 let ParseAllDirectory (directoryName:string) =
-    resultDirectoryPath := directoryName + @"\results\"
-    CreateEmptyResultDirectory |> ignore
+    resultDirectoryPath := System.IO.Path.Combine(directoryName, "results")
+        // directoryName + @"\results\"
+    CreateEmptyResultDirectory ()
     System.IO.Directory.GetFiles(directoryName,"*.dot")
     |> Array.iter Parse
 
@@ -142,7 +152,7 @@ do
     let parseDir = ref false
     let commandLineSpecs =
         [
-         "-p", ArgType.Unit (fun _ -> parserOnly := true), "Scip lexing. Input graph is ready for parsing."
+         "-p", ArgType.Unit (fun _ -> parserOnly := true), "Skip lexing. Input graph is ready for parsing."
          "-ol",ArgType.Unit (fun _ -> printLexerOutput := true), "Print tokenization result."
          "-f", ArgType.String (fun s -> inPath := path s), "Input file."
          "-d", ArgType.String (fun s -> parseDir := true; inPath := s), "Input dir. Use for parse all files in specified directory."

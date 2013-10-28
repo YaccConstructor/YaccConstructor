@@ -107,6 +107,7 @@ Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
 YaccConstructor/RNGLRAbstractParser.Test/*.yrd.fs
 YaccConstructor/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 YaccConstructor/FsYaccFrontend/Parser.fs
+YaccConstructor/packages/*
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/packages/*
 NuGet/FsYardPacket/*

@@ -10,6 +10,8 @@
     <RootNamespace>RNGLRAbstractParser</RootNamespace>
     <AssemblyName>RNGLRAbstractParser</AssemblyName>
     <Name>RNGLRAbstractParser</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -76,6 +78,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">

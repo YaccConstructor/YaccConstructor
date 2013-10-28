@@ -114,3 +114,7 @@ NuGet/FsYardPacket/*
 YaccConstructor/FParsecGenerator.Test/log.txt
 YaccConstructor/FParsecGenerator.Test/log1.txt
 YaccConstructor/FParsecGenerator.Test/out
+Examples/AbstractAnalysis/packages/*
+YaccConstructor/TSQL/log.txt
+NuGet/out
+*/FsYard.log

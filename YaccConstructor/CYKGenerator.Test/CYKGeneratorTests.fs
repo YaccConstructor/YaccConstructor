@@ -5,7 +5,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
 open Yard.Core.Checkers
-open Yard.Tests.Helper
+open YC.Tests.Helper
 open NUnit.Framework
 open System.Linq
 open System.IO
@@ -96,4 +96,3 @@ type ``CYK generator tests`` () =
         let code = iGenerator.Generate il
         System.IO.File.Exists resultFullPath |> Assert.IsTrue
         filesAreEqual resultFullPath expectedFullPath
-        

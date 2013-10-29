@@ -63,7 +63,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <Import Project="..\fsyard\bin\release\FsYard.targets" />
+  <!--Import Project="..\fsyard\bin\release\FsYard.targets" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>

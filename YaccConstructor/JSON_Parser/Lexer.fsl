@@ -1,0 +1,44 @@
+{
+module Lexer
+//open Microsoft.FSharp.Text.Lexing
+//open Microsoft.FSharp.Text
+open Microsoft.FSharp.Reflection
+open Yard.Examples.MSParser
+open LexerHelper
+open System
+open Yard.Utils.StructClass
+
+let mutable id = 0<id>
+}
+
+let letfBrace = '{'
+let rightBrace = '}'
+let letfBracket = '['
+let rightBracket = ']'
+let colon = ':'
+let comma = ','
+let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
+let character = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' '\t' '\f' '\b' '\/' '\"' '\\' '\u'hexnumber ' ' ] +
+let chars = character | character chars
+let string1 = "" | "chars"
+let digit = ['0'-'9']+
+let digits = digit | digit digits
+let int = ['-']? digit | ['-']? digit ['1' - '9']+ digits
+let frac = '.' digits
+let floae = 'e' ['+' '-']? | 'E' ['+' '-']?
+let exp = floae digits    
+let number = int [frac exp]? | int frac exp
+
+let value = string1 | number | object1 | array1 | true | false | null
+let elements = value (comma elements) ?
+let array1 = letfBracket (elements)?  rightBracket
+let pair = string1 colon value
+let members = pair (comma members) ?
+let object1 = letfBrace members?  rightBrace    
+
+//let lparen = '('
+//let rparen = ')' 
+//let whitespaces = [' '  '\t']+
+//let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'à'-'ÿ' 'À'-'ß' ] 
+//let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'à'-'ÿ' 'À'-'ß' ] 
+//let floatnumber = decnumber ('.' decnumber)? ( floae decnumber) ? 

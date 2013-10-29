@@ -1,5 +1,5 @@
 ﻿ <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask AssemblyFile="FsYARD.exe" TaskName="FsYard" />
+  <UsingTask AssemblyFile="FsYARD.exe" TaskName="YC.FsYARD.FsYard" />
   <PropertyGroup>
     <CompileDependsOn>FsYardCall;$(CompileDependsOn)</CompileDependsOn>
   </PropertyGroup>

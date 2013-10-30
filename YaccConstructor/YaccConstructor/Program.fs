@@ -22,7 +22,6 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
 open Yard.Core.Checkers
-open Yard.Core.Constraints
 open Microsoft.FSharp.Text
 open System.IO
 

@@ -14,6 +14,10 @@
     <releaseNotes>First version.</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
+    <dependencies> 
+        <dependency id="FSharpX.Core" version="[1.8.41]" />
+    </dependencies> 
+
   </metadata>
 <files>
     <file src="README" target="README" /> 

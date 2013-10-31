@@ -10,6 +10,8 @@
     <RootNamespace>FsYARD</RootNamespace>
     <AssemblyName>FsYARD</AssemblyName>
     <Name>FsYARD</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -28,10 +30,28 @@
     <None Include="FsYard.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FsYacc">
-      <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
+    <Reference Include="Common">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Constraints">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Constraints.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Conversions">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Conversions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="fsyacc">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="mscorlib" />
@@ -39,21 +59,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
@@ -74,7 +79,12 @@
       <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="YaccConstructor">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\YaccConstructor.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!--UsingTask AssemblyFile="bin/Release/FsYARD.exe" TaskName="FsYard" />
   <PropertyGroup>
     <CompileDependsOn>MyTarget;$(CompileDependsOn)</CompileDependsOn>

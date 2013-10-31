@@ -10,6 +10,8 @@
     <RootNamespace>FsYaccFrontend</RootNamespace>
     <AssemblyName>FsYaccFrontend</AssemblyName>
     <Name>FsYaccFrontend</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -40,22 +42,40 @@
     <Compile Include="Main.fs" />
     <Compile Include="FsYaccFrontend.fs" />
     <None Include="Parser.fsy" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FsYacc">
-      <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
+    <Reference Include="Common">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Constraints">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Constraints.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Conversions">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Conversions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="fsyacc">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+    <Reference Include="YaccConstructor">
+      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\YaccConstructor.exe</HintPath>
       <Private>True</Private>
-    </ProjectReference>
+    </Reference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!--PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)Main\Bin\Debug\Main.exe" -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c LeaveLast -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i "$(SolutionDir)FsYaccFrontend\fsyacc.yrd" &gt; "$(SolutionDir)FsYaccFrontend\Parser.fsy"</PreBuildEvent>
   </PropertyGroup-->

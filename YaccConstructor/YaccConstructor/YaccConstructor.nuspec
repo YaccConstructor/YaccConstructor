@@ -23,5 +23,8 @@
     <file src="..\..\Bin\Release\v45\Conversions.*" target="lib\net45\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v45\Constraints.*" target="lib\net45\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v45\YaccConstructor.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\FsYacc.*" target="lib\net45\" exclude="**\*.Test.*"/> 
 </files>
+<!--Dependences
+FSharpX.Text.StructuredFormat  -->
 </package>

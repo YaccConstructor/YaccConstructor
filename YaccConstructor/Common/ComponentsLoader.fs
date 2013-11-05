@@ -16,6 +16,7 @@ module Yard.Core.ComponentsLoader
 
 open System
 open System.IO
+open Microsoft.FSharp.Collections
 
 let private loadByType (desiredType:Type) =
     let basePath = AppDomain.CurrentDomain.BaseDirectory

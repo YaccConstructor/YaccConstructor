@@ -103,7 +103,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for line and column in received Map`` () =
-        let basePass = @"../../../../Tests/SourceText/Map.txt"
+        let basePass = @"../../../Tests/SourceText/Map.txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         p.AddLine 2<id> map
@@ -132,7 +132,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for get right Map`` () =
-        let basePass = @"../../../../Tests/SourceText/LittleMap.txt"
+        let basePass = @"../../../Tests/SourceText/LittleMap.txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         let actual : int64<symbol>[] = [| 0L<symbol>; 11L<symbol>; 13L<symbol>; 31L<symbol>; 33L<symbol>; 
@@ -141,7 +141,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for get right empty Map`` () =
-        let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
+        let basePass = @"../../../Tests/SourceText/EmptyMap.txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         let actual : int64<symbol>[] = [| 0L<symbol> |]
@@ -150,7 +150,7 @@ type UtilsTest () =
     [<Test>]
     member test.``Test for empty Map`` () =
         try
-            let basePass = @"../../../../Tests/SourceText/EmptyMap.txt"
+            let basePass = @"../../../Tests/SourceText/EmptyMap.txt"
             let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
             let map = p.GetMap StreamElement
             p.AddLine 3<id> map
@@ -167,7 +167,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for line and column in received Map (Unix style)`` () =
-        let basePass = @"../../../../Tests/SourceText/Map (Unix style).txt"
+        let basePass = @"../../../Tests/SourceText/Map (Unix style).txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         p.AddLine 4<id> map
@@ -182,7 +182,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for get right Map (Unix style)`` () =
-        let basePass = @"../../../../Tests/SourceText/LittleMap (Unix style).txt"
+        let basePass = @"../../../Tests/SourceText/LittleMap (Unix style).txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         let actual : int64<symbol>[] = [| 0L<symbol>; 10L<symbol>; 11L<symbol>; 28L<symbol>; 29L<symbol>; 
@@ -191,7 +191,7 @@ type UtilsTest () =
 
     [<Test>]
     member test.``Test for get right empty Map (Unix style)`` () =
-        let basePass = @"../../../../Tests/SourceText/EmptyMap (Unix style).txt"
+        let basePass = @"../../../Tests/SourceText/EmptyMap (Unix style).txt"
         let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
         let map = p.GetMap StreamElement
         let actual : int64<symbol>[] = [| 0L<symbol> |]
@@ -200,7 +200,7 @@ type UtilsTest () =
     [<Test>]
     member test.``Test for empty Map (Unix style)`` () =
         try
-            let basePass = @"../../../../Tests/SourceText/EmptyMap (Unix style).txt"
+            let basePass = @"../../../Tests/SourceText/EmptyMap (Unix style).txt"
             let StreamElement = new StreamReader(basePass, System.Text.Encoding.UTF8)
             let map = p.GetMap StreamElement
             p.AddLine 5<id> map

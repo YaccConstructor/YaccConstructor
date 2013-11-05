@@ -18,7 +18,7 @@
 module Yard.Frontends.AntlrFrontend.Main
 
 open Microsoft.FSharp.Text.Lexing
-
+open Microsoft.FSharp.Text
 open Yard.Frontends.AntlrFrontend.Lexer
 open Yard.Frontends.AntlrFrontend.Parser
 open Yard.Core.IL

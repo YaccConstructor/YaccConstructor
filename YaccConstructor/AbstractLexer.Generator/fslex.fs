@@ -7,6 +7,7 @@ open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
 open Printf
 open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
 open System
 open System.Collections.Generic
 open System.IO 

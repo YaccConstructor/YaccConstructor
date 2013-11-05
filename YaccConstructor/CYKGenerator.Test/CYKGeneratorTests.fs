@@ -5,7 +5,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
 open Yard.Core.Checkers
-open Yard.Tests.Helper
+open YC.Tests.Helper
 open NUnit.Framework
 open System.Linq
 open System.IO
@@ -17,7 +17,7 @@ type ``CYK generator tests`` () =
     let generator = new Yard.Generators.CYKGenerator.CYKGeneartorImpl()
     let iGenerator = new Yard.Generators.CYKGenerator.CYKGenerator()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
-    let basePath = "../../../../Tests/CYK"
+    let basePath = "../../../Tests/CYK"
 
     [<Test>]
     member test.``Simple one rule without lable test`` () =        
@@ -77,7 +77,7 @@ type ``CYK generator tests`` () =
             ; "    let tag = getTag t.Tag"
             ; "    if tag <> 0us then Some tag else None)"
             ; "  |> Array.ofSeq"
-            ] |> String.concat "\n"
+            ] |> String.concat "\r\n"
 
         let code = generator.Generate il
         printfn "%s" expectedCode
@@ -96,4 +96,3 @@ type ``CYK generator tests`` () =
         let code = iGenerator.Generate il
         System.IO.File.Exists resultFullPath |> Assert.IsTrue
         filesAreEqual resultFullPath expectedFullPath
-        

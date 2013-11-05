@@ -67,6 +67,8 @@ Examples/RNGLR/PLSql/*.dot
 NuGet/*.nupkg
 demo_picts/*
 demo_picts_bu/*
+NuGet/FsYard/*
+NuGet/FsYard
 Examples/RNGLR/PLSql/*.pdf
 Examples/RNGLR/PLSql/FsYard.log
 YaccConstructor/YardFrontend/out
@@ -104,3 +106,13 @@ Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
 YaccConstructor/RNGLRAbstractParser.Test/*.yrd.fs
 YaccConstructor/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 YaccConstructor/packages/*
+YaccConstructor/YardFrontend/out
+YaccConstructor/out
+Examples/Calc/FsYard/*
+Examples/Calc/packages/*
+Examples/Calc/Calc/FsYARD/*
+Examples/Calc/Calc/FsYARD/*
+NuGet/FsYardPacket/*
+YaccConstructor/FParsecGenerator.Test/log.txt
+YaccConstructor/FParsecGenerator.Test/log1.txt
+YaccConstructor/FParsecGenerator.Test/out

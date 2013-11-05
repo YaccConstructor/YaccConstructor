@@ -19,7 +19,6 @@ let loadGraphFromDOT filePath =
 let eofToken = AbstractLexer.Test.Calc.Parser.RNGLR_EOF ("",[||])
 let literalEofToken = AbstractLexer.Test.Literals.Parser.RNGLR_EOF
 
-let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    

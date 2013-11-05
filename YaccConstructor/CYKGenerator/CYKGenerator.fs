@@ -78,8 +78,8 @@ type CYKGeneartorImpl () =
         let res = ref ""
         let f () = 
             res := 
-                StructuredFormat.Display.layout_to_string 
-                    {StructuredFormat.FormatOptions.Default with PrintWidth=80} l
+                Microsoft.FSharp.Text.StructuredFormat.Display.layout_to_string 
+                    {Microsoft.FSharp.Text.StructuredFormat.FormatOptions.Default with PrintWidth=80} l
         let thread = new System.Threading.Thread(f, 134217728)
         thread.Start()
         thread.Join()

@@ -34,7 +34,7 @@ exception FEError of string
 let ConversionsManager = ConversionsManager.ConversionsManager()
 let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
-let conversionTestPath = @"../../../../Tests/Conversions/"
+let conversionTestPath = @"../../../Tests/Conversions/"
 let GeneratorsManager = Yard.Core.GeneratorsManager.GeneratorsManager()
 let getFrontend name =
         match FrontendsManager.Component name with

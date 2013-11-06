@@ -23,7 +23,18 @@
   </PropertyGroup>
   <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="FsYard\FsYard.Targets" />
+    <PropertyGroup>
+    <RLiterals>KW_%s</RLiterals>
+    <OutFile>MsParser.fs</OutFile>
+    <NeedTranslate>false</NeedTranslate>
+    <Token>SourceText</Token>
+    <Module>Yard.Examples.MSParser</Module>
+    <EpsilonPath>epsilons</EpsilonPath>
+  </PropertyGroup>
+
   <ItemGroup>
+  	<FsYard Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Calc.fs" />
@@ -36,18 +47,12 @@
     <None Include="FsYARD\RNGLRParser.SimpleTest.dll" />
     <None Include="FsYARD\RNGLRParser.pdb" />
     <None Include="FsYARD\RNGLRParser.dll" />
-    <Content Include="FsYARD\RNGLRCommon.xml" />
     <None Include="FsYARD\RNGLRCommon.pdb" />
     <None Include="FsYARD\RNGLRCommon.dll" />
-    <None Include="FsYARD\RNGLRApplication.pdb" />
-    <None Include="FsYARD\RNGLRApplication.exe" />
     <None Include="FsYARD\RNGLRAbstractParser.pdb" />
     <None Include="FsYARD\RNGLRAbstractParser.dll" />
     <None Include="FsYARD\RNGLR.pdb" />
     <None Include="FsYARD\RNGLR.dll" />
-    <None Include="FsYARD\FsYard.targets" />
-    <None Include="FsYARD\FsYARD.pdb" />
-    <None Include="FsYARD\FsYARD.exe" />
     <None Include="FsYARD\FsYacc.exe" />
     <Content Include="FsYARD\FSharpx.Text.StructuredFormat.xml" />
     <None Include="FsYARD\FSharpx.Text.StructuredFormat.pdb" />
@@ -59,25 +64,24 @@
     <None Include="FsYARD\Conversions.dll" />
     <None Include="FsYARD\Constraints.pdb" />
     <None Include="FsYARD\Constraints.dll" />
-    <Content Include="FsYARD\Common.xml" />
     <None Include="FsYARD\Common.pdb" />
     <None Include="FsYARD\Common.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\AbstractLexer.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -101,19 +105,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser.SimpleTest">
-      <HintPath>..\packages\YC.FsYARD.0.1.6100.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6160.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

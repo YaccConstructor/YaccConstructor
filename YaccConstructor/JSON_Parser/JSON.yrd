@@ -17,7 +17,7 @@ options {
 
 module Main
 
-open Common
+open  Common
 
 [<Start>]
 value: STRING1 | NUMBER  | objects  | array1  | 'true'  | 'false'  | 'null' 

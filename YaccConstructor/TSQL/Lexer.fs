@@ -88,111 +88,113 @@ let trans : uint16[] array =
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65533us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
 let actions : uint16[] = [|65535us; 0us; 1us; 2us; 3us; 4us; 5us; 6us; 7us; 8us; 9us; 10us; 11us; 12us; 13us; 14us; 15us; 16us; 18us; 19us; 16us; 17us; 17us; 1us; 0us; |]
-let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
+let _fslex_tables = Microsoft.FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule tokens *)
-let fslex_actions_tokens  _fslex_state lexeme brs =
-  match _fslex_state with
+and tokens  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_tokens  0 lexbuf
+(* Rule tokens *)
+and _fslex_tokens  _fslex_state lexbuf =
+  match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 55 "Lexer.fsl"
                                  DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some 
-# 99 "Lexer.fs"
+# 101 "Lexer.fs"
           )
   | 1 -> ( 
 # 56 "Lexer.fsl"
                                  None 
-# 104 "Lexer.fs"
+# 106 "Lexer.fs"
           )
   | 2 -> ( 
 # 57 "Lexer.fsl"
                                  getLiteral id brs "." |> Some 
-# 109 "Lexer.fs"
+# 111 "Lexer.fs"
           )
   | 3 -> ( 
 # 58 "Lexer.fsl"
                                  getLiteral id brs "," |> Some 
-# 114 "Lexer.fs"
+# 116 "Lexer.fs"
           )
   | 4 -> ( 
 # 59 "Lexer.fsl"
                                  getLiteral id brs "=" |> Some 
-# 119 "Lexer.fs"
+# 121 "Lexer.fs"
           )
   | 5 -> ( 
 # 60 "Lexer.fsl"
                                  getLiteral id brs ">"|> Some  
-# 124 "Lexer.fs"
+# 126 "Lexer.fs"
           )
   | 6 -> ( 
 # 61 "Lexer.fsl"
                                  getLiteral id brs "<" |> Some 
-# 129 "Lexer.fs"
+# 131 "Lexer.fs"
           )
   | 7 -> ( 
 # 62 "Lexer.fsl"
                                  getLiteral id brs ";" |> Some 
-# 134 "Lexer.fs"
+# 136 "Lexer.fs"
           )
   | 8 -> ( 
 # 63 "Lexer.fsl"
                              getLiteral id brs "(" |> Some 
-# 139 "Lexer.fs"
+# 141 "Lexer.fs"
           )
   | 9 -> ( 
 # 64 "Lexer.fsl"
                              getLiteral id brs ")" |> Some 
-# 144 "Lexer.fs"
+# 146 "Lexer.fs"
           )
   | 10 -> ( 
 # 65 "Lexer.fsl"
                              getLiteral id brs "[" |> Some 
-# 149 "Lexer.fs"
+# 151 "Lexer.fs"
           )
   | 11 -> ( 
 # 66 "Lexer.fsl"
                              getLiteral id brs "]" |> Some 
-# 154 "Lexer.fs"
+# 156 "Lexer.fs"
           )
   | 12 -> ( 
 # 67 "Lexer.fsl"
                              getLiteral id brs "+" |> Some 
-# 159 "Lexer.fs"
+# 161 "Lexer.fs"
           )
   | 13 -> ( 
 # 68 "Lexer.fsl"
                              getLiteral id brs "-" |> Some 
-# 164 "Lexer.fs"
+# 166 "Lexer.fs"
           )
   | 14 -> ( 
 # 69 "Lexer.fsl"
                              getLiteral id brs "~" |> Some 
-# 169 "Lexer.fs"
+# 171 "Lexer.fs"
           )
   | 15 -> ( 
 # 70 "Lexer.fsl"
                              getLiteral id brs "*" |> Some 
-# 174 "Lexer.fs"
+# 176 "Lexer.fs"
           )
   | 16 -> ( 
 # 72 "Lexer.fsl"
                            let tok = makeIdent false lexeme (brs, brs)
                            Some tok 
-# 180 "Lexer.fs"
+# 182 "Lexer.fs"
           )
   | 17 -> ( 
 # 74 "Lexer.fsl"
                                         None (* parser knows nothing about comments *) 
-# 185 "Lexer.fs"
+# 187 "Lexer.fs"
           )
   | 18 -> ( 
 # 76 "Lexer.fsl"
                         RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some 
-# 190 "Lexer.fs"
+# 192 "Lexer.fs"
           )
   | 19 -> ( 
 # 77 "Lexer.fsl"
                          failwith (sprintf "fucking shit received %s\n" lexeme ) 
-# 195 "Lexer.fs"
+# 197 "Lexer.fs"
           )
   | _ -> failwith "tokens"
 

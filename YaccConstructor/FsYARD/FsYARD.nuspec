@@ -11,32 +11,37 @@
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
-    <releaseNotes>Package structure was reworked.</releaseNotes>
+    <releaseNotes>Abstract analysis added. Version for .NET 4.0 </releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>
-	<files>
-		<file src="..\..\Bin\Release\v45\Common.*" target="\content\FsYARD"/>
-		<file src="..\..\Bin\Release\v45\Constraints.*" target="\content\FsYARD"/>
-		<file src="..\..\Bin\Release\v45\Conversions.*" target="\content\FsYARD"/>		
-		<file src="..\..\Bin\Release\v45\Abstract.*" target="\content\FsYARD"/>		
-		<file src="..\..\Bin\Release\v45\RNGLR*" target="\content\FsYARD"/>
-		<file src="..\..\Bin\Release\v45\YardFrontend.*" target="\content\FsYARD"/>
-		<file src="..\..\Bin\Release\v45\FsYARD.*" target="\content\FsYARD"/>
-		<file src="FsYard.targets" target="\content\FsYARD"/>
-		<file src="..\Tools\Release\bin\FsYacc.exe" target="\content\FsYARD"/>
-		<file src="..\packages\FSharpx.Text.StructuredFormat.*\lib\40\FSharpx.Text.StructuredFormat.*" target="\content\FsYARD"/>
-		<file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\content\FsYARD"/>
-		<file src="README" target="\"/>
-		<file src="..\LICENSE" target="\"/>
-		<file src="..\NOTICE" target="\"/>
-		
-		<file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net45\"/>
-		<file src="..\..\Bin\Release\v45\RNGLRCommon.*" target="\lib\net45\"/>
-		<file src="..\..\Bin\Release\v45\RNGLRParser.*" target="\lib\net45\"/>
-		
-		<file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net40\"/>
-		<file src="..\..\Bin\Release\v40\RNGLRCommon.*" target="\lib\net40\"/>
-		<file src="..\..\Bin\Release\v40\RNGLRParser.*" target="\lib\net40"/>
-	</files>
+    <files>
+        <file src="..\..\Bin\Release\v45\Common.*" target="\content\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\Constraints.*" target="\content\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\Conversions.*" target="\content\FsYARD" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v45\Abstract.*" target="\content\FsYARD" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v45\RNGLR*" target="\content\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\content\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\FsYARD.*" target="\content\FsYARD" exclude="**\*.Test.*"/>        
+        <file src="..\Tools\Release\bin\FsYacc.exe" target="\content\FsYARD"/>
+        <file src="..\packages\FSharpx.Text.StructuredFormat.*\lib\40\FSharpx.Text.StructuredFormat.*" target="\content\FsYARD"/>
+        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\content\FsYARD"/>
+        <file src="README" target="README"/>
+        <file src="..\..\LICENSE" target="LICENSE"/>
+        <file src="..\..\NOTICE" target="NOTICE"/>
+
+        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net45\"/>
+        <file src="..\..\Bin\Release\v45\RNGLRCommon.*" target="\lib\net45\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\RNGLRParser.*" target="\lib\net45\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\RNGLRAbstractParser.*" target="\lib\net45\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\Abstract*.Common.*" target="\lib\net45\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\AbstractLexer.Core.*" target="\lib\net45\" exclude="**\*.Test.*"/>
+
+        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\RNGLRCommon.*" target="\lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\RNGLRParser.*" target="\lib\net40" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\RNGLRAbstractParser.*" target="\lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\Abstract*.Common.*" target="\lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\AbstractLexer.Core.*" target="\lib\net40\" exclude="**\*.Test.*"/>
+    </files>
 </package>

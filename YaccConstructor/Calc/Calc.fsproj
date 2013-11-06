@@ -82,19 +82,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\AbstractLexer.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -118,19 +118,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser.SimpleTest">
-      <HintPath>..\packages\YC.FsYARD.0.1.6170.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6180.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

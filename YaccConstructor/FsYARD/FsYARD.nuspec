@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>0.1.6190.0</version>
+    <version>0.1.6200.0</version>
     <title>YC.FsYARD</title>
     <authors>Semyon Grigorev, Dmitry Avdyukhin, Iakov Kirilenko, Ilia Chemodanov, Konstantin Ulitin, Andrey Ivanov</authors>
     <owners>gsv</owners>
@@ -20,7 +20,7 @@
         <file src="..\..\Bin\Release\v45\Constraints.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v45\Conversions.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>		
         <file src="..\..\Bin\Release\v45\Abstract*.*.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\RNGLR*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\RNGLR*" target="\content\net45\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
         <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v45\FsYARD.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>        
         <file src="..\Tools\Release\bin\FsYacc.exe" target="\content\net45\FsYARD"/>
@@ -31,7 +31,7 @@
         <file src="..\..\Bin\Release\v40\Constraints.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v40\Conversions.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>		
         <file src="..\..\Bin\Release\v40\Abstract*.*.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v40\RNGLR*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\RNGLR*" target="\content\net40\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
         <file src="..\..\Bin\Release\v40\YardFrontend.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v40\FsYARD.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>        
         <file src="..\Tools\Release\bin\FsYacc.exe" target="\content\net40\FsYARD"/>

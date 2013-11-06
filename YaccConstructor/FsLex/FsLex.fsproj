@@ -78,7 +78,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="FSharp.Core" />
+
     <Reference Include="System.Numerics" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,8 @@ let printTag tag printBrs =
         | e -> string e
 
 let tokenize lexerInputGraph =
-    Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph)
+    let eof = Calc.AbstractParser.RNGLR_EOF("",[||])
+    Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eof)
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

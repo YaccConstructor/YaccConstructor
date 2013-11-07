@@ -108,3 +108,9 @@ YaccConstructor/FsYaccFrontend/Parser.fs
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/packages/*
 NuGet/FsYardPacket/*
+YaccConstructor/YC.ReSharper.AbstractAnalysis/YC.ReSharper.AbstractAnalysis.Plugin.Core/FsYARD/*
+YaccConstructor/Calc/FsYARD/*
+YaccConstructor/TSQL/FsYARD/*
+YaccConstructor/ConstantPropagation/FsYARD/*
+YaccConstructor/JSON_Parser/FsYARD/*
+YaccConstructor/TSQL/log.txt

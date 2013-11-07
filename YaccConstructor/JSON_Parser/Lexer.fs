@@ -130,7 +130,7 @@ let actions : uint16[] = [|2us; 0us; 0us; 1us; 1us; 10us; 3us; 4us; 5us; 6us; 7u
 let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-let fslex_actions_token  _fslex_state lexeme =
+let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
 # 26 "Lexer.fsl"

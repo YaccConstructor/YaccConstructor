@@ -9,10 +9,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>JSON_Parser</RootNamespace>
     <AssemblyName>JSON_Parser</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>JSON_Parser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,8 +41,14 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+    <PropertyGroup>
+    <ReSharperSdkTargets Condition=" '$(ReSharperSdkTargets)' == '' ">$(MSBuildExtensionsPath)\JetBrains\ReSharper.SDK\v8.0</ReSharperSdkTargets>
+  </PropertyGroup>
+  <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
+
   <Import Project="FsYard\FsYard.targets" />
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
@@ -56,20 +63,11 @@
     <Compile Include="JSONParser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Program.fs" />
-    <None Include="App.config" />
     <None Include="packages.config" />
-    <Content Include="FsYARD\YardFrontend.XML" />
-    <Content Include="FsYARD\RNGLRParser.XML" />
-    <Content Include="FsYARD\RNGLR.XML" />
-    <Content Include="FsYARD\FsYARD.XML" />
-    <None Include="FsYARD\FsYacc.pdb" />
-    <Content Include="FsYARD\Conversions.XML" />
-    <Content Include="FsYARD\Constraints.XML" />
     <None Include="FsYARD\YardFrontend.pdb" />
     <None Include="FsYARD\YardFrontend.dll" />
     <None Include="FsYARD\RNGLRParser.pdb" />
     <None Include="FsYARD\RNGLRParser.dll" />
-    <Content Include="FsYARD\RNGLRCommon.xml" />
     <None Include="FsYARD\RNGLRCommon.pdb" />
     <None Include="FsYARD\RNGLRCommon.dll" />
     <None Include="FsYARD\RNGLR.pdb" />
@@ -99,18 +97,25 @@
     <None Include="FsYARD\AbstractLexer.Core.dll" />
     <None Include="FsYARD\AbstractLexer.Common.pdb" />
     <None Include="FsYARD\AbstractLexer.Common.dll" />
+    <None Include="FsYARD\FsYARD.exe.config" />
+    <None Include="FsYARD\AbstractParsing.Common.pdb" />
+    <None Include="FsYARD\AbstractParsing.Common.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\AbstractLexer.Common.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\AbstractLexer.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AbstractParsing.Common">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -118,19 +123,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser.SimpleTest">
-      <HintPath>..\packages\YC.FsYARD.0.1.6200.0\lib\net45\RNGLRParser.SimpleTest.dll</HintPath>
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

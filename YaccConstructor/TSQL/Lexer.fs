@@ -196,6 +196,4 @@ let fslex_actions_tokens  _fslex_state lexeme brs =
           )
   | _ -> failwith "tokens"
 
-# 100 "Lexer.fsl"
-
 # 3000000 "Lexer.fs"

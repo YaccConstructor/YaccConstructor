@@ -118,3 +118,5 @@ Examples/AbstractAnalysis/packages/*
 YaccConstructor/TSQL/log.txt
 NuGet/out
 */FsYard.log
+YaccConstructor/Calc/FsYARD/*
+YaccConstructor/TSQL/FsYARD/*

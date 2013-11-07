@@ -31,7 +31,8 @@ factorOp: MULT { ( * ) } | DIV { (/) }
 
 factor: res=binExpr<powExpr powOp> { res }
         | ERROR
-powOp: POW {  ( ** ) }
+
+powOp: POW { ( ** ) }
 
 powExpr: n=NUMBER { fst n |> double } | LBRACE e=expr RBRACE { e }
          | ERROR

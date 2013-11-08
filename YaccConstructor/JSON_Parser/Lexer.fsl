@@ -2,10 +2,8 @@
 module Lexer
 open LexerHelper
 open System
-open LexerHelper
-//open Yard.Utils.StructClass
+open AbstractLexer.Core
 open JSON.Parser
-
 }
 
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
@@ -26,14 +24,4 @@ rule token = parse
 | whitespaces { None }
 | number { NUMBER(lexeme,brs) |> Some }
 | string1 { STRING1(lexeme,brs) |> Some }
-| character { CHARACTER(lexeme,brs) |> Some }
-| ',' { COMMA(lexeme,brs) |> Some }
-| ':' { COLON(lexeme,brs) |> Some }
-| '{' { LEFTBRACE(lexeme,brs) |> Some }
-| '}' { RIGHTBRACE(lexeme,brs) |> Some }
-| '[' { LEFTBRACKET(lexeme,brs) |> Some }
-| ']' { RIGHTBRACKET(lexeme,brs) |> Some }
-| _ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf }
-
-
- 
+| _ { getLiteral lexeme |> Some}

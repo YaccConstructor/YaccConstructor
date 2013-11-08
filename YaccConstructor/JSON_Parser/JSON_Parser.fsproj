@@ -41,14 +41,12 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
-    <PropertyGroup>
+  <PropertyGroup>
     <ReSharperSdkTargets Condition=" '$(ReSharperSdkTargets)' == '' ">$(MSBuildExtensionsPath)\JetBrains\ReSharper.SDK\v8.0</ReSharperSdkTargets>
   </PropertyGroup>
   <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
-
   <Import Project="FsYard\FsYard.targets" />
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
@@ -61,6 +59,7 @@
   <ItemGroup>
     <FsYard Include="JSON.yrd" />
     <Compile Include="JSONParser.fs" />
+    <Compile Include="LexerHelper.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
@@ -141,6 +140,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

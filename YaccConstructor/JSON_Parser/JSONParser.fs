@@ -37,6 +37,7 @@ let genLiteral (str : string) posStart posEnd =
     | "{" -> ``L 22`` (posStart, posEnd)
     | "}" -> ``L 23`` (posStart, posEnd)
     | x -> failwithf "Literal %s undefined" x
+
 let tokenData = function
     | NUMBER x -> box x
     | RNGLR_EOF x -> box x

@@ -72,7 +72,7 @@ let printTag tag printBrs =
     | x -> string x 
 
 let justParse (path:string) =
-    printfn "Parse file %A" path
+    //printfn "Parse file %A" path
     let translateArgs = {
         tokenToRange = fun x -> 0,0
         zeroPosition = 0
@@ -93,7 +93,7 @@ let justParse (path:string) =
 
 let p = new ProjInfo()
 let mutable counter = 1<id>
-let resultDirectoryPath = ref @"../../result"
+let resultDirectoryPath = ref @""
 
 let getResultFileName path pref =
     // 1) для получения имени файла есть  System.IO.Path.GetFileName
@@ -106,7 +106,11 @@ let Parse (srcFilePath:string) =
     let map = p.GetMap StreamElement
     p.AddLine counter map
     counter <- counter + 1<id>
-    match justParse srcFilePath with
+    let res = justParse srcFilePath
+    let start = System.DateTime.Now    
+    for i in 0..10 do justParse srcFilePath |> ignore
+    let t = (System.DateTime.Now - start).TotalMilliseconds/11.0
+    match res with
     | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg,_) ->
         let data =
             let d = tokenData tok
@@ -121,13 +125,14 @@ let Parse (srcFilePath:string) =
             GC.WaitForPendingFinalizers()
             GC.GetTotalMemory(true)
         GC_Collect() |> printfn "%A" 
-        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
-        |> Seq.groupBy snd
-        |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
-        |> Seq.iter (fun (prods, gv) -> 
-            printfn "conf# %i  prods: %A" (Seq.length gv) prods
-            gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
-        defaultAstToDot ast (getResultFileName srcFilePath "ast_")
+//        ast.collectWarnings (tokenPos >> fun (x,y) -> let x = RePack x in x.Line + 1<line> |> int, int x.Column)
+//        |> Seq.groupBy snd
+//        |> Seq.sortBy (fun (_,gv) -> - (Seq.length gv))
+//        |> Seq.iter (fun (prods, gv) -> 
+//            printfn "conf# %i  prods: %A" (Seq.length gv) prods
+//            gv |> (fun s -> if Seq.length s > 5 then Seq.take 5 s else s) |> Seq.map fst |> Seq.iter (printfn "    %A"))
+//        defaultAstToDot ast (getResultFileName srcFilePath "ast_")
+        printfn "Parsing time of file %A = %A" (System.IO.Path.GetFileName srcFilePath) t
 
 // без параметров это не функция. Так как объявлене на верхнем уровне, то будет выполнена инициализация переменной на загрузку модуля.
 // Может, в данном случае это и не страшно, но судя по тому, что ниже есть "вызов", хотелось немного другого.

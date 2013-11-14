@@ -363,9 +363,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             pushesInitFun curTokens.Value.Tokens.Length
  
         let print fName = 
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                        <| sprintf fName !curLvl     
+         ()
+//            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+//            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+//                        <| sprintf fName !curLvl     
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
         let mutable wasError = ref false

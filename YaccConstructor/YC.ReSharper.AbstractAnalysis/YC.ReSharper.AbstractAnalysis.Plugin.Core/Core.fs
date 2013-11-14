@@ -75,20 +75,13 @@ type Processor(file) =
             | Calc.AbstractParser.ERROR (l,br) -> e "ERROR" l br
             | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
         
-      (*  let addErrorJSON tok = 
+        let addErrorJSON tok = 
              let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                 br |> filterBrs |> Array.iter(fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
             match tok with
-            | JSON.Parset.MINUS (l,br) -> e "MINUS" l br
-            | JSON.Parset.DIV (l,br) -> e "DIV" l br
-            | JSON.Parset.PLUS (l,br) -> e "PLUS" l br
-            | JSON.Parset.NUMBER (l,br) -> e "NUMBER" l br
-            | JSON.Parset.LBRACE (l,br) -> e "LBRACE" l br
-            | JSON.Parset.RBRACE (l,br) -> e "RBRACE" l br
-            | JSON.Parset.POW (l,br) -> e "POW" l br
-            | JSON.Parset.RNGLR_EOF (l,br) -> e "EOF" l br
-            | JSON.Parset.ERROR (l,br) -> e "ERROR" l br
-            | JSON.Parset.MULT (l,br) -> e "MULT" l br *)
+            | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
+            | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
+
 
         let addErrorTSQL tok = 
             let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="calc.cs" />
+    <Compile Include="Example5.cs" />
     <Compile Include="TSQLDemo.cs" />
     <Compile Include="EmbeddedCalc.cs" />
     <Compile Include="Example4.cs" />

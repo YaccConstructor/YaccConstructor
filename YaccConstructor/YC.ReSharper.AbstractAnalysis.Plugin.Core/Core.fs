@@ -58,9 +58,26 @@ type Processor(file) =
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
+        let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+            try
+                let pos = brs |> Array.map(fun i -> i.pos_cnum)
+                let lengthTok = pos.Length
+                let beginPosTok = pos.[0] + 1
+                let endPosTok = pos.[lengthTok-1] + 2 
+                let endPos = 
+                    brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                    - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
+                brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+            with
+            | :? System.ArgumentOutOfRangeException -> brs.[0].back_ref.GetDocumentRange()
+
         let addError tok =
-            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                br |> filterBrs |> Array.iter(fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
+            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+                let newDr = calculatePos brs
+                brs |> filterBrs 
+                |> Array.iter
+                    (fun br ->
+                         parserErrors.Add <| ((sprintf "%A(%A)" t l), newDr)) //br.back_ref.GetDocumentRange()))
             match tok with
             | Calc.AbstractParser.MINUS (l,br) -> e "MINUS" l br
             | Calc.AbstractParser.DIV (l,br) -> e "DIV" l br
@@ -73,9 +90,10 @@ type Processor(file) =
             | Calc.AbstractParser.ERROR (l,br) -> e "ERROR" l br
             | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
         
-        let addErrorTSQL tok = 
-            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                 br |> filterBrs |> Array.iter (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
+        let addErrorTSQL tok =
+            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+                let newDr = calculatePos brs 
+                brs |> filterBrs |> Array.iter (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), newDr))
             match tok with
             | DEC_NUMBER (sourceText,brs)   -> e "DEC_NUMBER" sourceText.text brs
             | DOUBLE_COLON (sourceText,brs) -> e "DOUBLE_COLON" sourceText.text brs

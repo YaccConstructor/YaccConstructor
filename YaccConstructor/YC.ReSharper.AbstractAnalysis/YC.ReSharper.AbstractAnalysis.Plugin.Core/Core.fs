@@ -76,7 +76,7 @@ type Processor(file) =
             | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
         
         let addErrorJSON tok = 
-             let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                 br |> filterBrs |> Array.iter(fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
             match tok with
             | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br

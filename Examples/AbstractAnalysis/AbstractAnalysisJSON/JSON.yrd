@@ -1,0 +1,25 @@
+﻿{
+open AbstractLexer.Core
+}
+
+tokens {
+    _ of string*array<Position<string>>
+}
+
+options {
+    translate = true
+    module = "JSON.AbstractParser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+module Main
+
+[<Start>]
+value: STRING1 | NUMBER  | objects | array1  | 'true' | 'false' | 'null' 
+
+array1: '[' list<value ','> ']' 
+
+pair: STRING1 ':' value 
+ 
+objects: '{' list<pair ','> '}'

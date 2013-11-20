@@ -18,8 +18,8 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <FsYaccToolPath>$(SolutionDir)Tools\Release\bin\</FsYaccToolPath>
-    <FsLexToolPath>$(SolutionDir)Tools\Release\bin\</FsLexToolPath>
+    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsYaccToolPath>
+    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsLexToolPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <WarningLevel>4</WarningLevel>
@@ -27,8 +27,8 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(SolutionDir)Tools\Release\bin\FSharp.PowerPack.Targets" />
-  <ItemGroup>
+  <Import Project="$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\FSharp.PowerPack.targets" />
+    <ItemGroup>
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <FsLex Include="Lexer.fsl">
@@ -61,7 +61,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.1.0\lib\net45\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

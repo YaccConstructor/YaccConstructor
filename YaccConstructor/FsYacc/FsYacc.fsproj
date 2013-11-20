@@ -11,7 +11,7 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.Settings.targets" />
+  <Import Project="../YC.targets" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <!-- Always use x86 emulation for this binary... -->

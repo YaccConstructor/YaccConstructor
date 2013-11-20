@@ -54,13 +54,13 @@
     </Reference>
   </ItemGroup>
   <PropertyGroup>
-    <FsYaccToolPath>$(SolutionDir)Tools\Release\bin\</FsYaccToolPath>
-    <FsLexToolPath>$(SolutionDir)Tools\Release\bin\</FsLexToolPath>
+    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsYaccToolPath>
+    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsLexToolPath>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(SolutionDir)\Tools\Release\bin\FSharp.PowerPack.Targets" />
+  <Import Project="$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\FSharp.PowerPack.targets" />
   <ItemGroup>
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>

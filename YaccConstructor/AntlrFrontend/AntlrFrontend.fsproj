@@ -19,8 +19,8 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <FsYaccToolPath>$(SolutionDir)Tools\Release\bin\</FsYaccToolPath>
-    <FsLexToolPath>$(SolutionDir)Tools\Release\bin\</FsLexToolPath>
+    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsYaccToolPath>
+    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsLexToolPath>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -35,7 +35,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)Tools\Release\bin\FSharp.PowerPack.Targets" />
+  <Import Project="$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\FSharp.PowerPack.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <FsLex Include="Lexer.fsl">

@@ -20,7 +20,6 @@ let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 let eofToken = AbstractLexer.Test.Calc.Parser.RNGLR_EOF ("",[||])
 let literalEofToken = AbstractLexer.Test.Literals.Parser.RNGLR_EOF
 
-
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    
 

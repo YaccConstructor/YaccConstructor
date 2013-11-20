@@ -27,7 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Condition="'$(TargetFramework)' == ''" Include="FSharp.Core" />
+    <Reference Condition="'$(TargetFramework)' == ''" Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Condition="'$(TargetFramework)' == 'Silverlight' AND '$(SilverlightVersion)' == 'v4.0'" Include="System.Core" />
     <Reference Condition="'$(TargetFramework)' == 'Silverlight'" Include="$(MSBuildExtensionsPath32)\..\Microsoft F#\Silverlight\Libraries\Client\$(SilverlightVersion)\FSharp.Core.dll"/>
   </ItemGroup>

@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\Utils.SourceText\Utils.SourceText.fsproj -Prop Configuration=Release
+nuget pack ..\YaccConstructor\Utils.SourceText\Utils.SourceText.nuspec

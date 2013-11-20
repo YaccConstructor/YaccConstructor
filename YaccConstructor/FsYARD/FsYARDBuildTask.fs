@@ -12,10 +12,13 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Build
+namespace YC.FsYARD
 
 open Microsoft.Build.Framework
 open System.IO
+open Microsoft.FSharp.Text
+open Yard.Core.Conversions
+open Yard.Core.IL
 
 [<Class>] 
 type FsYard() =
@@ -34,6 +37,63 @@ type FsYard() =
     let mutable output = ""
     //let mutable replLiterals = ""
     let mutable projectBasePath = ""
+
+    let generate inFile rnglrArgs =
+        let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+        let be = new Yard.Generators.RNGLR.RNGLR()
+        let applyConversion (conv:Yard.Core.Conversion) parameters (ilTree:Definition.t<Source.t,Source.t>)  = 
+          { ilTree with  grammar = conv.ConvertGrammar (ilTree.grammar, parameters) }
+        let conversions =
+            [
+                new Linearize.Linearize() :> Yard.Core.Conversion ,[||]
+                new ExpandMeta.ExpandMeta() :> Yard.Core.Conversion ,[||]
+                new ExpandEbnfStrict.ExpandEbnf() :> Yard.Core.Conversion ,[||] 
+                //new ReplaceLiterals.ReplaceLiterals() :> Yard.Core.Conversion ,[|replLit|]
+                new ExpandInnerAlt.ExpandInnerAlt() :> Yard.Core.Conversion ,[||]
+                new ExpandBrackets.ExpandBrackets() :> Yard.Core.Conversion ,[||]
+                new LeaveLast.LeaveLast() :> Yard.Core.Conversion ,[||]
+            
+            ]
+            |> List.map (fun (x,y) -> fun (il:Definition.t<_,_>) -> applyConversion x y il)
+        fe.ParseGrammar inFile 
+        |> (fun il -> List.fold (fun il conv -> conv il) il conversions)
+        |> (fun il -> be.Generate(il,rnglrArgs))
+        |> ignore
+
+    [<EntryPoint>]
+    let cmdRun _ =
+        let userDefs = ref []
+        let userDefsStr = ref ""
+        let inFile = ref ""
+        //let replLit = ref ""
+        let rnglrArgs = ref ""
+        let addRnglrArg opt =
+            ArgType.String (fun value -> rnglrArgs := !rnglrArgs + opt + value)
+        let commandLineSpecs =
+            [
+             "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
+             "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
+                    "Remove previously defined constants for YardFrontend lexer."
+             "-i", ArgType.String (fun s -> inFile := s), "Input grammar"
+             "-module",     addRnglrArg " -module "    , "Target module name."
+             "-token",      addRnglrArg " -token "     , "Token type."
+             "-pos",        addRnglrArg " -pos "       , "Token position type."
+             "-o",          addRnglrArg " -o "         , "Output file name."
+             "-table",      addRnglrArg " -table "     , " Table type."
+             "-fullpath",   addRnglrArg " -fullpath "  , "Use full path."
+             "-translate",  addRnglrArg " -translate " , "Generate action code."
+             "-light",      addRnglrArg " -light "     , "Light syntax true/false."
+             "-infEpsPath", addRnglrArg " -infEpsPath ", "Path for infinite epsilons stats."
+             "-lang",       addRnglrArg " -lang "      , "Target language."
+             //"-replaceLiterals", ArgType.String (fun s -> replLit := s), "Replace literals regexp."
+             ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+        ArgParser.Parse commandLineSpecs
+        try 
+            generate !inFile !rnglrArgs
+            0 
+        with
+        | _ -> 1
+        
 
     [<Required>]
     member this.InputFiles
@@ -95,7 +155,7 @@ type FsYard() =
                 + sprintf "-fullpath %A" fullPath            
             let eventArgs = { new CustomBuildEventArgs(message= "FsYard " + rnglrArgs + " -i " + (items.[0].ToString()) ,helpKeyword="",senderName="") with member x.Equals(y) = false }
             engine.LogCustomEvent(eventArgs)
-            Yard.FsYard.generate (items.[0].ToString()) rnglrArgs
+            generate (items.[0].ToString()) rnglrArgs
             mem.Flush()
             use sr = new StreamReader(mem)
             let errors = sr.ReadToEnd().Split('\n')
@@ -107,7 +167,7 @@ type FsYard() =
             esw.Close()
             sw.Close()
             true
-            
+        //member statis cmdRun
         override this.HostObject
             with get () = host
             and set v = host <- v
@@ -115,5 +175,3 @@ type FsYard() =
         override this.BuildEngine
             with get () = engine
             and set v =  engine <- v
-
-do FsYard.cmdRun()

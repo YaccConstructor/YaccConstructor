@@ -93,8 +93,8 @@ and action_code = parse
   | "}"
     { decr comment_depth;
       if !comment_depth = 0 then ACTION_CODE(make_lexeme(!lexeme_start, lexbuf.StartPos)) else action_code lexbuf }
-  | '\'' { literal lexbuf; action_code lexbuf }
-  | '"' { literal2 lexbuf; action_code lexbuf }
+  | '\'' { literal lexbuf |> ignore; action_code lexbuf }
+  | '"' { literal2 lexbuf |> ignore; action_code lexbuf }
   | eof { EOF }
   | _ { action_code lexbuf }
 and literal = parse

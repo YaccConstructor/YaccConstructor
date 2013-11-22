@@ -30,7 +30,7 @@ let loadGraphFromDOT filePath =
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
-let baseInputGraphsPath = "../../../../Tests/AbstractRNGLR/DOT"
+let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =

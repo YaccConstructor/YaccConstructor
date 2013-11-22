@@ -5,7 +5,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Core.IL.Definition
 open Yard.Core.Checkers
-open Yard.Tests.Helper
+open YC.Tests.Helper
 open NUnit.Framework
 open System.Linq
 open System.IO
@@ -21,7 +21,7 @@ let generated = "Generated"
 type ``FParsec generator tests`` () =
     let iGenerator = new Yard.Generators.FParsecGenerator.FParsecGenerator()
     let parser = new Yard.Frontends.YardFrontend.YardFrontend()
-    let basePath = "../../../../Tests/FParsec"
+    let basePath = "../../../Tests/FParsec"
 
     let fixIl ilTree =
         let ilTree = ref ilTree
@@ -32,9 +32,7 @@ type ``FParsec generator tests`` () =
                 ilTree := {!ilTree with grammar = constr.Fix grammar}
         !ilTree
 
-    [<Test>]
-    member test.``Right generation of file`` () =  
-        let inFile = "calc.yrd"
+    let tetsFun inFile =
         let resultFile = System.IO.Path.GetFileNameWithoutExtension inFile + ".fs"
         let inFullPath = Path.Combine(basePath, inFile)
         let resultFullPath = Path.Combine(basePath, resultFile)
@@ -45,26 +43,22 @@ type ``FParsec generator tests`` () =
         filesAreEqual resultFullPath expectedFullPath      
 
     [<Test>]
+    member test.``Right generation of file`` () =  
+        tetsFun "calc.yrd"
+
+    [<Test>]
+    member test.``Test for literals`` () =
+        tetsFun "literals.yrd"                
+
+    [<Test>]
     member test.``Right calculation`` () = 
         let compCalc = ws >>. expr  .>> eof
         let gogo s = run compCalc s
         let checkInPut =
             function
-            | Success (v, _, _)  -> Assert.AreEqual(v.ToString(), "56")
+            | Success (v, _, _)  -> Assert.AreEqual("56", v.ToString())
             | Failure (msg, err, _) -> printf "%s" msg; failwith msg
-        ( gogo  "2+2*3**(2+1)" ) |> checkInPut 
-
-    [<Test>]
-    member test.``Test for literals`` () =
-        let inFile = "literals.yrd"
-        let resultFile = System.IO.Path.GetFileNameWithoutExtension inFile + ".fs"
-        let inFullPath = Path.Combine(basePath, inFile)
-        let resultFullPath = Path.Combine(basePath, resultFile)
-        let expectedFullPath = Path.Combine [|basePath; generated; resultFile|]
-        let il = parser.ParseGrammar inFullPath |> fixIl
-        let code = iGenerator.Generate il
-        System.IO.File.Exists resultFullPath |> Assert.IsTrue
-        filesAreEqual resultFullPath expectedFullPath
+        (gogo  "2+2*3**(2+1)") |> checkInPut 
 
     [<Test>]
     member test.``Right calculation for literals`` () = 
@@ -72,6 +66,6 @@ type ``FParsec generator tests`` () =
         let gogo s = run compCalc s
         let checkInPut =
             function
-            | Success (v, _, _)  -> Assert.AreEqual(v.ToString(), "aaaa")
+            | Success (v, _, _)  -> Assert.AreEqual("aaaa", v.ToString())
             | Failure (msg, err, _) -> printf "%s" msg; failwith msg
-        ( gogo  "aaaa" ) |> checkInPut 
+        (gogo  "aaaa") |> checkInPut 

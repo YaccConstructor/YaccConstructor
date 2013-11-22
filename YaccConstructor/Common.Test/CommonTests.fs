@@ -18,7 +18,7 @@ type ``Components loader tests`` () =
             List.ofSeq GeneratorsManager.Available
             |> List.sort
         let expetedResult = 
-            ["CYKGenerator";"FParsecGenerator";"FsYaccPrinter";"TreeDump";"YardPrinter"]
+            ["CYKGenerator";"FParsecGenerator";"FsYaccPrinter";"TreeDump";"YardPrinter";"GLLGenerator";"RNGLRGenerator"]
             |> List.sort
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
@@ -34,7 +34,7 @@ type ``Components loader tests`` () =
             List.ofSeq FrontendsManager.Available
             |> List.sort
         let expetedResult =
-            ["AntlrFrontend";"FsYaccFrontend";"YardFrontend"]
+            ["AntlrFrontend";"FsYaccFrontend";"IronyFrontend";"YardFrontend"]
             |> List.sort
         Seq.iter (printfn "%A;") allFrontends
         printfn "**********************"
@@ -80,7 +80,7 @@ type ``Components loader tests`` () =
 [<TestFixture>]
 type ``Checker test`` () =
     let frontend = Yard.Frontends.YardFrontend.YardFrontend() :> Frontend
-    let basePath = @"..\..\..\..\Tests\Checkers\"
+    let basePath = @"..\..\..\Tests\Checkers\"
 
     let getUndecl path =
         path

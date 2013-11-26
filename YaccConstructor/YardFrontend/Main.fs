@@ -164,7 +164,8 @@ let private parse buf userDefs =
                         (rangeToString (src.startPos, src.endPos)) msg src.text
     | Parser.Error (_, token, msg, debugs, _) -> 
         debugs.drawGSSDot "res.dot"
-        failwithf "Parse error on position %s on token %A: %s"  (token |> tokenToRange |> rangeToString) token msg
+        //todo
+        failwithf "Parse error on position %s on token %A: %s"  (token.[0] |> tokenToRange |> rangeToString) token msg
     
     
 let posTo2D (source:string) pos =    

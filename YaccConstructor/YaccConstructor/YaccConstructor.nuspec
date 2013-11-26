@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>YC.Core</id>
+    <version>0.0.0.1</version>
+    <title>Core of YaccConstructor</title>
+    <authors>YaccConstructor Software Foundation</authors>
+    <owners>YaccConstructor Software Foundation</owners>
+    <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
+    <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
+    <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
+    <dependencies> 
+        <dependency id="FSharpX.Core" version="[1.8.41]" />
+    </dependencies> 
+
+  </metadata>
+<files>
+    <file src="README" target="README" /> 
+    <file src="..\..\LICENSE" target="LICENSE" /> 
+    <file src="..\..\NOTICE" target="NOTICE" />
+    <file src="..\..\Bin\Release\v45\Common.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\Conversions.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\Constraints.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\YaccConstructor.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\FsYacc.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+</files>
+<!--Dependences
+FSharpX.Text.StructuredFormat  -->
+</package>

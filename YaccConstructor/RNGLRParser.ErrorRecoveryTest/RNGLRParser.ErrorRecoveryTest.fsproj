@@ -55,12 +55,14 @@
     <None Include="ErrorToEps.yrd" />
     <None Include="ManyReductions.yrd" />
     <None Include="PrimitiveErrorTranslate.yrd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\Program Files (x86)\NUnit 2.6\bin\framework\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

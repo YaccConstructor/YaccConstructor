@@ -34,7 +34,6 @@ open System.IO
 let justParse (path:string) =
     let lastTokenNum = ref 0L
     let traceStep = 50000L
-    let c = ref 0
 
     use reader = new System.IO.StreamReader(path)
 
@@ -94,10 +93,7 @@ let justParse (path:string) =
         filterEpsilons = true
     }
 
-    let res = 
-        buildAstAbstract (allTokens |> Seq.takeWhile (fun t -> box t <> null) 
-                                    |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r))
-//        buildAst allTokens
+    let res = buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 

@@ -293,7 +293,10 @@ let printTables
         printBr ""
         
         printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
+        printBrInd 1 "let c = ref 0"
+        printBrInd 1 "let seqToGraph = Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c;r) \
+                                    << Seq.takeWhile (fun t -> box t <> null)"
+        printBrInd 1 "buildAstAbstract << seqToGraph"
         printBr ""
         res.ToString()
 

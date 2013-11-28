@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>0.1.6250.0</version>
+    <version>0.1.7250.0</version>
     <title>YC.FsYARD</title>
     <authors>Semyon Grigorev, Dmitry Avdyukhin, Iakov Kirilenko, Ilia Chemodanov, Konstantin Ulitin, Andrey Ivanov</authors>
     <owners>gsv</owners>
@@ -16,44 +16,19 @@
     <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>
     <files>
-        <file src="..\..\Bin\Release\v45\Common.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Constraints.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Conversions.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\Abstract*.*.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\RNGLR*" target="\content\net45\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
-        <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\FsYARD.*" target="\content\net45\FsYARD" exclude="**\*.Test.*"/>        
-        <file src="..\Tools\Release\bin\FsYacc.exe" target="\content\net45\FsYARD"/>
-        <file src="..\packages\FSharpx.Text.StructuredFormat.*\lib\40\FSharpx.Text.StructuredFormat.*" target="\content\net45\FsYARD"/>
-        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\content\net45\FsYARD"/>
-        
-        <file src="..\..\Bin\Release\v40\Common.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\Constraints.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\Conversions.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v40\Abstract*.*.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v40\RNGLR*" target="\content\net40\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
-        <file src="..\..\Bin\Release\v40\YardFrontend.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\FsYARD.*" target="\content\net40\FsYARD" exclude="**\*.Test.*"/>        
-        <file src="..\Tools\Release\bin\FsYacc.exe" target="\content\net40\FsYARD"/>
-        <file src="..\packages\FSharpx.Text.StructuredFormat.*\lib\40\FSharpx.Text.StructuredFormat.*" target="\content\net40\FsYARD"/>
-        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\content\net40\FsYARD"/>
+        <file src="..\..\Bin\Release\v45\Common.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\Constraints.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\Conversions.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v45\Abstract*.*.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v45\RNGLR*" target="\tools\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
+        <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v45\FsYARD.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>        
+        <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools\FsYARD"/>
+        <file src="..\..\Bin\Release\v45\FSharpx.Text.StructuredFormat.*" target="\tools\FsYARD"/>
+        <file src="..\..\Bin\Release\v45\FSharpx.Core.*" target="\tools\FsYARD"/>
         
         <file src="README" target="README"/>
         <file src="..\..\LICENSE" target="LICENSE"/>
         <file src="..\..\NOTICE" target="NOTICE"/>
-
-        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net45\"/>
-        <file src="..\..\Bin\Release\v45\RNGLRCommon.*" target="\lib\net45\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\RNGLRParser.*" target="\lib\net45\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\RNGLRAbstractParser.*" target="\lib\net45\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Abstract*.Common.*" target="\lib\net45\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\AbstractLexer.Core.*" target="\lib\net45\" exclude="**\*.Test.*"/>
-
-        <file src="..\packages\FSharpx.Core.*\lib\40\FSharpx.Core.*" target="\lib\net40\"/>
-        <file src="..\..\Bin\Release\v40\RNGLRCommon.*" target="\lib\net40\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\RNGLRParser.*" target="\lib\net40" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\RNGLRAbstractParser.*" target="\lib\net40\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\Abstract*.Common.*" target="\lib\net40\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v40\AbstractLexer.Core.*" target="\lib\net40\" exclude="**\*.Test.*"/>
     </files>
 </package>

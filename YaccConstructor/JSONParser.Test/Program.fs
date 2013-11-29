@@ -20,7 +20,7 @@ let loadGraphFromDOT filePath =
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
-let baseInputGraphsPath = "../JSONParser.Test"
+let baseInputGraphsPath = "../jsonParser.Test"
 
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    
@@ -45,7 +45,7 @@ type ``Abstract lexer tests`` () =
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
         for e in qGraph.Edges do 
-            lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag, Unchecked.defaultof<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>)))
+            lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag.Replace('%','"'), Unchecked.defaultof<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>)))
         lexerInputG
 
     [<Test>]
@@ -61,5 +61,5 @@ let f x =
       let t = new ``Abstract lexer tests`` () 
       t.``Load graph test from DOT``()
       //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
-     // printfn "%A" t
+      //printfn "%A" t
       1

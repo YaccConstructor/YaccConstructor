@@ -21,7 +21,8 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 }
 
-+s:  h=HEAD? tokens=token* assoc* st=start typedef+ DOUBLE_PERC rules=rule* DOUBLE_PERC? 
+[<Start>]
+s:  h=HEAD? tokens=token* assoc* st=start typedef+ DOUBLE_PERC rules=rule* DOUBLE_PERC? 
     { h, List.concat tokens, st, rules }   ;
 
 token: TOKEN_KW TYPE? tokens=IDENT+ { tokens };

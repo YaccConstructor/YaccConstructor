@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Generators.RNGLR</id>
-    <version>0.0.0.1</version>
+    <version>0.0.5.0</version>
     <title>RNGLR parsers generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -11,17 +11,19 @@
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>RNGLR parsers generator for F# based on YaccConstructor. </description>
-    <releaseNotes>First version.</releaseNotes>
+    <releaseNotes>Errors is list.</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>Parsing Reengineering YaccConstructor YC RNGLR GLR Generator Parsergenerator Grammarware .NET F# FSharp</tags>
     <dependencies> 
         <dependency id="FSharpX.Core" version="[1.8.41]" />
         <dependency id="FSharpX.Text.StructuredFormat" version="[1.8.41]" />
         <dependency id="YC.Core" />
+        <dependency id="YC.AbstractAnalysis.Parsing.Common" />
     </dependencies> 
     <references>
         <reference file="RNGLRParser.dll" />
         <reference file="RNGLRCommon.dll" />
+        <reference file="RNGLRAbstractParser.dll" />
     </references>
 
   </metadata>
@@ -32,9 +34,11 @@
     <file src="..\..\Bin\Release\v45\RNGLRCommon.*" target="lib\net45\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v45\RNGLRParser.*" target="lib\net45\" exclude="**\*Test*"/> 
     <file src="..\..\Bin\Release\v45\RNGLR.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v45\RNGLRAbstractParser.*" target="lib\net45\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\RNGLRCommon.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\RNGLRParser.*" target="lib\net40\" exclude="**\*Test*"/> 
     <file src="..\..\Bin\Release\v40\RNGLR.*" target="lib\net40\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\RNGLRAbstractParser.*" target="lib\net40\" exclude="**\*.Test.*"/> 
 
 </files>
 <!--Dependences

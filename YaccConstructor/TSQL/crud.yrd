@@ -9,7 +9,7 @@ insert:
     ['TOP' sql_expr 'PERCENT'?]
     'INTO'? 
     (object | rowset_function ['WITH' '(' table_hint* ')'] )
-    ['(' comma_list<LOCALVAR> ')']
+    ['(' comma_list<ident> ')']
     output_clause?
     [
         'VALUES' '(' comma_list<('DEFAULT' | 'NULL' | sql_expr)> ')' 

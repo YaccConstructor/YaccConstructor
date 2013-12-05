@@ -120,3 +120,5 @@ NuGet/out
 */FsYard.log
 YaccConstructor/Calc/FsYARD/*
 YaccConstructor/TSQL/FsYARD/*
+YaccConstructor/FsYaccFrontend/out
+**/FsYard.log

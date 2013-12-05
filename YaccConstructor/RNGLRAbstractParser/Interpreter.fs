@@ -362,7 +362,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
             pushesInitFun curTokens.Value.Tokens.Length
  
-        let print fName = 
+        let print fName =
+            let path = fName |> string |> System.IO.Path.GetDirectoryName
+            if path |> System.IO.Directory.Exists |> not
+            then System.IO.Directory.CreateDirectory path |> ignore
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
             drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                         <| sprintf fName !curLvl     

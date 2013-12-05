@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.AbstractAnalysis.Lexing.Core</id>
-    <version>0.0.5.0</version>
+    <version>0.0.5.3</version>
     <title>YC.AbstractAnalysis.Lexing.Core</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>

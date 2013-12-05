@@ -26,20 +26,20 @@
   <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.5.0\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.5.3\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Accessibility" />
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.5.0\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.5.0\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.5.0\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -51,7 +51,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.5.0\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.5.3\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">
@@ -71,28 +71,28 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.0\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.5.0\lib\net40\YaccConstructor.exe</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <PropertyGroup>
-    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsYaccToolPath>
-    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\</FsLexToolPath>
+    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.5.3\lib\net40\</FsYaccToolPath>
+    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.5.3\lib\net40\</FsLexToolPath>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Choose>
@@ -108,7 +108,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)packages\YC.Tools.0.0.1.0\lib\net40\FSharp.PowerPack.targets" />
+  <Import Project="$(SolutionDir)packages\YC.Tools.0.0.5.3\lib\net40\FSharp.PowerPack.targets" />
   <ItemGroup>
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>

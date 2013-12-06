@@ -15,15 +15,15 @@ type Token =
     | NUMBER of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | STRING1 of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 15`` of (uint64 * uint64)
-    | ``L 16`` of (uint64 * uint64)
-    | ``L 17`` of (uint64 * uint64)
-    | ``L 18`` of (uint64 * uint64)
-    | ``L 19`` of (uint64 * uint64)
-    | ``L 20`` of (uint64 * uint64)
-    | ``L 21`` of (uint64 * uint64)
-    | ``L 22`` of (uint64 * uint64)
-    | ``L 23`` of (uint64 * uint64)
+    | ``L 15`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 16`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 17`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 18`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 19`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 20`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 21`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 22`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 23`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
@@ -37,7 +37,6 @@ let genLiteral (str : string) posStart posEnd =
     | "{" -> ``L 22`` (posStart, posEnd)
     | "}" -> ``L 23`` (posStart, posEnd)
     | x -> failwithf "Literal %s undefined" x
-
 let tokenData = function
     | NUMBER x -> box x
     | RNGLR_EOF x -> box x
@@ -58,12 +57,12 @@ let numToString = function
     | 2 -> "objects"
     | 3 -> "pair"
     | 4 -> "value"
-    | 5 -> "yard_exp_brackets_3"
-    | 6 -> "yard_exp_brackets_4"
-    | 7 -> "yard_many_1"
-    | 8 -> "yard_many_2"
-    | 9 -> "yard_rule_list_1"
-    | 10 -> "yard_rule_list_2"
+    | 5 -> "yard_exp_brackets_15607"
+    | 6 -> "yard_exp_brackets_15608"
+    | 7 -> "yard_many_1719"
+    | 8 -> "yard_many_1720"
+    | 9 -> "yard_rule_list_15605"
+    | 10 -> "yard_rule_list_15606"
     | 11 -> "yard_start_rule"
     | 12 -> "NUMBER"
     | 13 -> "RNGLR_EOF"

@@ -110,7 +110,7 @@ let fslex_actions_token  _fslex_state lexeme brs =
           )
   | 4 -> ( 
 # 28 "Lexer.fsl"
-                     getLiteral lexeme |> Some
+                     getLiteral brs lexeme |> Some
 # 114 "Lexer.fs"
           )
   | _ -> failwith "token"

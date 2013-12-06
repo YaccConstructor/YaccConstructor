@@ -131,6 +131,11 @@
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\JSON_Parser\JSON_Parser.fsproj">
+      <Name>JSON_Parser</Name>
+      <Project>{560052d2-e44a-42c0-8f88-04f623276b35}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\TSQL\TSQL.fsproj">
       <Name>TSQL</Name>
       <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>

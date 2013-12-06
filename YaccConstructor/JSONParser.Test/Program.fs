@@ -1,5 +1,4 @@
-﻿
-module JSONParser.Test
+﻿module JSONParser.Test
 
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot

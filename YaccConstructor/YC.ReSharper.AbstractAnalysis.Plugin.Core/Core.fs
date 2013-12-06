@@ -20,6 +20,7 @@ open Yard.Examples.MSParser
 type SupportedLangs =
     | Calc
     | TSQL
+    | JSON
 
 type Processor(file) =
     let defLang (n:ITreeNode) =
@@ -28,9 +29,10 @@ type Processor(file) =
             match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
             | "executeimmediate" -> TSQL
             | "eval" -> Calc
+            | "objnotation" ->JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let porcessLang graph tokenize parse addLError addPError = 
+    let processLang graph tokenize parse addLError addPError = 
         let tokenize g =
             try 
                tokenize g
@@ -89,6 +91,25 @@ type Processor(file) =
             | Calc.AbstractParser.RNGLR_EOF (l,br) -> e "EOF" l br
             | Calc.AbstractParser.ERROR (l,br) -> e "ERROR" l br
             | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
+        
+        let addErrorJSON tok = 
+            let e t l (br:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+                br |> filterBrs |> Array.iter(fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br.back_ref.GetDocumentRange()))
+            match tok with
+            | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
+            | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
+            | JSON.Parser.``L 15`` (br1)
+            | JSON.Parser.``L 16`` (br1)
+            | JSON.Parser.``L 17`` (br1)
+            | JSON.Parser.``L 18`` (br1)
+            | JSON.Parser.``L 19`` (br1)
+            | JSON.Parser.``L 20`` (br1)
+            | JSON.Parser.``L 21`` (br1)
+            | JSON.Parser.``L 22`` (br1)
+            | JSON.Parser.``L 23`` (br1) ->  
+                    let name = (JSON.Parser.tokenToNumber >> JSON.Parser.numToString) tok
+                    e name name (fst br1)
+
         
         let addErrorTSQL tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
@@ -429,7 +450,8 @@ type Processor(file) =
         |> ResizeArray.iter 
             (fun (l,g) ->
                 match l with
-                | Calc -> porcessLang g Calc.tokenize Calc.parse lexerErrors.Add  addError
-                | TSQL -> porcessLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL  )
+                | Calc -> processLang g Calc.tokenize Calc.parse lexerErrors.Add  addError
+                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL
+                | JSON -> processLang g JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON )
 
         lexerErrors,parserErrors

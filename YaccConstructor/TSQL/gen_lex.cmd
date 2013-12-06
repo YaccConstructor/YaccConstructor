@@ -1,1 +1,1 @@
-FsYard\AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
+..\packages\YC.FsYARD.0.2.5.3\tools\FsYARD\AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs

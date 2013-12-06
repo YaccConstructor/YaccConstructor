@@ -40,7 +40,6 @@
     <None Include="FsYard.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="app.config" Condition="'$(TargetFrameworkVersion)' == 'v4.0'" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

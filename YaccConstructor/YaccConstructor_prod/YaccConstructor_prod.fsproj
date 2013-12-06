@@ -45,6 +45,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\YaccConstructor\Program.fs">
+      <Link>Program.fs</Link>
+    </Compile>
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="fsyacc">
       <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
     </Reference>

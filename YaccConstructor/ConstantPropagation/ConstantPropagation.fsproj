@@ -23,6 +23,7 @@
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
+
       <PropertyGroup>
         <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
       </PropertyGroup>
@@ -34,13 +35,58 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+    <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="ConstantPropagation.fs" />
     <None Include="packages.config" />
+    <None Include="FsYARD\YardFrontend.pdb" />
+    <None Include="FsYARD\YardFrontend.dll" />
+    <None Include="FsYARD\RNGLRParser.pdb" />
+    <None Include="FsYARD\RNGLRParser.dll" />
+    <None Include="FsYARD\RNGLRCommon.pdb" />
+    <None Include="FsYARD\RNGLRCommon.dll" />
+    <None Include="FsYARD\RNGLRAbstractParser.pdb" />
+    <None Include="FsYARD\RNGLRAbstractParser.dll" />
+    <None Include="FsYARD\RNGLR.pdb" />
+    <None Include="FsYARD\RNGLR.dll" />
+    <None Include="FsYARD\FsYard.targets" />
+    <None Include="FsYARD\FsYARD.pdb" />
+    <None Include="FsYARD\FsYARD.exe.config" />
+    <None Include="FsYARD\FsYARD.exe" />
+    <None Include="FsYARD\FsYacc.exe" />
+    <Content Include="FsYARD\FSharpx.Text.StructuredFormat.xml" />
+    <None Include="FsYARD\FSharpx.Text.StructuredFormat.pdb" />
+    <None Include="FsYARD\FSharpx.Text.StructuredFormat.dll" />
+    <Content Include="FsYARD\FSharpx.Core.xml" />
+    <None Include="FsYARD\FSharpx.Core.pdb" />
+    <None Include="FsYARD\FSharpx.Core.dll" />
+    <None Include="FsYARD\Conversions.pdb" />
+    <None Include="FsYARD\Conversions.dll" />
+    <None Include="FsYARD\Constraints.pdb" />
+    <None Include="FsYARD\Constraints.dll" />
+    <Content Include="FsYARD\Common.xml" />
+    <None Include="FsYARD\Common.pdb" />
+    <None Include="FsYARD\Common.dll" />
+    <None Include="FsYARD\AbstractParsing.Common.pdb" />
+    <None Include="FsYARD\AbstractParsing.Common.dll" />
+    <None Include="FsYARD\AbstractLexer.Generator.pdb" />
+    <None Include="FsYARD\AbstractLexer.Generator.exe" />
+    <None Include="FsYARD\AbstractLexer.Core.pdb" />
+    <None Include="FsYARD\AbstractLexer.Core.dll" />
+    <None Include="FsYARD\AbstractLexer.Common.pdb" />
+    <None Include="FsYARD\AbstractLexer.Common.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.5.3\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AbstractLexer.Core">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AbstractParsing.Common">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
@@ -69,6 +115,22 @@
     </Reference>
     <Reference Include="QuickGraph.Serialization">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RNGLRAbstractParser">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RNGLRCommon">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RNGLRParser">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RNGLRParser.SimpleTest">
+      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

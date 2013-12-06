@@ -69,6 +69,6 @@ batch_body:
      | if_stmt 
      | drop_procedure 
      | create_table
-     | insert
+     | insert 
      | stmt_block
      | select_stmnt

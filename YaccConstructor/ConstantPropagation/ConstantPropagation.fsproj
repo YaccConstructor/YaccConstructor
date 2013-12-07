@@ -49,10 +49,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\AbstractParsing.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="AbstractParsing.Common">
       <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.5.3\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>

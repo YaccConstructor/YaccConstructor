@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A088-F9CE-4DC7-BA4B-082007601C67}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -18,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simple", "Simple", "{C4B45C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin", "Plugin", "{A20535F2-9BB0-42B6-8101-300091F179F2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "jSON", "jSON", "{B6002073-25B2-4EF6-BE9E-4BA92D664BDA}"
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ConstantPropagation", "ConstantPropagation\ConstantPropagation.fsproj", "{42485BCA-665D-48FB-BEFD-4A0232F2CF0B}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TSQL", "TSQL\TSQL.fsproj", "{5C8B9089-F612-4761-B712-09ECB5317C76}"
@@ -29,8 +33,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Core", "YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj", "{5FBF733C-9F3D-4831-89F2-68A500A2916C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin.Tests", "YC.ReSharper.AbstractAnalysis.Plugin.Tests\YC.ReSharper.AbstractAnalysis.Plugin.Tests.csproj", "{F67081A2-F11B-4203-B08C-FEFCB2EA924F}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "jSON", "jSON", "{B6002073-25B2-4EF6-BE9E-4BA92D664BDA}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JSON_Parser", "JSON_Parser\JSON_Parser.fsproj", "{560052D2-E44A-42C0-8F88-04F623276B35}"
 EndProject

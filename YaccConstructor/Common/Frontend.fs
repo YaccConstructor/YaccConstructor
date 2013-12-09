@@ -15,13 +15,13 @@
 namespace Yard.Core
 
 open Yard.Core.IL
+open Mono.Addins
 
+[<TypeExtensionPoint>]
 [<AbstractClass>]
-type Frontend() as this = 
+type Frontend() as this =
     abstract Name : string
-    //abstract CheckGrammar : Definition.t<Source.t,Source.t> -> bool
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>
-    //member public self.ParseGrammar = parse_grammar
     abstract ProductionTypes : string list
     interface Yard.Core.Manager.IComponent with
         member self.Name : string = this.Name

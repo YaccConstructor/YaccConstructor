@@ -15,7 +15,9 @@
 namespace Yard.Core
 
 open Yard.Core.IL
+open Mono.Addins
 
+[<TypeExtensionPoint>]
 [<AbstractClass>]
 type Generator() as this =
     abstract Name : string

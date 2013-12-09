@@ -15,7 +15,9 @@
 namespace Yard.Frontends.YardFrontend
 
 open Yard.Core
+open Mono.Addins
 
+[<Extension>]
 type YardFrontend() = 
     inherit Frontend()
         override this.Name = "YardFrontend"

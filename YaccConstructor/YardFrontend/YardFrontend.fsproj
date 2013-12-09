@@ -45,6 +45,9 @@
       <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>C:\Users\Илья\Downloads\Mono.Addins-binary-1.0\Mono.Addins.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

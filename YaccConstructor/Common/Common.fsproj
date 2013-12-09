@@ -51,6 +51,9 @@
     <Reference Include="FsYacc">
       <HintPath>..\Tools\Release\bin\FsYacc.exe</HintPath>
     </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>C:\Users\Илья\Downloads\Mono.Addins-binary-1.0\Mono.Addins.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

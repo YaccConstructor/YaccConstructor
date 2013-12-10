@@ -106,6 +106,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AbstractParsing.Common">
+      <HintPath>..\..\yc\AbstractParsing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
@@ -120,6 +123,9 @@
     <Reference Include="mscorlib" />
     <Reference Include="RNGLR">
       <HintPath>..\..\yc\RNGLR.dll</HintPath>
+    </Reference>
+    <Reference Include="RNGLRAbstractParser">
+      <HintPath>..\..\yc\RNGLRAbstractParser.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRCommon">
       <HintPath>..\..\yc\RNGLRCommon.dll</HintPath>

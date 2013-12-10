@@ -6,8 +6,6 @@
   <PropertyGroup>
     <LkgVersion>1.9.7.7</LkgVersion>
     <FsLexUnicode>true</FsLexUnicode>
-    <OutputPath Condition="'$(TargetFramework)' == ''">$(FSharpPowerPackSourcesRoot)\Tools\$(Configuration)\bin</OutputPath>
-    <OutputPath Condition="'$(TargetFramework)' == 'Silverlight'">$(FSharpPowerPackSourcesRoot)\..\$(TargetFramework)\$(SilverlightVersion)\$(Configuration)\bin</OutputPath>
     <IntermediateOutputPath Condition="'$(TargetFramework)' == ''">obj\$(Configuration)</IntermediateOutputPath>    
     <IntermediateOutputPath Condition="'$(TargetFramework)' == 'Silverlight'">obj\$(TargetFramework)\$(SilverlightVersion)\$(Configuration)</IntermediateOutputPath>
     <FsLexToolPath>$(FSharpPowerPackSourcesRoot)\..\lkg\FSharp.PowerPack-$(LkgVersion)\bin</FsLexToolPath>
@@ -29,7 +27,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Condition="'$(TargetFramework)' == ''" Include="FSharp.Core" />
     <Reference Condition="'$(TargetFramework)' == 'Silverlight' AND '$(SilverlightVersion)' == 'v4.0'" Include="System.Core" />
     <Reference Condition="'$(TargetFramework)' == 'Silverlight'" Include="$(MSBuildExtensionsPath32)\..\Microsoft F#\Silverlight\Libraries\Client\$(SilverlightVersion)\FSharp.Core.dll"/>
   </ItemGroup>

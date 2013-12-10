@@ -14,7 +14,7 @@
 
 
 module Yard.Core.IL
-module Source = begin
+module Source = 
     open Microsoft.FSharp.Text
     [<Struct>]
     type Position =
@@ -45,9 +45,8 @@ module Source = begin
         override this.ToString() = this.text
     // TODO: make something with toString overriding of Source.t   
     let toString (x : t) = x.text
-end
   
-module Production = begin
+module Production = 
     //let num = ref 0
     type IRuleType = interface end
     type DLabel = {
@@ -142,9 +141,9 @@ module Production = begin
                                 + "|]"
             |PSome x -> "(" + x.ToString() + ")+"
             |POpt x -> "(" + x.ToString() + ")?"
-end
 
-module Rule = begin
+
+module Rule = 
     /// <summary>
     /// <para>t&lt;'patt,'expr&gt; - Type of rule. </para>
     /// <para>  'patt - type of attributes (arguments). </para>
@@ -167,10 +166,8 @@ module Rule = begin
         /// List of meta-arguments - names of rules, parametrizing this rule.
         metaArgs: 'patt list
     }
-end
 
-
-module Grammar =  begin
+module Grammar =  
     type Module<'patt,'expr> = {
         /// Module is a list of rules
         rules : Rule.t<'patt,'expr> list
@@ -182,10 +179,8 @@ module Grammar =  begin
     }
     /// Grammar is a list of modules
     type t<'patt,'expr> = Module<'patt,'expr> list
-end 
 
-module Definition = begin
-    
+module Definition =     
     type info = { fileName: string }
     type t<'patt,'expr when 'patt : comparison and 'expr : comparison>  = { 
      /// Contains information (e.g. origin) about this grammar description
@@ -202,4 +197,3 @@ module Definition = begin
     
     /// Empty grammar
     let empty = { info = {fileName = ""}; head = None; foot = None; grammar = []; options = Map.empty; tokens = Map.empty}
-end

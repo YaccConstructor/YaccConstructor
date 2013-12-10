@@ -27,15 +27,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -43,12 +43,17 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.5.3\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">
@@ -73,15 +78,15 @@
     </ProjectReference>
     <Reference Include="System.Numerics" />
     <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\YaccConstructor.exe</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-	     Other similar extension points exist, see Microsoft.Common.targets.
-	<Target Name="BeforeBuild">
-	</Target>
-	<Target Name="AfterBuild">
-	</Target>
-	-->
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

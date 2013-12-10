@@ -1,6 +1,7 @@
 ﻿[<AllPublic>]
 module Datatype
 
+
 sql_datatype:
       'BIGINT'
     | 'NUMERIC'

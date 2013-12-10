@@ -1,10 +1,15 @@
+{
+open AbstractLexer.Core
+}
+
 tokens {
     _ of string
 }
 
 options {
-    translate = true
+    translate = false
     module = "AbstractLexer.Test.Calc.Parser"
+    token = "string*array<Position<string>>"
     infEpsPath = epsilons
     pos = uint64
 }

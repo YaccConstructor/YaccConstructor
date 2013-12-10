@@ -17,7 +17,6 @@ module Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open System.Collections.Generic
-open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.DataStructures
 open Microsoft.FSharp.Collections
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
@@ -48,7 +47,7 @@ type ParserDebugFuns<'TokenType> = {
 
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType> * Dictionary<Family, ErrorNode>
-    | Error of int * 'TokenType * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
+    | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
 let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level || (v'.Level = v.Level && v'.State < v.State)
@@ -73,7 +72,7 @@ let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex 
 
 /// Add or extend edge with specified destination and family.
 /// All edges are sorted by destination ascending.
-let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) (isError : bool) =
+let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * Family * AST>) isError =
     let mutable i = out.Count - 1
     let inline fst3 (x,_,_) = x
     let inline snd3 (_,x,_) = x
@@ -178,7 +177,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         then
             Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
         else
-            Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string",
+            Error (0, [||], "This grammar cannot accept empty string",
                     {
                         drawGSSDot = fun _ -> ()
                         lastTokens = fun _ -> [||]
@@ -286,7 +285,6 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         let curInd = ref 0
         let isEnd = ref false
         let attachEdges () =
-            let inline trd (_,_,x) = x
             let inline snd3 (_,x,_) = x
             for vertex in usedStates do
                 let mutable i = 0
@@ -632,7 +630,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         
         if !wasError 
         then 
-            Error (!curInd , !curToken , "Parse Error", debugFuns (), errDict)
+            Error (!curInd , [|!curToken|] , "Parse Error", debugFuns (), errDict)
         else
             let root = ref None
             let addTreeTop res =
@@ -646,7 +644,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, !curToken, "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
+            | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
                 Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)

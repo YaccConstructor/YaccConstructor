@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<actions>
+  <insert group-id="ReSharper" position="last">
+    <action-group id="YC.ReSharper.AbstractAnalysis.Plugin" text="YC.ReSharper.AbstractAnalysis.Plugin">
+      <action id="YC.ReSharper.AbstractAnalysis.Plugin.About" text="About ReSharper.AbstractAnalysis"/>
+      <!-- to break up elements use <separator/> -->
+    </action-group>
+  </insert>
+</actions>

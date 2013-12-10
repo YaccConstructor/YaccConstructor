@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MSSql", "MSSql\MSSql.fsproj", "{C1836F65-BDF4-4A8B-B59D-74A9676C9E5B}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MSSql.Test", "MSSql.Test\MSSql.Test.fsproj", "{7F1CCD2F-17AF-46EA-AA0E-2A072BC53CF8}"

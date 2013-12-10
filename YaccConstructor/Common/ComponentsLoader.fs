@@ -16,6 +16,7 @@ module Yard.Core.ComponentsLoader
 
 open System
 open System.IO
+open Microsoft.FSharp.Collections
 
 let private loadByType (desiredType:Type) =
     let basePath = AppDomain.CurrentDomain.BaseDirectory
@@ -35,5 +36,6 @@ let private isRealClass (cls:Type) =
 
 let LoadComponents (desiredType:Type) =
     loadByType desiredType
-    |> Seq.filter isRealClass
-    |> Seq.map Activator.CreateInstance
+    |> ResizeArray.ofSeq
+    |> ResizeArray.filter isRealClass
+    |> ResizeArray.choose (fun x -> try  Activator.CreateInstance x |> Some with _ -> None)

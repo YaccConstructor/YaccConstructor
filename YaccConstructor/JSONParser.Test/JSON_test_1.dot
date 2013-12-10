@@ -1,0 +1,5 @@
+digraph g
+{
+0; 1;
+0 -> 1 [label = "{ \"Name\" : Ivan }"];
+}

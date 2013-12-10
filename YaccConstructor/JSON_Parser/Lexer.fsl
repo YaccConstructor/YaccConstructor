@@ -1,0 +1,28 @@
+{
+module Lexer
+open LexerHelper
+open System
+open AbstractLexer.Core
+open JSON.Parser
+}
+//don`t support symbol '\f' and \u  four-hex-digits
+let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
+let s = ['\n' '\r' '\t' '\b']
+//let character = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' '\t' '\f' '\b' '\/' '\"' '\\' '\u'hexnumber ' ' ] +
+let character = ['a'-'z' 'A'-'Z' '0'-'9'  '/' '\"' '\\'  ' ' ] +
+let string1 =  '"' character* '"'
+let digit1to9 = ['1'-'9']+
+let digit = ['0'-'9']+
+let int = digit | digit1to9 digit | '-'digit | '-'digit1to9 digit
+let frac = '.' digit+
+let floae = ['e' 'E'] ['+' '-']?
+let exp = floae digit+    
+let number = int frac? exp? 
+let whitespaces = [' '  '\t']+
+
+rule token = parse
+| whitespaces { None }
+| number { NUMBER(lexeme,brs) |> Some }
+| string1 { STRING1(lexeme,brs) |> Some }
+| eof { RNGLR_EOF ("",[||]) |> Some }
+| _ { getLiteral brs lexeme |> Some}

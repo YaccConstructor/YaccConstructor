@@ -36,25 +36,30 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\Common\bin\Release\Common.dll</HintPath>
-    </Reference>
     <Reference Include="FParsec">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net45\FParsec.dll</HintPath>
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net40-client\FParsec.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FParsecCS">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net45\FParsecCS.dll</HintPath>
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net40-client\FParsecCS.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
       <Name>FParsecGenerator</Name>
       <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>

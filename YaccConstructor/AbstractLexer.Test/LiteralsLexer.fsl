@@ -8,5 +8,5 @@ open AbstractLexer.Core
 let smbs = ['0'-'9']
 
 rule token = parse
-| '\'' smbs+ '\'' { LITERAL "" }
+| '\'' smbs+ '\'' { LITERAL lexeme |> Some }
 | _ { failwithf "unexpected input: %s" <| "" }

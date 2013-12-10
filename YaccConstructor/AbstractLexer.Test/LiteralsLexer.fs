@@ -25,11 +25,11 @@ let actions : uint16[] = [|65535us; 1us; 1us; 65535us; 0us; 65535us; |]
 let _fslex_tables = AbstractLexer.Core.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-let fslex_actions_token  _fslex_state lexeme =
+let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
 # 11 "LiteralsLexer.fsl"
-                                   LITERAL "" 
+                                   LITERAL lexeme |> Some 
 # 33 "LiteralsLexer.fs"
           )
   | 1 -> ( 
@@ -38,7 +38,5 @@ let fslex_actions_token  _fslex_state lexeme =
 # 38 "LiteralsLexer.fs"
           )
   | _ -> failwith "token"
-
-# 13 "LiteralsLexer.fsl"
 
 # 3000000 "LiteralsLexer.fs"

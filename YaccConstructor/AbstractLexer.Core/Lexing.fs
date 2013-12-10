@@ -4,19 +4,150 @@ open System.Collections.Generic
 open AbstractLexer.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
+open QuickGraph.Graphviz
+open AbstractParsing.Common
+
+
+type Position<'br> =
+        { pos_fname : string;
+          pos_lnum : int;
+          pos_bol : int;
+          pos_cnum : int;
+          back_ref: 'br }
+        member x.FileName = x.pos_fname
+        member x.Line = x.pos_lnum
+        member x.Char = x.pos_cnum
+        member x.AbsoluteOffset = x.pos_cnum
+        member x.StartOfLine = x.pos_bol
+        member x.StartOfLineAbsoluteOffset = x.pos_bol
+        member x.Column = x.pos_cnum - x.pos_bol
+        member pos.NextLine =
+            { pos with
+                    pos_lnum = pos.Line+1;
+                    pos_bol = pos.AbsoluteOffset }
+        member pos.EndOfToken(n) = {pos with pos_cnum=pos.pos_cnum + n }
+        member pos.AsNewLinePos() = pos.NextLine
+        member pos.ShiftColumnBy(by) = {pos with pos_cnum = pos.pos_cnum + by}
+        static member Empty =
+            { pos_fname="";
+              pos_lnum= 0;
+              pos_bol= 0;
+              pos_cnum=0 
+              back_ref = Unchecked.defaultof<'br>}
+        static member FirstLine(filename,?br) =
+            { pos_fname=filename;
+              pos_lnum= 1;
+              pos_bol= 0;
+              pos_cnum=0;
+              back_ref = br}
 
 [<Struct>]
-type StateInfo<'a> =
+type StateInfo<'a, 'br> =
     val StartV: int
-    val AccumulatedString: 'a
-    new (startV, str) = {StartV = startV; AccumulatedString = str}
+    val AccumulatedString: ResizeArray<'a>
+    val Positions: ResizeArray<Position<'br>>
+    new (startV, str, positions) = {StartV = startV; AccumulatedString = str; Positions = positions}
 
 [<Struct>]
-type State<'a> =
+type State<'a, 'br> =
     val StateID: int
     val AcceptAction: int
-    val Info: ResizeArray<StateInfo<'a>>
-    new (stateId:int, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info}
+    val PreviousV: Option<int>
+    val Info: ResizeArray<StateInfo<'a, 'br>>
+    new (stateId, acceptAction, info) = {StateID = stateId; AcceptAction = acceptAction; Info = info ; PreviousV = None}
+    new (stateId, acceptAction, info, previousV) = 
+        {StateID = stateId; AcceptAction = acceptAction; Info = info ; PreviousV = previousV}
+
+type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
+        let context = new Dictionary<string,obj>(1) in
+        let mutable buffer=[||];
+        /// number of valid charactes beyond bufferScanStart
+        let mutable bufferMaxScanLength=0;
+        /// count into the buffer when scanning
+        let mutable bufferScanStart=0;
+        /// number of characters scanned so far
+        let mutable bufferScanLength=0;
+        /// length of the scan at the last accepting state
+        let mutable lexemeLength=0;
+        /// action related to the last accepting state
+        let mutable bufferAcceptAction=0;
+        let mutable eof = false
+        let mutable startPos = Position.Empty
+        let mutable endPos = Position.Empty
+        let mutable curPos = Position.Empty: Position<'br>
+        let count_pos_line = ref 0
+        let g = new LexerInnerGraph<'br>(inGraph)
+        let sorted = g.TopologicalSort() |> Array.ofSeq
+        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
+        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, new ResizeArray<_>(), new ResizeArray<_>())))
+        do states.[g.StartVertex] <- ResizeArray.singleton startState
+        let edgesSeq = seq{ for v in sorted do
+                                yield g.OutEdges v |> Array.ofSeq    
+                          }
+                        |> Seq.filter (fun x -> x.Length > 0)
+
+        let discardInput () =
+            let keep = Array.sub buffer bufferScanStart bufferScanLength
+            let nkeep = keep.Length
+            Array.blit keep 0 buffer 0 nkeep;
+            bufferScanStart <- 0;
+            bufferMaxScanLength <- nkeep
+                 
+              
+        member lexbuf.EndOfScan () : int =
+            // Printf.eprintf "endOfScan, lexBuffer.lexemeLength = %d\n" lexBuffer.lexemeLength;
+            if bufferAcceptAction < 0 then
+                failwith "unrecognized input"
+
+            // Printf.printf "endOfScan %d state %d on unconsumed input '%c' (%d)\n" a s (Char.chr inp) inp;
+            // Printf.eprintf "accept, lexeme = %s\n" (lexeme lexBuffer);
+            lexbuf.StartPos <- endPos;
+            lexbuf.EndPos <- endPos.EndOfToken(lexbuf.LexemeLength);
+            bufferAcceptAction
+
+        member lexbuf.StartPos
+           with get() = startPos
+           and set(b) = startPos <- b
+           
+        member lexbuf.EndPos
+           with get() = endPos
+           and set(b) = endPos <- b
+
+        member lexbuf.Lexeme = Array.sub buffer bufferScanStart lexemeLength
+        member lexbuf.LexemeChar(n) = buffer.[n+bufferScanStart]
+        
+        member lexbuf.CurrentPos  
+           with get() = curPos
+           and set(b) = curPos <- b
+
+        member lexbuf.BufferLocalStore = (context :> IDictionary<_,_>)
+        member lexbuf.LexemeLength with get() : int = lexemeLength and set v = lexemeLength <- v
+        member x.CountPosLine = count_pos_line
+        member x.States = states
+        member x.Edges = edgesSeq
+        member x.LastVId = sorted.[sorted.Length-1]
+        member internal lexbuf.Buffer with get() : 'char[] = buffer and set v = buffer <- v
+        member internal lexbuf.BufferMaxScanLength with get() = bufferMaxScanLength and set v = bufferMaxScanLength <- v
+        member internal lexbuf.BufferScanLength with get() = bufferScanLength and set v = bufferScanLength <- v
+        member internal lexbuf.BufferScanStart with get() : int = bufferScanStart and set v = bufferScanStart <- v
+        member internal lexbuf.BufferAcceptAction with get() = bufferAcceptAction and set v = bufferAcceptAction <- v
+
+//        static member LexemeString(lexbuf:LexBuffer<char>) =
+//            new System.String(lexbuf.Buffer,lexbuf.BufferScanStart,lexbuf.LexemeLength)
+
+        member lexbuf.IsPastEndOfStream
+           with get() = eof
+           and set(b) = eof <- b
+
+        member lexbuf.DiscardInput() = discardInput ()
+
+        member x.BufferScanPos = bufferScanStart + bufferScanLength
+
+        member lexbuf.EnsureBufferSize n =
+            if lexbuf.BufferScanPos + n >= buffer.Length then
+                let repl = Array.zeroCreate (lexbuf.BufferScanPos + n)
+                Array.blit buffer bufferScanStart repl bufferScanStart bufferScanLength;
+                buffer <- repl
 
 [<Sealed>]
 type AsciiTables(trans: uint16[] array, accept: uint16[]) =
@@ -78,7 +209,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 
             loop 0    
         
-    let scanUntilSentinel inp (state:State<_>) =
+    let scanUntilSentinel inp (state:State<_,_>) =
         // Return an endOfScan after consuming the input 
         let a = int accept.[state.StateID]
         let onAccept = if a <> sentinel then a else state.AcceptAction
@@ -86,71 +217,124 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let snew = lookupUnicodeCharacters (state.StateID,inp)
         snew = sentinel, onAccept, snew
 
-    let tokenize actions (inG:LexerInputGraph<_>) =
-        let g = new LexerInnerGraph<_>(inG)
-        let res = new DAG<_,_>()
-        let sorted = g.TopologicalSort() |> Array.ofSeq
-        let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_>(0,-1, ResizeArray.singleton (new StateInfo<_>(0,new ResizeArray<_>())))
-        states.[g.StartVertex] <- ResizeArray.singleton startState
-        let add (e:AEdge<_,_>) (newStt:State<_>) =
-            match states.[e.Target]
-                  |> ResizeArray.tryFind(fun x -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
+    let tokenize actions (lexbuf:LexBuffer<_,_>) printG =
+        //let edgesSeq = edgesSeq |> Array.ofSeq
+        let add (edg:LexerEdge<_,_>) (newStt:State<_,_>) =
+            match lexbuf.States.[edg.Target]
+                  |> ResizeArray.tryFind(fun (x:State<_,_>) -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
                 with
             | Some x ->
                 newStt.Info
                 |> ResizeArray.iter(
                     fun i -> 
                         if x.Info.Exists(fun j -> j.StartV = i.StartV
-                                                  && ResizeArray.length i.AccumulatedString = j.AccumulatedString.Count
+                                                  && i.AccumulatedString.Count = j.AccumulatedString.Count
                                                   && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
                            |> not
                         then x.Info.Add i)
-            | None -> states.[e.Target].Add newStt
+            | None -> lexbuf.States.[edg.Target].Add newStt
+ 
+        let mkNewString (edg:LexerEdge<_,'br>) (stt:State<_,_>) = 
+            let ch = edg.Label.Value
+            let newPos (p:Option<Position<_>>) =
+                match p with
+                | Some x when x.back_ref = edg.BackRef.Value ->
+                    {
+                        pos_fname = ""
+                        pos_lnum = 0
+                        pos_bol = 0
+                        pos_cnum = x.pos_cnum + 1
+                        back_ref = edg.BackRef.Value
+                    }
 
-        for v in sorted do
-            for stt in states.[v] do
-                let reduced = ref false
-                for e in g.OutEdges v do
-                    let ch = e.Label
-                    match ch with
-                    | Some x ->
-                        let rec go stt =
-                            let reduce, onAccept, news = scanUntilSentinel x stt
-                            if reduce
-                            then
-                                stt.Info
-                                |> ResizeArray.iter
-                                    (fun (i:StateInfo<_>) -> 
-                                        new string(i.AccumulatedString |> Array.ofSeq)
-                                        |> actions onAccept  
-                                        |> fun x -> 
-                                            if not !reduced then res.AddEdgeForsed(new AEdge<_,_>(i.StartV,v,(Some x,None)))
-                                            reduced := true)
-                                let newStt = new State<_>(0,-1,new ResizeArray<_>())                            
-                                go newStt
-                            else 
-                                let acc = 
-                                    if stt.Info.Count > 0
-                                    then
-                                        let newBuf (i:StateInfo<_>) = ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch.Value]
-                                        stt.Info |> ResizeArray.map (fun i -> new StateInfo<_>(i.StartV, newBuf i))
-                                    else ResizeArray.singleton(new StateInfo<_>(v, ResizeArray.singleton ch.Value))
-                                let newStt = new State<_>(news,onAccept,acc)
-                                add e newStt
-                        go stt
-                    | None -> add e stt
+                | _ ->
+                    {
+                        pos_fname = ""
+                        pos_lnum = 0
+                        pos_bol = 0
+                        pos_cnum = 0
+                        back_ref = edg.BackRef.Value
+                    }
+            
 
-        states.[sorted.[sorted.Length-1]]
-        |> ResizeArray.iter(
-            fun x ->
-                x.Info
-                |> ResizeArray.iter
-                    (fun (i:StateInfo<_>) ->                        
-                        new string(i.AccumulatedString.ToArray())
-                        |> actions (int accept.[x.StateID])
-                        |> fun x -> res.AddEdgeForsed(new AEdge<_,_>(i.StartV,sorted.[sorted.Length-1],(Some x,None)))))
-        res
+            if stt.Info.Count > 0
+            then
+                stt.Info
+                |> ResizeArray.map 
+                    (
+                        fun i ->
+                            let pos = 
+                                if i.Positions.Count = 0 then None else Some i.Positions.[0] 
+                                |> newPos
+                            new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> i.StartV)
+                            , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
+                            , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
+                    )
+            else 
+                new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source)
+                , ResizeArray.singleton ch
+                , ResizeArray.singleton (newPos (Some lexbuf.CurrentPos)))
+                |> ResizeArray.singleton
+
+        let processToken onAccept (p: StateInfo<_,_>) =
+            let s = (new string(p.AccumulatedString |> Array.ofSeq))
+            actions onAccept (new string(p.AccumulatedString |> Array.ofSeq)) (p.Positions |> Array.ofSeq |> Array.rev)                          
+
+        let processEdg (edg:LexerEdge<_,_>) stt reduced =
+            let acc = new ResizeArray<_>(10) 
+            match edg.Label with
+            | Some x ->
+                let rec go stt =
+                    let reduce, onAccept, news = scanUntilSentinel x stt
+                    if reduce
+                    then
+                        for i in stt.Info do
+                            if not !reduced then acc.Add(new ParserEdge<_>(i.StartV, edg.Source, processToken onAccept i))
+                            lexbuf.CurrentPos <- i.Positions.[0]
+                        reduced := true
+                        let newStt = new State<_,_>(0,-1,new ResizeArray<_>())
+                        go newStt
+                    else 
+                        let acc = mkNewString edg stt
+                        let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
+                        add edg newStt
+                go stt
+            | None -> 
+                      let acc = mkNewString edg stt
+                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
+                      add edg newStt
+            acc 
+
+        let res_edg_seq = 
+            seq{
+                for (edgs:array<LexerEdge<_,_>>) in lexbuf.Edges do
+                    for stt in lexbuf.States.[edgs.[0].Source] do
+                        let reduced = ref false
+                        for edg in edgs do
+                            yield! processEdg edg stt reduced
+                            }
+                 
+        seq{
+            yield! res_edg_seq
+            for x in lexbuf.States.[lexbuf.LastVId] do
+                for i in x.Info do                                            
+                    yield (new ParserEdge<_>(i.StartV,lexbuf.LastVId, processToken (int accept.[x.StateID]) i))                    
+        }
+        
+
+    let inputGraph actions (inG:LexerInputGraph<'br>) printG =
+        let lexbuf = new LexBuffer<_,'br>(inG) 
+        let newEdgs = 
+            tokenize actions lexbuf printG
+            |> Array.ofSeq
+        let res = new ParserInputGraph<_>()
+        let r = newEdgs
+        res.AddVerticesAndEdgeRange r
+        |> ignore
+        //EpsClosure.NfaToDfa res
+        //|> ignore
+        let eps_res = EpsClosure.NfaToDfa res
+        eps_res
                           
     // Each row for the Unicode table has format 
     //      128 entries for ASCII characters
@@ -158,7 +342,23 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     //      30 entries, one for each UnicodeCategory
     //      1 entry for EOF
 
+    member tables.Interpret stt (lexbuf:LexBuffer<_,_>) = 
+        0
 
-    member tables.Tokenize actions g = tokenize actions g
-    static member Create(trans,accept) = new UnicodeTables(trans,accept)
+    member tables.Tokenize(actions, g, eofToken, ?printG) =
+        let res = inputGraph actions g (match printG with Some f -> f | _ -> fun x y -> ())
+        let endV, newEndV = 
+            if res.VertexCount = 0 
+            then 0, 1 
+            else 
+                res.Vertices |> Seq.find (fun v -> res.OutDegree v = 0)
+                , (res.Vertices |> Seq.max) + 1
+        res.AddVerticesAndEdge(new ParserEdge<_>(endV, newEndV, eofToken)) |> ignore
+        res
 
+    static member Create(trans, accept) = new UnicodeTables(trans, accept)
+
+//    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
+//    let DB = new MS_DB("")
+//    let res = DB.exec query
+//    res |> Seq.iter (printfn "%A")

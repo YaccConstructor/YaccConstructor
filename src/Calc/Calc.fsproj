@@ -120,10 +120,6 @@
       <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RNGLRParser.SimpleTest">
-      <HintPath>..\packages\YC.FsYARD.0.1.6250.0\lib\net40\RNGLRParser.SimpleTest.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

@@ -47,25 +47,17 @@ let getResultFileName path pref =
     System.IO.Path.Combine (!resultDirectoryPath, pref + System.IO.Path.GetFileName path)
                                   //path.Substring(path.LastIndexOf("\\") + 1)
 
-let i = ref false
+//let flg = ref false
 let LexerTSQL (srcFilePath:string) =
     let tokenize srcFilePath = 
         let lexerInputGraph = loadLexerInputGraph srcFilePath
         let start = System.DateTime.Now
-        tokenize lexerInputGraph
-        |> ignore
-        if !i
-        then 
-            let sum = ref 0.0
-            //for i in 1..10 do sum := !sum + (System.DateTime.Now - start).TotalMilliseconds
-            //printfn "%s %A" (System.IO.Path.GetFileNameWithoutExtension(srcFilePath)) (!sum/10.0)
-            printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
-            for i in 1..10 do printf " %A "  (System.DateTime.Now - start).TotalMilliseconds
-            printfn " "
-    if not !i
-    then
-        tokenize srcFilePath
-        i := true
+        for i in 1..10 do
+            tokenize lexerInputGraph |> ignore
+        System.GC.Collect()
+        printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
+        printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
+        printfn " "
     tokenize srcFilePath
 
 let LexerTSQLAllDirectory (directoryName:string) =

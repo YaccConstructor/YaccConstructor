@@ -23,7 +23,7 @@
   </PropertyGroup>
   <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="FsYard\FsYard.Targets" />
+  <Import Project="FsYard\FsYard.Targets"/>
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>Calc.yrd.fs</OutFile>

@@ -1,0 +1,1 @@
+nuget pack ..\YaccConstructor\RNGLRCommon\YC.Generators.RNGLR.nuspec 

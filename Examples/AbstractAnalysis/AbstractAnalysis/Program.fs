@@ -32,7 +32,7 @@ let printTag tag printBrs =
 let go file =
     let lexerInputGraph = loadLexerInputGraph file
     let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR_EOF("",[||]))
-    printTokenizedGraph res printTag file
+    printTokenizedGraph res printTag (System.IO.Path.GetFileName file)
     let r = (new Yard.Generators.RNGLR.AbstractParser.Parser<_>()).Parse  buildAstAbstract res
     printfn "%A" r
     match r with
@@ -41,7 +41,7 @@ let go file =
         debug.drawGSSDot (file + ".out.dot")
     | Yard.Generators.RNGLR.Parser.Success(tree,_) ->
         tree.PrintAst()
-        defaultAstToDot tree (file + ".ast.dot")
+        defaultAstToDot tree ((System.IO.Path.GetFileName file) + ".ast.dot")
 
 let file = ref "simple_sum.dot"
 let commandLineSpecs =

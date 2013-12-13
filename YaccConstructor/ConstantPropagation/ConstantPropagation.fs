@@ -44,7 +44,7 @@ type Approximator(file:ICSharpFile) =
                 go start n a.LeftOperand 
                 go n _end a.RightOperand
             | :? ICSharpLiteralExpression as l -> 
-                new LexerEdge<_,_>(start,_end,Some(l.Literal.GetText().Trim[|'"'|],l))
+                new LexerEdge<_,_>(start,_end,Some(l.Literal.GetText().Replace("\\","").Trim[|'"'|],l))
                 |> edges.Add
             | :? IReferenceExpression as re -> processVar start _end re
             | :? IConditionalTernaryExpression as tern -> 
@@ -64,7 +64,7 @@ type Approximator(file:ICSharpFile) =
         let addHotspot (node:ITreeNode) =
             match node with 
             | :? IInvocationExpression as m 
-                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"|] 
+                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
                 -> hotspots.Add (defineLang node , m)
             | _ -> ()
         //InvocationExpressionNavigator.

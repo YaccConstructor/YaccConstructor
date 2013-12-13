@@ -117,6 +117,15 @@ YaccConstructor/FParsecGenerator.Test/out
 Examples/AbstractAnalysis/packages/*
 YaccConstructor/TSQL/log.txt
 NuGet/out
+YaccConstructor/YC.ReSharper.AbstractAnalysis/YC.ReSharper.AbstractAnalysis.Plugin.Core/FsYARD/*
+YaccConstructor/Calc/FsYARD/*
+YaccConstructor/TSQL/FsYARD/*
+YaccConstructor/ConstantPropagation/FsYARD/*
+YaccConstructor/JSON_Parser/FsYARD/*
+YaccConstructor/TSQL/log.txt
 */FsYard.log
 YaccConstructor/Calc/FsYARD/*
 YaccConstructor/TSQL/FsYARD/*
+YaccConstructor/FsYaccFrontend/out
+**/FsYard.log
+YaccConstructor/TSQL/MsParser.fs

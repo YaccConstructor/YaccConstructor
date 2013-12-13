@@ -2,7 +2,6 @@
 
 open QuickGraph
 
-
 type ParserEdge<'token>(s,e,t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
 

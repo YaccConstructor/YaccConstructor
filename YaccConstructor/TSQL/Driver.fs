@@ -25,7 +25,8 @@ open System
 open System.IO
 
 let tokenize lexerInputGraph =
-    Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, RNGLR_EOF(new Yard.Utils.SourceText.SourceText(),[||]))
+    let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
+    Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eof)
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

@@ -1,0 +1,1 @@
+nuget pack ..\YaccConstructor\Utils.SourceText\Utils.SourceText.nuspec

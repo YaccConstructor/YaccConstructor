@@ -25,7 +25,7 @@ type Token =
 
 let genLiteral (str : string) posStart posEnd =
     match str.ToLower() with
-    | x -> failwithf "Literal %s undefined" x
+    | x -> failwithf "Literal %%s undefined" x
 let tokenData = function
     | DIV x -> box x
     | ERROR x -> box x
@@ -47,15 +47,15 @@ let numToString = function
     | 5 -> "powOp"
     | 6 -> "term"
     | 7 -> "termOp"
-    | 8 -> "yard_exp_brackets_16"
-    | 9 -> "yard_exp_brackets_17"
-    | 10 -> "yard_exp_brackets_18"
-    | 11 -> "yard_many_7"
-    | 12 -> "yard_many_8"
-    | 13 -> "yard_many_9"
-    | 14 -> "yard_rule_binExpr_13"
-    | 15 -> "yard_rule_binExpr_14"
-    | 16 -> "yard_rule_binExpr_15"
+    | 8 -> "yard_exp_brackets_4"
+    | 9 -> "yard_exp_brackets_5"
+    | 10 -> "yard_exp_brackets_6"
+    | 11 -> "yard_many_1"
+    | 12 -> "yard_many_2"
+    | 13 -> "yard_many_3"
+    | 14 -> "yard_rule_binExpr_1"
+    | 15 -> "yard_rule_binExpr_2"
+    | 16 -> "yard_rule_binExpr_3"
     | 17 -> "yard_start_rule"
     | 18 -> "DIV"
     | 19 -> "ERROR"

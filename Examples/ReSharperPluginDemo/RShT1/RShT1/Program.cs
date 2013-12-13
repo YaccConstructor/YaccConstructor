@@ -12,6 +12,11 @@ namespace RShT1
             
         }
 
+        public static void Objnotation(string s)
+        {
+            
+        }
+
         public static int Eval(string s)
         {
             return 0;

@@ -2,11 +2,7 @@
 
 open JetBrains.Application.Progress
 open JetBrains.ProjectModel
-open JetBrains.ReSharper.Daemon.CSharp.Stages
 open JetBrains.ReSharper.Feature.Services.Bulbs
-open JetBrains.ReSharper.Feature.Services.CSharp.Bulbs
-open JetBrains.ReSharper.Feature.Services.LinqTools
-open JetBrains.ReSharper.Intentions.Extensibility
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree

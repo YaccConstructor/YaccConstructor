@@ -20,8 +20,11 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.ExtensionsAPI;
 using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
+using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
+using JetBrains.ReSharper.Psi.Xml.XmlDocComments;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
@@ -56,6 +59,14 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
       // Commit the result into document
       commiter(new DaemonStageResult(highlightings.ToArray()));
     }
+
+      protected void F()
+      {
+          //InjectedPsiHolderNode.CreateHolderFor();
+          //InjectedPsiExtensions.GetInjectAt();
+          ////IInjectedPsiProvider
+          //IndependentInjectedPsiProvider
+      }
 
     public IDaemonProcess DaemonProcess
     {

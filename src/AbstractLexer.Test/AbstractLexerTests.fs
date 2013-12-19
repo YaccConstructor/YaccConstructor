@@ -65,7 +65,7 @@ type ``Abstract lexer tests`` () =
         lexerInputG.StartVertex <- 0
         for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag, e.Tag+"|")))
         lexerInputG
-
+        
     let checkArr expectedArr actualArr =
         if Array.length expectedArr = Array.length actualArr
         then 

@@ -1,0 +1,29 @@
+﻿{
+open AbstractLexer.Core
+}
+
+include "../../GrammarTemplates/Common.yrd"
+
+tokens {
+    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+}
+
+options {
+    translate = false
+    module = "JSON.AbstractParser"
+    infEpsPath = epsilons
+    pos = "array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>" 
+}
+
+module Main
+
+open Common
+
+[<Start>]
+value: STRING1 | NUMBER  | objects | array1  | 'true' | 'false' | 'null' 
+
+array1: '[' list<value ','> ']' 
+
+pair: STRING1 ':' value 
+ 
+objects: '{' list<pair ','> '}'

@@ -1,0 +1,8 @@
+digraph g
+{
+0; 1; 2; 3;
+0 -> 1 [label = "{\"Name\" : "];
+1 -> 2 [label = "Ivan "];
+1 -> 2 [label = "Vasiliy "];
+2 -> 3 [label = "}"];
+}

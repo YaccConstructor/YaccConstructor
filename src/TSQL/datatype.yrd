@@ -1,0 +1,26 @@
+﻿[<AllPublic>]
+module Datatype
+
+sql_datatype:
+      'BIGINT'
+    | 'NUMERIC'
+    | 'BIT'
+    | 'SMALLINT'
+    | 'DECIMAL'
+    | 'DATETIME'
+    | 'SMALLMONEY'
+    | 'SYSNAME'
+    | 'INT'
+    | 'TINYINT'
+    | 'MONEY'
+    | 'FLOAT' type_size?  (* http://msdn.microsoft.com/en-us/library/ms173773.aspx *)
+    | 'REAL'
+    | 'CHAR' type_size?
+    | 'VARCHAR' type_size?
+    | 'VARBINARY' type_size?
+    | 'NCHAR' type_size?   (* http://msdn.microsoft.com/en-us/library/ms186939.aspx *)
+    | 'NVARCHAR' type_size?
+    | 'SQL_VARIANT'
+
+type_size : '(' (DEC_NUMBER | 'MAX') ')'
+

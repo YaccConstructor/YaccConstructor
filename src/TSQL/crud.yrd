@@ -1,0 +1,37 @@
+﻿[<AllPublic>]
+module Crud
+
+open MsCommon, Expr, Select_crud, Stmnt
+
+insert:
+    ['WITH' comma_list<common_table_expression>]
+    'INSERT' 
+    ['TOP' sql_expr 'PERCENT'?]
+    'INTO'? 
+    (object | rowset_function ['WITH' '(' table_hint* ')'] )
+    ['(' comma_list<ident> ')']
+    output_clause?
+    [
+        'VALUES' '(' comma_list<('DEFAULT' | 'NULL' | sql_expr)> ')' 
+      | proc_body_stmnt
+      | 'DEFAULT' 'VALUES'
+    ]
+    ';'?
+
+output_clause:
+    'OUTPUT' dml_select_list 'INTO' (LOCALVAR | IDENT)
+    ['(' comma_list<LOCALVAR> ')']
+    ['OUTPUT' dml_select_list]
+    
+dml_select_list:
+    (ident | sql_expr) ['AS'? IDENT]
+    comma_list<( (ident | sql_expr) ['AS'? IDENT])>
+
+object: full_ident
+   (* [
+        IDENT '.' IDENT '.' IDENT '.' 
+      | IDENT '.' IDENT? '.' 
+      | IDENT '.'
+    ]
+    ident
+	*)

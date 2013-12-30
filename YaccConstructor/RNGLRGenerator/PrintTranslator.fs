@@ -165,10 +165,26 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 childrenName !num i name
             |> wordL
         | PSeq (s, ac, _) ->
-            match ac with
-            | None -> wordL "[]"
-            | Some ac ->
-                let actionCodeLayout =
+            let getVarName innerNum (e : elem<_,_>) =
+                match e.binding with
+                | None ->
+                    incr innerNum
+                    sprintf "_rnglr_var_%d" <| !innerNum
+                | Some b -> Source.toString b
+                
+            let actionCodeLayout =
+                match ac with
+                | None ->
+                    let innerNum = ref -1
+                    s
+                    |> List.choose (fun e ->
+                        let var = getVarName innerNum e
+                        if e.omit then None
+                        else Some var
+                    ) |> String.concat ","
+                    |> (fun s -> "(" + s + ")")
+                    |> wordL
+                | Some ac ->
                     let strings = (Source.toString ac).Replace("\r\n", "\n").Split([|'\n'|])
                     strings.[0] <- String.replicate ac.startPos.column " " + strings.[0]
                     strings
@@ -176,31 +192,32 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                     |> (fun l -> getPosFromSource fullPath dummyPos ac ::l)
                     |> List.map wordL
                     |> aboveListL
-                s
-                |> List.collect
-                    (fun e ->
-                        let var = 
-                            if e.binding.IsNone || e.omit then "_"//(sprintf "_rnglr_var_%d" <| !num + 1)
-                            else Source.toString e.binding.Value
-                        let prod = getProductionLayout num e.rule
-                        match e.checker with
-                        | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
-                        | Some ch ->
-                            let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource fullPath dummyPos ch)
-                            let cond = wordL <| "if (" + ch.text + ") then (" 
-                            [res; cond]
-                        //-- wordL (" do")
-                    )
-                |> List.rev
-                |> List.fold
-                    (fun acc x -> x @@-- acc -- wordL ")")
-                    (wordL (resCycleName + " := (") @@-- actionCodeLayout @@-- wordL (")::!" + resCycleName))
-                |> (fun x -> [wordL <| "let " + resCycleName + " = ref []"
-                              x
-                              //wordL <| getPosFromSource fullPath dummyPos ac
-                              wordL <| "!" + resCycleName
-                             ] |> aboveListL)
-                |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
+            let innerNum = ref -1
+            s
+            |> List.collect
+                (fun e ->
+                    let var = getVarName innerNum e
+                    let prod = getProductionLayout num e.rule
+                    match e.checker with
+                    | None -> [prod -- wordL ("|> List.iter (fun (" + var + ") -> ")]
+                    | Some ch ->
+                        let res = prod -- wordL ("|> List.iter (fun (" + var + ") -> " + getPosFromSource fullPath dummyPos ch)
+                        let cond = wordL <| "if (" + ch.text + ") then (" 
+                        [res; cond]
+                    //-- wordL (" do")
+                )
+            |> List.rev
+            |> List.fold
+                (fun acc x -> x @@-- acc -- wordL ")")
+                (wordL (resCycleName + " := (") @@-- actionCodeLayout @@-- wordL (")::!" + resCycleName))
+            |> (fun x ->
+                [wordL <| "let " + resCycleName + " = ref []"
+                 x
+                 //wordL <| getPosFromSource fullPath dummyPos ac
+                 wordL <| "!" + resCycleName
+                ]
+                |> aboveListL)
+            |> (fun x -> (wordL "(" @@-- x) @@ wordL ")")
         | x -> failwithf "unexpected construction: %A" x
     let getRuleLayout (rule : Rule.t<Source.t,Source.t>) nonTermName =
         if positionType = "" then

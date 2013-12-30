@@ -39,6 +39,7 @@
     <Compile Include="Order.yrd.fs" />
     <Compile Include="LongCycle.yrd.fs" />
     <Compile Include="LolCalc.yrd.fs" />
+    <Compile Include="Omit.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
     <None Include="ComplexRightNull.yrd" />
@@ -56,6 +57,7 @@
     <None Include="LongCycle.yrd" />
     <None Include="LolCalc.yrd" />
     <None Include="packages.config" />
+    <None Include="Omit.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharpx.Core">

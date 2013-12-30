@@ -240,5 +240,17 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual([5,0], res)
 
+    [<Test>]
+    member test.``Omit``() =
+        let parser = RNGLR.ParseOmit.buildAst
+        let path = dir + "Omit.txt"
+
+        match run path parser with
+        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, errors) ->
+            let res = translate RNGLR.ParseOmit.translate mAst errors
+            printfn "%A" res
+            Assert.AreEqual([[1; 3]], res)
+
 (*[<EntryPoint>]
 (new ``RNGLR parser tests with simple lexer``()).``AST, containing long cycles``()*)

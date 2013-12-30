@@ -9,7 +9,7 @@ for %%i in (Epsilon, Longest, InfEpsilon) do (
         -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -translate true -table LR -o %%i.yrd.fs" >> log.txt
 )
 
-for %%i in (Order,Cond,Attrs,Calc,Counter,Cycle,LongCycle,Resolvers, LolCalc) do (
+for %%i in (Order,Cond,Attrs,Calc,Counter,Cycle,LongCycle,Resolvers, LolCalc, Omit) do (
 		echo . >> log.txt
 		echo %%i >> log.txt
     ..\..\bin\Release\v45\YaccConstructor.exe -i %%i.yrd ^

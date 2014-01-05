@@ -1,4 +1,3 @@
-@echo off
 
 del log.txt
 

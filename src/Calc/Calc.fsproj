@@ -61,15 +61,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -125,13 +125,13 @@
       <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\YaccConstructor.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YaccConstructor">
+      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\YaccConstructor.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

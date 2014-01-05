@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\AbstractParsing.Common\YC.AbstractAnalysis.Parsing.Common.nuspec 
+nuget pack ..\src\AbstractParsing.Common\YC.AbstractAnalysis.Parsing.Common.nuspec 

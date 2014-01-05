@@ -53,7 +53,7 @@ type ``Conversions expand metarules tests`` () =
         treeDump.Generate ilTreeConverted |> string |> printfn "%s"
         if not <| ILComparators.GrammarEqualsWithoutLineNumbers ilTreeConverted.grammar expected.grammar then
             let text = (new Yard.Generators.YardPrinter.YardPrinter()).Generate { ilTree with grammar=ilTreeConverted.grammar }
-            Directory.CreateDirectory "out"
+            Directory.CreateDirectory "out" |> ignore
             File.WriteAllText (Path.Combine ("out", srcFile + ".ans"), text :?> string)
             Assert.Fail "Trees are not equal"
             

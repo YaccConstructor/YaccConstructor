@@ -363,12 +363,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             pushesInitFun curTokens.Value.Tokens.Length
  
         let print fName =
+            ()
+#if DEBUG
             let path = fName |> string |> System.IO.Path.GetDirectoryName
             if path |> System.IO.Directory.Exists |> not
             then System.IO.Directory.CreateDirectory path |> ignore
             let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
             drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                         <| sprintf fName !curLvl     
+#endif
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
         let mutable wasError = ref false

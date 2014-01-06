@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.AbstractAnalysis.Lexing.Generator</id>
-    <version>0.0.5.3</version>
+    <version>0.0.6.4</version>
     <title>YC.AbstractAnalysis.Lexing.Generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -11,8 +11,8 @@
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Abstract lexers generator.</description>
-    <releaseNotes>Developer version. </releaseNotes>
-    <copyright>Copyright 2013</copyright>
+    <releaseNotes>First public version. </releaseNotes>
+    <copyright>Copyright 2013, 2014</copyright>
     <tags>F#  FSharp .NET AbstractLexing LexersGenerator lexing grammarware reengineering string-embedded SQL</tags>
   </metadata>
     <files>

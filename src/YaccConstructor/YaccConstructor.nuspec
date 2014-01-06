@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Core</id>
-    <version>0.0.6.3</version>
+    <version>0.0.6.4</version>
     <title>Core of YaccConstructor</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -12,7 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
     <releaseNotes>Support for .NET 4.0 .</releaseNotes>
-    <copyright>Copyright 2013</copyright>
+    <copyright>Copyright 2013, 2014</copyright>
     <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
     <dependencies> 
         <dependency id="FSharpX.Core" version="[1.8.41]" />

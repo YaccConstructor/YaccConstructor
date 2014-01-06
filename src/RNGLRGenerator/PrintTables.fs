@@ -170,22 +170,24 @@ let printTables
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
+        let literalType = 
+            match defaultType with
+            | Some (Some t) -> t
+            | _ -> failwithf "Default token type is not defined"
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            if positionType = "" then
-                failwith "RNGLR: Unspecified position type"
-            printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
+            printBrInd 1 "| ``L %d`` of %s" i literalType
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 
         printBr ""
-        printBr "let genLiteral (str : string) posStart posEnd ="
+        printBr "let genLiteral (str : string) (data : %s) =" literalType
         if caseSensitive then "str"
         else "str.ToLower()"
         |> printBrInd 1 "match %s with"
             
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (escapeQuotes <| indexator.indexToLiteral i) i
+            printBrInd 1 "| \"%s\" -> ``L %d`` data" (escapeQuotes <| indexator.indexToLiteral i) i
         printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
         //
 

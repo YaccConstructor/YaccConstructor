@@ -7,19 +7,16 @@ open NUnit.Framework
 open AbstractLexer.Common
 open AbstractLexer.Core
 open QuickGraph.Algorithms
-//open AbstractLexer.Test.Calc.Parser
-open QuickGraph.Algorithms
 open QuickGraph.Graphviz
 open JSON.Parser
 open System.IO
-//open QuickGraph.Algorithms
 
 
 let loadGraphFromDOT filePath = 
     let parser = AntlrParserAdapter<string>.GetParser()
     parser.Parse(new StreamReader(File.OpenRead filePath))
 
-let baseInputGraphsPath = "../jsonParser.Test"
+let baseInputGraphsPath = @"../../../Tests/AbstractRNGLR/json/"
 
 [<TestFixture>]
 type ``Abstract lexer tests`` () =    

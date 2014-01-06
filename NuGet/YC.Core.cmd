@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\YaccConstructor\YaccConstructor.nuspec
+nuget pack ..\src\YaccConstructor\YaccConstructor.nuspec

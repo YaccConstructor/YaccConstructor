@@ -2,7 +2,7 @@
 
 del log.txt
 
-for %%i in (Epsilon, Longest, InfEpsilon) do (
+for %%i in (Epsilon, Longest, InfEpsilon, Omit) do (
 		echo . >> log.txt
 		echo %%i >> log.txt
     ..\..\bin\Release\v40\YaccConstructor.exe -i %%i.yrd -c ExpandEbnf -c ExpandMeta ^

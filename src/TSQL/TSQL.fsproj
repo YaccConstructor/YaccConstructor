@@ -136,15 +136,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Utils.SourceText">

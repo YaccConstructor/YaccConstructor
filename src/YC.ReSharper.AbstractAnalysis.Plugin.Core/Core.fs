@@ -444,7 +444,7 @@ type Processor(file) =
             | ``L 1111``(brs1)
             | ``L 1112``(brs1) ->  
                 let name = TSQL.getTokenName tok
-                e name name (fst brs1)
+                e name name (snd brs1)
 
 
         graphs

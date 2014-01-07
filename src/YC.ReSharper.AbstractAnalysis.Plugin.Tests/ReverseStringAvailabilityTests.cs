@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Core.Tests
 {
   [TestFixture]
-  public class ReverseStringAvailabilityTests : CSharpContextActionAvailabilityTestBase
+  public class ReverseStringAvailabilityTests<T> : CSharpContextActionAvailabilityTestBase<T> where T:class, IContextAction
   {
     [Test]
     public void AvailabilityTest()
@@ -14,10 +14,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Core.Tests
       DoTestFiles("availability01.cs");
     }
 
-    protected override IContextAction CreateContextAction(ICSharpContextActionDataProvider dataProvider)
-    {
-      return new ReverseStringAction(dataProvider);
-    }
+    //protected override IContextAction CreateContextAction(ICSharpContextActionDataProvider dataProvider)
+    //{
+    //  return new ReverseStringAction(dataProvider);
+    //}
 
     protected override string ExtraPath
     {

@@ -176,7 +176,7 @@ let printTables
             | _ -> failwithf "Default token type is not defined"
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` of %s" i literalType
+            printBrInd 1 "| ``L %d`` of (%s)" i literalType
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 

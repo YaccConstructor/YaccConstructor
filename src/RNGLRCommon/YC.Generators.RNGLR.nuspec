@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Generators.RNGLR</id>
-    <version>0.0.6.4</version>
+    <version>0.0.6.5</version>
     <title>RNGLR parsers generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -13,7 +13,7 @@
     <description>RNGLR parsers generator for F# based on YaccConstructor. </description>
     <releaseNotes>Errors is list.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
-    <tags>Parsing Reengineering YaccConstructor YC RNGLR GLR Generator Parsergenerator Grammarware .NET F# FSharp</tags>
+    <tags>YaccConstructor Parsing Reengineering YaccConstructor YC RNGLR GLR Generator Parsergenerator Grammarware .NET F# FSharp</tags>
     <dependencies> 
         <dependency id="FSharpX.Core" version="[1.8.41]" />
         <dependency id="FSharpX.Text.StructuredFormat" version="[1.8.41]" />

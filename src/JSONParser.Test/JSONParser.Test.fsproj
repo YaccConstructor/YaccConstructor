@@ -38,30 +38,30 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.5.3\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.4\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.5.3\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.6.4\lib\net40\AbstractLexer.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.5.3\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.6.4\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -73,7 +73,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.5.3\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.4\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Graphviz4Net">
@@ -110,15 +110,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.4\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.4\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.3\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.4\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -130,7 +130,7 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\YaccConstructor.exe</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

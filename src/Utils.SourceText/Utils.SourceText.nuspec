@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Utils.SourceText</id>
-    <version>0.1.6500.4</version>
+    <version>0.1.6500.5</version>
     <title>YC.Utils.SourceText</title>
     <authors>Ilya Orlov</authors>
     <owners>Ilya Orlov</owners>
@@ -13,7 +13,7 @@
     <description>Utils.SourceText is a library for F# that allows you to store coordinates of different parts of code on the usefull way.</description>
     <releaseNotes>.NET 4.0 and .NET 4.5 supported.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
-    <tags>Parsing Reengineering SourceCode SourceText Navigation Utils .NET F# FSharp</tags>																																								
+    <tags>YaccConstructor Parsing Reengineering SourceCode SourceText Navigation Utils .NET F# FSharp</tags>																																								
   </metadata>
 <files>
     <file src="..\..\Bin\Release\v45\Utils.SourceText.*" target="\lib\net45\" exclude="**\*Test*"/>

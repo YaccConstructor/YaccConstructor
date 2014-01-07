@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>0.2.6.4</version>
+    <version>0.2.6.5</version>
     <title>YC.FsYARD</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -13,7 +13,7 @@
     <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
     <releaseNotes>Abstract analysis added.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
-    <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
+    <tags>YaccConstructor F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
   </metadata>
     <files>
         <file src="..\..\Bin\Release\v45\Common.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>

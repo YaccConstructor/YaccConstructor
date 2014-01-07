@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.AbstractAnalysis.Lexing.Common</id>
-    <version>0.0.6.4</version>
+    <version>0.0.6.5</version>
     <title>YC.AbstractAnalysis.Lexing.Common</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -13,7 +13,7 @@
     <description>Abstract lexing common stuff.</description>
     <releaseNotes>First public version.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
-    <tags>F#  FSharp .NET AbstractLexing LexersGenerator lexing grammarware reengineering string-embedded SQL</tags>
+    <tags>YaccConstructor F#  FSharp .NET AbstractLexing LexersGenerator lexing grammarware reengineering string-embedded SQL</tags>
     <dependencies> 
         <dependency id="QuickGraph" version="[3.6.61119.7]" />
     </dependencies> 

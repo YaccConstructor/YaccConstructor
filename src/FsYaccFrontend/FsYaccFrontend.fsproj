@@ -18,8 +18,8 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <FsYaccToolPath>$(SolutionDir)packages\YC.Tools.0.0.5.3\lib\net40\</FsYaccToolPath>
-    <FsLexToolPath>$(SolutionDir)packages\YC.Tools.0.0.5.3\lib\net40\</FsLexToolPath>
+    <FsYaccToolPath>$(YCToolsPath)</FsYaccToolPath>
+    <FsLexToolPath>$(YCToolsPath)</FsLexToolPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <WarningLevel>4</WarningLevel>
@@ -40,7 +40,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)\packages\YC.Tools.0.0.5.3\lib\net40\FSharp.PowerPack.targets" />
+  <Import Project="$(YCToolsPath)\FSharp.PowerPack.targets" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
@@ -59,15 +59,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -78,7 +78,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.5.3\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.4\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -86,7 +86,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.6.3\lib\net40\YaccConstructor.exe</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.6.4\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

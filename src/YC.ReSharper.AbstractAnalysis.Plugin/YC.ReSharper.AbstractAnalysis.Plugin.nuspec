@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.ReSharper.AbstractAnalysis</id>
-    <version>0.0.6.4-preview</version>
+    <version>0.0.6.5-preview</version>
     <title>AbstractAnalysis</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>gsv</owners>
@@ -11,7 +11,7 @@
     <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
     <projectUrl>https://code.google.com/p/recursive-ascent/wiki/ReSharper_AbstractAnalysis</projectUrl>
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
-    <tags>ReSharper AbstractParsing StringEmbeddedLanguages SQL EmbeddedSQL RNGLR ErrorsChecking</tags>
+    <tags>YaccConstructor  ReSharper AbstractParsing StringEmbeddedLanguages SQL EmbeddedSQL RNGLR ErrorsChecking</tags>
     <releaseNotes>It is first demo of plugin. Please use our demo solution for check features of pugin: https://code.google.com/p/recursive-ascent/wiki/ReSharper_AbstractAnalysis</releaseNotes>
     <dependencies>
       <dependency id="ReSharper" version="[8.0, 8.1]" />

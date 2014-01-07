@@ -47,15 +47,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.5.3\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.4\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.5.3\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.6.4\lib\net40\AbstractLexer.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.5.3\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.6.4\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Antlr3.Runtime">

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Generators.YardPrinter</id>
-    <version>0.0.6.4</version>
+    <version>0.0.6.5</version>
     <title>IL to YARD generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYacc_RNGLR</id>
-    <version>0.0.6.4</version>
+    <version>0.0.6.5</version>
     <title>YC.FsYacc_RNGLR</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -13,7 +13,7 @@
     <description>FsYacc forntend and parsers generator for F#  based on RNGLR algorithm.</description>
     <releaseNotes>First public version.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
-    <tags>F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF FsYacc</tags>
+    <tags>YaccConstructor F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF FsYacc</tags>
   </metadata>
     <files>
         <file src="..\..\Bin\Release\v45\Common.*" target="\tools\" exclude="**\*.Test.*"/>

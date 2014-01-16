@@ -23,9 +23,9 @@ type Token =
     | RBRACE of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
-let genLiteral (str : string) posStart posEnd =
+let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | x -> failwithf "Literal %s undefined" x
+    | x -> failwithf "Literal %%s undefined" x
 let tokenData = function
     | DIV x -> box x
     | ERROR x -> box x

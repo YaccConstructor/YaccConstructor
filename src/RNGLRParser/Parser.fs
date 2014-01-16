@@ -231,17 +231,20 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let nonTerm = parserSource.LeftSide.[prod]
 
                 let handlePath (path : obj[]) (final : Vertex) =
-                    let state = parserSource.Gotos.[final.State].[nonTerm]
-                    let newVertex = addVertex state num None
+                    if final = null
+                    then pushes.Clear()
+                    else
+                        let state = parserSource.Gotos.[final.State].[nonTerm]
+                        let newVertex = addVertex state num None
                     
-                    let family = new Family(prod, new Nodes(Array.copy path))
-                    if not <| containsEdge final family edges.[state] then
-                        let isCreated, edgeLabel = addEdge final family edges.[state] false
-                        if (pos > 0 && isCreated) then
-                            let arr = parserSource.Reduces.[state].[!curNum]
-                            if arr <> null then
-                                for (prod, pos) in arr do
-                                    reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
+                        let family = new Family(prod, new Nodes(Array.copy path))
+                        if not <| containsEdge final family edges.[state] then
+                            let isCreated, edgeLabel = addEdge final family edges.[state] false
+                            if (pos > 0 && isCreated) then
+                                let arr = parserSource.Reduces.[state].[!curNum]
+                                if arr <> null then
+                                    for (prod, pos) in arr do
+                                        reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
@@ -403,7 +406,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             let exp = expected |> Array.map (fun i -> parserSource.NumToString i)
             let recToks = recToks |> Array.map (fun i -> parserSource.NumToString i)
             
-            errDict.Add (errFamily, new ErrorNode (errOn, -1, exp, recToks))
+            try errDict.Add (errFamily, new ErrorNode (errOn, -1, exp, recToks))
+            with _ -> ()
 
         let containsRecState (oldVertices : Stack<Vertex * _ list>)(temp : Queue<_>) recVertNum =
             let oldVert = oldVertices.ToArray()

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Generators.RNGLR</id>
-    <version>0.0.6.5</version>
+    <version>0.0.6.7</version>
     <title>RNGLR parsers generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -11,7 +11,7 @@
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>RNGLR parsers generator for F# based on YaccConstructor. </description>
-    <releaseNotes>Errors is list.</releaseNotes>
+    <releaseNotes>Error recovery small fixes.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
     <tags>YaccConstructor Parsing Reengineering YaccConstructor YC RNGLR GLR Generator Parsergenerator Grammarware .NET F# FSharp</tags>
     <dependencies> 

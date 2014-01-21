@@ -187,8 +187,8 @@ let printTables
         |> printBrInd 1 "match %s with"
             
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| \"%s\" -> ``L %d`` data" (escapeQuotes <| indexator.indexToLiteral i) i
-        printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
+            printBrInd 1 "| \"%s\" -> Some (``L %d`` data)" (escapeQuotes <| indexator.indexToLiteral i) i
+        printBrInd 1 "| x -> None"
         //
 
         printBr "let tokenData = function"

@@ -156,6 +156,7 @@ let printTables
         printBr "type Token ="
         let indexator = grammar.indexator
         let defaultType = tokenType.TryFind "_"
+
         for i = indexator.termsStart to indexator.termsEnd do
             let name = indexator.indexToTerm i
             let type' =
@@ -170,13 +171,14 @@ let printTables
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
+
         let literalType = 
             match defaultType with
             | Some (Some t) -> t
             | _ -> failwithf "Default token type is not defined"
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` of (%s)" i literalType
+            printBrInd 1 "| L_%s of (%s)" (indexator.getLiteralName i) literalType
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 
@@ -187,7 +189,7 @@ let printTables
         |> printBrInd 1 "match %s with"
             
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| \"%s\" -> Some (``L %d`` data)" (escapeQuotes <| indexator.indexToLiteral i) i
+            printBrInd 1 "| \"%s\" -> Some (L_%s data)" (escapeQuotes <| indexator.indexToLiteral i) (indexator.getLiteralName i)
         printBrInd 1 "| x -> None"
         //
 
@@ -197,7 +199,7 @@ let printTables
             printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` x -> box x" i
+            printBrInd 1 "| L_%s x -> box x" (indexator.getLiteralName i)
 
         printBr ""
         printBr "let numToString = function"
@@ -218,14 +220,14 @@ let printTables
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> %d" i i
+            printBrInd 1 "| L_%s _ -> %d" (indexator.getLiteralName i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> true" i
+            printBrInd 1 "| L_%s _ -> true" (indexator.getLiteralName i)
         printBr ""
 
         printInd 0 "let getLiteralNames = ["

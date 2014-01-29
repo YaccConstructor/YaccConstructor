@@ -161,8 +161,8 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             incr num
             let name = Source.toString name
             let i = Indexator.transformLiteral caseSensitive name |> indexator.literalToIndex
-            sprintf "(match ((unbox %s.[%d]) : Token) with ``L %d`` _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
-                childrenName !num i name
+            sprintf "(match ((unbox %s.[%d]) : Token) with L_%s _rnglr_val -> [_rnglr_val] | a -> failwith \"%s expected, but %%A found\" a )"
+                childrenName !num (indexator.getLiteralName i) name
             |> wordL
         | PSeq (s, ac, _) ->
             let getVarName innerNum (e : elem<_,_>) =

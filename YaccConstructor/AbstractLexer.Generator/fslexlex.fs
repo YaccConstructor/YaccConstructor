@@ -731,6 +731,4 @@ and _fslex_comment p _fslex_state lexbuf =
           )
   | _ -> failwith "comment"
 
-# 208 "fslexlex.fsl"
-
 # 3000000 "fslexlex.fs"

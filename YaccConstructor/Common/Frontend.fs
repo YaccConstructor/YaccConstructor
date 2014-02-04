@@ -17,8 +17,11 @@ namespace Yard.Core
 open Yard.Core.IL
 open Mono.Addins
 
-[<TypeExtensionPoint>]
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
 [<AbstractClass>]
+[<TypeExtensionPoint>]
 type Frontend() as this =
     abstract Name : string
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>

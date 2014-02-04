@@ -73,7 +73,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
-      <HintPath>C:\Users\Илья\Downloads\Mono.Addins-binary-1.0\Mono.Addins.dll</HintPath>
+      <HintPath>..\packages\Mono.Addins.1.0\lib\net20\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

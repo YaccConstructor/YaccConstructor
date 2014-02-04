@@ -26,6 +26,10 @@ open Printer
 open TranslatorPrinter
 open Option
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
 [<Extension>]
 type RNGLR() = 
     inherit Generator()

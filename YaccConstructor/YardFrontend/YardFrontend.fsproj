@@ -54,6 +54,10 @@
       <HintPath>..\packages\YC.Tools.0.0.5.3\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.0\lib\net20\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
       <Private>True</Private>
@@ -81,9 +85,6 @@
     <Reference Include="RNGLRParser">
       <HintPath>..\packages\YC.Generators.RNGLR.0.0.5.3\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Addins">
-      <HintPath>C:\Users\Илья\Downloads\Mono.Addins-binary-1.0\Mono.Addins.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

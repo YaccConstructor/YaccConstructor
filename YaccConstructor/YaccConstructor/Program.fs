@@ -25,6 +25,7 @@ open Yard.Core.Helpers
 open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
+open System.Reflection
 
 exception InvalidFEName of string
 exception InvalidGenName of string
@@ -53,20 +54,22 @@ let () =
     let ConversionsManager = ConversionsManager.ConversionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
-//    let AddManIn = AddinManager.Initialize()
-//	let AddManReg = AddinManager.Registry.Update()
-//    let GeneratorsManagerAdd = AddinManager.GetExtensionNodes (typeof(ICommand))
+    AddinManager.Initialize()
+    AddinManager.Registry.Update(null)
+
+    let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
 
     let userDefs = ref []
     let userDefsStr = ref ""
 
     feName := // Fill by default value
-        if Seq.exists ((=) "YardFrontend") FrontendsManager.Available
+        if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
         then Some "YardFrontend"
         else Seq.tryFind (fun _ -> true) FrontendsManager.Available
             
     generatorName :=
-        if Seq.exists ((=) "RNGLRGenerator") GeneratorsManager.Available
+        if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator
         then Some "RNGLRGenerator"
         else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
 
@@ -103,14 +106,11 @@ let () =
     ArgParser.Parse commandLineSpecs
 
     let run () =
-//        AddinManager.Initialize(); TODO
-//		AddinManager.Registry.Update(null);
         match !testFile, !feName, !generatorName with
         | Some fName, Some feName, Some generatorName ->
             let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
-                let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> 
                 if Seq.exists (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend
                 then
                     try
@@ -176,7 +176,6 @@ let () =
     //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
-                let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
                 if Seq.exists (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator
                 then              
                     try

@@ -1,0 +1,9 @@
+digraph G {
+0;1;2;3;
+0 -> 1 [label="'"]1 -> 2 [label="x1"];
+1 -> 2 [label="x2"];
+1 -> 2 [label="x3"];
+1 -> 2 [label="x4"];
+1 -> 2 [label="x5"];
+2 -> 3 [label="'"]
+}

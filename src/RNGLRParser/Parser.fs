@@ -225,14 +225,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
         ignore <| addVertex startState 0 None
         let inline trd (_,_,x) = x
-        let makeReductions num =
+        let makeReductions num recovery =
             while reductions.Count > 0 do
                 let vertex, prod, pos, edgeOpt = reductions.Pop()
                 let nonTerm = parserSource.LeftSide.[prod]
 
                 let handlePath (path : obj[]) (final : Vertex) =
                     if final = null
-                    then pushes.Clear()
+                    then recovery()//pushes.Clear()
                     else
                         let state = parserSource.Gotos.[final.State].[nonTerm]
                         let newVertex = addVertex state num None
@@ -248,7 +248,8 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
-                    else
+                    elif vertex <> null
+                    then
                         if vertex.Level <> num then
                             if vertex.OutEdges.other <> null then
                                 vertex.OutEdges.other |> Array.iter
@@ -273,7 +274,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                                 while j < edges.Count && trd edges.[j] = a do
                                     j <- j + 1
                                 i <- j
-                
+                    else recovery() //pushes.Clear()
                 if pos = 0 then
                     let state = parserSource.Gotos.[vertex.State].[nonTerm]
                     let newVertex = addVertex state num None
@@ -379,26 +380,32 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             !expected
         
         /// returns  array that consists of tokens or error non-teminal (and its children)
-        let rec astToTokens (x : obj) =
-            let mutable res = []
-            match x : obj with 
-            | :? int as t when t >= 0 -> res <- x :: res
-            | :? Family as fam ->
-                for i = 0 to fam.nodes.Length - 1 do
-                    res <- res @ astToTokens fam.nodes.[i]
-            | :? AST as ast ->
-                if ast.other <> null 
-                then
-                    for family in ast.other do
-                        if family.prod = parserSource.LeftSide.Length
-                        then res <- res @ [ast]
-                        else res <- res @ astToTokens family
+        let astToTokens (x : obj) =            
+            let visited = ref 0
+            let rec go (x : obj) =
+                let mutable res = []
+                incr visited
+                if !visited < 100 
+                then                    
+                    match x : obj with 
+                    | :? int as t when t >= 0 -> res <- x :: res
+                    | :? Family as fam ->                    
+                        for i = 0 to fam.nodes.Length - 1 do
+                            res <- res @ go fam.nodes.[i]
+                    | :? AST as ast ->
+                        if ast.other <> null 
+                        then                            
+                            for family in ast.other do
+                                if family.prod = parserSource.LeftSide.Length
+                                then res <- res @ [ast]
+                                else res <- res @ go family
                             
-                if ast.first.prod = parserSource.LeftSide.Length
-                then res <- [ast] @ res
-                else res <- astToTokens ast.first @ res
-            | _ -> ()
-            res
+                        if ast.first.prod = parserSource.LeftSide.Length
+                        then res <- [ast] @ res
+                        else res <- go ast.first @ res
+                    | _ -> ()
+                res
+            go x
         
         /// collects info about error that is needed in the translation
         let createErrorNode (errFamily : Family) (errOn : obj) (prod : int) (expected : int[]) (recToks : int[]) = 
@@ -409,7 +416,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             try errDict.Add (errFamily, new ErrorNode (errOn, -1, exp, recToks))
             with _ -> ()
 
-        let containsRecState (oldVertices : Stack<Vertex * _ list>)(temp : Queue<_>) recVertNum =
+        let containsRecState (oldVertices : Stack<Vertex * _ list>)(temp : Queue<_>) recVertNum recovery =
             let oldVert = oldVertices.ToArray()
             for vertex, path in oldVert do
                 if pushes.Count <> recVertNum
@@ -421,7 +428,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         for (prod, pos) in arr do
                             let edgeOpt = Some (vertex.OutEdges.first.Dest, vertex.OutEdges.first.Ast)
                             reductions.Push (vertex, prod, pos, edgeOpt)
-                        makeReductions !curInd
+                        makeReductions !curInd recovery
                         temp.Enqueue path
                     //if shift is possible
                     let push = parserSource.Gotos.[vertex.State].[!curNum]
@@ -540,7 +547,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 //if parser finished in the non-accepting state and it generates the recovery
                 pushes.Clear()
 
-                while curVertices.Value.Count <> 0 && not <| containsRecState !curVertices temp recVertNumber do
+                while curVertices.Value.Count <> 0 && not <| containsRecState !curVertices temp recVertNumber (fun () -> ()) do
                     curVertices := getPrevVertices !curVertices
                 
                 let skipped = Queue<_>()
@@ -588,16 +595,26 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let unbrowsed = Array.append need <| skipped.ToArray()
                     pushes.Push (fst3 arr.[!var], snd3 arr.[!var])
                     let fam = createErrorFam unbrowsed
-                    createErrorNode fam <| box tokens.[errInd] <| 0 <| Set.toArray !expected <| thr arr.[!var]
+                    let rec onTok i =
+                        if i >= 0
+                        then
+                            let x = tokens.[i] 
+                            if box x <> null
+                            then box x
+                            else onTok (i-1)
+                        else null
+                            
+                    createErrorNode fam <| onTok errInd <| 0 <| Set.toArray !expected <| thr arr.[!var]
 
         let errorRuleExist = parserSource.ErrorRulesExists
         let wasError = ref false
 
         while not !isEnd && not !wasError do
             if usedStates.Count = 0 && reductions.Count = 0
-            then wasError := true
+            then 
+                wasError := true
             else
-                makeReductions !curInd
+                makeReductions !curInd recovery
                 attachEdges()
                 if !curNum = parserSource.EofIndex then isEnd := true
                 elif pushes.Count = 0 then 
@@ -618,7 +635,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             if errorRuleExist 
             then 
                  recovery()
-                 makeReductions <| !curInd + 1
+                 makeReductions (!curInd + 1) recovery
                  attachEdges()
             else wasError := true
 

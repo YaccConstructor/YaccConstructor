@@ -1,0 +1,4 @@
+[<Start>]
+expr: ab | ba
+a: A
+b: B | C

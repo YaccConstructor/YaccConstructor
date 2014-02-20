@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\GLLGenerator.XML</DocumentationFile>
+    <StartArguments>
+    </StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +32,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\GLLGenerator.XML</DocumentationFile>
+    <StartArguments>-g GLLGenerator -i ../../../RNGLRParser.SimpleTest/Attrs.yrd
+</StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
@@ -43,13 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeEmitter.fs" />
-    <Compile Include="GLLGenerator.fs" />
     <Compile Include="AST.fs" />
-    <Compile Include="Parser.fs" />
     <Compile Include="Table.fs" />
     <Compile Include="PrintTable.fs" />
     <Compile Include="PrintTranslator.fs" />
-    <Compile Include="RNGLRGenerator.fs" />
+    <Compile Include="GLLGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">

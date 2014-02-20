@@ -9,9 +9,9 @@ open Yard.Generators.RNGLR
 open InitialConvert
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.GLL
-open States
+open PrintTable
 open Printer
-open TranslatorPrinter
+open TranslatorPrinter2
 open Option
 
 type GLL() = 
@@ -37,9 +37,6 @@ type GLL() =
             let mutable moduleName = getOption "module" "" id
 
             let mutable tokenType = getOption "token" definition.tokens mapFromType
-            let mutable table = getOption "table" LL <| function
-                                    | "LL" -> LL
-                                    | x -> failwithf "Unsupported table type: %s." x
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
             let mutable needTranslate = getBoolOption "translate" true
@@ -49,10 +46,6 @@ type GLL() =
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
                 getOption "o" fstVal id
-            let mutable targetLanguage =
-                getOption "lang" FSharp <| function
-                    | "fsharp" -> FSharp
-                    | x -> failwithf "Unsupported output language: %s." x
             let getBoolValue name = function
                     | "true" -> true
                     | "false" -> false
@@ -65,13 +58,13 @@ type GLL() =
                 | "-pos" -> positionType <- value
                 | "-o" -> if value.Trim() <> "" then output <- value
                 | "-output" -> if value.Trim() <> "" then output <- value
-                | "-table" -> table <- LL
+                (*| "-table" -> table <- "GLR"*)
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
-                | "-lang" -> targetLanguage <- FSharp
+                | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
@@ -106,8 +99,6 @@ type GLL() =
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-  
             let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
@@ -122,20 +113,20 @@ type GLL() =
                         | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
                         | s -> "GLL",s
   
-            let printHeaders moduleName fullPath light output targetLanguage =
+            let printHeaders moduleName fullPath light output =
                 let fsHeaders() = 
                     println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
-                        | "" -> "GLL.Parse"
+                        | "" -> "GLL"
                         | s -> s
                     if not light then
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                    println "open Yard.Generators.GLL.Parser"
+                   // println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
-                    println "open Yard.Generators.GLL.AST"
+                    println "open Yard.Generators.RNGLR.AST"
 
                     match definition.head with
                     | None -> ()
@@ -145,13 +136,11 @@ type GLL() =
                 
                 fsHeaders()
                 
-
+            /////////////////////////////////////////////
                
-            printHeaders moduleName fullPath light output targetLanguage
-            let table = printTables grammar definition.head table moduleName tokenType res targetLanguage _class positionType caseSensitive
-            let res = if not needTranslate then table
-                      else table + printTranslator grammar newDefinition.grammar.[0].rules
-                                        positionType fullPath output dummyPos caseSensitive
+            printHeaders moduleName fullPath light output
+            let table = printTable grammar table moduleName tokenType res _class positionType caseSensitive
+            let res =  table
             let res = 
                 match definition.foot with
                 | None -> res
@@ -159,8 +148,6 @@ type GLL() =
                     res + (getPosFromSource fullPath dummyPos s + "\n"
                                 + s.text + getPosFromSource fullPath dummyPos (defaultSource output) + "\n")
             let res =
-                match targetLanguage with
-                | FSharp ->
                     let init = res.Replace("\r\n", "\n")
                     let curLine = ref 1// Must be 2, but there are (maybe) some problems with F# compiler, causing to incorrect warning
                     let res = new System.Text.StringBuilder(init.Length * 2)
@@ -171,7 +158,6 @@ type GLL() =
                         | x -> res.Append x
                         |> ignore
                     res.ToString()
-                | Scala -> res + "\n}"
             out.WriteLine res
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start

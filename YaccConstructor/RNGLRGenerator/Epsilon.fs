@@ -28,6 +28,7 @@ let emptyName = "empty"
 let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
 
 let canInferEpsilon (rules : NumberedRules) (indexator : Indexator) =
+    
     let result : bool[] = Array.zeroCreate indexator.fullCount
     let mutable modified = true
     result.[indexator.errorIndex] <- true

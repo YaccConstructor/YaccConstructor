@@ -76,9 +76,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRAbstractParser.Test", "RNGLRAbstractParser.Test\RNGLRAbstractParser.Test.fsproj", "{B1D8C4FB-23E7-46FF-81B0-4EA3CD6E716E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GLL", "GLL", "{11E0A5E6-3D2D-48CC-91E1-09EF624786A6}"
-	ProjectSection(SolutionItems) = preProject
-		Descriptor.fs = Descriptor.fs
-	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLRParser.ErrorRecoveryTest", "RNGLRParser.ErrorRecoveryTest\RNGLRParser.ErrorRecoveryTest.fsproj", "{E33864E1-96DA-4838-B088-A61901A1ECA0}"
 EndProject
@@ -117,7 +114,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{D7DE10
 		RNGLRGenerator\InitialConvert.fs = RNGLRGenerator\InitialConvert.fs
 		RNGLRGenerator\NumberedRules.fs = RNGLRGenerator\NumberedRules.fs
 		RNGLRCommon\ParserSource.fs = RNGLRCommon\ParserSource.fs
-		RNGLRGenerator\States.fs = RNGLRGenerator\States.fs
 		RNGLRGenerator\SymbolSets.fs = RNGLRGenerator\SymbolSets.fs
 	EndProjectSection
 EndProject

@@ -23,8 +23,8 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.Epsilon
 
 let firstSet (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
-    let result : Set<int>[] = Array.create indexator.fullCount Set.empty
-    
+    let result : Set<int>[] = Array.create indexator.fullCount Set.empty   
+      
     let calc term = 
     //for term = indexator.nonTermCount to indexator.fullCount-1 do
         let was : bool[] = Array.zeroCreate indexator.fullCount

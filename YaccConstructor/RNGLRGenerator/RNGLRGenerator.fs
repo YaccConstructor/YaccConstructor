@@ -162,7 +162,7 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
-
+                    
                     match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->

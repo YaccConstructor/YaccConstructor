@@ -32,7 +32,7 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-c ExpandEbnf -c ExpandMeta -c ExpandInnerAlt -c ExpandTopLevelAlt -c ExpandBrackets  -c "ReplaceLiterals KW_%s" -c Linearize -c ToCNF  -g CYKGenerator -i "D:\projects\YC\recursive-ascent\Examples\CYK\DialectsCYKDemo\SQLSelectDemo\mssql.yrd"</StartArguments>
+    <StartArguments>-g GLLGenerator -i ".\..\..\..\RNGLRParser.SimpleTest\LolCalc.yrd"</StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>

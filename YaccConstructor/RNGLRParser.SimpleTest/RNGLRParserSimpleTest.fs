@@ -70,16 +70,16 @@ type ``RNGLR parser tests with simple lexer`` () =
             RNGLR.ParseComplexRightNull.defaultAstToDot mAst "ast.dot"
         
 
-    [<Test>]
-    member test.``Expression test``() =
-        let parser = RNGLR.ParseExpr.buildAst
-        let path = dir + "expr.txt"
-
-        match run path parser with
-        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _) ->
-            mAst.ChooseLongestMatch()
-            mAst.PrintAst()
+    //[<Test>]
+    //member test.``Expression test``() =
+     //   let parser = RNGLR.ParseExpr.buildAst
+      //  let path = dir + "expr.txt"
+///
+ //       match run path parser with
+   //     | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
+     //   | Parser.Success (mAst, _) ->
+       //     mAst.ChooseLongestMatch()
+         //   mAst.PrintAst()
 
     [<Test>]
     member test.``Counter test - simple for translator``() =

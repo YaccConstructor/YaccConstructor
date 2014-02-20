@@ -18,7 +18,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Yard.Generators.gll.TranslatorPrinter
+module Yard.Generators.GLL.TranslatorPrinter2
 
 open System
 open Yard.Generators.RNGLR.FinalGrammar
@@ -44,7 +44,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
-let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
+let printTranslator2 (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
         positionType fullPath output dummyPos caseSensitive =
     let tab = 4
 

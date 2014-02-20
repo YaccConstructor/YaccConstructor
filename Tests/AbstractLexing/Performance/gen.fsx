@@ -12,20 +12,19 @@ let printGraph name m n gb =
       "digraph G {\n"
       + ([for i in 0..n+2 -> string i] |> String.concat ";")
       + ";\n"
-      + sprintf "%A -> %A [label=\"'\"]" 0 1
+      + sprintf "%A -> %A [label=\"a\"]" 0 1
       + ";\n"     
       + gb
       + ";\n"
-      + sprintf "%A -> %A [label=\"'\"]" (n+1) (n+2)
+      + sprintf "%A -> %A [label=\"b\"]" (n+1) (n+2)
       + ";\n}"
 
     System.IO.File.WriteAllText( name(), s)
-(*
+
 for m in series1 do
    for n in 1..100 do
-     graphBody (genSeries (fun () -> sprintf "%A/%A.dot" m n) m n)
-     |> printGraph m n
-*)
+     graphBody (genSeries  m n)
+     |> printGraph (fun () -> sprintf "%A/%A.dot" m n) m n
 
 let gen n =
     let pe l i j = sprintf "%i -> %i [label=%A]" i j l

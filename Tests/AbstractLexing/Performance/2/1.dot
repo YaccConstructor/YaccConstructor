@@ -1,6 +1,7 @@
 digraph G {
 0;1;2;3;
-0 -> 1 [label="'"]1 -> 2 [label="x1"];
+0 -> 1 [label="a"];
+1 -> 2 [label="x1"];
 1 -> 2 [label="x2"];
-2 -> 3 [label="'"]
+2 -> 3 [label="b"];
 }

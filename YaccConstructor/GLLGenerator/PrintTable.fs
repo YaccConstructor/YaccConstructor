@@ -185,5 +185,8 @@ let printTable
         printBr ""
 
         printBr ""
+
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (table, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
+        
         res.ToString()
     printTableToFSharp ()

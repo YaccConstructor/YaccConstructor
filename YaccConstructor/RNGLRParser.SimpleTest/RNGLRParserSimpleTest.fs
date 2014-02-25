@@ -107,18 +107,18 @@ type ``RNGLR parser tests with simple lexer`` () =
             printfn "Result: %A" res
             Assert.AreEqual(List.replicate 8 105, res)
 
-    [<Test>]
-    member test.``Lol Calc. To test priority``() =
-        let parser = RNGLR.ParseLolCalc.buildAst
-        let path = dir + "LolCalc.txt"
-
-        match run path parser with
-        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, errors) ->
-            let res = translate RNGLR.ParseLolCalc.translate mAst errors
-            RNGLR.ParseLolCalc.defaultAstToDot mAst "lolCalc.dot"
-            printfn "Result: %A" res
-            Assert.AreEqual(List.replicate 2 45, res)
+//    [<Test>]
+//    member test.``Lol Calc. To test priority``() =
+//        let parser = RNGLR.ParseLolCalc.buildAst
+//        let path = dir + "LolCalc.txt"//
+//
+  //      match run path parser with
+    //    | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
+ //       | Parser.Success (mAst, errors) ->
+ //           let res = translate RNGLR.ParseLolCalc.translate mAst errors
+ //           RNGLR.ParseLolCalc.defaultAstToDot mAst "lolCalc.dot"
+ //           printfn "Result: %A" res
+ //           Assert.AreEqual(List.replicate 2 45, res)
 
     [<Test>]
     member test.``Translate with Attributes``() =

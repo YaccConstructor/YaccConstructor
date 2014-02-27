@@ -301,10 +301,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
                 go stt
-            | None -> 
-                      let acc = mkNewString edg stt
-                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
-                      add edg newStt
+            | None -> add edg stt
             acc 
 
         let res_edg_seq = 

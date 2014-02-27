@@ -505,11 +505,52 @@ type ``Abstract lexer tests`` () =
         checkGraph res 1 2
         Assert.AreEqual(eofToken, (res.Edges |> Seq.nth 0).Tag)
 
+    [<Test>]
+    member this.``Check break literals 1.`` () =
+        calcTokenizationTest "test_break_1.dot" 2 3 
+
+    [<Test>]
+    member this.``Check break literals 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_break_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        checkGraph res 3 3
+        let positions =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        checkArr [|0; 1; 0; 1; 0; 1; 0; 1; 0; 1|] positions
+
+    [<Test>]
+    member this.``Check break literals 3.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_break_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        checkGraph res 4 5
+        let positions =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)
+                    | PLUS (n,brs) ->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        checkArr [|0; 1; 2; 0; 1|] positions
+
+
+
 
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Abstract lexer tests`` () 
-//      t.``Test with position. With branch and several tokens on the one edge_1``()
+//      t.``Check break literals 3.``()
 //      //``Test with space at the end of previous tokens at the end of branch.``()
 //      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
 //     // printfn "%A" t

@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CYKCore.fs" />
+    <Compile Include="CYKCoreForGPU.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">

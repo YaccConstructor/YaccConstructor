@@ -86,7 +86,7 @@ type CYKCoreForGPU() =
                 let leftCell = recTable.[i, k]
                 let left : CellData array = Array.zeroCreate leftCell.Length
                 let mutable realLeftLen = 0
-                for m in 0..leftCell.Length do
+                for m in 0..leftCell.Length - 1 do
                     if leftCell.[m].IsSome
                     then
                         left.[realLeftLen] <- leftCell.[m].Value
@@ -95,17 +95,17 @@ type CYKCoreForGPU() =
                 let rightCell = recTable.[k+i+1, l-k-1]
                 let right : CellData array = Array.zeroCreate rightCell.Length
                 let mutable realRightLen = 0
-                for m in 0..rightCell.Length do
+                for m in 0..rightCell.Length - 1 do
                     if rightCell.[m].IsSome
                     then
                         right.[realRightLen] <- rightCell.[m].Value
                         realRightLen <- realRightLen + 1
                 
-                for m in 0..realLeftLen do
+                for m in 0..realLeftLen - 1 do
                     if getCellRuleTop left.[m] = b
                     then
                         let lState1,lbl1,weight1 = getCellData left.[m]
-                        for n in 0..realRightLen do
+                        for n in 0..realRightLen - 1 do
                             if getCellRuleTop right.[n] = c
                             then
                                 let lState2,lbl2,weight2 = getCellData right.[n]

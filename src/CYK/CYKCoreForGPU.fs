@@ -53,37 +53,66 @@ type CYKCoreForGPU() =
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
             let conflictLbl = (noLbl,LblState.Conflict)
-            match lState1,lState2 with
-            |LblState.Conflict,_ -> conflictLbl
-            |_,LblState.Conflict -> conflictLbl
-            |LblState.Undefined,LblState.Undefined when ruleLabel = 0uy -> noLbl,LblState.Undefined
-            |_ ->
-                let notEmptyLbls = Array.filter ((<>) noLbl) [|lbl1;lbl2;ruleLabel|]
-                if notEmptyLbls.Length = 1
+            
+            if lState1 = LblState.Conflict then conflictLbl
+            elif lState2 = LblState.Conflict then conflictLbl
+            elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then noLbl,LblState.Undefined
+            else
+                let notEmptyLbls = [| noLbl; noLbl; noLbl |]
+                let mutable realLblCount = 0
+                if lbl1 <> noLbl
+                then 
+                    notEmptyLbls.[0] <- lbl1
+                    realLblCount <- realLblCount + 1
+                if lbl2 <> noLbl
+                then
+                    notEmptyLbls.[realLblCount] <- lbl2
+                    realLblCount <- realLblCount + 1
+                if ruleLabel <> noLbl
+                then 
+                    notEmptyLbls.[realLblCount] <- ruleLabel
+                    realLblCount <- realLblCount + 1
+
+                if realLblCount = 1
                 then notEmptyLbls.[0],LblState.Defined
-                elif Array.forall ((=)notEmptyLbls.[0]) notEmptyLbls
+                elif (realLblCount = 2 && notEmptyLbls.[1] = notEmptyLbls.[0]) ||
+                    (realLblCount = 3 && notEmptyLbls.[1] = notEmptyLbls.[0] && notEmptyLbls.[2] = notEmptyLbls.[0])
                 then notEmptyLbls.[0],LblState.Defined
                 else noLbl,LblState.Conflict
-
+                
         let processRule rule ruleIndex i k l =
             let a,b,c,rl,rw = getRule rule
             if c <> 0us then
-                let left = recTable.[i, k] |> Array.choose id
-                let right = recTable.[k+i+1, l-k-1] |> Array.choose id
-                left |> Array.iter (fun lf ->
-                    if getCellRuleTop lf = b
+                let leftCell = recTable.[i, k]
+                let left : CellData array = Array.zeroCreate leftCell.Length
+                let mutable realLeftLen = 0
+                for m in 0..leftCell.Length do
+                    if leftCell.[m].IsSome
                     then
-                        let lState1,lbl1,weight1 = getCellData lf
-                        right |> Array.iter (fun r ->
-                            if getCellRuleTop r = c
+                        left.[realLeftLen] <- leftCell.[m].Value
+                        realLeftLen <- realLeftLen + 1
+
+                let rightCell = recTable.[k+i+1, l-k-1]
+                let right : CellData array = Array.zeroCreate rightCell.Length
+                let mutable realRightLen = 0
+                for m in 0..rightCell.Length do
+                    if rightCell.[m].IsSome
+                    then
+                        right.[realRightLen] <- rightCell.[m].Value
+                        realRightLen <- realRightLen + 1
+                
+                for m in 0..realLeftLen do
+                    if getCellRuleTop left.[m] = b
+                    then
+                        let lState1,lbl1,weight1 = getCellData left.[m]
+                        for n in 0..realRightLen do
+                            if getCellRuleTop right.[n] = c
                             then
-                                let lState2,lbl2,weight2 = getCellData r
+                                let lState2,lbl2,weight2 = getCellData right.[n]
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                recTable.[i,l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
-                        )
-                )
+                                recTable.[i, l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
@@ -151,7 +180,7 @@ type CYKCoreForGPU() =
 
     let print lblValue weight leftI rightL leftL =
         let out = String.concat " " ["label ="; lblString lblValue; "weight ="; string weight; 
-                    "left ="; string leftI; "right ="; string (leftI+rightL+leftL+1)]
+                    "left ="; string leftI; "right ="; string (leftI + rightL + leftL + 1)]
         printfn "%s" out
 
     let rec trackLabel i l (cell:CellData)  flag =
@@ -165,12 +194,12 @@ type CYKCoreForGPU() =
             let left =
                 recTable.[leftI,leftL]
                 |> Array.tryFind (fun (x:Option<CellData>) -> 
-                                            match x with
-                                            | Some x ->
-                                                let ind,lSt,lbl,_ = getData x.rData
-                                                let top,_,_,_,_ = getRule rules.[int ind]
-                                                top = b
-                                            | None -> false)
+                                        match x with
+                                        | Some x ->
+                                            let ind,lSt,lbl,_ = getData x.rData
+                                            let top,_,_,_,_ = getRule rules.[int ind]
+                                            top = b
+                                        | None -> false)
             let right = 
                 recTable.[rightI,rightL]
                 |> Array.tryFind (fun (x:Option<CellData>) -> 
@@ -181,7 +210,6 @@ type CYKCoreForGPU() =
                                             top = c
                                         | None -> false)
 
-            
             match right with
             | Some (Some right) ->
                 match left with 
@@ -211,9 +239,8 @@ type CYKCoreForGPU() =
     member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 
         rules <- grules
         lblNameArr <- lblNames
-        // Info about dialects of derivation
-        // in format: "<lblState> <lblName> <weight>"
-        // If dialect undefined or was conflict lblName = "0"
+        // Info about dialects of derivation in format: "<lblState> <lblName> <weight>"
+        // If dialect undefined or was conflict lblName = "0" 
         let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
         | "" -> "Строка не выводима в заданной грамматике."

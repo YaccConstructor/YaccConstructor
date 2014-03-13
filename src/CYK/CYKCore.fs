@@ -160,12 +160,12 @@ type CYKCore() =
             let left =
                 recTable.[leftI,leftL]
                 |> Array.tryFind (fun (x:Option<CellData>) -> 
-                                            match x with
-                                            | Some x ->
-                                                let ind,lSt,lbl,_ = getData x.rData
-                                                let top,_,_,_,_ = getRuleCortege rules.[int ind]
-                                                top = b
-                                            | None -> false)
+                                        match x with
+                                        | Some x ->
+                                            let ind,lSt,lbl,_ = getData x.rData
+                                            let top,_,_,_,_ = getRuleCortege rules.[int ind]
+                                            top = b
+                                        | None -> false)
             let right = 
                 recTable.[rightI,rightL]
                 |> Array.tryFind (fun (x:Option<CellData>) -> 

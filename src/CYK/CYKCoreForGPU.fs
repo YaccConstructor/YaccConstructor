@@ -53,26 +53,31 @@ type CYKCoreForGPU() =
             elif lState2 = LblState.Conflict then conflictLbl
             elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then new LabelWithState(noLbl, LblState.Undefined)
             else
-                let notEmptyLbls = [| noLbl; noLbl; noLbl |]
+                let mutable notEmptyLbl1 = noLbl
+                let mutable notEmptyLbl2 = noLbl
+                let mutable notEmptyLbl3 = noLbl 
                 let mutable realLblCount = 0
                 if lbl1 <> noLbl
                 then 
-                    notEmptyLbls.[0] <- lbl1
+                    notEmptyLbl1 <- lbl1
                     realLblCount <- realLblCount + 1
                 if lbl2 <> noLbl
                 then
-                    notEmptyLbls.[realLblCount] <- lbl2
+                    if realLblCount = 0 then notEmptyLbl1 <- lbl2
+                    elif realLblCount = 1 then notEmptyLbl2 <- lbl2
                     realLblCount <- realLblCount + 1
                 if ruleLabel <> noLbl
                 then 
-                    notEmptyLbls.[realLblCount] <- ruleLabel
+                    if realLblCount = 0 then notEmptyLbl1 <- ruleLabel
+                    elif realLblCount = 1 then notEmptyLbl2 <- ruleLabel
+                    elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
                     realLblCount <- realLblCount + 1
 
                 if realLblCount = 1
-                then new LabelWithState(notEmptyLbls.[0], LblState.Defined)
-                elif (realLblCount = 2 && notEmptyLbls.[1] = notEmptyLbls.[0]) ||
-                    (realLblCount = 3 && notEmptyLbls.[1] = notEmptyLbls.[0] && notEmptyLbls.[2] = notEmptyLbls.[0])
-                then new LabelWithState(notEmptyLbls.[0], LblState.Defined)
+                then new LabelWithState(notEmptyLbl1, LblState.Defined)
+                elif (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
+                    (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
+                then new LabelWithState(notEmptyLbl1, LblState.Defined)
                 else conflictLbl
                 
         let processRule rule ruleIndex i k l =

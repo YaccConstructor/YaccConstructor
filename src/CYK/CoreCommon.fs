@@ -25,6 +25,12 @@ type CellDataInside =
     val Weight : byte
     new (lblState, lbl, weight) = { LabelState = lblState; Label = lbl; Weight = weight }
 
+[<Struct>]
+type LabelWithState = 
+    val Label : byte
+    val State : LblState
+    new (lbl, lblState) = { Label = lbl; State = lblState }
+
 [<AutoOpen>]
 module CellHelpers =
     
@@ -54,9 +60,3 @@ module CellHelpers =
     let getCellDataStruct(cellData:CellData) = 
         let _,curlblState,curcl,curcw = getData cellData.rData
         new CellDataInside(curlblState, curcl, curcw)
-
-[<Struct>]
-type LabelWithState = 
-    val Label : byte
-    val State : LblState
-    new (lbl, lblState) = { Label = lbl; State = lblState }

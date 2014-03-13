@@ -19,9 +19,28 @@ let run input =
         |> Yard.Generators.CYK.CodeTokenStream
         
     let cyk = new Yard.Generators.CYKGenerator.CYKCore()
+    printfn "CYK"
     cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy) Yard.Generators.CYK.lblName
 
-let time () =    
+let runForGPU input =
+    let  buf = Lexing.LexBuffer<_>.FromTextReader input
+    let ts =  
+        seq { 
+                while not buf.IsPastEndOfStream do
+                let t = Lexer.tokens buf
+                yield t
+            }
+        |> Array.ofSeq
+
+    let tokens =
+        ts
+        |> Yard.Generators.CYK.CodeTokenStream
+        
+    let cyk = new Yard.Generators.CYKGenerator.CYKCoreForGPU()
+    printfn "CYK for GPU"
+    cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> 0uy) Yard.Generators.CYK.lblName
+
+let time (run : System.IO.StreamReader -> string) =    
     let start = System.DateTime.Now
     ArgParser.Parse commandLineSpecs
     match path with
@@ -33,4 +52,5 @@ let time () =
         printfn "%s" "Не задано имя входного файла."
     
 do 
-    time ()    
+    //time (runForGPU)
+    time (run)

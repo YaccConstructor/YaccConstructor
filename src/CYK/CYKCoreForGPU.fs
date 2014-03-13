@@ -50,10 +50,8 @@ type CYKCoreForGPU() =
         recTable <- Array.init (rowSize * rowSize) (fun _ -> Array.init nTermsCount (fun _ -> None))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
-            let conflictLbl = new LabelWithState(noLbl, LblState.Conflict)
-            
-            if lState1 = LblState.Conflict then conflictLbl
-            elif lState2 = LblState.Conflict then conflictLbl
+            if lState1 = LblState.Conflict then new LabelWithState(noLbl, LblState.Conflict)
+            elif lState2 = LblState.Conflict then new LabelWithState(noLbl, LblState.Conflict)
             elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then new LabelWithState(noLbl, LblState.Undefined)
             else
                 let mutable notEmptyLbl1 = noLbl
@@ -76,12 +74,11 @@ type CYKCoreForGPU() =
                     elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
                     realLblCount <- realLblCount + 1
 
-                if realLblCount = 1
-                then new LabelWithState(notEmptyLbl1, LblState.Defined)
-                elif (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
+                if realLblCount = 1 ||
+                    (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
                     (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
                 then new LabelWithState(notEmptyLbl1, LblState.Defined)
-                else conflictLbl
+                else new LabelWithState(noLbl, LblState.Conflict)
                 
         let processRule rule ruleIndex i k l =
             let rule = getRuleStruct rule

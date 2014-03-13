@@ -84,31 +84,16 @@ type CYKCoreForGPU() =
             let a,b,c,rl,rw = getRule rule
             if c <> 0us then
                 let leftCell = recTable.[i, k]
-                let left : CellData array = Array.zeroCreate leftCell.Length
-                let mutable realLeftLen = 0
-                for m in 0..leftCell.Length - 1 do
-                    if leftCell.[m].IsSome
-                    then
-                        left.[realLeftLen] <- leftCell.[m].Value
-                        realLeftLen <- realLeftLen + 1
-
                 let rightCell = recTable.[k+i+1, l-k-1]
-                let right : CellData array = Array.zeroCreate rightCell.Length
-                let mutable realRightLen = 0
-                for m in 0..rightCell.Length - 1 do
-                    if rightCell.[m].IsSome
-                    then
-                        right.[realRightLen] <- rightCell.[m].Value
-                        realRightLen <- realRightLen + 1
                 
-                for m in 0..realLeftLen - 1 do
-                    if getCellRuleTop left.[m] = b
+                for m in 0..leftCell.Length - 1 do
+                    if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = b
                     then
-                        let lState1,lbl1,weight1 = getCellData left.[m]
-                        for n in 0..realRightLen - 1 do
-                            if getCellRuleTop right.[n] = c
+                        let lState1,lbl1,weight1 = getCellData leftCell.[m].Value
+                        for n in 0..rightCell.Length - 1 do
+                            if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = c
                             then
-                                let lState2,lbl2,weight2 = getCellData right.[n]
+                                let lState2,lbl2,weight2 = getCellData rightCell.[n].Value
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
@@ -121,6 +106,7 @@ type CYKCoreForGPU() =
           |> Array.iter (fun l ->
                 [|0..s.Length-1-l|]
                 |> Array.Parallel.iter (fun i -> elem i l))
+        
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->

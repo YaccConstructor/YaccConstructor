@@ -186,8 +186,8 @@ type CYKCoreForGPU() =
                                         match x with
                                         | Some x ->
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            let rule = getRuleStruct rules.[int ind]
-                                            rule.RuleName = rule.R1
+                                            let ruleLeft = getRuleStruct rules.[int ind]
+                                            ruleLeft.RuleName = rule.R1
                                         | None -> false)
             let right = 
                 recTable.[rightI * rowSize + rightL]
@@ -195,8 +195,8 @@ type CYKCoreForGPU() =
                                         match x with
                                         | Some x -> 
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            let rule = getRuleStruct rules.[int ind]
-                                            rule.RuleName = rule.R2
+                                            let ruleRight = getRuleStruct rules.[int ind]
+                                            ruleRight.RuleName = rule.R2
                                         | None -> false)
 
             match right with

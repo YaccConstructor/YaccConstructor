@@ -25,8 +25,8 @@ type CYKCoreForGPU() =
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellData:CellData) =
         let curRuleNum,_,_,_ = getData cellData.rData
-        let curNT,_,_,_,_ = getRule rules.[int curRuleNum]
-        curNT
+        let rule = getRuleStruct rules.[int curRuleNum]
+        rule.RuleName
 
     // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
     let getCellData (cellData:CellData) =
@@ -44,8 +44,8 @@ type CYKCoreForGPU() =
         let nTermsCount = 
             rules
             |> Array.map(fun r -> 
-                            let a,_,_,_,_ = getRule r
-                            a)
+                            let rule = getRuleStruct r
+                            rule.RuleName)
             |> Set.ofArray
             |> Set.count
 
@@ -81,23 +81,23 @@ type CYKCoreForGPU() =
                 else noLbl,LblState.Conflict
                 
         let processRule rule ruleIndex i k l =
-            let a,b,c,rl,rw = getRule rule
-            if c <> 0us then
+            let rule = getRuleStruct rule
+            if rule.R2 <> 0us then
                 let leftCell = recTable.[i, k]
                 let rightCell = recTable.[k+i+1, l-k-1]
-                
+
                 for m in 0..leftCell.Length - 1 do
-                    if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = b
+                    if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = rule.R1
                     then
                         let lState1,lbl1,weight1 = getCellData leftCell.[m].Value
                         for n in 0..rightCell.Length - 1 do
-                            if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = c
+                            if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = rule.R2
                             then
                                 let lState2,lbl2,weight2 = getCellData rightCell.[n].Value
-                                let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
-                                let newWeight = weightCalcFun rw weight1 weight2
+                                let newLabel,newlState = chooseNewLabel rule.Label lbl1 lbl2 lState1 lState2
+                                let newWeight = weightCalcFun rule.Weight weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
-                                recTable.[i, l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
+                                recTable.[i, l].[int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
@@ -111,14 +111,14 @@ type CYKCoreForGPU() =
         |> Array.iteri 
             (fun ruleIndex rule ->
                 for k in 0..(s.Length-1) do
-                    let a,b,c,rl,rw = getRule rule               
-                    if c = 0us && b = s.[k] then
+                    let rule = getRuleStruct rule               
+                    if rule.R2 = 0us && rule.R1 = s.[k] then
                         let lState =
-                            match rl with
+                            match rule.Label with
                             | 0uy -> LblState.Undefined
                             | _   -> LblState.Defined
-                        let currentElem = buildData ruleIndex lState rl rw
-                        recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
+                        let currentElem = buildData ruleIndex lState rule.Label rule.Weight
+                        recTable.[k,0].[int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)
     
         fillTable ()
         recTable
@@ -171,7 +171,7 @@ type CYKCoreForGPU() =
 
     let rec trackLabel i l (cell:CellData)  flag =
         let ruleInd,_,curL,curW = getData cell.rData
-        let _,b,c,lbl,_ = getRule rules.[int ruleInd]
+        let rule = getRuleStruct rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
         if l = 0
         then if curL <> noLbl
@@ -183,8 +183,8 @@ type CYKCoreForGPU() =
                                         match x with
                                         | Some x ->
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            let top,_,_,_,_ = getRule rules.[int ind]
-                                            top = b
+                                            let rule = getRuleStruct rules.[int ind]
+                                            rule.RuleName = rule.R1
                                         | None -> false)
             let right = 
                 recTable.[rightI,rightL]
@@ -192,8 +192,8 @@ type CYKCoreForGPU() =
                                         match x with
                                         | Some x -> 
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            let top,_,_,_,_ = getRule rules.[int ind]
-                                            top = c
+                                            let rule = getRuleStruct rules.[int ind]
+                                            rule.RuleName = rule.R2
                                         | None -> false)
 
             match right with
@@ -209,7 +209,7 @@ type CYKCoreForGPU() =
                         trackLabel rightI rightL right  true
                 | _ -> ()
             | _ ->
-                if flag && lbl <> noLbl
+                if flag && rule.Label <> noLbl
                 then print curL curW leftI rightL leftL
             
     let labelTracking lastInd = 

@@ -186,7 +186,7 @@ type CYKGeneartorImpl () =
         }
         
     let print rule = 
-        let rName, r1, r2, lblName, lblWeight = getRule rule
+        let rName, r1, r2, lblName, lblWeight = getRuleCortege rule
         [rName]
 
     member x.Generate grammar = 

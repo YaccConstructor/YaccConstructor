@@ -2,43 +2,6 @@
 
 open System.Collections.Generic
 
-//(32        |16       |8       |8        )
-//(ruleIndex |lblState |lblName |lblWeght )
-//..
-type tblData = uint64
-
-[<Struct>]
-type CellData =
-    val rData : tblData
-    val _k : uint32
-    new (r, k) = {rData=r;_k=k}
-
-type LblState =
-     | Defined = 0
-     | Undefined = 1
-     | Conflict = 2
-
-[<AutoOpen>]
-module CellHelpers =
-    
-    let buildData rNum lState (lblName:byte) lblWeight =
-        let lbl = (uint16 lblName <<< 8) ||| uint16 lblWeight
-        let r2 = (uint32 lState <<< 16) ||| uint32 lbl
-        let r =  (uint64 rNum <<< 32) ||| uint64 r2
-        r
-
-    let getData (rule:tblData) =
-        let rNum,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
-        let lState,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
-        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& 0xFFus), uint8 (lbl &&& 0xFFFFus)
-        let lblState =
-            match lState with
-            | 0us -> LblState.Defined
-            | 1us -> LblState.Undefined
-            | 2us -> LblState.Conflict
-            | _ -> failwith "Unexpected lblState value!"
-        rNum, lblState, lblName, lblWeight
-
 type CYKCore() =
 
     // правила грамматики, инициализируются в Recognize
@@ -62,13 +25,8 @@ type CYKCore() =
     // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
     let getCellRuleTop (cellData:CellData) =
         let curRuleNum,_,_,_ = getData cellData.rData
-        let curNT,_,_,_,_ = getRule rules.[int curRuleNum]
+        let curNT,_,_,_,_ = getRuleCortege rules.[int curRuleNum]
         curNT
-
-    // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
-    let getCellData (cellData:CellData) =
-        let _,curlblState,curcl,curcw = getData cellData.rData
-        curlblState,curcl,curcw
 
     // возвращает координаты дочерних ячеек 
     // i l - координаты текущей ячейки
@@ -81,7 +39,7 @@ type CYKCore() =
         let nTermsCount = 
             rules
             |> Array.map(fun r -> 
-                            let a,_,_,_,_ = getRule r
+                            let a,_,_,_,_ = getRuleCortege r
                             a)
             |> Set.ofArray
             |> Set.count
@@ -103,18 +61,18 @@ type CYKCore() =
                 else noLbl,LblState.Conflict
 
         let processRule rule ruleIndex i k l =
-            let a,b,c,rl,rw = getRule rule
+            let a,b,c,rl,rw = getRuleCortege rule
             if c <> 0us then
                 let left = recTable.[i, k] |> Array.choose id
                 let right = recTable.[k+i+1, l-k-1] |> Array.choose id
                 left |> Array.iter (fun lf ->
                     if getCellRuleTop lf = b
                     then
-                        let lState1,lbl1,weight1 = getCellData lf
+                        let lState1,lbl1,weight1 = getCellDataCortege lf
                         right |> Array.iter (fun r ->
                             if getCellRuleTop r = c
                             then
-                                let lState2,lbl2,weight2 = getCellData r
+                                let lState2,lbl2,weight2 = getCellDataCortege r
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
                                 let newWeight = weightCalcFun rw weight1 weight2
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
@@ -133,7 +91,7 @@ type CYKCore() =
         |> Array.iteri 
             (fun ruleIndex rule ->
                 for k in 0..(s.Length-1) do
-                    let a,b,c,rl,rw = getRule rule               
+                    let a,b,c,rl,rw = getRuleCortege rule               
                     if c = 0us && b = s.[k] then
                         let lState =
                             match rl with
@@ -175,7 +133,7 @@ type CYKCore() =
             then 
                 if cellDatas.[i].IsSome 
                 then
-                    let state,lbl,weight = getCellData (cellDatas.[i].Value)
+                    let state,lbl,weight = getCellDataCortege (cellDatas.[i].Value)
                     if i = last
                     then [getString state lbl weight]
                     else getString state lbl weight :: out (i+1) last
@@ -193,7 +151,7 @@ type CYKCore() =
 
     let rec trackLabel i l (cell:CellData)  flag =
         let ruleInd,_,curL,curW = getData cell.rData
-        let _,b,c,lbl,_ = getRule rules.[int ruleInd]
+        let _,b,c,lbl,_ = getRuleCortege rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
         if l = 0
         then if curL <> noLbl
@@ -205,7 +163,7 @@ type CYKCore() =
                                             match x with
                                             | Some x ->
                                                 let ind,lSt,lbl,_ = getData x.rData
-                                                let top,_,_,_,_ = getRule rules.[int ind]
+                                                let top,_,_,_,_ = getRuleCortege rules.[int ind]
                                                 top = b
                                             | None -> false)
             let right = 
@@ -214,7 +172,7 @@ type CYKCore() =
                                         match x with
                                         | Some x -> 
                                             let ind,lSt,lbl,_ = getData x.rData
-                                            let top,_,_,_,_ = getRule rules.[int ind]
+                                            let top,_,_,_,_ = getRuleCortege rules.[int ind]
                                             top = c
                                         | None -> false)
 

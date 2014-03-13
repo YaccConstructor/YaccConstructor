@@ -28,11 +28,6 @@ type CYKCoreForGPU() =
         let rule = getRuleStruct rules.[int curRuleNum]
         rule.RuleName
 
-    // возвращает i-ые состояние метки, метку и вес массива указанной ячейки
-    let getCellData (cellData:CellData) =
-        let _,curlblState,curcl,curcw = getData cellData.rData
-        curlblState,curcl,curcw
-
     // возвращает координаты дочерних ячеек 
     // i l - координаты текущей ячейки
     // k - число, определяющее координаты
@@ -89,13 +84,13 @@ type CYKCoreForGPU() =
                 for m in 0..leftCell.Length - 1 do
                     if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = rule.R1
                     then
-                        let lState1,lbl1,weight1 = getCellData leftCell.[m].Value
+                        let cellData1 = getCellDataStruct leftCell.[m].Value
                         for n in 0..rightCell.Length - 1 do
                             if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = rule.R2
                             then
-                                let lState2,lbl2,weight2 = getCellData rightCell.[n].Value
-                                let newLabel,newlState = chooseNewLabel rule.Label lbl1 lbl2 lState1 lState2
-                                let newWeight = weightCalcFun rule.Weight weight1 weight2
+                                let cellData2 = getCellDataStruct rightCell.[n].Value
+                                let newLabel,newlState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
+                                let newWeight = weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
                                 let currentElem = buildData ruleIndex newlState newLabel newWeight
                                 recTable.[i, l].[int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
 
@@ -153,10 +148,10 @@ type CYKCoreForGPU() =
             then 
                 if cellDatas.[i].IsSome 
                 then
-                    let state,lbl,weight = getCellData (cellDatas.[i].Value)
+                    let cellData = getCellDataStruct (cellDatas.[i].Value)
                     if i = last
-                    then [getString state lbl weight]
-                    else getString state lbl weight :: out (i+1) last
+                    then [getString cellData.LabelState cellData.Label cellData.Weight]
+                    else getString cellData.LabelState cellData.Label cellData.Weight :: out (i+1) last
                 else "" :: out (i+1) last
             else [""]
 

@@ -54,3 +54,9 @@ module CellHelpers =
     let getCellDataStruct(cellData:CellData) = 
         let _,curlblState,curcl,curcw = getData cellData.rData
         new CellDataInside(curlblState, curcl, curcw)
+
+[<Struct>]
+type LabelWithState = 
+    val Label : byte
+    val State : LblState
+    new (lbl, lblState) = { Label = lbl; State = lblState }

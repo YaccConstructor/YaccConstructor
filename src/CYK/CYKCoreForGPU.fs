@@ -47,11 +47,11 @@ type CYKCoreForGPU() =
         recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun _ _ -> Array.init nTermsCount (fun _ -> None))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
-            let conflictLbl = (noLbl,LblState.Conflict)
+            let conflictLbl = new LabelWithState(noLbl, LblState.Conflict)
             
             if lState1 = LblState.Conflict then conflictLbl
             elif lState2 = LblState.Conflict then conflictLbl
-            elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then noLbl,LblState.Undefined
+            elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then new LabelWithState(noLbl, LblState.Undefined)
             else
                 let notEmptyLbls = [| noLbl; noLbl; noLbl |]
                 let mutable realLblCount = 0
@@ -69,11 +69,11 @@ type CYKCoreForGPU() =
                     realLblCount <- realLblCount + 1
 
                 if realLblCount = 1
-                then notEmptyLbls.[0],LblState.Defined
+                then new LabelWithState(notEmptyLbls.[0], LblState.Defined)
                 elif (realLblCount = 2 && notEmptyLbls.[1] = notEmptyLbls.[0]) ||
                     (realLblCount = 3 && notEmptyLbls.[1] = notEmptyLbls.[0] && notEmptyLbls.[2] = notEmptyLbls.[0])
-                then notEmptyLbls.[0],LblState.Defined
-                else noLbl,LblState.Conflict
+                then new LabelWithState(notEmptyLbls.[0], LblState.Defined)
+                else conflictLbl
                 
         let processRule rule ruleIndex i k l =
             let rule = getRuleStruct rule
@@ -89,9 +89,9 @@ type CYKCoreForGPU() =
                             if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = rule.R2
                             then
                                 let cellData2 = getCellDataStruct rightCell.[n].Value
-                                let newLabel,newlState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
+                                let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
                                 let newWeight = weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
-                                let currentElem = buildData ruleIndex newlState newLabel newWeight
+                                let currentElem = buildData ruleIndex lblWithState.State lblWithState.Label newWeight
                                 recTable.[i, l].[int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)

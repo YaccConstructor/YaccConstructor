@@ -41,6 +41,8 @@
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
     <Compile Include="PrintTranslator.fs" />
+    <Compile Include="PrintTreeNode.fs" />
+    <Compile Include="HighlightingConvertions.fs" />
     <Compile Include="RNGLRGenerator.fs" />
     <None Include="packages.config" />
   </ItemGroup>

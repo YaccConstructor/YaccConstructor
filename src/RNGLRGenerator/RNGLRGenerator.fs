@@ -24,6 +24,8 @@ open States
 open Printer
 open TranslatorPrinter
 open Option
+open PrintTreeNode
+open HighlightingConvertions
 
 type RNGLR() = 
     inherit Generator()
@@ -55,6 +57,8 @@ type RNGLR() =
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
             let mutable needTranslate = getBoolOption "translate" true
+            let needHighlighting = ref <| getBoolOption "highlighting" false
+            let namespaceName = ref <| getOption "namespace" "NamespaceName" id
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
             let mutable caseSensitive = getBoolOption "caseSensitive" false
@@ -87,6 +91,8 @@ type RNGLR() =
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
+                | "-highlighting" -> needHighlighting := getBoolValue "highlighting" value
+                | "-namespace" -> if value.Trim() <> "" then namespaceName := value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-lang" ->
@@ -97,8 +103,32 @@ type RNGLR() =
                         | s -> failwithf "Language %s is not supported" s
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
-            let newDefinition = initialConvert definition
+            let mutable newDefinition = initialConvert definition
+
+            if !needHighlighting 
+            then
+                needTranslate <- true
+                newDefinition <- highlightingConvertions newDefinition
+
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
+
+            if !needHighlighting
+            then
+                let generateFile name = 
+                    use out = new System.IO.StreamWriter (name + ".cs")
+                    let tables = printTreeNode !namespaceName name
+                    out.WriteLine tables
+                    out.Close()
+
+                let indexator = grammar.indexator
+                for i = 0 to indexator.nonTermCount - 1 do
+                    let prefix = firstLetterToUpper <| indexator.indexToNonTerm i
+                    generateFile <| prefix + "NonTermTreeNode"
+
+                for i = indexator.termsStart to indexator.termsEnd do
+                    let prefix = grammar.indexator.indexToTerm i
+                    generateFile <| prefix + "TermTreeNode"
+
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -158,6 +188,11 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
 
+                    if !needHighlighting 
+                    then 
+                        println "open Highlighting.Tree"
+                        println "open %s" !namespaceName
+                        
                     match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->

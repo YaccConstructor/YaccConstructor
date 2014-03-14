@@ -17,6 +17,18 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <Reference Include="AbstractLexer.Common">
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net40\AbstractLexer.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AbstractLexer.Core">
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.6.5\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AbstractParsing.Common">
+      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.6.5\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -30,6 +42,15 @@
     </Reference>
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Util">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
@@ -58,21 +79,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
-      <Name>AbstractLexer.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
-      <Name>AbstractLexer.Core</Name>
-      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
-      <Name>AbstractParsing.Common</Name>
-      <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\TSQL\TSQL.fsproj">
       <Name>TSQL</Name>
       <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
@@ -98,8 +104,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(ReSharperSdkTargets)\Plugin.Targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

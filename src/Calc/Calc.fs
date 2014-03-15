@@ -1,8 +1,9 @@
 ﻿module YC.ReSharper.AbstractAnalysis.Languages.Calc
 
+open Calc.AbstractParser
 open AbstractLexer.Common
 open AbstractLexer.Core
-open Calc.AbstractParser
+open Yard.Generators.RNGLR.AST
 
 let printTag tag printBrs = 
     match tag with
@@ -25,3 +26,12 @@ let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
     
     fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
     
+let args = 
+    {
+        tokenToRange = fun _ -> 0UL,0UL
+        zeroPosition = 0UL
+        clearAST = false
+        filterEpsilons = true
+    }
+
+let translate ast errors = translate args ast errors

@@ -23,6 +23,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open PrintTreeNode
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =
@@ -39,7 +40,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive =
+        positionType fullPath output dummyPos caseSensitive needHighlighting =
     let tab = 4
 
     let rules = grammar.rules
@@ -294,8 +295,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         funHead @@-- body
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
-
-    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
+    let mainHighlightSemantic = 
+        if needHighlighting then wordL <| printMainSemantic() else wordL ""
+    [ mainHighlightSemantic; (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
     

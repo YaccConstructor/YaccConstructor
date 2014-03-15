@@ -1,8 +1,13 @@
 ﻿module PrintTreeNode
 
 let firstLetterToUpper (str : string) = 
-    let firstCharUpper = System.Char.ToUpper <| str.Chars 0
-    new System.String (firstCharUpper, 1) + str.Remove(0)
+    let symbols = [| 
+                    for i = 0 to str.Length - 1 do
+                        if i = 0 
+                        then yield System.Char.ToUpper str.[0]
+                        else yield System.Char.ToLower str.[i] 
+                  |] 
+    new System.String(symbols)
 
 let printTreeNode (nameOfNamespace : string) (nameOfClass : string) = 
     let res  = new System.Text.StringBuilder()
@@ -17,16 +22,16 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "using System.Collections.Generic;"
-    printBrInd 0 "using System.Text;"
-    printBrInd 0 "using JetBrains.DocumentModel;"
-    printBrInd 0 "using JetBrains.ReSharper.Psi;"
-    printBrInd 0 "using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;"
-    printBrInd 0 "using JetBrains.ReSharper.Psi.Modules;"
-    printBrInd 0 "using JetBrains.ReSharper.Psi.Tree;"
-    printBrInd 0 "using JetBrains.Text;"
-    printBrInd 0 "using Highlighting.Gen;"
-    printBrInd 0 "using Highlighting.Tree;"
+//    printBrInd 0 "using System.Collections.Generic;"
+//    printBrInd 0 "using System.Text;"
+//    printBrInd 0 "using JetBrains.DocumentModel;"
+//    printBrInd 0 "using JetBrains.ReSharper.Psi;"
+//    printBrInd 0 "using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;"
+//    printBrInd 0 "using JetBrains.ReSharper.Psi.Modules;"
+//    printBrInd 0 "using JetBrains.ReSharper.Psi.Tree;"
+//    printBrInd 0 "using JetBrains.Text;"
+//    printBrInd 0 "using Highlighting.Gen;"
+    printBrInd 0 "using Highlighting.Core;"
 
     printBr "" 
 
@@ -34,7 +39,7 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 0 "{"
 
     printBrInd 1 "public class %s : AbstractTreeNode" nameOfClass
-
+    printBrInd 1 "{"
 //	printBrInd 2 "public Dictionary<ITreeNode, ITreeNode> ParentAndPrevSibling { get; private set; }"
 //  printBrInd 2 "public Dictionary<ITreeNode, ITreeNode> ParentAndNextSibling { get; private set; }"
 //	printBrInd 2 "public ITreeNode Parent { get; private set; }"
@@ -50,28 +55,28 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 //  printBrInd 2 "private DocumentRange documentRange = new DocumentRange();"
 //  printBrInd 2 "private string text;"
         
-    printBrInd 2 "public %s (string s)" nameOfClass
+    printBrInd 2 "public %s (string s) : base(s)" nameOfClass
     printBrInd 2 "{"
-    printBrInd 3 "text = s"
+//    printBrInd 3 "text = s;"
     printBrInd 2 "}"
-    printBr ""
+//    printBr ""
         
     // printing all methods
 
-    printBrInd 2 "public void SetDocumentRange(DocumentRange range)"
-    printBrInd 2 "{"
-    printBrInd 3 "documentRange = range;"
-    printBrInd 2 "}"
-
-    printBrInd 2 "public void DocumentRangeSetStartTo(int start)"
-    printBrInd 2 "{"
-    printBrInd 3 "documentRange = documentRange.SetStartTo(start);"
-    printBrInd 2 "}"
-
-    printBrInd 2 "public void DocumentRangeSetEndTo(int end)"
-    printBrInd 2 "{"
-    printBrInd 3 "documentRange = documentRange.SetEndTo(end);"
-    printBrInd 2 "}"
+//    printBrInd 2 "public void SetDocumentRange(DocumentRange range)"
+//    printBrInd 2 "{"
+//    printBrInd 3 "documentRange = range;"
+//    printBrInd 2 "}"
+//
+//    printBrInd 2 "public void DocumentRangeSetStartTo(int start)"
+//    printBrInd 2 "{"
+//    printBrInd 3 "documentRange = documentRange.SetStartTo(start);"
+//    printBrInd 2 "}"
+//
+//    printBrInd 2 "public void DocumentRangeSetEndTo(int end)"
+//    printBrInd 2 "{"
+//    printBrInd 3 "documentRange = documentRange.SetEndTo(end);"
+//    printBrInd 2 "}"
 
 //    printBrInd 2 "public IPsiServices GetPsiServices()"
 //    printBrInd 2 "{"
@@ -239,7 +244,7 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 0 "}"
     res.ToString()
 
-let addMainSemantic parent children = 
+let printMainSemantic () = 
     let res  = new System.Text.StringBuilder()
 
     let inline print (x : 'a) =
@@ -252,7 +257,7 @@ let addMainSemantic parent children =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "addSemantic parent children" 
+    printBrInd 0 "let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = " 
     printBrInd 1 "let mutable prev = null"
     printBrInd 1 "let mutable curr = null"
     printBrInd 1 "for child in children do"
@@ -267,4 +272,3 @@ let addMainSemantic parent children =
     printBrInd 1 "parent.SetLastChild(curr)"
     printBrInd 1 "parent"
     res.ToString()
-

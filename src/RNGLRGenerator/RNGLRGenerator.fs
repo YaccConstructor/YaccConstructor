@@ -104,7 +104,7 @@ type RNGLR() =
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
-
+            
             if !needHighlighting 
             then
                 needTranslate <- true
@@ -123,12 +123,15 @@ type RNGLR() =
                 let indexator = grammar.indexator
                 for i = 0 to indexator.nonTermCount - 1 do
                     let prefix = firstLetterToUpper <| indexator.indexToNonTerm i
-                    generateFile <| prefix + "NonTermTreeNode"
+                    generateFile <| prefix + "NonTermNode"
 
                 for i = indexator.termsStart to indexator.termsEnd do
-                    let prefix = grammar.indexator.indexToTerm i
-                    generateFile <| prefix + "TermTreeNode"
-
+                    let prefix = firstLetterToUpper <| grammar.indexator.indexToTerm i
+                    generateFile <| prefix + "TermNode"
+                
+                for i = indexator.literalsStart to indexator.literalsEnd do
+                    let prefix = firstLetterToUpper <| grammar.indexator.indexToLiteral i
+                    generateFile <| prefix + "LitNode"
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -159,6 +162,7 @@ type RNGLR() =
                             grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
+            
             let statesInterpreter = buildStates table grammar
             let tables = new Tables(grammar, statesInterpreter)
             use out = new System.IO.StreamWriter (output)
@@ -184,13 +188,14 @@ type RNGLR() =
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
+
                     println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
 
                     if !needHighlighting 
                     then 
-                        println "open Highlighting.Tree"
+                        println "open Highlighting.Core"
                         println "open %s" !namespaceName
                         
                     match definition.head with
@@ -213,8 +218,8 @@ type RNGLR() =
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
             let res = if not needTranslate || targetLanguage = Scala then tables
-                      else tables + printTranslator grammar newDefinition.grammar.[0].rules
-                                        positionType fullPath output dummyPos caseSensitive
+                      else tables + printTranslator grammar newDefinition.grammar.[0].rules 
+                                        positionType fullPath output dummyPos caseSensitive !needHighlighting
             let res = 
                 match definition.foot with
                 | None -> res

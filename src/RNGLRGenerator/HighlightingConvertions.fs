@@ -2,9 +2,10 @@
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
+open Yard.Generators.RNGLR
 open PrintTreeNode
 
-let getLeafSemantic leaf = 
+let getLeafSemantic leaf isTok = 
     let res = new System.Text.StringBuilder()
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -12,9 +13,12 @@ let getLeafSemantic leaf =
     let inline printBr (x : 'a) =
         Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
 
-    printBr "new %s(\"%s\")" leaf leaf
+    if isTok
+    then printBr "new %sTermNode(\"%s\")" <| firstLetterToUpper leaf <| leaf
+    else printBr "new %sLitNode(\"%s\")"  <| firstLetterToUpper leaf <| leaf
+    
     res.ToString()
-
+                               
 let getNodeSemantic parent children = 
     let res = new System.Text.StringBuilder()
     let inline print (x : 'a) =
@@ -27,14 +31,20 @@ let getNodeSemantic parent children =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "let %s = new %s(%s)" parent <| firstLetterToUpper parent <| parent
+    printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| firstLetterToUpper parent <| parent
     printBrInd 0 "let children : IAbstractTreeNode list = %A" children
     printBrInd 0 "addSemantic parent children"
     res.ToString()
 
 let highlightingConvertions (def : Definition.t<Source.t, Source.t>) = 
     let rules = def.grammar.Head.rules    
-    let termsList = ref []
+    let literalToName lit = 
+        let indexator = new Indexator(rules, true)
+        lit
+        |> indexator.literalToIndex
+        |> indexator.getLiteralName
+
+    let termsAndLitsList = ref []
 
     let getNewElem newBinding refRule : elem<Source.t, Source.t> = 
         let newElem : elem<Source.t, Source.t> = 
@@ -62,15 +72,26 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
     let processElem (element : elem<Source.t, Source.t>) newBinding = 
         
         match element.rule with
-        | t.PToken tok -> 
-            if not <| List.exists ((=) tok.text) !termsList 
-            then termsList := tok.text :: !termsList
-                                                
-            getNewElem newBinding <| t.PRef(new Source.t("Highlight_" + tok.text), None)
-                                                
-        | t.PRef (s, _) as refer-> 
+        | t.PSeq (_,_,_) 
+        | t.PRef (_,_) as refer -> 
             getNewElem newBinding <| refer
-
+        | t.PToken tok -> 
+            if not <| List.exists (fun symbol -> fst symbol = tok.text) !termsAndLitsList
+            then termsAndLitsList := (tok.text, true) :: !termsAndLitsList
+            
+            getNewElem newBinding <| t.PRef(new Source.t("Highlight_" + tok.text), None)
+        
+        | t.PLiteral lit -> 
+            let litName = literalToName lit.text
+            if not <| List.exists (fun symbol -> fst symbol = litName) !termsAndLitsList
+            then termsAndLitsList := (litName, false) :: !termsAndLitsList
+        
+            getNewElem newBinding <| t.PRef(new Source.t("Highlight_" + litName), None)
+        
+        | _ as smth -> 
+                eprintfn "Unmatched %s pattern" <| element.rule.GetType().FullName
+                printfn  "Unmatched %s pattern" <| element.rule.GetType().FullName
+                failwith "Unexpected pattern "  <| element.ToString()
 
     let processRule (rule : Rule.t<Source.t, Source.t>) = 
         match rule.body with 
@@ -89,9 +110,12 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
 
     let addHighlightRules() = 
         let mutable res = []
-        for tok in !termsList do 
-            let actionCode = new Source.t(getLeafSemantic tok)
-            let newElem = getNewElem None <| t.PToken (new Source.t(tok))
+        for tok, isTok in !termsAndLitsList do 
+            let actionCode, newElem =
+                if isTok 
+                then new Source.t(getLeafSemantic tok isTok), getNewElem None <| t.PToken (new Source.t(tok))
+                else new Source.t(getLeafSemantic tok isTok), getNewElem None <| t.PLiteral (new Source.t(tok))
+
             let newRule : Rule.t<Source.t, Source.t> = 
                 {
                     name = new Source.t("Highlight_" + tok)

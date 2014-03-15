@@ -31,7 +31,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="$(FsYardPath)" />
+  <!--Import Project="$(FsYardPath)" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
@@ -157,6 +157,18 @@
       <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
+      <Name>Highlighting.Core</Name>
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
+      <Name>TSQLHighlighting</Name>
+      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

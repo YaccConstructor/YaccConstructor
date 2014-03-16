@@ -12,7 +12,7 @@ open JSONHighlighting
 
 open AbstractLexer.Core
 
-# 16 "JSONParser.fs"
+# 15 "JSONParser.fs"
 type Token =
     | EMPTY of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | KW_COLON of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
@@ -37,15 +37,15 @@ let tokenData = function
     | STRING1 x -> box x
 
 let numToString = function
-    | 0 -> "Highlight_EMPTY"
-    | 1 -> "Highlight_KW_COLON"
-    | 2 -> "Highlight_KW_FALSE"
-    | 3 -> "Highlight_KW_NULL"
-    | 4 -> "Highlight_KW_TRUE"
-    | 5 -> "Highlight_NUMBER"
-    | 6 -> "Highlight_STRING1"
-    | 7 -> "array1"
-    | 8 -> "error"
+    | 0 -> "array1"
+    | 1 -> "error"
+    | 2 -> "highlight_EMPTY"
+    | 3 -> "highlight_KW_COLON"
+    | 4 -> "highlight_KW_FALSE"
+    | 5 -> "highlight_KW_NULL"
+    | 6 -> "highlight_KW_TRUE"
+    | 7 -> "highlight_NUMBER"
+    | 8 -> "highlight_STRING1"
     | 9 -> "objects"
     | 10 -> "pair"
     | 11 -> "value"
@@ -86,8 +86,8 @@ let isLiteral = function
 
 let getLiteralNames = []
 let mutable private cur = 0
-let leftSide = [|11; 11; 11; 11; 11; 11; 11; 16; 7; 12; 12; 14; 14; 10; 9; 13; 13; 15; 15; 6; 5; 4; 2; 3; 0; 1|]
-let private rules = [|6; 5; 9; 7; 4; 2; 3; 11; 0; 12; 0; 11; 14; 17; 11; 14; 6; 1; 11; 0; 13; 0; 10; 15; 17; 10; 15; 24; 22; 21; 19; 20; 17; 18|]
+let leftSide = [|11; 11; 11; 11; 11; 11; 11; 16; 0; 12; 12; 14; 14; 10; 9; 13; 13; 15; 15; 8; 7; 6; 4; 5; 2; 3|]
+let private rules = [|8; 7; 9; 0; 6; 4; 5; 11; 2; 12; 2; 11; 14; 2; 11; 14; 8; 3; 11; 2; 13; 2; 10; 15; 2; 10; 15; 24; 22; 21; 19; 20; 17; 18|]
 let private rulesStart = [|0; 1; 2; 3; 4; 5; 6; 7; 8; 11; 11; 13; 13; 16; 19; 22; 22; 24; 24; 27; 28; 29; 30; 31; 32; 33; 34|]
 let startRule = 7
 
@@ -96,11 +96,11 @@ let acceptEmptyInput = false
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 43; 44; 45; 46; 47; 48; 49; 50; 13; 51; 52; 53; 54; 55; 2; 3; 4; 5; 6; 7; 10; 11; 20; 27; 38; 41; 14; 15; 16; 17; 37; 32; 35; 8; 19; 9; 12; 18; 21; 22; 23; 24; 26; 25; 28; 29; 30; 31; 33; 34; 36; 39; 40; 42|]
+let private lists_gotos = [|1; 2; 45; 46; 47; 48; 49; 50; 51; 14; 52; 53; 54; 55; 56; 3; 4; 5; 6; 7; 8; 9; 12; 21; 29; 40; 43; 15; 16; 17; 18; 39; 34; 37; 10; 20; 11; 13; 19; 22; 28; 26; 23; 24; 27; 25; 30; 33; 31; 32; 35; 36; 38; 41; 42; 44|]
 let private small_gotos =
-        [|15; 0; 131073; 196610; 262147; 327684; 393221; 458758; 589831; 720904; 1114121; 1245194; 1310731; 1376268; 1441805; 1572878; 65554; 15; 131088; 196625; 262162; 327699; 393236; 458773; 589846; 655383; 720920; 786457; 851994; 1114121; 1245211; 1310748; 1376285; 1441822; 1572895; 131090; 15; 131088; 196625; 262162; 327699; 393236; 458773; 589846; 655383; 720920; 786464; 852001; 1114121; 1245211; 1310748; 1376285; 1441822; 1572895; 458754; 65570; 1179683; 524303; 15; 131088; 196625; 262162; 327699; 393252; 458773; 589846; 720933; 1114121; 1245211; 1310748; 1376285; 1441822; 1572902; 1310722; 983079; 1114152; 1441795; 393257; 655402; 1572907; 1507330; 65570; 1179683; 1572866; 983084; 1114152; 1769474; 917549; 1114158; 1900559; 15; 131088; 196625; 262162; 327699; 393252; 458773; 589846; 720943; 1114121; 1245211; 1310748; 1376285; 1441822; 1572902; 1966082; 917552; 1114158; 2097154; 49; 1114162; 2293762; 51; 1114162; 2490370; 52; 1114165; 2686978; 54; 1114165|]
-let gotos = Array.zeroCreate 56
-for i = 0 to 55 do
+        [|15; 0; 131073; 262146; 327683; 393220; 458757; 524294; 589831; 720904; 1114121; 1245194; 1310731; 1376268; 1441805; 1572878; 131090; 15; 131088; 262161; 327698; 393235; 458772; 524309; 589846; 655383; 720920; 786457; 851994; 1114121; 1245211; 1310748; 1376285; 1441822; 1572895; 262162; 15; 131088; 262161; 327698; 393235; 458772; 524309; 589846; 655383; 720920; 786464; 852001; 1114121; 1245211; 1310748; 1376285; 1441822; 1572895; 589826; 196642; 1179683; 655375; 15; 131088; 262161; 327698; 393235; 458772; 524324; 589846; 720933; 1114121; 1245211; 1310748; 1376285; 1441822; 1572902; 1376259; 131111; 983080; 1114153; 1441795; 524330; 655403; 1572908; 1507330; 196642; 1179683; 1572867; 131111; 983085; 1114153; 1900547; 131118; 917551; 1114121; 1966095; 15; 131088; 262161; 327698; 393235; 458772; 524324; 589846; 720944; 1114121; 1245211; 1310748; 1376285; 1441822; 1572902; 2031619; 131118; 917553; 1114121; 2228226; 131122; 1114163; 2424834; 131124; 1114163; 2621442; 131125; 1114166; 2818050; 131127; 1114166|]
+let gotos = Array.zeroCreate 57
+for i = 0 to 56 do
         gotos.[i] <- Array.zeroCreate 25
 cur <- 0
 while cur < small_gotos.Length do
@@ -112,11 +112,11 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|5,1|]; [|6,1|]; [|4,1|]; [|1,1|]; [|0,1|]; [|3,1|]; [|2,1|]; [|13,3|]; [|24,1|]; [|22,1|]; [|23,1|]; [|21,1|]; [|20,1|]; [|19,1|]; [|25,1|]; [|16,1|]; [|16,2|]; [|18,2|]; [|18,3|]; [|10,1|]; [|10,2|]; [|12,2|]; [|12,3|]; [|8,3|]; [|14,3|]|]
+let private lists_reduces = [|[|3,1|]; [|5,1|]; [|6,1|]; [|4,1|]; [|1,1|]; [|0,1|]; [|2,1|]; [|13,3|]; [|24,1|]; [|22,1|]; [|23,1|]; [|21,1|]; [|20,1|]; [|19,1|]; [|25,1|]; [|16,1|]; [|18,2|]; [|18,3|]; [|16,2|]; [|10,1|]; [|12,2|]; [|12,3|]; [|10,2|]; [|8,3|]; [|14,3|]|]
 let private small_reduces =
-        [|196609; 1114112; 262145; 1114113; 327681; 1114114; 393217; 1114115; 458753; 1114116; 589825; 1114116; 655361; 1114117; 720897; 1114118; 786433; 1114119; 851974; 1114120; 1245192; 1310728; 1376264; 1441800; 1572872; 917505; 1114121; 983041; 1114122; 1048577; 1114123; 1114113; 1114124; 1179649; 1114125; 1245190; 1114126; 1245198; 1310734; 1376270; 1441806; 1572878; 1310721; 1114127; 1376257; 1114128; 1572865; 1114129; 1638401; 1114130; 1703937; 1179661; 1769473; 1114131; 1835009; 1114132; 1966081; 1114133; 2031617; 1114134; 2162689; 1114135; 2228225; 1114120; 2359297; 1114136; 2424834; 1114125; 1179661; 2555905; 1507351; 2621441; 1507336; 2752513; 1507352; 2818049; 1507328; 2883585; 1507329; 2949121; 1507330; 3014657; 1507331; 3080193; 1507332; 3145729; 1507333; 3211265; 1507334; 3342337; 1507337; 3407873; 1507338; 3473409; 1507339; 3538945; 1507340; 3604481; 1507341|]
-let reduces = Array.zeroCreate 56
-for i = 0 to 55 do
+        [|65537; 1507328; 196609; 1114112; 327681; 1114113; 393217; 1114114; 458753; 1114115; 524289; 1114116; 589825; 1114117; 720897; 1114117; 786433; 1114118; 851969; 1114119; 917510; 1114120; 1245192; 1310728; 1376264; 1441800; 1572872; 983041; 1114121; 1048577; 1114122; 1114113; 1114123; 1179649; 1114124; 1245185; 1114125; 1310726; 1114126; 1245198; 1310734; 1376270; 1441806; 1572878; 1376257; 1114127; 1572865; 1114128; 1638401; 1114129; 1703937; 1572872; 1769473; 1179661; 1835009; 1114130; 1900545; 1114131; 2031617; 1114132; 2097153; 1114133; 2162689; 1114134; 2293761; 1114135; 2359297; 1114120; 2490369; 1114136; 2555906; 1114125; 1179661; 2686977; 1507351; 2752513; 1507336; 2883585; 1507352; 2949121; 1507329; 3014657; 1507330; 3080193; 1507331; 3145729; 1507332; 3211265; 1507333; 3276801; 1507334; 3407873; 1507337; 3473409; 1507338; 3538945; 1507339; 3604481; 1507340; 3670017; 1507341|]
+let reduces = Array.zeroCreate 57
+for i = 0 to 56 do
         reduces.[i] <- Array.zeroCreate 25
 cur <- 0
 while cur < small_reduces.Length do
@@ -130,9 +130,9 @@ while cur < small_reduces.Length do
     cur <- cur + length
 let private lists_zeroReduces = [|[|15; 9|]; [|17|]; [|11|]|]
 let private small_zeroReduces =
-        [|65537; 1114112; 131073; 1114112; 1310721; 1114113; 1572865; 1114113; 1769473; 1114114; 1966081; 1114114|]
-let zeroReduces = Array.zeroCreate 56
-for i = 0 to 55 do
+        [|131073; 1114112; 262145; 1114112; 1376257; 1114113; 1572865; 1114113; 1900545; 1114114; 2031617; 1114114|]
+let zeroReduces = Array.zeroCreate 57
+for i = 0 to 56 do
         zeroReduces.[i] <- Array.zeroCreate 25
 cur <- 0
 while cur < small_zeroReduces.Length do
@@ -144,12 +144,12 @@ while cur < small_zeroReduces.Length do
         let x = small_zeroReduces.[cur + k] &&& 65535
         zeroReduces.[i].[j] <- lists_zeroReduces.[x]
     cur <- cur + length
-let private small_acc = [50]
-let private accStates = Array.zeroCreate 56
-for i = 0 to 55 do
+let private small_acc = [51]
+let private accStates = Array.zeroCreate 57
+for i = 0 to 56 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 23
-let errorIndex = 8
+let errorIndex = 1
 let errorRulesExists = false
 let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
 let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
@@ -173,11 +173,11 @@ let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list)
     parent.SetLastChild(curr)
     parent
 
-let _rnglr_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
-let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
+let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
+let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
 let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats = 
-  (Array.zeroCreate 0 : array<'_rnglr_type_Highlight_EMPTY * '_rnglr_type_Highlight_KW_COLON * '_rnglr_type_Highlight_KW_FALSE * '_rnglr_type_Highlight_KW_NULL * '_rnglr_type_Highlight_KW_TRUE * '_rnglr_type_Highlight_NUMBER * '_rnglr_type_Highlight_STRING1 * '_rnglr_type_array1 * '_rnglr_type_error * '_rnglr_type_objects * '_rnglr_type_pair * '_rnglr_type_value * '_rnglr_type_yard_rule_list_1 * '_rnglr_type_yard_rule_list_3 * '_rnglr_type_yard_rule_yard_many_1_2 * '_rnglr_type_yard_rule_yard_many_1_4 * '_rnglr_type_yard_start_rule>), 
+  (Array.zeroCreate 0 : array<'_rnglr_type_array1 * '_rnglr_type_error * '_rnglr_type_highlight_EMPTY * '_rnglr_type_highlight_KW_COLON * '_rnglr_type_highlight_KW_FALSE * '_rnglr_type_highlight_KW_NULL * '_rnglr_type_highlight_KW_TRUE * '_rnglr_type_highlight_NUMBER * '_rnglr_type_highlight_STRING1 * '_rnglr_type_objects * '_rnglr_type_pair * '_rnglr_type_value * '_rnglr_type_yard_rule_list_1 * '_rnglr_type_yard_rule_list_3 * '_rnglr_type_yard_rule_yard_many_1_2 * '_rnglr_type_yard_rule_yard_many_1_4 * '_rnglr_type_yard_start_rule>), 
   [|
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -185,13 +185,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_STRING1) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_STRING1) 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -200,7 +200,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 204 "JSONParser.fs"
+# 203 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -208,13 +208,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_NUMBER) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_NUMBER) 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -223,7 +223,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 227 "JSONParser.fs"
+# 226 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -232,12 +232,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_objects) 
-             |> List.iter (fun (H0) -> 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -246,7 +246,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 250 "JSONParser.fs"
+# 249 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -255,12 +255,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_array1) 
-             |> List.iter (fun (H0) -> 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -269,7 +269,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 273 "JSONParser.fs"
+# 272 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -277,13 +277,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_KW_TRUE) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_TRUE) 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -292,7 +292,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 296 "JSONParser.fs"
+# 295 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -300,13 +300,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_KW_FALSE) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_FALSE) 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -315,7 +315,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 319 "JSONParser.fs"
+# 318 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -323,13 +323,13 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_KW_NULL) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_NULL) 
+             |> List.iter (fun (H1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H0]
+                let children : IAbstractTreeNode list = [H1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -338,7 +338,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 342 "JSONParser.fs"
+# 341 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -348,7 +348,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 352 "JSONParser.fs"
+# 351 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -356,17 +356,17 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_EMPTY) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
+             |> List.iter (fun (H1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_list_1) 
-               |> List.iter (fun (H1) -> 
-                ((unbox _rnglr_children.[2]) : '_rnglr_type_Highlight_EMPTY) 
-                 |> List.iter (fun (H2) -> 
+               |> List.iter (fun (H2) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_highlight_EMPTY) 
+                 |> List.iter (fun (H3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Array1NonTermNode("array1")
-                    let children : IAbstractTreeNode list = [H0; H1; H2]
+                    let children : IAbstractTreeNode list = [H1; H2; H3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -375,7 +375,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "JSON.yrd"
                : '_rnglr_type_array1) 
-# 379 "JSONParser.fs"
+# 378 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -386,7 +386,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             _rnglr_cycle_res := (
               
 
-              let parent = new Yard_rule_list_1NonTermNode("yard_rule_list_1")
+              let parent = new YardRuleList1NonTermNode("yard_rule_list_1")
               let children : IAbstractTreeNode list = []
               addSemantic parent children
               
@@ -396,7 +396,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 400 "JSONParser.fs"
+# 399 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -405,14 +405,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_value) 
-             |> List.iter (fun (H0) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2)
-               |> List.iter (fun (H1) -> 
+             |> List.iter (fun (H1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2) 
+               |> List.iter (fun (H2) -> 
                 _rnglr_cycle_res := (
                   
 
-                  let parent = new Yard_rule_list_1NonTermNode("yard_rule_list_1")
-                  let children : IAbstractTreeNode list = [H0; H1]
+                  let parent = new YardRuleList1NonTermNode("yard_rule_list_1")
+                  let children : IAbstractTreeNode list = [H1; H2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -421,7 +421,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 425 "JSONParser.fs"
+# 424 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -432,7 +432,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             _rnglr_cycle_res := (
               
 
-              let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
+              let parent = new YardRuleYardMany12NonTermNode("yard_rule_yard_many_1_2")
               let children : IAbstractTreeNode list = []
               addSemantic parent children
               
@@ -442,7 +442,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 446 "JSONParser.fs"
+# 445 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -450,35 +450,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (
-              let _rnglr_cycle_res = ref []
-              (match ((unbox _rnglr_children.[0]) : Token) with EMPTY _rnglr_val -> [_rnglr_val] | a -> failwith "EMPTY expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_0) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_value) 
-                 |> List.iter (fun (S2) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
+             |> List.iter (fun (H1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_value) 
+               |> List.iter (fun (H2) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2) 
+                 |> List.iter (fun (H3) -> 
                   _rnglr_cycle_res := (
                     
-# 25 "JSON.yrd"
-                                            S2
-                      )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) |> List.iter (fun (H0) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2)
-               |> List.iter (fun (H1) -> 
-                _rnglr_cycle_res := (
-                  
 
-                  let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
-                  let children : IAbstractTreeNode list = [H0; H1]
-                  addSemantic parent children
-                  
-                    )::!_rnglr_cycle_res ) )
+                    let parent = new YardRuleYardMany12NonTermNode("yard_rule_yard_many_1_2")
+                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    addSemantic parent children
+                    
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 482 "JSONParser.fs"
+# 472 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -486,17 +477,17 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_STRING1) 
-             |> List.iter (fun (H0) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_Highlight_KW_COLON) 
-               |> List.iter (fun (H1) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_STRING1) 
+             |> List.iter (fun (H1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_highlight_KW_COLON) 
+               |> List.iter (fun (H2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_value) 
-                 |> List.iter (fun (H2) -> 
+                 |> List.iter (fun (H3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new PairNonTermNode("pair")
-                    let children : IAbstractTreeNode list = [H0; H1; H2]
+                    let children : IAbstractTreeNode list = [H1; H2; H3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -505,7 +496,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "JSON.yrd"
                : '_rnglr_type_pair) 
-# 509 "JSONParser.fs"
+# 499 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -513,17 +504,17 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            ((unbox _rnglr_children.[0]) : '_rnglr_type_Highlight_EMPTY) 
-             |> List.iter (fun (H0) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
+             |> List.iter (fun (H1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_list_3) 
-               |> List.iter (fun (H1) -> 
-                ((unbox _rnglr_children.[2]) : '_rnglr_type_Highlight_EMPTY) 
-                 |> List.iter (fun (H2) -> 
+               |> List.iter (fun (H2) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_highlight_EMPTY) 
+                 |> List.iter (fun (H3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new ObjectsNonTermNode("objects")
-                    let children : IAbstractTreeNode list = [H0; H1; H2]
+                    let children : IAbstractTreeNode list = [H1; H2; H3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -532,7 +523,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "JSON.yrd"
                : '_rnglr_type_objects) 
-# 536 "JSONParser.fs"
+# 526 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -543,7 +534,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             _rnglr_cycle_res := (
               
 
-              let parent = new Yard_rule_list_3NonTermNode("yard_rule_list_3")
+              let parent = new YardRuleList3NonTermNode("yard_rule_list_3")
               let children : IAbstractTreeNode list = []
               addSemantic parent children
               
@@ -553,7 +544,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 557 "JSONParser.fs"
+# 547 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -562,14 +553,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_pair) 
-             |> List.iter (fun (H0) -> 
-              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4)
-               |> List.iter (fun (H1) -> 
+             |> List.iter (fun (H1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4) 
+               |> List.iter (fun (H2) -> 
                 _rnglr_cycle_res := (
                   
 
-                  let parent = new Yard_rule_list_3NonTermNode("yard_rule_list_3")
-                  let children : IAbstractTreeNode list = [H0; H1]
+                  let parent = new YardRuleList3NonTermNode("yard_rule_list_3")
+                  let children : IAbstractTreeNode list = [H1; H2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -578,7 +569,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 582 "JSONParser.fs"
+# 572 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -589,7 +580,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             _rnglr_cycle_res := (
               
 
-              let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
+              let parent = new YardRuleYardMany14NonTermNode("yard_rule_yard_many_1_4")
               let children : IAbstractTreeNode list = []
               addSemantic parent children
               
@@ -599,7 +590,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 603 "JSONParser.fs"
+# 593 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -607,35 +598,26 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
         ( 
           (
             let _rnglr_cycle_res = ref []
-            (
-              let _rnglr_cycle_res = ref []
-              (match ((unbox _rnglr_children.[0]) : Token) with EMPTY _rnglr_val -> [_rnglr_val] | a -> failwith "EMPTY expected, but %A found" a )
-               |> List.iter (fun (_rnglr_var_0) -> 
-                ((unbox _rnglr_children.[1]) : '_rnglr_type_pair) 
-                 |> List.iter (fun (S2) -> 
+            ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
+             |> List.iter (fun (H1) -> 
+              ((unbox _rnglr_children.[1]) : '_rnglr_type_pair) 
+               |> List.iter (fun (H2) -> 
+                ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4) 
+                 |> List.iter (fun (H3) -> 
                   _rnglr_cycle_res := (
                     
-# 25 "JSON.yrd"
-                                            S2
-                      )::!_rnglr_cycle_res ) )
-              !_rnglr_cycle_res
-            ) |> List.iter (fun (H0) -> 
-              ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4)
-               |> List.iter (fun (H1) -> 
-                _rnglr_cycle_res := (
-                  
 
-                  let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
-                  let children : IAbstractTreeNode list = [H0; H1]
-                  addSemantic parent children
-                  
-                    )::!_rnglr_cycle_res ) )
+                    let parent = new YardRuleYardMany14NonTermNode("yard_rule_yard_many_1_4")
+                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    addSemantic parent children
+                    
+                      )::!_rnglr_cycle_res ) ) )
             !_rnglr_cycle_res
           )
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 639 "JSONParser.fs"
+# 620 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -648,15 +630,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new STRING1TermNode("STRING1")
+                new String1TermNode("STRING1")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_STRING1) 
-# 660 "JSONParser.fs"
+               : '_rnglr_type_highlight_STRING1) 
+# 641 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -669,15 +651,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new NUMBERTermNode("NUMBER")
+                new NumberTermNode("NUMBER")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_NUMBER) 
-# 681 "JSONParser.fs"
+               : '_rnglr_type_highlight_NUMBER) 
+# 662 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -690,15 +672,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new KW_TRUETermNode("KW_TRUE")
+                new KwTrueTermNode("KW_TRUE")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_KW_TRUE) 
-# 702 "JSONParser.fs"
+               : '_rnglr_type_highlight_KW_TRUE) 
+# 683 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -711,15 +693,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new KW_FALSETermNode("KW_FALSE")
+                new KwFalseTermNode("KW_FALSE")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_KW_FALSE) 
-# 723 "JSONParser.fs"
+               : '_rnglr_type_highlight_KW_FALSE) 
+# 704 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -732,15 +714,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new KW_NULLTermNode("KW_NULL")
+                new KwNullTermNode("KW_NULL")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_KW_NULL) 
-# 744 "JSONParser.fs"
+               : '_rnglr_type_highlight_KW_NULL) 
+# 725 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -753,15 +735,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new EMPTYTermNode("EMPTY")
+                new EmptyTermNode("EMPTY")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_EMPTY) 
-# 765 "JSONParser.fs"
+               : '_rnglr_type_highlight_EMPTY) 
+# 746 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -774,15 +756,15 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                new KW_COLONTermNode("KW_COLON")
+                new KwColonTermNode("KW_COLON")
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
           )
             )
 
-               : '_rnglr_type_Highlight_KW_COLON) 
-# 786 "JSONParser.fs"
+               : '_rnglr_type_highlight_KW_COLON) 
+# 767 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -800,36 +782,36 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 804 "JSONParser.fs"
+# 785 "JSONParser.fs"
       );
   |] , [|
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_EMPTY)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_KW_COLON)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_KW_FALSE)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_KW_NULL)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_KW_TRUE)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_NUMBER)   ) |> List.concat));
-    (fun (_rnglr_list : list<_>) -> 
-      box ( 
-        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_Highlight_STRING1)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_array1)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_error)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_EMPTY)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_KW_COLON)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_KW_FALSE)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_KW_NULL)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_KW_TRUE)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_NUMBER)   ) |> List.concat));
+    (fun (_rnglr_list : list<_>) -> 
+      box ( 
+        _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_highlight_STRING1)   ) |> List.concat));
     (fun (_rnglr_list : list<_>) -> 
       box ( 
         _rnglr_list |> List.map (fun _rnglr_item -> ((unbox _rnglr_item) : '_rnglr_type_objects)   ) |> List.concat));

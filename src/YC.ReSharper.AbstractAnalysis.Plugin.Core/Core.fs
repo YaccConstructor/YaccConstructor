@@ -11,7 +11,7 @@ open JetBrains.ReSharper.Psi.Files
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open YC.ReSharper.AbstractAnalysis.Languages
-//open Yard.Examples.MSParser
+open Yard.Examples.MSParser
 
 type SupportedLangs =
     | Calc
@@ -115,20 +115,20 @@ type Processor(file) =
 //                    e name name (fst br1)
 
         
-//        let addErrorTSQL tok =
-//            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
-//                calculatePos brs 
-//                |> Seq.iter (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-//            match tok with
-//            | DEC_NUMBER (sourceText,brs)   -> e "DEC_NUMBER" sourceText.text brs
-//            | DOUBLE_COLON (sourceText,brs) -> e "DOUBLE_COLON" sourceText.text brs
-//            | GLOBALVAR (sourceText,brs)    -> e "GLOBALVAR" sourceText.text brs
-//            | IDENT (sourceText,brs)        -> e "IDENT" sourceText.text brs
-//            | LOCALVAR (sourceText,brs)     -> e "LOCALVAR" sourceText.text brs
-//            | RNGLR_EOF (sourceText,brs)-> e "EOF" sourceText.text brs
-//            | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
-//            | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
-//            | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
+        let addErrorTSQL tok =
+            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+                calculatePos brs 
+                |> Seq.iter (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
+            match tok with
+            | DEC_NUMBER (sourceText,brs)   -> e "DEC_NUMBER" sourceText.text brs
+            | DOUBLE_COLON (sourceText,brs) -> e "DOUBLE_COLON" sourceText.text brs
+            | GLOBALVAR (sourceText,brs)    -> e "GLOBALVAR" sourceText.text brs
+            | IDENT (sourceText,brs)        -> e "IDENT" sourceText.text brs
+            | LOCALVAR (sourceText,brs)     -> e "LOCALVAR" sourceText.text brs
+            | RNGLR_EOF (sourceText,brs)-> e "EOF" sourceText.text brs
+            | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
+            | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
+            | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
 //            | ``L 796`` (brs1) 
 //            | ``L 797`` (brs1)
 //            | ``L 798`` (brs1)
@@ -455,7 +455,7 @@ type Processor(file) =
             (fun (l,g) ->
                 match l with
                 | Calc -> processLang g Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate
-//                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate
+                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate
                 | JSON -> processLang g JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate)
 
         lexerErrors,parserErrors

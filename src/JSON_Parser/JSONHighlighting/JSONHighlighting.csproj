@@ -48,31 +48,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Array1NonTermNode.cs" />
-    <Compile Include="EMPTYTermNode.cs" />
+    <Compile Include="EmptyTermNode.cs" />
     <Compile Include="ErrorNonTermNode.cs" />
-    <Compile Include="Highlight_EMPTYNonTermNode.cs" />
-    <Compile Include="Highlight_KW_COLONNonTermNode.cs" />
-    <Compile Include="Highlight_KW_FALSENonTermNode.cs" />
-    <Compile Include="Highlight_KW_NULLNonTermNode.cs" />
-    <Compile Include="Highlight_KW_TRUENonTermNode.cs" />
-    <Compile Include="Highlight_NUMBERNonTermNode.cs" />
-    <Compile Include="Highlight_STRING1NonTermNode.cs" />
-    <Compile Include="KW_COLONTermNode.cs" />
-    <Compile Include="KW_FALSETermNode.cs" />
-    <Compile Include="KW_NULLTermNode.cs" />
-    <Compile Include="KW_TRUETermNode.cs" />
-    <Compile Include="NUMBERTermNode.cs" />
+    <Compile Include="HighlightEmptyNonTermNode.cs" />
+    <Compile Include="HighlightKwColonNonTermNode.cs" />
+    <Compile Include="HighlightKwFalseNonTermNode.cs" />
+    <Compile Include="HighlightKwNullNonTermNode.cs" />
+    <Compile Include="HighlightKwTrueNonTermNode.cs" />
+    <Compile Include="HighlightNumberNonTermNode.cs" />
+    <Compile Include="HighlightString1NonTermNode.cs" />
+    <Compile Include="KwColonTermNode.cs" />
+    <Compile Include="KwFalseTermNode.cs" />
+    <Compile Include="KwNullTermNode.cs" />
+    <Compile Include="KwTrueTermNode.cs" />
+    <Compile Include="NumberTermNode.cs" />
     <Compile Include="ObjectsNonTermNode.cs" />
     <Compile Include="PairNonTermNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RNGLR_EOFTermNode.cs" />
-    <Compile Include="STRING1TermNode.cs" />
+    <Compile Include="RnglrEofTermNode.cs" />
+    <Compile Include="String1TermNode.cs" />
     <Compile Include="ValueNonTermNode.cs" />
-    <Compile Include="Yard_rule_list_1NonTermNode.cs" />
-    <Compile Include="Yard_rule_list_3NonTermNode.cs" />
-    <Compile Include="Yard_rule_yard_many_1_2NonTermNode.cs" />
-    <Compile Include="Yard_rule_yard_many_1_4NonTermNode.cs" />
-    <Compile Include="Yard_start_ruleNonTermNode.cs" />
+    <Compile Include="YardRuleList1NonTermNode.cs" />
+    <Compile Include="YardRuleList3NonTermNode.cs" />
+    <Compile Include="YardRuleYardMany12NonTermNode.cs" />
+    <Compile Include="YardRuleYardMany14NonTermNode.cs" />
+    <Compile Include="YardStartRuleNonTermNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

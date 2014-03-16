@@ -25,7 +25,7 @@ let getKwTokenOrIdent =
         if kws.Contains (name.ToLowerInvariant()) then
             genLiteral name defaultSourceText
         else
-            IDENT defaultSourceText
+            Some <| IDENT defaultSourceText
 
 //let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
@@ -51,7 +51,7 @@ let makeIdent notKeyWord (name:string) (startPos,endPos) =
   //else if name.[0] = '#' then TEMPOBJ name
   elif prefix = "%%" then STOREDPROCEDURE defaultSourceText
   elif notKeyWord then IDENT defaultSourceText
-  else getKwTokenOrIdent name defaultSourceText
+  else (getKwTokenOrIdent name defaultSourceText).Value
 
 
 let defaultSourceText id brs value =

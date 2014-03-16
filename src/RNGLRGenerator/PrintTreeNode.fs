@@ -1,14 +1,5 @@
 ﻿module PrintTreeNode
 
-let firstLetterToUpper (str : string) = 
-    let symbols = [| 
-                    for i = 0 to str.Length - 1 do
-                        if i = 0 
-                        then yield System.Char.ToUpper str.[0]
-                        else yield System.Char.ToLower str.[i] 
-                  |] 
-    new System.String(symbols)
-
 let printTreeNode (nameOfNamespace : string) (nameOfClass : string) = 
     let res  = new System.Text.StringBuilder()
 
@@ -242,33 +233,4 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 1 "}"
     printBrInd 0 "}"
-    res.ToString()
-
-let printMainSemantic () = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = " 
-    printBrInd 1 "let mutable prev = null"
-    printBrInd 1 "let mutable curr = null"
-    printBrInd 1 "for child in children do"
-    printBrInd 2 "prev <- curr"
-    printBrInd 2 "curr <- child"
-    printBrInd 2 "curr.SetParent(parent)"
-    printBrInd 2 "if prev = null"
-    printBrInd 2 "then parent.SetFirstChild(curr)"
-    printBrInd 2 "else"
-    printBrInd 3 "prev.SetNextSibling(curr)"
-    printBrInd 3 "curr.SetNextSibling(prev)"
-    printBrInd 1 "parent.SetLastChild(curr)"
-    printBrInd 1 "parent"
     res.ToString()

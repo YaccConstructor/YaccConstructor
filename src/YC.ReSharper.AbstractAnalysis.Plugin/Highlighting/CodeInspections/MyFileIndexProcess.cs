@@ -3,7 +3,7 @@ using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 
-namespace Highlighting.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
 {
     public class MyFileIndexProcess : MyDaemonStageProcessBase
     {

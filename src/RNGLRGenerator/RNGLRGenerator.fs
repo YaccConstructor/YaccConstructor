@@ -122,15 +122,15 @@ type RNGLR() =
 
                 let indexator = grammar.indexator
                 for i = 0 to indexator.nonTermCount - 1 do
-                    let prefix = firstLetterToUpper <| indexator.indexToNonTerm i
+                    let prefix = toClassName <| indexator.indexToNonTerm i
                     generateFile <| prefix + "NonTermNode"
 
                 for i = indexator.termsStart to indexator.termsEnd do
-                    let prefix = firstLetterToUpper <| grammar.indexator.indexToTerm i
+                    let prefix = toClassName <| grammar.indexator.indexToTerm i
                     generateFile <| prefix + "TermNode"
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
-                    let prefix = firstLetterToUpper <| grammar.indexator.indexToLiteral i
+                    let prefix = toClassName <| grammar.indexator.getLiteralName i
                     generateFile <| prefix + "LitNode"
 
             let printRules () =

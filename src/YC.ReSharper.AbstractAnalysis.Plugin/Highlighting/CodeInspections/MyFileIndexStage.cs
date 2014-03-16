@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Highlighting.CodeInspections;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.Util;
 
-namespace Highlighting.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
 {
     [DaemonStage]
     public class MyFileIndexStage : MyDaemonStageBase

@@ -1,12 +1,12 @@
-using System.Collections.Generic;
-using Highlighting.Tree;
+using Highlighting;
+using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.CSharp.Stages;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using SmartResolverProcess = Highlighting.CodeInspections.SmartResolverProcess;
+using SmartResolverProcess = YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections.SmartResolverProcess;
 
-namespace Highlighting
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [DaemonStage(StagesBefore = new[] { typeof(LanguageSpecificDaemonStage) })]
     public class CodeHighlightingStage : CSharpDaemonStageBase /*MyDaemonStageBase//*/

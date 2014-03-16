@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace Highlighting.Psi.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
 {
     [FileStructureExplorer]
     public class MyFileStructureExplorer : IFileStructureExplorer

@@ -1,16 +1,13 @@
 ﻿using System;
-using System.IO;
+using Highlighting;
 using JetBrains.Application.Settings;
-using JetBrains.Application.Threading;
 using JetBrains.Application.Threading.Tasks;
-using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
 
-namespace Highlighting.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
 {
     public abstract class MyIncrementalDaemonStageProcessBase : MyDaemonStageProcessBase
     {

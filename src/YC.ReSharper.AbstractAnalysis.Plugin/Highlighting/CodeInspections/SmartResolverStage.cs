@@ -3,6 +3,7 @@ using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.Util;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections;
 
 namespace Highlighting.CodeInspections
 {

@@ -1,8 +1,7 @@
 ﻿using System;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Psi.Tree;
 
-namespace Highlighting.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
 {
     public class SmartResolverProcess : IDaemonStageProcess
     {

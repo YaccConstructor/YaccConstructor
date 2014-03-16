@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="AbstractTreeNode.cs" />
     <Compile Include="IAbstractTreeNode.cs" />
-    <Compile Include="MyFileElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TreeNodeVisitor.cs" />
     <Compile Include="TreeNodeVisitor`1.cs" />

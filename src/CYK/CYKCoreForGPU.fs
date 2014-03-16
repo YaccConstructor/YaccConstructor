@@ -11,6 +11,8 @@ type CYKCoreForGPU() =
 
     let mutable rowSize = 0
 
+    let mutable nTermsCount = 0
+
     let mutable lblNameArr = [||]
 
     [<Literal>]
@@ -38,7 +40,7 @@ type CYKCoreForGPU() =
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
-        let nTermsCount = 
+        nTermsCount <- 
             rules
             |> Array.map(fun r -> 
                             let rule = getRuleStruct r
@@ -58,17 +60,14 @@ type CYKCoreForGPU() =
                 let mutable notEmptyLbl2 = noLbl
                 let mutable notEmptyLbl3 = noLbl 
                 let mutable realLblCount = 0
-                if lbl1 <> noLbl
-                then 
+                if lbl1 <> noLbl then 
                     notEmptyLbl1 <- lbl1
                     realLblCount <- realLblCount + 1
-                if lbl2 <> noLbl
-                then
+                if lbl2 <> noLbl then
                     if realLblCount = 0 then notEmptyLbl1 <- lbl2
                     elif realLblCount = 1 then notEmptyLbl2 <- lbl2
                     realLblCount <- realLblCount + 1
-                if ruleLabel <> noLbl
-                then 
+                if ruleLabel <> noLbl then 
                     if realLblCount = 0 then notEmptyLbl1 <- ruleLabel
                     elif realLblCount = 1 then notEmptyLbl2 <- ruleLabel
                     elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
@@ -87,30 +86,29 @@ type CYKCoreForGPU() =
                 let rightCell = recTable.[ (k+i+1) * rowSize + l-k-1]
 
                 for m in 0..nTermsCount - 1 do
-                    if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = rule.R1
-                    then
+                    if leftCell.[m].IsSome && getCellRuleTop leftCell.[m].Value = rule.R1 then
                         let cellData1 = getCellDataStruct leftCell.[m].Value
                         for n in 0..nTermsCount - 1 do
-                            if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = rule.R2
-                            then
+                            if rightCell.[n].IsSome && getCellRuleTop rightCell.[n].Value = rule.R2 then
                                 let cellData2 = getCellDataStruct rightCell.[n].Value
                                 let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
                                 let newWeight = weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
                                 let currentElem = buildData ruleIndex lblWithState.State lblWithState.Label newWeight
                                 recTable.[i * rowSize + l].[int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
 
-        let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
+        let elem i l (rulesIndexed:RuleIndexed[]) = 
+            rulesIndexed |> Array.iter (fun curRule -> for k in 0..(l-1) do processRule curRule.Rule curRule.Index i k l)
 
-        let fillTable () =
-          [|1..s.Length-1|]
+        let fillTable rulesIndexed =
+          [|1..rowSize - 1|]
           |> Array.iter (fun l ->
-                [|0..s.Length-1-l|]
-                |> Array.Parallel.iter (fun i -> elem i l))
-        
+                [|0..rowSize - 1 - l|]
+                |> Array.Parallel.iter (fun i -> elem i l rulesIndexed))
+          
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
-                for k in 0..(s.Length-1) do
+                for k in 0..(rowSize - 1) do
                     let rule = getRuleStruct rule               
                     if rule.R2 = 0us && rule.R1 = s.[k] then
                         let lState =
@@ -118,9 +116,22 @@ type CYKCoreForGPU() =
                             | 0uy -> LblState.Undefined
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
-                        recTable.[k * rowSize + 0].[int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)
-    
-        fillTable ()
+                        recTable.[k * rowSize + 0].[int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)   
+        printfn "total rules count %d" rules.Length
+                             
+        let ntrIndexes = new ResizeArray<_>()
+        rules
+        |> Array.iteri
+            (fun ruleIndex rule ->
+                let ruleStruct = getRuleStruct rule
+                if ruleStruct.R2 <> 0us then 
+                    ntrIndexes.Add ruleIndex )
+        let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
+        printfn "non terminal rules count %d" nonTermRules.Length
+
+        printfn "Fill table started %s" (string System.DateTime.Now)
+        fillTable nonTermRules
+        printfn "Fill table finished %s" (string System.DateTime.Now)
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =

@@ -31,6 +31,12 @@ type LabelWithState =
     val State : LblState
     new (lbl, lblState) = { Label = lbl; State = lblState }
 
+[<Struct>]
+type RuleIndexed = 
+    val Rule : rule
+    val Index : int
+    new (rl, ind) = { Rule = rl; Index = ind }
+
 [<AutoOpen>]
 module CellHelpers =
     

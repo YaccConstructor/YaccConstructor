@@ -3,7 +3,30 @@
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Yard.Generators.RNGLR
-open PrintTreeNode
+
+let toClassName (str : string) = 
+//    let onlyFirstLetterToUpper (word : string) = 
+//        let symbols = [| 
+//                        for i = 0 to word.Length - 1 do
+//                            if i = 0 
+//                            then yield System.Char.ToUpper word.[0]
+//                            else yield System.Char.ToLower word.[i] 
+//                      |] 
+//        new System.String(symbols)
+//    
+//    str.Split('_')
+//    |> Array.map onlyFirstLetterToUpper
+//    |> System.String.Concat 
+        let symbols = [| 
+                        for i = 0 to str.Length - 1 do
+                            if i = 0 
+                            then yield System.Char.ToUpper str.[0]
+                            else yield str.[i] 
+                      |] 
+        new System.String(symbols)
+
+let litToClassName (lit : string) = 
+    toClassName <| lit.ToLower()
 
 let getLeafSemantic leaf isTok = 
     let res = new System.Text.StringBuilder()
@@ -14,8 +37,8 @@ let getLeafSemantic leaf isTok =
         Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
 
     if isTok
-    then printBr "new %sTermNode(\"%s\")" <| firstLetterToUpper leaf <| leaf
-    else printBr "new %sLitNode(\"%s\")"  <| firstLetterToUpper leaf <| leaf
+    then printBr "new %sTermNode(\"%s\")" <| toClassName leaf <| leaf
+    else printBr "new %sLitNode(\"%s\")"  <| litToClassName leaf <| leaf
     
     res.ToString()
                                
@@ -31,7 +54,7 @@ let getNodeSemantic parent children =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| firstLetterToUpper parent <| parent
+    printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| toClassName parent <| parent
     printBrInd 0 "let children : IAbstractTreeNode list = %A" children
     printBrInd 0 "addSemantic parent children"
     res.ToString()
@@ -43,10 +66,21 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
         lit
         |> indexator.literalToIndex
         |> indexator.getLiteralName
+        
 
     let termsAndLitsList = ref []
 
+    let createNewBinding (numOpt : int ref option) = 
+        let newBinding = 
+            if numOpt.IsSome 
+            then 
+                incr numOpt.Value
+                Some <| new Source.t ("H" + numOpt.Value.Value.ToString())
+            else None
+        newBinding
+
     let getNewElem newBinding refRule : elem<Source.t, Source.t> = 
+        
         let newElem : elem<Source.t, Source.t> = 
             {
                 binding = newBinding
@@ -54,6 +88,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
                 omit = false
                 rule = refRule
             }
+        
         newElem
 
     let changeRule (oldRule : Rule.t<_,_>) (elemList : elem<Source.t, Source.t> list) (bindings : Source.t list) = 
@@ -69,44 +104,58 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             }
         newRule
 
-    let processElem (element : elem<Source.t, Source.t>) newBinding = 
+    let rec processElem (oldElem : elem<Source.t, Source.t>) count = 
+        let result = ref []
+        let newElem = ref oldElem
+
+        let inline createHighlightRefRule text = 
+            t.PRef(new Source.t("highlight_" + text), None)
         
-        match element.rule with
-        | t.PSeq (_,_,_) 
-        | t.PRef (_,_) as refer -> 
-            getNewElem newBinding <| refer
+        match oldElem.rule with
+        | t.PSeq (metaList,_,_) -> 
+            for meta in metaList do 
+                let someElemList = processElem meta count
+                result := !result @ someElemList
+
+        | t.PRef (name, _) as oldElemRule -> 
+            let newBinding = createNewBinding <| Some count
+            newElem := getNewElem <| newBinding <| t.PRef (name, None)
+            result := !result @ [!newElem]
+
         | t.PToken tok -> 
             if not <| List.exists (fun symbol -> fst symbol = tok.text) !termsAndLitsList
             then termsAndLitsList := (tok.text, true) :: !termsAndLitsList
             
-            getNewElem newBinding <| t.PRef(new Source.t("Highlight_" + tok.text), None)
+            let newBinding = createNewBinding <| Some count
+            newElem := getNewElem newBinding <| createHighlightRefRule tok.text
+            result := !result @ [!newElem]
         
         | t.PLiteral lit -> 
             let litName = literalToName lit.text
             if not <| List.exists (fun symbol -> fst symbol = litName) !termsAndLitsList
             then termsAndLitsList := (litName, false) :: !termsAndLitsList
         
-            getNewElem newBinding <| t.PRef(new Source.t("Highlight_" + litName), None)
-        
-        | _ as smth -> 
-                eprintfn "Unmatched %s pattern" <| element.rule.GetType().FullName
-                printfn  "Unmatched %s pattern" <| element.rule.GetType().FullName
-                failwith "Unexpected pattern "  <| element.ToString()
+            let newBinding = createNewBinding <| Some count
+            newElem := getNewElem <| newBinding <| createHighlightRefRule litName
+            result := !result @ [!newElem]
 
-    let processRule (rule : Rule.t<Source.t, Source.t>) = 
-        match rule.body with 
+        !result
+
+    let processRule (oldRule : Rule.t<Source.t, Source.t>) = 
+        let count = ref 0
+        match oldRule.body with 
         | t.PSeq(elemList, _, _) -> 
                             let mutable newElemList = []
                             let mutable bindingsList = []
                             for item in elemList do
-                                let newBinding = Some <| new Source.t ("H" + newElemList.Length.ToString())
-                                bindingsList <- newBinding.Value :: bindingsList
-                                        
-                                let newElem = processElem item newBinding
-                                newElemList <- newElem :: newElemList
+                                let newElem = processElem item count
+                                newElemList <- newElemList @ newElem
 
-                            changeRule <| rule <| List.rev newElemList <| List.rev bindingsList
-        | t.PRef (_, _) -> rule
+                            for newElem in newElemList do
+                                bindingsList <- newElem.binding.Value :: bindingsList
+
+                            changeRule <| oldRule <| newElemList <| List.rev bindingsList
+        | t.PRef (_, _) -> oldRule
 
     let addHighlightRules() = 
         let mutable res = []
@@ -118,7 +167,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
 
             let newRule : Rule.t<Source.t, Source.t> = 
                 {
-                    name = new Source.t("Highlight_" + tok)
+                    name = new Source.t("highlight_" + tok)
                     args = []
                     body = PSeq([newElem], Some <| actionCode, None)
                     isStart = false

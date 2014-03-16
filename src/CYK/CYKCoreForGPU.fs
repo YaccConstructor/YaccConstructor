@@ -119,7 +119,7 @@ type CYKCoreForGPU() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
                         recTable.[(k * rowSize + 0) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)   
-        printfn "total rules count %d" rules.Length
+        //printfn "total rules count %d" rules.Length
                              
         let ntrIndexes = new ResizeArray<_>()
         rules
@@ -129,11 +129,11 @@ type CYKCoreForGPU() =
                 if ruleStruct.R2 <> 0us then 
                     ntrIndexes.Add ruleIndex )
         let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
-        printfn "non terminal rules count %d" nonTermRules.Length
+        //printfn "non terminal rules count %d" nonTermRules.Length
 
-        printfn "Fill table started %s" (string System.DateTime.Now)
+        //printfn "Fill table started %s" (string System.DateTime.Now)
         fillTable nonTermRules
-        printfn "Fill table finished %s" (string System.DateTime.Now)
+        //printfn "Fill table finished %s" (string System.DateTime.Now)
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
@@ -142,8 +142,11 @@ type CYKCoreForGPU() =
         let printTbl () =
             for i in 0..s.Length-1 do
                 for j in 0..s.Length-1 do
-                    let cd = Array.sub recTable ((i * rowSize + j) * nTermsCount) nTermsCount |> Array.filter (fun x -> x.IsSome) |> fun a -> a.Length
-                    printf "! %s !" (string cd)
+                    let startIndex = (i * rowSize + j) * nTermsCount
+                    let mutable count = 0
+                    for m in startIndex..startIndex + nTermsCount - 1 do
+                        if recTable.[m].IsSome then count <- count + 1
+                    printf "! %s !" (string count)
                 printfn " "
             printfn "" 
 
@@ -161,12 +164,12 @@ type CYKCoreForGPU() =
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
-            let cellDatas = Array.sub recTable ((0 * rowSize + s.Length-1) * nTermsCount) nTermsCount
+            let cellData = recTable.[(0 * rowSize + s.Length-1) * nTermsCount + i]
             if i <= last 
             then 
-                if cellDatas.[i].IsSome 
+                if cellData.IsSome 
                 then
-                    let cellData = getCellDataStruct (cellDatas.[i].Value)
+                    let cellData = getCellDataStruct (cellData.Value)
                     if i = last
                     then [getString cellData.LabelState cellData.Label cellData.Weight]
                     else getString cellData.LabelState cellData.Label cellData.Weight :: out (i+1) last
@@ -227,12 +230,13 @@ type CYKCoreForGPU() =
             
     let labelTracking lastInd = 
         let i,l = 0,lastInd
-        Array.iteri (fun k x ->
-                    x |> Option.iter(fun x ->
-                        let out = "derivation #" + string (k + 1)
-                        printfn "%s" out
-                        trackLabel i l x false)
-        ) (Array.sub recTable ((i * rowSize + l) * nTermsCount) nTermsCount)
+        let startIndex = (i * rowSize + l) * nTermsCount
+        for ind in startIndex..startIndex + nTermsCount - 1 do
+            recTable.[ind] 
+            |> Option.iter(fun x ->
+                                let out = "derivation #" + string (ind + 1)
+                                printfn "%s" out
+                                trackLabel i l x false)
             
     
     member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 

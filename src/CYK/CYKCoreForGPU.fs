@@ -193,25 +193,28 @@ type CYKCoreForGPU() =
         then if curL <> noLbl
              then print curL curW leftI rightL leftL
         else 
-            let left =
-                Array.sub recTable ((leftI * rowSize + leftL) * nTermsCount) nTermsCount
-                |> Array.tryFind (fun (x:Option<CellData>) -> 
-                                        match x with
-                                        | Some x ->
-                                            let ind,lSt,lbl,_ = getData x.rData
-                                            let ruleLeft = getRuleStruct rules.[int ind]
-                                            ruleLeft.RuleName = rule.R1
-                                        | None -> false)
-            let right = 
-                Array.sub recTable ((rightI * rowSize + rightL) * nTermsCount) nTermsCount
-                |> Array.tryFind (fun (x:Option<CellData>) -> 
-                                        match x with
-                                        | Some x -> 
-                                            let ind,lSt,lbl,_ = getData x.rData
-                                            let ruleRight = getRuleStruct rules.[int ind]
-                                            ruleRight.RuleName = rule.R2
-                                        | None -> false)
+            let checkIndex start ind tryFind ruleCheck =
+                if ind < start + nTermsCount - 1 then
+                    tryFind start (ind + 1) ruleCheck
+                else None
 
+            let rec tryFind start index ruleCheck = 
+                let x = recTable.[index]
+                match x with
+                | Some x ->
+                    let ind,lSt,lbl,_ = getData x.rData
+                    let curRule = getRuleStruct rules.[int ind]
+                    if curRule.RuleName = ruleCheck then
+                        Some (Some x)
+                    else checkIndex start index tryFind ruleCheck
+                | None -> checkIndex start index tryFind ruleCheck
+
+            let startLeft = (leftI * rowSize + leftL) * nTermsCount
+            let left = tryFind startLeft startLeft rule.R1
+
+            let startRight = (rightI * rowSize + rightL) * nTermsCount
+            let right = tryFind startRight startRight rule.R2
+                
             match right with
             | Some (Some right) ->
                 match left with 

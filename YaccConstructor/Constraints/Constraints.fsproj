@@ -50,7 +50,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.0\lib\net20\Mono.Addins.dll</HintPath>
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

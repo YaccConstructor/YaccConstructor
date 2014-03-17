@@ -14,8 +14,8 @@
 
 namespace Yard.Frontends.YardFrontend
 
-open Yard.Core
 open Mono.Addins
+open Yard.Core
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]

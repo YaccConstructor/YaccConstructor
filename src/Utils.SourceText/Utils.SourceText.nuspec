@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>YC.Utils.SourceText</id>
+    <version>0.1.6500.5</version>
+    <title>YC.Utils.SourceText</title>
+    <authors>Ilya Orlov</authors>
+    <owners>Ilya Orlov</owners>
+    <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
+    <projectUrl>https://code.google.com/p/recursive-ascent/wiki/Source_Text_Utils</projectUrl>
+    <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Utils.SourceText is a library for F# that allows you to store coordinates of different parts of code on the usefull way.</description>
+    <releaseNotes>.NET 4.0 and .NET 4.5 supported.</releaseNotes>
+    <copyright>Copyright 2013, 2014</copyright>
+    <tags>YaccConstructor Parsing Reengineering SourceCode SourceText Navigation Utils .NET F# FSharp</tags>																																								
+  </metadata>
+<files>
+    <file src="..\..\Bin\Release\v45\Utils.SourceText.*" target="\lib\net45\" exclude="**\*Test*"/>
+    <file src="..\..\Bin\Release\v40\Utils.SourceText.*" target="\lib\net40\" exclude="**\*Test*"/>
+    <file src="README" target="README" /> 
+    <file src="..\..\LICENSE" target="LICENSE" /> 
+    <file src="..\..\NOTICE" target="NOTICE" />
+</files>
+</package>

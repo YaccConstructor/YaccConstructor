@@ -1,6 +1,4 @@
 [<Start>]
-s<<a1 a2 arg>>:  yard_rule_a_2<<a1>>;
+s<<a1 a2 arg>>:  yard_rule_a_1<<a1>>;
 
-yard_rule_a_2<<v>>:  yard_rule_1 yard_rule_1;
-
-yard_rule_1:  r<<arg>>;
+yard_rule_a_1<<v>>:  r<<arg>> r<<arg>>;

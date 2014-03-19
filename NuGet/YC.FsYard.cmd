@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\FsYARD\FsYARD.nuspec
+nuget pack ..\src\FsYARD\FsYARD.nuspec

@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\FsYacc\Tools.nuspec
+nuget pack ..\src\FsYacc\Tools.nuspec

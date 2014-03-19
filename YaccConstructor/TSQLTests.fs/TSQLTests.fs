@@ -12,8 +12,12 @@ open QuickGraph.Graphviz
 open Microsoft.FSharp.Text
 open YC.ReSharper.AbstractAnalysis.Languages.TSQL
 open YC.Tests.Helper
+open Lexer
+open Yard.Examples.MSParser
+open Yard.Utils.SourceText
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
+let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new SourceText("", new SourceRange(0UL,0UL)),[||])
 
 let loadLexerInputGraph gFile =
     let qGraph = loadDotToQG baseInputGraphsPath gFile
@@ -32,15 +36,14 @@ let getResultFileName path pref =
 
 //let flg = ref false
 let LexerTSQL (srcFilePath:string) =
+    let lexerInputGraph = loadLexerInputGraph srcFilePath
     let tokenize srcFilePath = 
-        let lexerInputGraph = loadLexerInputGraph srcFilePath
         let start = System.DateTime.Now
-        for i in 1..10 do
-            tokenize lexerInputGraph |> ignore
-        System.GC.Collect()
+        for i in 1..10 do Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eofToken) |> ignore
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
         printfn " "
+        System.GC.Collect()
     tokenize srcFilePath
 
 let LexerTSQLAllDirectory (directoryName:string) =

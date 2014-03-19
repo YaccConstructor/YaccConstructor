@@ -142,7 +142,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.3\lib\net40\Utils.SourceText.dll</HintPath>
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YaccConstructor">

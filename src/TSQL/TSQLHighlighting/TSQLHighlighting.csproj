@@ -40,6 +40,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TSQLHighlighting, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Release\TSQLHighlighting.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aggregate_windowed_functionNonTermNode.cs" />
@@ -1439,7 +1443,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">
-      <Project>{D4978D25-D792-4045-8941-25800D82AFA3}</Project>
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Name>Highlighting.Core</Name>
     </ProjectReference>
   </ItemGroup>

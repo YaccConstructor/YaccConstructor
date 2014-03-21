@@ -81,13 +81,13 @@
     <Compile Include="YardStartRuleNonTermNode.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">
-      <Project>{D4978D25-D792-4045-8941-25800D82AFA3}</Project>
-      <Name>Highlighting.Core</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+      <Name>Highlighting.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

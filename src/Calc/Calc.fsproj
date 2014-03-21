@@ -46,6 +46,7 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Calc.fs" />
     <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
@@ -87,14 +88,29 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Highlighting.Core">
+      <HintPath>..\Highlighting.Core\bin\Release\Highlighting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
@@ -128,17 +144,16 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="YaccConstructor">
       <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Name>Highlighting.Core</Name>
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="CalcHighlighting\CalcHighlighting.csproj">
       <Name>CalcHighlighting</Name>
       <Project>{0af126e6-f923-4b88-bc42-97cd3696e7e7}</Project>

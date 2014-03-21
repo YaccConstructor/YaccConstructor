@@ -86,14 +86,23 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -131,7 +140,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YaccConstructor">

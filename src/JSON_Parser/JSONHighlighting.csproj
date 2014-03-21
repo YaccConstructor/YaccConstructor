@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Props')" />
+  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D4978D25-D792-4045-8941-25800D82AFA3}</ProjectGuid>
+    <ProjectGuid>{F50644B7-FD15-4FCE-A070-BC419D510390}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Highlighting.Core</RootNamespace>
-    <AssemblyName>Highlighting.Core</AssemblyName>
+    <RootNamespace>JSONHighlighting</RootNamespace>
+    <AssemblyName>JSONHighlighting</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,6 +34,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Highlighting.Core">
+      <HintPath>..\..\Highlighting.Core\obj\Release\Highlighting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi, Version=8.1.23.523, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL" />
+    <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -42,12 +47,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractTreeNode.cs" />
-    <Compile Include="IAbstractTreeNode.cs" />
+    <Compile Include="Array1NonTermNode.cs" />
+    <Compile Include="EmptyTermNode.cs" />
+    <Compile Include="ErrorNonTermNode.cs" />
+    <Compile Include="HighlightEmptyNonTermNode.cs" />
+    <Compile Include="HighlightKwColonNonTermNode.cs" />
+    <Compile Include="HighlightKwFalseNonTermNode.cs" />
+    <Compile Include="HighlightKwNullNonTermNode.cs" />
+    <Compile Include="HighlightKwTrueNonTermNode.cs" />
+    <Compile Include="HighlightNumberNonTermNode.cs" />
+    <Compile Include="HighlightString1NonTermNode.cs" />
+    <Compile Include="KwColonTermNode.cs" />
+    <Compile Include="KwFalseTermNode.cs" />
+    <Compile Include="KwNullTermNode.cs" />
+    <Compile Include="KwTrueTermNode.cs" />
+    <Compile Include="NumberTermNode.cs" />
+    <Compile Include="ObjectsNonTermNode.cs" />
+    <Compile Include="PairNonTermNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TreeNodeVisitor.cs" />
-    <Compile Include="TreeNodeVisitor`1.cs" />
-    <Compile Include="TreeNodeVisitor`2.cs" />
+    <Compile Include="RnglrEofTermNode.cs" />
+    <Compile Include="String1TermNode.cs" />
+    <Compile Include="ValueNonTermNode.cs" />
+    <Compile Include="YardRuleList1NonTermNode.cs" />
+    <Compile Include="YardRuleList3NonTermNode.cs" />
+    <Compile Include="YardRuleYardMany12NonTermNode.cs" />
+    <Compile Include="YardRuleYardMany14NonTermNode.cs" />
+    <Compile Include="YardStartRuleNonTermNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -57,12 +82,12 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props'))" />
+    <Error Condition="!Exists('..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets'))" />
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Props'))" />
-    <Error Condition="!Exists('..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Targets'))" />
   </Target>
+  <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.0.1243\build\JetBrains.ReSharper.SDK.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -34,9 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Highlighting.Core">
-      <HintPath>..\..\Highlighting.Core\obj\Release\Highlighting.Core.dll</HintPath>
-    </Reference>
     <Reference Include="JetBrains.ReSharper.Psi, Version=8.1.23.523, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,6 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+      <Name>Highlighting.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

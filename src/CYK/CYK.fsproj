@@ -28,6 +28,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreCommon.fs" />
     <Compile Include="CYKCore.fs" />
     <Compile Include="CYKCoreForGPU.fs" />
   </ItemGroup>

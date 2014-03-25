@@ -37,8 +37,13 @@ let getLeafSemantic leaf isTok =
         Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
 
     if isTok
-    then printBr "new %sTermNode(\"%s\")" <| toClassName leaf <| leaf
-    else printBr "new %sLitNode(\"%s\")"  <| litToClassName leaf <| leaf
+    then printBr "let res = new %sTermNode(\"%s\")" <| toClassName leaf <| leaf
+    else printBr "let res = new %sLitNode(\"%s\")"  <| litToClassName leaf <| leaf
+
+    printBr "let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0"
+    printBr "let pos = calculatePos temp"
+    printBr "res.SetPositions (pos)"
+    printBr "res"
     
     res.ToString()
                                

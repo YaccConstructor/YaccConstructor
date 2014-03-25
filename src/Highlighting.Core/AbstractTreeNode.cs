@@ -43,6 +43,11 @@ namespace Highlighting.Core
             documentRange = range;
         }
 
+        public void SetPositions(object obj)
+        {
+            
+        }
+
         public virtual void DocumentRangeSetStartTo(int start)
         {
             documentRange = documentRange.SetStartTo(start);

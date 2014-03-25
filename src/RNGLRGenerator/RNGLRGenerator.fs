@@ -135,10 +135,10 @@ type RNGLR() =
 
             let printRules () =
                 let printSymbol (symbol : int) =
-                    if symbol < grammar.indexator.nonTermCount then
-                        grammar.indexator.indexToNonTerm symbol
-                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
-                        grammar.indexator.indexToTerm symbol
+                    if symbol < grammar.indexator.nonTermCount 
+                    then grammar.indexator.indexToNonTerm symbol
+                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd 
+                    then grammar.indexator.indexToTerm symbol
                     else grammar.indexator.indexToLiteral symbol
                 printfn "\nrules:"
                 for i = 0 to grammar.rules.rulesCount-1 do
@@ -154,7 +154,8 @@ type RNGLR() =
                 |> List.map (String.concat " <- ")
                 |> List.iter (eprintfn "%s")
                 eprintfn ""
-                if printInfiniteEpsilonPath <> "" then
+                if printInfiniteEpsilonPath <> "" 
+                then
                     System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
@@ -184,8 +185,8 @@ type RNGLR() =
                     <|  match moduleName with
                         | "" -> "RNGLR.Parse"
                         | s -> s
-                    if not light then
-                        println "#light \"off\""
+                    if not light 
+                    then println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
 
@@ -195,6 +196,7 @@ type RNGLR() =
 
                     if !needHighlighting 
                     then 
+                        println "open JetBrains.ReSharper.Psi.Tree"
                         println "open Highlighting.Core"
                         println "open %s" !namespaceName
                         
@@ -217,8 +219,10 @@ type RNGLR() =
 
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
-            let res = if not needTranslate || targetLanguage = Scala then tables
-                      else tables + printTranslator grammar newDefinition.grammar.[0].rules 
+            let res = 
+                if not needTranslate || targetLanguage = Scala 
+                then tables
+                else tables + printTranslator grammar newDefinition.grammar.[0].rules 
                                         positionType fullPath output dummyPos caseSensitive !needHighlighting
             let res = 
                 match definition.foot with

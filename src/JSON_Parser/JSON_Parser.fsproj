@@ -98,6 +98,9 @@
     <Reference Include="JetBrains.Platform.ReSharper.Shell">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
     </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Util">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+    </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>

@@ -1,5 +1,4 @@
 ﻿using System;
-using Highlighting.CodeInspections;
 using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
@@ -7,7 +6,7 @@ using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
     public abstract class MyDaemonStageProcessBase : TreeNodeVisitor<IHighlightingConsumer>, IRecursiveElementProcessor<IHighlightingConsumer>, IDaemonStageProcess
     {

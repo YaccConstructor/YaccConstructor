@@ -22,6 +22,16 @@
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>-i "C:\yc\recursive-ascent\src\Calc\calc.yrd" -c ExpandEbnf -c ExpandMeta -g "RNGLRGenerator -pos uint64 -token string*array&lt;Position&lt;JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression&gt;&gt; -module Calc.AbstractParser -translate true -highlighting true -namespace CalcHighlighting -table LALR -o Calc.yrd.fs"</StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartArguments />
+    <RemoteDebugEnabled>false</RemoteDebugEnabled>
+    <RemoteDebugMachine />
+  </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Choose>

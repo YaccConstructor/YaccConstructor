@@ -38,7 +38,7 @@ namespace Highlighting.CodeInspections
         public static IFile GetPsiFile(IPsiSourceFile sourceFile)
         {
             var psiServices = sourceFile.GetPsiServices();
-			//psiServices.Files.AssertAllDocumentAreCommited();
+            psiServices.Files.AssertAllDocumentAreCommited();
             return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(sourceFile);
         }
 

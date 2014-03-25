@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using JetBrains.Annotations;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon.Stages;
@@ -6,7 +10,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.GeneratedCode;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace Highlighting.Psi.CodeInspections
 {
     public class MyFileStructure : FileStructureWithRegionsBase
     {

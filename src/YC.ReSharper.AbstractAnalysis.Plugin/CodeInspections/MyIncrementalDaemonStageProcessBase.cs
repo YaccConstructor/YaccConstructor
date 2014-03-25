@@ -1,13 +1,15 @@
 ﻿using System;
-using Highlighting;
+using System.IO;
 using JetBrains.Application.Settings;
-using JetBrains.Application.Threading.Tasks;
+using JetBrains.Application.Threading;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.Util;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace Highlighting.CodeInspections
 {
     public abstract class MyIncrementalDaemonStageProcessBase : MyDaemonStageProcessBase
     {
@@ -31,7 +33,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
                 commiter(new DaemonStageResult(consumer.Highlightings) {Layer = 1});
             };
 
-            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
+            using (IMultiCoreFibers fibers = DaemonProcess.CreateFibers())
             {
                 fibers.EnqueueJob(globalHighlighter);
             }

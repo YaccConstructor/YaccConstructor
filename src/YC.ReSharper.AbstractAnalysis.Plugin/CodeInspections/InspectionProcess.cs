@@ -1,10 +1,9 @@
 ﻿using System;
-using Highlighting.CodeInspections;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace Highlighting.CodeInspections
 {
     internal class InspectionsProcess : MyDaemonStageProcessBase
     {

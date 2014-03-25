@@ -5,7 +5,7 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace Highlighting.CodeInspections
 {
     internal class IdentifierHighlighterProcess : MyIncrementalDaemonStageProcessBase
     {

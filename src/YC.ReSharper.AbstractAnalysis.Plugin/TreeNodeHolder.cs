@@ -1,6 +1,6 @@
 ﻿using JetBrains.ReSharper.Psi.Tree;
 
-namespace Highlighting
+namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
     public class TreeNodeHolder
     {

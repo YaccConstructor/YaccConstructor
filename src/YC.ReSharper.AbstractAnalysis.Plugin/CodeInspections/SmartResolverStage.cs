@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using Highlighting.CodeInspections;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Daemon.UsageChecking;
+using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.Util;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
+namespace Highlighting.CodeInspections
 {
-    [DaemonStage(StagesBefore = new[] { typeof(SmartResolverStage) }, StagesAfter = new[] { typeof(CollectUsagesStage) })]
-    public class IdentifierHighlightingStage : MyDaemonStageBase
+    [DaemonStage(StagesBefore = new[] { typeof(GlobalFileStructureCollectorStage) }, StagesAfter = new[] { typeof(IdentifierHighlightingStage) })]
+    public class SmartResolverStage : MyDaemonStageBase
     {
         public override IEnumerable<IDaemonStageProcess> CreateProcess(IDaemonProcess process, IContextBoundSettingsStore settings, DaemonProcessKind processKind)
         {
@@ -16,7 +15,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.CodeInspections
             {
                 return EmptyList<IDaemonStageProcess>.InstanceList;
             }
-            return new List<IDaemonStageProcess> { new IdentifierHighlighterProcess(process, settings) };
+            return new List<IDaemonStageProcess> { new SmartResolverProcess(process) };
         }
     }
 }

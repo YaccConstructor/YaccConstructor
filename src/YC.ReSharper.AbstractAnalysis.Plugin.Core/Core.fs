@@ -95,14 +95,14 @@ type Processor(file) =
             e name l br
             
                     
-       (* let addErrorTSQL tok =
+        let addErrorTSQL tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
                 calculatePos brs 
                 |> Seq.iter
                     (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
             let name = tok |> (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
             let l, br = Yard.Examples.MSParser.tokenData tok :?>_
-            e name l br *)
+            e name l br 
 
 
         graphs
@@ -110,7 +110,7 @@ type Processor(file) =
             (fun (l,g) ->
                 match l with
                 | Calc -> processLang g Calc.tokenize Calc.parse lexerErrors.Add  addError
-               (* | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL *)
+                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL 
                 | JSON -> processLang g JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON )
 
         lexerErrors,parserErrors

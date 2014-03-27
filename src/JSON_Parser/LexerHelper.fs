@@ -12,5 +12,6 @@ open System
 //let appendBuf (str:string) = str_buf.Append(str) |> ignore
 
 let getLiteral brs value =
-    genLiteral value brs brs
-        
+    match genLiteral value (value,brs) with
+    | Some x -> x
+    | None -> failwithf "Fail to get token with name %s " value

@@ -15,41 +15,41 @@ type Token =
     | NUMBER of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | STRING1 of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 15`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 16`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 17`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 18`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 19`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 20`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 21`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 22`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 23`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_comma_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_semi_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_left_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_right_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_false of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_null of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_true of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_left_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_right_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
-let genLiteral (str : string) posStart posEnd =
+let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | "," -> ``L 15`` (posStart, posEnd)
-    | ":" -> ``L 16`` (posStart, posEnd)
-    | "[" -> ``L 17`` (posStart, posEnd)
-    | "]" -> ``L 18`` (posStart, posEnd)
-    | "false" -> ``L 19`` (posStart, posEnd)
-    | "null" -> ``L 20`` (posStart, posEnd)
-    | "true" -> ``L 21`` (posStart, posEnd)
-    | "{" -> ``L 22`` (posStart, posEnd)
-    | "}" -> ``L 23`` (posStart, posEnd)
-    | x -> failwithf "Literal %s undefined" x
+    | "," -> Some (L_comma_ data)
+    | ":" -> Some (L_semi_ data)
+    | "[" -> Some (L_left_square_bracket_ data)
+    | "]" -> Some (L_right_square_bracket_ data)
+    | "false" -> Some (L_false data)
+    | "null" -> Some (L_null data)
+    | "true" -> Some (L_true data)
+    | "{" -> Some (L_left_figure_bracket_ data)
+    | "}" -> Some (L_right_figure_bracket_ data)
+    | x -> None
 let tokenData = function
     | NUMBER x -> box x
     | RNGLR_EOF x -> box x
     | STRING1 x -> box x
-    | ``L 15`` x -> box x
-    | ``L 16`` x -> box x
-    | ``L 17`` x -> box x
-    | ``L 18`` x -> box x
-    | ``L 19`` x -> box x
-    | ``L 20`` x -> box x
-    | ``L 21`` x -> box x
-    | ``L 22`` x -> box x
-    | ``L 23`` x -> box x
+    | L_comma_ x -> box x
+    | L_semi_ x -> box x
+    | L_left_square_bracket_ x -> box x
+    | L_right_square_bracket_ x -> box x
+    | L_false x -> box x
+    | L_null x -> box x
+    | L_true x -> box x
+    | L_left_figure_bracket_ x -> box x
+    | L_right_figure_bracket_ x -> box x
 
 let numToString = function
     | 0 -> "array1"
@@ -57,12 +57,12 @@ let numToString = function
     | 2 -> "objects"
     | 3 -> "pair"
     | 4 -> "value"
-    | 5 -> "yard_exp_brackets_15607"
-    | 6 -> "yard_exp_brackets_15608"
-    | 7 -> "yard_many_1719"
-    | 8 -> "yard_many_1720"
-    | 9 -> "yard_rule_list_15605"
-    | 10 -> "yard_rule_list_15606"
+    | 5 -> "yard_exp_brackets_1603"
+    | 6 -> "yard_exp_brackets_1604"
+    | 7 -> "yard_many_177"
+    | 8 -> "yard_many_178"
+    | 9 -> "yard_rule_list_1601"
+    | 10 -> "yard_rule_list_1602"
     | 11 -> "yard_start_rule"
     | 12 -> "NUMBER"
     | 13 -> "RNGLR_EOF"
@@ -82,29 +82,29 @@ let tokenToNumber = function
     | NUMBER _ -> 12
     | RNGLR_EOF _ -> 13
     | STRING1 _ -> 14
-    | ``L 15`` _ -> 15
-    | ``L 16`` _ -> 16
-    | ``L 17`` _ -> 17
-    | ``L 18`` _ -> 18
-    | ``L 19`` _ -> 19
-    | ``L 20`` _ -> 20
-    | ``L 21`` _ -> 21
-    | ``L 22`` _ -> 22
-    | ``L 23`` _ -> 23
+    | L_comma_ _ -> 15
+    | L_semi_ _ -> 16
+    | L_left_square_bracket_ _ -> 17
+    | L_right_square_bracket_ _ -> 18
+    | L_false _ -> 19
+    | L_null _ -> 20
+    | L_true _ -> 21
+    | L_left_figure_bracket_ _ -> 22
+    | L_right_figure_bracket_ _ -> 23
 
 let isLiteral = function
     | NUMBER _ -> false
     | RNGLR_EOF _ -> false
     | STRING1 _ -> false
-    | ``L 15`` _ -> true
-    | ``L 16`` _ -> true
-    | ``L 17`` _ -> true
-    | ``L 18`` _ -> true
-    | ``L 19`` _ -> true
-    | ``L 20`` _ -> true
-    | ``L 21`` _ -> true
-    | ``L 22`` _ -> true
-    | ``L 23`` _ -> true
+    | L_comma_ _ -> true
+    | L_semi_ _ -> true
+    | L_left_square_bracket_ _ -> true
+    | L_right_square_bracket_ _ -> true
+    | L_false _ -> true
+    | L_null _ -> true
+    | L_true _ -> true
+    | L_left_figure_bracket_ _ -> true
+    | L_right_figure_bracket_ _ -> true
 
 let getLiteralNames = [",";":";"[";"]";"false";"null";"true";"{";"}";]
 let mutable private cur = 0

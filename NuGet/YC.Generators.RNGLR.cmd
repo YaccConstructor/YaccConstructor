@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\RNGLRCommon\YC.Generators.RNGLR.nuspec 
+nuget pack ..\src\RNGLRCommon\YC.Generators.RNGLR.nuspec 

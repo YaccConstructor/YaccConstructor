@@ -1,0 +1,1 @@
+nuget pack ..\src\YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.nuspec 

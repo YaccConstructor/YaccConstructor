@@ -1,1 +1,0 @@
-..\..\bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs

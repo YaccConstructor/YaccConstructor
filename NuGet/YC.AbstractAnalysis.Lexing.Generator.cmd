@@ -1,1 +1,1 @@
-nuget pack ..\YaccConstructor\AbstractLexer.Generator\YC.AbstractAnalysis.Lexing.Generator.nuspec 
+nuget pack ..\src\AbstractLexer.Generator\YC.AbstractAnalysis.Lexing.Generator.nuspec 

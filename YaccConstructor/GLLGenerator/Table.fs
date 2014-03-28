@@ -1,21 +1,4 @@
-﻿//  Copyright 2011-2012 by Dmitry Avdyukhin
-//
-//  This file is part of YaccConctructor.
-//
-//  YaccConstructor is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-namespace Yard.Generators.GLL
+﻿namespace Yard.Generators.GLL
 
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR.States
@@ -25,29 +8,7 @@ open Yard.Generators.RNGLR
 
 type Table (grammar : FinalGrammar) =
     let getFollowSets  =
-        for i = 0 to grammar.rules.rulesCount-1 do
-            printf "rules leftside %d ->" (grammar.rules.leftSide i)
-            Array.iter (fun x -> printfn " %d" x) (grammar.rules.rightSide i)
-        printf "\n"
-        printf "RULES count %d \n" grammar.rules.rulesCount
-        printf "FULL COUNT FOR INDEXATOR %d \n" grammar.indexator.fullCount
-        printf "EOFINDEX FOR INDEXATOR %d \n" grammar.indexator.eofIndex
-        printf "literals COUNT for indexator %d \n" grammar.indexator.literalsCount
-        printf "literalStart FOR INDEXATOR %d \n" grammar.indexator.literalsStart
-        printf "nonTermCount FOR INDEXATOR %d \n" grammar.indexator.nonTermCount
-        printf "term COUNT FOR INDEXATOR %d \n" grammar.indexator.termCount
-        printf "termStart FOR INDEXATOR %d \n" grammar.indexator.termsStart
-        printf "termsEnd FOR INDEXATOR %d \n" grammar.indexator.termsEnd
-        printf "CYYYYCLEEEEEEEE FOOOORR PRINT"
-        for i = 0 to grammar.indexator.nonTermCount-1 do
-            printf "index for non term = %d -> " i 
-            printf "%s \n" (grammar.indexator.indexToNonTerm i)
-        for i = grammar.indexator.termsStart to grammar.indexator.termsEnd do
-            printf "index for term = %d -> " i 
-            printf "%s \n" (grammar.indexator.indexToTerm i)
-        printf "LIterals start %d \n" grammar.indexator.literalsStart
-        printf "Literals end %d \n" grammar.indexator.literalsEnd
-       
+        
         let nonTermsCount = grammar.indexator.nonTermCount
         let followSets = Array.create nonTermsCount Set.empty 
         followSets.[grammar.rules.startSymbol] <- Set.ofList [grammar.indexator.eofIndex]
@@ -107,30 +68,25 @@ type Table (grammar : FinalGrammar) =
     let follow = getFollowSets
     let canInferEpsilon = chainCanInferEpsilon
     let _table = 
-        for k = 0 to Array.length follow - 1 do
-            let arr = follow.[k] |> Set.toArray
-            for l = 0 to Array.length arr - 1 do
-                printfn "%d" arr.[l]
-
-        printfn "DOOOOONE"
         
-        let arr = Array2D.create grammar.indexator.fullCount grammar.indexator.fullCount -1
-        let result = Array.zeroCreate ((Array2D.length1 arr)*(Array2D.length2 arr))
+        let arr = Array2D.create grammar.indexator.fullCount grammar.indexator.fullCount (List.empty<int>)
+        let result = Array.create ((Array2D.length1 arr)*(Array2D.length2 arr)) Array.empty<int>
         for i = 0 to grammar.rules.rulesCount-1 do
             let curLeftSide = grammar.rules.leftSide i
             let curRigrhtSide = grammar.rules.rightSide i
             let curFirst = Set.toArray first.[i]
             for j = 0 to curFirst.Length-1 do
-                arr.[curLeftSide,curFirst.[j]] <- i
+                printfn "%d THISS ADDD" i
+                i::arr.[curLeftSide,curFirst.[j]] |> ignore
             if canInferEpsilon.[i] then 
                 let curFollow = Set.toArray follow.[curLeftSide]
                 for j = 0 to curFollow.Length-1 do
-                    arr.[curLeftSide,curFollow.[j]] <- i
+                    i::arr.[curLeftSide,curFollow.[j]] |> ignore
                 if Set.contains grammar.indexator.eofIndex follow.[curLeftSide] then 
                     printfn "uaaa"
         for i = 0 to grammar.indexator.fullCount-1 do
             for j = 0 to grammar.indexator.fullCount-1 do
-                result.[(j+i*(grammar.indexator.fullCount))] <- arr.[i,j]
+                result.[(j+i*(grammar.indexator.fullCount))] <- arr.[i,j] |> List.toArray 
 
         result
   

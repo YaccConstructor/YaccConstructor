@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>a24b88c9-0236-4575-a304-231e3b040e56</ProjectGuid>
+    <ProjectGuid>1548a831-3a8d-489d-8592-dda12fbc3ea4</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>GLL.Common</RootNamespace>
-    <AssemblyName>GLL.Common</AssemblyName>
+    <RootNamespace>GLLParser</RootNamespace>
+    <AssemblyName>GLLParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>GLL.Common</Name>
+    <Name>GLLParser</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\GLL.Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\GLLParser.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,7 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\GLL.Common.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\GLLParser.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -41,12 +41,47 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ParserSource.fs" />
+    <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GLL.Common\GLL.Common.fsproj">
+      <Name>GLL.Common</Name>
+      <Project>{a24b88c9-0236-4575-a304-231e3b040e56}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GLLApplication\GLLApplication.fsproj">
+      <Name>GLLApplication</Name>
+      <Project>{ddaeec23-d743-4248-83b9-ecdf25b59b59}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
       <Name>GLLGenerator</Name>
       <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YaccConstructor\YaccConstructor.fsproj">
+      <Name>YaccConstructor</Name>
+      <Project>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend.Test\YardFrontend.Test.fsproj">
+      <Name>YardFrontend.Test</Name>
+      <Project>{5936d84d-a842-43b3-97fd-e2c6990e77db}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
+      <Name>YardPrinter</Name>
+      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

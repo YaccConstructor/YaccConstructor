@@ -1,24 +1,4 @@
-﻿//  Parser.fs contains type, describing information, written to file as result of generation
-//     and used by Parser and Translator.
-//
-//  Copyright 2011-2012 Avdyukhin Dmitry
-//
-//  This file is part of YaccConctructor.
-//
-//  YaccConstructor is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-module Yard.Generators.GLL.PrintTable
+﻿module Yard.Generators.GLL.PrintTable
 
 open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.GLL
@@ -52,7 +32,7 @@ let printTable
             for i = 0 to arr.Length-1 do
                 if i <> 0 then print sep
                 printer arr.[i]
-            printBr rBr        
+            printBr rBr      
 
     let printList prefix lBr rBr sep l printer = 
          print prefix
@@ -63,6 +43,11 @@ let printTable
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
+
+    let printArr2 (arr : 'a[]) printer num = 
+         print "%s" (String.replicate (num <<< 2) " ")
+         printArr arr printer
+
    // let printListAsArray l printer = printList "" "[|" "|]" "; " l printer
    // let printList l printer = printList "" "[" "]" "; " l printer
 
@@ -88,28 +73,7 @@ let printTable
 
     let printTableToFSharp () =
        
-       // printBr "type Token ="
         let indexator = grammar.indexator
-        //let defaultType = tokenType.TryFind "_"
-        //for i = indexator.termsStart to indexator.termsEnd do
-        //    let name = indexator.indexToTerm i
-         //   let type' =
-         //       match tokenType.TryFind name with
-         //       | Some t -> t
-         // //      | None ->
-         //           match defaultType with
-         //           | Some t -> t
-         //           | None -> failwithf "Type of token %s in not defined" name
-//
-  //          printBrInd 1 "| %s%s" name 
-    //        <|  match type' with
-      //          | None -> ""
-        //        | Some s -> " of (" + s + ")"
-
-//        for i = indexator.literalsStart to indexator.literalsEnd do
-  //          if positionType = "" then
-    //            failwith "RNGLR: Unspecified position type"
-      //      printBrInd 1 "| ``L %d`` of (%s * %s)" i positionType positionType
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 
@@ -161,6 +125,24 @@ let printTable
             printBrInd 1 "| ``L %d`` _ -> true" i
         printBr ""
 
+        printBrInd 0 "let isTerminal = function"
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s _ -> true" <| indexator.indexToTerm i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> false" i
+        for i = 0 to indexator.nonTermCount-1 do
+            printBrInd 1 "| %s _ -> false" <| indexator.indexToNonTerm i
+        printBr ""
+
+        printBrInd 0 "let isNonTerminal = function"
+        for i = indexator.termsStart to indexator.termsEnd do
+            printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| ``L %d`` _ -> false" i
+        for i = 0 to indexator.nonTermCount-1 do
+            printBrInd 1 "| %s _ -> true" <| indexator.indexToNonTerm i
+        printBr ""
+
         printInd 0 "let getLiteralNames = ["
         for i = indexator.literalsStart to indexator.literalsEnd do
             print "\"%s\";" <| indexator.indexToLiteral i
@@ -168,12 +150,22 @@ let printTable
         printBr ""
 
         printBr "let mutable private cur = 0"
+        printBr ""
+        
+        printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
+        printBr ""
 
         print "let leftSide = "
         printArr leftSide (print "%d")
 
         print "let table = "
-        printArr table.result (print "%d")
+        print "\n"
+        printBrInd 1 "[| "
+        for arrs in table.result do
+            printArr2 arrs (print "%d") 2    
+        printBrInd 1 " |] "
+
+       
 
         print "let private rules = "
         printArr rules (print "%d")
@@ -182,11 +174,50 @@ let printTable
         printArr rulesStart (print "%d")
 
         printBr "let startRule = %d" grammar.startRule
-        printBr ""
+        printBr "let indexatorFullCount = %d" indexator.fullCount
+        printBr "let rulesCount = %d" grammar.rules.rulesCount
+        printBr "let indexEOF = %d" grammar.indexator.eofIndex
+        printBr "let literalsCount = %d" grammar.indexator.literalsCount
+        printBr "let literalStart = %d" grammar.indexator.literalsStart
+        printBr "let nonTermCount = %d" grammar.indexator.nonTermCount
+        printBr "let termCount = %d" grammar.indexator.termCount
+        printBr "let termStart = %d" grammar.indexator.termsStart
+        printBr "let termEnd = %d" grammar.indexator.termsEnd
+        printBr "let literalStart = %d" grammar.indexator.literalsStart
+        printBr "let literalEnd = %d" grammar.indexator.literalsEnd
+       
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (table, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
-        
+        printBr ""
+
+        printBrInd 0 "let private parserSource = 
+            new ParserSource<Token> (
+                               tokenToNumber        : 'TokenType -> int
+                               , genLiteral         : string -> int -> int -> string
+                               , numToString        : int -> string
+                               , tokenData          : int -> string
+                               , isLiteral          : string -> string
+                               , isTerminal         : string -> string
+                               , isNonTerminal      : string -> string
+                               , getLiteralNames    : string -> string
+                               , table              : int[][]
+                               , rules              : int[][]
+                               , rulesStart         : int[]
+                               , leftSide           : int[]
+                               , startRule          : int
+                               , literalEnd         : int
+                               , literalStart       : int
+                               , termEnd            : int
+                               , termStart          : int
+                               , termCount          : int
+                               , nonTermCount       : int
+                               , literalCount       : int
+                               , indexEOF           : int
+                               , rulesCount         : int
+                               , indexatorFullCount : int
+                               , acceptEmptyInput   : bool)"
+                       
+    
         res.ToString()
     printTableToFSharp ()

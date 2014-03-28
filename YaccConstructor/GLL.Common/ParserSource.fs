@@ -1,32 +1,31 @@
-﻿//  Parser.fs contains type, describing information, written to file as result of generation
-//     and used by Parser and Translator.
-//
-//  Copyright 2011-2012 Avdyukhin Dmitry
-//
-//  This file is part of YaccConctructor.
-//
-//  YaccConstructor is free software:you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿namespace Yard.Generators.GLL
 
-namespace Yard.Generators.GLL
-
-type ParserSource<'TokenType> (table : int[][]
-                               , rules : int[]
-                               , rulesStart : int[]
-                               , leftSide : int[]
-                               , startRule : int
-                               , tokenToNumber : 'TokenType -> int
-                               , numToString : int -> string
+       
+type ParserSource<'TokenType> (
+                               tokenToNumber        : 'TokenType -> int
+                               , genLiteral         : string -> int -> int -> string
+                               , numToString        : int -> string
+                               , tokenData          : int -> string
+                               , isLiteral          : string -> string
+                               , isTerminal         : string -> string
+                               , isNonTerminal      : string -> string
+                               , getLiteralNames    : string -> string
+                               , table              : int[][]
+                               , rules              : int[][]
+                               , rulesStart         : int[]
+                               , leftSide           : int[]
+                               , startRule          : int
+                               , literalEnd         : int
+                               , literalStart       : int
+                               , termEnd            : int
+                               , termStart          : int
+                               , termCount          : int
+                               , nonTermCount       : int
+                               , literalCount       : int
+                               , indexEOF           : int
+                               , rulesCount         : int
+                               , indexatorFullCount : int
+                               , acceptEmptyInput   : bool
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -38,7 +37,15 @@ type ParserSource<'TokenType> (table : int[][]
         _rules.[i] <- Array.zeroCreate length.[i]
         for j = 0 to length.[i]-1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
-
+                  
+                               
+    member this.GenLiteral = genLiteral 
+    member this.TokenData = tokenData
+    member this.IsLiteral = isLiteral
+    member this.IsTerminal = isTerminal
+    member this.IsNonTerminal = isNonTerminal 
+    member this.GetLiteralNames = getLiteralNames                         
+    member this.Table = table
     member this.Rules = _rules
     member this.RulesStart = rulesStart
     member this.Length = length
@@ -46,3 +53,14 @@ type ParserSource<'TokenType> (table : int[][]
     member this.StartRule = startRule
     member this.TokenToNumber = tokenToNumber
     member this.NumToString = numToString
+    member this.LiteralEnd = literalEnd
+    member this.LiteralStart = literalStart
+    member this.TermEnd = termEnd 
+    member this.TermStart = termStart
+    member this.TermCount = termCount
+    member this.NonTermCount = nonTermCount
+    member this.LiteralCount = literalCount
+    member this.IndexEOF = indexEOF
+    member this.RulesCount = rulesCount
+    member this.IndexatorFullCount = indexatorFullCount
+    member this.AcceptEmptyInput = acceptEmptyInput

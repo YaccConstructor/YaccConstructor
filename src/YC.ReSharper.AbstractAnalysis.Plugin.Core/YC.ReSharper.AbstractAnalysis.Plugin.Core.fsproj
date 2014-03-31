@@ -75,34 +75,34 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ActivityTracking">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ActivityTracking.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ActivityTracking.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Shell">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Feature.Services.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Feature.Services.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Feature.Services.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.Services.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.0.1243\bin\JetBrains.ReSharper.Psi.Services.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.Services.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
@@ -169,7 +169,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

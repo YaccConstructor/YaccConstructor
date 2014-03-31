@@ -12,7 +12,7 @@ let run path astBuilder =
     astBuilder tokens, tokens
 
 let parser = RNGLR.ParseCalc.buildAst
-let path = @"..\..\input.txt"
+let path = @"..\..\..\src\RNGLRApplication\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
 match run path parser with

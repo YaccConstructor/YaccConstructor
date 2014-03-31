@@ -58,6 +58,29 @@ let loadDotToQG gFile =
 
 let lbl tokenId = tokenId
 
+let loadLexerInputGraph gFile =
+    let qGraph = loadDotToQG gFile
+    let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
+    lexerInputG.StartVertex <- 0
+    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
+    lexerInputG
+
+let errorTest inputFilePath errorsCount =
+    let lexerInputGraph = loadLexerInputGraph inputFilePath
+    let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR.ParseCalc.RNGLR_EOF 0)
+
+    let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
+    printfn "%A" r
+    match r with
+    | Yard.Generators.RNGLR.Parser.Error (_, tok, message, debug, _) ->
+        printfn "Errors in file %s on Tokens %A: %s" inputFilePath tok message
+        debug.drawGSSDot "out.dot"
+        Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
+    | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        tree.PrintAst()
+        RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
+        Assert.Fail()
+
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
     let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
@@ -74,12 +97,7 @@ type ``RNGLR abstract parser tests`` () =
                 qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
         qGraph
 
-    let loadLexerInputGraph gFile =
-        let qGraph = loadDotToQG gFile
-        let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
-        lexerInputG.StartVertex <- 0
-        for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
-        lexerInputG
+
 
 
     [<Test>]
@@ -351,6 +369,45 @@ type ``RNGLR abstract parser tests`` () =
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
 
+    [<Test>]
+    member this.``Errors 1`` () =
+        errorTest "errors1.dot" 3
+    
+    [<Test>]
+    member this.``Errors 2`` () =
+        errorTest "errors2.dot" 1
+
+    [<Test>]
+    member this.``Errors 3`` () =
+        errorTest "errors3.dot" 0
+
+    [<Test>]
+    member this.``Errors 4`` () =
+        errorTest "errors4.dot" 0
+
+    [<Test>]
+    member this.``Errors 5`` () =
+        errorTest "errors5.dot" 1
+
+    [<Test>]
+    member this.``Errors 6`` () =
+        errorTest "errors6.dot" 1
+
+    [<Test>]
+    member this.``Errors 8`` () =
+        errorTest "errors8.dot" 1
+
+    [<Test>]
+    member this.``Errors 9`` () =
+        errorTest "errors9.dot" 1
+        
+    [<Test>]
+    member this.``Errors 10`` () =
+        errorTest "errors10.dot" 1
+
+    [<Test>]
+    member this.``Errors 11`` () =
+        errorTest "errors11.dot" 3
 
     [<Test>]
     member this.``Simple calc. Branch binop and second arg.`` () =
@@ -569,10 +626,23 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
+    
+    //t.``Errors 11``()
+
+    t.``Errors 1``()
+    t.``Errors 2``()
+    t.``Errors 3``()
+    t.``Errors 4``()
+    t.``Errors 5``()
+    t.``Errors 6``()
+    t.``Errors 8``()
+    t.``Errors 9``()
+    t.``Errors 10``()
+    
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
     //t.``Calc. Branched input error.``()
-    t.``Simple calc with nterm. Branch binop and first arg.``()
+    //t.``Simple calc with nterm. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and first arg.``()
     //t.``Simple calc. Branch binop and second arg.``()
     //t.``Simple calc with nterm. Seq input.``()
@@ -583,3 +653,4 @@ let f x =
     //t.``Simple calc with nterm 2. Brabch first operand.``()
     //t.``Simple calc with nterm 2. Fully brabched.``()
     0
+    

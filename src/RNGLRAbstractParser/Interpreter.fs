@@ -362,31 +362,41 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
             pushesInitFun curTokens.Value.Tokens.Length
  
-        let print fName =
+        let print (fName:PrintfFormat<_,_,_,_>) =
 #if DEBUG
-            let path = fName |> string |> System.IO.Path.GetDirectoryName
+            let path = fName.Value |> System.IO.Path.GetDirectoryName
             if path |> System.IO.Directory.Exists |> not
             then System.IO.Directory.CreateDirectory path |> ignore
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])
             drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                        <| sprintf fName !curLvl     
+                        <| sprintf fName !curLvl
 #endif
             ()
 
-        let mutable errorList = []                    
+        let mutable errorList = []
         let errorRuleExist = parserSource.ErrorRulesExists
-        let mutable wasError = ref false
+        let mutable wasError = false
         let lastErr = ref -1
         let pushesBackup = ref [||]
-        while not !isEnd && not !wasError do
-            print "dot\stack_1_%A"
+
+        let errors = new ResizeArray<_>()
+
+        let erTok () = 
+            let shiftBase = tokens.Count - (!pushesBackup).Length 
+            let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
+            x |> Array.choose id
+            |> errors.AddRange
+            //(try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
+
+        while not !isEnd && not wasError do
+            print @"dot\stack_1_%A"
             if usedStates.Count = 0 && reductions.Count = 0
             then
                 let errInfo = !curTokens
                 errorList <- errInfo :: errorList
-                wasError <- ref true
+                wasError <- true
             else
-                print "dot\stack_2_%A"
+                print @"dot\stack_2_%A"
                 if !isEOF
                 then
                     try 
@@ -398,13 +408,13 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                 let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
                                 addSimpleEdge vertex newAstNode simpleEdges.[state]
                         pushesMap.Remove(!curLvl) |> ignore
-                        makeReductions ()
+                        makeReductions()
                         attachEdges()
-                        print "dot\stack_5_%A"
+                        print @"dot\stack_5_%A"
                     with _ -> () 
                     isEnd := true
                 else
-                    print "dot\stack_3_%A"
+                    print @"dot\stack_3_%A"
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl
@@ -423,10 +433,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             usedStates.Clear()
                     makeReductions ()
                     attachEdges()
-                    if !pushes |> Array.exists (fun x -> x.Count = 0)
+                    let bad, good = !pushes |> Array.partition (fun x -> x.Count = 0)
+                    if bad.Length > 0 
+                    then ()
+                        //pushesBackup := !pushes 
+                        // erTok ()
+                    if good.Length = 0
                     then 
-                        wasError := true
+                        wasError <- true
                         pushesBackup := !pushes
+
                     shift ()
 
         let isAcceptState() = 
@@ -435,13 +451,13 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if not !flag 
                 then
                     flag := parserSource.AccStates.[state]
-            !flag                    
+            !flag
 
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
         then
             //recovery()
-            makeReductions ()
+            makeReductions()
             attachEdges()
 
         let lastTokens count =
@@ -453,22 +469,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 drawGSSDot = drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
                 lastTokens = lastTokens
             }
-            
-        let erTok () = 
-            let shiftBase = tokens.Count - (!pushesBackup).Length
-            let x = !pushesBackup |> Array.mapi (fun i a -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
-            x |> Array.choose id
-            //(try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
+
         if not errorList.IsEmpty 
         then
             errorList <- List.rev errorList
             let tokenToString token = token |> parserSource.TokenToNumber |> parserSource.NumToString
             for i = 0 to errorList.Length-1 do ()
-                //printfn "Parse error in %A position in %A token. " <| errorList.[min i (errorList.Length-1)].CurLvl <| tokenToString (errorList.[i].Tokens.[0].Token)
-            //Error (errorIndexes.Head, errorTokenTypes.Head, "Parse error", debugFuns ())
-        if !wasError 
-        then 
-            Error (!curInd , erTok() , "Parse Error", debugFuns (), new Dictionary<_,_>())
+            
+        if wasError 
+        then
+            erTok() 
+            Error (!curInd, errors.ToArray() , "Parse Error", debugFuns (), new Dictionary<_,_>())
         else
             let root = ref None
             let addTreeTop res =
@@ -482,7 +493,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         |> addTreeTop
                         |> Some
             match !root with
-            | None -> Error (!curInd, erTok(), "Input was fully processed, but it's not complete correct string.", debugFuns (), new Dictionary<_,_>())
+            | None ->
+                erTok() 
+                Error (!curInd, errors.ToArray(), "Input was fully processed, but it's not complete correct string.", debugFuns (), new Dictionary<_,_>())
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
                 Success(new Tree<_>(tokens.ToArray() , res, parserSource.Rules), new Dictionary<_,_>())

@@ -14,7 +14,7 @@ let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
 | whitespace { None }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(0) |> Some }
+(*| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(0) |> Some }
 | '-' { MINUS(0)  |> Some }
 | '(' { LBRACE(0)  |> Some}
 | ')' { RBRACE(0)  |> Some}
@@ -24,9 +24,9 @@ rule token = parse
 | '*' { MULT(0)  |> Some}
 | eof { RNGLR_EOF (-10)  |> Some}
 | _ { failwithf "unexpected input: %s" <| "-" }
+*)
 
-
-(* | ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(int (lexeme:string)) |> Some }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(int (lexeme:string)) |> Some }
 | '-' { MINUS(opc())  |> Some }
 | '(' { LBRACE(opc())  |> Some}
 | ')' { RBRACE(opc())  |> Some}
@@ -34,4 +34,3 @@ rule token = parse
 | '+' { PLUS(opc())  |> Some}
 | "**" { POW(opc())  |> Some}
 | '*' { MULT(opc())  |> Some}
-*)

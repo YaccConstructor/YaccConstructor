@@ -380,6 +380,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let pushesBackup = ref [||]
 
         let errors = new ResizeArray<_>()
+        
+        let restorePushes () =
+          for vertex in usedStates do
+              stateToVertex.[vertex] <- null
+          usedStates.Clear()
+          for oldPushes,newAstNode in pushesMap.[!curLvl] do
+              for (vertex, state) in oldPushes do
+                  let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                  addSimpleEdge vertex newAstNode simpleEdges.[state]
+          pushesMap.Remove(!curLvl) |> ignore
 
         let erTok () = 
             let shiftBase = tokens.Count - (!pushesBackup).Length 
@@ -392,9 +402,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             print @"dot\stack_1_%A"
             if usedStates.Count = 0 && reductions.Count = 0
             then
-                let errInfo = !curTokens
-                errorList <- errInfo :: errorList
-                wasError <- true
+                if pushesMap.Count = 0
+                then
+                  let errInfo = !curTokens
+                  errorList <- errInfo :: errorList
+                  wasError <- true
+                else
+                    //pushesBackup := !pushes
+                    //erTok()
+                    curLvl := pushesMap.Keys |> Seq.min
+                    restorePushes ()
+                    
             else
                 print @"dot\stack_2_%A"
                 if !isEOF
@@ -435,14 +453,19 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     attachEdges()
                     let bad, good = !pushes |> Array.partition (fun x -> x.Count = 0)
                     if bad.Length > 0 
-                    then ()
-                        //pushesBackup := !pushes 
-                        // erTok ()
+                    then
+                        //()
+                        pushesBackup := !pushes 
+                        erTok ()
                     if good.Length = 0
                     then 
-                        wasError <- true
+                        //wasError <- true
                         pushesBackup := !pushes
-
+                        if pushesMap.Count > 0 
+                        then
+                          curLvl := pushesMap.Keys |> Seq.min
+                          restorePushes ()
+                        else wasError <- true
                     shift ()
 
         let isAcceptState() = 

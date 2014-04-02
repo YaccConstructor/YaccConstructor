@@ -15,27 +15,27 @@ type Token =
     | NUMBER of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | STRING1 of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 15`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 16`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 17`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 18`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 19`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 20`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 21`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 22`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 23`` of (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 15`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 16`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 17`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 18`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 19`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 20`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 21`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 22`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | ``L 23`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
-let genLiteral (str : string) posStart posEnd =
+let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | "," -> ``L 15`` (posStart, posEnd)
-    | ":" -> ``L 16`` (posStart, posEnd)
-    | "[" -> ``L 17`` (posStart, posEnd)
-    | "]" -> ``L 18`` (posStart, posEnd)
-    | "false" -> ``L 19`` (posStart, posEnd)
-    | "null" -> ``L 20`` (posStart, posEnd)
-    | "true" -> ``L 21`` (posStart, posEnd)
-    | "{" -> ``L 22`` (posStart, posEnd)
-    | "}" -> ``L 23`` (posStart, posEnd)
+    | "," -> ``L 15`` data
+    | ":" -> ``L 16`` data
+    | "[" -> ``L 17`` data
+    | "]" -> ``L 18`` data
+    | "false" -> ``L 19`` data
+    | "null" -> ``L 20`` data
+    | "true" -> ``L 21`` data
+    | "{" -> ``L 22`` data
+    | "}" -> ``L 23`` data
     | x -> failwithf "Literal %s undefined" x
 let tokenData = function
     | NUMBER x -> box x
@@ -57,12 +57,12 @@ let numToString = function
     | 2 -> "objects"
     | 3 -> "pair"
     | 4 -> "value"
-    | 5 -> "yard_exp_brackets_15607"
-    | 6 -> "yard_exp_brackets_15608"
-    | 7 -> "yard_many_1719"
-    | 8 -> "yard_many_1720"
-    | 9 -> "yard_rule_list_15605"
-    | 10 -> "yard_rule_list_15606"
+    | 5 -> "yard_exp_brackets_803"
+    | 6 -> "yard_exp_brackets_804"
+    | 7 -> "yard_many_89"
+    | 8 -> "yard_many_90"
+    | 9 -> "yard_rule_list_801"
+    | 10 -> "yard_rule_list_802"
     | 11 -> "yard_start_rule"
     | 12 -> "NUMBER"
     | 13 -> "RNGLR_EOF"

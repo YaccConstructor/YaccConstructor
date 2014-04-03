@@ -6,6 +6,7 @@ open Microsoft.FSharp.Reflection
 open JSON.Parser
 open Yard.Utils.SourceText
 open Yard.Utils.StructClass
+open AbstractAnalysis.Common
 
 open System
 
@@ -14,4 +15,4 @@ open System
 let getLiteral brs value =
     match genLiteral value (value,brs) with
     | Some x -> x
-    | None -> failwithf "Fail to get token with name %s " value
+    | None -> raise (LexerError(value,box brs)) //failwithf "Fail to get token with name %s " value

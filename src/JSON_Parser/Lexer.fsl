@@ -4,6 +4,7 @@ open LexerHelper
 open System
 open AbstractLexer.Core
 open JSON.Parser
+open AbstractAnalysis.Common
 }
 //don`t support symbol '\f' and \u  four-hex-digits
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+

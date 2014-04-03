@@ -28,6 +28,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open Yard.Utils.StructClass
+open AbstractAnalysis.Common
 
 let mutable id = 0<id>
 
@@ -74,7 +75,7 @@ rule tokens = parse
  | "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)
  | eof  {RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some }
- | _    { failwith (sprintf "fucking shit received %s\n" lexeme ) }
+ | _  { raise (LexerError(lexeme,box brs)) }   //{ failwith (sprintf "fucking shit received %s\n" lexeme ) }
 (* and literal = parse
   | "''" { appendBuf("'"); literal brs }
   | '\'' { STRING_CONST(defaultSourceText id  brs (string str_buf)) }

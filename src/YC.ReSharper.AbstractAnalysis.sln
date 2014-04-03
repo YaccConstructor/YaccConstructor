@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A088-F9CE-4DC7-BA4B-082007601C67}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -37,6 +39,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JSONParser.Test", "JSONParser.Test\JSONParser.Test.fsproj", "{13716B0C-860D-428C-A281-C70D8DC029F9}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TSQL.Test", "TSQLTests.fs\TSQL.Test.fsproj", "{976AEB07-2E36-4FA0-AAD2-7B0EA031D7D4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj", "{F722FDA7-CB4E-49EE-A301-19708C99AE16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +104,12 @@ Global
 		{976AEB07-2E36-4FA0-AAD2-7B0EA031D7D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{976AEB07-2E36-4FA0-AAD2-7B0EA031D7D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{976AEB07-2E36-4FA0-AAD2-7B0EA031D7D4}.Release|x86.ActiveCfg = Release|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F722FDA7-CB4E-49EE-A301-19708C99AE16}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

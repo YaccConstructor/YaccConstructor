@@ -25,6 +25,16 @@ type rule = uint64
 
 type CYKGrammar = array<rule>
 
+[<Struct>]
+type Rule =
+    val RuleName : uint16
+    val R1 : uint16
+    val R2 : uint16
+    val Label : uint8
+    val Weight : uint8
+    new (ruleName : uint16, r1 : uint16, r2 : uint16, lbl : uint8, weight : uint8) = 
+        { RuleName = ruleName; R1 = r1; R2 = r2; Label = lbl; Weight = weight }
+   
 [<AutoOpen>]
 module RuleHelpers =
     
@@ -35,14 +45,20 @@ module RuleHelpers =
         let r =  (uint64 r1 <<< 32) ||| uint64 r2
         r
 
-    let getRule (rule:rule) =
+    let getRuleCortege (rule:rule) =
         let r1,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
         let rName,r1 = uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu), uint16 (r1 &&& 0xFFFFFFFFu)
         let r2,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
         let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
         rName, r1, r2, lblName, lblWeight
 
+    let getRuleStruct (rule:rule) =
+        let r1,r2 = uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL), uint32 (rule &&& 0xFFFFFFFFUL)
+        let rName,r1 = uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu), uint16 (r1 &&& 0xFFFFFFFFu)
+        let r2,lbl = uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), uint16 (r2 &&& 0xFFFFFFFFu)
+        let lblName,lblWeight = uint8 ((lbl >>> 8) &&& uint16 0xFFFFFFFFu), uint8 (lbl &&& uint16 0xFFFFFFFFu)
+        new Rule(rName, r1, r2, lblName, lblWeight)
+
 type CYKToken<'tag,'value>(tag:'tag, value:'value) =
     member x.Tag = tag
     member x.Value = value
-

@@ -60,8 +60,7 @@ let lbl tokenId = tokenId
 
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
-    let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
-
+    let path name = System.IO.Path.Combine(baseInputGraphsPath,name)    
     let loadDotToQG gFile =
         let g = loadGraphFromDOT(path gFile)
         let qGraph = new AdjacencyGraph<int, TaggedEdge<_,string>>()

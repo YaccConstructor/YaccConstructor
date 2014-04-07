@@ -68,7 +68,7 @@ let loadLexerInputGraph gFile =
 let errorTest inputFilePath errorsCount =
     let lexerInputGraph = loadLexerInputGraph inputFilePath
     let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR.ParseCalc.RNGLR_EOF 0)
-
+   
     let r = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
     printfn "%A" r
     match r with
@@ -410,6 +410,14 @@ type ``RNGLR abstract parser tests`` () =
         errorTest "errors11.dot" 3
 
     [<Test>]
+    member this.``Errors 12`` () =
+        errorTest "errors12.dot" 3
+    
+    [<Test>]
+    member this.``Errors 13`` () =
+        errorTest "errors13.dot" 3
+
+    [<Test>]
     member this.``Simple calc. Branch binop and second arg.`` () =
         let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
@@ -627,18 +635,18 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
     
-    //t.``Errors 11``()
+    //t.``Errors 13``()
 
     t.``Errors 1``()
-    t.``Errors 2``()
-    t.``Errors 3``()
-    t.``Errors 4``()
-    t.``Errors 5``()
-    t.``Errors 6``()
-    t.``Errors 8``()
-    t.``Errors 9``()
-    t.``Errors 10``()
-    
+//    t.``Errors 2``()
+//    t.``Errors 3``()
+//    t.``Errors 4``()
+//    t.``Errors 5``()
+//    t.``Errors 6``()
+//    t.``Errors 8``()
+//    t.``Errors 9``()
+//    t.``Errors 10``()
+//    
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
     //t.``Calc. Branched input error.``()

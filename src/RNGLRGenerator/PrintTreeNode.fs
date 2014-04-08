@@ -250,3 +250,79 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 1 "}"
     printBrInd 0 "}"
     res.ToString()
+
+
+let printXML (nameOfNamespace : string) tokens = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
+
+    let availableColors = ["UNRESOLVED_ERROR_ATTRIBUTE";
+    "ERROR_ATTRIBUTE";
+    "WARNING_ATTRIBUTE"; 
+    "DEADCODE_ATTRIBUTE";
+    "JAVA_SCRIPT_XML_DOC_TAG";
+    "PUBLIC_DEADCODE_ATTRIBUTE";
+    "SUGGESTION_ATTRIBUTE";
+    "HINT_ATTRIBUTE";
+    "CONSTANT_IDENTIFIER_ATTRIBUTE";
+    "EVENT_IDENTIFIER_ATTRIBUTE";
+    "FIELD_IDENTIFIER_ATTRIBUTE";
+    "LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
+    "MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
+    "METHOD_IDENTIFIER_ATTRIBUTE";
+    "EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE";
+    "OPERATOR_IDENTIFIER_ATTRIBUTE";
+    "TYPE_CLASS_ATTRIBUTE";
+    "TYPE_STATIC_CLASS_ATTRIBUTE";
+    "TYPE_INTERFACE_ATTRIBUTE";
+    "TYPE_DELEGATE_ATTRIBUTE";
+    "TYPE_STRUCT_ATTRIBUTE";
+    "TYPE_ENUM_ATTRIBUTE";
+    "TYPE_PARAMETER_ATTRIBUTE";
+    "NAMESPACE_IDENTIFIER_ATTRIBUTE";
+    "PARAMETER_IDENTIFIER_ATTRIBUTE";
+    "LATE_BOUND_IDENTIFIER_ATTRIBUTE";
+    "PATH_IDENTIFIER_ATTRIBUTE";
+    "IMPLEMENTS_ATTRIBUTE";
+    "OVERRIDES_ATTRIBUTE";
+    "IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE";
+    "HIDES_ATTRIBUTE";
+    "IMPLEMENTS_AND_HIDES_ATTRIBUTE";
+    "INTERFACE_IS_IMPLEMENTED_ATTRIBUTE";
+    "CLASS_IS_INHERITED_ATTRIBUTE";
+    "RECURSION_ATTRIBUTE";
+    "TODOITEM_ATTRIBUTE";
+    "TODOITEM_ERRORSTRIPE_ATTRIBUTE";
+    "FORMAT_STRING_ITEM";
+    "MATCHED_FORMAT_STRING_ITEM";
+    "MATCHED_BRACE";
+    "UNMATCHED_BRACE";
+    "OUTLINE_BRACE";
+    "ANALYSIS_ERROR_ERRORSTRIPE";
+    "ANALYSIS_WARNING_ERRORSTRIPE";
+    "ANALYSIS_SUGGESTION_ERRORSTRIPE";]
+
+    printBrInd 0 "<?xml version=\"1.0\"?>"
+    printBrInd 0 "<!-- Available color definitions:"
+    for color in availableColors do
+        printBrInd 1 "%s" color
+    printBrInd 0 "-->"
+
+    printBrInd 0 "<SyntaxDefinition name=\"%s\">" nameOfNamespace
+    printBrInd 1 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
+
+    for tok in tokens do
+        printBrInd 2 "<Token>%s</Token>" tok
+
+    printBrInd 1 "</Tokens>"
+    printBrInd 0 "</SyntaxDefinition>"
+    res.ToString()

@@ -6,7 +6,7 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.Util;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Inspections
 {
     public interface IMyInspectionsProcessFactory
     {

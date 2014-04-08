@@ -7,7 +7,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Inspections
 {
     public abstract class MyDaemonStageBase : IDaemonStage
     {

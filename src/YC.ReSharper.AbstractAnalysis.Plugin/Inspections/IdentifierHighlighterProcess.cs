@@ -4,7 +4,7 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi.Tree;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Inspections
 {
     internal class IdentifierHighlighterProcess : MyIncrementalDaemonStageProcessBase
     {
@@ -17,7 +17,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             DocumentRange colorConstantRange = node.GetNavigationRange();
 
-            AddHighLighting(colorConstantRange, node, consumer, new MySomethingHighlighting(node));
+            AddHighLighting(colorConstantRange, node, consumer, new MyHighlighter(node));
         }
 
         private void AddHighLighting(DocumentRange range, ITreeNode element, IHighlightingConsumer consumer, IHighlighting highlighting)

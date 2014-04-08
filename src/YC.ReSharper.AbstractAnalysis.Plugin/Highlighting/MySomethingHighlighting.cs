@@ -5,7 +5,7 @@ using JetBrains.ReSharper.Psi.Tree;
 
 [assembly: RegisterConfigurableSeverity("Variable", null, HighlightingGroupIds.LanguageUsage, "Variable", @"
           Variable", Severity.INFO, false, Internal = false)]
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [ConfigurableSeverityHighlighting("Variable", "MyLang", OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = "Variable")]
     internal class MySomethingHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange

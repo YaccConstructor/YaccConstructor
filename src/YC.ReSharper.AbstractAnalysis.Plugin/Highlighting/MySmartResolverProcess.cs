@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.ReSharper.Daemon;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     public class MySmartResolverProcess : IDaemonStageProcess
     {

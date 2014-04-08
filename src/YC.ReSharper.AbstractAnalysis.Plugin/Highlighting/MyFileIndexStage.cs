@@ -4,7 +4,7 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.Util;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [DaemonStage]
     public class MyFileIndexStage : MyDaemonStageBase

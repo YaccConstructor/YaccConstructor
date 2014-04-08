@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Highlighting.Core;
 using JetBrains.Application.Progress;
 using JetBrains.Application.Settings;
@@ -9,7 +10,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [DaemonStage(StagesBefore = new[] { typeof(LanguageSpecificDaemonStage) })]
     public class CodeHighlightingStage : CSharpDaemonStageBase /*MyDaemonStageBase//*/
@@ -32,13 +33,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 			// Running visitor against the PSI
 			var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
 			processor.Process();
-			var treeNode = processor.TreeNode as IAbstractTreeNode;
+			var treeNodeList = processor.TreeNode as IEnumerable<IAbstractTreeNode>;
 
-	        if (treeNode == null)
+	        if (treeNodeList == null)
 	        {
 	            throw new Exception("TreeNode is null!");
 	        }
-            TreeNodeHolder.TreeNode = treeNode;
+	        var enumerator = treeNodeList.GetEnumerator();
+
+            if (enumerator.MoveNext())
+                TreeNodeHolder.TreeNode = enumerator.Current;
+
 			// Checking if the daemon is interrupted by user activity
 			if (daemonProcess.InterruptFlag)
 				throw new ProcessCancelledException();

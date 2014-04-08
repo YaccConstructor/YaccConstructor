@@ -1,14 +1,12 @@
 ﻿using System;
 using Highlighting.Core;
 using JetBrains.Application.Settings;
-using JetBrains.Application.Threading;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Inspections
 {
     public abstract class MyIncrementalDaemonStageProcessBase : MyDaemonStageProcessBase
     {
@@ -32,7 +30,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
                 commiter(new DaemonStageResult(consumer.Highlightings) {Layer = 1});
             };
             
-            using (var fibers = (IMultiCoreFibers) DaemonProcess.CreateFibers())
+            using (var fibers = DaemonProcess.CreateFibers())
             {
                 fibers.EnqueueJob(globalHighlighter);
             }
@@ -43,7 +41,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 
         private void ProcessThisAndDescendants(IFile file, IRecursiveElementProcessor processor)
         {
-            var treeNode = TreeNodeHolder.TreeNode;
+            var treeNode = Helper.TreeNode;
             //processor.ProcessBeforeInterior(treeNode);
             if (processor.InteriorShouldBeProcessed(treeNode))
             {
@@ -62,16 +60,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             while (!processor.ProcessingIsFinished)
             {
                 processor.ProcessBeforeInterior(treeNode);
-                //CompositeElement compositeElement = treeNode as CompositeElement;
-                //if (compositeElement != null && compositeElement.firstChild != null && processor.InteriorShouldBeProcessed(treeNode))
-                //{
-                //    treeNode = treeNode.FirstChild;
-                //}
                 if (processor.InteriorShouldBeProcessed(treeNode) && treeNode.FirstChild != null)
                 {
-                    var parent = treeNode;
                     treeNode = treeNode.FirstChild as IAbstractTreeNode;
-                    treeNode.SetParent(parent);
                 }
                 else
                 {
@@ -85,9 +76,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
                         }
                     }
                     processor.ProcessAfterInterior(treeNode);
-                    var parent = treeNode.Parent;
                     treeNode = treeNode.NextSibling as IAbstractTreeNode;
-                    treeNode.SetParent(parent);
                 }
             }
         }

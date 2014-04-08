@@ -46,7 +46,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * Dictionary<Family, ErrorNode>
+    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
@@ -175,7 +175,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
         then
-            Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], errDict)
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -668,4 +668,4 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)
+                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), [||], errDict)

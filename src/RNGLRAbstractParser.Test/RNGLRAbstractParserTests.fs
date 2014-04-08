@@ -65,7 +65,7 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
-let errorTest inputFilePath errorsCount =
+let errorTest inputFilePath shouldContainsSuccess errorsCount =
     let lexerInputGraph = loadLexerInputGraph inputFilePath
     let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR.ParseCalc.RNGLR_EOF 0)
    
@@ -75,11 +75,15 @@ let errorTest inputFilePath errorsCount =
     | Yard.Generators.RNGLR.Parser.Error (_, tok, message, debug, _) ->
         printfn "Errors in file %s on Tokens %A: %s" inputFilePath tok message
         debug.drawGSSDot "out.dot"
-        Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
-    | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        if shouldContainsSuccess
+        then Assert.Fail(sprintf "Test %s should produce sucess parsing result but its fully failed." inputFilePath)
+        else Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
+    | Yard.Generators.RNGLR.Parser.Success(tree, tok, _) ->
         tree.PrintAst()
         RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
-        Assert.Fail()
+        if shouldContainsSuccess
+        then Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
+        else Assert.Fail(sprintf "Test %s should not produce sucess parsing result but it is produce." inputFilePath)
 
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
@@ -137,7 +141,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -159,7 +163,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _ ,_) ->
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -185,7 +189,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -209,7 +213,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Pass()
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Fail "!!!!"
@@ -234,7 +238,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass() 
@@ -257,7 +261,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass() 
@@ -281,7 +285,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Pass()
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.PrettySimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Fail "!!!!" 
@@ -309,7 +313,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -324,7 +328,7 @@ type ``RNGLR abstract parser tests`` () =
 //        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
 //            printfn "Error in position %d on Token %A: %s" num tok message
 //            debug.drawGSSDot "out.dot"
-//        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+//        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
 //            tree.PrintAst()
 //            RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
 //        Assert.Pass()
@@ -347,7 +351,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -364,58 +368,58 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
 
     [<Test>]
     member this.``Errors 1`` () =
-        errorTest "errors1.dot" 3
+        errorTest "errors1.dot" true 3
     
     [<Test>]
     member this.``Errors 2`` () =
-        errorTest "errors2.dot" 1
+        errorTest "errors2.dot" true 1
 
     [<Test>]
     member this.``Errors 3`` () =
-        errorTest "errors3.dot" 0
+        errorTest "errors3.dot" true 0
 
     [<Test>]
     member this.``Errors 4`` () =
-        errorTest "errors4.dot" 0
+        errorTest "errors4.dot" true 0
 
     [<Test>]
     member this.``Errors 5`` () =
-        errorTest "errors5.dot" 1
+        errorTest "errors5.dot" true 1
 
     [<Test>]
     member this.``Errors 6`` () =
-        errorTest "errors6.dot" 1
+        errorTest "errors6.dot" true 1
 
     [<Test>]
     member this.``Errors 8`` () =
-        errorTest "errors8.dot" 1
+        errorTest "errors8.dot" true 1
 
     [<Test>]
     member this.``Errors 9`` () =
-        errorTest "errors9.dot" 1
+        errorTest "errors9.dot" true 1
         
     [<Test>]
     member this.``Errors 10`` () =
-        errorTest "errors10.dot" 1
+        errorTest "errors10.dot" true 2
 
     [<Test>]
     member this.``Errors 11`` () =
-        errorTest "errors11.dot" 3
+        errorTest "errors11.dot" true 3
 
     [<Test>]
     member this.``Errors 12`` () =
-        errorTest "errors12.dot" 3
+        errorTest "errors12.dot" true 3
     
     [<Test>]
     member this.``Errors 13`` () =
-        errorTest "errors13.dot" 3
+        errorTest "errors13.dot" true 3
 
     [<Test>]
     member this.``Simple calc. Branch binop and second arg.`` () =
@@ -436,7 +440,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -460,7 +464,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -482,7 +486,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerm.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -506,7 +510,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerm.defaultAstToDot tree "ast.dot"            
             Assert.Pass()
@@ -528,7 +532,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerms_2.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -552,7 +556,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerms_2.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -577,7 +581,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerms_2.defaultAstToDot tree "ast.dot"        
             Assert.Pass()
@@ -599,7 +603,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerms_3.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -621,7 +625,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.SimpleCalcWithNTerms_4.defaultAstToDot tree "ast.dot"
             Assert.Pass()
@@ -635,9 +639,9 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
     
-    //t.``Errors 13``()
-
     t.``Errors 1``()
+
+    //t.``Errors 1``()
 //    t.``Errors 2``()
 //    t.``Errors 3``()
 //    t.``Errors 4``()

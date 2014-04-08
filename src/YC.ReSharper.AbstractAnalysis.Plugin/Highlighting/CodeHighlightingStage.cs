@@ -41,8 +41,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 	        }
 	        var enumerator = treeNodeList.GetEnumerator();
 
-            if (enumerator.MoveNext())
+	        if (enumerator.MoveNext())
+	        {
                 TreeNodeHolder.TreeNode = enumerator.Current;
+                TreeNodeHolder.ParseFile("CalcHighlighting.xml");
+	        }
+                
 
 			// Checking if the daemon is interrupted by user activity
 			if (daemonProcess.InterruptFlag)

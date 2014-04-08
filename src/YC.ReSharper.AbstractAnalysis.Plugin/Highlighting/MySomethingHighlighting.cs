@@ -10,12 +10,22 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     [ConfigurableSeverityHighlighting("Variable", "MyLang", OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = "Variable")]
     internal class MySomethingHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
     {
-        private const string AtributeId = HighlightingAttributeIds.CONSTANT_IDENTIFIER_ATTRIBUTE;
+        private string attributeId;
+        //private const string AtributeId = HighlightingAttributeIds.CONSTANT_IDENTIFIER_ATTRIBUTE;
         private readonly ITreeNode myElement;
 
         public MySomethingHighlighting(ITreeNode element)
         {
             myElement = element;
+            var tokenName = element.GetText();
+            if (TreeNodeHolder.TokenToColor.ContainsKey(tokenName))
+            {
+                attributeId = TreeNodeHolder.TokenToColor[tokenName];
+            }
+            else
+            {
+                attributeId = TreeNodeHolder.DefaultColor;
+            }
         }
 
         #region ICustomAttributeIdHighlighting Members
@@ -42,7 +52,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public string AttributeId
         {
-            get { return AtributeId; }
+            get { return attributeId; }
         }
 
         #endregion

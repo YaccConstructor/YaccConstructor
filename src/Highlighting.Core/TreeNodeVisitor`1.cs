@@ -8,7 +8,7 @@ namespace Highlighting.Core
         {
         }
         
-        public virtual void VisitVariableName([JetBrains.Annotations.NotNull] ITreeNode node)
+        public virtual void VisitSomething([JetBrains.Annotations.NotNull] ITreeNode node)
         {
             VisitNode(node);
         }

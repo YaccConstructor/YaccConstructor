@@ -320,7 +320,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printBrInd 2 "then parent.SetFirstChild(curr)"
             printBrInd 2 "else"
             printBrInd 3 "prev.SetNextSibling(curr)"
-            printBrInd 3 "curr.SetNextSibling(prev)"
+            printBrInd 3 "curr.SetPrevSibling(prev)"
             printBrInd 1 "parent.SetLastChild(curr)"
             printBrInd 1 "parent"
             res.ToString()

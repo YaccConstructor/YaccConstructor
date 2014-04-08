@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi;
@@ -11,9 +12,8 @@ namespace Highlighting.Core
 {
     public class AbstractTreeNode : IAbstractTreeNode
     {
-        public Dictionary<ITreeNode, ITreeNode> ParentAndPrevSibling { get; private set; }
-        public Dictionary<ITreeNode, ITreeNode> ParentAndNextSibling { get; private set; }
-        
+        public bool IsProcessed { get; set; }
+        public bool IsVisited { get; set; }
         public ITreeNode Parent { get; private set; }
         public ITreeNode FirstChild { get; private set; }
         public ITreeNode LastChild { get; private set; }
@@ -24,13 +24,21 @@ namespace Highlighting.Core
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
         
+        
         private DocumentRange documentRange = new DocumentRange();
+        private List<DocumentRange> ranges = new List<DocumentRange>();
+
         private string text;
+
         public AbstractTreeNode(string s)
         {
             text = s;
-            ParentAndPrevSibling = new Dictionary<ITreeNode, ITreeNode>();
-            ParentAndNextSibling = new Dictionary<ITreeNode, ITreeNode>();
+        }
+
+        public AbstractTreeNode(string s, object positions)
+        {
+            text = s;
+            SetPositions(positions);
         }
 
         public virtual void SetDocument(IDocument document)
@@ -45,7 +53,12 @@ namespace Highlighting.Core
 
         public void SetPositions(object obj)
         {
-            
+            var positions = obj as IEnumerable<DocumentRange>;
+            if (positions != null)
+            {
+                ranges = positions.ToList();
+                documentRange = ranges[0];
+            }
         }
 
         public virtual void DocumentRangeSetStartTo(int start)
@@ -166,15 +179,7 @@ namespace Highlighting.Core
 
         public virtual void SetParent(ITreeNode parent)
         {
-            if (!ParentAndPrevSibling.ContainsKey(parent))
-            {
-                ParentAndPrevSibling.Add(parent, null);
-                ParentAndNextSibling.Add(parent, null);
-            }
-
             Parent = parent;
-            PrevSibling = ParentAndPrevSibling[Parent];
-            NextSibling = ParentAndNextSibling[Parent];
         }
 
         public virtual void SetFirstChild(ITreeNode firstChild)
@@ -189,13 +194,11 @@ namespace Highlighting.Core
 
         public virtual void SetNextSibling(ITreeNode nextSibling)
         {
-            ParentAndNextSibling[Parent] = nextSibling;
             NextSibling = nextSibling;
         }
 
         public virtual void SetPrevSibling(ITreeNode prevSibling)
         {
-            ParentAndPrevSibling[Parent] = prevSibling;
             PrevSibling = prevSibling;
         }
 
@@ -216,7 +219,7 @@ namespace Highlighting.Core
 
         public virtual void Accept(TreeNodeVisitor visitor)
         {
-            visitor.VisitNode(this);
+            visitor.VisitSomething(this);
         }
 
         public virtual void Accept<TContext>(TreeNodeVisitor<TContext> visitor, TContext context)

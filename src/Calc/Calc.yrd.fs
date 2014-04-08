@@ -187,7 +187,7 @@ let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list)
         then parent.SetFirstChild(curr)
         else
             prev.SetNextSibling(curr)
-            curr.SetNextSibling(prev)
+            curr.SetPrevSibling(prev)
     parent.SetLastChild(curr)
     parent
 
@@ -528,7 +528,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 30 "calc.yrd"
+# 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
 # 533 "Calc.yrd.fs"
       );
@@ -551,7 +551,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 30 "calc.yrd"
+# 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
 # 556 "Calc.yrd.fs"
       );
@@ -574,7 +574,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 32 "calc.yrd"
+# 31 "calc.yrd"
                : '_rnglr_type_factor) 
 # 579 "Calc.yrd.fs"
       );
@@ -597,7 +597,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 32 "calc.yrd"
+# 31 "calc.yrd"
                : '_rnglr_type_factor) 
 # 602 "Calc.yrd.fs"
       );
@@ -693,7 +693,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 35 "calc.yrd"
+# 34 "calc.yrd"
                : '_rnglr_type_powOp) 
 # 698 "Calc.yrd.fs"
       );
@@ -716,7 +716,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 37 "calc.yrd"
+# 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
 # 721 "Calc.yrd.fs"
       );
@@ -743,7 +743,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 37 "calc.yrd"
+# 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
 # 748 "Calc.yrd.fs"
       );
@@ -766,7 +766,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             !_rnglr_cycle_res
           )
             )
-# 37 "calc.yrd"
+# 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
 # 771 "Calc.yrd.fs"
       );
@@ -781,11 +781,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new ERRORTermNode("ERROR")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new ERRORTermNode("ERROR", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -793,7 +791,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_ERROR) 
-# 796 "Calc.yrd.fs"
+# 794 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -806,11 +804,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new PLUSTermNode("PLUS")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new PLUSTermNode("PLUS", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -818,7 +814,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_PLUS) 
-# 821 "Calc.yrd.fs"
+# 817 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -831,11 +827,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new MINUSTermNode("MINUS")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new MINUSTermNode("MINUS", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -843,7 +837,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MINUS) 
-# 846 "Calc.yrd.fs"
+# 840 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -856,11 +850,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new MULTTermNode("MULT")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new MULTTermNode("MULT", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -868,7 +860,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MULT) 
-# 871 "Calc.yrd.fs"
+# 863 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -881,11 +873,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new DIVTermNode("DIV")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new DIVTermNode("DIV", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -893,7 +883,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_DIV) 
-# 896 "Calc.yrd.fs"
+# 886 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -906,11 +896,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new POWTermNode("POW")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new POWTermNode("POW", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -918,7 +906,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_POW) 
-# 921 "Calc.yrd.fs"
+# 909 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -931,11 +919,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new NUMBERTermNode("NUMBER")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new NUMBERTermNode("NUMBER", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -943,7 +929,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 946 "Calc.yrd.fs"
+# 932 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -956,11 +942,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new LBRACETermNode("LBRACE")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new LBRACETermNode("LBRACE", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -968,7 +952,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_LBRACE) 
-# 971 "Calc.yrd.fs"
+# 955 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -981,11 +965,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new RBRACETermNode("RBRACE")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new RBRACETermNode("RBRACE", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -993,7 +975,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_RBRACE) 
-# 996 "Calc.yrd.fs"
+# 978 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -1011,7 +993,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 1014 "Calc.yrd.fs"
+# 996 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

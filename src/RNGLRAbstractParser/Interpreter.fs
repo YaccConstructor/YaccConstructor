@@ -145,7 +145,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         new TokensInfo<_>(Array.map (fun (t,nl) -> new TokenWithInfo<_>(t,nl, parserSource.TokenToNumber t))ts,cl)
     
     let pushesMap = new Dictionary<_,ResizeArray<_>>(10)
-
+    let rangeToSkip = ref (-1,-1)
     let enum = tokens.GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
     let startState = 0
@@ -170,6 +170,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         // Currently processed token
         let curTokens = processChunk enum.Current |> ref
         let curLvl = ref (!curTokens).CurLvl
+        let errorLvl = ref -1
         let isEOF = ref false
         /// Here all tokens from the input will be collected
         let tokens = new BlockResizeArray<_>()
@@ -344,9 +345,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let oldTokens = !curTokens
             curTokens.Value.Tokens |> Array.iter (fun t -> tokens.Add t.Token)
             let flg = 
-                enum.MoveNext() |> ref
-                //ref false
-            //while (flg := enum.MoveNext(); !flg) && fst enum.Current <> !curLvl  + 1 do printfn "sckiped" 
+                //enum.MoveNext() |> ref
+                ref false
+            //let actualVertices = usedStates |> Seq.map (fun x -> stateToVertex.[x].Level) |> Array.ofSeq
+            while (flg := enum.MoveNext(); !flg) && fst (!rangeToSkip) < (fst enum.Current) && (fst enum.Current) < snd (!rangeToSkip) do printfn "sckiped %A"  (fst enum.Current)
             if !flg then
                 curTokens := processChunk enum.Current                
                 curLvl := (!curTokens).CurLvl
@@ -401,6 +403,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let erTok () = 
             //let shiftBase = tokens.Count - (!pushesBackup).Length 
             //let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
+            rangeToSkip := !curLvl, try pushesMap.Keys |> Seq.min with _ -> !curLvl
             let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (curTokens.Value.Tokens.[i].Token) else None)
             x |> Array.choose id
             |> errors.AddRange

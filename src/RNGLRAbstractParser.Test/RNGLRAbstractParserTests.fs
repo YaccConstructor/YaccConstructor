@@ -374,7 +374,7 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Errors 1`` () =
-        errorTest "errors1.dot" true 3
+        errorTest "errors1.dot" true 1
     
     [<Test>]
     member this.``Errors 2`` () =
@@ -382,11 +382,11 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Errors 3`` () =
-        errorTest "errors3.dot" true 0
+        errorTest "errors3.dot" true 1
 
     [<Test>]
     member this.``Errors 4`` () =
-        errorTest "errors4.dot" true 0
+        errorTest "errors4.dot" false 1
 
     [<Test>]
     member this.``Errors 5`` () =
@@ -419,6 +419,14 @@ type ``RNGLR abstract parser tests`` () =
     [<Test>]
     member this.``Errors 13`` () =
         errorTest "errors13.dot" true 3
+
+    [<Test>]
+    member this.``Errors 15`` () =
+        errorTest "errors15.dot" true 2
+
+    [<Test>]
+    member this.``Errors 16`` () =
+        errorTest "errors16.dot" true 1
 
     [<Test>]
     member this.``Simple calc. Branch binop and second arg.`` () =
@@ -638,7 +646,7 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
     
-    t.``Errors 1``()
+    t.``Errors 16``()
 
     //t.``Errors 1``()
 //    t.``Errors 2``()

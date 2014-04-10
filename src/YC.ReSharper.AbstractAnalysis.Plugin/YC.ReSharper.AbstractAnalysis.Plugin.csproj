@@ -56,7 +56,6 @@
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
     <Compile Include="AbstractAnalysisWarning.cs" />
-    <Compile Include="Highlighting\CodeHighlightingStage.cs" />
     <Compile Include="Highlighting\IdentifierHighlighterProcess.cs" />
     <Compile Include="Highlighting\IdentifierHighlightingStage.cs" />
     <Compile Include="Highlighting\InspectionProcess.cs" />

@@ -16,8 +16,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public override IEnumerable<IDaemonStageProcess> CreateProcess(IDaemonProcess process,
             IContextBoundSettingsStore settings, DaemonProcessKind processKind)
         {
-            return new List<IDaemonStageProcess> {new IdentifierHighlighterProcess(process, settings)};
+            return new List<IDaemonStageProcess> {new IdentifierHighlighterProcess(process, settings, processKind)};
         }
-
     }
 }

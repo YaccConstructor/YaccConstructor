@@ -3,7 +3,6 @@ using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
-using JetBrains.ReSharper.Features.Browsing.Resources;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
 
@@ -12,8 +11,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     public class IdentifierHighlighterProcess : MyIncrementalDaemonStageProcessBase
     {
         private List<TextRange> addedRanges = new List<TextRange>();
-        public IdentifierHighlighterProcess(IDaemonProcess daemonProcess, IContextBoundSettingsStore settingsStore)
-            : base(daemonProcess, settingsStore)
+     
+        public IdentifierHighlighterProcess(IDaemonProcess daemonProcess, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
+            : base(daemonProcess, settingsStore, processKind)
         {
         }
 
@@ -29,16 +29,14 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private void AddHighLighting(DocumentRange range, ITreeNode element, IHighlightingConsumer consumer, IHighlighting highlighting)
         {
-            //var myRange = range.SetStartTo(15);
-            //myRange = range.SetEndTo(20);
             var info = new HighlightingInfo(range, highlighting, new Severity?());
             IFile file = this.File;
 
             if (file != null)
             {
                 addedRanges.Add(range.TextRange);
-                consumer.Highlightings.Add(info);
-                //consumer.AddHighlighting(info.Highlighting, file);
+                //consumer.Highlightings.Add(info);
+                consumer.AddHighlighting(info.Highlighting, file);
             }
         }
     }

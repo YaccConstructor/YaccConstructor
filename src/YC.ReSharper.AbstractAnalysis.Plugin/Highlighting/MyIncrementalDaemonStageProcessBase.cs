@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Highlighting.Core;
+using JetBrains.Application.Progress;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -13,21 +20,54 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         private readonly IDaemonProcess myProcess;
         private readonly IContextBoundSettingsStore mySettingsStore;
+        private readonly DaemonProcessKind myProcessKind;
 
-        protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
+        protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
             : base(process, settingsStore)
         {
             myProcess = process;
             mySettingsStore = settingsStore;
+            myProcessKind = processKind;
         }
+
+        private void UpdateForest()
+        {
+            var sourceFile = myProcess.SourceFile;
+            var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            if (file == null)
+                return;
+
+            // Running visitor against the PSI
+            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
+            processor.Process();
+            var forest = processor.TreeNode as IEnumerable<IAbstractTreeNode>;
+
+            if (forest == null || !forest.Any())
+            {
+                return;
+                throw new Exception("TreeNode is null!");
+            }
+
+            TreeNodeHolder.Forest = forest;
+            TreeNodeHolder.ParseFile("CalcHighlighting.xml");
+
+            // Checking if the daemon is interrupted by user activity
+            if (myProcess.InterruptFlag)
+                throw new ProcessCancelledException();
+        }
+
 
         public override void Execute(Action<DaemonStageResult> commiter)
         {
+            if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
+                return;
+
+            UpdateForest();
+
             Action globalHighlighter = () =>
             {
                 var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
                 ProcessThisAndDescendants(File, new ProcessorBase(this, consumer));
-                //File.ProcessThisAndDescendants(new GlobalProcessor(this, consumer));
                 commiter(new DaemonStageResult(consumer.Highlightings) {Layer = 1});
             };
             
@@ -37,18 +77,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
 
             // remove all old highlightings
-            //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
+            commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
         private void ProcessThisAndDescendants(IFile file, IRecursiveElementProcessor processor)
         {
-            var treeNode = TreeNodeHolder.TreeNode;
-            //processor.ProcessBeforeInterior(treeNode);
-            if (processor.InteriorShouldBeProcessed(treeNode))
+            if (TreeNodeHolder.Forest == null)
+                return;
+
+            foreach (IAbstractTreeNode tree in TreeNodeHolder.Forest)
             {
-                ProcessDescendants(treeNode, processor);
+                ProcessDescendants(tree, processor);
             }
-            //processor.ProcessAfterInterior(treeNode);
+            
         }
 
         private void ProcessDescendants(ITreeNode root, IRecursiveElementProcessor processor)
@@ -60,13 +101,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
             while (!processor.ProcessingIsFinished)
             {
-                //processor.ProcessBeforeInterior(treeNode);
-                //CompositeElement compositeElement = treeNode as CompositeElement;
-                //if (compositeElement != null && compositeElement.firstChild != null && processor.InteriorShouldBeProcessed(treeNode))
-                //{
-                //    treeNode = treeNode.FirstChild;
-                //}
-                if (/*processor.InteriorShouldBeProcessed(treeNode) &&*/ treeNode.FirstChild != null)
+                if (treeNode.FirstChild != null)
                 {
                     treeNode = treeNode.FirstChild as IAbstractTreeNode;
                 }

@@ -4,9 +4,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 using Highlighting.Core;
-using JetBrains.CommonControls.ActiveRichText.Impl;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Psi.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -69,13 +67,21 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public static void ParseFile(string fileName)
         {
-            using (XmlReader reader = new XmlTextReader(new StreamReader(fileName)))
+            try
             {
-                reader.MoveToContent();
-                var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
-                xmlReader.Read();
-                ParseDefinition(xmlReader);
+                using (XmlReader reader = new XmlTextReader(new StreamReader(fileName)))
+                {
+                    reader.MoveToContent();
+                    var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
+                    xmlReader.Read();
+                    ParseDefinition(xmlReader);
+                }
             }
+            catch (Exception)
+            {
+                return;
+            }
+            
         }
 
         private static void ParseDefinition(XmlReader xmlReader)
@@ -103,12 +109,14 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             xmlReader.Read();
             var content = xmlReader.ReadContentAsString();
+
+            if (TokenToColor.ContainsKey(content))
+                return;
+
             if (!string.IsNullOrEmpty(color) && mapping.ContainsKey(color))
                 TokenToColor.Add(content, mapping[color]);
             else
-            {
                 TokenToColor.Add(content, DefaultColor);
-            }
         }
 
         private static void ParseTokensGroup(XmlReader xmlReader, string color)
@@ -121,7 +129,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private static XmlReader GetValidatingReader(XmlReader input, XmlSchemaSet schemaSet)
         {
-            XmlReaderSettings settings = new XmlReaderSettings();
+            var settings = new XmlReaderSettings();
             settings.CloseInput = true;
             settings.IgnoreComments = true;
             settings.IgnoreWhitespace = true;

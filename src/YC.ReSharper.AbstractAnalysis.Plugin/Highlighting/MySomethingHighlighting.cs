@@ -18,7 +18,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             myElement = element;
             var tokenName = element.GetText();
-            if (TreeNodeHolder.TokenToColor.ContainsKey(tokenName))
+            if (TreeNodeHolder.TokenToColor != null && TreeNodeHolder.TokenToColor.ContainsKey(tokenName))
             {
                 attributeId = TreeNodeHolder.TokenToColor[tokenName];
             }

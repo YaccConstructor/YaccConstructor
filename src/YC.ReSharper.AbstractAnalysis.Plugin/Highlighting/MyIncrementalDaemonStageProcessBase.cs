@@ -40,20 +40,26 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             // Running visitor against the PSI
             var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             processor.Process();
-            var forest = processor.TreeNode as IEnumerable<IAbstractTreeNode>;
+            var fSharpforest = processor.TreeNode;
 
-            if (forest == null || !forest.Any())
+            if (fSharpforest == null)
             {
                 return;
                 throw new Exception("TreeNode is null!");
+            }
+
+            var forest = new List<IAbstractTreeNode>();
+            foreach (IEnumerable<IAbstractTreeNode> obj in fSharpforest)
+            {
+                forest.AddRange(obj);
             }
 
             TreeNodeHolder.Forest = forest;
             TreeNodeHolder.ParseFile("CalcHighlighting.xml");
 
             // Checking if the daemon is interrupted by user activity
-            if (myProcess.InterruptFlag)
-                throw new ProcessCancelledException();
+            //if (myProcess.InterruptFlag)
+                //throw new ProcessCancelledException();
         }
 
 

@@ -439,22 +439,26 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     res.Add (ranges.[i], Array.append [|children.first.prod|] (children.other |> Array.map (fun family -> family.prod)))
         res
 
-    member private this.getTokensFromFamily (family : Family) =
-        let rec func (fam : Family) = 
+    member private this.getBoxedTokensFromFamily (family : Family) =
+            let tokensAsInt = this.getTokensFromFamily family
+            List.map  (fun i -> box tokens.[i]) tokensAsInt
+
+    member private this.getTokensFromFamily (family : Family) = 
+        let rec processFamily (fam : Family) = 
             let mutable res = []
             for j = 0 to fam.nodes.Length-1 do
                 match fam.nodes.[j] with
                 | :? int as t when t >= 0 -> 
-                    res <- res @ [box tokens.[t]]
+                    res <- res @ [t]
                 | :? AST as ast -> 
                     if ast.other <> null 
                     then
                         for other in ast.other do
-                            res <- res @ func other
-                    res <- func ast.first @ res
+                            res <- res @ processFamily other 
+                    res <- processFamily ast.first @ res 
                 | _ -> ()
             res
-        func family
+        processFamily family
 
     member this.collectErrors tokenToRange = 
         let res = new ResizeArray<'Position * 'Position * array<obj>>()
@@ -466,7 +470,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
                 if children.first.prod = this.RulesCount //i.e. error production
                 then 
-                    let result = this.getTokensFromFamily children.first
+                    let result = this.getBoxedTokensFromFamily children.first
                     res.Add(fst ranges.[i], snd ranges.[i], List.toArray result)
 
                 if children.other <> null
@@ -474,7 +478,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     for other in children.other do
                         if other.prod = this.RulesCount //i.e. error production
                         then
-                            let result = this.getTokensFromFamily other
+                            let result = this.getBoxedTokensFromFamily other
                             res.Add(fst ranges.[i], snd ranges.[i], List.toArray result)
         res
         
@@ -573,11 +577,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             if errFamily.IsSome
                             then 
                                 let info = errDict.[errFamily.Value]
-                                let arr = List.toArray <| this.getTokensFromFamily errFamily.Value
-                                info.tokens <- arr
+                                let arr = this.getBoxedTokensFromFamily errFamily.Value
+                                info.tokens <- List.toArray arr
                                 let errNodes = Array.zeroCreate 1
-                                let list = info :: []
-                                errNodes.[0] <- box list
+                                errNodes.[0] <- box [info]
                                 funs.[fam.prod] errNodes ranges.[i]
                             else
                                 funs.[fam.prod] res ranges.[i]
@@ -618,6 +621,62 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 if needGroup then printInd ind "vvvv"
             | _ -> failwith ""
         printAst 0 root
+
+    member this.GetForest () = 
+        let processed : bool[] = Array.zeroCreate <| tokens.Length
+        let rootFamily = 
+            match root with
+            | :? AST as ast -> ast
+            | :? int as x when x < 0 -> Unchecked.defaultof<_>
+            | _ -> failwith "Strange tree - singleNode with non-negative value"
+
+        let getUnprocessedTokens() = 
+            let tokArr = [| for i=0 to processed.Length-1 do yield i |]
+            Array.filter (fun i -> not processed.[i]) tokArr
+
+        let handleAST (ast : AST) = 
+            if ast.other = null
+            then ast.first
+            else
+                let nextAst = 
+                    ast.findFamily <| fun family -> 
+                        let unprocessedLeaves = getUnprocessedTokens()
+                        let familyLeaves = this.getTokensFromFamily family
+                        let needExists = 
+                            Array.tryFind (
+                                fun unproc -> 
+                                    List.exists (fun elem -> elem = unproc) familyLeaves
+                                            ) unprocessedLeaves
+                        needExists.IsSome
+                if nextAst.IsSome
+                then nextAst.Value
+                else ast.first
+
+        let rec processFamily (family : Family) : obj = 
+            let children = new ResizeArray<_>()
+            
+            let processNode (node : obj) = 
+                match node with 
+                | :? AST as ast -> 
+                    let child = processFamily <| handleAST ast
+                    children.Add child
+                | :? int as tok -> 
+                    processed.[tok] <- true
+                    children.Add node
+                | _ -> failwithf "Error in generation one of highlighting tree"
+
+            family.nodes.doForAll <| fun child -> processNode child
+            box <| new AST (new Family (family.prod, new Nodes(children.ToArray())), null)
+
+        let mutable forest = []
+        let mutable unprocessed = getUnprocessedTokens()
+        while unprocessed.Length > 0 do
+            let tree = processFamily rootFamily.first
+            // now parameter 'tokens' is all tokens rather than tokens from new tree
+            forest <- new Tree<_> (tokens, tree, rules) :: forest
+            unprocessed <- getUnprocessedTokens()
+        
+        List.rev forest
 
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =
@@ -669,7 +728,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     let children = x
                     
                     let label = 
-                        if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
+                        if children.first.prod < leftSide.Length 
+                        then indToString leftSide.[children.first.prod]
                         else "error"
                      
                     createNode i (children.other <> null) AstNode ("n " + label)

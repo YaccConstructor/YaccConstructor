@@ -45,4 +45,6 @@ let args =
         filterEpsilons = true
     }
 
+let printAstToDot ast name = defaultAstToDot ast name
+
 let translate ast errors = translate args ast errors

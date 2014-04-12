@@ -2,9 +2,12 @@
 
 exception LexerError of string*obj
 
-(*
-[<EntryPoint>]
-let main argv = 
-    printfn "%A" argv
-    0 // return an integer exit code
-*)
+type InjectedLanguageAttribute(language : string) = 
+    inherit System.Attribute()
+
+    member this.language = language
+
+//----------------------------------
+[<InjectedLanguage("TSQL")>]
+type MyClass() = 
+    member this.field = "lalala"

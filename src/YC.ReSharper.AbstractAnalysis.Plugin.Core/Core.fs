@@ -19,7 +19,8 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
-    let treeNode = ref []
+    let mutable treeNode = []
+    let mutable xmlPath = ""
     let defLang (n:ITreeNode) =
         match n with 
         | :? IInvocationExpression as m ->
@@ -42,15 +43,16 @@ type Processor(file) =
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> 
-//                printer ast "CALC_ORIGINAL.dot"
+             | Yard.Generators.RNGLR.Parser.Success (ast, errors) ->
+
+//                printer ast "AST_ORIGINAL.dot"
                 let forest = ast.GetForest()
 //                let count = ref 0
 //                List.iter (fun tree -> 
 //                    incr count
 //                    printer tree <| sprintf "calc_%d.dot" !count
 //                    ) forest
-                treeNode := List.map (fun tree -> translate tree errors) forest
+                treeNode <- treeNode @ List.map (fun tree -> translate tree errors) forest
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
             
@@ -127,13 +129,20 @@ type Processor(file) =
 
         graphs
         |> ResizeArray.iter 
-            (fun (l,g) ->
-                match l with
-                | Calc -> processLang g Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
-                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
-                | JSON -> processLang g JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
+            (fun (lang, graph) ->
+                match lang with
+                | Calc -> 
+                    xmlPath <- Calc.xmlPath
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
+                | TSQL -> 
+                    xmlPath <- TSQL.xmlPath
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
+                | JSON -> 
+                    xmlPath <- JSON.xmlPath
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
             )
 
-        lexerErrors,parserErrors
+        lexerErrors, parserErrors
 
-    member this.TreeNode = List.toArray !treeNode
+    member this.TreeNode = List.toArray treeNode
+    member this.XmlPath = xmlPath

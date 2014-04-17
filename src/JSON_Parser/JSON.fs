@@ -26,4 +26,5 @@ let args =
     }
 
 let printAstToDot ast name = defaultAstToDot ast name
+let xmlPath = xmlPath
 let translate ast errors = translate args ast errors

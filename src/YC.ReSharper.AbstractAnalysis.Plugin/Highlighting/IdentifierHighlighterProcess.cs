@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
@@ -17,17 +19,31 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
         }
 
-        public override void VisitSomething(ITreeNode node, IHighlightingConsumer consumer)
+        public override void VisitSomething(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
-            DocumentRange colorConstantRange = node.GetNavigationRange();
+            var myTreeNode = (IAbstractTreeNode) treeNode;
 
-            if (colorConstantRange.Document != null && !addedRanges.Contains(colorConstantRange.TextRange))
-            {
-                AddHighLighting(colorConstantRange, node, consumer, new MySomethingHighlighting(node));
-            }
+            DocumentRange colorRange = myTreeNode.GetNavigationRange();
+
+            if (colorRange.Document == null || addedRanges.Contains(colorRange.TextRange))
+                return;
+
+            AddHighLighting(colorRange, consumer, new MySomethingHighlighting(treeNode));
+            
+            //List<DocumentRange> colorConstantRange = myTreeNode.UserData.GetData(new Key<List<DocumentRange>>("ranges"));
+            /*var colorConstantRange = new List<DocumentRange>();
+            }*/
+
+            //foreach (DocumentRange range in colorConstantRange)
+            //{
+            //    if (range.Document != null && !addedRanges.Contains(range.TextRange))
+            //    {
+            //        AddHighLighting(range, consumer, new MySomethingHighlighting(treeNode));
+            //    }
+            //}
         }
 
-        private void AddHighLighting(DocumentRange range, ITreeNode element, IHighlightingConsumer consumer, IHighlighting highlighting)
+        private void AddHighLighting(DocumentRange range, IHighlightingConsumer consumer, IHighlighting highlighting)
         {
             var info = new HighlightingInfo(range, highlighting, new Severity?());
             IFile file = this.File;

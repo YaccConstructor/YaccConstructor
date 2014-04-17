@@ -45,7 +45,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (fSharpforest == null)
             {
                 return;
-                throw new Exception("TreeNode is null!");
             }
 
             var forest = new List<IAbstractTreeNode>();
@@ -54,14 +53,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 forest.AddRange(obj);
             }
 
+            if (!forest.Any())
+                return;
+
+
             TreeNodeHolder.Forest = forest;
-            TreeNodeHolder.ParseFile("CalcHighlighting.xml");
+            TreeNodeHolder.ParseFile(processor.XmlPath);
 
             // Checking if the daemon is interrupted by user activity
             //if (myProcess.InterruptFlag)
                 //throw new ProcessCancelledException();
         }
-
 
         public override void Execute(Action<DaemonStageResult> commiter)
         {
@@ -83,7 +85,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
 
             // remove all old highlightings
-            commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
+            //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
         private void ProcessThisAndDescendants(IFile file, IRecursiveElementProcessor processor)
@@ -95,7 +97,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 ProcessDescendants(tree, processor);
             }
-            
         }
 
         private void ProcessDescendants(ITreeNode root, IRecursiveElementProcessor processor)

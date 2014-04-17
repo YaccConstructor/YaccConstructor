@@ -7,13 +7,12 @@ using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Modules;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Text;
+using JetBrains.Util;
 
 namespace Highlighting.Core
 {
     public class AbstractTreeNode : IAbstractTreeNode
     {
-        public bool IsProcessed { get; set; }
-        public bool IsVisited { get; set; }
         public ITreeNode Parent { get; private set; }
         public ITreeNode FirstChild { get; private set; }
         public ITreeNode LastChild { get; private set; }
@@ -23,7 +22,7 @@ namespace Highlighting.Core
         public PsiLanguageType Language { get; private set; }
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
-        
+        public int Parts { get; private set; }
         
         private DocumentRange documentRange = new DocumentRange();
         private List<DocumentRange> ranges = new List<DocumentRange>();
@@ -59,7 +58,13 @@ namespace Highlighting.Core
                 ranges = positions.ToList();
                 documentRange = ranges[0];
             }
+            UserData.PutData(new Key<List<DocumentRange>>("ranges"), ranges);
         }
+
+        //public virtual DocumentRange[] GetAllPositions()
+        //{
+        //    return ranges.ToArray();
+        //}
 
         public virtual void DocumentRangeSetStartTo(int start)
         {

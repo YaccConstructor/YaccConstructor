@@ -633,24 +633,30 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         let getUnprocessedTokens() = 
             let tokArr = [| for i=0 to processed.Length-1 do yield i |]
             Array.filter (fun i -> not processed.[i]) tokArr
+            |> Array.toList
 
+        /// choose family from AST which contains the more unprocessed tokens
         let handleAST (ast : AST) = 
             if ast.other = null
             then ast.first
             else
-                let nextAst = 
-                    ast.findFamily <| fun family -> 
-                        let unprocessedLeaves = getUnprocessedTokens()
-                        let familyLeaves = this.getTokensFromFamily family
-                        let needExists = 
-                            Array.tryFind (
-                                fun unproc -> 
-                                    List.exists (fun elem -> elem = unproc) familyLeaves
-                                            ) unprocessedLeaves
-                        needExists.IsSome
-                if nextAst.IsSome
-                then nextAst.Value
-                else ast.first
+                let unprocessed = getUnprocessedTokens()
+                
+                let getUnprocessedCount family = 
+                    let familyLeaves = this.getTokensFromFamily family
+                    let newToksList = 
+                        List.filter (fun leaf -> List.exists ((=) leaf) unprocessed) familyLeaves
+                    newToksList.Length
+
+                let mutable nextFam = ast.first
+                let mutable maxNewToks = getUnprocessedCount ast.first
+                
+                for family in ast.other do
+                    let newTokens = getUnprocessedCount family
+                    if newTokens > maxNewToks 
+                    then nextFam <- family
+
+                nextFam
 
         let rec processFamily (family : Family) : obj = 
             let children = new ResizeArray<_>()

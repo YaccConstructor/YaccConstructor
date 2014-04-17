@@ -127,22 +127,22 @@ type RNGLR() =
                     out.Close()
 
                 let indexator = grammar.indexator
-                let tokensAndLits = ref []
+                let mutable tokensAndLits = []
                 for i = 0 to indexator.nonTermCount - 1 do
                     let prefix = toClassName <| indexator.indexToNonTerm i
                     generateFile <| prefix + "NonTermNode"
 
                 for i = indexator.termsStart to indexator.termsEnd do
                     let prefix = toClassName <| grammar.indexator.indexToTerm i
-                    tokensAndLits := prefix :: !tokensAndLits
+                    tokensAndLits <- prefix :: tokensAndLits
                     generateFile <| prefix + "TermNode"
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
                     let prefix = toClassName <| grammar.indexator.getLiteralName i
-                    tokensAndLits := prefix :: !tokensAndLits
+                    tokensAndLits <- prefix :: tokensAndLits
                     generateFile <| prefix + "LitNode"
 
-                generateXML !namespaceName !tokensAndLits
+                generateXML !namespaceName <| List.rev tokensAndLits
 
             let printRules () =
                 let printSymbol (symbol : int) =
@@ -233,8 +233,13 @@ type RNGLR() =
             let res = 
                 if not needTranslate || targetLanguage = Scala 
                 then tables
-                else tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                        positionType fullPath output dummyPos caseSensitive !needHighlighting
+                else 
+                    let xmlOpt = 
+                        if !namespaceName <> "" 
+                        then Some <| !namespaceName
+                        else None
+                    tables + printTranslator grammar newDefinition.grammar.[0].rules 
+                                        positionType fullPath output dummyPos caseSensitive xmlOpt
             let res = 
                 match definition.foot with
                 | None -> res

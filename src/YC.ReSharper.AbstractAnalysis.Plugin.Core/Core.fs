@@ -110,6 +110,7 @@ type Processor(file) =
             match tok with
             | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
             | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
+            | _ -> failwith "error in addErrorJSON function"
 
         
         let addErrorTSQL tok =
@@ -126,6 +127,7 @@ type Processor(file) =
             | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
             | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
             | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
+            | _ -> failwith "error in addErrorTSQL function"
 
         graphs
         |> ResizeArray.iter 

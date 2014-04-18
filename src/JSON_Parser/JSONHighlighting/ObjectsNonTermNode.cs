@@ -24,6 +24,7 @@ namespace JSONHighlighting
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
 
+        public int Parts { get; private set; }
         private List<DocumentRange> ranges = new List<DocumentRange>();
         private string text;
         private int curRange = 0;
@@ -47,6 +48,11 @@ namespace JSONHighlighting
                 //UserData.PutData(new Key<List<DocumentRange>>("ranges"), ranges);
                 //Parts = ranges.Count;
             }
+        }
+
+        public DocumentRange[] GetAllPositions()
+        {
+            return ranges.ToArray();
         }
 
         public IPsiServices GetPsiServices()

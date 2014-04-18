@@ -22,10 +22,11 @@ namespace Highlighting.Core
         public PsiLanguageType Language { get; private set; }
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
-        public int Parts { get; private set; }
+        //public int Parts { get; private set; }
         
-        private DocumentRange documentRange = new DocumentRange();
+        //private DocumentRange documentRange = new DocumentRange();
         private List<DocumentRange> ranges = new List<DocumentRange>();
+        private int curInd;
 
         private string text;
 
@@ -40,15 +41,15 @@ namespace Highlighting.Core
             SetPositions(positions);
         }
 
-        public virtual void SetDocument(IDocument document)
-        {
-            documentRange = new DocumentRange(document, 0);
-        }
+        //public virtual void SetDocument(IDocument document)
+        //{
+        //    documentRange = new DocumentRange(document, 0);
+        //}
 
-        public virtual void SetDocumentRange(DocumentRange range)
-        {
-            documentRange = range;
-        }
+        //public virtual void SetDocumentRange(DocumentRange range)
+        //{
+        //    documentRange = range;
+        //}
 
         public void SetPositions(object obj)
         {
@@ -56,25 +57,14 @@ namespace Highlighting.Core
             if (positions != null)
             {
                 ranges = positions.ToList();
-                documentRange = ranges[0];
+                //UserData.PutData(new Key<List<DocumentRange>>("ranges"), ranges);
             }
-            UserData.PutData(new Key<List<DocumentRange>>("ranges"), ranges);
         }
 
         //public virtual DocumentRange[] GetAllPositions()
         //{
         //    return ranges.ToArray();
         //}
-
-        public virtual void DocumentRangeSetStartTo(int start)
-        {
-            documentRange = documentRange.SetStartTo(start);
-        }
-
-        public virtual void DocumentRangeSetEndTo(int end)
-        {
-            documentRange = documentRange.SetEndTo(end);
-        }
 
         public virtual IPsiServices GetPsiServices()
         {
@@ -133,7 +123,11 @@ namespace Highlighting.Core
 
         public virtual DocumentRange GetNavigationRange()
         {
-            return documentRange;
+            if (ranges.Count == 0)
+                return default(DocumentRange);
+            if (curInd >= ranges.Count)
+                curInd = 0;
+            return ranges[curInd++];
         }
 
         public virtual TreeOffset GetTreeStartOffset()
@@ -195,6 +189,11 @@ namespace Highlighting.Core
         public virtual void SetLastChild(ITreeNode lastChild)
         {
             LastChild = lastChild;
+        }
+
+        public DocumentRange[] GetAllPositions()
+        {
+            return ranges.ToArray();
         }
 
         public virtual void SetNextSibling(ITreeNode nextSibling)

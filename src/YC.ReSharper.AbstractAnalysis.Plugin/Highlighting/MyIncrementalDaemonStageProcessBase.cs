@@ -19,7 +19,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     public abstract class MyIncrementalDaemonStageProcessBase : MyDaemonStageProcessBase
     {
         private readonly IDaemonProcess myProcess;
-        private readonly IContextBoundSettingsStore mySettingsStore;
+        //private readonly IContextBoundSettingsStore mySettingsStore;
         private readonly DaemonProcessKind myProcessKind;
 
         protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)

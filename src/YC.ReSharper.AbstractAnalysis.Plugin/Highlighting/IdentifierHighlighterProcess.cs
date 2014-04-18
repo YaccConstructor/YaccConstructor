@@ -21,26 +21,28 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public override void VisitSomething(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
-            var myTreeNode = (IAbstractTreeNode) treeNode;
-
-            DocumentRange colorRange = myTreeNode.GetNavigationRange();
-
-            if (colorRange.Document == null || addedRanges.Contains(colorRange.TextRange))
+            var myTreeNode = treeNode as IAbstractTreeNode;
+            if (myTreeNode == null) 
                 return;
 
-            AddHighLighting(colorRange, consumer, new MySomethingHighlighting(treeNode));
-            
-            //List<DocumentRange> colorConstantRange = myTreeNode.UserData.GetData(new Key<List<DocumentRange>>("ranges"));
-            /*var colorConstantRange = new List<DocumentRange>();
-            }*/
+            //DocumentRange colorRange = myTreeNode.GetNavigationRange();
 
-            //foreach (DocumentRange range in colorConstantRange)
-            //{
-            //    if (range.Document != null && !addedRanges.Contains(range.TextRange))
-            //    {
-            //        AddHighLighting(range, consumer, new MySomethingHighlighting(treeNode));
-            //    }
-            //}
+            //if (colorRange.Document == null || addedRanges.Contains(colorRange.TextRange))
+            //    return;
+
+            //AddHighLighting(colorRange, consumer, new MySomethingHighlighting(treeNode));
+
+            //List<DocumentRange> colorConstantRange = myTreeNode.UserData.GetData(new Key<List<DocumentRange>>("ranges"));
+            ICollection<DocumentRange> colorConstantRange;
+            colorConstantRange = myTreeNode.GetAllPositions();
+
+            foreach (DocumentRange range in colorConstantRange)
+            {
+                if (range.Document != null && !addedRanges.Contains(range.TextRange))
+                {
+                    AddHighLighting(range, consumer, new MySomethingHighlighting(treeNode));
+                }
+            }
         }
 
         private void AddHighLighting(DocumentRange range, IHighlightingConsumer consumer, IHighlighting highlighting)

@@ -11,7 +11,7 @@ namespace Highlighting.Core
         void Accept<TContext>(TreeNodeVisitor<TContext> visitor, TContext context);
         TResult Accept<TContext, TResult>(TreeNodeVisitor<TContext, TResult> visitor, TContext context);
 
-        //DocumentRange[] GetAllPositions();
+        DocumentRange[] GetAllPositions();
 
         void SetNextSibling(ITreeNode sibling);
         void SetPrevSibling(ITreeNode sibling);

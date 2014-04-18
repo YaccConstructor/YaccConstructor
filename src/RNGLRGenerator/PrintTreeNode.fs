@@ -42,7 +42,7 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 2 "public NodeUserData UserData { get; private set; }"
     printBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
     printBr ""    
-//    printBrInd 2 "public int Parts { get; private set; }"
+    printBrInd 2 "public int Parts { get; private set; }"
     printBrInd 2 "private List<DocumentRange> ranges = new List<DocumentRange>();"
 
     printBrInd 2 "private string text;"
@@ -74,13 +74,13 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 2 "}"
     printBr ""
 
-    (*
+    
     printBrInd 2 "public DocumentRange[] GetAllPositions()"
     printBrInd 2 "{"
     printBrInd 3 "return ranges.ToArray();"
     printBrInd 2 "}"
     printBr ""
-    
+    (*
     printBrInd 2 "public void SetDocumentRange(DocumentRange range)"
     printBrInd 2 "{"
     printBrInd 3 "documentRange = range;"

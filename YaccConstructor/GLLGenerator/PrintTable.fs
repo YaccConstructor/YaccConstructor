@@ -6,7 +6,7 @@ open System.Collections.Generic
 open Yard.Core.IL
 
 
-let printTable 
+let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
     _class positionType caseSensitive : string =
@@ -74,18 +74,49 @@ let printTable
     let printTableToFSharp () =
        
         let indexator = grammar.indexator
+        printBr "type Token ="
+        let indexator = grammar.indexator
+        let defaultType = tokenType.TryFind "_"
+
+        for i = indexator.termsStart to indexator.termsEnd do
+            let name = indexator.indexToTerm i
+            let type' =
+                match tokenType.TryFind name with
+                | Some t -> t
+                | None ->
+                    match defaultType with
+                    | Some t -> t
+                    | None -> failwithf "Type of token %s in not defined" name
+
+            printBrInd 1 "| %s%s" name 
+            <|  match type' with
+                | None -> ""
+                | Some s -> " of (" + s + ")"
+
+
+
+        let literalType = 
+            match defaultType with
+            | Some (Some t) -> t
+            | _ -> failwithf "Default token type is not defined"
+
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| L_%s of (%s)" (indexator.getLiteralName i) literalType
 
         let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
 
         printBr ""
-        printBr "let genLiteral (str : string) posStart posEnd ="
+        let escapeQuotes = String.collect (function '"' -> "\\\"" | c -> string c)
+
+        printBr ""
+        printBr "let genLiteral (str : string) (data : %s) =" literalType
         if caseSensitive then "str"
         else "str.ToLower()"
         |> printBrInd 1 "match %s with"
             
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| \"%s\" -> ``L %d`` (posStart, posEnd)" (escapeQuotes <| indexator.indexToLiteral i) i
-        printBrInd 1 "| x -> failwithf \"Literal %%s undefined\" x"
+            printBrInd 1 "| \"%s\" -> Some (L_%s data)" (escapeQuotes <| indexator.indexToLiteral i) (indexator.getLiteralName i)
+        printBrInd 1 "| x -> None"
         //
 
         printBr "let tokenData = function"
@@ -94,7 +125,7 @@ let printTable
             printBrInd 1 "| %s x -> box x" (indexator.indexToTerm i)
 
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` x -> box x" i
+            printBrInd 1 "| L_%s x -> box x" (indexator.getLiteralName i)
 
         printBr ""
         printBr "let numToString = function"
@@ -114,33 +145,40 @@ let printTable
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
-        for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> %d" i i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
         for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> true" i
+            printBrInd 1 "| L_%s _ -> true" (indexator.getLiteralName i)
+
+
         printBr ""
 
         printBrInd 0 "let isTerminal = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> true" <| indexator.indexToTerm i
-        for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> false" i
-        for i = 0 to indexator.nonTermCount-1 do
-            printBrInd 1 "| %s _ -> false" <| indexator.indexToNonTerm i
+        printBrInd 1 "| _ -> false"
         printBr ""
 
-        printBrInd 0 "let isNonTerminal = function"
+        printBrInd 0 "let numIsTerminal = function"
         for i = indexator.termsStart to indexator.termsEnd do
-            printBrInd 1 "| %s _ -> false" <| indexator.indexToTerm i
-        for i = indexator.literalsStart to indexator.literalsEnd do
-            printBrInd 1 "| ``L %d`` _ -> false" i
+            printBrInd 1 "| %d -> true" <| i
+        printBrInd 1 "| _ -> false"
+        printBr ""
+
+        printBrInd 0 "let numIsNonTerminal = function"
+        for i = 0 to indexator.nonTermCount do
+            printBrInd 1 "| %d -> true" <| i
+        printBrInd 1 "| _ -> false"
+        printBr ""
+
+
+        printBrInd 0 "let isNonTerminal = function"   
         for i = 0 to indexator.nonTermCount-1 do
-            printBrInd 1 "| %s _ -> true" <| indexator.indexToNonTerm i
+            printBrInd 1 "| %s -> true" <| indexator.indexToNonTerm i
+        printBrInd 1 "| _ -> false"
         printBr ""
 
         printInd 0 "let getLiteralNames = ["
@@ -161,8 +199,8 @@ let printTable
         print "let table = "
         print "\n"
         printBrInd 1 "[| "
-        for arrs in table.result do
-            printArr2 arrs (print "%d") 2    
+        for arr in table.result do
+            printArr2 arr (print "%d") 2 
         printBrInd 1 " |] "
 
        
@@ -177,47 +215,24 @@ let printTable
         printBr "let indexatorFullCount = %d" indexator.fullCount
         printBr "let rulesCount = %d" grammar.rules.rulesCount
         printBr "let indexEOF = %d" grammar.indexator.eofIndex
-        printBr "let literalsCount = %d" grammar.indexator.literalsCount
-        printBr "let literalStart = %d" grammar.indexator.literalsStart
         printBr "let nonTermCount = %d" grammar.indexator.nonTermCount
         printBr "let termCount = %d" grammar.indexator.termCount
         printBr "let termStart = %d" grammar.indexator.termsStart
         printBr "let termEnd = %d" grammar.indexator.termsEnd
         printBr "let literalStart = %d" grammar.indexator.literalsStart
         printBr "let literalEnd = %d" grammar.indexator.literalsEnd
+        printBr "let literalsCount = %d" grammar.indexator.literalsCount
        
 
         printBr ""
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = 
-            new ParserSource<Token> (
-                               tokenToNumber        : 'TokenType -> int
-                               , genLiteral         : string -> int -> int -> string
-                               , numToString        : int -> string
-                               , tokenData          : int -> string
-                               , isLiteral          : string -> string
-                               , isTerminal         : string -> string
-                               , isNonTerminal      : string -> string
-                               , getLiteralNames    : string -> string
-                               , table              : int[][]
-                               , rules              : int[][]
-                               , rulesStart         : int[]
-                               , leftSide           : int[]
-                               , startRule          : int
-                               , literalEnd         : int
-                               , literalStart       : int
-                               , termEnd            : int
-                               , termStart          : int
-                               , termCount          : int
-                               , nonTermCount       : int
-                               , literalCount       : int
-                               , indexEOF           : int
-                               , rulesCount         : int
-                               , indexatorFullCount : int
-                               , acceptEmptyInput   : bool)"
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput)"
+        
                        
-    
+        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+        printBrInd 1 "buildAst<Token> parserSource"
+        printBr ""
         res.ToString()
     printTableToFSharp ()

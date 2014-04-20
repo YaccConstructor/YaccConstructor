@@ -1,6 +1,4 @@
-﻿//CHANGE IN STATES
-
-namespace Yard.Generators.GLL
+﻿namespace Yard.Generators.GLL
 
 open Yard.Core
 open IL
@@ -13,6 +11,8 @@ open PrintTable
 open Printer
 open TranslatorPrinter2
 open Option
+
+
 
 type GLL() = 
     inherit Generator()
@@ -58,7 +58,6 @@ type GLL() =
                 | "-pos" -> positionType <- value
                 | "-o" -> if value.Trim() <> "" then output <- value
                 | "-output" -> if value.Trim() <> "" then output <- value
-                (*| "-table" -> table <- "GLR"*)
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
@@ -118,13 +117,13 @@ type GLL() =
                     println "%s" <| getPosFromSource fullPath dummyPos (defaultSource output)
                     println "module %s"
                     <|  match moduleName with
-                        | "" -> "GLL"
+                        | "" -> "GLL.Parse"
                         | s -> s
                     if not light then
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                   // println "open Yard.Generators.GLL.Parser"
+                    println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.RNGLR.AST"
 
@@ -139,7 +138,7 @@ type GLL() =
             /////////////////////////////////////////////
                
             printHeaders moduleName fullPath light output
-            let table = printTable grammar table moduleName tokenType res _class positionType caseSensitive
+            let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive
             let res =  table
             let res = 
                 match definition.foot with

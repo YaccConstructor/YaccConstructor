@@ -7,8 +7,9 @@ open Yard.Generators.RNGLR
 
 
 type Table (grammar : FinalGrammar) =
-    let getFollowSets  =
-        
+    //let nonTermToIndex nTrm = 
+    //let termToIndex =     
+    let getFollowSets  =  
         let nonTermsCount = grammar.indexator.nonTermCount
         let followSets = Array.create nonTermsCount Set.empty 
         followSets.[grammar.rules.startSymbol] <- Set.ofList [grammar.indexator.eofIndex]
@@ -34,64 +35,68 @@ type Table (grammar : FinalGrammar) =
                 List.iter (addElementsToSet followSets.[currentRuleLeft]) previousNonTerms
         followSets 
 
-    let getFirstSets =
-        let firstSets = Array.create grammar.rules.rulesCount Set.empty
-        for i = 0 to grammar.rules.rulesCount - 1 do
-            let rightSide = grammar.rules.rightSide i
-            let mutable curFirstSet : Set<int> = Set.empty
-            let mutable condition = true
-            let mutable j = 0
-            while condition do
-            if j< Array.length rightSide - 1 then
-                if grammar.canInferEpsilon.[rightSide.[j]] then 
-                    curFirstSet <- Set.union curFirstSet grammar.firstSet.[rightSide.[j]]
-                    j <- j + 1 
-                else 
-                    curFirstSet <- Set.union curFirstSet grammar.firstSet.[rightSide.[j]]
-                    firstSets.[i] <- curFirstSet
-                    j <- Array.length rightSide - 1            
-            else condition <- false
-        firstSets 
-
-    let first = getFirstSets
-    let chainCanInferEpsilon = 
-        let canInferEpsilon = Array.create grammar.rules.rulesCount true
-        let mutable canInfer = true
-        for i = 0 to grammar.rules.rulesCount-1 do
-            let curFirst = Set.toArray first.[i] 
-            for j = 0 to curFirst.Length-1 do
-                if not grammar.canInferEpsilon.[curFirst.[j]] then canInfer <- false
-            canInferEpsilon.[i] <- canInfer
-        canInferEpsilon
-
+//    let getFirstSets =
+//        let result = Array.create grammar.rules.rulesCount Set.empty
+//        for i = 0 to grammar.rules.rulesCount - 1 do
+//            let rightSide = grammar.rules.rightSide i
+//            let mutable condition = true
+//            let mutable j = 0
+//            let mutable curFirst = result.[i]
+//            while condition do
+//            if j <= Array.length rightSide - 1 then
+//                if grammar.canInferEpsilon.[rightSide.[j]] then 
+//                    curFirst <- Set.union curFirst (grammar.firstSet.[rightSide.[j]])
+//                    j <- j + 1 
+//                else 
+//                    let temp = grammar.firstSet.[rightSide.[j]]
+//                    curFirst <- Set.union curFirst grammar.firstSet.[rightSide.[j]]
+//                    condition <- false 
+//                    result.[i] <- curFirst           
+//            else 
+//                condition <- false
+//                result.[i] <- curFirst
+//        result 
+//
+//    let first = getFirstSets
+//    let chainCanInferEpsilon = 
+//        let canInferEpsilon = Array.create grammar.rules.rulesCount true
+//        let mutable canInfer = true
+//        for i = 0 to grammar.rules.rulesCount-1 do
+//            let curFirst = Set.toArray first.[i] 
+//            for j = 0 to curFirst.Length-1 do
+//                if not grammar.canInferEpsilon.[curFirst.[j]] then canInfer <- false
+//            canInferEpsilon.[i] <- canInfer
+//        canInferEpsilon
 
     let follow = getFollowSets
-    let canInferEpsilon = chainCanInferEpsilon
+    //let canInferEpsilon = chainCanInferEpsilon
     let _table = 
-        
-        let arr = Array2D.create grammar.indexator.fullCount grammar.indexator.fullCount (List.empty<int>)
-        let result = Array.create ((Array2D.length1 arr)*(Array2D.length2 arr)) Array.empty<int>
+        let length = grammar.indexator.fullCount
+        let arr = Array2D.create length length (List.empty<int>)
+        let result = Array.create (length*length) (Array.empty<int>)
         for i = 0 to grammar.rules.rulesCount-1 do
-            let curLeftSide = grammar.rules.leftSide i
-            let curRigrhtSide = grammar.rules.rightSide i
-            let curFirst = Set.toArray first.[i]
+            let curFirst = Set.toArray grammar.firstSet.[i]
             for j = 0 to curFirst.Length-1 do
-                printfn "%d THISS ADDD" i
-                i::arr.[curLeftSide,curFirst.[j]] |> ignore
-            if canInferEpsilon.[i] then 
-                let curFollow = Set.toArray follow.[curLeftSide]
+                arr.[grammar.rules.leftSide i,curFirst.[j]] <- i::arr.[grammar.rules.leftSide i,curFirst.[j]]
+            if grammar.canInferEpsilon.[i] then 
+                let curFollow = Set.toArray follow.[grammar.rules.leftSide i]
                 for j = 0 to curFollow.Length-1 do
-                    i::arr.[curLeftSide,curFollow.[j]] |> ignore
-                if Set.contains grammar.indexator.eofIndex follow.[curLeftSide] then 
-                    printfn "uaaa"
-        for i = 0 to grammar.indexator.fullCount-1 do
-            for j = 0 to grammar.indexator.fullCount-1 do
-                result.[(j+i*(grammar.indexator.fullCount))] <- arr.[i,j] |> List.toArray 
+                    arr.[grammar.rules.leftSide i,curFollow.[j]] <- i::arr.[grammar.rules.leftSide i,curFollow.[j]]            
+           // if Set.contains grammar.indexator.eofIndex follow.[grammar.rules.leftSide i] then 
+             //   arr.[grammar.startRule,grammar.indexator.eofIndex] <- grammar.startRule :: arr.[grammar.startRule,grammar.indexator.eofIndex]
 
+        //tr
+        //trttr
+        for i = 0 to length - 1 do
+            for j = 0 to length - 1 do
+                result.[length*i + j] <- List.toArray arr.[i,j]
         result
   
     member this.result = _table
 
+
+       // if Set.contains grammar.indexator.eofIndex follow.[grammar.rules.leftSide i] then 
+               //     arr.[grammar.startRule,grammar.indexator.eofIndex] <- grammar.startRule :: arr.[grammar.startRule,grammar.indexator.eofIndex]
 
 
 

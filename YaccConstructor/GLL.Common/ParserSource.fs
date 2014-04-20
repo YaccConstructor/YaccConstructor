@@ -1,19 +1,19 @@
 ﻿namespace Yard.Generators.GLL
 
        
-type ParserSource<'TokenType> (
+type ParserSourceGLL<'TokenType> (
                                tokenToNumber        : 'TokenType -> int
-                               , genLiteral         : string -> int -> int -> string
+                               , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string
-                               , tokenData          : int -> string
-                               , isLiteral          : string -> string
-                               , isTerminal         : string -> string
-                               , isNonTerminal      : string -> string
-                               , getLiteralNames    : string -> string
+                               , tokenData          : 'TokenType -> obj
+                               , isLiteral          : 'TokenType -> bool
+                               , isTerminal         : 'TokenType -> bool
+                               , isNonTerminal      : 'TokenType -> bool
+                               , getLiteralNames    : string list
                                , table              : int[][]
-                               , rules              : int[][]
-                               , rulesStart         : int[]
-                               , leftSide           : int[]
+                               , rules              : int array
+                               , rulesStart         : int array
+                               , leftSide           : int array
                                , startRule          : int
                                , literalEnd         : int
                                , literalStart       : int
@@ -26,6 +26,8 @@ type ParserSource<'TokenType> (
                                , rulesCount         : int
                                , indexatorFullCount : int
                                , acceptEmptyInput   : bool
+                               , numIsTerminal      : int -> bool
+                               , numIsNonTerminal   : int -> bool
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -37,6 +39,7 @@ type ParserSource<'TokenType> (
         _rules.[i] <- Array.zeroCreate length.[i]
         for j = 0 to length.[i]-1 do
             _rules.[i].[j] <- rules.[rulesStart.[i] + j]
+    
                   
                                
     member this.GenLiteral = genLiteral 
@@ -64,3 +67,5 @@ type ParserSource<'TokenType> (
     member this.RulesCount = rulesCount
     member this.IndexatorFullCount = indexatorFullCount
     member this.AcceptEmptyInput = acceptEmptyInput
+    member this.NumIsTerminal = numIsTerminal
+    member this.NumIsNonTerminal = numIsNonTerminal

@@ -66,6 +66,7 @@ let loadLexerInputGraph gFile =
     lexerInputG
 
 let errorTest inputFilePath shouldContainsSuccess errorsCount =
+    printfn "==============================================================="
     let lexerInputGraph = loadLexerInputGraph inputFilePath
     let qGraph = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, RNGLR.ParseCalc.RNGLR_EOF 0)
    
@@ -77,12 +78,12 @@ let errorTest inputFilePath shouldContainsSuccess errorsCount =
         debug.drawGSSDot "out.dot"
         if shouldContainsSuccess
         then Assert.Fail(sprintf "Test %s should produce sucess parsing result but its fully failed." inputFilePath)
-        else Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
+        else Assert.AreEqual(errorsCount, tok.Length, (sprintf "Errors count mismatch in test %s." inputFilePath))
     | Success(tree, tok, _) ->
         tree.PrintAst()
         RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
         if shouldContainsSuccess
-        then Assert.AreEqual(errorsCount, tok.Length, "Errors count mismatch.")
+        then Assert.AreEqual(errorsCount, tok.Length, (sprintf "Errors count mismatch in test %s." inputFilePath))
         else Assert.Fail(sprintf "Test %s should not produce sucess parsing result but it is produce." inputFilePath)
 
 [<TestFixture>]
@@ -386,7 +387,7 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Errors 4`` () =
-        errorTest "errors4.dot" false 1
+        errorTest "errors4.dot" false 0
 
     [<Test>]
     member this.``Errors 5`` () =
@@ -406,19 +407,23 @@ type ``RNGLR abstract parser tests`` () =
         
     [<Test>]
     member this.``Errors 10`` () =
-        errorTest "errors10.dot" true 2
+        errorTest "errors10.dot" false 2
 
     [<Test>]
     member this.``Errors 11`` () =
-        errorTest "errors11.dot" true 3
+        errorTest "errors11.dot" false 3
 
     [<Test>]
     member this.``Errors 12`` () =
-        errorTest "errors12.dot" true 3
+        errorTest "errors12.dot" false 3
     
     [<Test>]
     member this.``Errors 13`` () =
-        errorTest "errors13.dot" true 3
+        errorTest "errors13.dot" true 1
+    
+    [<Test>]
+    member this.``Errors 14`` () =
+        errorTest "errors14.dot" true 2
 
     [<Test>]
     member this.``Errors 15`` () =
@@ -646,18 +651,22 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
     
+    t.``Errors 1``()
+    t.``Errors 2``()
+    //t.``Errors 3``()
+    t.``Errors 4``() 
+    t.``Errors 5``()
+    t.``Errors 6``()
+    t.``Errors 8``()
+   // t.``Errors 9``()
+    //t.``Errors 10``()
+   // t.``Errors 11``() // 3 EOF? O_o
+   // t.``Errors 12``() // skip!
+    t.``Errors 13``()
+   // t.``Errors 14``()
+    //t.``Errors 15``()
     t.``Errors 16``()
-
-    //t.``Errors 1``()
-//    t.``Errors 2``()
-//    t.``Errors 3``()
-//    t.``Errors 4``()
-//    t.``Errors 5``()
-//    t.``Errors 6``()
-//    t.``Errors 8``()
-//    t.``Errors 9``()
-//    t.``Errors 10``()
-//    
+    
     //t.``Simple calc. Branch binop input.``  ()
     //t.``Calc. Sequence input.``()
     //t.``Calc. Branched input error.``()

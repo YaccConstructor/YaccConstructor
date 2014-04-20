@@ -2,19 +2,37 @@
 
 module RNGLRApplication
 
-open Yard.Generators.RNGLR
+open Yard.Generators.GLL
 //open Yard.Generators.RNGLR.AST
 open Yard.Generators
-open LexCommon
+open HardLexer
 
 let run path astBuilder =
-    let tokens = LexCommon.tokens(path)
+    let tokens = HardLexer.tokens(path)
     astBuilder tokens, tokens
 
-let parser = GLL.ParseCalc.parserSource
+let parser = GLL.ParseCalc.buildAst
 let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
+match run path parser with
+| Parser.Error _ , _ ->
+    printfn "Error"
+    //debug.drawGSSDot "out.dot"
+| Parser.Success _, _ ->
+    printfn "Success"
+    //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
+    //printfn "%A" tree.Order
+//    let args = {
+//        tokenToRange = fun _ -> 0,0
+//        zeroPosition = 0
+//        clearAST = false
+//        filterEpsilons = true
+//    }
+
+
+    //printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
+    //tree.ChooseSingleAst()
+    //tree.PrintAst()
 
 //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
-

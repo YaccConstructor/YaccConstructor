@@ -1,11 +1,3 @@
-options {
-    pos = int
-    token = "int * int"
-    module = "RNGLR.ParseCalc"
-    translate = true
-    output = "Calc.yrd.fs"
-}
-
 [<Start>]
 expr : a=expr '+' b=expr {a + b} | f=fact {f};
 fact : a=fact '*' b=fact {a * b} | n=num {n};

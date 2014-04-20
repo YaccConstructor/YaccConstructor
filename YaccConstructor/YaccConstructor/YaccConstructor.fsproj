@@ -32,7 +32,8 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Main.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <StartArguments>-g GLLGenerator -i ".\..\..\..\RNGLRParser.SimpleTest\Expr.yrd"</StartArguments>
+    <StartArguments>
+    </StartArguments>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>

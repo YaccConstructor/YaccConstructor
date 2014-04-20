@@ -1,0 +1,7 @@
+tokens {
+    _ of string
+}
+
+[<Start>]
+e : N | e P e | b
+b : N | O

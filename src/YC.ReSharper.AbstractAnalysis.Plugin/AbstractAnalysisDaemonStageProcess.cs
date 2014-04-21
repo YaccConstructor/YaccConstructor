@@ -25,52 +25,56 @@ using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
 using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
 using JetBrains.ReSharper.Psi.Xml.XmlDocComments;
+using YC.ReSharper.AbstractAnalysis.Plugin.Core;
+using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
-  public class ComplexityAnalysisDaemonStageProcess : IDaemonStageProcess
-  {
-    private readonly IDaemonProcess myDaemonProcess;
-    private readonly int myThreshold;
-
-    public ComplexityAnalysisDaemonStageProcess(IDaemonProcess daemonProcess, int threshold)
+    public class ComplexityAnalysisDaemonStageProcess : IDaemonStageProcess
     {
-      myDaemonProcess = daemonProcess;
-      myThreshold = threshold;
+        private readonly IDaemonProcess myDaemonProcess;
+        private readonly int myThreshold;
+
+        public ComplexityAnalysisDaemonStageProcess(IDaemonProcess daemonProcess, int threshold)
+        {
+            myDaemonProcess = daemonProcess;
+            myThreshold = threshold;
+        }
+
+        public void Execute(Action<DaemonStageResult> commiter)
+        {
+            // Getting PSI (AST) for the file being highlighted
+            var sourceFile = myDaemonProcess.SourceFile;
+            var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            if (file == null)
+            return;
+
+            // Running visitor against the PSI
+            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
+            var parserRes = processor.Process();
+            //return graph to show
+            GraphLoader.OnEvent(this, new LoadGraphEventArgs(processor));
+            // Checking if the daemon is interrupted by user activity
+            if (myDaemonProcess.InterruptFlag)
+            throw new ProcessCancelledException();
+
+            var highlightings = (from e in parserRes.Item2 select new HighlightingInfo(e.Item2, new ComplexityWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
+                                from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ComplexityWarning("Unexpected symbol: " + e.Item1 + ".")));
+            // Commit the result into document
+            commiter(new DaemonStageResult(highlightings.ToArray()));
+        }
+
+        protected void F()
+        {
+            //InjectedPsiHolderNode.CreateHolderFor();
+            //InjectedPsiExtensions.GetInjectAt();
+            ////IInjectedPsiProvider
+            //IndependentInjectedPsiProvider
+        }
+
+        public IDaemonProcess DaemonProcess
+        {
+            get { return myDaemonProcess; }
+        }
     }
-
-    public void Execute(Action<DaemonStageResult> commiter)
-    {
-      // Getting PSI (AST) for the file being highlighted
-      var sourceFile = myDaemonProcess.SourceFile;
-      var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
-      if (file == null)
-        return;
-
-      // Running visitor against the PSI
-      var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
-      var parserRes = processor.Process();      
-      // Checking if the daemon is interrupted by user activity
-      if (myDaemonProcess.InterruptFlag)
-        throw new ProcessCancelledException();
-
-      var highlightings = (from e in parserRes.Item2 select new HighlightingInfo(e.Item2, new ComplexityWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
-                           from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ComplexityWarning("Unexpected symbol: " + e.Item1 + ".")));
-      // Commit the result into document
-      commiter(new DaemonStageResult(highlightings.ToArray()));
-    }
-
-      protected void F()
-      {
-          //InjectedPsiHolderNode.CreateHolderFor();
-          //InjectedPsiExtensions.GetInjectAt();
-          ////IInjectedPsiProvider
-          //IndependentInjectedPsiProvider
-      }
-
-    public IDaemonProcess DaemonProcess
-    {
-      get { return myDaemonProcess; }
-    }
-  }
 }

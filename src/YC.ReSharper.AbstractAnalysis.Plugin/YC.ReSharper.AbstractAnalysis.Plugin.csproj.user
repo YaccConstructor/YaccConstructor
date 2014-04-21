@@ -4,6 +4,6 @@
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files %28x86%29\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe</StartProgram>
     <StartArguments>/ReSharper.Plugin YC.ReSharper.AbstractAnalysis.Plugin.dll</StartArguments>
-    <StartWorkingDirectory>I:\projects\yc\recursive-ascent\Bin\Debug\v40\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Users\Александр\recursive-ascent\Bin\Debug\v40</StartWorkingDirectory>
   </PropertyGroup>
 </Project>

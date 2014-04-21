@@ -11,3 +11,11 @@ type InjectedLanguageAttribute(language : string) =
 [<InjectedLanguage("TSQL")>]
 type MyClass() = 
     member this.field = "lalala"
+    
+
+type IParser =
+    abstract NumToString : int -> string
+    abstract TokenToNumber<'a> : 'a -> int //Token -> int
+    abstract TokenData<'a> : 'a -> obj //Token -> Obj
+    abstract Tokenize<'a, 'b> : 'a -> 'b //a -> AbstractParsing.Common.ParserInputGraph<Token>
+    abstract Parse<'a, 'b> : 'a -> 'b

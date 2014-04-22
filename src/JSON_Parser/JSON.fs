@@ -19,9 +19,9 @@ let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
 
 
 type JSONPars = 
-    interface IParser with
-        //member this.Parse() = parse()
+    interface IParser<JSON.Parser.Token,JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression> with
+        member this.Parse (inG) = parse (inG)
         member this.NumToString (int) = JSON.Parser.numToString(int)
-        //member this.TokenData<'Token>() = JSON.Parser.tokenData(Token)
-        //member this.TokenToNumber() = JSON.Parser.tokenToNumber()
-        //member this.Tokenize() = tokenize
+        member this.TokenData(token) = JSON.Parser.tokenData(token)
+        member this.TokenToNumber(token) = JSON.Parser.tokenToNumber(token)
+        member this.Tokenize(inG) = tokenize inG

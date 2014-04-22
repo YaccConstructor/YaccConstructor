@@ -176,6 +176,8 @@ let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
 let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
+let xmlPath = "CalcHighlighting.xml" 
+
 let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = 
     let mutable prev = null
     let mutable curr = null
@@ -222,12 +224,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_1) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ExprNonTermNode("expr")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -236,7 +238,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_expr) 
-# 239 "Calc.yrd.fs"
+# 241 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -245,12 +247,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_ERROR) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ExprNonTermNode("expr")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -259,7 +261,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_expr) 
-# 262 "Calc.yrd.fs"
+# 264 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -269,7 +271,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 272 "Calc.yrd.fs"
+# 274 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -278,14 +280,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_term) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 _rnglr_cycle_res := (
                   
 
                   let parent = new Yard_rule_binExpr_1NonTermNode("yard_rule_binExpr_1")
-                  let children : IAbstractTreeNode list = [H1; H2]
+                  let children : IAbstractTreeNode list = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -294,7 +296,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_1) 
-# 297 "Calc.yrd.fs"
+# 299 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -315,7 +317,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 318 "Calc.yrd.fs"
+# 320 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -324,16 +326,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_termOp) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_term) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -342,7 +344,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 345 "Calc.yrd.fs"
+# 347 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -351,12 +353,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_PLUS) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new TermOpNonTermNode("termOp")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -365,7 +367,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 368 "Calc.yrd.fs"
+# 370 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -374,12 +376,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_MINUS) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new TermOpNonTermNode("termOp")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -388,7 +390,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 391 "Calc.yrd.fs"
+# 393 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -397,12 +399,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_3) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new TermNonTermNode("term")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -411,7 +413,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "calc.yrd"
                : '_rnglr_type_term) 
-# 414 "Calc.yrd.fs"
+# 416 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -420,12 +422,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_ERROR) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new TermNonTermNode("term")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -434,7 +436,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "calc.yrd"
                : '_rnglr_type_term) 
-# 437 "Calc.yrd.fs"
+# 439 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -443,14 +445,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_factor) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 _rnglr_cycle_res := (
                   
 
                   let parent = new Yard_rule_binExpr_3NonTermNode("yard_rule_binExpr_3")
-                  let children : IAbstractTreeNode list = [H1; H2]
+                  let children : IAbstractTreeNode list = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -459,7 +461,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_3) 
-# 462 "Calc.yrd.fs"
+# 464 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -480,7 +482,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 483 "Calc.yrd.fs"
+# 485 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -489,16 +491,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_factorOp) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_factor) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -507,7 +509,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 510 "Calc.yrd.fs"
+# 512 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -516,12 +518,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_MULT) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new FactorOpNonTermNode("factorOp")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -530,7 +532,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 533 "Calc.yrd.fs"
+# 535 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -539,12 +541,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_DIV) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new FactorOpNonTermNode("factorOp")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -553,7 +555,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 556 "Calc.yrd.fs"
+# 558 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -562,12 +564,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_yard_rule_binExpr_5) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new FactorNonTermNode("factor")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -576,7 +578,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 31 "calc.yrd"
                : '_rnglr_type_factor) 
-# 579 "Calc.yrd.fs"
+# 581 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -585,12 +587,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_ERROR) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new FactorNonTermNode("factor")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -599,7 +601,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 31 "calc.yrd"
                : '_rnglr_type_factor) 
-# 602 "Calc.yrd.fs"
+# 604 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -608,14 +610,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_powExpr) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_6) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 _rnglr_cycle_res := (
                   
 
                   let parent = new Yard_rule_binExpr_5NonTermNode("yard_rule_binExpr_5")
-                  let children : IAbstractTreeNode list = [H1; H2]
+                  let children : IAbstractTreeNode list = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -624,7 +626,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_5) 
-# 627 "Calc.yrd.fs"
+# 629 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -645,7 +647,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 648 "Calc.yrd.fs"
+# 650 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -654,16 +656,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_powOp) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_powExpr) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_6) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Yard_rule_yard_many_1_6NonTermNode("yard_rule_yard_many_1_6")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -672,7 +674,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 675 "Calc.yrd.fs"
+# 677 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -681,12 +683,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_POW) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new PowOpNonTermNode("powOp")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -695,7 +697,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 34 "calc.yrd"
                : '_rnglr_type_powOp) 
-# 698 "Calc.yrd.fs"
+# 700 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -704,12 +706,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_NUMBER) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new PowExprNonTermNode("powExpr")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -718,7 +720,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 721 "Calc.yrd.fs"
+# 723 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -727,16 +729,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_LBRACE) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_expr) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_highlight_RBRACE) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new PowExprNonTermNode("powExpr")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -745,7 +747,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 748 "Calc.yrd.fs"
+# 750 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -754,12 +756,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_ERROR) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new PowExprNonTermNode("powExpr")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -768,7 +770,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 771 "Calc.yrd.fs"
+# 773 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -791,7 +793,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_ERROR) 
-# 794 "Calc.yrd.fs"
+# 796 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -814,7 +816,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_PLUS) 
-# 817 "Calc.yrd.fs"
+# 819 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -837,7 +839,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MINUS) 
-# 840 "Calc.yrd.fs"
+# 842 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -860,7 +862,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MULT) 
-# 863 "Calc.yrd.fs"
+# 865 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -883,7 +885,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_DIV) 
-# 886 "Calc.yrd.fs"
+# 888 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -906,7 +908,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_POW) 
-# 909 "Calc.yrd.fs"
+# 911 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -929,7 +931,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 932 "Calc.yrd.fs"
+# 934 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -952,7 +954,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_LBRACE) 
-# 955 "Calc.yrd.fs"
+# 957 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -975,7 +977,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_RBRACE) 
-# 978 "Calc.yrd.fs"
+# 980 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -993,7 +995,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 996 "Calc.yrd.fs"
+# 998 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

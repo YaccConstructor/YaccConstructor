@@ -78,7 +78,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             if numOpt.IsSome 
             then 
                 incr numOpt.Value
-                Some <| new Source.t ("H" + numOpt.Value.Value.ToString())
+                Some <| new Source.t ("h" + numOpt.Value.Value.ToString())
             else None
         newBinding
 
@@ -142,6 +142,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             newElem := getNewElem <| newBinding <| createHighlightRefRule litName
             result := !result @ [!newElem]
 
+        | _ -> failwith "Error in highlighting convertions"
         !result
 
     let processRule (oldRule : Rule.t<Source.t, Source.t>) = 
@@ -159,6 +160,7 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
 
                             changeRule <| oldRule <| newElemList <| List.rev bindingsList
         | t.PRef (_, _) -> oldRule
+        | _ -> failwith "Error in highlighting convertions"
 
     let addHighlightRules() = 
         let mutable res = []

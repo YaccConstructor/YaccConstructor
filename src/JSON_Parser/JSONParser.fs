@@ -159,6 +159,8 @@ let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) =
 let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 
+let xmlPath = "JSONHighlighting.xml" 
+
 let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = 
     let mutable prev = null
     let mutable curr = null
@@ -170,7 +172,7 @@ let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list)
         then parent.SetFirstChild(curr)
         else
             prev.SetNextSibling(curr)
-            curr.SetNextSibling(prev)
+            curr.SetPrevSibling(prev)
     parent.SetLastChild(curr)
     parent
 
@@ -205,12 +207,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_STRING1) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -219,7 +221,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 222 "JSONParser.fs"
+# 224 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -228,12 +230,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_NUMBER) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -242,7 +244,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 245 "JSONParser.fs"
+# 247 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -251,12 +253,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_objects) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -265,7 +267,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 268 "JSONParser.fs"
+# 270 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -274,12 +276,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_array1) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -288,7 +290,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 291 "JSONParser.fs"
+# 293 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -297,12 +299,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_TRUE) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -311,7 +313,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 314 "JSONParser.fs"
+# 316 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -320,12 +322,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_FALSE) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -334,7 +336,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 337 "JSONParser.fs"
+# 339 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -343,12 +345,12 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_KW_NULL) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               _rnglr_cycle_res := (
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [H1]
+                let children : IAbstractTreeNode list = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -357,7 +359,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 360 "JSONParser.fs"
+# 362 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -367,7 +369,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 370 "JSONParser.fs"
+# 372 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -376,16 +378,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_list_1) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_highlight_EMPTY) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Array1NonTermNode("array1")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -394,7 +396,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "JSON.yrd"
                : '_rnglr_type_array1) 
-# 397 "JSONParser.fs"
+# 399 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -415,7 +417,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 418 "JSONParser.fs"
+# 420 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -424,14 +426,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_value) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_2) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 _rnglr_cycle_res := (
                   
 
                   let parent = new Yard_rule_list_1NonTermNode("yard_rule_list_1")
-                  let children : IAbstractTreeNode list = [H1; H2]
+                  let children : IAbstractTreeNode list = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -440,7 +442,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 443 "JSONParser.fs"
+# 445 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -461,7 +463,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 464 "JSONParser.fs"
+# 466 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -470,16 +472,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_value) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_2) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -488,7 +490,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 491 "JSONParser.fs"
+# 493 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -497,16 +499,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_STRING1) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_highlight_KW_COLON) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_value) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new PairNonTermNode("pair")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -515,7 +517,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "JSON.yrd"
                : '_rnglr_type_pair) 
-# 518 "JSONParser.fs"
+# 520 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -524,16 +526,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_list_3) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_highlight_EMPTY) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new ObjectsNonTermNode("objects")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -542,7 +544,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "JSON.yrd"
                : '_rnglr_type_objects) 
-# 545 "JSONParser.fs"
+# 547 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -563,7 +565,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 566 "JSONParser.fs"
+# 568 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -572,14 +574,14 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_pair) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_yard_rule_yard_many_1_4) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 _rnglr_cycle_res := (
                   
 
                   let parent = new Yard_rule_list_3NonTermNode("yard_rule_list_3")
-                  let children : IAbstractTreeNode list = [H1; H2]
+                  let children : IAbstractTreeNode list = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -588,7 +590,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 591 "JSONParser.fs"
+# 593 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -609,7 +611,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 612 "JSONParser.fs"
+# 614 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -618,16 +620,16 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
           (
             let _rnglr_cycle_res = ref []
             ((unbox _rnglr_children.[0]) : '_rnglr_type_highlight_EMPTY) 
-             |> List.iter (fun (H1) -> 
+             |> List.iter (fun (h1) -> 
               ((unbox _rnglr_children.[1]) : '_rnglr_type_pair) 
-               |> List.iter (fun (H2) -> 
+               |> List.iter (fun (h2) -> 
                 ((unbox _rnglr_children.[2]) : '_rnglr_type_yard_rule_yard_many_1_4) 
-                 |> List.iter (fun (H3) -> 
+                 |> List.iter (fun (h3) -> 
                   _rnglr_cycle_res := (
                     
 
                     let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
-                    let children : IAbstractTreeNode list = [H1; H2; H3]
+                    let children : IAbstractTreeNode list = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -636,7 +638,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 639 "JSONParser.fs"
+# 641 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -649,11 +651,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new STRING1TermNode("STRING1")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new STRING1TermNode("STRING1", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -674,11 +674,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new NUMBERTermNode("NUMBER")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new NUMBERTermNode("NUMBER", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -686,7 +684,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 689 "JSONParser.fs"
+# 687 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -699,11 +697,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new KW_TRUETermNode("KW_TRUE")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new KW_TRUETermNode("KW_TRUE", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -711,7 +707,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_TRUE) 
-# 714 "JSONParser.fs"
+# 710 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -724,11 +720,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new KW_FALSETermNode("KW_FALSE")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new KW_FALSETermNode("KW_FALSE", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -736,7 +730,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_FALSE) 
-# 739 "JSONParser.fs"
+# 733 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -749,11 +743,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new KW_NULLTermNode("KW_NULL")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new KW_NULLTermNode("KW_NULL", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -761,7 +753,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_NULL) 
-# 764 "JSONParser.fs"
+# 756 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -774,11 +766,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new EMPTYTermNode("EMPTY")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new EMPTYTermNode("EMPTY", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -786,7 +776,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_EMPTY) 
-# 789 "JSONParser.fs"
+# 779 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -799,11 +789,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let res = new KW_COLONTermNode("KW_COLON")
                 let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
                 let pos = calculatePos temp
-                res.SetPositions (pos)
-                res
+                new KW_COLONTermNode("KW_COLON", pos)
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -811,7 +799,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_COLON) 
-# 814 "JSONParser.fs"
+# 802 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -829,7 +817,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 832 "JSONParser.fs"
+# 820 "JSONParser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

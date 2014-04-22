@@ -15,7 +15,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 return EmptyList<IDaemonStageProcess>.InstanceList;
             }
-            return new List<IDaemonStageProcess> { new IdentifierHighlighterProcess(process, settings) };
+            return new List<IDaemonStageProcess> { new IdentifierHighlighterProcess(process, settings, processKind) };
         }
     }
 }

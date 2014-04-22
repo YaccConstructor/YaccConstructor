@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TSQLHighlighting")]
+[assembly: AssemblyTitle("CalcHighlighting")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TSQLHighlighting")]
+[assembly: AssemblyProduct("CalcHighlighting")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d6eb2b2c-c4b8-444a-9b2a-e880eb29f500")]
+[assembly: Guid("a0385bb5-14b6-48be-94cd-cf281b1ba83c")]
 
 // Version information for an assembly consists of the following four values:
 //

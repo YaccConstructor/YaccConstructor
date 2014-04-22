@@ -40,7 +40,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive needHighlighting =
+        positionType fullPath output dummyPos caseSensitive (highlightingOpt : string option)=
     let tab = 4
 
     let rules = grammar.rules
@@ -147,7 +147,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             incr num
             let name = Source.toString name
             let value = 
-                if name <> "error" || needHighlighting
+                if name <> "error" || highlightingOpt.IsSome
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
                 else sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
             value + (printArgsCallOpt args)
@@ -296,7 +296,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
     let mainHighlightSemantic () = 
-        let printAddSemantic () = 
+        let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
+        
+        let printAddSemantic = 
             let res  = new System.Text.StringBuilder()
 
             let inline print (x : 'a) =
@@ -325,7 +327,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printBrInd 1 "parent"
             res.ToString()
 
-        let printCalculatePos () = 
+        let printCalculatePos = 
             let res  = new System.Text.StringBuilder()
 
             let inline print (x : 'a) =
@@ -357,8 +359,10 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printBrInd 1 "ranges"
             res.ToString()
 
-        if needHighlighting 
-        then wordL <| System.String.Concat [|printAddSemantic(); System.Environment.NewLine; printCalculatePos()|] 
+        if highlightingOpt.IsSome 
+        then wordL <| System.String.Concat [| printXmlName; System.Environment.NewLine; 
+                                                printAddSemantic; System.Environment.NewLine; 
+                                                printCalculatePos|] 
         else wordL ""
     
     [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]

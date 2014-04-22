@@ -7,11 +7,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         private IDaemonProcess myProcess;
 
-        //public MySmartResolverProcess(IDaemonProcess process, ITreeNode treeNode)
-        //{
-        //    myProcess = process;
-        //}
-
         public MySmartResolverProcess(IDaemonProcess process)
         {
             myProcess = process;

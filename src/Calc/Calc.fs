@@ -25,7 +25,7 @@ let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
     
     fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
-    
+
 let args = 
     {
         tokenToRange = fun _ -> 0UL,0UL
@@ -34,4 +34,6 @@ let args =
         filterEpsilons = true
     }
 
+let printAstToDot ast name = defaultAstToDot ast name
+let xmlPath = xmlPath
 let translate ast errors = translate args ast errors

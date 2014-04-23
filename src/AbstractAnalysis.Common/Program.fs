@@ -13,9 +13,9 @@ type MyClass() =
     member this.field = "lalala"
     
 
-type IParser<'a,'b> =
+type IInjectedLanguageProcessor<'token,'expression> =
     abstract NumToString : int -> string
-    abstract TokenToNumber: 'a -> int //Token -> int
-    abstract TokenData: 'a -> obj //Token -> Obj
-    abstract Tokenize : AbstractLexer.Common.LexerInputGraph<'b> -> AbstractParsing.Common.ParserInputGraph<'a>
-    abstract Parse : AbstractParsing.Common.ParserInputGraph<'a> -> Yard.Generators.RNGLR.Parser.ParseResult<'a>
+    abstract TokenToNumber: 'token -> int
+    abstract TokenData: 'token -> obj
+    abstract Tokenize : AbstractLexer.Common.LexerInputGraph<'expression> -> AbstractParsing.Common.ParserInputGraph<'token>
+    abstract Parse : AbstractParsing.Common.ParserInputGraph<'token> -> Yard.Generators.RNGLR.Parser.ParseResult<'token>

@@ -19,7 +19,7 @@ match run path parser with
 | Parser.Error (num, tok, message, debug, _),_ ->
     printfn "Error in position %d on Token %A: %s" num tok message
     debug.drawGSSDot "out.dot"
-| Parser.Success (tree, _), tokens ->
+| Parser.Success (tree, _, _), tokens ->
     tree.PrintAst()
     RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
     //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)

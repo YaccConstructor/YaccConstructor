@@ -1,4 +1,5 @@
-﻿//  Parser.fs contains methods, needed to build an AST
+﻿
+//  Parser.fs contains methods, needed to build an AST
 //
 //  Copyright 2011-2012 Avdyukhin Dmitry
 //
@@ -144,7 +145,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         new TokensInfo<_>(Array.map (fun (t,nl) -> new TokenWithInfo<_>(t,nl, parserSource.TokenToNumber t))ts,cl)
     
     let pushesMap = new Dictionary<_,ResizeArray<_>>(10)
-
+    let rangeToSkip = ref (-1,-1)
     let enum = tokens.GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
     let startState = 0
@@ -157,7 +158,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     // If input stream is empty or consists only of EOF token
     if not <| enum.MoveNext() || Array.forall (fun t -> parserSource.EofIndex = parserSource.TokenToNumber (fst t)) (snd enum.Current) then
         if parserSource.AcceptEmptyInput then
-            Success (new Tree<_>(null, getEpsilon startNonTerm, null), new Dictionary<_,_>())
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], new Dictionary<_,_>())
         else
             Error (0, Unchecked.defaultof<_>, "This grammar cannot accept empty string",
                     {
@@ -169,6 +170,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         // Currently processed token
         let curTokens = processChunk enum.Current |> ref
         let curLvl = ref (!curTokens).CurLvl
+        let errorLvl = ref -1
         let isEOF = ref false
         /// Here all tokens from the input will be collected
         let tokens = new BlockResizeArray<_>()
@@ -342,8 +344,13 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let newAstNodes = curTokens.Value.Tokens |> Array.mapi (fun i _ -> tokens.Count + i |> box)
             let oldTokens = !curTokens
             curTokens.Value.Tokens |> Array.iter (fun t -> tokens.Add t.Token)
-            if enum.MoveNext() then
-                curTokens := processChunk enum.Current
+            let flg = 
+                //enum.MoveNext() |> ref
+                ref false
+            //let actualVertices = usedStates |> Seq.map (fun x -> stateToVertex.[x].Level) |> Array.ofSeq
+            while (flg := enum.MoveNext(); !flg) && fst (!rangeToSkip) < (fst enum.Current) && (fst enum.Current) < snd (!rangeToSkip) do printfn "sckiped %A"  (fst enum.Current)
+            if !flg then
+                curTokens := processChunk enum.Current                
                 curLvl := (!curTokens).CurLvl
                 isEOF := 
                     curTokens.Value.Tokens.Length = 0 
@@ -382,24 +389,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let errors = new ResizeArray<_>()
         
         let restorePushes () =
-          for vertex in usedStates do
-              stateToVertex.[vertex] <- null
-          usedStates.Clear()
-          for oldPushes,newAstNode in pushesMap.[!curLvl] do
-              for (vertex, state) in oldPushes do
-                  let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                  addSimpleEdge vertex newAstNode simpleEdges.[state]
-          pushesMap.Remove(!curLvl) |> ignore
+          if pushesMap.ContainsKey !curLvl
+          then
+              for vertex in usedStates do
+                  stateToVertex.[vertex] <- null
+              usedStates.Clear()
+              for oldPushes,newAstNode in pushesMap.[!curLvl] do
+                  for (vertex, state) in oldPushes do
+                      let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
+                      addSimpleEdge vertex newAstNode simpleEdges.[state]
+              pushesMap.Remove(!curLvl) |> ignore
 
         let erTok () = 
-            let shiftBase = tokens.Count - (!pushesBackup).Length 
-            let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
+            //let shiftBase = tokens.Count - (!pushesBackup).Length 
+            //let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (tokens.Item(shiftBase + i)) else None)
+            rangeToSkip := !curLvl, try pushesMap.Keys |> Seq.min with _ -> !curLvl
+            let x = !pushesBackup |> Array.mapi (fun i (a:Stack<_>) -> if a.Count = 0  then Some (curTokens.Value.Tokens.[i].Token) else None)
             x |> Array.choose id
             |> errors.AddRange
             //(try curTokens.Value.Tokens.[0].Token with _ -> tokens.[tokens.Count-1])
 
         while not !isEnd && not wasError do
-            print @"dot\stack_1_%A"
+            print @"dot\stack_%A_1"
             if usedStates.Count = 0 && reductions.Count = 0
             then
                 if pushesMap.Count = 0
@@ -408,43 +419,28 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                   errorList <- errInfo :: errorList
                   wasError <- true
                 else
-                    //pushesBackup := !pushes
-                    //erTok()
+                    pushesBackup := !pushes
+                    erTok()
                     curLvl := pushesMap.Keys |> Seq.min
                     restorePushes ()
-                    
+                    makeReductions ()
+                    attachEdges()
+                    if not !isEOF then shift()
             else
-                print @"dot\stack_2_%A"
+                print @"dot\stack_%A_2"
                 if !isEOF
                 then
-                    try 
-                        for vertex in usedStates do
-                            stateToVertex.[vertex] <- null
-                        usedStates.Clear()
-                        for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-                            for (vertex, state) in oldPushes do
-                                let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                                addSimpleEdge vertex newAstNode simpleEdges.[state]
-                        pushesMap.Remove(!curLvl) |> ignore
-                        makeReductions()
-                        attachEdges()
-                        print @"dot\stack_5_%A"
-                    with _ -> () 
+                    restorePushes ()
+                    makeReductions()
+                    attachEdges()
+                    print @"dot\stack_%A_3"               
                     isEnd := true
                 else
-                    print @"dot\stack_3_%A"
+                    print @"dot\stack_%A_4"
                     if !curLvl > 0
                     then
                         if pushesMap.ContainsKey !curLvl
-                        then
-                            for vertex in usedStates do
-                                stateToVertex.[vertex] <- null
-                            usedStates.Clear()
-                            for  oldPushes,newAstNode in pushesMap.[!curLvl] do
-                                for (vertex, state) in oldPushes do
-                                    let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode)|]
-                                    addSimpleEdge vertex newAstNode simpleEdges.[state]
-                            pushesMap.Remove(!curLvl) |> ignore
+                        then restorePushes ()
                         else
                             for vertex in usedStates do
                                 stateToVertex.[vertex] <- null
@@ -452,20 +448,21 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     makeReductions ()
                     attachEdges()
                     let bad, good = !pushes |> Array.partition (fun x -> x.Count = 0)
-                    if bad.Length > 0 
+                    if bad.Length > 0 || good.Length = 0
                     then
                         //()
                         pushesBackup := !pushes 
                         erTok ()
-                    if good.Length = 0
-                    then 
-                        //wasError <- true
-                        pushesBackup := !pushes
-                        if pushesMap.Count > 0 
-                        then
-                          curLvl := pushesMap.Keys |> Seq.min
-                          restorePushes ()
-                        else wasError <- true
+//                    if good.Length = 0
+//                    then 
+//                        //wasError <- true
+//                        pushesBackup := !pushes
+//                        erTok ()
+//                        if pushesMap.Count > 0 
+//                        then ()
+//                          //curLvl := pushesMap.Keys |> Seq.min
+//                          //restorePushes ()
+//                        //else wasError <- true
                     shift ()
 
         let isAcceptState() = 
@@ -521,4 +518,4 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 Error (!curInd, errors.ToArray(), "Input was fully processed, but it's not complete correct string.", debugFuns (), new Dictionary<_,_>())
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success(new Tree<_>(tokens.ToArray() , res, parserSource.Rules), new Dictionary<_,_>())
+                Success(new Tree<_>(tokens.ToArray() , res, parserSource.Rules), errors.ToArray(), new Dictionary<_,_>())

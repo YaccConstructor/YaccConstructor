@@ -47,13 +47,6 @@
     <Compile Include="Array1NonTermNode.cs" />
     <Compile Include="EMPTYTermNode.cs" />
     <Compile Include="ErrorNonTermNode.cs" />
-    <Compile Include="Highlight_EMPTYNonTermNode.cs" />
-    <Compile Include="Highlight_KW_COLONNonTermNode.cs" />
-    <Compile Include="Highlight_KW_FALSENonTermNode.cs" />
-    <Compile Include="Highlight_KW_NULLNonTermNode.cs" />
-    <Compile Include="Highlight_KW_TRUENonTermNode.cs" />
-    <Compile Include="Highlight_NUMBERNonTermNode.cs" />
-    <Compile Include="Highlight_STRING1NonTermNode.cs" />
     <Compile Include="KW_COLONTermNode.cs" />
     <Compile Include="KW_FALSETermNode.cs" />
     <Compile Include="KW_NULLTermNode.cs" />

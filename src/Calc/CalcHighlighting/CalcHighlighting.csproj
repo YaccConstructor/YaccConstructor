@@ -50,15 +50,6 @@
     <Compile Include="ExprNonTermNode.cs" />
     <Compile Include="FactorNonTermNode.cs" />
     <Compile Include="FactorOpNonTermNode.cs" />
-    <Compile Include="Highlight_DIVNonTermNode.cs" />
-    <Compile Include="Highlight_ERRORNonTermNode.cs" />
-    <Compile Include="Highlight_LBRACENonTermNode.cs" />
-    <Compile Include="Highlight_MINUSNonTermNode.cs" />
-    <Compile Include="Highlight_MULTNonTermNode.cs" />
-    <Compile Include="Highlight_NUMBERNonTermNode.cs" />
-    <Compile Include="Highlight_PLUSNonTermNode.cs" />
-    <Compile Include="Highlight_POWNonTermNode.cs" />
-    <Compile Include="Highlight_RBRACENonTermNode.cs" />
     <Compile Include="LBRACETermNode.cs" />
     <Compile Include="MINUSTermNode.cs" />
     <Compile Include="MULTTermNode.cs" />

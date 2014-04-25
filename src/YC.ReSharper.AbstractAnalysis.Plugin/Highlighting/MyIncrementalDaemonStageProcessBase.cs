@@ -19,8 +19,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     public abstract class MyIncrementalDaemonStageProcessBase : MyDaemonStageProcessBase
     {
         private readonly IDaemonProcess myProcess;
-        //private readonly IContextBoundSettingsStore mySettingsStore;
         private readonly DaemonProcessKind myProcessKind;
+        private YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor ycProcessor;
 
         protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
             : base(process, settingsStore)
@@ -30,39 +30,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myProcessKind = processKind;
         }
 
-        private void UpdateForest()
+        private void UpdateYCProcessor()
         {
-            var sourceFile = myProcess.SourceFile;
+            // Getting PSI (AST) for the file being highlighted
+            var sourceFile = myDaemonProcess.SourceFile;
             var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
             if (file == null)
                 return;
 
             // Running visitor against the PSI
-            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
-            processor.Process();
-            var fSharpforest = processor.TreeNode;
+            ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
+            ycProcessor.Process();
 
-            if (fSharpforest == null)
-            {
-                return;
-            }
-
-            var forest = new List<IAbstractTreeNode>();
-            foreach (IEnumerable<IAbstractTreeNode> obj in fSharpforest)
-            {
-                forest.AddRange(obj);
-            }
-
-            if (!forest.Any())
-                return;
-
-
-            TreeNodeHolder.Forest = forest;
-            TreeNodeHolder.ParseFile(processor.XmlPath);
-
-            // Checking if the daemon is interrupted by user activity
-            //if (myProcess.InterruptFlag)
-                //throw new ProcessCancelledException();
+            TreeNodeHolder.ParseFile(ycProcessor.XmlPath);
         }
 
         public override void Execute(Action<DaemonStageResult> commiter)
@@ -70,12 +50,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
                 return;
 
-            UpdateForest();
-
             Action globalHighlighter = () =>
             {
                 var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-                ProcessThisAndDescendants(File, new ProcessorBase(this, consumer));
+                ProcessThisAndDescendants(new ProcessorBase(this, consumer));
                 commiter(new DaemonStageResult(consumer.Highlightings) {Layer = 1});
             };
             
@@ -88,14 +66,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
-        private void ProcessThisAndDescendants(IFile file, IRecursiveElementProcessor processor)
+        private void ProcessThisAndDescendants(IRecursiveElementProcessor processor)
         {
-            if (TreeNodeHolder.Forest == null)
-                return;
+            UpdateYCProcessor();
 
-            foreach (IAbstractTreeNode tree in TreeNodeHolder.Forest)
+            var fsTree = ycProcessor.GetNextForest<IEnumerable<IAbstractTreeNode>>();
+            // fsTree is List<ITreeNode>. It can be null.
+            while (fsTree != null)
             {
+                var tree = (fsTree.ToList())[0];
                 ProcessDescendants(tree, processor);
+                fsTree = ycProcessor.GetNextForest<IEnumerable<IAbstractTreeNode>>();
             }
         }
 

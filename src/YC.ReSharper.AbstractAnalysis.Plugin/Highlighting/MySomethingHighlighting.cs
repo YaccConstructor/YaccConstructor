@@ -11,7 +11,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     internal class MySomethingHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
     {
         private string attributeId;
-        //private const string AtributeId = HighlightingAttributeIds.CONSTANT_IDENTIFIER_ATTRIBUTE;
         private readonly ITreeNode myElement;
 
         public MySomethingHighlighting(ITreeNode element)

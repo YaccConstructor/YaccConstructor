@@ -203,6 +203,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     member this.Order = order
     member this.Root = root
     member this.RulesCount = rules.GetLength(0)
+    member this.TokensCount = tokens.Length
 
     static member inline private smaller pos : (obj -> _) = function
         | :? int -> true
@@ -622,26 +623,23 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             | _ -> failwith ""
         printAst 0 root
 
-    member this.GetForest () = 
-        let processed : bool[] = Array.zeroCreate <| tokens.Length
+
+    member this.GetNextTree (unprocessed : int list) = 
+        let processed = [| 
+                            for i = 0 to tokens.Length - 1 do
+                                yield not <| List.exists (fun j -> j = i) unprocessed
+                        |]
         let rootFamily = 
             match root with
             | :? AST as ast -> ast
             | :? int as x when x < 0 -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
-        let getUnprocessedTokens() = 
-            let tokArr = [| for i=0 to processed.Length-1 do yield i |]
-            Array.filter (fun i -> not processed.[i]) tokArr
-            |> Array.toList
-
         /// choose family from AST which contains the more unprocessed tokens
         let handleAST (ast : AST) = 
             if ast.other = null
             then ast.first
-            else
-                let unprocessed = getUnprocessedTokens()
-                
+            else                
                 let getUnprocessedCount family = 
                     let familyLeaves = this.getTokensFromFamily family
                     let newToksList = 
@@ -674,15 +672,20 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             family.nodes.doForAll <| fun child -> processNode child
             box <| new AST (new Family (family.prod, new Nodes(children.ToArray())), null)
 
-        let mutable forest = []
-        let mutable unprocessed = getUnprocessedTokens()
-        while unprocessed.Length > 0 do
-            let tree = processFamily rootFamily.first
-            // now parameter 'tokens' is all tokens rather than tokens from new tree
-            forest <- new Tree<_> (tokens, tree, rules) :: forest
-            unprocessed <- getUnprocessedTokens()
+        let tree = processFamily rootFamily.first
+
+        ///
+        let finalUnprocessed = 
+            let mutable res = [] 
+            for i = 0 to processed.Length - 1 do
+                if not processed.[i] 
+                then res <- i :: res
+            List.rev res
+
+        // now parameter 'tokens' is all tokens rather than tokens from new tree
+        let newTree = new Tree<_> (tokens, tree, rules)
         
-        List.rev forest
+        newTree, finalUnprocessed
 
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =

@@ -19,8 +19,15 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
-    let mutable treeNode = []
+//    let mutable treeNode = []
     let mutable xmlPath = ""
+    let mutable forest = []
+    let mutable language = Calc
+    
+    ///Needs for tree generation for highlighting
+    let mutable unprocessed = []
+    let mutable count = 0
+
     let defLang (n:ITreeNode) =
         match n with 
         | :? IInvocationExpression as m ->
@@ -43,16 +50,8 @@ type Processor(file) =
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success (ast, errors) ->
-
-//                printer ast "AST_ORIGINAL.dot"
-                let forest = ast.GetForest()
-//                let count = ref 0
-//                List.iter (fun tree -> 
-//                    incr count
-//                    printer tree <| sprintf "calc_%d.dot" !count
-//                    ) forest
-                treeNode <- treeNode @ List.map (fun tree -> translate tree errors) forest
+             | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> 
+                    forest <- [ast, errors] @ forest
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
             
@@ -135,16 +134,41 @@ type Processor(file) =
                 match lang with
                 | Calc -> 
                     xmlPath <- Calc.xmlPath
+                    language <- Calc
                     processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
-                | TSQL -> 
+                (*| TSQL -> 
                     xmlPath <- TSQL.xmlPath
                     processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
                 | JSON -> 
                     xmlPath <- JSON.xmlPath
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot*)
             )
 
         lexerErrors, parserErrors
 
-    member this.TreeNode = List.toArray treeNode
+//    member this.TreeNode = List.toArray treeNode
     member this.XmlPath = xmlPath
+    
+    member this.GetNextForest() = 
+        let translate = 
+            match language with
+            | Calc -> Calc.translate
+            | JSON -> JSON.translate
+            | TSQL -> TSQL.translate
+
+        if forest.Length <= count 
+        then null
+        else 
+            let mutable curAst, errors = List.nth forest count 
+            let mutable unproc = 
+                if unprocessed.Length = 0
+                then Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
+                else unprocessed
+            
+            let nextTree, unproc = curAst.GetNextTree unproc
+            if unproc.Length = 0
+            then 
+                count <- count + 1
+            unprocessed <- unproc
+            
+            translate nextTree errors

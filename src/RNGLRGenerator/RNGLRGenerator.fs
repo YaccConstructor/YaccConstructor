@@ -130,7 +130,8 @@ type RNGLR() =
                 let mutable tokensAndLits = []
                 for i = 0 to indexator.nonTermCount - 1 do
                     let prefix = toClassName <| indexator.indexToNonTerm i
-                    generateFile <| prefix + "NonTermNode"
+                    if not <| prefix.Contains ("Highlight_")
+                    then generateFile <| prefix + "NonTermNode"
 
                 for i = indexator.termsStart to indexator.termsEnd do
                     let prefix = toClassName <| grammar.indexator.indexToTerm i

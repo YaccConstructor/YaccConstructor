@@ -18,19 +18,8 @@ type Label =
         result 
     new (rule : int,position : int) = {Rule = ref rule; Position = ref position} 
 
-//[<Struct>]
-//type Label = 
-//    val mutable Rule     : int
-//    val mutable Position : int
-//    static member  Equal (label1 : Label) (label2 : Label) =
-//        let mutable result = true
-//        if label1.Rule <> label2.Rule || label1.Position <> label2.Position then result <- false
-//        result 
-//    new (rule ,position) = {Rule = rule; Position = position} 
-
-
 type GSSNode = 
-    val Index : int   
+    val Index  : int   
     val Value  : Label 
     static member  Equal (node1 : GSSNode) (node2 : GSSNode) =
         let mutable result = true
@@ -58,20 +47,20 @@ type GSS (node, len) =
     member this.EdgeSet = edgeSet
 
 type Context =
-    val Index    : int
-    val LabelC   : Label
-    val Node     : GSSNode
+    val Index    : int  //index in the input stream
+    val Label    : Label //current label
+    val Node     : GSSNode //current stack
     static member  Equal (con1:Context) (con2:Context) =
         let mutable result = true
-        if con1.Index <> con2.Index || con1.LabelC <> con2.LabelC || not (GSSNode.Equal con1.Node con2.Node) then result <- false
+        if con1.Index <> con2.Index || con1.Label <> con2.Label || not (GSSNode.Equal con1.Node con2.Node) then result <- false
         result 
-    new (index, label, node) = {Index = index; LabelC = label; Node = node}
+    new (index, label, node) = {Index = index; Label = label; Node = node}
 
 type ParseResult<'s> =
     | Success of 's
     | Error of 's
 
-let containsContext (set:Queue<Context>) (context:Context) =
+let containsContext (set : Queue<Context>) (context : Context) =
     let mutable result = false
     for curCon in set do
         if Context.Equal curCon context 
@@ -82,7 +71,7 @@ let containsContext (set:Queue<Context>) (context:Context) =
 let containsContextParams (set:IEnumerable<Context>) label node index = 
     let mutable result = false
     for curCon in set do
-        if curCon.Index = index && Label.Equal curCon.LabelC label && GSSNode.Equal curCon.Node node 
+        if curCon.Index = index && Label.Equal curCon.Label label && GSSNode.Equal curCon.Node node 
         then 
             result <- true
     result
@@ -118,21 +107,21 @@ type Incrementor(delta) =
         i <- i - delta
     
 
-let buildAst<'TokenType> (parserSourceGLL : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
+let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let enum = tokens.GetEnumerator()
     let inputLength = Seq.length tokens
-    let startNonTerm = parserSourceGLL.LeftSide.[parserSourceGLL.StartRule]
-    let nonTermsCountLimit = 1 + (Array.max parserSourceGLL.LeftSide)
+    let startNonTerm = parser.LeftSide.[parser.StartRule]
+    let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let getEpsilon =
 
          let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i-1))
          fun i -> epsilons.[i]
     // Currently processed token
    // let curToken = ref enum.Current
-    //let curNum = ref (parserSourceGLL.TokenToNumber enum.Current)
+    //let curNum = ref (parser .TokenToNumber enum.Current)
     // If input stream is empty or consists only of _EOF token
-    if not <| enum.MoveNext() || parserSourceGLL.IndexEOF = parserSourceGLL.TokenToNumber enum.Current then
-        if parserSourceGLL.AcceptEmptyInput then
+    if not <| enum.MoveNext() || parser.IndexEOF = parser.TokenToNumber enum.Current then
+        if parser.AcceptEmptyInput then
             Success ("UIIII")
         else
             Error ("UAAAA")     
@@ -142,17 +131,14 @@ let buildAst<'TokenType> (parserSourceGLL : ParserSourceGLL<'TokenType>) (tokens
         let tokens = Seq.toArray tokens
         let setU = Array.create tokens.Length List.empty<Context>
         let setR = new Queue<Context>();   // множество всех контекстов
-        let setP = new Queue<GSSNode>();   //множество для потенциально незавершаемых попов 
-//initialize different necessary values       
+        let setP = new Queue<GSSNode>();   //множество для потенциально незавершаемых попов       
         let currentIndex = ref 0
         let currentLabel = ref <| new Label(0, 0);
         let startLabel = new Label(0, 0);
-        let currentGSSNodeName = ref 0
-        let startGSSNode = new GSSNode(!currentGSSNodeName,!currentLabel);
-        let currentGSSNode = ref <| new GSSNode(!currentGSSNodeName,!currentLabel);
+        let startGSSNode = new GSSNode(!currentIndex,!currentLabel);
+        let currentGSSNode = ref <| new GSSNode(!currentIndex,!currentLabel);
         let gss =  new GSS(startGSSNode, tokens.Length)
-        let currentContextName = ref 0
-        let currentContext = ref <| new Context(!currentContextName,!currentLabel,!currentGSSNode)
+        let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode)
 
         setR.Enqueue(!currentContext)
         
@@ -175,8 +161,7 @@ let buildAst<'TokenType> (parserSourceGLL : ParserSourceGLL<'TokenType>) (tokens
             then
                 setP.Enqueue node
                 for edge in gss.EdgeSet do
-                    if GSSNode.Equal edge.Src node 
-                    then
+                    if GSSNode.Equal edge.Src node then
                         addContext node.Value edge.Dst index  
         
         let updateGSS (label:Label) (index : int) (node:GSSNode) =
@@ -189,33 +174,33 @@ let buildAst<'TokenType> (parserSourceGLL : ParserSourceGLL<'TokenType>) (tokens
                 gss.AddEdge (new GSSEdge (newNode, node)) 
         
 //        Success ("Test")        
-        let rec dispatcher () =  
+        let rec dispatcher () =   
             if setR.Count <> 0 then
                 currentContext := setR.Dequeue()
                 currentIndex := currentContext.Value.Index
                 currentGSSNode := currentContext.Value.Node
-                currentLabel := currentContext.Value.LabelC
+                currentLabel := currentContext.Value.Label
                 processing()
-            elif containsContextParams setU.[inputLength] startLabel  startGSSNode inputLength then 
+            elif containsContextParams setU.[inputLength-1] startLabel  startGSSNode inputLength then 
                 Success ("UIIII") else Error ("fail")        
         and processing () = 
-            let curInd = currentIndex
-            if Array.length parserSourceGLL.Rules.[!currentLabel.Value.Rule]  <> !currentLabel.Value.Position then
-                if parserSourceGLL.NumIsTerminal parserSourceGLL.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position] then 
-                   incrementor.Increment(currentLabel.Value.Position)
-                   currentIndex := !currentIndex+1
-                elif parserSourceGLL.NumIsNonTerminal parserSourceGLL.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position] then 
-                    incrementor.Decrement currentLabel.Value.Rule
+            let curInd = !currentIndex 
+            let curToken = parser.TokenToNumber tokens.[curInd]
+            let curSymbol = parser.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position]
+            if Array.length parser.Rules.[!currentLabel.Value.Rule]  <> !currentLabel.Value.Position then
+                if parser.NumIsTerminal curSymbol then
+                    if curToken = curSymbol then
+                        incrementor.Increment(currentLabel.Value.Position)
+                        currentIndex := !currentIndex+1
+                        pop !currentContext !currentGSSNode !currentIndex
+                elif parser.NumIsNonTerminal parser.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position] then 
                     let mutable index = !currentLabel.Value.Rule
-                    index <- (index*(parserSourceGLL.IndexatorFullCount))
+                    index <- (index*(parser.IndexatorFullCount))
                     index <- index + !currentLabel.Value.Position
-                    if Array.length parserSourceGLL.Table.[index] <> 0 then
-                        incrementor.Decrement currentLabel.Value.Rule
-                        let mutable index= !currentLabel.Value.Rule
-                        index <- index * parserSourceGLL.IndexatorFullCount
-                        index <- index + !currentLabel.Value.Position
-                        for rulesN in parserSourceGLL.Table.[index] do
-                            addContextRulePosition rulesN 0 !currentGSSNode !currentIndex
+                    if Array.length parser.Table.[index] <> 0 then
+                        let position = 0
+                        for rulesN in parser.Table.[index] do
+                            addContextRulePosition rulesN position !currentGSSNode !currentIndex
             else 
                 pop !currentContext !currentGSSNode !currentIndex
             dispatcher ()

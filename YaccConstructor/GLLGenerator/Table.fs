@@ -4,11 +4,7 @@ open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR
 
-
-
-type Table (grammar : FinalGrammar) =
-    //let nonTermToIndex nTrm = 
-    //let termToIndex =     
+type Table (grammar : FinalGrammar) =   
     let getFollowSets  =  
         let nonTermsCount = grammar.indexator.nonTermCount
         let followSets = Array.create nonTermsCount Set.empty 
@@ -33,71 +29,38 @@ type Table (grammar : FinalGrammar) =
                     if grammar.indexator.isNonTerm currentSymbol
                     then previousNonTerms <- currentSymbol::previousNonTerms
                 List.iter (addElementsToSet followSets.[currentRuleLeft]) previousNonTerms
-        followSets 
-
-//    let getFirstSets =
-//        let result = Array.create grammar.rules.rulesCount Set.empty
-//        for i = 0 to grammar.rules.rulesCount - 1 do
-//            let rightSide = grammar.rules.rightSide i
-//            let mutable condition = true
-//            let mutable j = 0
-//            let mutable curFirst = result.[i]
-//            while condition do
-//            if j <= Array.length rightSide - 1 then
-//                if grammar.canInferEpsilon.[rightSide.[j]] then 
-//                    curFirst <- Set.union curFirst (grammar.firstSet.[rightSide.[j]])
-//                    j <- j + 1 
-//                else 
-//                    let temp = grammar.firstSet.[rightSide.[j]]
-//                    curFirst <- Set.union curFirst grammar.firstSet.[rightSide.[j]]
-//                    condition <- false 
-//                    result.[i] <- curFirst           
-//            else 
-//                condition <- false
-//                result.[i] <- curFirst
-//        result 
-//
-//    let first = getFirstSets
-//    let chainCanInferEpsilon = 
-//        let canInferEpsilon = Array.create grammar.rules.rulesCount true
-//        let mutable canInfer = true
-//        for i = 0 to grammar.rules.rulesCount-1 do
-//            let curFirst = Set.toArray first.[i] 
-//            for j = 0 to curFirst.Length-1 do
-//                if not grammar.canInferEpsilon.[curFirst.[j]] then canInfer <- false
-//            canInferEpsilon.[i] <- canInfer
-//        canInferEpsilon
+        followSets
 
     let follow = getFollowSets
-    //let canInferEpsilon = chainCanInferEpsilon
+
+    let getTableIndex num = 
+        let mutable result = num
+        if num >= grammar.indexator.termsStart && num <= grammar.indexator.termsEnd then 
+            result <- num - grammar.indexator.nonTermCount
+        elif num >= grammar.indexator.literalsStart && num <= grammar.indexator.literalsEnd then
+            result <- num - grammar.indexator.termCount - grammar.indexator.nonTermCount
+        result
+            
+
     let _table = 
-        let length = grammar.indexator.fullCount
-        let arr = Array2D.create length length (List.empty<int>)
-        let result = Array.create (length*length) (Array.empty<int>)
+        let length1 = grammar.indexator.nonTermCount
+        let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
+        let arr = Array2D.create length1 length2 (List.empty<int>)
+        let result = Array.create (length1*length2) (Array.empty<int>)
         for i = 0 to grammar.rules.rulesCount-1 do
             let curFirst = Set.toArray grammar.firstSet.[i]
             for j = 0 to curFirst.Length-1 do
-                arr.[grammar.rules.leftSide i,curFirst.[j]] <- i::arr.[grammar.rules.leftSide i,curFirst.[j]]
+                arr.[grammar.rules.leftSide i,getTableIndex curFirst.[j]] <- i::arr.[grammar.rules.leftSide i,getTableIndex curFirst.[j]]
             if grammar.canInferEpsilon.[i] then 
                 let curFollow = Set.toArray follow.[grammar.rules.leftSide i]
                 for j = 0 to curFollow.Length-1 do
-                    arr.[grammar.rules.leftSide i,curFollow.[j]] <- i::arr.[grammar.rules.leftSide i,curFollow.[j]]            
-           // if Set.contains grammar.indexator.eofIndex follow.[grammar.rules.leftSide i] then 
-             //   arr.[grammar.startRule,grammar.indexator.eofIndex] <- grammar.startRule :: arr.[grammar.startRule,grammar.indexator.eofIndex]
-
-        //tr
-        //trttr
-        for i = 0 to length - 1 do
-            for j = 0 to length - 1 do
-                result.[length*i + j] <- List.toArray arr.[i,j]
+                    arr.[grammar.rules.leftSide i,getTableIndex curFollow.[j]] <- i::arr.[grammar.rules.leftSide i,getTableIndex curFollow.[j]]            
+        for i = 0 to length1 - 1 do
+            for j = 0 to length1 - 1 do
+                result.[length1*i + j] <- List.toArray arr.[i,j]
         result
   
     member this.result = _table
-
-
-       // if Set.contains grammar.indexator.eofIndex follow.[grammar.rules.leftSide i] then 
-               //     arr.[grammar.startRule,grammar.indexator.eofIndex] <- grammar.startRule :: arr.[grammar.startRule,grammar.indexator.eofIndex]
-
 
 
     

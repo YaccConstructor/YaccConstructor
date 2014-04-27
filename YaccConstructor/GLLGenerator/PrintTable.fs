@@ -18,6 +18,8 @@ let printTableGLL
          print x
     let inline printBr (x : 'a) =
         Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+    let inline printBr2 (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s) |> ignore) x
     let inline printBrInd num (x : 'a) =
          print "%s" (String.replicate (num <<< 2) " ")
          printBr x
@@ -32,7 +34,15 @@ let printTableGLL
             for i = 0 to arr.Length-1 do
                 if i <> 0 then print sep
                 printer arr.[i]
-            printBr rBr      
+            printBr rBr   
+    
+    let printArr2 prefix lBr rBr sep (arr : 'a[]) printer =
+            print prefix
+            print lBr
+            for i = 0 to arr.Length-1 do
+                if i <> 0 then print sep
+                printer arr.[i]
+            printBr2 rBr    
 
     let printList prefix lBr rBr sep l printer = 
          print prefix
@@ -43,10 +53,10 @@ let printTableGLL
 
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
-
-    let printArr2 (arr : 'a[]) printer num = 
-         print "%s" (String.replicate (num <<< 2) " ")
-         printArr arr printer
+    let printArr2 (arr : 'a[]) printer = printArr2 "" "[|" "|]" "; " (arr : 'a[]) printer
+//    let printArr2 (arr : 'a[]) printer num = 
+//         print "%s" (String.replicate (num <<< 2) " ")
+//         printArr arr printer
 
    // let printListAsArray l printer = printList "" "[|" "|]" "; " l printer
    // let printList l printer = printList "" "[" "]" "; " l printer
@@ -196,12 +206,12 @@ let printTableGLL
         print "let leftSide = "
         printArr leftSide (print "%d")
 
-        print "let table = "
-        print "\n"
-        printBrInd 1 "[| "
+        print "let table = [| "
         for arr in table.result do
-            printArr2 arr (print "%d") 2 
-        printBrInd 1 " |] "
+            printArr2 arr (print "%d")
+            print ";"
+        print " |]"
+        printBr ""
 
        
 
@@ -228,10 +238,10 @@ let printTableGLL
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput)"
+        printBrInd 0 "let private parserSource = new ParserSource<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal)"
         
                        
-        printBr "let buildAst : (seq<Token> -> ParseResult<Token>) ="
+        printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()

@@ -1,7 +1,7 @@
 ﻿namespace Yard.Generators.GLL
 
        
-type ParserSourceGLL<'TokenType> (
+type ParserSource<'TokenType> (
                                tokenToNumber        : 'TokenType -> int
                                , genLiteral         : string -> int -> 'TokenType option
                                , numToString        : int -> string

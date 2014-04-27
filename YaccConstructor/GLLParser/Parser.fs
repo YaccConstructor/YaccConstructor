@@ -107,7 +107,7 @@ type Incrementor(delta) =
         i <- i - delta
     
 
-let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
+let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let enum = tokens.GetEnumerator()
     let inputLength = Seq.length tokens
     let startNonTerm = parser.LeftSide.[parser.StartRule]
@@ -133,13 +133,14 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
         let setR = new Queue<Context>();   // множество всех контекстов
         let setP = new Queue<GSSNode>();   //множество для потенциально незавершаемых попов       
         let currentIndex = ref 0
-        let currentLabel = ref <| new Label(0, 0);
-        let startLabel = new Label(0, 0);
+        let currentRule = parser.StartRule
+        let currentLabel = ref <| new Label(currentRule, 0);
+        let startLabel = new Label(currentRule, 0);
         let startGSSNode = new GSSNode(!currentIndex,!currentLabel);
         let currentGSSNode = ref <| new GSSNode(!currentIndex,!currentLabel);
         let gss =  new GSS(startGSSNode, tokens.Length)
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode)
-
+        let mutable firstTime = true
         setR.Enqueue(!currentContext)
         
         
@@ -188,7 +189,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             let curToken = parser.TokenToNumber tokens.[curInd]
             let curSymbol = parser.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position]
             if Array.length parser.Rules.[!currentLabel.Value.Rule]  <> !currentLabel.Value.Position then
-                if parser.NumIsTerminal curSymbol then
+                if parser.NumIsTerminal curSymbol  || parser.IsLiteral tokens.[curInd] then
                     if curToken = curSymbol then
                         incrementor.Increment(currentLabel.Value.Position)
                         currentIndex := !currentIndex+1
@@ -204,7 +205,7 @@ let buildAst<'TokenType> (parser : ParserSourceGLL<'TokenType>) (tokens : seq<'T
             else 
                 pop !currentContext !currentGSSNode !currentIndex
             dispatcher ()
-        dispatcher()
+        processing()
 //        match dispatcher() with
 //        | Error _ -> Error ("fail")
 //        | Success _ -> Success "UIIII"

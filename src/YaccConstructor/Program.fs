@@ -65,6 +65,8 @@ let () =
         if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
         then Some "YardFrontend"
         else Seq.tryFind (fun _ -> true) FrontendsManager.Available
+
+    //printf "feName = %A\n" feName
             
     generatorName :=
         if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator

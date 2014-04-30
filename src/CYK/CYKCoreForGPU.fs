@@ -15,9 +15,6 @@ type CYKCoreForGPU() =
 
     let mutable lblNameArr = [||]
 
-    [<Literal>]
-    let noLbl = 0uy
-
     let lblString lbl = 
         match lblNameArr with
         | [||] -> "0" 
@@ -25,18 +22,6 @@ type CYKCoreForGPU() =
                 match lbl with 
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
-
-    // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
-    let getCellRuleTop (cellData:CellData) =
-        let curRuleNum,_,_,_ = getData cellData.rData
-        let rule = getRuleStruct rules.[int curRuleNum]
-        rule.RuleName
-
-    // возвращает координаты дочерних ячеек 
-    // i l - координаты текущей ячейки
-    // k - число, определяющее координаты
-    let getSubsiteCoordinates i l k =
-        (i,k),(k+i+1,l-k-1)
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
@@ -87,26 +72,45 @@ type CYKCoreForGPU() =
 
                 for m in 0..nTermsCount - 1 do
                     let leftCell = recTable.[leftStart + m]
-                    if leftCell.IsSome && getCellRuleTop leftCell.Value = rule.R1 then
+                    if leftCell.IsSome && getCellRuleTop leftCell.Value rules = rule.R1 then
                         let cellData1 = getCellDataStruct leftCell.Value
                         for n in 0..nTermsCount - 1 do
                             let rightCell = recTable.[rightStart + n]
-                            if rightCell.IsSome && getCellRuleTop rightCell.Value = rule.R2 then
+                            if rightCell.IsSome && getCellRuleTop rightCell.Value rules = rule.R2 then
                                 let cellData2 = getCellDataStruct rightCell.Value
                                 let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
                                 let newWeight = weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
                                 let currentElem = buildData ruleIndex lblWithState.State lblWithState.Label newWeight
                                 recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
 
-        let elem i l (rulesIndexed:RuleIndexed[]) = 
-            rulesIndexed |> Array.iter (fun curRule -> for k in 0..(l-1) do processRule curRule.Rule curRule.Index i k l)
+        let elem i len rulesIndexed = 
+            // foreach rule r in grammar in parallel
+            rulesIndexed 
+            |> Array.iter (fun (curRule:RuleIndexed) -> for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len)
 
+        let elem2 i len symRuleArr = 
+            // foreach symbol in grammar in parallel
+            symRuleArr
+            |> Array.Parallel.iter (fun (item:SymbolRuleMapItem) ->
+                                        // foreach rule r per symbol in parallel
+                                        item.Rules
+                                        |> Array.iter (
+                                            fun curRule -> for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len
+                                        )
+            )
+        
         let fillTable rulesIndexed =
           [|1..rowSize - 1|]
-          |> Array.iter (fun l ->
-                [|0..rowSize - 1 - l|]
-                |> Array.Parallel.iter (fun i -> elem i l rulesIndexed))
-          
+          |> Array.iter (fun len ->
+                [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
+                |> Array.Parallel.iter (fun i -> elem i len rulesIndexed))
+
+        let fillTable2 symRuleArr = 
+            [|1..rowSize - 1|]
+            |> Array.iter (fun len ->
+                [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
+                |> Array.Parallel.iter (fun i -> elem2 i len symRuleArr))
+
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -119,9 +123,9 @@ type CYKCoreForGPU() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
                         recTable.[(k * rowSize + 0) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)   
-        //printfn "total rules count %d" rules.Length
+        printfn "total rules count %d" rules.Length
                              
-        let ntrIndexes = new ResizeArray<_>()
+        let ntrIndexes = new ResizeArray<_>() // non-terminal rules indexes array
         rules
         |> Array.iteri
             (fun ruleIndex rule ->
@@ -129,11 +133,35 @@ type CYKCoreForGPU() =
                 if ruleStruct.R2 <> 0us then 
                     ntrIndexes.Add ruleIndex )
         let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
-        //printfn "non terminal rules count %d" nonTermRules.Length
+        printfn "non terminal rules count %d" nonTermRules.Length
 
-        //printfn "Fill table started %s" (string System.DateTime.Now)
+        // left parts of non-terminal rules array
+        // needed only for 2nd realization
+        let symRuleMap = 
+            nonTermRules
+            |> Seq.groupBy (fun rule -> initSymbol (getRuleStruct rule.Rule).RuleName )
+            |> Map.ofSeq
+            |> Map.map (fun k v -> Array.ofSeq v)
+        
+        let symRuleArr =
+            symRuleMap
+            |> Map.toArray
+            |> Array.map (fun (sym,rules) -> 
+                            //printfn "Symbol %d rules count: %d" sym rules.Length
+                            new SymbolRuleMapItem(sym,rules))
+        
+        let fillStart = System.DateTime.Now
+        printfn "Fill table started %s" (string fillStart)
         fillTable nonTermRules
-        //printfn "Fill table finished %s" (string System.DateTime.Now)
+        let fillFinish = System.DateTime.Now
+        printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
+        
+        let fillImprStart = System.DateTime.Now
+        printfn "Fill table improved started %s" (string fillImprStart)
+        fillTable2 symRuleArr
+        let fillImprFinish = System.DateTime.Now
+        printfn "Fill table improved finished %s [%s]" (string fillImprFinish) (string (fillImprFinish - fillImprStart))
+        
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =

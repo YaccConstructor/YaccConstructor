@@ -11,9 +11,6 @@ type CYKCore() =
 
     let mutable lblNameArr = [||]
 
-    [<Literal>]
-    let noLbl = 0uy
-
     let lblString lbl = 
         match lblNameArr with
         | [||] -> "0" 
@@ -21,18 +18,6 @@ type CYKCore() =
                 match lbl with 
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
-
-    // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
-    let getCellRuleTop (cellData:CellData) =
-        let curRuleNum,_,_,_ = getData cellData.rData
-        let curNT,_,_,_,_ = getRuleCortege rules.[int curRuleNum]
-        curNT
-
-    // возвращает координаты дочерних ячеек 
-    // i l - координаты текущей ячейки
-    // k - число, определяющее координаты
-    let getSubsiteCoordinates i l k =
-        (i,k),(k+i+1,l-k-1)
 
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
@@ -66,11 +51,11 @@ type CYKCore() =
                 let left = recTable.[i, k] |> Array.choose id
                 let right = recTable.[k+i+1, l-k-1] |> Array.choose id
                 left |> Array.iter (fun lf ->
-                    if getCellRuleTop lf = b
+                    if getCellRuleTop lf rules = b
                     then
                         let lState1,lbl1,weight1 = getCellDataCortege lf
                         right |> Array.iter (fun r ->
-                            if getCellRuleTop r = c
+                            if getCellRuleTop r rules = c
                             then
                                 let lState2,lbl2,weight2 = getCellDataCortege r
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
@@ -87,6 +72,7 @@ type CYKCore() =
           |> Array.iter (fun l ->
                 [|0..s.Length-1-l|]
                 |> Array.Parallel.iter (fun i -> elem i l))
+
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -99,8 +85,11 @@ type CYKCore() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
-    
+        
+        printfn "Fill table started %s" (string System.DateTime.Now)
         fillTable ()
+        printfn "Fill table finished %s" (string System.DateTime.Now)
+        
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
@@ -114,7 +103,6 @@ type CYKCore() =
                 printfn " "
             printfn "" 
 
-        //printfn "%A" recTable
         //printTbl ()
 
         let getString state lbl weight = 

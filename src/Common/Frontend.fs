@@ -15,13 +15,16 @@
 namespace Yard.Core
 
 open Yard.Core.IL
+open Mono.Addins
+
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
 
 [<AbstractClass>]
-type Frontend() as this = 
+[<TypeExtensionPoint>]
+type Frontend() as this =
     abstract Name : string
-    //abstract CheckGrammar : Definition.t<Source.t,Source.t> -> bool
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>
-    //member public self.ParseGrammar = parse_grammar
     abstract ProductionTypes : string list
     interface Yard.Core.Manager.IComponent with
         member self.Name : string = this.Name

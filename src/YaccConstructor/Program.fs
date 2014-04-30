@@ -14,12 +14,14 @@
 
 module YaccConstructor.Program
 
+open Mono.Addins
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.Helpers
 open Yard.Core.Checkers
 open Microsoft.FSharp.Text
 open System.IO
+open System.Reflection
 
 exception InvalidFEName of string
 exception InvalidGenName of string
@@ -50,16 +52,22 @@ let () =
     let ConversionsManager = ConversionsManager.ConversionsManager()
     let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
+    AddinManager.Initialize()
+    AddinManager.Registry.Update(null)
+
+    let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
+
     let userDefs = ref []
     let userDefsStr = ref ""
 
     feName := // Fill by default value
-        if Seq.exists ((=) "YardFrontend") FrontendsManager.Available
+        if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
         then Some "YardFrontend"
         else Seq.tryFind (fun _ -> true) FrontendsManager.Available
             
     generatorName :=
-        if Seq.exists ((=) "RNGLRGenerator") GeneratorsManager.Available
+        if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator
         then Some "RNGLRGenerator"
         else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
 
@@ -101,7 +109,7 @@ let () =
             let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
-                if Seq.exists ((=) feName) FrontendsManager.Available
+                if Seq.exists (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend
                 then
                     try
                         match FrontendsManager.Component feName with
@@ -173,7 +181,7 @@ let () =
     //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
-                if Seq.exists ((=) generatorName) GeneratorsManager.Available
+                if Seq.exists (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator
                 then              
                     try
                         match GeneratorsManager.Component generatorName with

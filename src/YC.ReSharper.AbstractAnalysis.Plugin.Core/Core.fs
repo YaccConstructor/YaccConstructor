@@ -109,7 +109,7 @@ type Processor(file) =
             | JSON.Parser.``L 22`` (br1)
             | JSON.Parser.``L 23`` (br1) ->  
                     let name = (JSON.Parser.tokenToNumber >> JSON.Parser.numToString) tok
-                    e name name (fst br1)
+                    e name name (snd br1)
 
         
         let addErrorTSQL tok =

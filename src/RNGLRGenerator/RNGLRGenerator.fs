@@ -14,6 +14,7 @@
 
 namespace Yard.Generators.RNGLR
 
+open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
@@ -25,6 +26,11 @@ open Printer
 open TranslatorPrinter
 open Option
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type RNGLR() = 
     inherit Generator()
         override this.Name = "RNGLRGenerator"

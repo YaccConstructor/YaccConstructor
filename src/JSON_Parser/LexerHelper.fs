@@ -12,5 +12,5 @@ open System
 //let appendBuf (str:string) = str_buf.Append(str) |> ignore
 
 let getLiteral brs value =
-    genLiteral value brs brs
+    genLiteral value (value,brs)
         

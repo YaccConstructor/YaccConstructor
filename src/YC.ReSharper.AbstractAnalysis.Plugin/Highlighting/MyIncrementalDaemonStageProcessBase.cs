@@ -71,14 +71,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             UpdateYCProcessor();
 
-            var fsTree = ycProcessor.GetNextForest<IEnumerable<ITreeNode>>();
+            var tree = ycProcessor.GetNextTree();
 
             // fsTree is List<ITreeNode>. It can be null.
-            while (fsTree != null)
+            while (tree != null)
             {
-                var tree = (fsTree.ToList())[0];
                 ProcessDescendants(tree, processor);
-                fsTree = ycProcessor.GetNextForest<IEnumerable<ITreeNode>>();
+                tree = ycProcessor.GetNextTree();
             }
 
             //var fsTree = ycProcessor.GetForestWithToken<IEnumerable<IMyTreeNode>>();

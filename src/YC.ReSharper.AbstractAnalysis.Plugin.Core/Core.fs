@@ -19,7 +19,6 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
-//    let mutable treeNode = []
     let mutable xmlPath = ""
     let mutable forest = []
     let mutable language = Calc
@@ -149,7 +148,7 @@ type Processor(file) =
 //    member this.TreeNode = List.toArray treeNode
     member this.XmlPath = xmlPath
     
-    member this.GetNextForest() = 
+    member this.GetNextTree() = 
         let translate = 
             match language with
             | Calc -> Calc.translate
@@ -171,7 +170,8 @@ type Processor(file) =
                 count <- count + 1
             unprocessed <- unproc
             
-            translate nextTree errors
+            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
+            treeNodeList.ToTreeNodeCollection().First()
 
     member this.GetForestWithToken() = 
         let translate = 
@@ -186,7 +186,6 @@ type Processor(file) =
         for ast, errors in forest do
             let trees = ast.GetForestWithToken 0
             for tree in trees do
-                res.Add (translate tree errors)
+                let treeNodeList = translate tree errors :> seq<ITreeNode>
+                res.Add <| treeNodeList.ToTreeNodeCollection().First()
         res
-            
-

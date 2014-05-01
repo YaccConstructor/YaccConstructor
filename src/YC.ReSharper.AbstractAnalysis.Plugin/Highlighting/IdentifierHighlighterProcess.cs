@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.DocumentModel;
@@ -12,7 +11,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     public class IdentifierHighlighterProcess : MyIncrementalDaemonStageProcessBase
     {
-        private List<TextRange> addedRanges = new List<TextRange>();
+        private readonly List<TextRange> addedRanges = new List<TextRange>();
      
         public IdentifierHighlighterProcess(IDaemonProcess daemonProcess, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
             : base(daemonProcess, settingsStore, processKind)

@@ -580,8 +580,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 let info = errDict.[errFamily.Value]
                                 let arr = this.getBoxedTokensFromFamily errFamily.Value
                                 info.tokens <- List.toArray arr
-                                let errNodes = Array.zeroCreate 1
-                                errNodes.[0] <- box [info]
+                                let errNodes = [| box [info] |]
                                 funs.[fam.prod] errNodes ranges.[i]
                             else
                                 funs.[fam.prod] res ranges.[i]
@@ -623,8 +622,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             | _ -> failwith ""
         printAst 0 root
 
-
-    member this.GetNextTree (unprocessed : int list) = 
+    /// <summary>
+    /// Returns tree which contains some unprocessed tokens. 
+    /// Uses in highlighting.
+    /// <para> unprocessed - list of number of tokens that need process. </para>
+    /// <para> filter is a function that is involved in choosing trees.</para>
+    /// </summary>
+    member this.GetNextTree unprocessed filter = 
         let processed = [| 
                             for i = 0 to tokens.Length - 1 do
                                 yield not <| List.exists (fun j -> j = i) unprocessed
@@ -650,9 +654,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let mutable maxNewToks = getUnprocessedCount ast.first
                 
                 for family in ast.other do
-                    let newTokens = getUnprocessedCount family
-                    if newTokens > maxNewToks 
-                    then nextFam <- family
+                    if filter family
+                    then 
+                        let newTokens = getUnprocessedCount family
+                        if newTokens >= maxNewToks 
+                        then nextFam <- family
 
                 nextFam
 
@@ -672,9 +678,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             family.nodes.doForAll <| fun child -> processNode child
             box <| new AST (new Family (family.prod, new Nodes(children.ToArray())), null)
 
+        // I suppose that rootFamily.other is always null. But I'm not sure
         let tree = processFamily rootFamily.first
 
-        ///
+        /// list of unprocessed token after adding new tree
         let finalUnprocessed = 
             let mutable res = [] 
             for i = 0 to processed.Length - 1 do
@@ -686,6 +693,39 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         let newTree = new Tree<_> (tokens, tree, rules)
         
         newTree, finalUnprocessed
+
+    ///<summary>
+    /// Returns all trees which contain some token.
+    /// <para> Token - number of token </para>
+    ///</summary>
+    member this.GetForestWithToken token = 
+        let forestFam = ref []
+        let mutable forestTree = []
+        let filter (family : Family) = 
+            let nodes = this.getTokensFromFamily family
+            not <| List.exists (fun fam -> 
+                                    let famNodes = this.getTokensFromFamily fam
+                                    let newList = List.filter (fun node1 -> List.exists (fun node2 -> node1 = node2) famNodes) nodes
+                                    newList.Length = nodes.Length
+                                ) !forestFam 
+
+        let filterTree (tree : Tree<_>)= 
+            match tree.Root with
+            | :? AST as ast -> 
+                // I suppose that rootFamily.other is always null. But I'm not sure
+                let res = filter ast.first
+                if res then forestFam := ast.first :: !forestFam
+                res
+            | _ -> failwith "Error in GetForestWithToken function"
+
+        let mutable pair = this.GetNextTree [token] filter
+        let mutable tree = fst pair
+        let mutable a = snd pair
+        while filterTree tree do
+            forestTree <- tree :: forestTree
+            tree <- fst <| this.GetNextTree [token] filter
+        
+        forestTree
 
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =

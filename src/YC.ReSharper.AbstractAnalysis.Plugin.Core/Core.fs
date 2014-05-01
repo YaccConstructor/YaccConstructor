@@ -159,16 +159,34 @@ type Processor(file) =
         if forest.Length <= count 
         then null
         else 
-            let mutable curAst, errors = List.nth forest count 
+            let mutable curAst, errors = List.nth forest count
             let mutable unproc = 
                 if unprocessed.Length = 0
                 then Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
                 else unprocessed
             
-            let nextTree, unproc = curAst.GetNextTree unproc
+            let nextTree, unproc = curAst.GetNextTree unproc (fun _ -> true)
             if unproc.Length = 0
             then 
                 count <- count + 1
             unprocessed <- unproc
             
             translate nextTree errors
+
+    member this.GetForestWithToken() = 
+        let translate = 
+            match language with
+            | Calc -> Calc.translate
+            | JSON -> JSON.translate
+            | TSQL -> TSQL.translate
+
+        let tokNumber = 0
+
+        let res = new ResizeArray<_>()
+        for ast, errors in forest do
+            let trees = ast.GetForestWithToken 0
+            for tree in trees do
+                res.Add (translate tree errors)
+        res
+            
+

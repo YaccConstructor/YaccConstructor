@@ -161,19 +161,19 @@ let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
 
 let xmlPath = "JSONHighlighting.xml" 
 
-let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = 
+let addSemantic (parent : #ITreeNode) (children : #ITreeNode list) = 
     let mutable prev = null
     let mutable curr = null
     for child in children do
         prev <- curr
         curr <- child
-        curr.SetParent(parent)
+        curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)
         if prev = null
-        then parent.SetFirstChild(curr)
+        then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)
         else
-            prev.SetNextSibling(curr)
-            curr.SetPrevSibling(prev)
-    parent.SetLastChild(curr)
+            prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)
+            curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)
+    parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)
     parent
 
 let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
@@ -212,7 +212,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -235,7 +235,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -258,7 +258,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -281,7 +281,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -304,7 +304,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -327,7 +327,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -350,7 +350,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                 
 
                 let parent = new ValueNonTermNode("value")
-                let children : IAbstractTreeNode list = [h1]
+                let children (*: ITreeNode list*) = [h1]
                 addSemantic parent children
                 
                   )::!_rnglr_cycle_res )
@@ -387,7 +387,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     
 
                     let parent = new Array1NonTermNode("array1")
-                    let children : IAbstractTreeNode list = [h1; h2; h3]
+                    let children (*: ITreeNode list*) = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -408,7 +408,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               
 
               let parent = new Yard_rule_list_1NonTermNode("yard_rule_list_1")
-              let children : IAbstractTreeNode list = []
+              let children (*: ITreeNode list*) = []
               addSemantic parent children
               
                 )::!_rnglr_cycle_res
@@ -433,7 +433,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   
 
                   let parent = new Yard_rule_list_1NonTermNode("yard_rule_list_1")
-                  let children : IAbstractTreeNode list = [h1; h2]
+                  let children (*: ITreeNode list*) = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -454,7 +454,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               
 
               let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
-              let children : IAbstractTreeNode list = []
+              let children (*: ITreeNode list*) = []
               addSemantic parent children
               
                 )::!_rnglr_cycle_res
@@ -481,7 +481,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     
 
                     let parent = new Yard_rule_yard_many_1_2NonTermNode("yard_rule_yard_many_1_2")
-                    let children : IAbstractTreeNode list = [h1; h2; h3]
+                    let children (*: ITreeNode list*) = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -508,7 +508,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     
 
                     let parent = new PairNonTermNode("pair")
-                    let children : IAbstractTreeNode list = [h1; h2; h3]
+                    let children (*: ITreeNode list*) = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -535,7 +535,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     
 
                     let parent = new ObjectsNonTermNode("objects")
-                    let children : IAbstractTreeNode list = [h1; h2; h3]
+                    let children (*: ITreeNode list*) = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -556,7 +556,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               
 
               let parent = new Yard_rule_list_3NonTermNode("yard_rule_list_3")
-              let children : IAbstractTreeNode list = []
+              let children (*: ITreeNode list*) = []
               addSemantic parent children
               
                 )::!_rnglr_cycle_res
@@ -581,7 +581,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                   
 
                   let parent = new Yard_rule_list_3NonTermNode("yard_rule_list_3")
-                  let children : IAbstractTreeNode list = [h1; h2]
+                  let children (*: ITreeNode list*) = [h1; h2]
                   addSemantic parent children
                   
                     )::!_rnglr_cycle_res ) )
@@ -602,7 +602,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               
 
               let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
-              let children : IAbstractTreeNode list = []
+              let children (*: ITreeNode list*) = []
               addSemantic parent children
               
                 )::!_rnglr_cycle_res
@@ -629,7 +629,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     
 
                     let parent = new Yard_rule_yard_many_1_4NonTermNode("yard_rule_yard_many_1_4")
-                    let children : IAbstractTreeNode list = [h1; h2; h3]
+                    let children (*: ITreeNode list*) = [h1; h2; h3]
                     addSemantic parent children
                     
                       )::!_rnglr_cycle_res ) ) )
@@ -651,9 +651,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new STRING1TermNode("STRING1", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new STRING1TermNode("STRING1", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -674,9 +674,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new NUMBERTermNode("NUMBER", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new NUMBERTermNode("NUMBER", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -697,9 +697,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new KW_TRUETermNode("KW_TRUE", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new KW_TRUETermNode("KW_TRUE", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -720,9 +720,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new KW_FALSETermNode("KW_FALSE", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new KW_FALSETermNode("KW_FALSE", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -743,9 +743,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new KW_NULLTermNode("KW_NULL", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new KW_NULLTermNode("KW_NULL", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -766,9 +766,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new EMPTYTermNode("EMPTY", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new EMPTYTermNode("EMPTY", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -789,9 +789,9 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
               _rnglr_cycle_res := (
                 
 
-                let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0
-                let pos = calculatePos temp
-                new KW_COLONTermNode("KW_COLON", pos)
+                let pos = snd <| _rnglr_var_0
+                let ranges = calculatePos pos
+                new KW_COLONTermNode("KW_COLON", ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res

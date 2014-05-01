@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using Highlighting.Core;
-using JetBrains.Application.Progress;
+using JetBrains.Annotations;
 using JetBrains.Application.Settings;
-using JetBrains.Application.Threading;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Files;
+using JetBrains.ReSharper.Psi.Impl;
+using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -70,41 +71,49 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             UpdateYCProcessor();
 
-            var fsTree = ycProcessor.GetNextForest<IEnumerable<IAbstractTreeNode>>();
+            var fsTree = ycProcessor.GetNextForest<IEnumerable<ITreeNode>>();
+
             // fsTree is List<ITreeNode>. It can be null.
             while (fsTree != null)
             {
                 var tree = (fsTree.ToList())[0];
                 ProcessDescendants(tree, processor);
-                fsTree = ycProcessor.GetNextForest<IEnumerable<IAbstractTreeNode>>();
+                fsTree = ycProcessor.GetNextForest<IEnumerable<ITreeNode>>();
             }
+
+            //var fsTree = ycProcessor.GetForestWithToken<IEnumerable<IMyTreeNode>>();
+            //if (fsTree != null)
+            //{
+            //    foreach (IEnumerable<IMyTreeNode> nodes in fsTree)
+            //    {
+            //        var tree = (nodes.ToList())[0];
+            //        ProcessDescendants(tree, processor);
+            //    }
+            //}
         }
 
-        private void ProcessDescendants(ITreeNode root, IRecursiveElementProcessor processor)
+        private void ProcessDescendants([NotNull] ITreeNode root, IRecursiveElementProcessor processor)
         {
-            var treeNode = root as IAbstractTreeNode;
-            if (treeNode == null)
-            {
-                return;
-            }
+            var treeNode = root;
+            
             while (!processor.ProcessingIsFinished)
             {
                 if (treeNode.FirstChild != null)
                 {
-                    treeNode = treeNode.FirstChild as IAbstractTreeNode;
+                    treeNode = treeNode.FirstChild;
                 }
                 else
                 {
                     processor.ProcessAfterInterior(treeNode);
                     while (treeNode.NextSibling == null)
                     {
-                        treeNode = treeNode.Parent as IAbstractTreeNode;
+                        treeNode = treeNode.Parent;
                         if (treeNode == root || treeNode == null)
                         {
                             return;
                         }
                     }
-                    treeNode = treeNode.NextSibling as IAbstractTreeNode;
+                    treeNode = treeNode.NextSibling;
                 }
             }
         }

@@ -36,12 +36,12 @@ let getLeafSemantic leaf isTok =
     let inline printBr (x : 'a) =
         Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
 
-    printBr "let temp : array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> = snd <| _rnglr_var_0"
-    printBr "let pos = calculatePos temp"
+    printBr "let pos = snd <| _rnglr_var_0"
+    printBr "let ranges = calculatePos pos"
 
     if isTok
-    then printBr "new %sTermNode(\"%s\", pos)" <| toClassName leaf <| leaf
-    else printBr "new %sLitNode(\"%s\", pos)"  <| litToClassName leaf <| leaf
+    then printBr "new %sTermNode(\"%s\", ranges) :> ITreeNode" <| toClassName leaf <| leaf
+    else printBr "new %sLitNode(\"%s\", ranges) :> ITreeNode"  <| litToClassName leaf <| leaf
 
     res.ToString()
                                
@@ -58,7 +58,7 @@ let getNodeSemantic parent children =
         printBr x
 
     printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| toClassName parent <| parent
-    printBrInd 0 "let children : IAbstractTreeNode list = %A" children
+    printBrInd 0 "let children (*: ITreeNode list*) = %A" children
     printBrInd 0 "addSemantic parent children"
     res.ToString()
 

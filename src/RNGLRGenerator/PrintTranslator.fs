@@ -311,19 +311,19 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
                 print "%s" (String.replicate (num <<< 2) " ")
                 printBr x
 
-            printBrInd 0 "let addSemantic (parent : IAbstractTreeNode) (children : IAbstractTreeNode list) = " 
+            printBrInd 0 "let addSemantic (parent : #ITreeNode) (children : #ITreeNode list) = " 
             printBrInd 1 "let mutable prev = null"
             printBrInd 1 "let mutable curr = null"
             printBrInd 1 "for child in children do"
             printBrInd 2 "prev <- curr"
             printBrInd 2 "curr <- child"
-            printBrInd 2 "curr.SetParent(parent)"
+            printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
             printBrInd 2 "if prev = null"
-            printBrInd 2 "then parent.SetFirstChild(curr)"
+            printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
             printBrInd 2 "else"
-            printBrInd 3 "prev.SetNextSibling(curr)"
-            printBrInd 3 "curr.SetPrevSibling(prev)"
-            printBrInd 1 "parent.SetLastChild(curr)"
+            printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
+            printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
+            printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
             printBrInd 1 "parent"
             res.ToString()
 

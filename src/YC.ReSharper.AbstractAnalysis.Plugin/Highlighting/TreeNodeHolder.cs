@@ -12,8 +12,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         public static readonly string DefaultColor = HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE;
 
-        //public static IEnumerable<IAbstractTreeNode> Forest { get; set; }
-        //public static ITreeNode TreeNode { get; set; }
         public static Dictionary<string, string> TokenToColor { get; set; }
 
         private static Dictionary<string, string> mapping = new Dictionary<string, string>()

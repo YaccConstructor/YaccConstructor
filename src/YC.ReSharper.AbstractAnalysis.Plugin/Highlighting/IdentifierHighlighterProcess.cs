@@ -21,20 +21,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public override void VisitSomething(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
-            var myTreeNode = treeNode as IAbstractTreeNode;
-            if (myTreeNode == null) 
-                return;
-
-            //DocumentRange colorRange = myTreeNode.GetNavigationRange();
-
-            //if (colorRange.Document == null || addedRanges.Contains(colorRange.TextRange))
-            //    return;
-
-            //AddHighLighting(colorRange, consumer, new MySomethingHighlighting(treeNode));
-
-            //List<DocumentRange> colorConstantRange = myTreeNode.UserData.GetData(new Key<List<DocumentRange>>("ranges"));
             ICollection<DocumentRange> colorConstantRange;
-            colorConstantRange = myTreeNode.GetAllPositions();
+            colorConstantRange = treeNode.UserData.GetData(KeyConstant.Ranges);
+
+            if (colorConstantRange == null)
+                return;
 
             foreach (DocumentRange range in colorConstantRange)
             {
@@ -53,7 +44,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (file != null)
             {
                 addedRanges.Add(range.TextRange);
-                //consumer.Highlightings.Add(info);
                 consumer.AddHighlighting(info.Highlighting, file);
             }
         }

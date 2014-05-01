@@ -3,12 +3,14 @@ using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
+using JetBrains.ReSharper.Feature.Services.LiveTemplates.Context;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-    public abstract class MyDaemonStageProcessBase : TreeNodeVisitor<IHighlightingConsumer>, IRecursiveElementProcessor<IHighlightingConsumer>, IDaemonStageProcess
+    public abstract class MyDaemonStageProcessBase : ITreeNodeVisitor<IHighlightingConsumer>,
+        IRecursiveElementProcessor<IHighlightingConsumer>, IDaemonStageProcess
     {
         public IDaemonProcess myDaemonProcess;
         public IFile myFile;
@@ -21,7 +23,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myFile = MyDaemonStageBase.GetPsiFile(myDaemonProcess.SourceFile);
             mySettingsStore = settingsStore;
         }
-        
+
         public IFile File
         {
             get { return myFile; }
@@ -31,7 +33,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public IDaemonProcess DaemonProcess
         {
-          get { return myDaemonProcess; }
+            get { return myDaemonProcess; }
         }
 
         public abstract void Execute(Action<DaemonStageResult> commiter);
@@ -57,20 +59,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public virtual void ProcessAfterInterior(ITreeNode element, IHighlightingConsumer consumer)
         {
-            var myElement = element as IAbstractTreeNode; 
-            if (myElement != null)
-            {
-                //VisitSomething(element, consumer);
-                myElement.Accept(this, consumer);
-            }
-            //else
-            //{
-            //    //VisitNode(element, consumer);
-            //}
+            VisitSomething(element, consumer);
         }
-
         #endregion
 
+        public virtual void VisitSomething(ITreeNode node, IHighlightingConsumer consumer)
+        {}
+    
         protected void HighlightInFile(Action<IFile, IHighlightingConsumer> fileHighlighter, Action<DaemonStageResult> commiter)
         {
             var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);

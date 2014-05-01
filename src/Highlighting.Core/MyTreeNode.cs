@@ -4,6 +4,7 @@ using System.Text;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
+using JetBrains.ReSharper.Psi.Impl;
 using JetBrains.ReSharper.Psi.Modules;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Text;
@@ -11,53 +12,75 @@ using JetBrains.Util;
 
 namespace Highlighting.Core
 {
-    public class AbstractTreeNode : IAbstractTreeNode
+    public class MyTreeNode : ITreeNode
     {
-        public ITreeNode Parent { get; private set; }
-        public ITreeNode FirstChild { get; private set; }
-        public ITreeNode LastChild { get; private set; }
-        public ITreeNode NextSibling { get; private set; }
-        public ITreeNode PrevSibling { get; private set; }
-        public NodeType NodeType { get; private set; }
-        public PsiLanguageType Language { get; private set; }
+        public ITreeNode Parent
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.Parent); }
+        }
+
+        public ITreeNode FirstChild
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.FirstChild); }
+        }
+
+        public ITreeNode LastChild
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.LastChild); }
+        }
+
+        public ITreeNode NextSibling
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.NextSibling); }
+        }
+
+        public ITreeNode PrevSibling
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.PrevSibling); }
+        }
+
+        public NodeType NodeType
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.NodeType); }
+        }
+
+        public PsiLanguageType Language
+        {
+            get { return PersistentUserData.GetData(PropertyConstant.Language); }
+        }
+
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
+        //public NodeUserDataHolder NodeUserDataHolder { get; private set; }
         //public int Parts { get; private set; }
-        
+
         //private DocumentRange documentRange = new DocumentRange();
-        private List<DocumentRange> ranges = new List<DocumentRange>();
+        //private List<DocumentRange> ranges = new List<DocumentRange>();
         private int curInd;
 
-        private string text;
+        //private string text;
 
-        public AbstractTreeNode(string s)
+        public MyTreeNode(string text)
         {
-            text = s;
+            UserData = DataHelper.GetNodeUserData(this);
+            PersistentUserData = DataHelper.GetNodeUserData(this);
+            UserData.PutData(KeyConstant.Text, text);
         }
 
-        public AbstractTreeNode(string s, object positions)
+        public MyTreeNode(string text, object positions)
+            : this(text)
         {
-            text = s;
             SetPositions(positions);
         }
-
-        //public virtual void SetDocument(IDocument document)
-        //{
-        //    documentRange = new DocumentRange(document, 0);
-        //}
-
-        //public virtual void SetDocumentRange(DocumentRange range)
-        //{
-        //    documentRange = range;
-        //}
 
         public void SetPositions(object obj)
         {
             var positions = obj as IEnumerable<DocumentRange>;
             if (positions != null)
             {
-                ranges = positions.ToList();
-                //UserData.PutData(new Key<List<DocumentRange>>("ranges"), ranges);
+                var ranges = positions.ToList();
+
+                UserData.PutData(KeyConstant.Ranges, ranges);
             }
         }
 
@@ -123,6 +146,7 @@ namespace Highlighting.Core
 
         public virtual DocumentRange GetNavigationRange()
         {
+            var ranges = UserData.GetData(KeyConstant.Ranges);
             if (ranges.Count == 0)
                 return default(DocumentRange);
             if (curInd >= ranges.Count)
@@ -137,7 +161,8 @@ namespace Highlighting.Core
 
         public virtual int GetTextLength()
         {
-            return text.Length;
+            var text = UserData.GetData(KeyConstant.Text);
+            return text != null ? text.Length : 0;
         }
 
         public virtual StringBuilder GetText(StringBuilder to)
@@ -151,14 +176,16 @@ namespace Highlighting.Core
 
         public virtual IBuffer GetTextAsBuffer()
         {
-            return new StringBuffer(text);
+            var text = UserData.GetData(KeyConstant.Text);
+            return new StringBuffer(text ?? "");
         }
 
         public virtual string GetText()
         {
             //StringBuilder to = (this.MyCachedLength >= 0) ? new StringBuilder(this.myCachedLength) : new StringBuilder();
             //return this.GetText(to).ToString();
-            return text;
+            var text = UserData.GetData(KeyConstant.Text);
+            return text ?? "";
         }
 
         public virtual ITreeNode FindNodeAt(TreeTextRange treeTextRange)
@@ -176,65 +203,51 @@ namespace Highlighting.Core
             return null;
         }
 
-        public virtual void SetParent(ITreeNode parent)
-        {
-            Parent = parent;
-        }
 
-        public virtual void SetFirstChild(ITreeNode firstChild)
-        {
-            FirstChild = firstChild;
-        }
+        //public DocumentRange[] GetAllPositions()
+        //{
+        //    return ranges.ToArray();
+        //}
 
-        public virtual void SetLastChild(ITreeNode lastChild)
-        {
-            LastChild = lastChild;
-        }
+        //public virtual void SetNextSibling(ITreeNode nextSibling)
+        //{
+        //    NextSibling = nextSibling;
+        //}
 
-        public DocumentRange[] GetAllPositions()
-        {
-            return ranges.ToArray();
-        }
+        //public virtual void SetPrevSibling(ITreeNode prevSibling)
+        //{
+        //    PrevSibling = prevSibling;
+        //}
 
-        public virtual void SetNextSibling(ITreeNode nextSibling)
-        {
-            NextSibling = nextSibling;
-        }
+        //public virtual void SetPsiLanguageType(PsiLanguageType languageType)
+        //{
+        //    Language = languageType;
+        //}
 
-        public virtual void SetPrevSibling(ITreeNode prevSibling)
-        {
-            PrevSibling = prevSibling;
-        }
+        //public virtual void SetNodeUserData(NodeUserData userData)
+        //{
+        //    UserData = userData;
+        //}
 
-        public virtual void SetPsiLanguageType(PsiLanguageType languageType)
-        {
-            Language = languageType;
-        }
+        //public virtual void SetPersistentUserData(NodeUserData persistentUserData)
+        //{
+        //    PersistentUserData = persistentUserData;
+        //}
 
-        public virtual void SetNodeUserData(NodeUserData userData)
-        {
-            UserData = userData;
-        }
+        //public virtual void Accept(ITreeNodeVisitor visitor)
+        //{
+        //    visitor.VisitSomething(this);
+        //}
 
-        public virtual void SetPersistentUserData(NodeUserData persistentUserData)
-        {
-            PersistentUserData = persistentUserData;
-        }
-
-        public virtual void Accept(TreeNodeVisitor visitor)
-        {
-            visitor.VisitSomething(this);
-        }
-
-        public virtual void Accept<TContext>(TreeNodeVisitor<TContext> visitor, TContext context)
+        public virtual void Accept<TContext>(ITreeNodeVisitor<TContext> visitor, TContext context)
         {
             visitor.VisitSomething(this, context);
         }
 
-        public virtual TResult Accept<TContext, TResult>(TreeNodeVisitor<TContext, TResult> visitor, TContext context)
-        {
-            visitor.VisitSomething(this, context);
-            return default(TResult);
-        }
+        //public virtual TResult Accept<TContext, TResult>(ITreeNodeVisitor<TContext, TResult> visitor, TContext context)
+        //{
+        //    visitor.VisitSomething(this, context);
+        //    return default(TResult);
+        //}
     }
 }

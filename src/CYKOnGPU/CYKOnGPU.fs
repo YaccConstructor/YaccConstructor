@@ -10,16 +10,14 @@ open Brahma.FSharp.OpenCL.Extensions
 open System.Collections.Generic
 
 
-type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesIndexed) =
+type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[]) =
 
     let rowSize = extRowSize
     let nTermsCount = extNTermsCount
     let mutable recTable = extRecTable
     let rules = extRules
-    let rulesIndexed = extRulesIndexed
-    // todo
-    let localWorkSize = 1
-
+    let mutable rulesIndexed = extRulesIndexed
+    
     let platformName = "AMD*"
     let deviceType = DeviceType.Default
     
@@ -36,69 +34,99 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
     let run = 
         printfn "Using %A" provider
         
+        let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
+        let maxLocalWorkSize = 8//int <| lws.CastTo<uint64>()
+        printfn "Local memory size: %d" maxLocalWorkSize
+
+        let fillArray (arr:'a[]) (initFun:unit -> 'a) =
+            let count = arr.Length
+            if count % maxLocalWorkSize <> 0 
+            then 
+                let div = count / maxLocalWorkSize
+                Array.init ((div + 1) * maxLocalWorkSize) (fun i -> if i < count then arr.[i]
+                                                                    else initFun())
+            else arr
+        
+        let realRecTableLen = recTable.Length
+        recTable <- fillArray recTable createEmptyCellData
+        
+        printfn "rec table len: %d" recTable.Length                          
+        
+        let createEmptyRuleIndexed () =
+            new RuleIndexed((buildRule 0 0 0 0 0),0)
+
+        let realRulesIndexedLen = rulesIndexed.Length
+        rulesIndexed <- fillArray rulesIndexed createEmptyRuleIndexed
+        printfn "rules indexed len: %d" rulesIndexed.Length
+
         // Write quotation
         let command = 
             <@
-                fun (r:_3D) (rulesIndexed:_[]) -> 
+                fun (r:_3D) (rulesIndexed:_[]) (recTable:_[]) -> 
                     let tx = r.GlobalID0 // len
                     let ty = r.GlobalID1 // i
 
                     let i = ty
                     let len = tx
+
+                    if (len <= realRulesIndexedLen && i <= realRecTableLen)
+                    then                     
+                        let chooseNewLabel ruleLabel (lbl1:byte) (lbl2:byte) lState1 lState2 =
+                            if lState1 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
+                            elif lState2 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
+                            elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then [| int noLbl; int LblState.Undefined |] // new LabelWithState(noLbl, LblState.Undefined)
+                            else
+                                let mutable notEmptyLbl1 = noLbl
+                                let mutable notEmptyLbl2 = noLbl
+                                let mutable notEmptyLbl3 = noLbl 
+                                let mutable realLblCount = 0
+                                if lbl1 <> noLbl then 
+                                    notEmptyLbl1 <- lbl1
+                                    realLblCount <- realLblCount + 1
+                                if lbl2 <> noLbl then
+                                    if realLblCount = 0 then notEmptyLbl1 <- lbl2
+                                    elif realLblCount = 1 then notEmptyLbl2 <- lbl2
+                                    realLblCount <- realLblCount + 1
+                                if ruleLabel <> noLbl then 
+                                    if realLblCount = 0 then notEmptyLbl1 <- ruleLabel
+                                    elif realLblCount = 1 then notEmptyLbl2 <- ruleLabel
+                                    elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
+                                    realLblCount <- realLblCount + 1
+
+                                if realLblCount = 1 ||
+                                    (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
+                                    (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
+                                then [| int noLbl; int LblState.Defined |] // new LabelWithState(notEmptyLbl1, LblState.Defined)
+                                else [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
                     
-                    let chooseNewLabel ruleLabel (lbl1:byte) (lbl2:byte) lState1 lState2 =
-                        if lState1 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                        elif lState2 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                        elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then [| int noLbl; int LblState.Undefined |] // new LabelWithState(noLbl, LblState.Undefined)
-                        else
-                            let mutable notEmptyLbl1 = noLbl
-                            let mutable notEmptyLbl2 = noLbl
-                            let mutable notEmptyLbl3 = noLbl 
-                            let mutable realLblCount = 0
-                            if lbl1 <> noLbl then 
-                                notEmptyLbl1 <- lbl1
-                                realLblCount <- realLblCount + 1
-                            if lbl2 <> noLbl then
-                                if realLblCount = 0 then notEmptyLbl1 <- lbl2
-                                elif realLblCount = 1 then notEmptyLbl2 <- lbl2
-                                realLblCount <- realLblCount + 1
-                            if ruleLabel <> noLbl then 
-                                if realLblCount = 0 then notEmptyLbl1 <- ruleLabel
-                                elif realLblCount = 1 then notEmptyLbl2 <- ruleLabel
-                                elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
-                                realLblCount <- realLblCount + 1
+                        let processRule rule ruleIndex i k l =
+                            let rule = getRuleStruct rule
+                            if rule.R2 <> 0us then
+                                let leftStart = (i * rowSize + k) * nTermsCount
+                                let rightStart = ((k+i+1) * rowSize + l-k-1) * nTermsCount
 
-                            if realLblCount = 1 ||
-                                (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
-                                (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
-                            then [| int noLbl; int LblState.Defined |] // new LabelWithState(notEmptyLbl1, LblState.Defined)
-                            else [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                    
-                    let processRule rule ruleIndex i k l =
-                        let rule = getRuleStruct rule
-                        if rule.R2 <> 0us then
-                            let leftStart = (i * rowSize + k) * nTermsCount
-                            let rightStart = ((k+i+1) * rowSize + l-k-1) * nTermsCount
+                                for m in 0..nTermsCount - 1 do
+                                    let leftCell:CellData = recTable.[leftStart + m]
+                                    if not (isCellDataEmpty (leftCell)) && getCellRuleTop leftCell rules = rule.R1 then
+                                        let cellData1 = getCellDataStruct leftCell
+                                        for n in 0..nTermsCount - 1 do
+                                            let rightCell = recTable.[rightStart + n]
+                                            if not (isCellDataEmpty (rightCell)) && getCellRuleTop rightCell rules = rule.R2 then
+                                                let cellData2 = getCellDataStruct rightCell
+                                                let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
+                                                let newWeight = 0uy//weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
+                                                let currentElem = buildData ruleIndex (toState (lblWithState.[1])) (byte lblWithState.[0]) newWeight
+                                                recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1].rData <- currentElem
+                                                recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1]._k <- uint32 k
+                                                    // <- new CellData(currentElem, uint32 k) |> Some
 
-                            for m in 0..nTermsCount - 1 do
-                                let leftCell:CellData = recTable.[leftStart + m]
-                                if not (isCellDataEmpty (leftCell)) && getCellRuleTop leftCell rules = rule.R1 then
-                                    let cellData1 = getCellDataStruct leftCell
-                                    for n in 0..nTermsCount - 1 do
-                                        let rightCell = recTable.[rightStart + n]
-                                        if not (isCellDataEmpty (rightCell)) && getCellRuleTop rightCell rules = rule.R2 then
-                                            let cellData2 = getCellDataStruct rightCell
-                                            let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
-                                            let newWeight = 0uy//weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
-                                            let currentElem = buildData ruleIndex (toState (lblWithState.[1])) (byte lblWithState.[0]) newWeight
-                                            recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1].rData <- currentElem
-                                            recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1]._k <- uint32 k
-                                             // <- new CellData(currentElem, uint32 k) |> Some
-
-                    for k in 0..(len-1) do
-                        let curRule:RuleIndexed = rulesIndexed.[k]
-                        let h = ref 0
-                        h := 9//processRule curRule.Rule curRule.Index i k len
+                        for k in 0..(len-1) do
+                            let curRule:RuleIndexed = rulesIndexed.[k]
+                        
+                            let h = ref 0
+                            h := 9
+                            
+                            //processRule curRule.Rule curRule.Index i k len
                     
             @>
     
@@ -109,9 +137,9 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
         printfn "%s" !str
         
         // computation grid configuration: 2D grid with size = rows*columns and local block with size=localWorkSize*localWorkSize
-        let d =(new _3D(rules.Length,nTermsCount, nTermsCount, localWorkSize, localWorkSize, localWorkSize))
+        let d =(new _3D(rulesIndexed.Length, recTable.Length, recTable.Length, maxLocalWorkSize, maxLocalWorkSize, maxLocalWorkSize))
         // Prepare kernel. Pass actual parameters for computation:
-        kernelPrepare d rulesIndexed
+        kernelPrepare d rulesIndexed recTable
         // Add command into queue and finish it
         let _ = commandQueue.Add(kernelRun()).Finish()
     
@@ -160,7 +188,7 @@ type CYKOnGPU() =
             |> Set.count
 
         rowSize <- s.Length
-        recTable <- Array.init (rowSize * rowSize * nTermsCount) ( fun _ -> createEmptyCellData )
+        recTable <- Array.init (rowSize * rowSize * nTermsCount) ( fun _ -> createEmptyCellData () )
 
         (* writed in command *)
         (*
@@ -182,14 +210,17 @@ type CYKOnGPU() =
             )
         *)
         let fillTable rulesIndexed =
+          let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
+          gpuWork.Run()
+          gpuWork.Dispose()
+          (*
           [|1..rowSize - 1|]
           |> Array.iter (fun len ->
-                printfn "iter 1"
                 [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
                 |> Array(*.Parallel*).iter (fun i -> 
-                    printfn "iter 2"
-                    (new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)).Run((* todo command exec *))(*elem i len rulesIndexed*))
+                    ((*elem i len rulesIndexed*))
                 )
+          *)
         (*
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]

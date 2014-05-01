@@ -97,7 +97,8 @@ module CommonHelpers =
 
     let initSymbol (s:uint16) : symbol = 
         s
-    let createEmptyCellData = 
+
+    let createEmptyCellData () = 
         new CellData(System.UInt64.MaxValue, 0ul)
 
     let isCellDataEmpty (cd:CellData) = 

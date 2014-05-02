@@ -7,9 +7,11 @@ type CYKCore() =
     // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
-    let mutable recTable:_[,] = null
+    let mutable recTable:Option<_>[][,] = null
 
     let mutable lblNameArr = [||]
+
+    let mutable rowSize = 0
 
     let lblString lbl = 
         match lblNameArr with
@@ -19,6 +21,14 @@ type CYKCore() =
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
 
+    let printTbl () =
+            for i in 0..rowSize-1 do
+                for j in 0..rowSize-1 do
+                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
+                    printf "! %s !" (string cd)
+                printfn " "
+            printfn "" 
+    
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
         let nTermsCount = 
@@ -29,6 +39,7 @@ type CYKCore() =
             |> Set.ofArray
             |> Set.count
 
+        rowSize <- s.Length
         recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun _ _ -> Array.init nTermsCount (fun _ -> None))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
@@ -85,7 +96,9 @@ type CYKCore() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
-        
+        printfn "After 1st line fill:"
+        printTbl()
+
         printfn "Fill table started %s" (string System.DateTime.Now)
         fillTable ()
         printfn "Fill table finished %s" (string System.DateTime.Now)
@@ -95,15 +108,7 @@ type CYKCore() =
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
-        let printTbl () =
-            for i in 0..s.Length-1 do
-                for j in 0..s.Length-1 do
-                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
-                    printf "! %s !" (string cd)
-                printfn " "
-            printfn "" 
-
-        //printTbl ()
+        printTbl ()
 
         let getString state lbl weight = 
             let stateString = 
@@ -199,7 +204,7 @@ type CYKCore() =
         // If dialect undefined or was conflict lblName = "0"
         let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
-        | "" -> "Строка не выводима в заданной грамматике."
+        | "" -> "The string is not derivable in specified grammar"
         | _ -> 
             labelTracking (s.Length - 1)
             out

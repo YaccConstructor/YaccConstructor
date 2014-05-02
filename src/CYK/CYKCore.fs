@@ -22,12 +22,12 @@ type CYKCore() =
                 | _ -> lblNameArr.[(int lbl) - 1]
 
     let printTbl () =
-            for i in 0..rowSize-1 do
-                for j in 0..rowSize-1 do
-                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
-                    printf "! %s !" (string cd)
-                printfn " "
-            printfn "" 
+        for i in 0..rowSize-1 do
+            for j in 0..rowSize-1 do
+                let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
+                printf "! %s !" (string cd)
+            printfn " "
+        printfn "" 
     
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
@@ -75,6 +75,7 @@ type CYKCore() =
                                 recTable.[i,l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
                         )
                 )
+            //printfn "(%d, %d, %d) -> (%d, %d)" i k l i l
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 

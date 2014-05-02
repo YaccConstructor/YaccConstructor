@@ -162,7 +162,7 @@ type CYKCoreForGPU() =
           [|1..rowSize - 1|]
           |> Array.iter (fun len ->
                 [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
-                |> Array(*.Parallel*).iter (fun i -> elem i len rulesIndexed))
+                |> Array.Parallel.iter (fun i -> elem i len rulesIndexed))
         (*
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]
@@ -243,11 +243,10 @@ type CYKCoreForGPU() =
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
-            let index = ( 0 * rowSize + s.Length-1 ) * nTermsCount + i // ( s.Length-1 * rowSize + 0 - calcDiff (s.Length-1) ) * nTermsCount + i
-            printfn "i: %d last: %d index: %d" i last index 
-            let cellData = recTable.[index]
+            let index = ( (s.Length-1) * rowSize + 0 - calcDiff (s.Length-1) ) * nTermsCount + i // ( 0 * rowSize + s.Length-1 ) * nTermsCount + i 
             if i <= last 
             then 
+                let cellData = recTable.[index]
                 if cellData.IsSome 
                 then
                     let cellData = getCellDataStruct (cellData.Value)
@@ -257,7 +256,7 @@ type CYKCoreForGPU() =
                 else "" :: out (i+1) last
             else [""]
 
-        let lastIndex = nTermsCount - 1 //(recTable.[0 * rowSize + s.Length-1]).Length - 1
+        let lastIndex = nTermsCount - 1
         
         out 0 lastIndex
 
@@ -270,6 +269,7 @@ type CYKCoreForGPU() =
         let ruleInd,_,curL,curW = getData cell.rData
         let rule = getRuleStruct rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
+        //printfn "(%d, %d) -> (%d, %d), (%d, %d)" i l leftI leftL rightI rightL
         if l = 0
         then if curL <> noLbl
              then print curL curW leftI rightL leftL

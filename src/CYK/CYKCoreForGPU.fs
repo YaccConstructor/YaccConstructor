@@ -315,10 +315,12 @@ type CYKCoreForGPU() =
     let labelTracking lastInd = 
         let i,l = 0,lastInd
         let startIndex = ( l * rowSize + i - calcDiff l ) * nTermsCount // ( i * rowSize + l - calcDiff i ) * nTermsCount
+        let derivationNum = ref 0
         for ind in startIndex..startIndex + nTermsCount - 1 do
+            derivationNum := !derivationNum + 1
             recTable.[ind] 
             |> Option.iter(fun x ->
-                                printfn "derivation #%d" (ind + 1)
+                                printfn "derivation #%d" !derivationNum
                                 trackLabel i l x false)
             
     

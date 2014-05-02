@@ -96,12 +96,12 @@ type CYKCore() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
-        printfn "After 1st line fill:"
-        printTbl()
-
-        printfn "Fill table started %s" (string System.DateTime.Now)
+        
+        let startFill = System.DateTime.Now
+        printfn "Fill table started %s" (string startFill)
         fillTable ()
-        printfn "Fill table finished %s" (string System.DateTime.Now)
+        let endFill = System.DateTime.Now
+        printfn "Fill table finished %s [%s]" (string endFill) (string (endFill - startFill))
         
         recTable
 

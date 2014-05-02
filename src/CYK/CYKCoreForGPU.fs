@@ -33,28 +33,44 @@ type CYKCoreForGPU() =
                 !diff
 
     let printTbl () =
+        (*
         printfn "As table:"
         for i in 0..rowSize - 1 do
             for j in 0..rowSize - 1 do
-                if i <= j
+                if i < rowSize - i
                 then
                     let startIndex = (i * rowSize + j - calcDiff i) * nTermsCount
                     let mutable count = 0
                     for m in startIndex..startIndex + nTermsCount - 1 do
                         if recTable.[m].IsSome then count <- count + 1
                     printf " %d |" count
-            printfn " "
+            printfn ""
         printfn ""
-        
-        printfn "As array:"
-        [| 0..( rowSize * rowSize - calcDiff (rowSize - 1) - 1) |] 
+        *)
+        let needNewLine i =
+            if i = rowSize - 1 then true
+            else
+                let mutable lnEndCounter = rowSize - 1
+                let mutable newLine = rowSize - 1
+                let mutable k = 0
+                let mutable need = false
+                while (k  <= rowSize - 1 && i <> newLine) do
+                    newLine <- newLine + lnEndCounter
+                    lnEndCounter <- lnEndCounter - 1
+                    k <- k + 1
+                    if newLine = i 
+                    then 
+                        need <- true
+                need
+
+        [| 0..( rowSize * rowSize - calcDiff rowSize - 1) |] 
         |> Array.iter( fun i -> 
                                 let startIndex = i * nTermsCount // (i * rowSize + j - calcDiff i) * nTermsCount
                                 let mutable count = 0
                                 for m in startIndex..startIndex + nTermsCount - 1 do
                                     if recTable.[m].IsSome then count <- count + 1
                                 printf " %d |" count
-                                if i % rowSize = 0 then printfn ""
+                                if needNewLine i then printfn ""
         )
         
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
@@ -68,7 +84,7 @@ type CYKCoreForGPU() =
             |> Set.count
 
         rowSize <- s.Length
-        recTable <- Array.init ( ( rowSize * rowSize - calcDiff (rowSize - 1) ) * nTermsCount) (fun _ -> None)
+        recTable <- Array.init ( ( rowSize * rowSize - calcDiff rowSize ) * nTermsCount) (fun _ -> None)
         printfn "row size %d" rowSize
         printfn "non terms count %d" nTermsCount
         printfn "matrix should be %d" (rowSize * rowSize * nTermsCount)
@@ -163,8 +179,6 @@ type CYKCoreForGPU() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
                         recTable.[(k * rowSize + 0 - calcDiff k) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) |> Some)
-        printfn "After 1st line fill:"
-        printTbl()
         printfn "total rules count %d" rules.Length
                              
         let ntrIndexes = new ResizeArray<_>() // non-terminal rules indexes array

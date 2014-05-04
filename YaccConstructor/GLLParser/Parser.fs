@@ -10,13 +10,13 @@ open Yard.Generators.RNGLR
 //descriptor
 [<Struct>]
 type Label = 
-    val Rule     : int ref
-    val Position : int ref
+    val Rule     : int
+    val Position : int
     static member  Equal (label1 : Label) (label2 : Label) =
         let mutable result = true
         if label1.Rule <> label2.Rule || label1.Position <> label2.Position then result <- false
         result 
-    new (rule : int,position : int) = {Rule = ref rule; Position = ref position} 
+    new (rule : int,position : int) = {Rule = rule; Position = position} 
 
 type GSSNode = 
     val Index  : int   
@@ -92,13 +92,6 @@ let gssContainsEdge (gss : GSS) (nodeSrc : GSSNode) (nodeDst : GSSNode) =
             result <- true
     result
 
-(*let next =
-    let i = ref -1
-    fun () -> 
-        //let j = !i
-        incr i
-        !i
-*)
 
 type Incrementor(delta) =
     member this.Increment(i : int byref) =
@@ -107,7 +100,7 @@ type Incrementor(delta) =
         i <- i - delta
     
 
-let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
+let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let enum = tokens.GetEnumerator()
     let inputLength = Seq.length tokens
     let startNonTerm = parser.LeftSide.[parser.StartRule]
@@ -187,21 +180,21 @@ let buildAst<'TokenType> (parser : ParserSource<'TokenType>) (tokens : seq<'Toke
         and processing () = 
             let curInd = !currentIndex 
             let curToken = parser.TokenToNumber tokens.[curInd]
-            let curSymbol = parser.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position]
-            if Array.length parser.Rules.[!currentLabel.Value.Rule]  <> !currentLabel.Value.Position then
+            let curSymbol = parser.Rules.[currentLabel.Value.Rule].[currentLabel.Value.Position]
+            if Array.length parser.Rules.[currentLabel.Value.Rule]  <> currentLabel.Value.Position then
                 if parser.NumIsTerminal curSymbol  || parser.IsLiteral tokens.[curInd] then
                     if curToken = curSymbol then
-                        incrementor.Increment(currentLabel.Value.Position)
                         currentIndex := !currentIndex+1
                         pop !currentContext !currentGSSNode !currentIndex
-                elif parser.NumIsNonTerminal parser.Rules.[!currentLabel.Value.Rule].[!currentLabel.Value.Position] then 
-                    let mutable index = !currentLabel.Value.Rule
+                elif parser.NumIsNonTerminal parser.Rules.[currentLabel.Value.Rule].[currentLabel.Value.Position] then 
+                    let mutable index = currentLabel.Value.Rule
                     index <- (index*(parser.IndexatorFullCount))
-                    index <- index + !currentLabel.Value.Position
+                    index <- index + currentLabel.Value.Position
                     if Array.length parser.Table.[index] <> 0 then
                         let position = 0
                         for rulesN in parser.Table.[index] do
-                            addContextRulePosition rulesN position !currentGSSNode !currentIndex
+                            //addContextRulePosition rulesN position !currentGSSNode !currentIndex
+                            updateGSS !currentLabel !currentIndex !currentGSSNode
             else 
                 pop !currentContext !currentGSSNode !currentIndex
             dispatcher ()

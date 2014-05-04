@@ -38,10 +38,11 @@ let getLeafSemantic leaf isTok =
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
+    printBr "let value = fst <| _rnglr_var_0"
 
     if isTok
-    then printBr "new %sTermNode(\"%s\", ranges) :> ITreeNode" <| toClassName leaf <| leaf
-    else printBr "new %sLitNode(\"%s\", ranges) :> ITreeNode"  <| litToClassName leaf <| leaf
+    then printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName leaf <| leaf
+    else printBr "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode"  <| litToClassName leaf <| leaf
 
     res.ToString()
                                

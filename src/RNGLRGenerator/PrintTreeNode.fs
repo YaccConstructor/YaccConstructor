@@ -21,7 +21,7 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 0 "using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;"
     printBrInd 0 "using JetBrains.ReSharper.Psi.Modules;"
     printBrInd 0 "using JetBrains.ReSharper.Psi.Tree;"
-    printBrInd 0 "using JetBrains.ReSharper.Psi.Impl;"
+    //printBrInd 0 "using JetBrains.ReSharper.Psi.Impl;"
     printBrInd 0 "using JetBrains.Text;"
     printBrInd 0 "using Highlighting.Core;"
 
@@ -64,29 +64,35 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBr ""
     printBrInd 2 "public PsiLanguageType Language"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.Language); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.Language) ?? UnknownLanguage.Instance; }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public NodeUserData UserData { get; private set; }"
     printBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
 //    printBrInd 2 "public NodeUserDataHolder NodeUserDataHolder { get; private set; }"    
-    printBr ""    
-    printBrInd 2 "public %s (string text)" nameOfClass
+    printBr ""
+    printBrInd 2 "public %s (string ycTokName) : this (ycTokName, string.Empty)" nameOfClass
+    printBrInd 2 "{"
+    printBrInd 2 "}"
+
+    printBr ""
+    printBrInd 2 "public %s (string ycTokName, string ycValue)" nameOfClass
     printBrInd 2 "{"
     printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
     printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
-    printBrInd 3 "UserData.PutData(KeyConstant.Text, text);"
+    printBrInd 3 "UserData.PutData(KeyConstant.YcTokName, ycTokName);"
+    printBrInd 3 "UserData.PutData(KeyConstant.YcValue, ycValue);"
     printBrInd 2 "}"
     printBr ""
         
-    printBrInd 2 "public %s (string text, object positions) : this (text)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)" nameOfClass
     printBrInd 2 "{"
     printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
     printBrInd 2 "}"
     printBr ""
     // printing all methods
 
-    printBrInd 2 "public void SetPositions(IEnumerable<DocumentRange> positions)"
+    printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
     printBrInd 2 "{"
     printBrInd 3 "if (positions != null)"
     printBrInd 3 "{"
@@ -112,19 +118,19 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 2 "public IPsiModule GetPsiModule()"
     printBrInd 2 "{"
-    printBrInd 3 "return this.Parent.GetPsiModule();"
+    printBrInd 3 "return default(IPsiModule);"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public IPsiSourceFile GetSourceFile()"
     printBrInd 2 "{"
-    printBrInd 3 "return Parent.GetSourceFile();"
+    printBrInd 3 "return default(IPsiSourceFile);"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public ReferenceCollection GetFirstClassReferences()"
     printBrInd 2 "{"
-    printBrInd 3 "return default(ReferenceCollection);"
+    printBrInd 3 "return ReferenceCollection.Empty;"
     printBrInd 2 "}"
     printBr ""
 
@@ -142,7 +148,10 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 2 "public bool Contains(ITreeNode other)"
     printBrInd 2 "{"
-    printBrInd 3 "return true;"
+    printBrInd 3 "if (this.FirstChild != null)"
+    printBrInd 4 "return this.Children().Contains(other);"
+    printBrInd 3 "else"
+    printBrInd 4 "return this == other;"
     printBrInd 2 "}"
     printBr ""
 
@@ -186,22 +195,26 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 2 "public TreeOffset GetTreeStartOffset()"
     printBrInd 2 "{"
-    printBrInd 3 "return new TreeOffset();"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "if (ranges == null || ranges.Count == 0)"
+    printBrInd 4 "return TreeOffset.InvalidOffset;"
+    printBr ""
+    printBrInd 3 "return new TreeOffset(ranges[0].TextRange.StartOffset);"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public int GetTextLength()"
     printBrInd 2 "{"
-    printBrInd 3 "string text = UserData.GetData(KeyConstant.Text);"
-    printBrInd 3 "return text != null ? text.Length : 0;"
+    printBrInd 3 "return GetText(new StringBuilder()).Length;"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public StringBuilder GetText(StringBuilder to)"
     printBrInd 2 "{"
-    printBrInd 3 "for (ITreeNode nextSibling = this.FirstChild; nextSibling != null; nextSibling = nextSibling.NextSibling)"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "foreach (DocumentRange range in ranges)"
     printBrInd 3 "{"
-    printBrInd 4 "nextSibling.GetText(to);"
+    printBrInd 4 "to.Append(range.GetText());"
     printBrInd 3 "}"
     printBrInd 3 "return to;"
     printBrInd 2 "}"
@@ -209,23 +222,33 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 2 "public IBuffer GetTextAsBuffer()"
     printBrInd 2 "{"
-    printBrInd 3 "var text = UserData.GetData(KeyConstant.Text);"
-    printBrInd 3 "return new StringBuffer(text?? \"\");"
+    printBrInd 3 "return new StringBuffer(GetText());"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public string GetText()"
     printBrInd 2 "{"
-            //StringBuilder to = (this.MyCachedLength >= 0) ? new StringBuilder(this.myCachedLength) : new StringBuilder();
-            //return this.GetText(to).ToString();
-    printBrInd 3 "string text = UserData.GetData(KeyConstant.Text);"
-    printBrInd 3 "return text?? \"\";"
+    printBrInd 3 "return GetText(new StringBuilder()).ToString();"
     printBrInd 2 "}"
     printBr ""
 
     printBrInd 2 "public ITreeNode FindNodeAt(TreeTextRange treeTextRange)"
     printBrInd 2 "{"
-    printBrInd 3 "return null;"
+    printBrInd 3 "ITreeNode needNode = null;"
+    printBrInd 3 "for (ITreeNode child = this.FirstChild; child != null; child = child.NextSibling)"
+    printBrInd 3 "{"
+    printBrInd 4 "var childOffset = child.GetTreeStartOffset();"
+    printBrInd 4 "if (!childOffset.IsValid())"
+    printBrInd 5 "continue;"
+    printBrInd 4 "if (child.GetTreeStartOffset() <= treeTextRange.StartOffset)"
+    printBrInd 5 "needNode = child;"
+    printBrInd 4 "else"
+    printBrInd 5 "break;"
+    printBrInd 3 "}"
+    printBrInd 3 "//needNode = needNode.PrevSibling;"
+    printBr ""
+    printBrInd 3 "if (needNode == null || needNode.FirstChild == null) return needNode;"
+    printBrInd 3 "else return needNode.FindNodeAt(treeTextRange);"
     printBrInd 2 "}"
     printBr ""
 

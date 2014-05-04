@@ -3,7 +3,6 @@ using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
-using JetBrains.ReSharper.Feature.Services.LiveTemplates.Context;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
 
@@ -59,7 +58,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public virtual void ProcessAfterInterior(ITreeNode element, IHighlightingConsumer consumer)
         {
-            VisitSomething(element, consumer);
+            if (element.FirstChild == null)
+                VisitSomething(element, consumer);
+            
         }
         #endregion
 

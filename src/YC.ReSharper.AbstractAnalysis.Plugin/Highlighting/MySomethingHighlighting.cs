@@ -1,4 +1,5 @@
-﻿using JetBrains.DocumentModel;
+﻿using Highlighting.Core;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Impl;
 using JetBrains.ReSharper.Psi.Tree;
@@ -16,10 +17,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public MySomethingHighlighting(ITreeNode element)
         {
             myElement = element;
-            var tokenName = element.GetText();
-            if (TreeNodeHolder.TokenToColor != null && TreeNodeHolder.TokenToColor.ContainsKey(tokenName))
+            string ycTokName = element.UserData.GetData(KeyConstant.YcTokName);
+            if (TreeNodeHolder.TokenToColor == null || string.IsNullOrEmpty(ycTokName))
             {
-                attributeId = TreeNodeHolder.TokenToColor[tokenName];
+                attributeId = TreeNodeHolder.DefaultColor;
+            }
+
+            else if (TreeNodeHolder.TokenToColor.ContainsKey(ycTokName))
+            {
+                attributeId = TreeNodeHolder.TokenToColor[ycTokName];
             }
             else
             {

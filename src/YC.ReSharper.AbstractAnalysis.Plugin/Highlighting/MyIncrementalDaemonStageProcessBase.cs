@@ -42,7 +42,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             // Running visitor against the PSI
             ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             ycProcessor.Process();
-
+            
             TreeNodeHolder.ParseFile(ycProcessor.XmlPath);
         }
 
@@ -69,7 +69,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private void ProcessThisAndDescendants(IRecursiveElementProcessor processor)
         {
+            TreeNodeHolder.ClearForest();
             UpdateYCProcessor();
+            TreeNodeHolder.YcProcessor = ycProcessor;
 
             var tree = ycProcessor.GetNextTree();
 
@@ -77,6 +79,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             while (tree != null)
             {
                 ProcessDescendants(tree, processor);
+                TreeNodeHolder.Forest.Add(tree);
                 tree = ycProcessor.GetNextTree();
             }
 

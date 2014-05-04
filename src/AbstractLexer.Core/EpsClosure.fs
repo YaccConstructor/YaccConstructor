@@ -118,9 +118,10 @@ let NfaToDfa (inGraph: AbstractParsing.Common.ParserInputGraph<_>)=
                 { Id= newDfaNodeId()
                   Name = nfaSet.Fold (fun s nid -> string nid + "-" + s) ""
                   Transitions=[]
-                  Accepted= nfaSet.Elements 
-                            |> Seq.map (fun nid -> [])//nfaNodeMap.[nid].Accepted)
-                            |> List.concat }
+                  Accepted= [] (*nfaSet.Elements 
+                            |> Array.collect (fun nid -> [])//nfaNodeMap.[nid].Accepted)
+                            |> List.concat*)
+                             }
             //Printf.printfn "id = %d" dfaNode.Id;
 
             dfaNodes := (!dfaNodes).Add(nfaSet,dfaNode)

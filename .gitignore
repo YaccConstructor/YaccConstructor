@@ -107,6 +107,7 @@ Examples/AbstractAnalysis/SQL/tests/*.dot.pdf
 src/RNGLRAbstractParser.Test/*.yrd.fs
 src/RNGLRParser.ErrorRecoveryTest/*.yrd.fs
 src/FsYaccFrontend/Parser.fs
+*.userprefs
 src/packages/*
 Examples/Calc/Calc/FsYARD/*
 Examples/Calc/packages/*

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{c1836f65-bdf4-4a8b-b59d-74a9676c9e5b}</ProjectGuid>
+    <ProjectGuid>{C1836F65-BDF4-4A8B-B59D-74A9676C9E5B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>MsSqll</RootNamespace>
     <AssemblyName>MsSql</AssemblyName>
@@ -13,7 +13,6 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>MsSqll</Name>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,7 +62,6 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <Import Project="..\..\yc\FsYard.targets" />
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
@@ -79,7 +77,7 @@
     </FsYard>
     <FsYard Include="datatype.yrd" />
     <FsYard Include="stmnt.yrd" />
-    <FsYard Include="expr.yrd" />
+    <FsYard Include="expr.yrd"/>
     <FsYard Include="execute_stmnt.yrd" />
     <FsYard Include="..\common_grammars\set_stmnt.yrd">
       <Link>set_stmnt.yrd</Link>
@@ -93,9 +91,6 @@
     <FsYard Include="..\common_grammars\MsCommon.yrd">
       <Link>MsCommon.yrd</Link>
     </FsYard>
-    <FsYard Include="../../../GrammarTemplates/Common.yrd">
-      <Link>Common.yrd</Link>
-    </FsYard>
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
@@ -104,6 +99,9 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Driver.fs" />
     <None Include="packages.config" />
+    <FsYard Include="..\..\..\GrammarTemplates\Common.yrd">
+      <Link>Common.yrd</Link>
+    </FsYard>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractParsing.Common">
@@ -112,13 +110,12 @@
     <Reference Include="Common">
       <HintPath>..\..\yc\Common.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
+    <Reference Include="FSharp.Core, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b">
+      <HintPath>/Users/dancingrobot84/Projects/dotfiles/bin/fspp/bin/FSharp.PowerPack.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.7.11\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="RNGLR">
@@ -140,7 +137,7 @@
       <HintPath>..\..\yc\Utils.SourceText.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
     </Target>

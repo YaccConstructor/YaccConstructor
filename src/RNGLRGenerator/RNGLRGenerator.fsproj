@@ -91,7 +91,6 @@
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

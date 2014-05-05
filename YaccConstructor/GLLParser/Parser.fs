@@ -6,6 +6,8 @@ open System.Collections.Generic
 //open Yard.Generators.RNGLR.DataStructures
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
+open Yard.Generators.RNGLR.AST
+open Yard.Generators.RNGLR.DataStructures
 
 //descriptor
 [<Struct>]
@@ -21,40 +23,40 @@ type Label =
 type GSSNode = 
     val Index  : int   
     val Value  : Label 
+    val mutable OutEdges : UsualOne<GSSEdge>
     static member  Equal (node1 : GSSNode) (node2 : GSSNode) =
         let mutable result = true
         if node1.Index <> node2.Index || not(Label.Equal node1.Value node2.Value) then result <- false
         result  
-    new (index, value) = {Index = index; Value = value}
+    new (index, value) = {OutEdges = Unchecked.defaultof<_>; Index = index; Value = value}
 
-type GSSEdge =
-    val Src      : GSSNode
-    val Dst      : GSSNode
-    member  this.Equal (nodeSrc : GSSNode) (nodeDst : GSSNode) =
+and GSSEdge =
+    val Dst    : GSSNode
+     /// AST on the edge
+    val Ast    : obj
+    member  this.Equal (nodeDst : GSSNode) =
         let mutable result = true
-        if not (GSSNode.Equal this.Src nodeSrc) || not (GSSNode.Equal this.Dst nodeDst) then result <- false
+        if not (GSSNode.Equal this.Dst nodeDst) then result <- false
         result  
-    new (src, dst) = {Src = src; Dst = dst}
-
-type GSS (node, len) =
-    let dummyNode = node
-    let length = len
-    let mutable edgeSet = new List<GSSEdge>() 
-    member this.AddEdge (newEdge : GSSEdge)=
-        edgeSet.Add newEdge
-    member this.Dummy = dummyNode
-    member this.Length = length
-    member this.EdgeSet = edgeSet
+    new (src, dst, ast) = {Dst = dst; Ast = ast}
+//type GSS (len) =
+//    let length = len
+//    let mutable edgeSet = new List<GSSEdge>() 
+//    member this.AddEdge (newEdge : GSSEdge)=
+//        edgeSet.Add newEdge
+//    member this.Length = length
+//    member this.EdgeSet = edgeSet
 
 type Context =
     val Index    : int  //index in the input stream
     val Label    : Label //current label
     val Node     : GSSNode //current stack
+    val Ast     : obj
     static member  Equal (con1:Context) (con2:Context) =
         let mutable result = true
         if con1.Index <> con2.Index || con1.Label <> con2.Label || not (GSSNode.Equal con1.Node con2.Node) then result <- false
         result 
-    new (index, label, node) = {Index = index; Label = label; Node = node}
+    new (index, label, node, ast) = {Index = index; Label = label; Node = node; Ast = ast}
 
 type ParseResult<'s> =
     | Success of 's
@@ -126,12 +128,15 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let setR = new Queue<Context>();   // множество всех контекстов
         let setP = new Queue<GSSNode>();   //множество для потенциально незавершаемых попов       
         let currentIndex = ref 0
+        let currentN = new Nodes()
+        let currentR = new Nodes()
         let currentRule = parser.StartRule
+        let dummyNode = new GSSNode(!currentIndex, new Label(currentRule, -1))
         let currentLabel = ref <| new Label(currentRule, 0);
         let startLabel = new Label(currentRule, 0);
         let startGSSNode = new GSSNode(!currentIndex,!currentLabel);
         let currentGSSNode = ref <| new GSSNode(!currentIndex,!currentLabel);
-        let gss =  new GSS(startGSSNode, tokens.Length)
+        let gss =  new GSS(dummyNode, tokens.Length)
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode)
         let mutable firstTime = true
         setR.Enqueue(!currentContext)

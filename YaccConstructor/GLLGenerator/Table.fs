@@ -85,10 +85,3 @@ type Table (grammar : FinalGrammar) =
         result
   
     member this.result = _table
-
-
-    
-
-    
-            
-   

@@ -696,36 +696,53 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
     ///<summary>
     /// Returns all trees which contain some token.
-    /// <para> Token - number of token </para>
+    /// <para> tokenName - name of token </para>
+    /// <para> tokRange - range of token </para>
     ///</summary>
-    member this.GetForestWithToken token = 
-        let forestFam = ref []
-        let mutable forestTree = []
-        let filter (family : Family) = 
-            let nodes = this.getTokensFromFamily family
-            not <| List.exists (fun fam -> 
-                                    let famNodes = this.getTokensFromFamily fam
-                                    let newList = List.filter (fun node1 -> List.exists (fun node2 -> node1 = node2) famNodes) nodes
-                                    newList.Length = nodes.Length
-                                ) !forestFam 
+    member this.GetForestWithToken tokRange (tokenToRange: 'TokenType -> seq<_>) = 
+        let findToken toRange = 
+            let predicate (range : seq<_>) = 
+                let enum = range.GetEnumerator()
+                enum.MoveNext() |> ignore
+                let firstElem = enum.Current
+                firstElem = tokRange
+                
+            Array.tryFindIndex (fun tok -> 
+                            let range = tokenToRange tok
+                            predicate range) tokens
 
-        let filterTree (tree : Tree<_>)= 
-            match tree.Root with
-            | :? AST as ast -> 
-                // I suppose that rootFamily.other is always null. But I'm not sure
-                let res = filter ast.first
-                if res then forestFam := ast.first :: !forestFam
-                res
-            | _ -> failwith "Error in GetForestWithToken function"
+        let tokNumberOption = findToken tokenToRange
+        if tokNumberOption.IsNone
+        then []
+        else
+            let token = tokNumberOption.Value
+            let forestFam = ref []
+            let mutable forestTree = []
+            let filter (family : Family) = 
+                let nodes = this.getTokensFromFamily family
+                not <| List.exists (fun fam -> 
+                                        let famNodes = this.getTokensFromFamily fam
+                                        let newList = List.filter (fun node1 -> List.exists (fun node2 -> node1 = node2) famNodes) nodes
+                                        newList.Length = nodes.Length
+                                    ) !forestFam 
 
-        let mutable pair = this.GetNextTree [token] filter
-        let mutable tree = fst pair
-        let mutable a = snd pair
-        while filterTree tree do
-            forestTree <- tree :: forestTree
-            tree <- fst <| this.GetNextTree [token] filter
+            let filterTree (tree : Tree<_>)= 
+                match tree.Root with
+                | :? AST as ast -> 
+                    // I suppose that rootFamily.other is always null. But I'm not sure
+                    let res = filter ast.first
+                    if res then forestFam := ast.first :: !forestFam
+                    res
+                | _ -> failwith "Error in GetForestWithToken function"
+
+            let mutable pair = this.GetNextTree [token] filter
+            let mutable tree = fst pair
+            let mutable a = snd pair
+            while filterTree tree do
+                forestTree <- tree :: forestTree
+                tree <- fst <| this.GetNextTree [token] filter
         
-        forestTree
+            forestTree
 
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =

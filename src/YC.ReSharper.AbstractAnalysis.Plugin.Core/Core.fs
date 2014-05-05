@@ -53,7 +53,25 @@ type Processor(file) =
                     forest <- [ast, errors] @ forest
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
-            
+        
+    let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+        let ranges = 
+            brs |> Seq.groupBy (fun x -> x.back_ref)
+            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+            |> Seq.map(fun brs ->
+                try
+                    let pos =  brs |> Array.map(fun i -> i.pos_cnum)
+                    let lengthTok = pos.Length
+                    let beginPosTok = pos.[0] + 1
+                    let endPosTok = pos.[lengthTok-1] + 2 
+                    let endPos = 
+                        brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                        - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
+                    brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+                with
+                | e -> 
+                    brs.[0].back_ref.GetDocumentRange())
+        ranges    
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
@@ -65,24 +83,6 @@ type Processor(file) =
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
-        let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
-            let ranges = 
-                brs |> Seq.groupBy (fun x -> x.back_ref)
-                |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-                |> Seq.map(fun brs ->
-                    try
-                        let pos =  brs |> Array.map(fun i -> i.pos_cnum)
-                        let lengthTok = pos.Length
-                        let beginPosTok = pos.[0] + 1
-                        let endPosTok = pos.[lengthTok-1] + 2 
-                        let endPos = 
-                            brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                            - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-                        brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-                    with
-                    | e -> 
-                        brs.[0].back_ref.GetDocumentRange())
-            ranges
 
         let addError tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
@@ -121,7 +121,7 @@ type Processor(file) =
             | GLOBALVAR (sourceText,brs)    -> e "GLOBALVAR" sourceText.text brs
             | IDENT (sourceText,brs)        -> e "IDENT" sourceText.text brs
             | LOCALVAR (sourceText,brs)     -> e "LOCALVAR" sourceText.text brs
-            | RNGLR_EOF (sourceText,brs)-> e "EOF" sourceText.text brs
+            | RNGLR_EOF (sourceText,brs) -> e "EOF" sourceText.text brs
             | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
             | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
             | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
@@ -135,17 +135,18 @@ type Processor(file) =
                     xmlPath <- Calc.xmlPath
                     language <- Calc
                     processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
-                (*| TSQL -> 
-                    xmlPath <- TSQL.xmlPath
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
-                | JSON -> 
+                (*| JSON -> 
                     xmlPath <- JSON.xmlPath
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot*)
+                    language <- JSON
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
+                | TSQL -> 
+                    xmlPath <- TSQL.xmlPath
+                    language <- TSQL
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot*)
             )
 
         lexerErrors, parserErrors
 
-//    member this.TreeNode = List.toArray treeNode
     member this.XmlPath = xmlPath
     
     member this.GetNextTree() = 
@@ -173,18 +174,28 @@ type Processor(file) =
             let treeNodeList = translate nextTree errors :> seq<ITreeNode>
             treeNodeList.ToTreeNodeCollection().First()
 
-    member this.GetForestWithToken() = 
+    member this.GetForestWithToken range = 
         let translate = 
             match language with
             | Calc -> Calc.translate
             | JSON -> JSON.translate
             | TSQL -> TSQL.translate
 
-        let tokNumber = 0
+        let calcPos token  = 
+            let tokenData = 
+                match language with
+                | Calc -> Calc.AbstractParser.tokenData
+//                | JSON -> JSON.Parser.tokenData 
+//                | TSQL -> tokenData
+            
+            let (_ : string), (position : AbstractLexer.Core.Position<ICSharpLiteralExpression>[]) 
+                = unbox <| tokenData token
+                
+            calculatePos position
 
         let res = new ResizeArray<_>()
         for ast, errors in forest do
-            let trees = ast.GetForestWithToken 0
+            let trees = ast.GetForestWithToken range calcPos
             for tree in trees do
                 let treeNodeList = translate tree errors :> seq<ITreeNode>
                 res.Add <| treeNodeList.ToTreeNodeCollection().First()

@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 using Highlighting.Core;
+using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using QuickGraph.Collections;
@@ -12,15 +13,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     public class TreeNodeHolder
     {
-        private static List<ITreeNode> forest = new List<ITreeNode>();
-        public static List<ITreeNode> Forest { get { return forest; } }
+        //private static List<ITreeNode> forest = new List<ITreeNode>();
+        //public static List<ITreeNode> Forest { get { return forest; } }
 
         public static Core.Processor YcProcessor { get; set; }
 
-        public static void ClearForest()
-        {
-            forest.Clear();
-        }
+        //public static void ClearForest()
+        //{
+        //    forest.Clear();
+        //}
         
         public static readonly string DefaultColor = HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE;
 
@@ -41,7 +42,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {"FORMAT_STRING_ITEM", HighlightingAttributeIds.FORMAT_STRING_ITEM},
             {"HIDES_ATTRIBUTE", HighlightingAttributeIds.HIDES_ATTRIBUTE},
             {"HINT_ATTRIBUTE", HighlightingAttributeIds.HINT_ATTRIBUTE},
-            
             {"IMPLEMENTS_AND_HIDES_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_AND_HIDES_ATTRIBUTE},
             {"IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE},
             {"IMPLEMENTS_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_ATTRIBUTE},

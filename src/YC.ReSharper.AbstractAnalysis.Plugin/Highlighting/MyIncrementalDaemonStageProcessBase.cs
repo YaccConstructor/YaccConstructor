@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Highlighting.Core;
 using JetBrains.Annotations;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
@@ -9,10 +6,7 @@ using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Files;
-using JetBrains.ReSharper.Psi.Impl;
-using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
 using JetBrains.ReSharper.Psi.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
@@ -21,7 +15,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         private readonly IDaemonProcess myProcess;
         private readonly DaemonProcessKind myProcessKind;
-        private YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor ycProcessor;
 
         protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
             : base(process, settingsStore)
@@ -31,25 +24,27 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myProcessKind = processKind;
         }
 
-        private void UpdateYCProcessor()
+        private Core.Processor UpdateYCProcessor()
         {
             // Getting PSI (AST) for the file being highlighted
             var sourceFile = myDaemonProcess.SourceFile;
             var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
             if (file == null)
-                return;
+                return null;
 
             // Running visitor against the PSI
-            ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
+            var ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             ycProcessor.Process();
             
             TreeNodeHolder.ParseFile(ycProcessor.XmlPath);
+            return ycProcessor;
         }
 
         public override void Execute(Action<DaemonStageResult> commiter)
         {
             if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
                 return;
+
 
             Action globalHighlighter = () =>
             {
@@ -69,8 +64,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private void ProcessThisAndDescendants(IRecursiveElementProcessor processor)
         {
-            TreeNodeHolder.ClearForest();
-            UpdateYCProcessor();
+            Core.Processor ycProcessor = UpdateYCProcessor();
+            if (ycProcessor == null)
+                return;
+
             TreeNodeHolder.YcProcessor = ycProcessor;
 
             var tree = ycProcessor.GetNextTree();
@@ -79,19 +76,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             while (tree != null)
             {
                 ProcessDescendants(tree, processor);
-                TreeNodeHolder.Forest.Add(tree);
                 tree = ycProcessor.GetNextTree();
             }
-
-            //var fsTree = ycProcessor.GetForestWithToken<IEnumerable<IMyTreeNode>>();
-            //if (fsTree != null)
-            //{
-            //    foreach (IEnumerable<IMyTreeNode> nodes in fsTree)
-            //    {
-            //        var tree = (nodes.ToList())[0];
-            //        ProcessDescendants(tree, processor);
-            //    }
-            //}
         }
 
         private void ProcessDescendants([NotNull] ITreeNode root, IRecursiveElementProcessor processor)

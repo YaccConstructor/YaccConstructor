@@ -28,6 +28,8 @@ type ParserSource2<'TokenType> (
                                , acceptEmptyInput   : bool
                                , numIsTerminal      : int -> bool
                                , numIsNonTerminal   : int -> bool
+                               , numIsLiteral       : int -> bool
+                               , canInferEpsilon    : bool array
                                ) =
     let length =
         let res = Array.zeroCreate <| (rulesStart.Length - 1)
@@ -42,30 +44,32 @@ type ParserSource2<'TokenType> (
     
                   
                                
-    member this.GenLiteral = genLiteral 
-    member this.TokenData = tokenData
-    member this.IsLiteral = isLiteral
-    member this.IsTerminal = isTerminal
-    member this.IsNonTerminal = isNonTerminal 
+    member this.GenLiteral      = genLiteral 
+    member this.TokenData       = tokenData
+    member this.IsLiteral       = isLiteral
+    member this.IsTerminal      = isTerminal
+    member this.IsNonTerminal   = isNonTerminal 
     member this.GetLiteralNames = getLiteralNames                         
-    member this.Table = table
-    member this.Rules = _rules
-    member this.RulesStart = rulesStart
-    member this.Length = length
-    member this.LeftSide = leftSide
-    member this.StartRule = startRule
-    member this.TokenToNumber = tokenToNumber
-    member this.NumToString = numToString
-    member this.LiteralEnd = literalEnd
-    member this.LiteralStart = literalStart
-    member this.TermEnd = termEnd 
-    member this.TermStart = termStart
-    member this.TermCount = termCount
-    member this.NonTermCount = nonTermCount
-    member this.LiteralCount = literalCount
-    member this.IndexEOF = indexEOF
-    member this.RulesCount = rulesCount
+    member this.Table           = table
+    member this.Rules           = _rules
+    member this.RulesStart      = rulesStart
+    member this.Length          = length
+    member this.LeftSide        = leftSide
+    member this.StartRule       = startRule
+    member this.TokenToNumber   = tokenToNumber
+    member this.NumToString     = numToString
+    member this.LiteralEnd      = literalEnd
+    member this.LiteralStart    = literalStart
+    member this.TermEnd         = termEnd 
+    member this.TermStart       = termStart
+    member this.TermCount       = termCount
+    member this.NonTermCount    = nonTermCount
+    member this.LiteralCount    = literalCount
+    member this.IndexEOF        = indexEOF
+    member this.RulesCount      = rulesCount
     member this.IndexatorFullCount = indexatorFullCount
-    member this.AcceptEmptyInput = acceptEmptyInput
-    member this.NumIsTerminal = numIsTerminal
-    member this.NumIsNonTerminal = numIsNonTerminal
+    member this.AcceptEmptyInput   = acceptEmptyInput
+    member this.NumIsTerminal      = numIsTerminal
+    member this.NumIsNonTerminal   = numIsNonTerminal
+    member this.NumIsLiteral       = numIsLiteral
+    member this.canInferEpsilon    = canInferEpsilon

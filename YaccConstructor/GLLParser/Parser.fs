@@ -10,89 +10,67 @@ open Yard.Generators.RNGLR.AST
 open Yard.Generators.RNGLR.DataStructures
 
 //descriptor
-[<Struct>]
-type Label = 
-    val Rule     : int
-    val Position : int
+
+type Label =  
+    val Rule             : int
+    val mutable Position : int 
     static member  Equal (label1 : Label) (label2 : Label) =
         let mutable result = true
         if label1.Rule <> label2.Rule || label1.Position <> label2.Position then result <- false
         result 
     new (rule : int,position : int) = {Rule = rule; Position = position} 
 
-type GSSNode = 
-    val Index  : int   
-    val Value  : Label 
-    val mutable OutEdges : UsualOne<GSSEdge>
-    static member  Equal (node1 : GSSNode) (node2 : GSSNode) =
-        let mutable result = true
-        if node1.Index <> node2.Index || not(Label.Equal node1.Value node2.Value) then result <- false
-        result  
-    new (index, value) = {OutEdges = Unchecked.defaultof<_>; Index = index; Value = value}
+[<AllowNullLiteral>]
+type Vertex  =
+    val mutable OutEdges : UsualOne<Edge>
+    val Level            : int
+    val Value            : Label
+    new (value, level) = {OutEdges = Unchecked.defaultof<_>; Value = value; Level = level}
 
-and GSSEdge =
-    val Dst    : GSSNode
-     /// AST on the edge
-    val Ast    : obj
-    member  this.Equal (nodeDst : GSSNode) =
-        let mutable result = true
-        if not (GSSNode.Equal this.Dst nodeDst) then result <- false
-        result  
-    new (src, dst, ast) = {Dst = dst; Ast = ast}
-//type GSS (len) =
-//    let length = len
-//    let mutable edgeSet = new List<GSSEdge>() 
-//    member this.AddEdge (newEdge : GSSEdge)=
-//        edgeSet.Add newEdge
-//    member this.Length = length
-//    member this.EdgeSet = edgeSet
+and Edge =
+    struct
+        val Ast   : obj
+        val Dest  : Vertex
+        val Begin : int
+        val End   : int
+        new (d, a, b, e) = {Dest = d; Ast = a; Begin = b; End = e}
+    end
+
+/// Compare vertex like a pair: (level, state)
+let inline private less (v' : Vertex) (v : Vertex) = v'.Level < v.Level 
+let inline private eq (v' : Vertex) (v : Vertex) = v'.Level = v.Level && Label.Equal v'.Value v.Value
+
+
 
 type Context =
-    val Index    : int  //index in the input stream
-    val Label    : Label //current label
-    val Node     : GSSNode //current stack
-    val Ast     : obj
-    static member  Equal (con1:Context) (con2:Context) =
-        let mutable result = true
-        if con1.Index <> con2.Index || con1.Label <> con2.Label || not (GSSNode.Equal con1.Node con2.Node) then result <- false
-        result 
-    new (index, label, node, ast) = {Index = index; Label = label; Node = node; Ast = ast}
+    val Index         : int
+    val Label         : Label
+    val GssNode       : Vertex
+    val SppfNode      : obj
+    val Positions     : int * int
+    member this.Equal(indx, lbl, vrtx, sppf) =
+        let mutable res = false
+        if this.Index = indx && Label.Equal this.Label lbl && eq this.GssNode vrtx ///как сравнивать ячейки sppf
+            then res <- true
+        res    
+    //CHECK!!!! Whether these numbers are required everytime
+  //  new (index, label, node, ast) = new (index, label, node, ast, (-1,-1))
+    new (index, label, node, ast) = {Index = index; Label = label; GssNode = node; SppfNode = ast; Positions = (-1, -1)}
+    new (index, label, node, ast, pos) = {Index = index; Label = label; GssNode = node; SppfNode = ast; Positions = pos}
+
 
 type ParseResult<'s> =
     | Success of 's
     | Error of 's
 
-let containsContext (set : Queue<Context>) (context : Context) =
-    let mutable result = false
-    for curCon in set do
-        if Context.Equal curCon context 
-        then 
-            result <- true
-    result
-             
-let containsContextParams (set:IEnumerable<Context>) label node index = 
-    let mutable result = false
-    for curCon in set do
-        if curCon.Index = index && Label.Equal curCon.Label label && GSSNode.Equal curCon.Node node 
-        then 
-            result <- true
-    result
+let containsContext (set : IEnumerable<Context>) (index : int) (label : Label) (gssNode : Vertex) (sppfNode : Family) =
+    let mutable res = false
+    for cntxt in set do
+        if cntxt.Equal(index, label, gssNode, sppfNode) then
+            res <- true
+    res
 
-let gssContainsNode (gss : GSS) (label : Label) (index : int) = 
-    let result = ref None
-    for curEdge in gss.EdgeSet do    
-         if Label.Equal curEdge.Dst.Value label && curEdge.Dst.Index = index then
-             result := Some(curEdge.Dst) 
-         elif Label.Equal curEdge.Src.Value label && curEdge.Src.Index = index then
-            result := Some(curEdge.Src) 
-    !result
 
-let gssContainsEdge (gss : GSS) (nodeSrc : GSSNode) (nodeDst : GSSNode) = 
-    let mutable result = false
-    for edges in gss.EdgeSet do
-        if edges.Equal nodeSrc nodeDst then
-            result <- true
-    result
 
 
 type Incrementor(delta) =
@@ -126,84 +104,143 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let tokens = Seq.toArray tokens
         let setU = Array.create tokens.Length List.empty<Context>
         let setR = new Queue<Context>();   // множество всех контекстов
-        let setP = new Queue<GSSNode>();   //множество для потенциально незавершаемых попов       
+        let setP = new Queue<GSSNode * obj>();   //множество для потенциально незавершаемых попов       
         let currentIndex = ref 0
         let currentN = new Nodes()
         let currentR = new Nodes()
         let currentRule = parser.StartRule
-        let dummyNode = new GSSNode(!currentIndex, new Label(currentRule, -1))
-        let currentLabel = ref <| new Label(currentRule, 0);
-        let startLabel = new Label(currentRule, 0);
-        let startGSSNode = new GSSNode(!currentIndex,!currentLabel);
-        let currentGSSNode = ref <| new GSSNode(!currentIndex,!currentLabel);
-        let gss =  new GSS(dummyNode, tokens.Length)
+        let dummy = new Node()
+        let dummyGSSNode = new Vertex(new Label(currentRule, -1), !currentIndex)
+        let currentLabel = ref <| new Label(currentRule, 0)
+        let startLabel = new Label(currentRule, 0)
+        let startGSSNode = new Vertex(!currentLabel, !currentIndex)
+        let currentGSSNode = ref <| new Vertex(!currentLabel, !currentIndex)
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode)
-        let mutable firstTime = true
         setR.Enqueue(!currentContext)
-        
-        
-        let addContext (label:Label) (node:GSSNode) (index:int) =
-            if not (containsContextParams setU.[index] label node index) 
-            then
-                setU.[index] <- new Context(index, label, node) :: setU.[index]
-                setR.Enqueue (new Context(index, label, node))
 
-        let addContextRulePosition (rule : int) (position : int) (node:GSSNode) (index:int) =
-            let label = new Label (rule, position)
-            if not (containsContextParams setU.[index] label node index) 
-            then
-                setU.[index] <- new Context(index, label, node) :: setU.[index]
-                setR.Enqueue (new Context(index, label, node))
+        let chainCanInferEpsilon rule pos =
+            let curRule = parser.Rules.[rule]
+            let mutable result = true
+            for i = pos to curRule.Length - 1 do
+                if result && not parser.canInferEpsilon.[curRule.[i]]
+                then    
+                    result <- false
+            result
+        
+        let addContext (label : Label)  (index : int) (gssNode : Vertex) (sppfNode : Ast) =
+            if not containsContext setU.[index] index label gssNode sppfNode then
+                let cntxt = new Context(index,label, gssNode, sppfNode)
+                setU.[index] <- cntxt :: setU.[index]
+                setR.Enqueue(cntxt)
 
-        let pop (context:Context) (node: GSSNode) (index:int) =
-            if not (GSSNode.Equal node startGSSNode) 
-            then
-                setP.Enqueue node
-                for edge in gss.EdgeSet do
-                    if GSSNode.Equal edge.Src node then
-                        addContext node.Value edge.Dst index  
+        let getNodeP (label : Label) (left : obj) (right : obj) =
+            let mutable result = right
+            let previousSym = parser.Rules.[label.Rule].[label.Position - 1]
+            let nextSym = parser.Rules.[label.Rule].[label.Position + 1] /// check
+            if parser.NumIsTerminal previousSym || 
+                not canInferEpsilon label.Rule label.Position - 1 && not canInferEpsilon label.Rule label.Position + 1
+            then 
+                result
+            else
+                let t =
+                    if canInferEpsilon label.Rule label.Position + 1
+                    then 
+                        label.Position <- parser.Rules.[label.Rule].Length
+                    label
+                let tempRight : Family = unbox right
+                let q = tempRight.prod
+                let k, i = currentContext.Value.Positions
+                if not dummy.Equals left 
+                then
+                    let tempLeft : Family = unbox left
+                    let s = tempLeft.prod
+                    let j, k = currentContext.Value.Positions
+                    //check if 
+
+
+                    
+
+                
+
+(*For each edge (cU , z, u) in the GSS, where cU denotes the current stack top, getNodeP() is called to construct an
+intermediate or symbol node, w, with a packed node whose left child is the node z retrieved from the GSS edge between cU
+and u and whose right child is the SPPF node corresponding to xq+1. The function getNodeT () simply constructs a terminal
+labelled SPPF node. A descriptor of the form (Rxq+1 , u, cI ,w) is then created. When such a descriptor is removed from R
+execution continues with the input pointer at position cI , the grammar pointer after xq+1, and cU := u and cN := w.*)
+        let pop (u : Vertex) (i : int) (z : obj) =
+            if not (eq u startGSSNode) then
+                let label = u.Value
+                setP.Enqueue(u, z)
+                let processEdge (edge : Edge) =
+                    let y = getNodeP(label, edge.Ast, z)
+                    addContext label i edge.Dest y
+                processEdge u.OutEdges.first
+                for edge in u.OutEdges.other do
+                    processEdge edge
+
+
         
-        let updateGSS (label:Label) (index : int) (node:GSSNode) =
-            let smth = gssContainsNode gss label index
-            let newNode = 
-                match smth with
-                |Some _ -> smth.Value
-                |None -> new GSSNode(index, label)
-            if not (gssContainsEdge gss newNode node) then
-                gss.AddEdge (new GSSEdge (newNode, node)) 
-        
-//        Success ("Test")        
+
+
+
+
+        let table = parser.Table
+//        Success ("Test")   
+        let mutable condition = true  
+/////Main method////   
         let rec dispatcher () =   
             if setR.Count <> 0 then
                 currentContext := setR.Dequeue()
                 currentIndex := currentContext.Value.Index
                 currentGSSNode := currentContext.Value.Node
                 currentLabel := currentContext.Value.Label
+                let mutable currentPosition = currentLabel.Value.Position
                 processing()
-            elif containsContextParams setU.[inputLength-1] startLabel  startGSSNode inputLength then 
+            elif containsContextParams setU.[inputLength-1] startLabel  startGSSNode inputLength then ///////////////???????????
                 Success ("UIIII") else Error ("fail")        
-        and processing () = 
-            let curInd = !currentIndex 
-            let curToken = parser.TokenToNumber tokens.[curInd]
-            let curSymbol = parser.Rules.[currentLabel.Value.Rule].[currentLabel.Value.Position]
+        and processing () =  
+(*
+Берем индекс для таблицы.
+*)
+            let getIndex() = 
+                let mutable index = currentLabel.Value.Rule
+                index <- (index*(parser.IndexatorFullCount))
+                index <- index + currentLabel.Value.Position
+                index
+
+            let curToken = parser.TokenToNumber tokens.[!currentIndex]
+            let curSymbol = parser.Rules.[currentLabel.Value.Rule].[currentPosition]
+            
+(*
+Если правило ещё не закончилось, то нужно понять, кого обрабатываем.
+*)
             if Array.length parser.Rules.[currentLabel.Value.Rule]  <> currentLabel.Value.Position then
-                if parser.NumIsTerminal curSymbol  || parser.IsLiteral tokens.[curInd] then
-                    if curToken = curSymbol then
-                        currentIndex := !currentIndex+1
-                        pop !currentContext !currentGSSNode !currentIndex
-                elif parser.NumIsNonTerminal parser.Rules.[currentLabel.Value.Rule].[currentLabel.Value.Position] then 
-                    let mutable index = currentLabel.Value.Rule
-                    index <- (index*(parser.IndexatorFullCount))
-                    index <- index + currentLabel.Value.Position
-                    if Array.length parser.Table.[index] <> 0 then
-                        let position = 0
-                        for rulesN in parser.Table.[index] do
-                            //addContextRulePosition rulesN position !currentGSSNode !currentIndex
-                            updateGSS !currentLabel !currentIndex !currentGSSNode
+(*
+Обрабатываем терминал. Нужно считать текущий символ, обновить правое дерево и сдвинуть позицию. 
+После этого разбор продолжается.
+*)
+                if parser.NumIsTerminal curSymbol  || parser.NumIsLiteral curSymbol then
+                    if Array.IndexOf(table.[getIndex()], curToken) <> -1 then
+                        currentR = getNodeT(curSymbol, !currentIndex)
+                        currentIndex := !currentIndex + 1
+                        currentPosition <- currentPosition + 1
+                        condition <- false
+(*
+Обрабатываем нетерминал. Необходимо добавить новые контексты и обновить стек, чтобы знать, куда возвращаться. 
+После этого управление передается диспетчеру.
+*)
+                elif parser.NumIsNonTerminal parser.Rules.[currentLabel.Value.Rule].[currentPosition] then 
+                    let index = getIndex()
+                    if Array.IndexOf(table.[index], curToken) <> -1 then
+                        currentGSSNode = create (new Label(currentLabel.Value.Rule, currentPosition +1), currentGSSNode, currentIndex, currentN)
+                        for ruleN in table.[index] do
+                            addContext(currentLabel, currentIndex, currentGSSNode, new Nodes())
+                        condition <- true
+////если же правило закончилось, то пришло время для попа и возврата дерева.
             else 
-                pop !currentContext !currentGSSNode !currentIndex
-            dispatcher ()
+                currentN = getNodeP(currentLabel, currentN, currentR) /////нужно подумать, как менять позицию в лэйбле!!!
+                pop currentGSSNode currentIndex currentN
+                condition <- true
+            if condition then dispatcher() else processing()
         processing()
-//        match dispatcher() with
-//        | Error _ -> Error ("fail")
-//        | Success _ -> Success "UIIII"
+

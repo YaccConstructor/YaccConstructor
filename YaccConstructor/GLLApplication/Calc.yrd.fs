@@ -71,6 +71,11 @@ let numIsNonTerminal = function
     | 5 -> true
     | _ -> false
 
+let numIsLiteral = function
+    | 8 -> true
+    | 9 -> true
+    | _ -> false
+
 let isNonTerminal = function
     | error -> true
     | expr -> true
@@ -85,8 +90,9 @@ let mutable private cur = 0
 let acceptEmptyInput = false
 
 let leftSide = [|1; 1; 4; 2; 2; 3; 3|]
-let table = [| [||];[||];[||];[||];[||];[|1; 0|];[|1; 0|];[|0|];[||];[||];[|4; 3|];[|4; 3|];[||];[||];[||];[|5|];[|6|];[||];[||];[||];[|2|];[|2|];[||];[||];[||]; |]
+let table = [| [||];[||];[||];[||];[||];[|1; 0|];[|1; 0|];[||];[||];[||];[|4; 3|];[|4; 3|];[||];[||];[||];[|5|];[|6|];[||];[||];[||];[|2|];[|2|];[||];[||];[||]; |]
 let private rules = [|1; 9; 1; 2; 1; 2; 8; 2; 3; 5; 6|]
+let private canInferEpsilon = [|true; false; false; false; false; false; false; false; false; false|]
 let private rulesStart = [|0; 3; 4; 5; 8; 9; 10; 11|]
 let startRule = 2
 let indexatorFullCount = 10
@@ -101,7 +107,7 @@ let literalEnd = 9
 let literalsCount = 2
 
 
-let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal)
+let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)
 let buildAst : (seq<Token> -> ParseResult<_>) =
     buildAst<Token> parserSource
 

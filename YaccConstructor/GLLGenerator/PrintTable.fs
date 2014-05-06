@@ -184,6 +184,12 @@ let printTableGLL
         printBrInd 1 "| _ -> false"
         printBr ""
 
+        printBrInd 0 "let numIsLiteral = function"
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| %d -> true" <| i
+        printBrInd 1 "| _ -> false"
+        printBr ""
+
 
         printBrInd 0 "let isNonTerminal = function"   
         for i = 0 to indexator.nonTermCount-1 do
@@ -218,9 +224,12 @@ let printTableGLL
         print "let private rules = "
         printArr rules (print "%d")
 
+        print "let private canInferEpsilon = "
+        printArr grammar.canInferEpsilon (print "%A")
+
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
-
+        
         printBr "let startRule = %d" grammar.startRule
         printBr "let indexatorFullCount = %d" indexator.fullCount
         printBr "let rulesCount = %d" grammar.rules.rulesCount
@@ -238,7 +247,7 @@ let printTableGLL
 
         printBr ""
 
-        printBrInd 0 "let private parserSource = new ParserSource<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal)"
+        printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
         
                        
         printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="

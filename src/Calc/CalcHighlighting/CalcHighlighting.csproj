@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalcTokenType.cs" />
     <Compile Include="DIVTermNode.cs" />
     <Compile Include="ErrorNonTermNode.cs" />
     <Compile Include="ERRORTermNode.cs" />

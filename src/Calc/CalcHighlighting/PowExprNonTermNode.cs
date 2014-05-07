@@ -6,7 +6,6 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Modules;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.ReSharper.Psi.Impl;
 using JetBrains.Text;
 using Highlighting.Core;
 
@@ -46,32 +45,39 @@ namespace CalcHighlighting
 
         public PsiLanguageType Language
         {
-            get { return PersistentUserData.GetData(PropertyConstant.Language); }
+            get { return PersistentUserData.GetData(PropertyConstant.Language) ?? UnknownLanguage.Instance; }
         }
 
         public NodeUserData UserData { get; private set; }
         public NodeUserData PersistentUserData { get; private set; }
 
+        public PowExprNonTermNode (string ycTokName) : this (ycTokName, string.Empty)
+        {
+        }
 
-        public PowExprNonTermNode (string text)
+        public PowExprNonTermNode (string ycTokName, string ycValue)
         {
             UserData = DataHelper.GetNodeUserData(this);
             PersistentUserData = DataHelper.GetNodePersistentUserData(this);
-            UserData.PutData(KeyConstant.Text, text);
+
+            UserData.PutData(KeyConstant.YcTokName, ycTokName);
+            UserData.PutData(KeyConstant.YcValue, ycValue);
+
+            YcHelper.AddYcItem(ycTokName, ycValue);
         }
 
-        public PowExprNonTermNode (string text, object positions) : this (text)
+        public PowExprNonTermNode (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)
         {
             SetPositions(positions as IEnumerable<DocumentRange>);
         }
 
-        public void SetPositions(IEnumerable<DocumentRange> positions)
+        private void SetPositions(IEnumerable<DocumentRange> positions)
         {
-            if (positions != null)
-            {
-                var ranges = positions.ToList();
-                UserData.PutData(KeyConstant.Ranges, ranges);
-            }
+            if (positions == null)
+                return;
+
+            var ranges = positions.ToList();
+            UserData.PutData(KeyConstant.Ranges, ranges);
         }
 
         public IPsiServices GetPsiServices()
@@ -81,17 +87,17 @@ namespace CalcHighlighting
 
         public IPsiModule GetPsiModule()
         {
-            return this.Parent.GetPsiModule();
+            return default(IPsiModule);
         }
 
         public IPsiSourceFile GetSourceFile()
         {
-            return Parent.GetSourceFile();
+            return default(IPsiSourceFile);
         }
 
         public ReferenceCollection GetFirstClassReferences()
         {
-            return default(ReferenceCollection);
+            return ReferenceCollection.Empty;
         }
 
         public void ProcessDescendantsForResolve(IRecursiveElementProcessor processor)
@@ -106,7 +112,10 @@ namespace CalcHighlighting
 
         public bool Contains(ITreeNode other)
         {
-            return true;
+            if (this.FirstChild != null)
+                return this.Children().Contains(other);
+            else
+                return this == other;
         }
 
         public bool IsPhysical()
@@ -144,39 +153,55 @@ namespace CalcHighlighting
 
         public TreeOffset GetTreeStartOffset()
         {
-            return new TreeOffset();
+            List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);
+            if (ranges == null || ranges.Count == 0)
+                return TreeOffset.InvalidOffset;
+
+            return new TreeOffset(ranges[0].TextRange.StartOffset);
         }
 
         public int GetTextLength()
         {
-            string text = UserData.GetData(KeyConstant.Text);
-            return text != null ? text.Length : 0;
+            return GetText(new StringBuilder()).Length;
         }
 
         public StringBuilder GetText(StringBuilder to)
         {
-            for (ITreeNode nextSibling = this.FirstChild; nextSibling != null; nextSibling = nextSibling.NextSibling)
+            List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);
+            foreach (DocumentRange range in ranges)
             {
-                nextSibling.GetText(to);
+                to.Append(range.GetText());
             }
             return to;
         }
 
         public IBuffer GetTextAsBuffer()
         {
-            var text = UserData.GetData(KeyConstant.Text);
-            return new StringBuffer(text?? "");
+            return new StringBuffer(GetText());
         }
 
         public string GetText()
         {
-            string text = UserData.GetData(KeyConstant.Text);
-            return text?? "";
+            return GetText(new StringBuilder()).ToString();
         }
 
         public ITreeNode FindNodeAt(TreeTextRange treeTextRange)
         {
-            return null;
+            ITreeNode needNode = null;
+            for (ITreeNode child = this.FirstChild; child != null; child = child.NextSibling)
+            {
+                var childOffset = child.GetTreeStartOffset();
+                if (!childOffset.IsValid())
+                    continue;
+                if (child.GetTreeStartOffset() <= treeTextRange.StartOffset)
+                    needNode = child;
+                else
+                    break;
+            }
+            //needNode = needNode.PrevSibling;
+
+            if (needNode == null || needNode.FirstChild == null) return needNode;
+            else return needNode.FindNodeAt(treeTextRange);
         }
 
         public ICollection<ITreeNode> FindNodesAt(TreeOffset treeTextOffset)

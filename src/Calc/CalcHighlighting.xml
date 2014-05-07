@@ -20,13 +20,11 @@
     JAVA_SCRIPT_XML_DOC_TAG
     LATE_BOUND_IDENTIFIER_ATTRIBUTE
     LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE
-    MATCHED_BRACE
     MATCHED_FORMAT_STRING_ITEM
     METHOD_IDENTIFIER_ATTRIBUTE
     MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE
     NAMESPACE_IDENTIFIER_ATTRIBUTE
     OPERATOR_IDENTIFIER_ATTRIBUTE
-    OUTLINE_BRACE
     OVERRIDES_ATTRIBUTE
     PARAMETER_IDENTIFIER_ATTRIBUTE
     PATH_IDENTIFIER_ATTRIBUTE
@@ -48,16 +46,32 @@
 -->
 <SyntaxDefinition name="CalcHighlighting">
     <Tokens color="CONSTANT_IDENTIFIER_ATTRIBUTE">
-        <Token>DIV</Token>
-        <Token>ERROR</Token>
-        <Token>LBRACE</Token>
-        <Token>MINUS</Token>
-        <Token>MULT</Token>
-        <Token>NUMBER</Token>
-        <Token>PLUS</Token>
-        <Token>POW</Token>
-        <Token>RBRACE</Token>
-        <Token>RNGLR_EOF</Token>
+        <Token> DIV </Token>
+        <Token> ERROR </Token>
+        <Token> LBRACE </Token>
+        <Token> MINUS </Token>
+        <Token> MULT </Token>
+        <Token> NUMBER </Token>
+        <Token> PLUS </Token>
+        <Token> POW </Token>
+        <Token> RBRACE </Token>
+        <Token> RNGLR_EOF </Token>
     </Tokens>
+<!-- Dynamic highlighting:
+    <Matched>
+        <Pair>
+            <Left> LBRACE </Left>
+            <Right> RBRACE </Right>
+        </Pair>
+        <Pair>
+            <Left> LEFT_SQUARE_BRACKET </Left>
+            <Right> RIGHT_SQUARE_BRACKET </Right>
+        </Pair>
+        <Pair>
+            <Left> LEFT_FIGURE_BRACKET </Left>
+            <Right> LEFT_FIGURE_BRACKET </Right>
+        </Pair>
+    </Matched>
+-->
 </SyntaxDefinition>
 

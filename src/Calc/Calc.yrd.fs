@@ -178,19 +178,22 @@ let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
 
 let xmlPath = "CalcHighlighting.xml" 
 
-let addSemantic (parent : #ITreeNode) (children : #ITreeNode list) = 
+let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
     let mutable prev = null
     let mutable curr = null
+    let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()
     for child in children do
         prev <- curr
         curr <- child
         curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)
+        ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))
         if prev = null
         then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)
         else
             prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)
             curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)
     parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)
+    parent.UserData.PutData(KeyConstant.Ranges, ranges)
     parent
 
 let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
@@ -238,7 +241,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_expr) 
-# 241 "Calc.yrd.fs"
+# 244 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -261,7 +264,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_expr) 
-# 264 "Calc.yrd.fs"
+# 267 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -271,7 +274,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 22 "calc.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 274 "Calc.yrd.fs"
+# 277 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -296,7 +299,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_1) 
-# 299 "Calc.yrd.fs"
+# 302 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -317,7 +320,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 320 "Calc.yrd.fs"
+# 323 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -344,7 +347,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 347 "Calc.yrd.fs"
+# 350 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -367,7 +370,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 370 "Calc.yrd.fs"
+# 373 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -390,7 +393,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "calc.yrd"
                : '_rnglr_type_termOp) 
-# 393 "Calc.yrd.fs"
+# 396 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -413,7 +416,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "calc.yrd"
                : '_rnglr_type_term) 
-# 416 "Calc.yrd.fs"
+# 419 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -436,7 +439,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "calc.yrd"
                : '_rnglr_type_term) 
-# 439 "Calc.yrd.fs"
+# 442 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -461,7 +464,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_3) 
-# 464 "Calc.yrd.fs"
+# 467 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -482,7 +485,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 485 "Calc.yrd.fs"
+# 488 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -509,7 +512,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 512 "Calc.yrd.fs"
+# 515 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -532,7 +535,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 535 "Calc.yrd.fs"
+# 538 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -555,7 +558,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "calc.yrd"
                : '_rnglr_type_factorOp) 
-# 558 "Calc.yrd.fs"
+# 561 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -578,7 +581,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 31 "calc.yrd"
                : '_rnglr_type_factor) 
-# 581 "Calc.yrd.fs"
+# 584 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -601,7 +604,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 31 "calc.yrd"
                : '_rnglr_type_factor) 
-# 604 "Calc.yrd.fs"
+# 607 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -626,7 +629,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 18 "calc.yrd"
                : '_rnglr_type_yard_rule_binExpr_5) 
-# 629 "Calc.yrd.fs"
+# 632 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -647,7 +650,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 650 "Calc.yrd.fs"
+# 653 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -674,7 +677,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 19 "calc.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_6) 
-# 677 "Calc.yrd.fs"
+# 680 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -697,7 +700,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 34 "calc.yrd"
                : '_rnglr_type_powOp) 
-# 700 "Calc.yrd.fs"
+# 703 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -720,7 +723,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 723 "Calc.yrd.fs"
+# 726 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -747,7 +750,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 750 "Calc.yrd.fs"
+# 753 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -770,7 +773,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 36 "calc.yrd"
                : '_rnglr_type_powExpr) 
-# 773 "Calc.yrd.fs"
+# 776 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -785,7 +788,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new ERRORTermNode("ERROR", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new ERRORTermNode("ERROR", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -793,7 +797,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_ERROR) 
-# 796 "Calc.yrd.fs"
+# 800 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -808,7 +812,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new PLUSTermNode("PLUS", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new PLUSTermNode("PLUS", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -816,7 +821,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_PLUS) 
-# 819 "Calc.yrd.fs"
+# 824 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -831,7 +836,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new MINUSTermNode("MINUS", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new MINUSTermNode("MINUS", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -839,7 +845,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MINUS) 
-# 842 "Calc.yrd.fs"
+# 848 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -854,7 +860,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new MULTTermNode("MULT", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new MULTTermNode("MULT", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -862,7 +869,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_MULT) 
-# 865 "Calc.yrd.fs"
+# 872 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -877,7 +884,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new DIVTermNode("DIV", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new DIVTermNode("DIV", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -885,7 +893,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_DIV) 
-# 888 "Calc.yrd.fs"
+# 896 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -900,7 +908,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new POWTermNode("POW", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new POWTermNode("POW", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -908,7 +917,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_POW) 
-# 911 "Calc.yrd.fs"
+# 920 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -923,7 +932,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new NUMBERTermNode("NUMBER", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new NUMBERTermNode("NUMBER", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -931,7 +941,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 934 "Calc.yrd.fs"
+# 944 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -946,7 +956,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new LBRACETermNode("LBRACE", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new LBRACETermNode("LBRACE", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -954,7 +965,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_LBRACE) 
-# 957 "Calc.yrd.fs"
+# 968 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -969,7 +980,8 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
 
                 let pos = snd <| _rnglr_var_0
                 let ranges = calculatePos pos
-                new RBRACETermNode("RBRACE", ranges) :> ITreeNode
+                let value = fst <| _rnglr_var_0
+                new RBRACETermNode("RBRACE", value.ToString(), ranges) :> ITreeNode
                 
                   )::!_rnglr_cycle_res )
             !_rnglr_cycle_res
@@ -977,7 +989,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_RBRACE) 
-# 980 "Calc.yrd.fs"
+# 992 "Calc.yrd.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (uint64 * uint64)) -> 
@@ -995,7 +1007,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 998 "Calc.yrd.fs"
+# 1010 "Calc.yrd.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

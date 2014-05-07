@@ -412,7 +412,11 @@ let printXML (nameOfNamespace : string) tokens =
     
     printBrInd 0 "<!-- Dynamic highlighting:"
     printBrInd 1 "<Matched>"
-    let pair = [ "(", ")"; "[", "]"; "{", "}"]
+    let pair = [
+                "LBRACE", "RBRACE"; 
+                "LEFT_SQUARE_BRACKET", "RIGHT_SQUARE_BRACKET"; 
+                "LEFT_FIGURE_BRACKET", "LEFT_FIGURE_BRACKET"
+               ]
 
     for left, right in pair do
         printBrInd 2 "<Pair>"

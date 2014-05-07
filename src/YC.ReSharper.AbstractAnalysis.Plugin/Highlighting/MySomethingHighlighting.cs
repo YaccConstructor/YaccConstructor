@@ -18,18 +18,18 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             myElement = element;
             string ycTokName = element.UserData.GetData(KeyConstant.YcTokName);
-            if (TreeNodeHolder.TokenToColor == null || string.IsNullOrEmpty(ycTokName))
+            if (ColorHelper.TokenToColor == null || string.IsNullOrEmpty(ycTokName))
             {
-                attributeId = TreeNodeHolder.DefaultColor;
+                attributeId = ColorHelper.DefaultColor;
             }
 
-            else if (TreeNodeHolder.TokenToColor.ContainsKey(ycTokName))
+            else if (ColorHelper.TokenToColor.ContainsKey(ycTokName))
             {
-                attributeId = TreeNodeHolder.TokenToColor[ycTokName];
+                attributeId = ColorHelper.TokenToColor[ycTokName];
             }
             else
             {
-                attributeId = TreeNodeHolder.DefaultColor;
+                attributeId = ColorHelper.DefaultColor;
             }
         }
 

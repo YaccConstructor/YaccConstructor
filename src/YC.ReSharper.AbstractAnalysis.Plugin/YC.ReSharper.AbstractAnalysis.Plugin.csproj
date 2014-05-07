@@ -56,6 +56,8 @@
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
     <Compile Include="AbstractAnalysisWarning.cs" />
+    <Compile Include="Highlighting\Dynamic\Matcher.cs" />
+    <Compile Include="Highlighting\Dynamic\MatcherHelper.cs" />
     <Compile Include="Highlighting\IdentifierHighlighterProcess.cs" />
     <Compile Include="Highlighting\IdentifierHighlightingStage.cs" />
     <Compile Include="Highlighting\InspectionProcess.cs" />
@@ -74,7 +76,7 @@
     <Compile Include="ReverseStringAction.cs" />
     <Compile Include="Highlighting\MySmartResolverProcess.cs" />
     <Compile Include="Highlighting\MySmartResolverStage.cs" />
-    <Compile Include="Highlighting\TreeNodeHolder.cs" />
+    <Compile Include="Highlighting\ColorHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.txt" />
@@ -88,6 +90,10 @@
     <ProjectReference Include="..\Calc\Calc.fsproj">
       <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>
       <Name>Calc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Calc\CalcHighlighting\CalcHighlighting.csproj">
+      <Project>{0af126e6-f923-4b88-bc42-97cd3696e7e7}</Project>
+      <Name>CalcHighlighting</Name>
     </ProjectReference>
     <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>

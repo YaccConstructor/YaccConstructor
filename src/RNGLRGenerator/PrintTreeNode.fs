@@ -80,8 +80,11 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBrInd 2 "{"
     printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
     printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
+    printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokName, ycTokName);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcValue, ycValue);"
+    printBr ""
+    printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue);"
     printBrInd 2 "}"
     printBr ""
         
@@ -94,11 +97,11 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
 
     printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
     printBrInd 2 "{"
-    printBrInd 3 "if (positions != null)"
-    printBrInd 3 "{"
-    printBrInd 4 "var ranges = positions.ToList();"
-    printBrInd 4 "UserData.PutData(KeyConstant.Ranges, ranges);"
-    printBrInd 3 "}"
+    printBrInd 3 "if (positions == null)"
+    printBrInd 4 "return;"
+    printBr ""
+    printBrInd 3 "var ranges = positions.ToList();"
+    printBrInd 3 "UserData.PutData(KeyConstant.Ranges, ranges);"
     printBrInd 2 "}"
     printBr ""
 
@@ -365,13 +368,13 @@ let printXML (nameOfNamespace : string) tokens =
             "JAVA_SCRIPT_XML_DOC_TAG";
             "LATE_BOUND_IDENTIFIER_ATTRIBUTE";
             "LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
-            "MATCHED_BRACE";
+            //"MATCHED_BRACE";
             "MATCHED_FORMAT_STRING_ITEM";
             "METHOD_IDENTIFIER_ATTRIBUTE";
             "MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE";
             "NAMESPACE_IDENTIFIER_ATTRIBUTE";
             "OPERATOR_IDENTIFIER_ATTRIBUTE";
-            "OUTLINE_BRACE";
+            //"OUTLINE_BRACE";
             "OVERRIDES_ATTRIBUTE";
             "PARAMETER_IDENTIFIER_ATTRIBUTE";
             "PATH_IDENTIFIER_ATTRIBUTE";
@@ -402,8 +405,22 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 1 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
 
     for tok in tokens do
-        printBrInd 2 "<Token>%s</Token>" tok
+        printBrInd 2 "<Token> %s </Token>" tok
 
     printBrInd 1 "</Tokens>"
+
+    
+    printBrInd 0 "<!-- Dynamic highlighting:"
+    printBrInd 1 "<Matched>"
+    let pair = [ "(", ")"; "[", "]"; "{", "}"]
+
+    for left, right in pair do
+        printBrInd 2 "<Pair>"
+        printBrInd 3 "<Left> %s </Left>" left
+        printBrInd 3 "<Right> %s </Right>" right
+        printBrInd 2 "</Pair>"
+    printBrInd 1 "</Matched>"
+    printBrInd 0 "-->"
+
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()

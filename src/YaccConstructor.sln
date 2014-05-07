@@ -36,6 +36,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CYK", "CYK", "{9D794C1B-8BF8-46EE-836A-CE22C41BEA87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1614C776-2F55-42AB-8511-7E22B4FA7D69}"
+	ProjectSection(SolutionItems) = preProject
+		YC.ReSharper.AbstractAnalysis.Plugin\Dynamic\MatcherHelper.cs = YC.ReSharper.AbstractAnalysis.Plugin\Dynamic\MatcherHelper.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{21078D4A-D454-42B7-BA14-3D74D5CB8793}"
 EndProject

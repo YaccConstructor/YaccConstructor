@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using Highlighting.Core;
@@ -8,24 +9,20 @@ using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi.Tree;
 using QuickGraph.Collections;
+using YC.ReSharper.AbstractAnalysis.Plugin.Dynamic;
+using MatcherHelper = YC.ReSharper.AbstractAnalysis.Plugin.Dynamic.MatcherHelper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-    public class TreeNodeHolder
+    public class ColorHelper
     {
-        //private static List<ITreeNode> forest = new List<ITreeNode>();
-        //public static List<ITreeNode> Forest { get { return forest; } }
+        public static string DefaultColor = HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE;
 
-        public static Core.Processor YcProcessor { get; set; }
-
-        //public static void ClearForest()
-        //{
-        //    forest.Clear();
-        //}
-        
-        public static readonly string DefaultColor = HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE;
-
-        public static Dictionary<string, string> TokenToColor { get; set; }
+        private static Dictionary<string, string> myTokenToColor;
+        public static Dictionary<string, string> TokenToColor
+        {
+            get { return myTokenToColor; }
+        }
 
         private static Dictionary<string, string> mapping = new Dictionary<string, string>()
         {
@@ -80,6 +77,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             try
             {
+                MatcherHelper.ReCreate();
                 using (XmlReader reader = new XmlTextReader(new StreamReader(fileName)))
                 {
                     reader.MoveToContent();
@@ -92,12 +90,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 return;
             }
-
         }
 
         private static void ParseDefinition(XmlReader xmlReader)
         {
-            TokenToColor = new Dictionary<string, string>();
+            myTokenToColor = new Dictionary<string, string>();
 
             while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
             {
@@ -109,6 +106,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 {
                     ParseToken(xmlReader, xmlReader.GetAttribute("color"));
                 }
+                else if (xmlReader.Name == "Matched")
+                {
+                    ParseMatching(xmlReader);
+                }
                 else
                 {
                     throw new Exception(string.Format("Unexpected element"));
@@ -119,15 +120,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private static void ParseToken(XmlReader xmlReader, string color)
         {
             xmlReader.Read();
-            var content = xmlReader.ReadContentAsString();
+            var content = xmlReader.ReadContentAsString().Trim();
 
-            if (TokenToColor.ContainsKey(content))
+            if (myTokenToColor.ContainsKey(content))
                 return;
 
             if (!string.IsNullOrEmpty(color) && mapping.ContainsKey(color))
-                TokenToColor.Add(content, mapping[color]);
+                myTokenToColor.Add(content, mapping[color]);
             else
-                TokenToColor.Add(content, DefaultColor);
+                myTokenToColor.Add(content, DefaultColor);
         }
 
         private static void ParseTokensGroup(XmlReader xmlReader, string color)
@@ -138,12 +139,52 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
+        private static void ParseMatching(XmlReader xmlReader)
+        {
+            while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
+            {
+                xmlReader.Read();
+
+                var left = ParseLeftMatcher(xmlReader);
+                var right = ParseRightMatcher(xmlReader);
+
+                MatcherHelper.AddMatch(left, right);
+            }
+        }
+
+        private static string ParseLeftMatcher(XmlReader xmlReader)
+        {
+            if (xmlReader.Name == "Left")
+            {
+                xmlReader.Read();
+                string res = xmlReader.ReadContentAsString().Trim();
+                xmlReader.Read();
+                return res;
+            }
+            else throw new Exception("Unexpected left element in matching");
+        }
+
+        private static string ParseRightMatcher(XmlReader xmlReader)
+        {
+            if (xmlReader.Name == "Right")
+            {
+                xmlReader.Read();
+                string res = xmlReader.ReadContentAsString().Trim();
+                xmlReader.Read();
+                return res;
+            }
+            else throw new Exception("Unexpected right element in matching");
+        }
+
         private static XmlReader GetValidatingReader(XmlReader input, XmlSchemaSet schemaSet)
         {
-            var settings = new XmlReaderSettings();
-            settings.CloseInput = true;
-            settings.IgnoreComments = true;
-            settings.IgnoreWhitespace = true;
+            var settings = new XmlReaderSettings
+            {
+                CloseInput = true, 
+                IgnoreComments = true, 
+                IgnoreWhitespace = true
+            };
+
             if (schemaSet != null)
             {
                 settings.Schemas = schemaSet;

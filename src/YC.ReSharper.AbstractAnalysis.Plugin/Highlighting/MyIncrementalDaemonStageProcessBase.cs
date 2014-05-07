@@ -8,6 +8,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
+using YC.ReSharper.AbstractAnalysis.Plugin.Dynamic;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -36,7 +37,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             ycProcessor.Process();
             
-            TreeNodeHolder.ParseFile(ycProcessor.XmlPath);
+            ColorHelper.ParseFile(ycProcessor.XmlPath);
             return ycProcessor;
         }
 
@@ -68,7 +69,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (ycProcessor == null)
                 return;
 
-            TreeNodeHolder.YcProcessor = ycProcessor;
+            MatcherHelper.YcProcessor = ycProcessor;
 
             var tree = ycProcessor.GetNextTree();
 

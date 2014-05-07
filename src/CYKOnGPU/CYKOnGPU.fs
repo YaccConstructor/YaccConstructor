@@ -35,8 +35,8 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
         printfn "Using %A" provider
         
         let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
-        let maxLocalWorkSize = 8//int <| lws.CastTo<uint64>()
-        printfn "Local memory size: %d" maxLocalWorkSize
+        let maxLocalWorkSize = 1// int <| lws.CastTo<uint64>()
+        //printfn "Local memory size: %d" maxLocalWorkSize
 
         let fillArray (arr:'a[]) (initFun:unit -> 'a) =
             let count = arr.Length
@@ -48,14 +48,15 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
             else arr
         
         let realRecTableLen = recTable.Length
-        recTable <- fillArray recTable createEmptyCellData
-        
+        printfn "real rec table len: %d" realRecTableLen
+        recTable <- fillArray recTable createEmptyCellData        
         printfn "rec table len: %d" recTable.Length                          
         
         let createEmptyRuleIndexed () =
             new RuleIndexed((buildRule 0 0 0 0 0),0)
 
         let realRulesIndexedLen = rulesIndexed.Length
+        printfn "real rules indexed len: %d" realRulesIndexedLen
         rulesIndexed <- fillArray rulesIndexed createEmptyRuleIndexed
         printfn "rules indexed len: %d" rulesIndexed.Length
 
@@ -102,8 +103,8 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                         let processRule rule ruleIndex i k l =
                             let rule = getRuleStruct rule
                             if rule.R2 <> 0us then
-                                let leftStart = (i * rowSize + k) * nTermsCount
-                                let rightStart = ((k+i+1) * rowSize + l-k-1) * nTermsCount
+                                let leftStart = ( k * rowSize + i - calcDiff k ) * nTermsCount
+                                let rightStart = ( (l-k-1) * rowSize + k+i+1 - (calcDiff (l-k-1)) ) * nTermsCount
 
                                 for m in 0..nTermsCount - 1 do
                                     let leftCell:CellData = recTable.[leftStart + m]
@@ -116,8 +117,8 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                                                 let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
                                                 let newWeight = 0uy//weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
                                                 let currentElem = buildData ruleIndex (toState (lblWithState.[1])) (byte lblWithState.[0]) newWeight
-                                                recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1].rData <- currentElem
-                                                recTable.[(i * rowSize + l) * nTermsCount + int rule.RuleName - 1]._k <- uint32 k
+                                                recTable.[( l * rowSize + i - calcDiff l ) * nTermsCount + int rule.RuleName - 1].rData <- currentElem
+                                                recTable.[( l * rowSize + i - calcDiff l ) * nTermsCount + int rule.RuleName - 1]._k <- uint32 k
                                                     // <- new CellData(currentElem, uint32 k) |> Some
 
                         for k in 0..(len-1) do
@@ -239,7 +240,7 @@ type CYKOnGPU() =
                             | 0uy -> LblState.Undefined
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
-                        recTable.[(k * rowSize + 0) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) (*|> Some*))   
+                        recTable.[(0 * rowSize + k - calcDiff 0) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) (*|> Some*))   
         //printfn "total rules count %d" rules.Length
                              
         let ntrIndexes = new ResizeArray<_>() // non-terminal rules indexes array
@@ -306,9 +307,10 @@ type CYKOnGPU() =
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
-            let cellData = recTable.[(0 * rowSize + s.Length-1) * nTermsCount + i]
+            let index = ( (s.Length-1) * rowSize + 0 - calcDiff (s.Length-1) ) * nTermsCount + i
             if i <= last 
-            then 
+            then
+                let cellData = recTable.[index] 
                 if not (isCellDataEmpty (cellData))
                 then
                     let cellData = getCellDataStruct (cellData)
@@ -351,10 +353,10 @@ type CYKOnGPU() =
                     else checkIndex start index tryFind ruleCheck
                 | true -> checkIndex start index tryFind ruleCheck
 
-            let startLeft = (leftI * rowSize + leftL) * nTermsCount
+            let startLeft = ( leftL * rowSize + leftI - calcDiff leftL ) * nTermsCount
             let left = tryFind startLeft startLeft rule.R1
 
-            let startRight = (rightI * rowSize + rightL) * nTermsCount
+            let startRight = ( rightL * rowSize + rightI - calcDiff rightL ) * nTermsCount
             let right = tryFind startRight startRight rule.R2
                 
             match right with
@@ -375,14 +377,15 @@ type CYKOnGPU() =
             
     let labelTracking lastInd = 
         let i,l = 0,lastInd
-        let startIndex = (i * rowSize + l) * nTermsCount
+        let startIndex = ( l * rowSize + i - calcDiff l ) * nTermsCount
+        let derivationNum = ref 0
         for ind in startIndex..startIndex + nTermsCount - 1 do
-            if not (isCellDataEmpty recTable.[ind]) // |> Option.iter(fun x ->
+            derivationNum := !derivationNum + 1
+            if not (isCellDataEmpty recTable.[ind])
             then 
                 let x = recTable.[ind]
-                let out = "derivation #" + string (ind + 1)
-                printfn "%s" out
-                trackLabel i l x false //)
+                printfn "derivation #%d" !derivationNum
+                trackLabel i l x false
             
     
     member this.Recognize ((grules, start) as g) s weightCalcFun lblNames = 

@@ -72,6 +72,7 @@ type Processor(file) =
                 | e -> 
                     brs.[0].back_ref.GetDocumentRange())
         ranges    
+
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
@@ -135,14 +136,14 @@ type Processor(file) =
                     xmlPath <- Calc.xmlPath
                     language <- Calc
                     processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
-                (*| JSON -> 
+                | JSON -> 
                     xmlPath <- JSON.xmlPath
                     language <- JSON
                     processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
                 | TSQL -> 
                     xmlPath <- TSQL.xmlPath
                     language <- TSQL
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot*)
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
             )
 
         lexerErrors, parserErrors
@@ -174,6 +175,7 @@ type Processor(file) =
             let treeNodeList = translate nextTree errors :> seq<ITreeNode>
             treeNodeList.ToTreeNodeCollection().First()
 
+
     member this.GetForestWithToken range = 
         let translate = 
             match language with
@@ -185,8 +187,8 @@ type Processor(file) =
             let tokenData = 
                 match language with
                 | Calc -> Calc.AbstractParser.tokenData
-//                | JSON -> JSON.Parser.tokenData 
-//                | TSQL -> tokenData
+                | JSON -> JSON.Parser.tokenData
+                | TSQL -> tokenData
             
             let (_ : string), (position : AbstractLexer.Core.Position<ICSharpLiteralExpression>[]) 
                 = unbox <| tokenData token

@@ -78,7 +78,7 @@
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
     <Compile Include="AbstractAnalysisWarning.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DaraGraph.cs" />
+    <Compile Include="GraphCodeWindow\GraphClasses\DataGraph.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataEdge.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataVertex.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\EmptyGraphArea.cs" />

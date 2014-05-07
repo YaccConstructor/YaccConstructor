@@ -25,15 +25,18 @@ type Vertex  =
     val mutable OutEdges : UsualOne<Edge>
     val Level            : int
     val Value            : Label
+    static member Equal (v1 : Vertex) (v2 : Vertex) =
+        let mutable res = false
+        if v1.Level = v2.Level && Label.Equal v1.Value v2.Value then
+            res <- true
+        res
     new (value, level) = {OutEdges = Unchecked.defaultof<_>; Value = value; Level = level}
 
 and Edge =
     struct
         val Ast   : obj
         val Dest  : Vertex
-        val Begin : int
-        val End   : int
-        new (d, a, b, e) = {Dest = d; Ast = a; Begin = b; End = e}
+        new (d, a) = {Dest = d; Ast = a}
     end
 
 /// Compare vertex like a pair: (level, state)
@@ -47,16 +50,12 @@ type Context =
     val Label         : Label
     val GssNode       : Vertex
     val SppfNode      : obj
-    val Positions     : int * int
     member this.Equal(indx, lbl, vrtx, sppf) =
         let mutable res = false
         if this.Index = indx && Label.Equal this.Label lbl && eq this.GssNode vrtx ///как сравнивать ячейки sppf
             then res <- true
         res    
-    //CHECK!!!! Whether these numbers are required everytime
-  //  new (index, label, node, ast) = new (index, label, node, ast, (-1,-1))
-    new (index, label, node, ast) = {Index = index; Label = label; GssNode = node; SppfNode = ast; Positions = (-1, -1)}
-    new (index, label, node, ast, pos) = {Index = index; Label = label; GssNode = node; SppfNode = ast; Positions = pos}
+    new (index, label, node, ast) = {Index = index; Label = label; GssNode = node; SppfNode = ast}
 
 
 type ParseResult<'s> =
@@ -70,8 +69,22 @@ let containsContext (set : IEnumerable<Context>) (index : int) (label : Label) (
             res <- true
     res
 
-
-
+    
+let deleteIntermidiateNodes (v : Family) = 
+    let rec handle (o : obj) =
+        let res =
+            match o with
+            | :? AST as ast -> box <| ast
+            | :? IntermidiateNode as interNode ->
+                let t : IntermidiateNode = unbox interNode
+                let fst = handle t.leftChild
+                let snd = handle t.rightChild
+                box <| new Nodes([|fst, snd|])
+            | :? Nodes as node -> box <| node
+            | _ -> failwith "Unexpected type."
+        res
+    let arr = v.nodes.map handle
+    new Family(v.prod, new Nodes(arr))
 
 type Incrementor(delta) =
     member this.Increment(i : int byref) =
@@ -103,20 +116,26 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 // sets for correct work of algorithm
         let tokens = Seq.toArray tokens
         let setU = Array.create tokens.Length List.empty<Context>
+        let allGSSNodes = Array.create tokens.Length List.empty<Vertex>
         let setR = new Queue<Context>();   // множество всех контекстов
-        let setP = new Queue<GSSNode * obj>();   //множество для потенциально незавершаемых попов       
+        let setP = new Queue<Vertex * obj>();   //множество для потенциально незавершаемых попов       
         let currentIndex = ref 0
         let currentN = new Nodes()
         let currentR = new Nodes()
         let currentRule = parser.StartRule
-        let dummy = new Node()
+        let dummy = new Nodes()
         let dummyGSSNode = new Vertex(new Label(currentRule, -1), !currentIndex)
         let currentLabel = ref <| new Label(currentRule, 0)
         let startLabel = new Label(currentRule, 0)
         let startGSSNode = new Vertex(!currentLabel, !currentIndex)
         let currentGSSNode = ref <| new Vertex(!currentLabel, !currentIndex)
-        let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode)
+        let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
         setR.Enqueue(!currentContext)
+        let sppfNodes = List.empty<obj>
+        let intermidiateNodes = List.empty<IntermidiateNode>
+        let terminalNodes = List.empty<Nodes>
+        let familyNode = List.empty<Family>
+        
 
         let chainCanInferEpsilon rule pos =
             let curRule = parser.Rules.[rule]
@@ -126,37 +145,83 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 then    
                     result <- false
             result
+
+        let containsGSSNode (label : Label) (index : int) = 
+            let curList = allGSSNodes.[index]
+            let mutable res = null 
+            for vrtx in curList do
+                if vrtx.Value.Equals label 
+                then
+                    res <- box <| vrtx
+            res
         
-        let addContext (label : Label)  (index : int) (gssNode : Vertex) (sppfNode : Ast) =
+        let addContext (label : Label)  (index : int) (gssNode : Vertex) (sppfNode : AST) =
             if not containsContext setU.[index] index label gssNode sppfNode then
                 let cntxt = new Context(index,label, gssNode, sppfNode)
                 setU.[index] <- cntxt :: setU.[index]
                 setR.Enqueue(cntxt)
 
-        let getNodeP (label : Label) (left : obj) (right : obj) =
-            let mutable result = right
+                //в результате хотим упаковать правую и левую и вернуть результат
+        let getNodeP (label : Label) (left : obj) (right : Nodes) =
+            let mutable result = box <| right
             let previousSym = parser.Rules.[label.Rule].[label.Position - 1]
             let nextSym = parser.Rules.[label.Rule].[label.Position + 1] /// check
-            if parser.NumIsTerminal previousSym || 
-                not canInferEpsilon label.Rule label.Position - 1 && not canInferEpsilon label.Rule label.Position + 1
+            if parser.NumIsTerminal previousSym || not (chainCanInferEpsilon label.Rule (label.Position - 1)) && not (chainCanInferEpsilon label.Rule (label.Position + 1))
             then 
                 result
             else
-                let t =
-                    if canInferEpsilon label.Rule label.Position + 1
-                    then 
+            //если может выводить эпсилон, то мы должны создать family со значением нетерминала в левой части текущего правила. 
+                if chainCanInferEpsilon label.Rule (label.Position + 1)
+                    then
                         label.Position <- parser.Rules.[label.Rule].Length
-                    label
-                let tempRight : Family = unbox right
-                let q = tempRight.prod
-                let k, i = currentContext.Value.Positions
-                if not dummy.Equals left 
-                then
-                    let tempLeft : Family = unbox left
-                    let s = tempLeft.prod
-                    let j, k = currentContext.Value.Positions
-                    //check if 
+                if not (left.Equals dummy) then
+                    result <- box <| new IntermidiateNode(left, right, (label.Rule, label.Position)) 
+                else result <- box <| new IntermidiateNode(null, right, (label.Rule, label.Position))
+                        
+                result
 
+                //Добавить проверку, что такой терминал не содержится
+                //Для этого нужно понять, как хранить ячейки
+                //Где и сколько
+        let getNodeT term = 
+            new Nodes([|term|])
+
+        
+
+        let create (label : Label) (gss : Vertex) (index : int) (ast : obj) = 
+            let o = containsGSSNode label index
+            let newNode =
+                if o <> null 
+                then
+                    (unbox o) :> Vertex
+                else new Vertex(label, index)
+            let newEdge =
+                let fst = newNode.OutEdges.first 
+                if fst <> Unchecked.defaultof<Edge>
+                then
+                    if fst.Ast.Equals ast && Vertex.Equal fst.Dest gss 
+                    then
+                        fst
+                    elif newNode.OutEdges.other <> null 
+                    then
+                        let mutable temp = None
+                        for ed in newNode.OutEdges.other do
+                            if temp.IsNone && ed.Ast.Equals ast && Vertex.Equal ed.Dest gss
+                            then
+                                temp <- Some <| ed
+                        if temp.IsSome then
+                            temp.Value
+                        else new Edge(gss, ast)
+                    else new Edge(gss, ast)
+                else new Edge(gss, ast)
+            newNode.OutEdges.other <- Array.append newNode.OutEdges.other [| newEdge |]
+
+                                  
+
+
+                        
+
+                
 
                     
 
@@ -172,8 +237,9 @@ execution continues with the input pointer at position cI , the grammar pointer 
                 let label = u.Value
                 setP.Enqueue(u, z)
                 let processEdge (edge : Edge) =
-                    let y = getNodeP(label, edge.Ast, z)
-                    addContext label i edge.Dest y
+                    let y = getNodeP label, edge.Ast, z 
+                    let unboxed : Nodes = unbox y
+                    addContext label i edge.Dest unboxed
                 processEdge u.OutEdges.first
                 for edge in u.OutEdges.other do
                     processEdge edge
@@ -192,7 +258,7 @@ execution continues with the input pointer at position cI , the grammar pointer 
             if setR.Count <> 0 then
                 currentContext := setR.Dequeue()
                 currentIndex := currentContext.Value.Index
-                currentGSSNode := currentContext.Value.Node
+                currentGSSNode := currentContext.Value.GssNode
                 currentLabel := currentContext.Value.Label
                 let mutable currentPosition = currentLabel.Value.Position
                 processing()
@@ -208,6 +274,7 @@ execution continues with the input pointer at position cI , the grammar pointer 
                 index <- index + currentLabel.Value.Position
                 index
 
+            let mutable currentPosition = currentLabel.Value.Position
             let curToken = parser.TokenToNumber tokens.[!currentIndex]
             let curSymbol = parser.Rules.[currentLabel.Value.Rule].[currentPosition]
             
@@ -221,26 +288,25 @@ execution continues with the input pointer at position cI , the grammar pointer 
 *)
                 if parser.NumIsTerminal curSymbol  || parser.NumIsLiteral curSymbol then
                     if Array.IndexOf(table.[getIndex()], curToken) <> -1 then
-                        currentR = getNodeT(curSymbol, !currentIndex)
+                        currentR = getNodeT curSymbol
                         currentIndex := !currentIndex + 1
                         currentPosition <- currentPosition + 1
                         condition <- false
 (*
 Обрабатываем нетерминал. Необходимо добавить новые контексты и обновить стек, чтобы знать, куда возвращаться. 
-После этого управление передается диспетчеру.
+После этого управление передается диспетчеру.. 
 *)
                 elif parser.NumIsNonTerminal parser.Rules.[currentLabel.Value.Rule].[currentPosition] then 
                     let index = getIndex()
                     if Array.IndexOf(table.[index], curToken) <> -1 then
-                        currentGSSNode = create (new Label(currentLabel.Value.Rule, currentPosition +1), currentGSSNode, currentIndex, currentN)
+                        currentGSSNode = create (new Label(currentLabel.Value.Rule, currentPosition + 1)), currentGSSNode, currentIndex, currentN
                         for ruleN in table.[index] do
-                            addContext(currentLabel, currentIndex, currentGSSNode, new Nodes())
+                            ignore <| (addContext !currentLabel, currentIndex, currentGSSNode, dummy)
                         condition <- true
 ////если же правило закончилось, то пришло время для попа и возврата дерева.
             else 
-                currentN = getNodeP(currentLabel, currentN, currentR) /////нужно подумать, как менять позицию в лэйбле!!!
-                pop currentGSSNode currentIndex currentN
+                currentN = getNodeP currentLabel, currentN, currentR /////нужно подумать, как менять позицию в лэйбле!!!
+                pop !currentGSSNode !currentIndex currentN
                 condition <- true
             if condition then dispatcher() else processing()
         processing()
-

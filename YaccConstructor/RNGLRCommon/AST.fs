@@ -77,6 +77,7 @@ and Nodes =
             {fst = res.fst; snd = res.snd; other = res.other}
             //match arr with
 
+
         member nodes.doForAll f =
             if nodes.fst <> null then
                 f nodes.fst
@@ -134,6 +135,14 @@ and Nodes =
                             res.[i+2] <- f nodes.other.[i]
             res
         end
+
+and IntermidiateNode =
+    struct 
+        val mutable leftChild  : obj
+        val mutable rightChild : obj
+        val mutable value      : int * int
+        new (l, r, v : int * int) = {leftChild = l; rightChild = r; value = v}
+    end
 
 let inline getFamily (node : obj) =
     match node with

@@ -109,7 +109,7 @@ type CYKCore() =
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
-        printTbl ()
+        //printTbl ()
 
         let getString state lbl weight = 
             let stateString = 

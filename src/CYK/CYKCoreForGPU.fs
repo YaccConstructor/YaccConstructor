@@ -146,7 +146,7 @@ type CYKCoreForGPU() =
             // foreach rule r in grammar in parallel
             rulesIndexed 
             |> Array.iter (fun (curRule:RuleIndexed) -> for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len)
-        (*
+        
         let elem2 i len symRuleArr = 
             // foreach symbol in grammar in parallel
             symRuleArr
@@ -157,20 +157,20 @@ type CYKCoreForGPU() =
                                             fun curRule -> for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len
                                         )
             )
-        *)
+        
         let fillTable rulesIndexed =
           [|1..rowSize - 1|]
           |> Array.iter (fun len ->
                 [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
                 |> Array.Parallel.iter (fun i -> elem i len rulesIndexed))
-        (*
+        
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]
             |> Array.iter (fun len ->
                 [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
                 |> Array.Parallel.iter (fun i -> elem2 i len symRuleArr))
-        *)
         
+
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -197,7 +197,7 @@ type CYKCoreForGPU() =
                     ntrIndexes.Add ruleIndex )
         let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
         printfn "non terminal rules count %d" nonTermRules.Length
-        (*
+        
         // left parts of non-terminal rules array
         // needed only for 2nd realization
         let symRuleMap = 
@@ -212,25 +212,25 @@ type CYKCoreForGPU() =
             |> Array.map (fun (sym,rules) -> 
                             //printfn "Symbol %d rules count: %d" sym rules.Length
                             new SymbolRuleMapItem(sym,rules))
-        *)
+        
         let fillStart = System.DateTime.Now
         printfn "Fill table started %s" (string fillStart)
         fillTable nonTermRules
         let fillFinish = System.DateTime.Now
         printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
-        (*
+        
         let fillImprStart = System.DateTime.Now
         printfn "Fill table improved started %s" (string fillImprStart)
         fillTable2 symRuleArr
         let fillImprFinish = System.DateTime.Now
         printfn "Fill table improved finished %s [%s]" (string fillImprFinish) (string (fillImprFinish - fillImprStart))
-        *)
+        
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
-        printTbl ()
+        //printTbl ()
 
         let getString state lbl weight = 
             let stateString = 
@@ -269,7 +269,6 @@ type CYKCoreForGPU() =
         let ruleInd,_,curL,curW = getData cell.rData
         let rule = getRuleStruct rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
-        //printfn "(%d, %d) -> (%d, %d), (%d, %d)" i l leftI leftL rightI rightL
         if l = 0
         then if curL <> noLbl
              then print curL curW leftI rightL leftL

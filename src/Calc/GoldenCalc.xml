@@ -61,5 +61,11 @@
         <Token>RBRACE</Token>
         <Token>LBRACE</Token>	
     </Tokens>
+    <Matched>
+        <Pair>
+            <Left> LBRACE </Left>
+            <Right> RBRACE </Right>
+        </Pair>
+    </Matched>
 </SyntaxDefinition>
 

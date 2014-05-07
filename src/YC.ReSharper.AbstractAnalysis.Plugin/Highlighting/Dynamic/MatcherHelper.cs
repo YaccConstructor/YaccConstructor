@@ -2,7 +2,7 @@
 using System.Linq;
 using Highlighting.Core;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
     public static class MatcherHelper
     {

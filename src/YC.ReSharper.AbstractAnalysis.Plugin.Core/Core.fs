@@ -19,10 +19,18 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
-    let mutable xmlPath = ""
-    let mutable forest = []
-    let mutable language = Calc
+    let mutable calcXmlPath = ""
+    let mutable jsonXmlPath = ""
+    let mutable tsqlXmlPath = ""
     
+    let mutable calcForest = []
+    let mutable jsonForest = []
+    let mutable tsqlForest = []
+
+    let mutable nowCalcTreeGen = false
+    let mutable nowJsonTreeGen = false
+    let mutable nowTsqlTreeGen = false
+
     ///Needs for tree generation for highlighting
     let mutable unprocessed = []
     let mutable count = 0
@@ -36,7 +44,7 @@ type Processor(file) =
             | "objnotation" ->JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError translate printer = 
+    let processLang graph tokenize parse addLError addPError translate printer addAST = 
         let tokenize g =
             try 
                tokenize g
@@ -46,11 +54,12 @@ type Processor(file) =
                 (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
                 |> addLError
                 None
+
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
              | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> 
-                    forest <- [ast, errors] @ forest
+                    addAST (ast, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
         
@@ -72,6 +81,44 @@ type Processor(file) =
                 | e -> 
                     brs.[0].back_ref.GetDocumentRange())
         ranges    
+
+
+    let getNextTree (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) translate = 
+        if forest.Length <= count 
+        then
+            count <- 0 
+            null
+        else 
+            let mutable curAst, errors = List.nth forest count
+            if unprocessed.Length = 0
+            then 
+                unprocessed <- Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
+            
+            let nextTree, unproc = curAst.GetNextTree unprocessed (fun _ -> true)
+            if unproc.Length = 0
+            then 
+                count <- count + 1
+            unprocessed  <- unproc
+            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
+            treeNodeList.ToTreeNodeCollection().First()
+
+    let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
+                            range (tokenData: 'TokenType -> obj)  translate = 
+        let tokenToPos (token : 'TokenType) = 
+            let data = unbox <| tokenData token
+            let str : string = fst data
+            let pos : array<AbstractLexer.Core.Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> 
+                = snd data
+                
+            calculatePos pos
+        
+        let res = new ResizeArray<_>()
+        for ast, errors in forest do
+            let trees = ast.GetForestWithToken range tokenToPos
+            for tree in trees do
+                let treeNodeList = translate tree errors :> seq<ITreeNode>
+                res.Add <| treeNodeList.ToTreeNodeCollection().First()
+        res
 
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
@@ -110,7 +157,6 @@ type Processor(file) =
             | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
             | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
             | _ -> failwith "error in addErrorJSON function"
-
         
         let addErrorTSQL tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
@@ -128,77 +174,76 @@ type Processor(file) =
             | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
             | _ -> failwith "error in addErrorTSQL function"
 
+
+        let addCalcAst pair = calcForest <- calcForest @ [pair]
+        let addJsonAst pair = jsonForest <- jsonForest @ [pair]
+        let addTSqlAst pair =  tsqlForest <- tsqlForest @ [pair]
+
         graphs
         |> ResizeArray.iter 
             (fun (lang, graph) ->
                 match lang with
                 | Calc -> 
-                    xmlPath <- Calc.xmlPath
-                    language <- Calc
-                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot
+                    calcXmlPath <- Calc.xmlPath
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot addCalcAst
                 | JSON -> 
-                    xmlPath <- JSON.xmlPath
-                    language <- JSON
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot
+                    jsonXmlPath <- JSON.xmlPath
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot addJsonAst 
                 | TSQL -> 
-                    xmlPath <- TSQL.xmlPath
-                    language <- TSQL
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot
+                    tsqlXmlPath <- TSQL.xmlPath
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot addTSqlAst
             )
-
         lexerErrors, parserErrors
 
-    member this.XmlPath = xmlPath
+    member this.XmlPath = 
+        if nowCalcTreeGen then calcXmlPath 
+        elif nowJsonTreeGen then jsonXmlPath 
+        elif nowTsqlTreeGen then tsqlXmlPath 
+        else System.String.Empty
+        
     
     member this.GetNextTree() = 
-        let translate = 
-            match language with
-            | Calc -> Calc.translate
-            | JSON -> JSON.translate
-            | TSQL -> TSQL.translate
+        if not <| nowCalcTreeGen || nowJsonTreeGen || nowTsqlTreeGen 
+        then
+            nowCalcTreeGen <- true
 
-        if forest.Length <= count 
-        then null
-        else 
-            let mutable curAst, errors = List.nth forest count
-            let mutable unproc = 
-                if unprocessed.Length = 0
-                then Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
-                else unprocessed
-            
-            let nextTree, unproc = curAst.GetNextTree unproc (fun _ -> true)
-            if unproc.Length = 0
+        let mutable res = null
+        if nowCalcTreeGen 
+        then 
+            res <- getNextTree calcForest Calc.translate
+            if res = null
             then 
-                count <- count + 1
-            unprocessed <- unproc
-            
-            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
-            treeNodeList.ToTreeNodeCollection().First()
+                nowCalcTreeGen <- false
+                nowJsonTreeGen <- true 
 
+        elif nowJsonTreeGen 
+        then
+            res <- getNextTree jsonForest JSON.translate
+            if res = null
+            then 
+                nowJsonTreeGen <- false
+                nowTsqlTreeGen <- true
+
+        elif nowTsqlTreeGen 
+        then
+            res <- getNextTree tsqlForest TSQL.translate
+            if res = null
+            then 
+                nowTsqlTreeGen <- false
+        res
 
     member this.GetForestWithToken range = 
-        let translate = 
-            match language with
-            | Calc -> Calc.translate
-            | JSON -> JSON.translate
-            | TSQL -> TSQL.translate
-
-        let calcPos token  = 
-            let tokenData = 
-                match language with
-                | Calc -> Calc.AbstractParser.tokenData
-                | JSON -> JSON.Parser.tokenData
-                | TSQL -> tokenData
-            
-            let (_ : string), (position : AbstractLexer.Core.Position<ICSharpLiteralExpression>[]) 
-                = unbox <| tokenData token
-                
-            calculatePos position
-
         let res = new ResizeArray<_>()
-        for ast, errors in forest do
-            let trees = ast.GetForestWithToken range calcPos
-            for tree in trees do
-                let treeNodeList = translate tree errors :> seq<ITreeNode>
-                res.Add <| treeNodeList.ToTreeNodeCollection().First()
+        if calcForest.Length <> 0
+        then
+            res.AddRange <| getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
+        
+        elif res.Count = 0 && jsonForest.Length <> 0
+        then
+            res.AddRange <| getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
+        
+        elif res.Count = 0 && tsqlForest.Length <> 0
+        then
+            res.AddRange <| getForestWithToken tsqlForest range tokenData TSQL.translate 
+        
         res

@@ -9,7 +9,6 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Collections.Generic
 
-
 type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[]) =
 
     let rowSize = extRowSize
@@ -63,7 +62,7 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
         // Write quotation
         let command = 
             <@
-                fun (r:_3D) (rulesIndexed:_[]) (recTable:_[]) -> 
+                fun (r:_3D) (rulesIndexed:_[]) (recTable:_[]) (rules:rule[]) -> 
                     let tx = r.GlobalID0 // len
                     let ty = r.GlobalID1 // i
 
@@ -72,6 +71,91 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
 
                     if (len <= realRulesIndexedLen && i <= realRecTableLen)
                     then                     
+                        let calcDiff columnIndex =
+                            if columnIndex < 2
+                            then 0
+                            else 
+                                let diff = ref 0
+                                for i in 1..columnIndex-1 do
+                                    diff := (!diff + i)
+                                !diff
+
+                        let isCellDataEmpty (cd:CellData) = 
+                            cd.rData = System.UInt64.MaxValue && cd._k = 0ul
+
+                                
+                        let getRuleName (rule:rule) = 
+                            let r1 = Microsoft.FSharp.Core.Operators.uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL)
+                            let rName = Microsoft.FSharp.Core.Operators.uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu)
+                            rName
+                            
+                        let getR1 (rule:rule) =
+                            let r1 = Microsoft.FSharp.Core.Operators.uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL)
+                            let r1 = Microsoft.FSharp.Core.Operators.uint16 (r1 &&& 0xFFFFFFFFu)
+                            r1
+
+                        let getR2 (rule:rule) =
+                            let r2 = uint32 (rule &&& 0xFFFFFFFFUL)
+                            let r2 = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
+                            r2
+
+                        let getRuleLabel (rule:rule) =
+                            let r2 = uint32 (rule &&& 0xFFFFFFFFUL)
+                            let r2,lbl = // ?
+                                Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), 
+                                Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
+                            let lblName = 
+                                Microsoft.FSharp.Core.Operators.byte ((lbl >>> 8) &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
+                            lblName
+
+                        let getRuleWeight (rule:rule) =
+                            let r2 = uint32 (rule &&& 0xFFFFFFFFUL)
+                            let r2,lbl = // ?
+                                Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu), 
+                                Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
+                            let lblWeight = 
+                                Microsoft.FSharp.Core.Operators.byte (lbl &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
+                            lblWeight
+
+                        let getRuleNum (rule:tblData) =
+                            let rNum = Microsoft.FSharp.Core.Operators.uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL)
+                            rNum
+
+                        let getLblState (rule:tblData) = 
+                            let r2 = Microsoft.FSharp.Core.Operators.uint32 (rule &&& 0xFFFFFFFFUL)
+                            let lState = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
+                            let lblState =
+                                match lState with
+                                | 0us -> LblState.Defined
+                                | 1us -> LblState.Undefined
+                                | 2us -> LblState.Conflict
+                                | _ -> failwith "Unexpected lblState value!"
+                            lblState
+
+                        let getCellLabel(rule:tblData) = 
+                            let r2 = Microsoft.FSharp.Core.Operators.uint32 (rule &&& 0xFFFFFFFFUL)
+                            let lbl = Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
+                            let lblName = Microsoft.FSharp.Core.Operators.byte ((lbl >>> 8) &&& 0xFFus)
+                            lblName
+
+                        let getCellWeight (rule:tblData) = 
+                            let r2 = Microsoft.FSharp.Core.Operators.uint32 (rule &&& 0xFFFFFFFFUL)
+                            let lbl = Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
+                            let lblWeight = Microsoft.FSharp.Core.Operators.byte (lbl &&& 0xFFFFus)
+                            lblWeight
+                            
+                        let getCellRuleTop (cellData:CellData) (rules:rule[]) =
+                            let curRuleNum = getRuleNum cellData.rData
+                            let ruleName = getRuleName rules.[int curRuleNum]
+                            ruleName
+                                                    
+                        let buildData rNum (lState:LblState) (lblName:Microsoft.FSharp.Core.uint8) (lblWeight:Microsoft.FSharp.Core.uint8) =
+                            let (lbl:Microsoft.FSharp.Core.uint16) = 
+                                (Microsoft.FSharp.Core.Operators.uint16 lblName <<< 8) ||| Microsoft.FSharp.Core.Operators.uint16 lblWeight
+                            let (r2:Microsoft.FSharp.Core.uint32) = (uint32 lState <<< 16) ||| uint32 lbl
+                            let r =  (uint64 rNum <<< 32) ||| uint64 r2
+                            r
+
                         let chooseNewLabel ruleLabel (lbl1:byte) (lbl2:byte) lState1 lState2 =
                             if lState1 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
                             elif lState2 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
@@ -101,33 +185,40 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                                 else [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
                     
                         let processRule rule ruleIndex i k l =
-                            let rule = getRuleStruct rule
-                            if rule.R2 <> 0us then
+                            let r2 = getR2 rule
+                            if r2 <> 0us then
                                 let leftStart = ( k * rowSize + i - calcDiff k ) * nTermsCount
                                 let rightStart = ( (l-k-1) * rowSize + k+i+1 - (calcDiff (l-k-1)) ) * nTermsCount
 
                                 for m in 0..nTermsCount - 1 do
                                     let leftCell:CellData = recTable.[leftStart + m]
-                                    if not (isCellDataEmpty (leftCell)) && getCellRuleTop leftCell rules = rule.R1 then
-                                        let cellData1 = getCellDataStruct leftCell
+                                    let r1 = getR1 rule
+                                    if not (isCellDataEmpty (leftCell)) && getCellRuleTop leftCell rules = r1 then
                                         for n in 0..nTermsCount - 1 do
                                             let rightCell = recTable.[rightStart + n]
-                                            if not (isCellDataEmpty (rightCell)) && getCellRuleTop rightCell rules = rule.R2 then
-                                                let cellData2 = getCellDataStruct rightCell
-                                                let lblWithState = chooseNewLabel rule.Label cellData1.Label cellData2.Label cellData1.LabelState cellData2.LabelState
-                                                let newWeight = 0uy//weightCalcFun rule.Weight cellData1.Weight cellData2.Weight
+                                            if not (isCellDataEmpty (rightCell)) && getCellRuleTop rightCell rules = r2 then
+                                                let label = getRuleLabel rule
+                                                let label1 = getCellLabel leftCell.rData
+                                                let lState1 = getLblState leftCell.rData
+                                                let label2 = getCellLabel rightCell.rData
+                                                let lState2 = getLblState rightCell.rData
+                                                let lblWithState = chooseNewLabel label label1 label2 lState1 lState2
+                                                
+                                                let weight = getRuleWeight rule
+                                                let weight1 = getCellWeight leftCell.rData
+                                                let weight2 = getCellWeight rightCell.rData
+                                                let newWeight = 0uy // weightCalcFun weight weight1 weight2
+                                                
                                                 let currentElem = buildData ruleIndex (toState (lblWithState.[1])) (byte lblWithState.[0]) newWeight
-                                                recTable.[( l * rowSize + i - calcDiff l ) * nTermsCount + int rule.RuleName - 1].rData <- currentElem
-                                                recTable.[( l * rowSize + i - calcDiff l ) * nTermsCount + int rule.RuleName - 1]._k <- uint32 k
-                                                    // <- new CellData(currentElem, uint32 k) |> Some
+                                                let ruleName = int (getRuleName rule)
+                                                let index = ( l * rowSize + i - calcDiff l ) * nTermsCount + ruleName - 1 
+                                                recTable.[index].rData <- currentElem
+                                                recTable.[index]._k <- uint32 k
 
                         for k in 0..(len-1) do
                             let curRule:RuleIndexed = rulesIndexed.[k]
-                        
-                            let h = ref 0
-                            h := 9
-                            
-                            //processRule curRule.Rule curRule.Index i k len
+                                                    
+                            processRule curRule.Rule curRule.Index i k len
                     
             @>
     
@@ -140,7 +231,7 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
         // computation grid configuration: 2D grid with size = rows*columns and local block with size=localWorkSize*localWorkSize
         let d =(new _3D(rulesIndexed.Length, recTable.Length, recTable.Length, maxLocalWorkSize, maxLocalWorkSize, maxLocalWorkSize))
         // Prepare kernel. Pass actual parameters for computation:
-        kernelPrepare d rulesIndexed recTable
+        kernelPrepare d rulesIndexed recTable rules
         // Add command into queue and finish it
         let _ = commandQueue.Add(kernelRun()).Finish()
     
@@ -178,6 +269,15 @@ type CYKOnGPU() =
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
                 
+    let calcDiff columnIndex =
+        if columnIndex < 2
+        then 0
+        else 
+            let diff = ref 0
+            [|1..columnIndex-1|]
+            |> Array.iter (fun i -> diff := (!diff + i))
+            !diff
+
     let recognitionTable (_,_) (s:Microsoft.FSharp.Core.uint16[]) weightCalcFun =
 
         nTermsCount <- 

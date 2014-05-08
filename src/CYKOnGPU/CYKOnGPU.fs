@@ -79,11 +79,7 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                                 for i in 1..columnIndex-1 do
                                     diff := (!diff + i)
                                 !diff
-
-                        let isCellDataEmpty (cd:CellData) = 
-                            cd.rData = System.UInt64.MaxValue && cd._k = 0ul
-
-                                
+                                                                                            
                         let getRuleName (rule:rule) = 
                             let r1 = Microsoft.FSharp.Core.Operators.uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL)
                             let rName = Microsoft.FSharp.Core.Operators.uint16 ((r1 >>> 16) &&& 0xFFFFFFFFu)
@@ -116,22 +112,15 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                             let lblWeight = 
                                 Microsoft.FSharp.Core.Operators.byte (lbl &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
                             lblWeight
-
-                        let getRuleNum (rule:tblData) =
-                            let rNum = Microsoft.FSharp.Core.Operators.uint32 ((rule >>> 32) &&&  0xFFFFFFFFUL)
-                            rNum
-
+                            
                         let getLblState (rule:tblData) = 
                             let r2 = Microsoft.FSharp.Core.Operators.uint32 (rule &&& 0xFFFFFFFFUL)
                             let lState = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
-                            let lblState =
-                                match lState with
-                                | 0us -> LblState.Defined
-                                | 1us -> LblState.Undefined
-                                | 2us -> LblState.Conflict
-                                | _ -> failwith "Unexpected lblState value!"
-                            lblState
-
+                            if lState = 0us then LblState.Defined
+                            elif lState = 1us then LblState.Undefined
+                            elif lState = 2us then LblState.Conflict
+                            else failwith "Unexpected lblState value!"
+                            
                         let getCellLabel(rule:tblData) = 
                             let r2 = Microsoft.FSharp.Core.Operators.uint32 (rule &&& 0xFFFFFFFFUL)
                             let lbl = Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
@@ -143,47 +132,7 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                             let lbl = Microsoft.FSharp.Core.Operators.uint16 (r2 &&& 0xFFFFFFFFu)
                             let lblWeight = Microsoft.FSharp.Core.Operators.byte (lbl &&& 0xFFFFus)
                             lblWeight
-                            
-                        let getCellRuleTop (cellData:CellData) (rules:rule[]) =
-                            let curRuleNum = getRuleNum cellData.rData
-                            let ruleName = getRuleName rules.[int curRuleNum]
-                            ruleName
-                                                    
-                        let buildData rNum (lState:LblState) (lblName:Microsoft.FSharp.Core.uint8) (lblWeight:Microsoft.FSharp.Core.uint8) =
-                            let (lbl:Microsoft.FSharp.Core.uint16) = 
-                                (Microsoft.FSharp.Core.Operators.uint16 lblName <<< 8) ||| Microsoft.FSharp.Core.Operators.uint16 lblWeight
-                            let (r2:Microsoft.FSharp.Core.uint32) = (uint32 lState <<< 16) ||| uint32 lbl
-                            let r =  (uint64 rNum <<< 32) ||| uint64 r2
-                            r
-
-                        let chooseNewLabel ruleLabel (lbl1:byte) (lbl2:byte) lState1 lState2 =
-                            if lState1 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                            elif lState2 = LblState.Conflict then [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                            elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && ruleLabel = noLbl then [| int noLbl; int LblState.Undefined |] // new LabelWithState(noLbl, LblState.Undefined)
-                            else
-                                let mutable notEmptyLbl1 = noLbl
-                                let mutable notEmptyLbl2 = noLbl
-                                let mutable notEmptyLbl3 = noLbl 
-                                let mutable realLblCount = 0
-                                if lbl1 <> noLbl then 
-                                    notEmptyLbl1 <- lbl1
-                                    realLblCount <- realLblCount + 1
-                                if lbl2 <> noLbl then
-                                    if realLblCount = 0 then notEmptyLbl1 <- lbl2
-                                    elif realLblCount = 1 then notEmptyLbl2 <- lbl2
-                                    realLblCount <- realLblCount + 1
-                                if ruleLabel <> noLbl then 
-                                    if realLblCount = 0 then notEmptyLbl1 <- ruleLabel
-                                    elif realLblCount = 1 then notEmptyLbl2 <- ruleLabel
-                                    elif realLblCount = 2 then notEmptyLbl3 <- ruleLabel
-                                    realLblCount <- realLblCount + 1
-
-                                if realLblCount = 1 ||
-                                    (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
-                                    (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
-                                then [| int noLbl; int LblState.Defined |] // new LabelWithState(notEmptyLbl1, LblState.Defined)
-                                else [| int noLbl; int LblState.Conflict |] // new LabelWithState(noLbl, LblState.Conflict)
-                    
+                                                                        
                         let processRule rule ruleIndex i k l =
                             let r2 = getR2 rule
                             if r2 <> 0us then
@@ -193,23 +142,70 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                                 for m in 0..nTermsCount - 1 do
                                     let leftCell:CellData = recTable.[leftStart + m]
                                     let r1 = getR1 rule
-                                    if not (isCellDataEmpty (leftCell)) && getCellRuleTop leftCell rules = r1 then
+                                    (* get rule num *)
+                                    let leftRuleNum = int (uint32 ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL))
+                                    (* get cell rule top *)
+                                    let leftTop = getRuleName (rules.[leftRuleNum])
+                                    (* is cell data empty *)
+                                    let isLeftEmpty = leftCell.rData = System.UInt64.MaxValue && leftCell._k = 0ul
+                                    if not isLeftEmpty && leftTop = r1 then
                                         for n in 0..nTermsCount - 1 do
                                             let rightCell = recTable.[rightStart + n]
-                                            if not (isCellDataEmpty (rightCell)) && getCellRuleTop rightCell rules = r2 then
+                                            (* get rule num *)
+                                            let rightRuleNum = int (uint32 ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL))
+                                            (* get cell rule top *)
+                                            let rightTop = getRuleName (rules.[rightRuleNum])
+                                            (* is cell data empty *)
+                                            let isRightEmpty = rightCell.rData = System.UInt64.MaxValue && rightCell._k = 0ul
+                                            if not isRightEmpty && rightTop = r2 then
                                                 let label = getRuleLabel rule
                                                 let label1 = getCellLabel leftCell.rData
                                                 let lState1 = getLblState leftCell.rData
                                                 let label2 = getCellLabel rightCell.rData
                                                 let lState2 = getLblState rightCell.rData
-                                                let lblWithState = chooseNewLabel label label1 label2 lState1 lState2
+                                                let newLabel = ref noLbl
+                                                let newState = ref LblState.Undefined
+                                                
+                                                (* choose new label *)
+                                                if lState1 = LblState.Conflict then newLabel := noLbl; newState := LblState.Conflict
+                                                elif lState2 = LblState.Conflict then newLabel := noLbl; newState := LblState.Conflict
+                                                elif lState1 = LblState.Undefined && lState2 = LblState.Undefined && label = noLbl 
+                                                then newLabel := noLbl; newState := LblState.Undefined
+                                                else
+                                                    let mutable notEmptyLbl1 = noLbl
+                                                    let mutable notEmptyLbl2 = noLbl
+                                                    let mutable notEmptyLbl3 = noLbl 
+                                                    let mutable realLblCount = 0
+                                                    if label1 <> noLbl then 
+                                                        notEmptyLbl1 <- label1
+                                                        realLblCount <- realLblCount + 1
+                                                    if label2 <> noLbl then
+                                                        if realLblCount = 0 then notEmptyLbl1 <- label2
+                                                        elif realLblCount = 1 then notEmptyLbl2 <- label2
+                                                        realLblCount <- realLblCount + 1
+                                                    if label <> noLbl then 
+                                                        if realLblCount = 0 then notEmptyLbl1 <- label
+                                                        elif realLblCount = 1 then notEmptyLbl2 <- label
+                                                        elif realLblCount = 2 then notEmptyLbl3 <- label
+                                                        realLblCount <- realLblCount + 1
+                                                    if realLblCount = 1 ||
+                                                        (realLblCount = 2 && notEmptyLbl2 = notEmptyLbl1) ||
+                                                        (realLblCount = 3 && notEmptyLbl2 = notEmptyLbl1 && notEmptyLbl3 = notEmptyLbl1)
+                                                    then newLabel := notEmptyLbl1; newState := LblState.Defined
+                                                    else newLabel := noLbl; newState := LblState.Conflict
                                                 
                                                 let weight = getRuleWeight rule
                                                 let weight1 = getCellWeight leftCell.rData
                                                 let weight2 = getCellWeight rightCell.rData
                                                 let newWeight = 0uy // weightCalcFun weight weight1 weight2
                                                 
-                                                let currentElem = buildData ruleIndex (toState (lblWithState.[1])) (byte lblWithState.[0]) newWeight
+                                                (* build data *)
+                                                let currentLabel = 
+                                                    (Microsoft.FSharp.Core.Operators.uint16 !newLabel <<< 8) 
+                                                    ||| Microsoft.FSharp.Core.Operators.uint16 newWeight
+                                                let currentR2 = (uint32 !newState <<< 16) ||| uint32 currentLabel
+                                                let currentElem = (uint64 ruleIndex <<< 32) ||| uint64 currentR2
+
                                                 let ruleName = int (getRuleName rule)
                                                 let index = ( l * rowSize + i - calcDiff l ) * nTermsCount + ruleName - 1 
                                                 recTable.[index].rData <- currentElem

@@ -7,10 +7,11 @@ using System.Xml.Schema;
 using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
+using JetBrains.ReSharper.Daemon.VB.Errors;
 using JetBrains.ReSharper.Psi.Tree;
 using QuickGraph.Collections;
 using YC.ReSharper.AbstractAnalysis.Plugin.Dynamic;
-using MatcherHelper = YC.ReSharper.AbstractAnalysis.Plugin.Dynamic.MatcherHelper;
+using MatcherHelper = YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic.MatcherHelper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -18,7 +19,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         public static string DefaultColor = HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE;
 
-        private static Dictionary<string, string> myTokenToColor;
+        private static Dictionary<string, Dictionary<string, string>> parsedFiles =
+            new Dictionary<string, Dictionary<string, string>>();
+        
+        private static Dictionary<string, string> myTokenToColor = new Dictionary<string, string>();
+        
         public static Dictionary<string, string> TokenToColor
         {
             get { return myTokenToColor; }
@@ -75,6 +80,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public static void ParseFile(string fileName)
         {
+            if (parsedFiles.ContainsKey(fileName))
+            {
+                myTokenToColor = parsedFiles[fileName];
+                return;
+            }
+
             try
             {
                 MatcherHelper.ReCreate();
@@ -84,6 +95,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                     var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
                     xmlReader.Read();
                     ParseDefinition(xmlReader);
+                    parsedFiles.Add(fileName, myTokenToColor);
                 }
             }
             catch (Exception)
@@ -94,8 +106,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private static void ParseDefinition(XmlReader xmlReader)
         {
-            myTokenToColor = new Dictionary<string, string>();
-
             while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
             {
                 if (xmlReader.Name == "Tokens")

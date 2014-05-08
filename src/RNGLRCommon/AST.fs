@@ -647,17 +647,20 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let getUnprocessedCount family = 
                     let familyLeaves = this.getTokensFromFamily family
                     let newToksList = 
-                        List.filter (fun leaf -> List.exists ((=) leaf) unprocessed) familyLeaves
+                        List.filter (fun leaf -> List.exists ((=) leaf) familyLeaves) unprocessed
                     newToksList.Length
 
                 let mutable nextFam = ast.first
-                let mutable maxNewToks = getUnprocessedCount ast.first
+                let mutable maxNewToks = 
+                    if filter ast.first 
+                    then getUnprocessedCount ast.first
+                    else -1
                 
                 for family in ast.other do
                     if filter family
                     then 
                         let newTokens = getUnprocessedCount family
-                        if newTokens >= maxNewToks 
+                        if newTokens > maxNewToks 
                         then nextFam <- family
 
                 nextFam

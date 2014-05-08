@@ -14,6 +14,7 @@ using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
 using CalcHighlighting;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
 {
@@ -51,7 +52,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             
             var lBrotherText = lBraceRange.GetText();
 
-            var rBrotherText = MatcherHelper.GetMatch(lBrotherText);
+            var rBrotherText = MatcherHelper.GetRightMatch(lBrotherText);
             if (string.IsNullOrEmpty(rBrotherText))
                 return;
 
@@ -96,7 +97,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
 
             var rBrotherText = rBraceRange.GetText();
-            var lBrotherText = MatcherHelper.GetMatch(rBrotherText);
+            var lBrotherText = MatcherHelper.GetLeftMatch(rBrotherText);
             
             if (string.IsNullOrEmpty(lBrotherText))
                 return;

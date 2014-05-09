@@ -89,8 +89,14 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                             let lblWeight = 
                                 Microsoft.FSharp.Core.Operators.byte (lbl &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
                             lblWeight
-                                                                        
-                        let processRule rule ruleIndex i k l =
+                       
+                        for k in 0..(len-1) do
+                            let curRule:RuleIndexed = rulesIndexed.[k]
+                            let rule = curRule.Rule
+                            let ruleIndex = curRule.Index
+                            let l = len
+                                                    
+                            (* process rule *)
                             (* get r2 *)
                             let r2 = uint32 (rule &&& 0xFFFFFFFFUL)
                             let r2 = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
@@ -239,11 +245,6 @@ type GPUWork(extRowSize, extNTermsCount, extRecTable:_[], extRules, extRulesInde
                                                 let index = ( l * rowSize + i - currentDiff ) * nTermsCount + ruleName - 1 
                                                 recTable.[index].rData <- currentElem
                                                 recTable.[index]._k <- uint32 k
-
-                        for k in 0..(len-1) do
-                            let curRule:RuleIndexed = rulesIndexed.[k]
-                                                    
-                            processRule curRule.Rule curRule.Index i k len
                     
             @>
     

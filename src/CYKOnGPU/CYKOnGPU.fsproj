@@ -92,6 +92,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GPUWork.fs" />
     <Compile Include="CYKOnGPU.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

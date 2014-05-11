@@ -59,12 +59,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public virtual void ProcessAfterInterior(ITreeNode element, IHighlightingConsumer consumer)
         {
             if (element.FirstChild == null)
-                VisitSomething(element, consumer);
+                VisitLeaf(element, consumer);
             
         }
         #endregion
 
-        public virtual void VisitSomething(ITreeNode node, IHighlightingConsumer consumer)
+        public virtual void VisitLeaf(ITreeNode node, IHighlightingConsumer consumer)
         {}
     
         protected void HighlightInFile(Action<IFile, IHighlightingConsumer> fileHighlighter, Action<DaemonStageResult> commiter)

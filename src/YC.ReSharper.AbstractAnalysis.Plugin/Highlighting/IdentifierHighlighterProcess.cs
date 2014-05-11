@@ -18,7 +18,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
         }
 
-        public override void VisitSomething(ITreeNode treeNode, IHighlightingConsumer consumer)
+        public override void VisitLeaf(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
             ICollection<DocumentRange> colorConstantRange;
             colorConstantRange = treeNode.UserData.GetData(KeyConstant.Ranges);
@@ -30,7 +30,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 if (range.Document != null && !addedRanges.Contains(range.TextRange))
                 {
-                    AddHighLighting(range, consumer, new MySomethingHighlighting(treeNode));
+                    AddHighLighting(range, consumer, new MyLeafHighlighting(treeNode));
                 }
             }
         }

@@ -5,6 +5,6 @@ namespace Highlighting.Core
 {
     public interface ITreeNodeVisitor<TContext>
     {
-        void VisitSomething([NotNull] ITreeNode node, TContext context);
+        void VisitLeaf([NotNull] ITreeNode node, TContext context);
     }
 }

@@ -62,8 +62,9 @@ namespace CalcHighlighting
 
             UserData.PutData(KeyConstant.YcTokName, ycTokName);
             UserData.PutData(KeyConstant.YcValue, ycValue);
+            UserData.PutData(KeyConstant.YcLanguage, "Calc");
 
-            YcHelper.AddYcItem(ycTokName, ycValue);
+            YcHelper.AddYcItem(ycTokName, ycValue, "Calc");
         }
 
         public FactorNonTermNode (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)

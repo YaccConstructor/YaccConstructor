@@ -62,8 +62,9 @@ namespace JSONHighlighting
 
             UserData.PutData(KeyConstant.YcTokName, ycTokName);
             UserData.PutData(KeyConstant.YcValue, ycValue);
+            UserData.PutData(KeyConstant.YcLanguage, "JSON");
 
-            YcHelper.AddYcItem(ycTokName, ycValue);
+            YcHelper.AddYcItem(ycTokName, ycValue, "JSON");
         }
 
         public ErrorNonTermNode (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)

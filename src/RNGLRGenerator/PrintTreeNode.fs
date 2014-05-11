@@ -1,6 +1,6 @@
 ﻿module PrintTreeNode
 
-let printTreeNode (nameOfNamespace : string) (nameOfClass : string) = 
+let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
     let res  = new System.Text.StringBuilder()
 
     let inline print (x : 'a) =
@@ -83,8 +83,9 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) =
     printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokName, ycTokName);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcValue, ycValue);"
+    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" lang
     printBr ""
-    printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue);"
+    printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, \"%s\");" lang
     printBrInd 2 "}"
     printBr ""
         

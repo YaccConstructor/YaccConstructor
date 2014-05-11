@@ -77,8 +77,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             // fsTree is List<ITreeNode>. It can be null.
             while (tree != null)
             {
-                ColorHelper.ParseFile(ycProcessor.XmlPath);
+                string lang = ycProcessor.CurrentLang.ToLower();
+                ColorHelper.ParseFile(ycProcessor.XmlPath, lang);
                 ProcessDescendants(tree, processor);
+                MatcherHelper.NodeCover.Add(tree);
                 tree = ycProcessor.GetNextTree();
             }
         }

@@ -5,14 +5,17 @@ using Highlighting.Core;
 using JetBrains.DataFlow;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
+using JetBrains.ReSharper.Daemon.CSharp.Errors;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.ContextHighlighters;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
+using JetBrains.ReSharper.Psi.Css;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
 using CalcHighlighting;
+using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
@@ -45,18 +48,20 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (MatcherHelper.YcProcessor == null)
+            if (MatcherHelper.YcProcessor == null || MatcherHelper.NodeCover.Count == 0)
                 return;
             
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
             
             var lBrotherText = lBraceRange.GetText();
+            //if (!MatcherHelper.AllMatchingValues.Contains(lBrotherText)) return;
 
-            var rBrotherText = MatcherHelper.GetRightMatch(lBrotherText);
+            var lang = GetLanguageFromRange(lBraceRange);
+            var rBrotherText = MatcherHelper.GetRightMatch(lBrotherText, lang);
             if (string.IsNullOrEmpty(rBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lBraceRange);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lBraceRange, lang);
 
             var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -89,20 +94,22 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (MatcherHelper.YcProcessor == null)
+            if (MatcherHelper.YcProcessor == null || MatcherHelper.NodeCover.Count == 0)
                 return;
             
-            //if (myProvider.DocumentCaret.TextRange.StartOffset == 0)
-            //    return;
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
 
             var rBrotherText = rBraceRange.GetText();
-            var lBrotherText = MatcherHelper.GetLeftMatch(rBrotherText);
-            
+            //if (!MatcherHelper.AllMatchingValues.Contains(rBrotherText)) return;
+
+            var lang = GetLanguageFromRange(rBraceRange);
+            var lBrotherText = MatcherHelper.GetLeftMatch(rBrotherText, lang);
+
+            //possible it is unnecessary
             if (string.IsNullOrEmpty(lBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(rBraceRange);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(rBraceRange, lang);
 
             var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -126,6 +133,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             {
                 MatchingBracesContextHighlightersUtil.ConsumeMatchingBracesHighlighting(consumer, range, rBraceRange);
             }
+        }
+
+        private string GetLanguageFromRange(DocumentRange range)
+        {
+            foreach (var treeNode in MatcherHelper.NodeCover)
+            {
+                var nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
+                if (nodeRange.Contains(range))
+                    return treeNode.UserData.GetData(KeyConstant.YcLanguage);
+            }
+            return string.Empty;
         }
 
         //Method doesn't call now

@@ -32,6 +32,7 @@ namespace Highlighting.Core
         public static readonly Key<string> YcTokName = new Key<string>("ycTokName");
         public static readonly Key<string> YcValue = new Key<string>("ycValue");
         public static readonly Key<List<DocumentRange>> Ranges = new Key<List<DocumentRange>>("ranges");
+        public static readonly Key<string> YcLanguage = new Key<string>("ycLanguage");
     }
 
     public static class PropertyConstant

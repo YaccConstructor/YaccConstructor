@@ -1,16 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
-using Highlighting.Core;
-using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Daemon.VB.Errors;
-using JetBrains.ReSharper.Psi.Tree;
-using QuickGraph.Collections;
-using YC.ReSharper.AbstractAnalysis.Plugin.Dynamic;
 using MatcherHelper = YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic.MatcherHelper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
@@ -78,7 +71,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {"WARNING_ATTRIBUTE", HighlightingAttributeIds.WARNING_ATTRIBUTE},
         };
 
-        public static void ParseFile(string fileName)
+        public static void ParseFile(string fileName, string lang)
         {
             if (parsedFiles.ContainsKey(fileName))
             {
@@ -88,14 +81,18 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
             try
             {
-                MatcherHelper.ReCreate();
+                MatcherHelper.ChangeLanguageTo(lang);
                 using (XmlReader reader = new XmlTextReader(new StreamReader(fileName)))
                 {
                     reader.MoveToContent();
                     var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
                     xmlReader.Read();
-                    ParseDefinition(xmlReader);
-                    parsedFiles.Add(fileName, myTokenToColor);
+                    Dictionary<string, string> res = ParseDefinition(xmlReader, lang);
+                    myTokenToColor = res;
+
+                    parsedFiles.Add(fileName, res);
+                    MatcherHelper.UpdateMatchingValues(lang);
+                    
                 }
             }
             catch (Exception)
@@ -104,52 +101,54 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
-        private static void ParseDefinition(XmlReader xmlReader)
+        private static Dictionary<string, string> ParseDefinition(XmlReader xmlReader, string lang)
         {
+            var dict = new Dictionary<string, string>();
             while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
             {
                 if (xmlReader.Name == "Tokens")
                 {
-                    ParseTokensGroup(xmlReader, xmlReader.GetAttribute("color"));
+                    ParseTokensGroup(xmlReader, xmlReader.GetAttribute("color"), dict);
                 }
                 else if (xmlReader.Name == "Token")
                 {
-                    ParseToken(xmlReader, xmlReader.GetAttribute("color"));
+                    ParseToken(xmlReader, xmlReader.GetAttribute("color"), dict);
                 }
                 else if (xmlReader.Name == "Matched")
                 {
-                    ParseMatching(xmlReader);
+                    ParseMatching(xmlReader, lang);
                 }
                 else
                 {
                     throw new Exception(string.Format("Unexpected element"));
                 }
             }
+            return dict;
         }
 
-        private static void ParseToken(XmlReader xmlReader, string color)
+        private static void ParseToken(XmlReader xmlReader, string color, Dictionary<string, string> dict)
         {
             xmlReader.Read();
             var content = xmlReader.ReadContentAsString().Trim();
 
-            if (myTokenToColor.ContainsKey(content))
+            if (dict.ContainsKey(content))
                 return;
 
             if (!string.IsNullOrEmpty(color) && mapping.ContainsKey(color))
-                myTokenToColor.Add(content, mapping[color]);
+                dict.Add(content, mapping[color]);
             else
-                myTokenToColor.Add(content, DefaultColor);
+                dict.Add(content, DefaultColor);
         }
 
-        private static void ParseTokensGroup(XmlReader xmlReader, string color)
+        private static void ParseTokensGroup(XmlReader xmlReader, string color, Dictionary<string, string> dict)
         {
             while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
             {
-                ParseToken(xmlReader, color);
+                ParseToken(xmlReader, color, dict);
             }
         }
 
-        private static void ParseMatching(XmlReader xmlReader)
+        private static void ParseMatching(XmlReader xmlReader, string lang)
         {
             while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
             {
@@ -158,7 +157,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 var left = ParseLeftMatcher(xmlReader);
                 var right = ParseRightMatcher(xmlReader);
 
-                MatcherHelper.AddMatch(left, right);
+                MatcherHelper.AddMatch(left, right, lang);
             }
         }
 
@@ -171,7 +170,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 xmlReader.Read();
                 return res;
             }
-            else throw new Exception("Unexpected left element in matching");
+            throw new Exception("Unexpected left element in matching");
         }
 
         private static string ParseRightMatcher(XmlReader xmlReader)
@@ -183,7 +182,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 xmlReader.Read();
                 return res;
             }
-            else throw new Exception("Unexpected right element in matching");
+            throw new Exception("Unexpected right element in matching");
         }
 
         private static XmlReader GetValidatingReader(XmlReader input, XmlSchemaSet schemaSet)

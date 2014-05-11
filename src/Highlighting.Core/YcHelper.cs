@@ -7,15 +7,26 @@ namespace Highlighting.Core
 {
     public static class YcHelper
     {
-        private static List<string> ununique = new List<string>();
-        private static Dictionary<string, string> ycTokenToString = new Dictionary<string, string>();
-
-        public static void AddYcItem(string key, string value)
+        /// <summary>
+        /// For each language name returns ycTokenToString dictiionary
+        /// </summary>
+        private static Dictionary<string, Dictionary<string, string>> allYcToString = new Dictionary<string, Dictionary<string, string>>();
+        private static Dictionary<string, List<string>> allUnunique = new Dictionary<string, List<string>>();
+        
+        public static void AddYcItem(string key, string value, string lang)
         {
+            lang = lang.ToLower();
             if (String.IsNullOrEmpty(key) ||
-                String.IsNullOrEmpty(value) ||
-                ununique.Contains(key))
+                String.IsNullOrEmpty(value))
                 return;
+
+            if (!allYcToString.ContainsKey(lang))
+            {
+                allYcToString.Add(lang, new Dictionary<string, string>());
+                allUnunique.Add(lang, new List<string>());
+            }
+            var ycTokenToString = allYcToString[lang];
+            var ununique = allUnunique[lang];
 
             if (ycTokenToString.ContainsKey(key))
             {
@@ -37,8 +48,11 @@ namespace Highlighting.Core
         /// </summary>
         /// <param name="ycToken"></param>
         /// <returns></returns>
-        public static string GetYcTokenName(string str)
+        public static string GetYcTokenName(string str, string lang)
         {
+            if (!allYcToString.ContainsKey(lang)) return null;
+            
+            var ycTokenToString = allYcToString[lang];
             if (!ycTokenToString.ContainsValue(str))
                 return null;
 
@@ -51,17 +65,21 @@ namespace Highlighting.Core
         /// </summary>
         /// <param name="ycToken"></param>
         /// <returns></returns>
-        public static string GetStringValue(string ycToken)
+        public static string GetStringValue(string ycToken, string lang)
         {
+            if (!allYcToString.ContainsKey(lang)) return null;
+
+            var ycTokenToString = allYcToString[lang];
             if (!ycTokenToString.ContainsKey(ycToken))
                 return null;
+
             return ycTokenToString[ycToken];
         }
 
-        public static void ReCreate()
-        {
-            ununique = new List<string>();
-            ycTokenToString = new Dictionary<string, string>();
-        }
+        //public static void ChangeLanguageTo(string lang)
+        //{
+        //    ununiqueDict = new List<string>();
+        //    ycTokenToString = new Dictionary<string, string>();
+        //}
     }
 }

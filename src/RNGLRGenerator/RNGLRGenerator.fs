@@ -122,7 +122,7 @@ type RNGLR() =
                 
                 let generateFile name = 
                     use out = new System.IO.StreamWriter (name + ".cs")
-                    let tables = printTreeNode !namespaceName name
+                    let tables = printTreeNode !namespaceName name <| namespaceName.Value.Replace ("Highlighting", "")
                     out.WriteLine tables
                     out.Close()
 

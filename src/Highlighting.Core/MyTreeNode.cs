@@ -65,6 +65,9 @@ namespace Highlighting.Core
             PersistentUserData = DataHelper.GetNodeUserData(this);
             UserData.PutData(KeyConstant.YcTokName, ycTokName);
             UserData.PutData(KeyConstant.YcValue, ycValue);
+            UserData.PutData(KeyConstant.YcLanguage, "Calc");
+            
+            YcHelper.AddYcItem(ycTokName, ycValue, "Calc");
         }
 
         public MyTreeNode(string ycName, string ycValue, object positions)

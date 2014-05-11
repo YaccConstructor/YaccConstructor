@@ -22,14 +22,16 @@ type Processor(file) =
     let mutable calcXmlPath = ""
     let mutable jsonXmlPath = ""
     let mutable tsqlXmlPath = ""
+
+    let mutable currentLang = Calc
     
     let mutable calcForest = []
     let mutable jsonForest = []
     let mutable tsqlForest = []
 
-    let mutable nowCalcTreeGen = false
-    let mutable nowJsonTreeGen = false
-    let mutable nowTsqlTreeGen = false
+//    let mutable nowCalcTreeGen = false
+//    let mutable nowJsonTreeGen = false
+//    let mutable nowTsqlTreeGen = false
 
     ///Needs for tree generation for highlighting
     let mutable unprocessed = []
@@ -58,8 +60,7 @@ type Processor(file) =
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> 
-                    addAST (ast, errors)
+             | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> addAST (ast, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
         
@@ -100,7 +101,7 @@ type Processor(file) =
                 count <- count + 1
             unprocessed  <- unproc
             let treeNodeList = translate nextTree errors :> seq<ITreeNode>
-            treeNodeList.ToTreeNodeCollection().First()
+            Seq.head treeNodeList
 
     let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
                             range (tokenData: 'TokenType -> obj)  translate = 
@@ -117,7 +118,7 @@ type Processor(file) =
             let trees = ast.GetForestWithToken range tokenToPos
             for tree in trees do
                 let treeNodeList = translate tree errors :> seq<ITreeNode>
-                res.Add <| treeNodeList.ToTreeNodeCollection().First()
+                res.Add <| Seq.head treeNodeList
         res
 
 //(provider: ICSharpContextActionDataProvider) = 
@@ -196,54 +197,50 @@ type Processor(file) =
         lexerErrors, parserErrors
 
     member this.XmlPath = 
-        if nowCalcTreeGen then calcXmlPath 
-        elif nowJsonTreeGen then jsonXmlPath 
-        elif nowTsqlTreeGen then tsqlXmlPath 
-        else System.String.Empty
-        
+        match currentLang with
+        | Calc -> calcXmlPath 
+        | JSON -> jsonXmlPath 
+        | TSQL -> tsqlXmlPath
+        | _ -> System.String.Empty
+    
+    member this.CurrentLang = 
+        match currentLang with
+        | Calc -> "Calc"
+        | JSON -> "JSON"
+        | TSQL -> "TSQL"
+        | _ -> "Unknown Language"
     
     member this.GetNextTree() = 
-        if not <| nowCalcTreeGen || nowJsonTreeGen || nowTsqlTreeGen 
-        then
-            nowCalcTreeGen <- true
+//        if not <| nowCalcTreeGen || nowJsonTreeGen || nowTsqlTreeGen 
+//        then
+//            nowCalcTreeGen <- true
 
         let mutable res = null
-        if nowCalcTreeGen 
-        then 
-            res <- getNextTree calcForest Calc.translate
-            if res = null
-            then 
-                nowCalcTreeGen <- false
-                nowJsonTreeGen <- true 
+        
+        match currentLang with
+        | Calc -> 
+                res <- getNextTree calcForest Calc.translate
+                if res = null
+                then currentLang <- JSON
+        | _ -> ()
+        
+        match currentLang with
+        | JSON when res = null -> 
+                res <- getNextTree jsonForest JSON.translate
+                if res = null
+                then currentLang <- TSQL
+        | _ -> ()
 
-        elif nowJsonTreeGen 
-        then
-            res <- getNextTree jsonForest JSON.translate
-            if res = null
-            then 
-                nowJsonTreeGen <- false
-                nowTsqlTreeGen <- true
-
-        elif nowTsqlTreeGen 
-        then
-            res <- getNextTree tsqlForest TSQL.translate
-            if res = null
-            then 
-                nowTsqlTreeGen <- false
+        match currentLang with 
+        | TSQL when res = null ->
+                res <- getNextTree tsqlForest TSQL.translate
+        | _ -> ()
+                
         res
 
-    member this.GetForestWithToken range = 
-        let res = new ResizeArray<_>()
-        if calcForest.Length <> 0
-        then
-            res.AddRange <| getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
-        
-        elif res.Count = 0 && jsonForest.Length <> 0
-        then
-            res.AddRange <| getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
-        
-        elif res.Count = 0 && tsqlForest.Length <> 0
-        then
-            res.AddRange <| getForestWithToken tsqlForest range tokenData TSQL.translate 
-        
-        res
+    member this.GetForestWithToken range (lang : string) = 
+        match lang.ToLower() with
+        | "calc" -> getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
+        | "json" -> getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
+        | "tsql" -> getForestWithToken tsqlForest range tokenData TSQL.translate 
+        | _ -> new ResizeArray<_>()

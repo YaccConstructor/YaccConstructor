@@ -62,8 +62,9 @@ namespace TSQLHighlighting
 
             UserData.PutData(KeyConstant.YcTokName, ycTokName);
             UserData.PutData(KeyConstant.YcValue, ycValue);
+            UserData.PutData(KeyConstant.YcLanguage, "TSQL");
 
-            YcHelper.AddYcItem(ycTokName, ycValue);
+            YcHelper.AddYcItem(ycTokName, ycValue, "TSQL");
         }
 
         public Yard_opt_61NonTermNode (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)

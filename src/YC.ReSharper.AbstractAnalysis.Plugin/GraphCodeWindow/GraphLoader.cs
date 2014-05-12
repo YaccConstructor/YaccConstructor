@@ -21,30 +21,44 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
             LoadGraphFromCoreEvent += GetProcessor;
         }
 
-        public DataGraph Load()
+        public List<DataGraph> Load()
         {
             var graphs = _processor.Graphs();
-            var readyGraph = new DataGraph();
+            var readyGraphs = new List<DataGraph>();
             if (graphs == null)
-                return readyGraph;
-            var initialGraph = graphs[0].Item2;
-            var vertices = new List<DataVertex>();
-            foreach (var v in initialGraph.Vertices)
             {
-                vertices.Add(new DataVertex() {ID = v, Text = v.ToString()});
-                readyGraph.AddVertex(vertices[vertices.Count - 1]);
+                readyGraphs.Add(new DataGraph());
+                return readyGraphs;
             }
-            foreach (var e in initialGraph.Edges)
+            for (int i = 0; i < graphs.Count; ++i)
             {
-                var text = "";
-                try
+                var readyGraph = new DataGraph();
+                var initialGraph = graphs[i].Item2;
+                var vertices = new List<DataVertex>();
+                foreach (var v in initialGraph.Vertices)
                 {
-                    text = e.Label.Value;
+                    vertices.Add(new DataVertex() {ID = v, Text = v.ToString()});
+                    readyGraph.AddVertex(vertices[vertices.Count - 1]);
                 }
-                catch (Exception ex){} // if e.Label = None then text = ""
-                readyGraph.AddEdge(new DataEdge(vertices[e.Source], vertices[e.Target], 1) {ToolTipText = text, BackRef = e.BackRef});
+                foreach (var e in initialGraph.Edges)
+                {
+                    var text = "";
+                    try
+                    {
+                        text = e.Label.Value;
+                    }
+                    catch (Exception ex)
+                    {
+                    } // if e.Label = None then text = ""
+                    readyGraph.AddEdge(new DataEdge(vertices[e.Source], vertices[e.Target], 1)
+                    {
+                        ToolTipText = text,
+                        BackRef = e.BackRef
+                    });
+                }
+                readyGraphs.Add(readyGraph);
             }
-            return readyGraph;
+            return readyGraphs;
         }
 
         public static event EventHandler<LoadGraphEventArgs> LoadGraphFromCoreEvent;

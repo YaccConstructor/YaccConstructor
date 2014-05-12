@@ -18,42 +18,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
         public static ReadyGraphArea Initialize(DataGraph graph)
         {
             var gg_Area = new ReadyGraphArea();
-
             try
             {
-                /*var Rand = new Random();
-
-                //Create data graph object
-                var graph = new DataGraph();
-                var vlist = new List<DataVertex>();
-                for (int i = 0; i < 7; ++i)
-                {
-                    vlist.Add(new DataVertex() { ID = i, Text = i.ToString() });
-                    graph.AddVertex(vlist[i]);
-                }
-
-                graph.AddEdge(new DataEdge(vlist[0], vlist[1], 1) {ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-                graph.AddEdge(new DataEdge(vlist[0], vlist[2], 2) { ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-                graph.AddEdge(new DataEdge(vlist[1], vlist[3], 3) {ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-                graph.AddEdge(new DataEdge(vlist[2], vlist[4], 4) {ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-                graph.AddEdge(new DataEdge(vlist[3], vlist[5], 5) {ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-                graph.AddEdge(new DataEdge(vlist[3], vlist[6], 6) {ToolTipText = "T_T_SomeText_SomeText_SomeText" });
-
-                //Create and add vertices using some DataSource for ID's
-                /*                for (int i = 0; i < 10; ++i)
-                                    graph.AddVertex(new DataVertex() { ID = i, Text = i.ToString() });
-
-                                var vlist = graph.Vertices.ToList();
-                                //Generate random edges for the vertices
-                                foreach (var item in vlist)
-                                {
-                                    if (Rand.Next(0, 50) > 25) continue;
-                                    var vertex2 = vlist[Rand.Next(0, graph.VertexCount - 1)];
-                                    graph.AddEdge(new DataEdge(item, vertex2, Rand.Next(1, 50)) { Text1 = "Edge" });
-                                }
-                 */
                 var LogicCore = new LogicCore();
-
                 //This property sets layout algorithm that will be used to calculate vertices positions
                 //Different algorithms uses different values and some of them uses edge Weight property.
                 LogicCore.DefaultLayoutAlgorithm = GraphX.LayoutAlgorithmTypeEnum.Tree;

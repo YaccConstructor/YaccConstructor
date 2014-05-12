@@ -52,8 +52,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             // Running visitor against the PSI
             var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             var parserRes = processor.Process();
-            //return graph to show
-            GraphLoader.OnEvent(this, new LoadGraphEventArgs(processor));
+            try
+            {
+                //return graph to show
+                GraphLoader.OnEvent(this, new LoadGraphEventArgs(processor));
+            }
+            catch (NullReferenceException e) {} // if GraphLoader is not created then nothing else to do
             // Checking if the daemon is interrupted by user activity
             if (myDaemonProcess.InterruptFlag)
             throw new ProcessCancelledException();

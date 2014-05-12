@@ -41,7 +41,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
                 {
                     text = e.Label.Value;
                 }
-                catch (Exception ex){}
+                catch (Exception ex){} // if e.Label = None then text = ""
                 readyGraph.AddEdge(new DataEdge(vertices[e.Source], vertices[e.Target], 1) {ToolTipText = text, BackRef = e.BackRef});
             }
             return readyGraph;

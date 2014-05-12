@@ -13,8 +13,7 @@
     <Name>TSQL.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
-  </PropertyGroup>
+     </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">

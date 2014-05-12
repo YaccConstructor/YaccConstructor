@@ -47,11 +47,16 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
               lifetime,
               lt =>
               {
-                  var graph = (new GraphLoader()).Load();
-                  var gArea = InitializeGraphArea.Initialize(graph);
-                  var zcontrol = new ZoomControl();
-                  zcontrol.Content = gArea;
-                  var control = new EitherControl(zcontrol);
+                  var graphs = (new GraphLoader()).Load();
+                  var tabControl = new TabControl();
+                  foreach (var graph in graphs)
+                  {
+                      var gArea = InitializeGraphArea.Initialize(graph);
+                      var zcontrol = new ZoomControl();
+                      zcontrol.Content = gArea;
+                      tabControl.Controls.Add(new EitherControl(zcontrol)); //maybe slow works
+                  }
+                  var control = new EitherControl(tabControl);
                   return control.BindToLifetime(lt);
               });
         }

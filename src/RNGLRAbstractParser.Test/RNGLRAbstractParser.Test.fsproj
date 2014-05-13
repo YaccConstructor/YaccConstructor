@@ -33,6 +33,9 @@
     <None Include="simpleCalc.yrd" />
     <None Include="Lexer.fsl" />
     <Compile Include="Calc.yrd.fs" />
+    <Compile Include="MsParser.fs" />
+    <Compile Include="LexerHelper.fs" />
+    <Compile Include="MsLexer.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
@@ -71,9 +74,6 @@
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net-beta\Graphviz4Net.dll</HintPath>
     </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\..\Bin\Release\v40\Helper.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
@@ -98,8 +98,30 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+        <Reference Include="JetBrains.Platform.ReSharper.Util">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Helper\Helper.fsproj">
+      <Name>Helper</Name>
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Name>RNGLRAbstractParser</Name>
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>

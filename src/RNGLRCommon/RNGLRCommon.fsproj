@@ -48,6 +48,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

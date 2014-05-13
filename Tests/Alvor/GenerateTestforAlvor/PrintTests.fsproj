@@ -23,6 +23,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\PrintTests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>-d I:\projects\yc\recursive-ascent\Tests\AbstractPerformance\TSQL\1</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,11 +37,15 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime">
+      <HintPath>..\..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="fsyacc">
-      <HintPath>C:\yc\recursive-ascent\YaccConstructor\packages\YC.Tools.0.0.1.0\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Graphviz4Net">
-      <HintPath>C:\yc\recursive-ascent\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
+      <HintPath>..\..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

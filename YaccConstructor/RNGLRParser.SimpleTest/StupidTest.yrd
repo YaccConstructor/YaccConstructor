@@ -1,4 +1,8 @@
+tokens {
+    _ of string
+}
+
 [<Start>]
-expr: ab | ba
+expr: a b | b a
 a: A
 b: B | C

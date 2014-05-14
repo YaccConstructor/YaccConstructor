@@ -101,6 +101,7 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
         let mutable j = i-1
         while j >= 0 && eq (fst3 out.[j])  (fst3 out.[i]) do
             j <- j-1
+
         out.RemoveRange(j+1, i-j-1)
     isCreated, ast
 

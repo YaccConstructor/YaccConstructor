@@ -43,8 +43,10 @@ type UsualOne<'T> =
 type AST =
     val mutable first : Family
     val mutable other : Family[]
+    val mutable leftExt  : int
+    val mutable rightExt : int
     val mutable pos : int
-    new (f, o) = {pos = -1; first = f; other = o}
+    new (f, o) = {pos = -1; first = f; other = o; leftExt = -1; rightExt = -1}
     member inline this.findFamily f =
         if f this.first then Some this.first
         elif this.other <> null then
@@ -55,7 +57,9 @@ and Family =
     struct
         val prod : int
         val nodes : Nodes
-        new (p,n) = {prod = p; nodes = n}
+        val mutable leftExt  : int
+        val mutable rightExt : int
+        new (p,n) = {prod = p; nodes = n; leftExt = -1; rightExt = -1}
     end
 
 and Nodes =
@@ -63,7 +67,9 @@ and Nodes =
         val mutable fst : obj
         val mutable snd : obj
         val mutable other : obj[]
-        new (f,s,o) = {fst = f; snd = s; other = o}
+        val mutable leftExt  : int
+        val mutable rightExt : int
+        new (f,s,o) = {fst = f; snd = s; other = o; leftExt = -1; rightExt = -1}
 
         new (arr : array<_>) =
             let mutable res = new Nodes()
@@ -74,7 +80,7 @@ and Nodes =
                         res.snd <- arr.[1]
                         if arr.Length > 2 then
                             res.other <- arr.[2..]
-            {fst = res.fst; snd = res.snd; other = res.other}
+            {fst = res.fst; snd = res.snd; other = res.other; leftExt = -1; rightExt = -1}
             //match arr with
 
 
@@ -135,14 +141,6 @@ and Nodes =
                             res.[i+2] <- f nodes.other.[i]
             res
         end
-
-and IntermidiateNode =
-    struct 
-        val mutable leftChild  : obj
-        val mutable rightChild : obj
-        val mutable value      : int * int
-        new (l, r, v : int * int) = {leftChild = l; rightChild = r; value = v}
-    end
 
 let inline getFamily (node : obj) =
     match node with

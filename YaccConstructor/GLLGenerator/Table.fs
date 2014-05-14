@@ -33,14 +33,8 @@ type Table (grammar : FinalGrammar) =
 
     let follow = getFollowSets
 
-    let getTableIndex num = 
-        let mutable result = num
-        if num >= grammar.indexator.termsStart && num <= grammar.indexator.termsEnd then 
-            result <- num - grammar.indexator.nonTermCount
-        elif num >= grammar.indexator.literalsStart && num <= grammar.indexator.literalsEnd then
-            result <- num - grammar.indexator.termCount - grammar.indexator.nonTermCount
-        result
     let canInferEpsilon = Array.create grammar.rules.rulesCount false
+
     let firstForChain = 
         let ruleCount = grammar.rules.rulesCount
         let result = Array.create ruleCount Set.empty<int>
@@ -60,13 +54,18 @@ type Table (grammar : FinalGrammar) =
                     canInferEpsilon.[i] <- true
                 else condition <- false
         result
+
+    let getTableIndex num = 
+
+            let result = num - grammar.indexator.nonTermCount
+            result
             
 
     let _table = 
         let length1 = grammar.indexator.nonTermCount
         let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
         let arr = Array2D.create length1 length2 (List.empty<int>)
-        let result = Array.create (length1*length2) (Array.empty<int>)
+        let result = Array.create (length1 * length2) (Array.empty<int>)
         let firsts = firstForChain
         for i = 0 to grammar.rules.rulesCount - 1 do
             let curFirst = Set.toArray firsts.[i]
@@ -80,8 +79,8 @@ type Table (grammar : FinalGrammar) =
                     arr.[curNTerm, getTableIndex curFollow.[j]] <- i :: arr.[curNTerm, getTableIndex curFollow.[j]] 
                                
         for i = 0 to length1 - 1 do
-            for j = 0 to length1 - 1 do
-                result.[length1*i + j] <- List.toArray arr.[i,j]
+            for j = 0 to length2 - 1 do
+                result.[length2 * i + j] <- List.toArray arr.[i,j]
         result
   
     member this.result = _table

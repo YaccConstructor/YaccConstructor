@@ -3,5 +3,4 @@ tokens {
 }
 
 [<Start>]
-e : N | e P e | b
-b : N | O
+s : A s B | D  | A D B

@@ -179,7 +179,7 @@ let printTableGLL
         printBr ""
 
         printBrInd 0 "let numIsNonTerminal = function"
-        for i = 0 to indexator.nonTermCount do
+        for i = 0 to indexator.nonTermCount - 1 do
             printBrInd 1 "| %d -> true" <| i
         printBrInd 1 "| _ -> false"
         printBr ""

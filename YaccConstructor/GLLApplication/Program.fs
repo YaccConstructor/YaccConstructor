@@ -5,13 +5,13 @@ module RNGLRApplication
 open Yard.Generators.GLL
 //open Yard.Generators.RNGLR.AST
 open Yard.Generators
-open HardLexer
+open Lexer2
 
 let run path astBuilder =
-    let tokens = HardLexer.tokens(path)
+    let tokens = Lexer2.tokens(path)
     astBuilder tokens, tokens
 
-let parser = GLL.ParseCalc.buildAst
+let parser = GLL.SimpleAmb.buildAst
 let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 

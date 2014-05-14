@@ -1,1 +1,1 @@
-bin\Debug\SQLSelectDemo.exe -i "test input.sql"
+bin\Release\SQLSelectDemo.exe -i "test input.sql"

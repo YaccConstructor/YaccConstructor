@@ -45,13 +45,6 @@ type CYKOnGPU() =
         rowSize <- s.Length
         recTable <- Array.init (rowSize * rowSize * nTermsCount) ( fun _ -> createEmptyCellData () )
 
-        (* writed in command *)
-        (*
-        let elem i len rulesIndexed = 
-            // foreach rule r in grammar in parallel
-            rulesIndexed 
-            |> Array.iter (fun (curRule:RuleIndexed) -> ()(*for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len*))
-        *)
         (*
         let elem2 i len symRuleArr = 
             // foreach symbol in grammar in parallel
@@ -76,7 +69,7 @@ type CYKOnGPU() =
                 |> Array(*.Parallel*).iter (fun i -> 
                     ((*elem i len rulesIndexed*))
                 )
-          *)
+         *)
         (*
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]

@@ -39,6 +39,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             myDaemonProcess = daemonProcess;
             myThreshold = threshold;
+            GraphLoader.InvokeLoadGrapFromCoreEvent += GetGraphs;
         }
 
         public void Execute(Action<DaemonStageResult> commiter)
@@ -52,12 +53,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             // Running visitor against the PSI
             var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             var parserRes = processor.Process();
-            try
-            {
-                //return graph to show
-                GraphLoader.OnEvent(this, new LoadGraphEventArgs(processor));
-            }
-            catch (NullReferenceException e) {} // if GraphLoader is not created then nothing else to do
+            _processor = processor;
             // Checking if the daemon is interrupted by user activity
             if (myDaemonProcess.InterruptFlag)
             throw new ProcessCancelledException();
@@ -66,6 +62,16 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
                                 from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ComplexityWarning("Unexpected symbol: " + e.Item1 + ".")));
             // Commit the result into document
             commiter(new DaemonStageResult(highlightings.ToArray()));
+        }
+
+        public void GetGraphs(object sender, EventArgs args)
+        {
+            try
+            {
+                //return graph to show
+                GraphLoader.OnEvent(this, new LoadGraphEventArgs(_processor));
+            }
+            catch (NullReferenceException e) { } // if GraphLoader is not created then nothing else to do
         }
 
         protected void F()
@@ -80,5 +86,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             get { return myDaemonProcess; }
         }
+
+        private Processor _processor ;
     }
 }

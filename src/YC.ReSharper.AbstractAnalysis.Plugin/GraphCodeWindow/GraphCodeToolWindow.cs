@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 using GraphX.Controls;
 using JetBrains.Application;
@@ -29,7 +30,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
         }
     }
 
-    [SolutionComponent]
     public class GraphCodeWindowRegistrar
     {
         private readonly Lifetime _lifetime;
@@ -41,23 +41,24 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
         {
             _environment = environment;
             _lifetime = lifetime;
-
+            
             _toolWindowClass = toolWindowManager.Classes[descriptor];
             _toolWindowClass.RegisterEmptyContent(
               lifetime,
               lt =>
               {
                   var graphs = (new GraphLoader()).Load();
-                  var tabControl = new TabControl();
+                  var tabControl = new System.Windows.Controls.TabControl();
+                  var zcontrols = new List<ZoomControl>();
                   foreach (var graph in graphs)
                   {
                       var gArea = InitializeGraphArea.Initialize(graph);
                       var zcontrol = new ZoomControl();
                       zcontrol.Content = gArea;
-                      tabControl.Controls.Add(new EitherControl(zcontrol)); //maybe slow works
+                      zcontrols.Add(zcontrol);
                   }
-                  var control = new EitherControl(tabControl);
-                  return control.BindToLifetime(lt);
+                  tabControl.ItemsSource = zcontrols;
+                  return (new EitherControl(tabControl)).BindToLifetime(lt);
               });
         }
 
@@ -69,17 +70,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
               null, // return a System.Drawing.Image to be displayed
               (lt, twi) =>
               {
+
                   var graphs = (new GraphLoader()).Load();
-                  var tabControl = new TabControl();
+                  var tabControl = new System.Windows.Controls.TabControl();
+                  var zcontrols = new List<ZoomControl>();
                   foreach (var graph in graphs)
                   {
                       var gArea = InitializeGraphArea.Initialize(graph);
                       var zcontrol = new ZoomControl();
                       zcontrol.Content = gArea;
-                      tabControl.Controls.Add(new EitherControl(zcontrol)); //maybe slow works
+                      zcontrols.Add(zcontrol);
                   }
-                  var control = new EitherControl(tabControl);
-                  return control.BindToLifetime(lt);
+                  tabControl.ItemsSource = zcontrols;
+                  return (new EitherControl(tabControl)).BindToLifetime(lt);
               });
             instance.EnsureControlCreated().Show();
         }

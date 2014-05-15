@@ -40,6 +40,7 @@ let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
 
 type TSQLPars = 
     interface IInjectedLanguageProcessor<Yard.Examples.MSParser.Token,JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression> with
+        member this.Name = "TSQL"
         member this.Parse (inG) = parse (inG)
         member this.NumToString (int) = Yard.Examples.MSParser.numToString(int)
         member this.TokenData(token) = Yard.Examples.MSParser.tokenData(token)

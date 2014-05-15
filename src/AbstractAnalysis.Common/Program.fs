@@ -12,8 +12,8 @@ type InjectedLanguageAttribute(language : string) =
 type MyClass() = 
     member this.field = "lalala"
     
-
 type IInjectedLanguageProcessor<'token,'expression> =
+    abstract Name: string
     abstract NumToString : int -> string
     abstract TokenToNumber: 'token -> int
     abstract TokenData: 'token -> obj

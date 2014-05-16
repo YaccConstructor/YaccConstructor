@@ -7,10 +7,12 @@ open System.Collections.Generic
 //..
 type tblData = uint64
 
+type symbol = Microsoft.FSharp.Core.uint16 
+
 [<Struct>]
 type CellData =
-    val rData : tblData
-    val _k : uint32
+    val mutable rData : tblData
+    val mutable _k : uint32
     new (r, k) = {rData=r;_k=k}
 
 type LblState =
@@ -27,8 +29,8 @@ type CellDataInside =
 
 [<Struct>]
 type LabelWithState = 
-    val Label : byte
-    val State : LblState
+    val mutable Label : byte
+    val mutable State : LblState
     new (lbl, lblState) = { Label = lbl; State = lblState }
 
 [<Struct>]
@@ -36,6 +38,14 @@ type RuleIndexed =
     val Rule : rule
     val Index : int
     new (rl, ind) = { Rule = rl; Index = ind }
+
+
+[<Struct>]
+type SymbolRuleMapItem =
+    val Symbol : symbol
+    val Rules : RuleIndexed[]
+    new (symbol : symbol, rules : RuleIndexed[]) = 
+        { Symbol = symbol; Rules = rules }
 
 [<AutoOpen>]
 module CellHelpers =
@@ -66,3 +76,37 @@ module CellHelpers =
     let getCellDataStruct(cellData:CellData) = 
         let _,curlblState,curcl,curcw = getData cellData.rData
         new CellDataInside(curlblState, curcl, curcw)
+
+    // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
+    let getCellRuleTop (cellData:CellData) (rules:rule[]) =
+        let curRuleNum,_,_,_ = getData cellData.rData
+        let rule = getRuleStruct rules.[int curRuleNum]
+        rule.RuleName
+
+    // возвращает координаты дочерних ячеек 
+    // i l - координаты текущей ячейки
+    // k - число, определяющее координаты
+    let getSubsiteCoordinates i l k =
+        (i,k),(k+i+1,l-k-1)
+
+[<AutoOpen>]
+module CommonHelpers =
+
+    [<Literal>]
+    let noLbl = 0uy
+
+    let initSymbol (s:uint16) : symbol = 
+        s
+
+    let createEmptyCellData () = 
+        new CellData(System.UInt64.MaxValue, 0ul)
+
+    let isCellDataEmpty (cd:CellData) = 
+        cd.rData = System.UInt64.MaxValue && cd._k = 0ul
+
+    let toState value = 
+        match value with
+        | 0 -> LblState.Defined
+        | 1 -> LblState.Undefined
+        | 2 -> LblState.Conflict
+        | _ -> failwith "Unexpected label state value" 

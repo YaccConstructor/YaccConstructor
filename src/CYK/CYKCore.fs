@@ -7,12 +7,11 @@ type CYKCore() =
     // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
-    let mutable recTable:_[,] = null
+    let mutable recTable:Option<_>[][,] = null
 
     let mutable lblNameArr = [||]
 
-    [<Literal>]
-    let noLbl = 0uy
+    let mutable rowSize = 0
 
     let lblString lbl = 
         match lblNameArr with
@@ -22,18 +21,14 @@ type CYKCore() =
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
 
-    // возвращает нетерминал A правила A->BC, правило из i-го элемента массива указанной ячейки
-    let getCellRuleTop (cellData:CellData) =
-        let curRuleNum,_,_,_ = getData cellData.rData
-        let curNT,_,_,_,_ = getRuleCortege rules.[int curRuleNum]
-        curNT
-
-    // возвращает координаты дочерних ячеек 
-    // i l - координаты текущей ячейки
-    // k - число, определяющее координаты
-    let getSubsiteCoordinates i l k =
-        (i,k),(k+i+1,l-k-1)
-
+    let printTbl () =
+        for i in 0..rowSize-1 do
+            for j in 0..rowSize-1 do
+                let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
+                printf "! %s !" (string cd)
+            printfn " "
+        printfn "" 
+    
     let recognitionTable (_,_) (s:uint16[]) weightCalcFun =
 
         let nTermsCount = 
@@ -44,6 +39,7 @@ type CYKCore() =
             |> Set.ofArray
             |> Set.count
 
+        rowSize <- s.Length
         recTable <- Microsoft.FSharp.Collections.Array2D.init s.Length s.Length (fun _ _ -> Array.init nTermsCount (fun _ -> None))
 
         let chooseNewLabel (ruleLabel:uint8) (lbl1:byte) (lbl2:byte) lState1 lState2 =
@@ -66,11 +62,11 @@ type CYKCore() =
                 let left = recTable.[i, k] |> Array.choose id
                 let right = recTable.[k+i+1, l-k-1] |> Array.choose id
                 left |> Array.iter (fun lf ->
-                    if getCellRuleTop lf = b
+                    if getCellRuleTop lf rules = b
                     then
                         let lState1,lbl1,weight1 = getCellDataCortege lf
                         right |> Array.iter (fun r ->
-                            if getCellRuleTop r = c
+                            if getCellRuleTop r rules = c
                             then
                                 let lState2,lbl2,weight2 = getCellDataCortege r
                                 let newLabel,newlState = chooseNewLabel rl lbl1 lbl2 lState1 lState2
@@ -79,6 +75,7 @@ type CYKCore() =
                                 recTable.[i,l].[int a - 1] <- new CellData(currentElem, uint32 k) |> Some
                         )
                 )
+            //printfn "(%d, %d, %d) -> (%d, %d)" i k l i l
 
         let elem i l = rules |> Array.iteri (fun ruleIndex rule -> for k in 0..(l-1) do processRule rule ruleIndex i k l)
 
@@ -87,6 +84,7 @@ type CYKCore() =
           |> Array.iter (fun l ->
                 [|0..s.Length-1-l|]
                 |> Array.Parallel.iter (fun i -> elem i l))
+
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -99,22 +97,18 @@ type CYKCore() =
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rl rw
                         recTable.[k,0].[int a - 1] <- new CellData(currentElem,0u) |> Some)
-    
+        
+        let startFill = System.DateTime.Now
+        printfn "Fill table started %s" (string startFill)
         fillTable ()
+        let endFill = System.DateTime.Now
+        printfn "Fill table finished %s [%s]" (string endFill) (string (endFill - startFill))
+        
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
         
-        let printTbl () =
-            for i in 0..s.Length-1 do
-                for j in 0..s.Length-1 do
-                    let cd = recTable.[i,j] |> Array.filter (fun x -> x.IsSome) |> fun a-> a.Length
-                    printf "! %s !" (string cd)
-                printfn " "
-            printfn "" 
-
-        //printfn "%A" recTable
         //printTbl ()
 
         let getString state lbl weight = 
@@ -211,7 +205,7 @@ type CYKCore() =
         // If dialect undefined or was conflict lblName = "0"
         let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
-        | "" -> "Строка не выводима в заданной грамматике."
+        | "" -> "The string is not derivable in specified grammar"
         | _ -> 
             labelTracking (s.Length - 1)
             out

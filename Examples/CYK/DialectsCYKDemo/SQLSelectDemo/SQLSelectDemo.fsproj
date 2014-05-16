@@ -76,8 +76,12 @@
     <Compile Include="SelectDemo.fs" />
     <Compile Include="Program.fs" />
     <None Include="SelectDemo.yrd" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Brahma">
+      <HintPath>..\..\..\..\src\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>
+    </Reference>
     <Reference Include="Common">
       <HintPath>..\..\..\yc\Common.dll</HintPath>
     </Reference>
@@ -86,6 +90,9 @@
     </Reference>
     <Reference Include="CYKCommon">
       <HintPath>..\..\..\yc\CYKCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="CYKOnGPU">
+      <HintPath>..\..\..\yc\CYKOnGPU.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />

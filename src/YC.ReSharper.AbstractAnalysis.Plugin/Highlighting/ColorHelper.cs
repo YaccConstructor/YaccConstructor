@@ -82,7 +82,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             try
             {
                 MatcherHelper.ChangeLanguageTo(lang);
-                using (XmlReader reader = new XmlTextReader(new StreamReader(fileName)))
+
+                var path = GetFullPath(fileName);
+
+                using (XmlReader reader = new XmlTextReader
+                    (new StreamReader(path)))
                 {
                     reader.MoveToContent();
                     var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
@@ -99,6 +103,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 return;
             }
+        }
+
+        private static string GetFullPath(string fileName)
+        {
+            var res = Directory.GetFiles(@"..\..\..\src", fileName, SearchOption.AllDirectories);
+            if (res.Length > 0)
+                return res[0];
+
+            return string.Empty;
         }
 
         private static Dictionary<string, string> ParseDefinition(XmlReader xmlReader, string lang)

@@ -429,3 +429,28 @@ let printXML (nameOfNamespace : string) tokens =
 
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()
+
+let printItemsGroup nameOfClasses xmlName = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 1) " ")
+        printBr x
+
+    printBrInd 1 "<ItemGroup>" 
+    printBrInd 2 "<Compile Include=\"Properties\AssemblyInfo.cs\" />"
+    for className in nameOfClasses do
+        printBrInd 2 "<Compile Include=\"%s\" />" className
+
+    printBrInd 1 "</ItemGroup>"
+
+    printBrInd 1 "<ItemGroup>" 
+    printBrInd 2 "<Content Include=\"%s.xml\" />" xmlName
+    printBrInd 1 "</ItemGroup>"
+    res.ToString()

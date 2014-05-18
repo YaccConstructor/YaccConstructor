@@ -114,36 +114,53 @@ type RNGLR() =
 
             if !needHighlighting
             then
+                let folder = !namespaceName + "\\" 
                 let generateXML name toksAndLits = 
-                    use out = new System.IO.StreamWriter (name + ".xml")
+                    use out = new System.IO.StreamWriter (folder + name + ".xml")
                     let content = printXML name toksAndLits
+                    out.WriteLine content
+                    out.Close()
+
+                let generateItemsGroup toksAndLits = 
+                    use out = new System.IO.StreamWriter (folder + "ItemsGroup.txt")
+                    let content = printItemsGroup toksAndLits !namespaceName 
                     out.WriteLine content
                     out.Close()
                 
                 let generateFile name = 
-                    use out = new System.IO.StreamWriter (name + ".cs")
+                    use out = new System.IO.StreamWriter (folder + name + ".cs")
                     let tables = printTreeNode !namespaceName name <| namespaceName.Value.Replace ("Highlighting", "")
                     out.WriteLine tables
                     out.Close()
 
                 let indexator = grammar.indexator
                 let mutable tokensAndLits = []
+                let mutable nameOfClasses = []
+                
                 for i = 0 to indexator.nonTermCount - 1 do
                     let prefix = toClassName <| indexator.indexToNonTerm i
                     if not <| prefix.Contains ("Highlight_")
-                    then generateFile <| prefix + "NonTermNode"
+                    then 
+                        nameOfClasses <- prefix + "NonTermNode.cs" :: nameOfClasses
+                        generateFile <| prefix + "NonTermNode"
 
                 for i = indexator.termsStart to indexator.termsEnd do
                     let prefix = toClassName <| grammar.indexator.indexToTerm i
+                    
+                    nameOfClasses <- prefix + "TermNode.cs" :: nameOfClasses
                     tokensAndLits <- prefix :: tokensAndLits
                     generateFile <| prefix + "TermNode"
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
                     let prefix = toClassName <| grammar.indexator.getLiteralName i
+                    
+                    nameOfClasses <- prefix + "LitNode.cs" :: nameOfClasses
                     tokensAndLits <- prefix :: tokensAndLits
                     generateFile <| prefix + "LitNode"
+                    
 
                 generateXML !namespaceName <| List.rev tokensAndLits
+                generateItemsGroup <| List.rev nameOfClasses
 
             let printRules () =
                 let printSymbol (symbol : int) =

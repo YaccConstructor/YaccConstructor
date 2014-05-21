@@ -11,7 +11,7 @@ open System.Collections.Generic
 
 type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[]) =
 
-    let platformName = "AMD*"
+    let platformName = "*"
     let deviceType = DeviceType.Default
     
     // Configure provider
@@ -226,8 +226,12 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
         // Compile&Run
         // kernel function compilation
         let str = ref ""
-        let kernel, kernelPrepare, kernelRun = provider.Compile(command,_outCode = str)
-        printfn "%s" !str
+        let kernel, kernelPrepare, kernelRun = 
+            try 
+                provider.Compile(command,_outCode = str)
+            with e ->
+                printfn "%s" !str
+                failwith e.Message
         
         // computation grid configuration: 2D grid with size = rows*columns and local block with size=localWorkSize*localWorkSize
         let d =(new _1D(recTable.Length, maxLocalWorkSize))

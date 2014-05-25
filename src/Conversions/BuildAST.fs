@@ -17,6 +17,7 @@ module Yard.Core.Conversions.BuildAST
 open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
+open Mono.Addins
 
 open System.Collections.Generic
 
@@ -104,6 +105,12 @@ let buildAST (ruleList: Rule.t<Source.t, Source.t> list) tokenType =
         isTyped := true
     ruleList |> List.map (fun rule -> {rule with body=(_buildAST rule.name.text rule.body) } )
 
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type BuildAST() =
     inherit Conversion()
         override this.Name = "BuildAST"

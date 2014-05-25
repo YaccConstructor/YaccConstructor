@@ -48,15 +48,16 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let conversions = new ResizeArray<string>()
-    let GeneratorsManager = GeneratorsManager.GeneratorsManager()
-    let ConversionsManager = ConversionsManager.ConversionsManager()
-    let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
     AddinManager.Initialize()
     AddinManager.Registry.Update(null)
 
     let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
-    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
+    let AddinConversion = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
+    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
+    let AddinFrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) AddinFrontend
+    let AddinConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) AddinConversion
+    let AddinGeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) AddinGenerator
 
     let userDefs = ref []
     let userDefsStr = ref ""
@@ -64,14 +65,16 @@ let () =
     feName := // Fill by default value
         if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
         then Some "YardFrontend"
-        else Seq.tryFind (fun _ -> true) FrontendsManager.Available
-
-    //printf "feName = %A\n" feName
+        else
+            let tmpName = (Seq.head AddinFrontend).Name
+            Some tmpName
             
     generatorName :=
         if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator
         then Some "RNGLRGenerator"
-        else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
+        else 
+            let tmpName = (Seq.head AddinGenerator).Name
+            Some tmpName
 
     let generateSomething = ref true
 
@@ -85,7 +88,7 @@ let () =
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.Available !feName), "Available frontends"
+         "-af", ArgType.Unit (printItems "frontends" AddinFrontendNames !feName), "Available frontends"
          "-g", ArgType.String 
             (fun s -> 
                 match Array.toList (s.Split ' ') with
@@ -93,9 +96,9 @@ let () =
                 | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" AddinGeneratorNames !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "conversions" ConversionsManager.Available None), "Available conversions"
+         "-ac", ArgType.Unit (printItems "conversions" AddinConversionNames None), "Available conversions"
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
          "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
@@ -104,6 +107,7 @@ let () =
                                    testsPath := System.IO.Path.GetDirectoryName s |> Some), "Input grammar"         
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
+
 
     let run () =
         match !testFile, !feName, !generatorName with
@@ -114,7 +118,7 @@ let () =
                 if Seq.exists (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend
                 then
                     try
-                        match FrontendsManager.Component feName with
+                        match Seq.tryFind (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend with
                         | Some fe -> fe
                         | None -> failwith "Frontend is not found."
                     with
@@ -176,8 +180,21 @@ let () =
                         |> printfn "Lost sources after frontend or conversion %s:\n %s" name
             checkSources fe.Name !ilTree
             // Apply Conversions
+
+            let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = 
+                let parameters = convNameWithParams.Split(' ')
+                    //printfn "Conversion: %s" convNameWithParams
+                if parameters.Length = 0 then failwith "Missing Conversion name"
+                else
+                    {ilTree
+                     with grammar =
+                            match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) AddinConversion with 
+                            | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
+                            | None -> failwith <| "Conversion not found: " + parameters.[0]
+                            }
+
             for conv in conversions do
-                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                ilTree := apply_Conversion conv !ilTree
                 checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
@@ -186,7 +203,7 @@ let () =
                 if Seq.exists (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator
                 then              
                     try
-                        match GeneratorsManager.Component generatorName with
+                        match Seq.tryFind (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator with
                         | Some gen -> gen
                         | None -> failwith "TreeDump is not found."
                     with

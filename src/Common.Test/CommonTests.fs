@@ -8,14 +8,18 @@ open Yard.Core.Checkers
 open NUnit.Framework
 open System.Linq
 open System.IO
+open Mono.Addins
 
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =
-        let GeneratorsManager = GeneratorsManager.GeneratorsManager()
+        AddinManager.Initialize()
+        AddinManager.Registry.Update(null)
+        let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
+        let GeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) GeneratorsManager
         let allGenerators = 
-            List.ofSeq GeneratorsManager.Available
+            List.ofSeq GeneratorNames
             |> List.sort
         let expetedResult = 
             ["CYKGenerator"; "FParsecGenerator"; "FsYaccPrinter"; "RNGLRGenerator"; "TreeDump"; "YardPrinter"]
@@ -29,9 +33,12 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All frontends`` () =
-        let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
+        AddinManager.Initialize()
+        AddinManager.Registry.Update(null)
+        let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+        let FrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) FrontendsManager 
         let allFrontends = 
-            List.ofSeq FrontendsManager.Available
+            List.ofSeq FrontendNames
             |> List.sort
         let expetedResult =
             ["AntlrFrontend"; "FsYaccFrontend"; "IronyFrontend"; "YardFrontend"]
@@ -45,9 +52,12 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        let ConversionsManager = ConversionsManager.ConversionsManager()
+        AddinManager.Initialize()
+        AddinManager.Registry.Update(null)
+        let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
+        let ConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) ConversionsManager
         let allConversions = 
-            List.ofSeq ConversionsManager.Available
+            List.ofSeq ConversionNames
             |> List.sort
         let expetedResult =
              ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "CNF"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";
@@ -62,11 +72,13 @@ type ``Components loader tests`` () =
     
     [<Test>]
     member test.``Get generators name`` () =
-        let GeneratorsManager = GeneratorsManager.GeneratorsManager()
+        AddinManager.Initialize()
+        AddinManager.Registry.Update(null)
+        let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 
         let genfun (x,y)  = 
-            match (x |> GeneratorsManager.Component  ) with
+            match (Seq.tryFind (fun (elem : Generator) -> elem.Name = x) GeneratorsManager) with
                 | Some _ -> true
                 | None -> false
         

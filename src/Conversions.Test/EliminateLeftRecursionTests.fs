@@ -5,6 +5,7 @@ open Yard.Core.IL
 open Yard.Core.Conversions.EliminateLeftRecursion
 open NUnit.Framework
 open ConversionsTests
+open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Conversions eliminate left recursion tests`` () =
@@ -17,7 +18,7 @@ type ``Conversions eliminate left recursion tests`` () =
         let srcFile = System.IO.Path.Combine(basePath, srcFile)
         let ilTree = frontend.ParseGrammar srcFile
         Namer.initNamer ilTree.grammar
-        let ilTreeConverted = ConversionsManager.ApplyConversion conversion ilTree 
+        let ilTreeConverted = apply_Conversion conversion ilTree 
         let expected =
             try
                 srcFile + ".ans" |> frontend.ParseGrammar

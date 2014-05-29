@@ -1,7 +1,10 @@
 
 rules:
-   0: s = A s B 
-   1: s = D 
-   2: s = A D B 
-   3: yard_start_rule = s 
+   0: expr = expr + expr 
+   1: expr = fact 
+   2: yard_start_rule = expr 
+   3: fact = fact * fact 
+   4: fact = num 
+   5: num = A 
+   6: num = B 
 <null>

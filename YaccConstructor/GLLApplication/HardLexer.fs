@@ -3,7 +3,7 @@
 open Microsoft.FSharp.Text
 //open Yard.Generators.RNGLR.Parser
 open Microsoft.FSharp.Reflection
-open GLL.ParseCalc
+open GLL.Calc
  
 let tokens(path) = 
     let toLexerTag (name:string) =

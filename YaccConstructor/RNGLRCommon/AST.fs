@@ -70,6 +70,7 @@ and Nodes =
         val mutable leftExt  : int
         val mutable rightExt : int
         new (f,s,o) = {fst = f; snd = s; other = o; leftExt = -1; rightExt = -1}
+        new (f, s, o, l, r) = {fst = f; snd = s; other = o; leftExt = l; rightExt = r}
 
         new (arr : array<_>) =
             let mutable res = new Nodes()

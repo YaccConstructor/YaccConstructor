@@ -1,9 +1,7 @@
-﻿
-module Yard.Generators.GLL.Parser 
+﻿module Yard.Generators.GLL.Parser 
 open Yard.Generators.GLL 
 open System 
-open System.Collections.Generic 
-//open Yard.Generators.RNGLR.DataStructures
+open System.Collections.Generic
 open Yard.Generators.GLL
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
@@ -56,10 +54,11 @@ type Context =
         res    
     new (index, label, node, ast) = {Index = index; Label = label; Node = node; Ast = ast}
 
+type ParseResult<'TokenType> =
+    | Success of Tree<'TokenType>
+    | Error of string
+    
 
-type ParseResult<'s> =
-    | Success of 's
-    | Error of 's
 
 let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let enum = tokens.GetEnumerator()
@@ -72,9 +71,9 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
          fun i -> epsilons.[i]
     if not <| enum.MoveNext() || parser.IndexEOF = parser.TokenToNumber enum.Current then
         if parser.AcceptEmptyInput then
-            Success ("UIIII")
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null))
         else
-            Error ("UAAAA")     
+            Error ("This grammar does not accept empty input.")     
     else
         let tokens = Seq.toArray tokens
 
@@ -90,12 +89,13 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let dummyGSSNode = new Vertex(new Label(currentRule, -1), !currentIndex)
         let currentLabel = ref <| new Label(currentRule, 0)
         let startLabel = new Label(currentRule, 0)
-        let startGSSNode = new Vertex(!currentLabel, !currentIndex)
+        //let startGSSNode = new Vertex(!currentLabel, !currentIndex)
         
         let currentN = ref <| null
         let currentR = ref <| null
 
-        let currentGSSNode = ref <| new Vertex(!currentLabel, !currentIndex)
+        //let currentGSSNode = ref <| new Vertex(!currentLabel, !currentIndex)
+        let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
         
         
@@ -103,7 +103,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let ast = Array.init inputLength (fun _ -> new ResizeArray<AST>())
 
 
-        let terminalNodes = new ResizeArray<Nodes>()
+        let terminalNodes = new BlockResizeArray<Nodes>()
 
         let chainCanInferEpsilon rule pos =
             let curRule = parser.Rules.[rule]
@@ -116,20 +116,25 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         (*Проверить есть ли такое дерево, кого и куда вставлять и куда добавить правое и левое*)
         let handleIntermidiate node   (prod : int) = 
+            let result = new List<obj>()
             let rec handle (o : obj) =
-                let result =
-                    match o with
-                    | :? IntermidiateNode as interNode ->
-                        let t : IntermidiateNode = unbox interNode
-                        let fst = handle t.LeftChild
-                        let snd = handle t.RightChild
-                        List.append fst snd
-                    | :? Nodes as node -> [box <| node]
-                    | :? AST as ast    -> [box <| ast]
-                    | null -> [box <| null]
-                    | _ -> failwith "Unexpected type."
-                result
-            let res = List.toArray <| handle node
+                if o <> null then
+                    //let res =
+                        match o with
+                        | :? IntermidiateNode as interNode ->
+                            let t : IntermidiateNode = unbox interNode
+                            handle t.LeftChild
+                            handle t.RightChild
+                            //result.Add (box <| fst)
+                            //result.Add (box <| snd)
+                        | :? Nodes as node -> 
+                            result.Add (box <| node)     
+                        | :? AST as ast    -> 
+                             result.Add (box <| ast)
+                        | _ -> failwith "Unexpected type."
+                    //res
+            handle node
+            let res = result.ToArray()
             let fam = new Family(prod, new Nodes(res))
             fam
                                 
@@ -174,7 +179,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     if chainCanInferEpsilon label.Rule label.Position
                         then
                             label.Position <- parser.Rules.[label.Rule].Length
-                    if not (left.Equals dummy) then
+                    if not (left = null) then
                         ///add checking
                         result <- new IntermidiateNode(left, right, (label.Rule, label.Position)) 
                     else result <- new IntermidiateNode(null, right, (label.Rule, label.Position))             
@@ -248,7 +253,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             v
           
         let pop (u : Vertex) (i : int) (z : obj) =
-            if not (Vertex.Equal u startGSSNode) then
+            if not (Vertex.Equal u dummyGSSNode) then
                 let label = u.Value
                 setP.Enqueue(u, z)
                 let processEdge (edge : Edge) =
@@ -271,45 +276,48 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let findTree family level prod =
             let curLevelTrees = ast.[level]
             let mutable wasAdded = false
-            let result = 
-                if curLevelTrees.Count <> 0
-                then
-                    let mutable cond = true
-                    //здесь можно посатавить while cond, чтобы не обходить всех
-                    let mutable temp = null
-                    for tree in curLevelTrees do
-                        if parser.LeftSide.[tree.first.prod] = parser.LeftSide.[prod] 
-                        then
-                            if currentLabel.Value.Rule = tree.first.prod
-                            then
-                                cond <- false                                            
-                            else
-                                if tree.other <> null
-                                then
-                                    for fam in tree.other do
-                                        if currentLabel.Value.Rule = fam.prod
-                                        then    
-                                            cond <- false                                                       
-                            if cond
-                            then
-                                if tree.other <> null
-                                then
-                                    tree.other <- Array.append tree.other [|family|]
-                                else 
-                                    tree.other <- [|family|]                            
-                            wasAdded <- true
-                            temp <- box tree
-                    let temp : AST = unbox temp
-                    if not wasAdded
+            let mutable temp = null  
+            if curLevelTrees.Count <> 0
+            then
+                let mutable cond = true   
+                let mutable i = 0
+                while cond && i < curLevelTrees.Count do
+                    let tree = curLevelTrees.[i]
+                    if parser.LeftSide.[tree.first.prod] = parser.LeftSide.[prod] 
                     then
-                        let res = new AST(family, null)
-                        curLevelTrees.Add <| res
-                        res
-                    else
-                        let res = new AST(family, null)
-                        curLevelTrees.Add <| res
-                        res  
-            result
+                        if currentLabel.Value.Rule = tree.first.prod
+                        then
+                            cond <- false                                          
+                        else
+                            if tree.other <> null
+                            then
+                                for fam in tree.other do
+                                    if currentLabel.Value.Rule = fam.prod
+                                    then    
+                                        cond <- false                                                  
+                        if cond
+                        then
+                            if tree.other <> null
+                            then
+                                tree.other <- Array.append tree.other [|family|]
+                            else 
+                                tree.other <- [|family|]                            
+                        wasAdded <- true
+                        temp <- box tree
+                        cond <- false
+                    i <- i + 1
+                if not wasAdded
+                then
+                    let res = new AST(family, null)
+                    curLevelTrees.Add <| res
+                    temp <- box res
+            else
+                let res = new AST(family, null)
+                curLevelTrees.Add <| res
+                temp <- box res
+                 
+            let result : AST = unbox <| temp
+            result 
    
         let rec dispatcher () =  
          
@@ -346,19 +354,19 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     then
                         if !currentN = null 
                         then
-                            if terminalNodes.[!currentIndex].fst = null
+                            if (terminalNodes.Item !currentIndex).fst = null
                             then
-                                currentN := getNodeT curToken !currentIndex
-                                terminalNodes.[!currentIndex] <- unbox <| !currentN
+                                currentN := getNodeT tokens.[!currentIndex] !currentIndex
+                                terminalNodes.Set !currentIndex (unbox <| !currentN)
                             else 
-                                currentN := box <| terminalNodes.[!currentIndex]
+                                currentN := box <| terminalNodes.Item !currentIndex
                         else
-                            if terminalNodes.[!currentIndex].fst = null
+                            if (terminalNodes.Item !currentIndex).fst = null
                             then
-                                currentR := getNodeT curToken !currentIndex
-                                terminalNodes.[!currentIndex] <- unbox <| !currentR
+                                currentR := getNodeT tokens.[!currentIndex] !currentIndex
+                                terminalNodes.Set !currentIndex (unbox <| !currentR)
                             else 
-                                currentR := box <| terminalNodes.[!currentIndex]
+                                currentR := box <| terminalNodes.Item !currentIndex
                         currentIndex := !currentIndex + 1
                         currentLabel.Value.Position <- currentLabel.Value.Position + 1
                         if !currentR <> null
@@ -384,19 +392,35 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                             
                     condition := true             
             else 
-                if not (parser.LeftSide.[currentLabel.Value.Rule] = startNonTerm) 
-                then 
-                    let curRight = unbox <| !currentN
-                    let resTree = handleIntermidiate curRight currentLabel.Value.Rule
-                    let resTree = findTree resTree currentGSSNode.Value.Level currentLabel.Value.Rule
-                        
-
-                    pop !currentGSSNode !currentIndex resTree
-                    condition := true
-                else
-                    condition := true
+//                if not (parser.LeftSide.[currentLabel.Value.Rule] = startNonTerm) 
+//                then 
+                let curRight = unbox <| !currentN
+                let resTree = handleIntermidiate curRight currentLabel.Value.Rule
+                let resTree = findTree resTree currentGSSNode.Value.Level currentLabel.Value.Rule
+                pop !currentGSSNode !currentIndex resTree
+                condition := true
+//                else
+//                    let curRight = unbox <| !currentN
+//                    let resTree = handleIntermidiate curRight currentLabel.Value.Rule
+//                    let resTree = findTree resTree currentGSSNode.Value.Level currentLabel.Value.Rule
+//                    condition := true
         let control () =
             while not !stop do
                 if !condition then dispatcher() else processing()
         control()
-        Success("ffd") 
+             
+        let root = ref None
+        if ast.[0].Count <> 0
+        then
+            for tree in ast.[0] do
+                if parser.LeftSide.[tree.first.prod] = parser.LeftSide.[parser.StartRule]
+                then
+                    root := Some <| tree
+            match !root with
+                | None -> Error ("String was not parsed")
+                | Some res -> 
+        //    debugFuns().drawGSSDot "res.dot"
+                    Success (new Tree<_> (terminalNodes.ToArray(), res, parser.Rules))
+        else
+            Error("String was not parsed.")
+         

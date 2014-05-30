@@ -227,6 +227,11 @@ let printTableGLL
         print "let private canInferEpsilon = "
         printArr grammar.canInferEpsilon (print "%A")
 
+        printBr "let defaultAstToDot ="
+        printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+
+        printBr ""
+
         print "let private rulesStart = "
         printArr rulesStart (print "%d")
         

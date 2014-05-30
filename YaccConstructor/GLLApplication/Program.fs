@@ -18,9 +18,28 @@ let path = @"..\..\input.txt"
 match run path parser with
 | Parser.Error _ , _ ->
     printfn "Error"
-    //debug.drawGSSDot "out.dot"
 | Parser.Success _, _ ->
     printfn "Success"
+
+match run path parser with
+| Parser.Error (str),_ ->
+    printfn "Error"
+| Parser.Success (tree), tokens ->
+    tree.PrintAst()
+//    GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
+//    let args = {
+//        tokenToRange = fun _ -> 0,0
+//        zeroPosition = 0
+//        clearAST = false
+//        filterEpsilons = true
+//    }
+//
+//
+////    printfn "Result: %A" (GLL.SimpleAmb.translate args tree)
+//    tree.ChooseSingleAst()
+//    tree.PrintAst()
+
+//|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
     //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
     //printfn "%A" tree.Order
 //    let args = {

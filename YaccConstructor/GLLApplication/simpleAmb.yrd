@@ -1,0 +1,6 @@
+tokens {
+    _ of string
+}
+
+[<Start>]
+s : A s B | D  | A D B

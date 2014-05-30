@@ -1,25 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Highlighting.Core;
 using JetBrains.DataFlow;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
-using JetBrains.ReSharper.Daemon.CSharp.Errors;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.ContextHighlighters;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
-using JetBrains.ReSharper.Psi.Css;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
-using CalcHighlighting;
-using JetBrains.Util;
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
-using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
     [ContainsContextConsumer]
     public class CalcMatchingBraceContextHighlighter : MatchingBraceContextHighlighterBase
@@ -35,15 +28,14 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             Lifetime lifetime, 
             [ContextKey(typeof(CSharpContextActionDataProvider.ContextKey))] IContextActionDataProvider dataProvider, 
             InvisibleBraceHintManager invisibleBraceHintManager, 
-            MatchingBraceSuggester matchingBraceSuggester/*,
-            [ContextKey(typeof(MyActionProvider.ContextKey))] IContextActionDataProvider myProvider*/)
+            MatchingBraceSuggester matchingBraceSuggester)
         {
             return new CalcMatchingBraceContextHighlighter(dataProvider).ProcessDataContextImpl(lifetime, dataProvider, invisibleBraceHintManager, matchingBraceSuggester);
         }
 
         // We have left brace. We'll find all right braces.
         // '[caret]LBRACE'
-        protected override void TryHighlightToLeft(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
+        protected override void TryHighlightToRight(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
@@ -89,7 +81,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
 
         // We have right brace. We'll find all left braces.
         // 'RBRACE[caret]'
-        protected override void TryHighlightToRight(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
+        protected override void TryHighlightToLeft(MatchingHighlightingsConsumer consumer, ITokenNode selectedToken, TreeOffset treeOffset)
         {
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
@@ -140,7 +132,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Dynamic
             foreach (var treeNode in MatcherHelper.NodeCover)
             {
                 var nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
-                if (nodeRange.Contains(range))
+                if (nodeRange != null && nodeRange.Contains(range))
                     return treeNode.UserData.GetData(KeyConstant.YcLanguage);
             }
             return string.Empty;

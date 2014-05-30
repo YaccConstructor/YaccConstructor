@@ -456,9 +456,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     then
                         for other in ast.other do
                             res <- res @ processFamily other 
-                    res <- processFamily ast.first @ res 
+                    res <- processFamily ast.first @ res
                 | _ -> ()
+            
+//            res <- res |> Seq.distinct |> Seq.sort |> Seq.toList
             res
+
         processFamily family
 
     member this.collectErrors tokenToRange = 
@@ -633,6 +636,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             for i = 0 to tokens.Length - 1 do
                                 yield not <| List.exists (fun j -> j = i) unprocessed
                         |]
+        
         let rootFamily = 
             match root with
             | :? AST as ast -> ast
@@ -641,11 +645,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
 
         /// choose family from AST which contains the more unprocessed tokens
         let handleAST (ast : AST) = 
-            if ast.other = null
+            if ast.other = null || not <| Seq.exists (fun i -> i = false) processed
             then ast.first
             else                
                 let getUnprocessedCount family = 
-                    let familyLeaves = this.getTokensFromFamily family
+                    let familyLeaves = 
+                        this.getTokensFromFamily family |> Seq.distinct |> Seq.toList
                     let newToksList = 
                         List.filter (fun leaf -> List.exists ((=) leaf) familyLeaves) unprocessed
                     newToksList.Length
@@ -668,7 +673,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         let rec processFamily (family : Family) : obj = 
             let children = new ResizeArray<_>()
             
-            let processNode (node : obj) = 
+            let inline processNode (node : obj) = 
                 match node with 
                 | :? AST as ast -> 
                     let child = processFamily <| handleAST ast
@@ -692,7 +697,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 then res <- i :: res
             List.rev res
 
-        // now parameter 'tokens' is all tokens rather than tokens from new tree
+        // now parameter 'tokens' is all sppf tokens rather than tokens from new tree
         let newTree = new Tree<_> (tokens, tree, rules)
         
         newTree, finalUnprocessed
@@ -703,18 +708,15 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     /// <para> tokRange - range of token </para>
     ///</summary>
     member this.GetForestWithToken tokRange (tokenToRange: 'TokenType -> seq<_>) = 
-        let findToken toRange = 
+        let findToken() = 
             let predicate (range : seq<_>) = 
-                let enum = range.GetEnumerator()
-                enum.MoveNext() |> ignore
-                let firstElem = enum.Current
-                firstElem = tokRange
+                tokRange = Seq.head range
                 
             Array.tryFindIndex (fun tok -> 
                             let range = tokenToRange tok
                             predicate range) tokens
 
-        let tokNumberOption = findToken tokenToRange
+        let tokNumberOption = findToken()
         if tokNumberOption.IsNone
         then []
         else
@@ -729,7 +731,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                         newList.Length = nodes.Length
                                     ) !forestFam 
 
-            let filterTree (tree : Tree<_>)= 
+            let filterTree (tree : Tree<_>) = 
                 match tree.Root with
                 | :? AST as ast -> 
                     // I suppose that rootFamily.other is always null. But I'm not sure
@@ -738,9 +740,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     res
                 | _ -> failwith "Error in GetForestWithToken function"
 
-            let mutable pair = this.GetNextTree [token] filter
-            let mutable tree = fst pair
-            let mutable a = snd pair
+            let mutable tree = fst <| this.GetNextTree [token] filter
+
             while filterTree tree do
                 forestTree <- tree :: forestTree
                 tree <- fst <| this.GetNextTree [token] filter

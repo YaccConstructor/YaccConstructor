@@ -14,9 +14,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private static Dictionary<string, Dictionary<string, string>> parsedFiles =
             new Dictionary<string, Dictionary<string, string>>();
-        
+
         private static Dictionary<string, string> myTokenToColor = new Dictionary<string, string>();
-        
+
         public static Dictionary<string, string> TokenToColor
         {
             get { return myTokenToColor; }
@@ -79,29 +79,22 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return;
             }
 
-            try
+            MatcherHelper.ChangeLanguageTo(lang);
+
+            var path = GetFullPath(fileName);
+
+            using (XmlReader reader = new XmlTextReader
+                (new StreamReader(path)))
             {
-                MatcherHelper.ChangeLanguageTo(lang);
+                reader.MoveToContent();
+                var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
+                xmlReader.Read();
+                Dictionary<string, string> res = ParseDefinition(xmlReader, lang);
+                myTokenToColor = res;
 
-                var path = GetFullPath(fileName);
+                parsedFiles.Add(fileName, res);
+                MatcherHelper.UpdateMatchingValues(lang);
 
-                using (XmlReader reader = new XmlTextReader
-                    (new StreamReader(path)))
-                {
-                    reader.MoveToContent();
-                    var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
-                    xmlReader.Read();
-                    Dictionary<string, string> res = ParseDefinition(xmlReader, lang);
-                    myTokenToColor = res;
-
-                    parsedFiles.Add(fileName, res);
-                    MatcherHelper.UpdateMatchingValues(lang);
-                    
-                }
-            }
-            catch (Exception)
-            {
-                return;
             }
         }
 
@@ -202,8 +195,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             var settings = new XmlReaderSettings
             {
-                CloseInput = true, 
-                IgnoreComments = true, 
+                CloseInput = true,
+                IgnoreComments = true,
                 IgnoreWhitespace = true
             };
 

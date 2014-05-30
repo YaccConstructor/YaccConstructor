@@ -46,7 +46,8 @@ namespace Highlighting.Core
         /// Returns ycToken from string value.
         /// For example if str is "(" then method returns LBRACE
         /// </summary>
-        /// <param name="ycToken"></param>
+        /// <param name="str"></param>
+        /// <param name="lang">Name of language (Calc, JSON, TSQL)</param>
         /// <returns></returns>
         public static string GetYcTokenName(string str, string lang)
         {
@@ -75,11 +76,5 @@ namespace Highlighting.Core
 
             return ycTokenToString[ycToken];
         }
-
-        //public static void ChangeLanguageTo(string lang)
-        //{
-        //    ununiqueDict = new List<string>();
-        //    ycTokenToString = new Dictionary<string, string>();
-        //}
     }
 }

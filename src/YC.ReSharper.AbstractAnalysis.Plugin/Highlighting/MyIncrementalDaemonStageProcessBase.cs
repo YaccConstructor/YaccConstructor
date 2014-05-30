@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
@@ -8,7 +9,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.ReSharper.AbstractAnalysis.Plugin.Dynamic;
+using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
@@ -38,7 +39,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
             ycProcessor.Process();
             
-            
             return ycProcessor;
         }
 
@@ -47,42 +47,47 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
                 return;
 
-
             Action globalHighlighter = () =>
             {
-                var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-                ProcessThisAndDescendants(new ProcessorBase(this, consumer));
-                commiter(new DaemonStageResult(consumer.Highlightings) {Layer = 1});
+                ProcessThisAndDescendants(commiter);
             };
             
             using (var fibers = DaemonProcess.CreateFibers())
             {
                 fibers.EnqueueJob(globalHighlighter);
             }
-
+            
             // remove all old highlightings
+            //if (DaemonProcess.FullRehighlightingRequired)
             //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
-        private void ProcessThisAndDescendants(IRecursiveElementProcessor processor)
+        private void ProcessThisAndDescendants(Action<DaemonStageResult> commiter)
         {
             Core.Processor ycProcessor = UpdateYCProcessor();
             if (ycProcessor == null)
                 return;
 
             MatcherHelper.YcProcessor = ycProcessor;
+            MatcherHelper.ClearNodeCover();
 
-            var tree = ycProcessor.GetNextTree();
+            var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
+            var processor = new ProcessorBase(this, consumer);
+
+            ITreeNode tree = ycProcessor.GetNextTree();
             
-            // fsTree is List<ITreeNode>. It can be null.
             while (tree != null)
             {
                 string lang = ycProcessor.CurrentLang.ToLower();
                 ColorHelper.ParseFile(ycProcessor.XmlPath, lang);
                 ProcessDescendants(tree, processor);
+                
+                commiter(new DaemonStageResult(consumer.Highlightings) { Layer = 1 });
                 MatcherHelper.NodeCover.Add(tree);
+
                 tree = ycProcessor.GetNextTree();
             }
+            //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
         private void ProcessDescendants([NotNull] ITreeNode root, IRecursiveElementProcessor processor)

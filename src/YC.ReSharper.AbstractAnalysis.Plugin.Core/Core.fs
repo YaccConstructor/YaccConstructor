@@ -29,10 +29,6 @@ type Processor(file) =
     let mutable jsonForest = []
     let mutable tsqlForest = []
 
-//    let mutable nowCalcTreeGen = false
-//    let mutable nowJsonTreeGen = false
-//    let mutable nowTsqlTreeGen = false
-
     ///Needs for tree generation for highlighting
     let mutable unprocessed = []
     let mutable count = 0
@@ -46,7 +42,7 @@ type Processor(file) =
             | "objnotation" ->JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError translate printer addAST = 
+    let processLang graph tokenize parse addLError addPError translate printer addSPPF = 
         let tokenize g =
             try 
                tokenize g
@@ -60,7 +56,7 @@ type Processor(file) =
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success (ast, errors) -> addAST (ast, errors)
+             | Yard.Generators.RNGLR.Parser.Success (sppf, errors) -> addSPPF (sppf, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
         
@@ -90,18 +86,18 @@ type Processor(file) =
             count <- 0 
             null
         else 
-            let mutable curAst, errors = List.nth forest count
+            let mutable curSppf, errors = List.nth forest count
             if unprocessed.Length = 0
             then 
-                unprocessed <- Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
+                unprocessed <- Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
             
-            let nextTree, unproc = curAst.GetNextTree unprocessed (fun _ -> true)
+            let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
             if unproc.Length = 0
             then 
                 count <- count + 1
             unprocessed  <- unproc
-            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
-            Seq.head treeNodeList
+
+            (Seq.head <| translate nextTree errors) :> ITreeNode
 
     let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
                             range (tokenData: 'TokenType -> obj)  translate = 
@@ -117,8 +113,8 @@ type Processor(file) =
         for ast, errors in forest do
             let trees = ast.GetForestWithToken range tokenToPos
             for tree in trees do
-                let treeNodeList = translate tree errors :> seq<ITreeNode>
-                res.Add <| Seq.head treeNodeList
+                let treeNode = Seq.head <| translate tree errors :> ITreeNode
+                res.Add treeNode
         res
 
 //(provider: ICSharpContextActionDataProvider) = 
@@ -176,9 +172,9 @@ type Processor(file) =
             | _ -> failwith "error in addErrorTSQL function"
 
 
-        let addCalcAst pair = calcForest <- calcForest @ [pair]
-        let addJsonAst pair = jsonForest <- jsonForest @ [pair]
-        let addTSqlAst pair =  tsqlForest <- tsqlForest @ [pair]
+        let addCalcSPPF pair = calcForest <- calcForest @ [pair]
+        let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]
+        let addTSqlSPPF pair = tsqlForest <- tsqlForest @ [pair]
 
         graphs
         |> ResizeArray.iter 
@@ -186,13 +182,13 @@ type Processor(file) =
                 match lang with
                 | Calc -> 
                     calcXmlPath <- Calc.xmlPath
-                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot addCalcAst
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot addCalcSPPF
                 | JSON -> 
                     jsonXmlPath <- JSON.xmlPath
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot addJsonAst 
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot addJsonSPPF
                 | TSQL -> 
                     tsqlXmlPath <- TSQL.xmlPath
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot addTSqlAst
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
             )
         lexerErrors, parserErrors
 
@@ -208,13 +204,9 @@ type Processor(file) =
         | Calc -> "Calc"
         | JSON -> "JSON"
         | TSQL -> "TSQL"
-        | _ -> "Unknown Language"
+        | _ -> System.String.Empty
     
     member this.GetNextTree() = 
-//        if not <| nowCalcTreeGen || nowJsonTreeGen || nowTsqlTreeGen 
-//        then
-//            nowCalcTreeGen <- true
-
         let mutable res = null
         
         match currentLang with

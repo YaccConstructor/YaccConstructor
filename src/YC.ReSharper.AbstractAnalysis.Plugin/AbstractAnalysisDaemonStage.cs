@@ -39,8 +39,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 
       return new[]
                {
-                 new ComplexityAnalysisDaemonStageProcess(
-                   process, 0)
+                 new ComplexityAnalysisDaemonStageProcess(process, 0)
                };
     }
 

@@ -2,7 +2,6 @@
 using System.Linq;
 using Highlighting.Core;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.UI.Resources;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
@@ -32,10 +31,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             foreach (KeyValuePair<string, string> pair in allMatch[lang])
             {
                 var strLeft = YcHelper.GetStringValue(pair.Key, lang);
+                if (string.IsNullOrEmpty(strLeft))
+                    return;
+
                 if (!AllMatchingValues.Contains(strLeft)) 
                     AllMatchingValues += strLeft;
 
                 var strRight = YcHelper.GetStringValue(pair.Value, lang);
+                
+                if (string.IsNullOrEmpty(strRight))
+                    return;
+
                 if (!AllMatchingValues.Contains(strRight)) 
                     AllMatchingValues += strRight;
             }
@@ -82,6 +88,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
                 allMatch.Add(lang, new Dictionary<string, string>());
             }
             myMatched = allMatch[lang];
+        }
+
+        public static void ClearNodeCover()
+        {
+            NodeCover.Clear();
         }
     }
 }

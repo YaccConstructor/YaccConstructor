@@ -42,6 +42,8 @@ let tokenToNumber = function
     | A _ -> 5
     | B _ -> 6
     | RNGLR_EOF _ -> 7
+    | L_star_ _ -> 8
+    | L_plus_ _ -> 9
 
 let isLiteral = function
     | A _ -> false
@@ -104,6 +106,9 @@ let termEnd = 7
 let literalStart = 8
 let literalEnd = 9
 let literalsCount = 2
+
+let defaultAstToDot =
+    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
 
 let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)

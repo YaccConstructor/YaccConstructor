@@ -44,14 +44,16 @@ type Table (grammar : FinalGrammar) =
             let curRule = grammar.rules.rightSide i
             let mutable j = 0
             while condition do
-                let curFirst = grammar.firstSet.[curRule.[j]]
-                result.[i] <- Set.union result.[i] curFirst
-                if grammar.canInferEpsilon.[curRule.[j]] then 
-                    if j < curRule.Length then
-                        j <- j + 1
-                    else 
-                    condition <- false
-                    canInferEpsilon.[i] <- true
+                if j <= curRule.Length - 1 then
+                    let curFirst = grammar.firstSet.[curRule.[j]]
+                    result.[i] <- Set.union result.[i] curFirst
+                    if grammar.canInferEpsilon.[curRule.[j]] then 
+                        if j < curRule.Length - 1 then
+                            j <- j + 1
+                        else 
+                        condition <- false
+                        canInferEpsilon.[i] <- true
+                    else condition <- false
                 else condition <- false
         result
 
@@ -72,8 +74,9 @@ type Table (grammar : FinalGrammar) =
             let curNTerm = grammar.rules.leftSide i
             for j = 0 to curFirst.Length - 1 do
                 arr.[curNTerm, getTableIndex curFirst.[j]] <- i :: arr.[curNTerm, getTableIndex curFirst.[j]]
-
-            if canInferEpsilon.[i] then 
+            let temp = canInferEpsilon.[curNTerm]
+            
+            if grammar.canInferEpsilon.[curNTerm] then 
                 let curFollow = Set.toArray follow.[curNTerm]
                 for j = 0 to curFollow.Length - 1 do
                     arr.[curNTerm, getTableIndex curFollow.[j]] <- i :: arr.[curNTerm, getTableIndex curFollow.[j]] 

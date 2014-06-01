@@ -40,13 +40,18 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
+    <Compile Include="Calc2.yrd.fs" />
+    <None Include="Lexer.fsl" />
+    <Compile Include="Lexer.fs" />
     <None Include="App.config" />
-    <None Include="Calc.yrd" />
-    <Compile Include="simpleAmb.yrd.fs" />
-    <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FsYARD\FsYARD.fsproj">
+      <Name>FsYARD</Name>
+      <Project>{9aea3f62-7f50-4939-85dc-ce29ab43815d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLLParser\GLLParser.fsproj">
       <Name>GLLParser</Name>
       <Project>{1548a831-3a8d-489d-8592-dda12fbc3ea4}</Project>
@@ -62,6 +67,12 @@
       <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Utils.SourceText\Utils.SourceText.fsproj">
+      <Name>Utils.SourceText</Name>
+      <Project>{f296356b-00c3-465c-9c97-7cfa279f5574}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

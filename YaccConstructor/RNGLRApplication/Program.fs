@@ -35,5 +35,5 @@ match run path parser with
     printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
     tree.ChooseSingleAst()
     tree.PrintAst()
-
+    printfn "fff"
 //|> (fun x -> Assert.IsTrue <| compareRes x rightValue)

@@ -11,10 +11,10 @@ let tokens<'lexType>(path) =
             |> Array.map (fun uci -> (uci.Name,  FSharpValue.PreComputeUnionConstructor(uci)) ) 
             |> dict
 
-        printfn "%A" targetUCIs
+//        printfn "%A" targetUCIs
         let curI = ref 0
         fun (name:string) ->
-            printf "%s " name
+//            printf "%s " name
             let caseCtor = targetUCIs.[name]
             incr curI
             (caseCtor [|!curI|]) :?> 'lexType

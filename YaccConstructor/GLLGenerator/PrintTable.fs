@@ -155,6 +155,8 @@ let printTableGLL
         printBrInd 0 "let tokenToNumber = function"
         for i = indexator.termsStart to indexator.termsEnd do
             printBrInd 1 "| %s _ -> %d" (indexator.indexToTerm i) i
+        for i = indexator.literalsStart to indexator.literalsEnd do
+            printBrInd 1 "| L_%s _ -> %d" (indexator.indexToLiteral i) i
         printBr ""
 
         printBrInd 0 "let isLiteral = function"

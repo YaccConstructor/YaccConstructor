@@ -64,7 +64,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <Import Project="$(MSBuildExtensionsPath)\FSharp\1.0\FSharp.PowerPack.Targets" />
   <ItemGroup>
-    <Compile Include="Parser.fs" />
+    <Compile Include="Calc2.yrd.fs" />
     <None Include="calc.yrd" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
@@ -82,8 +82,11 @@
     <Reference Include="RNGLRCommon">
       <HintPath>..\yc\RNGLRCommon.dll</HintPath>
     </Reference>
-    <Reference Include="RNGLRParser">
-      <HintPath>..\yc\RNGLRParser.dll</HintPath>
+    <Reference Include="GLLCommon">
+      <HintPath>..\yc\GLL.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="GLLParser">
+      <HintPath>..\yc\GLLParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

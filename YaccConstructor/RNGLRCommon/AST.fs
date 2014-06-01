@@ -615,6 +615,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             match (ast : obj) with
             | :? int as i when i < 0 -> printInd ind "e"
             | :? int as t -> printInd ind "t: %A" tokens.[t]
+            | :? Nodes as n -> printInd ind "t: %A" n.fst
             | :? AST as fam ->
                 let children = fam
                 let needGroup = children.other <> null
@@ -674,6 +675,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             let res = next()
             createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
             res
+        let createTerm2 t =
+            let res = next()
+            createNode res false AstNode ("t " + indToString (tokenToNumber t))
+            res
         if not isEpsilon then
             //for i in order do
             for i = order.Length-1 downto 0 do
@@ -687,7 +692,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                      
                     createNode i (children.other <> null) AstNode ("n " + label)
                      
-                    let inline handle (family : Family) =
+                    let handle (family : Family) =
                         let u = next()
                         createNode u false Prod ("prod " + family.prod.ToString())
                         createEdge i u true ""
@@ -696,6 +701,9 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 match child with
                                 | :? AST as v -> v.pos
                                 | :? int as e when e < 0 -> createEpsilon e
+                                | :? Nodes as n -> 
+                                    let tok : 'TokenType = unbox <| n.fst
+                                    createTerm2 tok 
                                 | :? int as t -> createTerm t
                                 | _ -> failwith ""
                             createEdge u v false ""

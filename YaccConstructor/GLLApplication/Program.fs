@@ -1,57 +1,70 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-module RNGLRApplication
+module GLLApplication
+open System.IO
+open System
+open Microsoft.FSharp.Text
+open Microsoft.FSharp.Reflection
+
+
+open Yard.Generators.GLL
+open Yard.Generators.GLL.Parser    
+open Microsoft.FSharp.Text.Lexing
+open Yard.Generators.RNGLR.AST
+open GLL.Calc2
 
 open Yard.Generators.GLL
 //open Yard.Generators.RNGLR.AST
 open Yard.Generators
-open Lexer2
+open Calc.Lexer
 
-let run path astBuilder =
-    let tokens = Lexer2.tokens(path)
-    astBuilder tokens, tokens
+let src = @"..\..\input.txt"
 
-let parser = GLL.SimpleAmb.buildAst
-let path = @"..\..\input.txt"
+let tokens = 
+    let lexbuf = Lexing.LexBuffer<_>.FromTextReader <| new System.IO.StreamReader(src)
+    seq { while not lexbuf.IsPastEndOfStream do
+              yield Calc.Lexer.token lexbuf }
+
+
+let run2 astBuilder =
+    astBuilder tokens
+
+let parser = GLL.Calc2.buildAst
+//let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
-match run path parser with
-| Parser.Error _ , _ ->
-    printfn "Error"
-| Parser.Success _, _ ->
-    printfn "Success"
-
-match run path parser with
-| Parser.Error (str),_ ->
-    printfn "Error"
-| Parser.Success (tree), tokens ->
+match run2 parser with
+| Parser.Error str ->
+    printfn "%s" str
+| Parser.Success tree ->
     tree.PrintAst()
-//    GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
-//    let args = {
-//        tokenToRange = fun _ -> 0,0
-//        zeroPosition = 0
-//        clearAST = false
-//        filterEpsilons = true
-//    }
+    GLL.Calc2.defaultAstToDot tree "ast.dot"
+printfn "ff"
+
+//
+//    //printfn "Result: %A" (GLL.SimpleAmb.translate args tree)
+//    //tree.ChooseSingleAst()
+//    //tree.PrintAst()
+//let src = @"..\..\input.txt"
 //
 //
-////    printfn "Result: %A" (GLL.SimpleAmb.translate args tree)
-//    tree.ChooseSingleAst()
+//open Lexer2
+//
+//let run path astBuilder =
+//    let tokens = Lexer2.tokens(path)
+//    astBuilder tokens, tokens
+//
+//let parser = GLL.SimpleAmb.buildAst
+//let path = @"..\..\input.txt"
+////let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
+//
+//
+//match run path parser with
+//| Parser.Error str, _ ->
+//    printfn "%s" str
+//| Parser.Success tree, tokens ->    
 //    tree.PrintAst()
-
-//|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
-    //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
-    //printfn "%A" tree.Order
-//    let args = {
-//        tokenToRange = fun _ -> 0,0
-//        zeroPosition = 0
-//        clearAST = false
-//        filterEpsilons = true
-//    }
-
-
-    //printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
-    //tree.ChooseSingleAst()
-    //tree.PrintAst()
-
-//|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+//    GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
+//
+//
+//printfn "ff"

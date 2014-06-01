@@ -5,8 +5,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using FSharpx;
 using JetBrains.Annotations;
+using JetBrains.IDE;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.TextControl;
 using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow.GraphClasses;
 using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 
@@ -22,7 +24,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
             LoadGraphFromCoreEvent += GetProcessor;
             InvokeLoadGrapFromCoreEvent.Invoke(this, new EventArgs());
         }
-
         public List<DataGraph> Load()
         {
             var readyGraphs = new List<DataGraph>();
@@ -72,6 +73,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
 
         public static event EventHandler<LoadGraphEventArgs> LoadGraphFromCoreEvent;
         public static event EventHandler InvokeLoadGrapFromCoreEvent;
+
         /// <summary>
         /// Invokes event for load initial graph
         /// </summary>

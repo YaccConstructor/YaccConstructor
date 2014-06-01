@@ -8,9 +8,12 @@ using GraphX.Controls;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
 using JetBrains.DataFlow;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.TextControl;
 using JetBrains.UI.Application;
 using JetBrains.UI.CrossFramework;
 using JetBrains.UI.ToolWindowManagement;
+using Microsoft.FSharp.Core;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
 {
@@ -24,6 +27,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
 
         public void Execute(IDataContext context, DelegateExecute nextExecute)
         {
+            textControl = context.GetData(JetBrains.TextControl.DataContext.DataConstants.TEXT_CONTROL);
+            GoToCodeEventHandler.InvokeGetCodeEvent += GetSourceCode;
             var descriptor = DataConstantsExtensions.GetComponent<GraphCodeToolWindow>(context);
             var manager = DataConstantsExtensions.GetComponent<ToolWindowManager>(context);
             var lifetime = DataConstantsExtensions.GetComponent<Lifetime>(context);
@@ -45,5 +50,26 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
             w.Content = tabControl;
             w.Show();
         }
+
+        public void GetSourceCode(object sender, EventArgs args)
+        {
+            try
+            {
+                //return source code
+                GoToCodeEventHandler.OnEvent(textControl, new BackRefEventArgs((FSharpOption<ICSharpLiteralExpression>) sender));
+            }
+            catch (NullReferenceException e) { }
+        }
+
+        private ITextControl textControl;
+    }
+
+    public class BackRefEventArgs : EventArgs
+    {
+        public BackRefEventArgs(FSharpOption<ICSharpLiteralExpression> br)
+        {
+            BackRef = br;
+        }
+        public FSharpOption<ICSharpLiteralExpression> BackRef { get; private set; } 
     }
 }

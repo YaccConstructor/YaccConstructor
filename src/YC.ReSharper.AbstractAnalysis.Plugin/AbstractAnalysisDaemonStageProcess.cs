@@ -16,6 +16,10 @@
 
 using System;
 using JetBrains.Application.Progress;
+using JetBrains.DocumentManagers;
+using JetBrains.DocumentModel;
+using JetBrains.IDE;
+using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -25,6 +29,8 @@ using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
 using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
 using JetBrains.ReSharper.Psi.Xml.XmlDocComments;
+using JetBrains.TextControl;
+using JetBrains.Util.dataStructures.TypedIntrinsics;
 using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow;
 
@@ -47,8 +53,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             // Getting PSI (AST) for the file being highlighted
             var sourceFile = myDaemonProcess.SourceFile;
             var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            
             if (file == null)
-            return;
+                return;
 
             // Running visitor against the PSI
             var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);

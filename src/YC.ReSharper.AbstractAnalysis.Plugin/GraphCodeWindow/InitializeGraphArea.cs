@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using GraphX;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.Hierarchical;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.Tree;
 using GraphX.GraphSharp.Algorithms.OverlapRemoval;
+using GraphX.Models;
+using JetBrains.ReSharper.Daemon.CSharp.Errors;
 using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow.GraphClasses;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
@@ -29,8 +32,20 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
                                    logicCore.AlgorithmFactory.CreateLayoutParameters(GraphX.LayoutAlgorithmTypeEnum.Tree);
                 ((SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams).LayerGap = 100;
                 ((SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams).VertexGap = 100;
-
+                ((SimpleTreeLayoutParameters) logicCore.DefaultLayoutAlgorithmParams).WidthPerHeight = 1000;
                 ((SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams).OptimizeWidthAndHeight = true;
+
+                /************************************/
+
+                /*logicCore.DefaultLayoutAlgorithm = GraphX.LayoutAlgorithmTypeEnum.KK;
+                logicCore.DefaultLayoutAlgorithmParams =
+                                   logicCore.AlgorithmFactory.CreateLayoutParameters(GraphX.LayoutAlgorithmTypeEnum.KK);
+                ((KKLayoutParameters)logicCore.DefaultLayoutAlgorithmParams).MaxIterations = 100;*/
+
+                /*************************************/
+
+
+
                 logicCore.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
                 logicCore.DefaultOverlapRemovalAlgorithmParams =
                                   logicCore.AlgorithmFactory.CreateOverlapRemovalParameters(GraphX.OverlapRemovalAlgorithmTypeEnum.FSA);
@@ -46,6 +61,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
                 logicCore.EdgeSelfLoopCircleRadius = 50;
                 logicCore.EdgeCurvingEnabled = true;               
                 gg_Area.LogicCore = logicCore;
+                gg_Area.EdgeDoubleClick += delegate(object sender, EdgeSelectedEventArgs args)
+                {
+                    var backRef = ((DataEdge) (args.EdgeControl.Edge)).BackRef;
+                    GoToCodeEventHandler.ClickHandler(backRef, args);
+                };
                 gg_Area.InitializeComponent();
                 gg_Area.GenerateGraph(graph, true, true, true);
                 gg_Area.ShowAllEdgesLabels(true);

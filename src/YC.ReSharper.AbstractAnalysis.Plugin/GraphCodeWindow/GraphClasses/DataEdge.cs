@@ -24,7 +24,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow.GraphClasses
         {
         }
 
-        public FSharpOption<ICSharpLiteralExpression> BackRef;
+        public FSharpOption<ICSharpLiteralExpression> BackRef { get; set; }
         public string ToolTipText { get; set; }
         public override string ToString()
         {

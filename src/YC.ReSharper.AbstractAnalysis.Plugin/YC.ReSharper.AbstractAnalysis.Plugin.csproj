@@ -78,6 +78,7 @@
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
     <Compile Include="AbstractAnalysisWarning.cs" />
+    <Compile Include="GraphCodeWindow\GoToCode.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataGraph.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataEdge.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataVertex.cs" />

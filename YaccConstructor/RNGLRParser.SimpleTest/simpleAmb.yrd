@@ -3,4 +3,6 @@ tokens {
 }
 
 [<Start>]
-s : A s B | D  | A D B
+s1 : s
+s : B | f
+f : s s

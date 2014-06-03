@@ -1,6 +1,6 @@
 
-# 2 "SimpleAmb.yrd.fs"
-module GLL.SimpleAmb
+# 2 "SimpleEpsilon.yrd.fs"
+module GLL.SimpleEpsilon
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.GLL.Parser
 open Yard.Generators.GLL
@@ -19,16 +19,17 @@ let tokenData = function
 
 let numToString = function
     | 0 -> "error"
-    | 1 -> "s"
-    | 2 -> "s1"
-    | 3 -> "yard_start_rule"
-    | 4 -> "B"
-    | 5 -> "RNGLR_EOF"
+    | 1 -> "f"
+    | 2 -> "s"
+    | 3 -> "s1"
+    | 4 -> "yard_start_rule"
+    | 5 -> "B"
+    | 6 -> "RNGLR_EOF"
     | _ -> ""
 
 let tokenToNumber = function
-    | B _ -> 4
-    | RNGLR_EOF _ -> 5
+    | B _ -> 5
+    | RNGLR_EOF _ -> 6
 
 let isLiteral = function
     | B _ -> false
@@ -40,8 +41,8 @@ let isTerminal = function
     | _ -> false
 
 let numIsTerminal = function
-    | 4 -> true
     | 5 -> true
+    | 6 -> true
     | _ -> false
 
 let numIsNonTerminal = function
@@ -49,6 +50,7 @@ let numIsNonTerminal = function
     | 1 -> true
     | 2 -> true
     | 3 -> true
+    | 4 -> true
     | _ -> false
 
 let numIsLiteral = function
@@ -56,6 +58,7 @@ let numIsLiteral = function
 
 let isNonTerminal = function
     | error -> true
+    | f -> true
     | s -> true
     | s1 -> true
     | yard_start_rule -> true
@@ -66,24 +69,24 @@ let mutable private cur = 0
 
 let acceptEmptyInput = false
 
-let leftSide = [|2; 3; 1; 1|]
-let table = [| [||];[||];[|3; 2|];[||];[|0|];[||];[|1|];[||]; |]
-let private rules = [|1; 2; 4; 1; 1|]
-let private canInferEpsilon = [|true; false; false; false; false; false|]
+let leftSide = [|3; 4; 2; 2; 1|]
+let table = [| [||];[||];[|4|];[||];[|3; 2|];[||];[|0|];[||];[|1|];[||]; |]
+let private rules = [|2; 3; 5; 1; 2; 2|]
+let private canInferEpsilon = [|true; false; false; false; false; false; false|]
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private rulesStart = [|0; 1; 2; 3; 5|]
+let private rulesStart = [|0; 1; 2; 3; 4; 6|]
 let startRule = 1
-let indexatorFullCount = 6
-let rulesCount = 4
-let indexEOF = 5
-let nonTermCount = 4
+let indexatorFullCount = 7
+let rulesCount = 5
+let indexEOF = 6
+let nonTermCount = 5
 let termCount = 2
-let termStart = 4
-let termEnd = 5
-let literalStart = 6
-let literalEnd = 5
+let termStart = 5
+let termEnd = 6
+let literalStart = 7
+let literalEnd = 6
 let literalsCount = 0
 
 

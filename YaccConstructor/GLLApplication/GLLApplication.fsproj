@@ -40,10 +40,9 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
-    <Compile Include="Calc2.yrd.fs" />
-    <None Include="Lexer.fsl" />
-    <Compile Include="Lexer.fs" />
     <None Include="App.config" />
+    <Compile Include="SimpleEpsilon.yrd.fs" />
+    <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

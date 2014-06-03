@@ -46,6 +46,7 @@ type AST =
     val mutable leftExt  : int
     val mutable rightExt : int
     val mutable pos : int
+    new (f, o, l, r) = {pos = -1; first = f; other = o; leftExt = l; rightExt = r}
     new (f, o) = {pos = -1; first = f; other = o; leftExt = -1; rightExt = -1}
     member inline this.findFamily f =
         if f this.first then Some this.first
@@ -60,6 +61,7 @@ and Family =
         val mutable leftExt  : int
         val mutable rightExt : int
         new (p,n) = {prod = p; nodes = n; leftExt = -1; rightExt = -1}
+        new (p,n, l, r) = {prod = p; nodes = n; leftExt = l; rightExt = r}
     end
 
 and Nodes =

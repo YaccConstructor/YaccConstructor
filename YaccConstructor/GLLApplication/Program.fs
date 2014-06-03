@@ -11,7 +11,7 @@ open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser    
 open Microsoft.FSharp.Text.Lexing
 open Yard.Generators.RNGLR.AST
-open GLL.SimpleEpsilon
+open GLL.SimpleAmb
 
 open Yard.Generators.GLL
 //open Yard.Generators.RNGLR.AST
@@ -50,7 +50,7 @@ let run path astBuilder =
     let tokens = Lexer2.tokens(path)
     astBuilder tokens, tokens
 
-let parser = GLL.SimpleEpsilon.buildAst
+let parser = GLL.SimpleAmb.buildAst
 let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
@@ -61,7 +61,7 @@ match run path parser with
 | Parser.Success tree, tokens -> 
     printfn "ff"   
     //tree.PrintAst()
-    GLL.SimpleEpsilon.defaultAstToDot tree "ast.dot"
+    GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
 
 
 printfn "ff"

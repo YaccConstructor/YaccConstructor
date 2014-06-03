@@ -4,5 +4,6 @@ tokens {
 
 [<Start>]
 s1 : s
-s : B | f
+s : b | B | f
 f : s s
+b : B

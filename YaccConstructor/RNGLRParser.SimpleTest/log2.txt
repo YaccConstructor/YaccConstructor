@@ -2,7 +2,5 @@
 rules:
    0: s1 = s 
    1: yard_start_rule = s1 
-   2: s = B 
-   3: s = f 
-   4: f = s s 
+   2: s = A B D 
 <null>

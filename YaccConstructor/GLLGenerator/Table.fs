@@ -74,7 +74,7 @@ type Table (grammar : FinalGrammar) =
             let curNTerm = grammar.rules.leftSide i
             for j = 0 to curFirst.Length - 1 do
                 arr.[curNTerm, getTableIndex curFirst.[j]] <- i :: arr.[curNTerm, getTableIndex curFirst.[j]]
-            let temp = canInferEpsilon.[curNTerm]
+           // let temp = canInferEpsilon.[curNTerm]
             
             if grammar.canInferEpsilon.[curNTerm] then 
                 let curFollow = Set.toArray follow.[curNTerm]

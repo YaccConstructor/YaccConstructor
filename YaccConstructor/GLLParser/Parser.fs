@@ -61,7 +61,7 @@ type Context =
             | :? AST as a -> Some(a.leftExt, a.rightExt), a.first.prod
             | :? IntermidiateNode as i -> Some i.Extention, fst i.Pos
             | _ -> None,0
-        if cntxt1.Index = index && Label.Equal cntxt1.Label label && Vertex.Equal cntxt1.Node node && (t1 = t2) && p1 = p2
+        if cntxt1.Index = index && Label.Equal cntxt1.Label label && Vertex.Equal cntxt1.Node node && t1 = t2 && p1 = p2
             then 
                 res <- true
         res    
@@ -101,22 +101,17 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentRule = parser.StartRule
         let dummy = box <| null
         let dummyGSSNode = new Vertex(new Label(currentRule, -1), !currentIndex)
-        //let startGSSNode = new Vertex(new Label)
         let currentLabel = ref <| new Label(currentRule, 0)
         let startLabel = new Label(currentRule, 0)
-        //let startGSSNode = new Vertex(!currentLabel, !currentIndex)
         
         let currentN = ref <| null
         let currentR = ref <| null
 
-        //let currentGSSNode = ref <| new Vertex(!currentLabel, !currentIndex)
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
-        
-        
+           
         let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
-        let ast = Array.init inputLength (fun _ -> new ResizeArray<AST>())
-
+       // let ast = Array.init inputLength (fun _ -> new ResizeArray<AST>())
 
         let terminalNodes = new BlockResizeArray<Nodes>()
 
@@ -129,27 +124,44 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     result <- false
             result
 
-        let rec astToTokens (x : obj) =
-            let mutable res = []
-            match x : obj with 
-            | :? int as t when t >= 0 -> res <- x :: res
-            | :? Family as fam ->
-                for i = 0 to fam.nodes.Length - 1 do
-                    res <- res @ astToTokens fam.nodes.[i]
-            | :? AST as ast ->
-                if ast.other <> null 
+        let findTree (fam : Family) =
+            let prod = fam.prod
+            let leftExt = fam.leftExt
+            let rightExt = fam.rightExt
+            let currentNonTerm = parser.LeftSide.[prod]
+            let mutable condition = true
+            let mutable rightAST = false
+            let res = ref None
+            for pair in setP do
+                if condition
                 then
-                    for family in ast.other do
-                        if family.prod = parser.LeftSide.Length
-                        then res <- res @ [ast]
-                        else res <- res @ astToTokens family
-                            
-                if ast.first.prod = parser.LeftSide.Length
-                then res <- [ast] @ res
-                else res <- astToTokens ast.first @ res
-            | _ -> ()
-            res
-        
+                    match snd pair with
+                    | :? AST as a->
+                        if parser.LeftSide.[a.first.prod] = currentNonTerm
+                        then
+                            if a.first.prod = prod && a.first.leftExt = leftExt && a.rightExt = rightExt
+                            then                              
+                                rightAST <- true
+                            elif a.other <> null
+                            then
+                                for cur in a.other do
+                                    if cur.prod = prod && cur.leftExt = leftExt && cur.rightExt = rightExt
+                                    then
+                                        res := Some a
+                                        rightAST <- true
+                            if not rightAST
+                            then
+                                if a.other <> null
+                                then
+                                    a.other <- Array.append a.other [|fam|]
+                                else a.other <- [|fam|]
+                            res := Some a
+                        condition <- false
+                    | _ -> failwith "ff"
+            printfn "ffffg"
+            !res
+                                        
+
         let handleIntermidiate node   (prod : int) = 
             let result = new List<obj>()
             let rec handle (o : obj) =
@@ -173,14 +185,18 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     n.leftExt
                 | :? AST as a -> a.leftExt
             let r =
-                match res.[res.Length-1] with
+                match res.[res.Length - 1] with
                 | :? Nodes as n ->
                     n.rightExt
                 | :? AST as a -> a.rightExt
                     
-           
             let fam = new Family(prod, new Nodes(res),l, r)
-            fam
+            let res =
+                let tree = findTree fam
+                match  tree with
+                | Some _ -> tree.Value
+                | None -> new AST(fam, null, l, r)
+            res
                                 
         let containsContext (set : List<Label * Vertex * obj>) (label : Label) (gssNode : Vertex) (ast : obj) =
             let mutable result = false
@@ -229,7 +245,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 | :? AST as a   -> Some(a.leftExt, a.rightExt)
                 | :? Nodes as n -> Some(n.leftExt, n.rightExt) 
                 | :? IntermidiateNode as i -> Some i.Extention
-                | _ -> None //failwith "Unexpected type."
+                | _ -> None
             
             let mutable result =  right
             if left <> null
@@ -318,13 +334,11 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     if edge.Ast <> null && z <> null 
                     then 
                         printfn "fff"
-                    let y1 = getNodeP label edge.Ast z
-//                    let y2 = handleIntermidiate y1 prod
-//                    let y = new AST(y2, null, y2.leftExt, y2.rightExt)
-                    let cntxt = addContext label i edge.Dest y1
+                    let y = getNodeP label edge.Ast z
+                    let cntxt = addContext label i edge.Dest y
                     if  cntxt.IsSome
                     then
-                        setU.[i].Add (label, edge.Dest, box y1)
+                        setU.[i].Add (label, edge.Dest, box y)
                         setR.Enqueue(cntxt.Value)    
                 processEdge u.OutEdges.first
                 if u.OutEdges.other <> null then 
@@ -350,21 +364,20 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 currentN := currentContext.Value.Ast 
                 currentR := null
                 condition := false
-//                if !currentIndex >= inputLength 
-//                then
-//                    condition := true
             else 
                 stop := true  
                 
                 printfn  "%A" setP
-                let v,ast =
-                    setP
-                    |> Seq.find 
-                        (fun (x,y) -> 
-                            let ast = unbox y :> AST
-                            x.Value.Rule = parser.StartRule && ast.leftExt = 0 && ast.rightExt = inputLength)
-                resultAST := Some ast 
-                              
+//                let cc =
+//                    setP
+//                    |> Seq.filter 
+//                        (fun (x,y) -> 
+//                            let ast = unbox y :> AST
+//                            x.Value.Rule = parser.StartRule && ast.leftExt = 0 && ast.rightExt = inputLength)
+//                printfn "L = %A" (Seq.length cc)
+//                let v,ast = Seq.head cc
+//                resultAST := Some ast 
+//                              
         and processing () =  
 
             let getIndex(nTerm, term) = 
@@ -405,8 +418,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                                     currentR := box <| terminalNodes.Item !currentIndex
                             currentIndex := !currentIndex + 1
                             currentLabel.Value.Position <- currentLabel.Value.Position + 1
-//                            if !currentR <> null
-//                            then
                             currentN := getNodeP !currentLabel !currentN !currentR
                             condition := false
                         else 
@@ -429,32 +440,16 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                             condition := true
                            
                 else 
-//                    if currentLabel.Value.Rule = parser.StartRule && !currentIndex = inputLength
-//                    then
-//                        let curRight = unbox <| !currentN
-//                        let resTree = handleIntermidiate curRight currentLabel.Value.Rule
-//                        if (!resultAST).IsNone
-//                        then
-//                            
-//                     //   let resTree = findTree resTree currentGSSNode.Value.Level currentLabel.Value.Rule
-//                        //    let resTree = new AST(resTree, null)
-//                            resultAST := Some <| new AST(resTree, null)
-//                            condition := true
-//
-//                        else 
-//                            let temp = (!resultAST).Value
-//                            if temp.other <> null
-//                            then
-//                                temp.other <- Array.append temp.other [|resTree|]
-//                            else
-//                                temp.other <- [|resTree|]
-//                        condition := true
-//                    else
-                    let curRight = unbox <| !currentN
-                    let resTree = handleIntermidiate curRight currentLabel.Value.Rule
-                    //   let resTree = findTree resTree currentGSSNode.Value.Level currentLabel.Value.Rule
-                    let resTree = new AST(resTree, null, resTree.leftExt, resTree.rightExt)
-                    pop !currentGSSNode !currentIndex resTree currentLabel.Value.Rule
+                    if currentLabel.Value.Rule = parser.StartRule 
+                    then
+                        let curRight = unbox <| !currentN
+                        let resTree = handleIntermidiate curRight currentLabel.Value.Rule
+                        resultAST := Some <| box resTree
+                    else
+                           
+                        let curRight = unbox <| !currentN
+                        let resTree = handleIntermidiate curRight currentLabel.Value.Rule
+                        pop !currentGSSNode !currentIndex resTree currentLabel.Value.Rule
                     condition := true
         let control () =
             while not !stop do

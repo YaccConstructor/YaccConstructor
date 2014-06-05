@@ -44,8 +44,11 @@ type Processor(file) =
              | Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
-            
-//(provider: ICSharpContextActionDataProvider) = 
+        
+//(provider: ICSharpContextActionDataProvider) =
+
+    member this.Graphs () =  (new Approximator(file)).Approximate defLang
+     
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()

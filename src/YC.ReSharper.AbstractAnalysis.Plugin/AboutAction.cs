@@ -15,7 +15,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
 
     public void Execute(IDataContext context, DelegateExecute nextExecute)
     {
-      MessageBox.Show(
+        MessageBox.Show(
         "ReSharper.AbstractAnalysis\nJetBrains Lab\n\nAbstract analysis for string-embedded languages.",
         "About ReSharper.AbstractAnalysis",
         MessageBoxButtons.OK,

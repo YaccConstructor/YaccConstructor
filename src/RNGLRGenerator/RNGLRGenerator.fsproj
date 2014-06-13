@@ -40,7 +40,9 @@
     <Compile Include="States.fs" />
     <Compile Include="Tables.fs" />
     <Compile Include="PrintTables.fs" />
+    <Compile Include="PrintTreeNode.fs" />
     <Compile Include="PrintTranslator.fs" />
+    <Compile Include="HighlightingConvertions.fs" />
     <Compile Include="RNGLRGenerator.fs" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -80,11 +82,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.5.3\lib\net40\YaccConstructor.exe</HintPath>
+    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
+      <Name>Highlighting.Core</Name>
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
-    </Reference>
-  </ItemGroup>
+    </ProjectReference>
   <ItemGroup>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>

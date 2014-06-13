@@ -13,4 +13,3 @@ open System
 
 let getLiteral brs value =
     genLiteral value (value,brs)
-        

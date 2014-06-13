@@ -25,4 +25,4 @@ rule token = parse
 | number { NUMBER(lexeme,brs) |> Some }
 | string1 { STRING1(lexeme,brs) |> Some }
 | eof { RNGLR_EOF ("",[||]) |> Some }
-| _ { getLiteral brs lexeme |> Some}
+(*| _ { getLiteral brs lexeme |> Some}*)

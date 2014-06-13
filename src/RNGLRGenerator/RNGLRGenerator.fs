@@ -25,6 +25,8 @@ open States
 open Printer
 open TranslatorPrinter
 open Option
+open PrintTreeNode
+open HighlightingConvertions
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
@@ -61,6 +63,8 @@ type RNGLR() =
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
             let mutable needTranslate = getBoolOption "translate" true
+            let needHighlighting = ref <| getBoolOption "highlighting" false
+            let namespaceName = ref <| getOption "namespace" "NamespaceName" id
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
             let mutable caseSensitive = getBoolOption "caseSensitive" false
@@ -93,6 +97,8 @@ type RNGLR() =
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
+                | "-highlighting" -> needHighlighting := getBoolValue "highlighting" value
+                | "-namespace" -> if value.Trim() <> "" then namespaceName := value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
                 | "-lang" ->
@@ -103,15 +109,71 @@ type RNGLR() =
                         | s -> failwithf "Language %s is not supported" s
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
-            let newDefinition = initialConvert definition
+            let mutable newDefinition = initialConvert definition
+            
+            if !needHighlighting 
+            then
+                needTranslate <- true
+                newDefinition <- highlightingConvertions newDefinition
+
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
+
+            if !needHighlighting
+            then
+                let folder = !namespaceName + "\\" 
+                let generateXML name toksAndLits = 
+                    use out = new System.IO.StreamWriter (folder + name + ".xml")
+                    let content = printXML name toksAndLits
+                    out.WriteLine content
+                    out.Close()
+
+                let generateItemsGroup toksAndLits = 
+                    use out = new System.IO.StreamWriter (folder + "ItemsGroup.txt")
+                    let content = printItemsGroup toksAndLits !namespaceName 
+                    out.WriteLine content
+                    out.Close()
+                
+                let generateFile name = 
+                    use out = new System.IO.StreamWriter (folder + name + ".cs")
+                    let tables = printTreeNode !namespaceName name <| namespaceName.Value.Replace ("Highlighting", "")
+                    out.WriteLine tables
+                    out.Close()
+
+                let indexator = grammar.indexator
+                let mutable tokensAndLits = []
+                let mutable nameOfClasses = []
+                
+                for i = 0 to indexator.nonTermCount - 1 do
+                    let prefix = toClassName <| indexator.indexToNonTerm i
+                    if not <| prefix.Contains ("Highlight_")
+                    then 
+                        nameOfClasses <- prefix + "NonTermNode.cs" :: nameOfClasses
+                        generateFile <| prefix + "NonTermNode"
+
+                for i = indexator.termsStart to indexator.termsEnd do
+                    let prefix = toClassName <| grammar.indexator.indexToTerm i
+                    
+                    nameOfClasses <- prefix + "TermNode.cs" :: nameOfClasses
+                    tokensAndLits <- prefix :: tokensAndLits
+                    generateFile <| prefix + "TermNode"
+                
+                for i = indexator.literalsStart to indexator.literalsEnd do
+                    let prefix = toClassName <| grammar.indexator.getLiteralName i
+                    
+                    nameOfClasses <- prefix + "LitNode.cs" :: nameOfClasses
+                    tokensAndLits <- prefix :: tokensAndLits
+                    generateFile <| prefix + "LitNode"
+                    
+
+                generateXML !namespaceName <| List.rev tokensAndLits
+                generateItemsGroup <| List.rev nameOfClasses
 
             let printRules () =
                 let printSymbol (symbol : int) =
-                    if symbol < grammar.indexator.nonTermCount then
-                        grammar.indexator.indexToNonTerm symbol
-                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
-                        grammar.indexator.indexToTerm symbol
+                    if symbol < grammar.indexator.nonTermCount 
+                    then grammar.indexator.indexToNonTerm symbol
+                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd 
+                    then grammar.indexator.indexToTerm symbol
                     else grammar.indexator.indexToLiteral symbol
                 printfn "\nrules:"
                 for i = 0 to grammar.rules.rulesCount-1 do
@@ -127,7 +189,8 @@ type RNGLR() =
                 |> List.map (String.concat " <- ")
                 |> List.iter (eprintfn "%s")
                 eprintfn ""
-                if printInfiniteEpsilonPath <> "" then
+                if printInfiniteEpsilonPath <> "" 
+                then
                     System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
@@ -135,6 +198,7 @@ type RNGLR() =
                             grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
+            
             let statesInterpreter = buildStates table grammar
             let tables = new Tables(grammar, statesInterpreter)
             use out = new System.IO.StreamWriter (output)
@@ -156,14 +220,21 @@ type RNGLR() =
                     <|  match moduleName with
                         | "" -> "RNGLR.Parse"
                         | s -> s
-                    if not light then
-                        println "#light \"off\""
+                    if not light 
+                    then println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+
 
                     println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
 
+                    if !needHighlighting 
+                    then 
+                        println "open JetBrains.ReSharper.Psi.Tree"
+                        println "open Highlighting.Core"
+                        println "open %s" !namespaceName
+                        
                     match definition.head with
                     | None -> ()
                     | Some (s : Source.t) ->
@@ -183,9 +254,16 @@ type RNGLR() =
 
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
-            let res = if not needTranslate || targetLanguage = Scala then tables
-                      else tables + printTranslator grammar newDefinition.grammar.[0].rules
-                                        positionType fullPath output dummyPos caseSensitive
+            let res = 
+                if not needTranslate || targetLanguage = Scala 
+                then tables
+                else 
+                    let xmlOpt = 
+                        if !namespaceName <> "" 
+                        then Some <| !namespaceName
+                        else None
+                    tables + printTranslator grammar newDefinition.grammar.[0].rules 
+                                        positionType fullPath output dummyPos caseSensitive xmlOpt
             let res = 
                 match definition.foot with
                 | None -> res

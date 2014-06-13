@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -16,6 +15,8 @@
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>JET_MODE_ASSERT;DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -31,9 +32,6 @@
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net40\AbstractLexer.Common.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="FSharpx.Core, Version=1.8.41.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
-    </Reference>
     <Reference Include="GraphX.Common">
       <HintPath>GraphCodeWindow\GraphXdll\GraphX.Common.dll</HintPath>
     </Reference>
@@ -88,9 +86,27 @@
     <Compile Include="GraphCodeWindow\GraphCodeToolWindowAction.cs" />
     <Compile Include="GraphCodeWindow\GraphLoader.cs" />
     <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
+    <Compile Include="Highlighting\Dynamic\Matcher.cs" />
+    <Compile Include="Highlighting\Dynamic\MatcherHelper.cs" />
+    <Compile Include="Highlighting\IdentifierHighlighterProcess.cs" />
+    <Compile Include="Highlighting\IdentifierHighlightingStage.cs" />
+    <Compile Include="Highlighting\InspectionProcess.cs" />
+    <Compile Include="Highlighting\InspectionStage.cs" />
+    <Compile Include="Highlighting\MyDaemonStageBase.cs" />
+    <Compile Include="Highlighting\MyDaemonStageProcessBase.cs" />
+    <Compile Include="Highlighting\MyFileIndexProcess.cs" />
+    <Compile Include="Highlighting\MyFileIndexStage.cs" />
+    <Compile Include="Highlighting\MyFileStructure.cs" />
+    <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
+    <Compile Include="Highlighting\MyHighlightingStage.cs" />
+    <Compile Include="Highlighting\MyIncrementalDaemonStageProcessBase.cs" />
+    <Compile Include="Highlighting\MyLeafHighlighting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AboutAction.cs" />
     <Compile Include="ReverseStringAction.cs" />
+    <Compile Include="Highlighting\MySmartResolverProcess.cs" />
+    <Compile Include="Highlighting\MySmartResolverStage.cs" />
+    <Compile Include="Highlighting\ColorHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.txt" />
@@ -105,12 +121,31 @@
       <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>
       <Name>Calc</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Calc\CalcHighlighting\CalcHighlighting.csproj">
+      <Project>{0af126e6-f923-4b88-bc42-97cd3696e7e7}</Project>
+      <Name>CalcHighlighting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+      <Name>Highlighting.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JSON_Parser\JSON_Parser.fsproj">
+      <Project>{560052d2-e44a-42c0-8f88-04f623276b35}</Project>
+      <Name>JSON_Parser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TSQL\TSQL.fsproj">
+      <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
+      <Name>TSQL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -128,7 +163,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />
+  <!--Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
 del JetBrains*</PostBuildEvent>

@@ -105,72 +105,72 @@ let fslex_actions_tokens  _fslex_state lexeme brs =
           )
   | 2 -> ( 
 # 57 "Lexer.fsl"
-                                 getLiteral id brs "." |> Some 
+                                 getLiteral id brs "."
 # 109 "Lexer.fs"
           )
   | 3 -> ( 
 # 58 "Lexer.fsl"
-                                 getLiteral id brs "," |> Some 
+                                 getLiteral id brs ","
 # 114 "Lexer.fs"
           )
   | 4 -> ( 
 # 59 "Lexer.fsl"
-                                 getLiteral id brs "=" |> Some 
+                                 getLiteral id brs "="
 # 119 "Lexer.fs"
           )
   | 5 -> ( 
 # 60 "Lexer.fsl"
-                                 getLiteral id brs ">"|> Some  
+                                 getLiteral id brs ">"
 # 124 "Lexer.fs"
           )
   | 6 -> ( 
 # 61 "Lexer.fsl"
-                                 getLiteral id brs "<" |> Some 
+                                 getLiteral id brs "<"
 # 129 "Lexer.fs"
           )
   | 7 -> ( 
 # 62 "Lexer.fsl"
-                                 getLiteral id brs ";" |> Some 
+                                 getLiteral id brs ";"
 # 134 "Lexer.fs"
           )
   | 8 -> ( 
 # 63 "Lexer.fsl"
-                             getLiteral id brs "(" |> Some 
+                             getLiteral id brs "("
 # 139 "Lexer.fs"
           )
   | 9 -> ( 
 # 64 "Lexer.fsl"
-                             getLiteral id brs ")" |> Some 
+                             getLiteral id brs ")"
 # 144 "Lexer.fs"
           )
   | 10 -> ( 
 # 65 "Lexer.fsl"
-                             getLiteral id brs "[" |> Some 
+                             getLiteral id brs "["
 # 149 "Lexer.fs"
           )
   | 11 -> ( 
 # 66 "Lexer.fsl"
-                             getLiteral id brs "]" |> Some 
+                             getLiteral id brs "]"
 # 154 "Lexer.fs"
           )
   | 12 -> ( 
 # 67 "Lexer.fsl"
-                             getLiteral id brs "+" |> Some 
+                             getLiteral id brs "+"
 # 159 "Lexer.fs"
           )
   | 13 -> ( 
 # 68 "Lexer.fsl"
-                             getLiteral id brs "-" |> Some 
+                             getLiteral id brs "-"
 # 164 "Lexer.fs"
           )
   | 14 -> ( 
 # 69 "Lexer.fsl"
-                             getLiteral id brs "~" |> Some 
+                             getLiteral id brs "~"
 # 169 "Lexer.fs"
           )
   | 15 -> ( 
 # 70 "Lexer.fsl"
-                             getLiteral id brs "*" |> Some 
+                             getLiteral id brs "*"
 # 174 "Lexer.fs"
           )
   | 16 -> ( 

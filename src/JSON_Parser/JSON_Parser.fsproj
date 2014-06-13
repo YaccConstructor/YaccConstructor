@@ -31,16 +31,17 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="$(FsYardPath)" />
+  <!--Import Project="$(FsYardPath)" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>JSONParser.fs</OutFile>
-    <NeedTranslate>false</NeedTranslate>
+    <NeedTranslate>true</NeedTranslate>
     <!--Token>SourceText</Token-->
     <Module>JSON.Parser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Lexer.fsl" />
     <FsYard Include="JSON.yrd" />
     <Compile Include="JSONParser.fs" />
     <Compile Include="LexerHelper.fs" />
@@ -85,16 +86,32 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -133,7 +150,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YaccConstructor">
@@ -141,7 +158,26 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
+      <Name>Highlighting.Core</Name>
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="JSONHighlighting\JSONHighlighting.csproj">
+      <Name>JSONHighlighting</Name>
+      <Project>{d0fde059-31e0-4c71-8573-7787b8dfb903}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -9,11 +9,11 @@ tokens {
 }
 
 options {
-    translate = false
+    translate = true
     module = "JSON.AbstractParser"
     infEpsPath = epsilons
     pos = "array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>" 
-}
+}												   
 
 module Main
 

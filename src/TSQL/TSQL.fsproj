@@ -31,7 +31,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="$(FsYardPath)" />
+  <!--Import Project="$(FsYardPath)" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
@@ -108,16 +108,35 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Highlighting.Core">
+      <HintPath>..\Highlighting.Core\bin\Release\Highlighting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -160,6 +179,13 @@
       <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
+      <Name>TSQLHighlighting</Name>
+      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

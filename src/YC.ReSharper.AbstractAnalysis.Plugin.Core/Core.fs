@@ -2,7 +2,7 @@
 
 open JetBrains.Application.Progress
 open JetBrains.ProjectModel
-open JetBrains.ReSharper.Feature.Services.Bulbs
+//open JetBrains.ReSharper.Feature.Services.Bulbs
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
@@ -19,6 +19,20 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
+    let mutable calcXmlPath = ""
+    let mutable jsonXmlPath = ""
+    let mutable tsqlXmlPath = ""
+
+    let mutable currentLang = Calc
+    
+    let mutable calcForest = []
+    let mutable jsonForest = []
+    let mutable tsqlForest = []
+
+    ///Needs for tree generation for highlighting
+    let mutable unprocessed = []
+    let mutable count = 0
+
     let defLang (n:ITreeNode) =
         match n with 
         | :? IInvocationExpression as m ->
@@ -28,7 +42,7 @@ type Processor(file) =
             | "objnotation" ->JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError = 
+    let processLang graph tokenize parse addLError addPError translate printer addSPPF = 
         let tokenize g =
             try 
                tokenize g
@@ -38,17 +52,75 @@ type Processor(file) =
                 (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
                 |> addLError
                 None
+
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
+             | Yard.Generators.RNGLR.Parser.Success (sppf, errors) -> addSPPF (sppf, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
         
-//(provider: ICSharpContextActionDataProvider) =
 
     member this.Graphs () =  (new Approximator(file)).Approximate defLang
      
+    let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
+        let ranges = 
+            brs |> Seq.groupBy (fun x -> x.back_ref)
+            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+            |> Seq.map(fun brs ->
+                try
+                    let pos =  brs |> Array.map(fun i -> i.pos_cnum)
+                    let lengthTok = pos.Length
+                    let beginPosTok = pos.[0] + 1
+                    let endPosTok = pos.[lengthTok-1] + 2 
+                    let endPos = 
+                        brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                        - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
+                    brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+                with
+                | e -> 
+                    brs.[0].back_ref.GetDocumentRange())
+        ranges    
+
+
+    let getNextTree (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) translate = 
+        if forest.Length <= count 
+        then
+            count <- 0 
+            null
+        else 
+            let mutable curAst, errors = List.nth forest count
+            if unprocessed.Length = 0
+            then 
+                unprocessed <- Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
+            
+            let nextTree, unproc = curAst.GetNextTree unprocessed (fun _ -> true)
+            if unproc.Length = 0
+            then 
+                count <- count + 1
+            unprocessed  <- unproc
+            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
+            Seq.head treeNodeList
+
+    let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
+                            range (tokenData: 'TokenType -> obj)  translate = 
+        let tokenToPos (token : 'TokenType) = 
+            let data = unbox <| tokenData token
+            let str : string = fst data
+            let pos : array<AbstractLexer.Core.Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> 
+                = snd data
+                
+            calculatePos pos
+        
+        let res = new ResizeArray<_>()
+        for ast, errors in forest do
+            let trees = ast.GetForestWithToken range tokenToPos
+            for tree in trees do
+                let treeNodeList = translate tree errors :> seq<ITreeNode>
+                res.Add <| Seq.head treeNodeList
+        res
+
+//(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
@@ -59,24 +131,6 @@ type Processor(file) =
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
-        let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
-            let ranges = 
-                brs |> Seq.groupBy (fun x -> x.back_ref)
-                |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-                |> Seq.map(fun brs ->
-                    try
-                        let pos =  brs |> Array.map(fun i -> i.pos_cnum)
-                        let lengthTok = pos.Length
-                        let beginPosTok = pos.[0] + 1
-                        let endPosTok = pos.[lengthTok-1] + 2 
-                        let endPos = 
-                            brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                            - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-                        brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-                    with
-                    | e -> 
-                        brs.[0].back_ref.GetDocumentRange())
-            ranges
 
         let addError tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
@@ -102,18 +156,7 @@ type Processor(file) =
             match tok with
             | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
             | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
-            | JSON.Parser.``L 15`` (br1)
-            | JSON.Parser.``L 16`` (br1)
-            | JSON.Parser.``L 17`` (br1)
-            | JSON.Parser.``L 18`` (br1)
-            | JSON.Parser.``L 19`` (br1)
-            | JSON.Parser.``L 20`` (br1)
-            | JSON.Parser.``L 21`` (br1)
-            | JSON.Parser.``L 22`` (br1)
-            | JSON.Parser.``L 23`` (br1) ->  
-                    let name = (JSON.Parser.tokenToNumber >> JSON.Parser.numToString) tok
-                    e name name (snd br1)
-
+            | _ -> failwith "error in addErrorJSON function"
         
         let addErrorTSQL tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
@@ -125,337 +168,74 @@ type Processor(file) =
             | GLOBALVAR (sourceText,brs)    -> e "GLOBALVAR" sourceText.text brs
             | IDENT (sourceText,brs)        -> e "IDENT" sourceText.text brs
             | LOCALVAR (sourceText,brs)     -> e "LOCALVAR" sourceText.text brs
-            | RNGLR_EOF (sourceText,brs)-> e "EOF" sourceText.text brs
+            | RNGLR_EOF (sourceText,brs) -> e "EOF" sourceText.text brs
             | STOREDPROCEDURE (sourceText,brs) -> e "STOREDPROCEDURE" sourceText.text brs
             | STRING_CONST (sourceText,brs) -> e "STRING_CONST" sourceText.text brs
             | WEIGHT (sourceText,brs) -> e "WEIGHT" sourceText.text brs
-            | ``L 796`` (brs1) 
-            | ``L 797`` (brs1)
-            | ``L 798`` (brs1)
-            | ``L 799`` (brs1)
-            | ``L 800`` (brs1)
-            | ``L 801`` (brs1)
-            | ``L 802`` (brs1)
-            | ``L 803`` (brs1)
-            | ``L 804`` (brs1)
-            | ``L 805`` (brs1)
-            | ``L 806`` (brs1)
-            | ``L 807`` (brs1)
-            | ``L 808`` (brs1)
-            | ``L 809`` (brs1)
-            | ``L 810`` (brs1)
-            | ``L 811`` (brs1)
-            | ``L 812`` (brs1)
-            | ``L 813`` (brs1)
-            | ``L 814`` (brs1)
-            | ``L 815`` (brs1)
-            | ``L 816`` (brs1)
-            | ``L 817`` (brs1)
-            | ``L 818`` (brs1)
-            | ``L 819`` (brs1)
-            | ``L 820`` (brs1)
-            | ``L 821`` (brs1)
-            | ``L 822`` (brs1)
-            | ``L 823`` (brs1)
-            | ``L 824`` (brs1)
-            | ``L 825`` (brs1)
-            | ``L 826`` (brs1)
-            | ``L 827`` (brs1)
-            | ``L 828`` (brs1)
-            | ``L 829`` (brs1)
-            | ``L 830`` (brs1)
-            | ``L 831`` (brs1)
-            | ``L 832`` (brs1)
-            | ``L 833`` (brs1)
-            | ``L 834`` (brs1)
-            | ``L 835`` (brs1)
-            | ``L 836`` (brs1)
-            | ``L 837`` (brs1)
-            | ``L 838`` (brs1)
-            | ``L 839`` (brs1)
-            | ``L 840`` (brs1)
-            | ``L 841`` (brs1)
-            | ``L 842`` (brs1)
-            | ``L 843`` (brs1)
-            | ``L 844`` (brs1)
-            | ``L 845`` (brs1)
-            | ``L 846`` (brs1)
-            | ``L 847`` (brs1)
-            | ``L 848`` (brs1)
-            | ``L 849`` (brs1)
-            | ``L 850`` (brs1)
-            | ``L 851`` (brs1)
-            | ``L 852`` (brs1)
-            | ``L 853`` (brs1)
-            | ``L 854`` (brs1)
-            | ``L 855`` (brs1)
-            | ``L 856`` (brs1)
-            | ``L 857`` (brs1)
-            | ``L 858`` (brs1)
-            | ``L 859`` (brs1)
-            | ``L 860`` (brs1)
-            | ``L 861`` (brs1)
-            | ``L 862`` (brs1)
-            | ``L 863`` (brs1)
-            | ``L 864`` (brs1)
-            | ``L 865`` (brs1)
-            | ``L 866`` (brs1)
-            | ``L 867`` (brs1)
-            | ``L 868`` (brs1)
-            | ``L 869`` (brs1)
-            | ``L 870`` (brs1)
-            | ``L 871`` (brs1)
-            | ``L 872`` (brs1)
-            | ``L 873`` (brs1)
-            | ``L 874`` (brs1)
-            | ``L 875`` (brs1)
-            | ``L 876`` (brs1)
-            | ``L 877`` (brs1)
-            | ``L 878`` (brs1)
-            | ``L 879`` (brs1)
-            | ``L 880`` (brs1)
-            | ``L 881`` (brs1)
-            | ``L 882`` (brs1)
-            | ``L 883`` (brs1)
-            | ``L 884`` (brs1)
-            | ``L 885`` (brs1)
-            | ``L 886`` (brs1)
-            | ``L 887`` (brs1)
-            | ``L 888`` (brs1)
-            | ``L 889`` (brs1)
-            | ``L 890`` (brs1)
-            | ``L 891`` (brs1)
-            | ``L 892`` (brs1)
-            | ``L 893`` (brs1)
-            | ``L 894`` (brs1)
-            | ``L 895`` (brs1)
-            | ``L 896`` (brs1)
-            | ``L 897`` (brs1)
-            | ``L 898`` (brs1)
-            | ``L 899`` (brs1)
-            | ``L 900`` (brs1)
-            | ``L 901`` (brs1)
-            | ``L 902`` (brs1)
-            | ``L 903`` (brs1)
-            | ``L 904`` (brs1)
-            | ``L 905`` (brs1)
-            | ``L 906`` (brs1)
-            | ``L 907`` (brs1)
-            | ``L 908`` (brs1)
-            | ``L 909`` (brs1)
-            | ``L 910`` (brs1)
-            | ``L 911`` (brs1)
-            | ``L 912`` (brs1)
-            | ``L 913`` (brs1)
-            | ``L 914`` (brs1)
-            | ``L 915`` (brs1)
-            | ``L 916`` (brs1)
-            | ``L 917`` (brs1)
-            | ``L 918`` (brs1)
-            | ``L 919`` (brs1)
-            | ``L 920`` (brs1)
-            | ``L 921`` (brs1)
-            | ``L 922`` (brs1)
-            | ``L 923`` (brs1)
-            | ``L 924`` (brs1)
-            | ``L 925`` (brs1)
-            | ``L 926`` (brs1)
-            | ``L 927`` (brs1)
-            | ``L 928`` (brs1)
-            | ``L 929`` (brs1)
-            | ``L 930`` (brs1)
-            | ``L 931`` (brs1)
-            | ``L 932`` (brs1)
-            | ``L 933`` (brs1)
-            | ``L 934`` (brs1)
-            | ``L 935`` (brs1)
-            | ``L 936`` (brs1)
-            | ``L 937`` (brs1)
-            | ``L 938`` (brs1)
-            | ``L 939`` (brs1)
-            | ``L 940`` (brs1)
-            | ``L 941`` (brs1)
-            | ``L 942`` (brs1)
-            | ``L 943`` (brs1)
-            | ``L 944`` (brs1)
-            | ``L 945`` (brs1)
-            | ``L 946`` (brs1)
-            | ``L 947`` (brs1)
-            | ``L 948`` (brs1)
-            | ``L 949`` (brs1)
-            | ``L 950`` (brs1)
-            | ``L 951`` (brs1)
-            | ``L 952`` (brs1)
-            | ``L 953`` (brs1)
-            | ``L 954`` (brs1)
-            | ``L 955`` (brs1)
-            | ``L 956`` (brs1)
-            | ``L 957`` (brs1)
-            | ``L 958`` (brs1)
-            | ``L 959`` (brs1)
-            | ``L 960`` (brs1)
-            | ``L 961`` (brs1)
-            | ``L 962`` (brs1)
-            | ``L 963`` (brs1)
-            | ``L 964`` (brs1)
-            | ``L 965`` (brs1)
-            | ``L 966`` (brs1)
-            | ``L 967`` (brs1)
-            | ``L 968`` (brs1)
-            | ``L 969`` (brs1)
-            | ``L 970`` (brs1)
-            | ``L 971`` (brs1)
-            | ``L 972`` (brs1)
-            | ``L 973`` (brs1)
-            | ``L 974`` (brs1)
-            | ``L 975`` (brs1)
-            | ``L 976`` (brs1)
-            | ``L 977`` (brs1)
-            | ``L 978`` (brs1)
-            | ``L 979`` (brs1)
-            | ``L 980`` (brs1)
-            | ``L 981`` (brs1)
-            | ``L 982`` (brs1)
-            | ``L 983`` (brs1)
-            | ``L 984`` (brs1)
-            | ``L 985`` (brs1)
-            | ``L 986`` (brs1)
-            | ``L 987`` (brs1)
-            | ``L 988`` (brs1)
-            | ``L 989`` (brs1)
-            | ``L 990`` (brs1)
-            | ``L 991`` (brs1)
-            | ``L 992`` (brs1)
-            | ``L 993`` (brs1)
-            | ``L 994`` (brs1)
-            | ``L 995`` (brs1)
-            | ``L 996`` (brs1)
-            | ``L 997`` (brs1)
-            | ``L 998`` (brs1)
-            | ``L 999`` (brs1)
-            | ``L 1000``(brs1)
-            | ``L 1001``(brs1)
-            | ``L 1002``(brs1)
-            | ``L 1003``(brs1)
-            | ``L 1004``(brs1)
-            | ``L 1005``(brs1)
-            | ``L 1006``(brs1)
-            | ``L 1007``(brs1)
-            | ``L 1008``(brs1)
-            | ``L 1009``(brs1)
-            | ``L 1010``(brs1)
-            | ``L 1011``(brs1)
-            | ``L 1012``(brs1)
-            | ``L 1013``(brs1)
-            | ``L 1014``(brs1)
-            | ``L 1015``(brs1)
-            | ``L 1016``(brs1)
-            | ``L 1017``(brs1)
-            | ``L 1018``(brs1)
-            | ``L 1019``(brs1)
-            | ``L 1020``(brs1)
-            | ``L 1021``(brs1)
-            | ``L 1022``(brs1)
-            | ``L 1023``(brs1)
-            | ``L 1024``(brs1)
-            | ``L 1025``(brs1)
-            | ``L 1026``(brs1)
-            | ``L 1027``(brs1)
-            | ``L 1028``(brs1)
-            | ``L 1029``(brs1)
-            | ``L 1030``(brs1)
-            | ``L 1031``(brs1)
-            | ``L 1032``(brs1)
-            | ``L 1033``(brs1)
-            | ``L 1034``(brs1)
-            | ``L 1035``(brs1)
-            | ``L 1036``(brs1)
-            | ``L 1037``(brs1)
-            | ``L 1038``(brs1)
-            | ``L 1039``(brs1)
-            | ``L 1040``(brs1)
-            | ``L 1041``(brs1)
-            | ``L 1042``(brs1)
-            | ``L 1043``(brs1)
-            | ``L 1044``(brs1)
-            | ``L 1045``(brs1)
-            | ``L 1046``(brs1)
-            | ``L 1047``(brs1)
-            | ``L 1048``(brs1)
-            | ``L 1049``(brs1)
-            | ``L 1050``(brs1)
-            | ``L 1051``(brs1)
-            | ``L 1052``(brs1)
-            | ``L 1053``(brs1)
-            | ``L 1054``(brs1)
-            | ``L 1055``(brs1)
-            | ``L 1056``(brs1)
-            | ``L 1057``(brs1)
-            | ``L 1058``(brs1)
-            | ``L 1059``(brs1)
-            | ``L 1060``(brs1)
-            | ``L 1061``(brs1)
-            | ``L 1062``(brs1)
-            | ``L 1063``(brs1)
-            | ``L 1064``(brs1)
-            | ``L 1065``(brs1)
-            | ``L 1066``(brs1)
-            | ``L 1067``(brs1)
-            | ``L 1068``(brs1)
-            | ``L 1069``(brs1)
-            | ``L 1070``(brs1)
-            | ``L 1071``(brs1)
-            | ``L 1072``(brs1)
-            | ``L 1073``(brs1)
-            | ``L 1074``(brs1)
-            | ``L 1075``(brs1)
-            | ``L 1076``(brs1)
-            | ``L 1077``(brs1)
-            | ``L 1078``(brs1)
-            | ``L 1079``(brs1)
-            | ``L 1080``(brs1)
-            | ``L 1081``(brs1)
-            | ``L 1082``(brs1)
-            | ``L 1083``(brs1)
-            | ``L 1084``(brs1)
-            | ``L 1085``(brs1)
-            | ``L 1086``(brs1)
-            | ``L 1087``(brs1)
-            | ``L 1088``(brs1)
-            | ``L 1089``(brs1)
-            | ``L 1090``(brs1)
-            | ``L 1091``(brs1)
-            | ``L 1092``(brs1)
-            | ``L 1093``(brs1)
-            | ``L 1094``(brs1)
-            | ``L 1095``(brs1)
-            | ``L 1096``(brs1)
-            | ``L 1097``(brs1)
-            | ``L 1098``(brs1)
-            | ``L 1099``(brs1)
-            | ``L 1100``(brs1)
-            | ``L 1101``(brs1)
-            | ``L 1102``(brs1)
-            | ``L 1103``(brs1)
-            | ``L 1104``(brs1)
-            | ``L 1105``(brs1)
-            | ``L 1106``(brs1)
-            | ``L 1107``(brs1)
-            | ``L 1108``(brs1)
-            | ``L 1109``(brs1)
-            | ``L 1110``(brs1)
-            | ``L 1111``(brs1)
-            | ``L 1112``(brs1) ->  
-                let name = TSQL.getTokenName tok
-                e name name (snd brs1)
+            | _ -> failwith "error in addErrorTSQL function"
 
+
+        let addCalcSPPF pair = calcForest <- calcForest @ [pair]
+        let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]
+        let addTSqlSPPF pair = tsqlForest <- tsqlForest @ [pair]
 
         graphs
         |> ResizeArray.iter 
-            (fun (l,g) ->
-                match l with
-                | Calc -> processLang g Calc.tokenize Calc.parse lexerErrors.Add  addError
-                | TSQL -> processLang g TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL
-                | JSON -> processLang g JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON )
+            (fun (lang, graph) ->
+                match lang with
+                | Calc -> 
+                    calcXmlPath <- Calc.xmlPath
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot addCalcSPPF
+                | JSON -> 
+                    jsonXmlPath <- JSON.xmlPath
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot addJsonSPPF
+                | TSQL -> 
+                    tsqlXmlPath <- TSQL.xmlPath
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
+            )
+        lexerErrors, parserErrors
 
-        lexerErrors,parserErrors
+    member this.XmlPath = 
+        match currentLang with
+        | Calc -> calcXmlPath 
+        | JSON -> jsonXmlPath 
+        | TSQL -> tsqlXmlPath
+        | _ -> System.String.Empty
+    
+    member this.CurrentLang = 
+        match currentLang with
+        | Calc -> "Calc"
+        | JSON -> "JSON"
+        | TSQL -> "TSQL"
+        | _ -> System.String.Empty
+    
+    member this.GetNextTree() = 
+        let mutable res = null
+        
+        match currentLang with
+        | Calc -> 
+                res <- getNextTree calcForest Calc.translate
+                if res = null
+                then currentLang <- JSON
+        | _ -> ()
+        
+        match currentLang with
+        | JSON when res = null -> 
+                res <- getNextTree jsonForest JSON.translate
+                if res = null
+                then currentLang <- TSQL
+        | _ -> ()
+
+        match currentLang with 
+        | TSQL when res = null ->
+                res <- getNextTree tsqlForest TSQL.translate
+        | _ -> ()
+                
+        res
+
+    member this.GetForestWithToken range (lang : string) = 
+        match lang.ToLower() with
+        | "calc" -> getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
+        | "json" -> getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
+        | "tsql" -> getForestWithToken tsqlForest range tokenData TSQL.translate 
+        | _ -> new ResizeArray<_>()

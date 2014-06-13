@@ -74,32 +74,44 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ActivityTracking">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ActivityTracking.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="JetBrains.ReSharper.Daemon">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Daemon.dll</HintPath>
+    <Reference Include="JetBrains.ReSharper.Feature.Services.CSharp">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Feature.Services.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
-      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.Services.CSharp">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.Services.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -121,10 +133,6 @@
     </Reference>
     <Reference Include="RNGLRAbstractParser">
       <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.5\lib\net40\RNGLRAbstractParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.6.5\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
@@ -160,6 +168,11 @@
       <Project>{560052d2-e44a-42c0-8f88-04f623276b35}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\TSQL\TSQL.fsproj">
       <Name>TSQL</Name>
       <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
@@ -167,7 +180,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

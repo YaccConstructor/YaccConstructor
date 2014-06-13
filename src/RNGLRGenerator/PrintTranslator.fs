@@ -23,6 +23,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open PrintTreeNode
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =
@@ -39,7 +40,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive =
+        positionType fullPath output dummyPos caseSensitive (highlightingOpt : string option)=
     let tab = 4
 
     let rules = grammar.rules
@@ -146,7 +147,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             incr num
             let name = Source.toString name
             let value = 
-                if name <> "error" 
+                if name <> "error" || highlightingOpt.IsSome
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
                 else sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
             value + (printArgsCallOpt args)
@@ -294,8 +295,80 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         funHead @@-- body
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
+    let mainHighlightSemantic () = 
+        let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
+        
+        let printAddSemantic = 
+            let res  = new System.Text.StringBuilder()
 
-    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
+            let inline print (x : 'a) =
+                Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+            let inline printBr (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+            let inline printBrInd num (x : 'a) =
+                print "%s" (String.replicate (num <<< 2) " ")
+                printBr x
+
+            printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
+            printBrInd 1 "let mutable prev = null"
+            printBrInd 1 "let mutable curr = null"
+            printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
+            printBrInd 1 "for child in children do"
+            printBrInd 2 "prev <- curr"
+            printBrInd 2 "curr <- child"
+            printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
+            printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
+            printBrInd 2 "if prev = null"
+            printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
+            printBrInd 2 "else"
+            printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
+            printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
+            printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
+            printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
+            printBrInd 1 "parent"
+            res.ToString()
+
+        let printCalculatePos = 
+            let res  = new System.Text.StringBuilder()
+
+            let inline print (x : 'a) =
+                Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+            let inline printBr (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+            let inline printBrInd num (x : 'a) =
+                print "%s" (String.replicate (num <<< 2) " ")
+                printBr x
+
+            printBrInd 0 "let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) ="
+            printBrInd 1 "let ranges = "
+            printBrInd 2 "brs |> Seq.groupBy (fun x -> x.back_ref)"
+            printBrInd 2 "|> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)"
+            printBrInd 2 "|> Seq.map(fun brs ->"
+            printBrInd 3 "try"
+            printBrInd 4 "let pos =  brs |> Array.map(fun i -> i.pos_cnum)"
+            printBrInd 4 "let lengthTok = pos.Length"
+            printBrInd 4 "let beginPosTok = pos.[0] + 1"
+            printBrInd 4 "let endPosTok = pos.[lengthTok-1] + 2"
+            printBrInd 4 "let endPos = "
+            printBrInd 5 "brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok"
+            printBrInd 5 "- brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset"
+            printBrInd 4 "brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)"
+            printBrInd 3 "with"
+            printBrInd 3 "| e -> brs.[0].back_ref.GetDocumentRange())"
+            printBrInd 1 "ranges"
+            res.ToString()
+
+        if highlightingOpt.IsSome 
+        then wordL <| System.String.Concat [| printXmlName; System.Environment.NewLine; 
+                                                printAddSemantic; System.Environment.NewLine; 
+                                                printCalculatePos|] 
+        else wordL ""
+    
+    [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
     

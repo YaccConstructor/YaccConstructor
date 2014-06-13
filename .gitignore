@@ -129,3 +129,4 @@ src/TSQL/FsYARD/*
 src/FsYaccFrontend/out
 **/FsYard.log
 src/TSQL/MsParser.fs
+Tests/Alvor/GenerateTestforAlvor/packages/*

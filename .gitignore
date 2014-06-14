@@ -147,3 +147,6 @@ Tests/AbstractRNGLR/DOT/errors6.dot.pdf
 Tests/AbstractRNGLR/DOT/errors7.dot.pdf
 Tests/AbstractRNGLR/DOT/errors8.dot.pdf
 Tests/AbstractRNGLR/DOT/errors9.dot.pdf
+src/TSQL/Highlight_*.cs
+src/TSQL/*TermNode.cs
+src/TSQL/*LitNode.cs

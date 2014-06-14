@@ -217,7 +217,20 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         ignore <| addVertex [|startState, 0, None|]
         let inline trd (_,_,x) = x
+
+        let print fName =
+#if DEBUG
+            let path = (sprintf fName !curLvl) |> string |> System.IO.Path.GetDirectoryName
+            if path |> System.IO.Directory.Exists |> not
+            then System.IO.Directory.CreateDirectory path |> ignore
+            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
+            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
+                        <| sprintf fName !curLvl     
+#endif
+            ()
+
         let makeReductions () =
+            print "dot\stack_7_%A"
             while reductions.Count > 0 do
                 let vertex, prod, pos, edgeOpt = reductions.Pop()
                 let nonTerm = parserSource.LeftSide.[prod]
@@ -339,6 +352,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 simpleEdges.[vertex].Clear()
 
         let shift () =
+            print "dot\stack_6_%A"
             let newAstNodes = curTokens.Value.Tokens |> Array.mapi (fun i _ -> tokens.Count + i |> box)
             let oldTokens = !curTokens
             curTokens.Value.Tokens |> Array.iter (fun t -> tokens.Add t.Token)
@@ -360,18 +374,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 then 
                     pushesMap.[num].Add((oldPushes,newAstNode)) 
                 else pushesMap.Add(num,new ResizeArray<_>([|oldPushes,newAstNode|]))
+            print "dot\stack_6_1_%A"
             pushesInitFun curTokens.Value.Tokens.Length
- 
-        let print fName =
-#if DEBUG
-            let path = fName |> string |> System.IO.Path.GetDirectoryName
-            if path |> System.IO.Directory.Exists |> not
-            then System.IO.Directory.CreateDirectory path |> ignore
-            let vertices = usedStates.ToArray() |> Array.map (fun i -> stateToVertex.[i])                    
-            drawDot parserSource.TokenToNumber tokens parserSource.LeftSide vertices parserSource.NumToString parserSource.ErrorIndex
-                        <| sprintf fName !curLvl     
-#endif
-            ()
 
         let mutable errorList = []                    
         let errorRuleExist = parserSource.ErrorRulesExists
@@ -428,6 +432,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         wasError := true
                         pushesBackup := !pushes
                     shift ()
+                    print "dot\stack_4_%A"
 
         let isAcceptState() = 
             let flag = ref false

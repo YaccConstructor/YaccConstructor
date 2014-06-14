@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using FSharpx;
+//using FSharpx;
 using JetBrains.Annotations;
 using JetBrains.IDE;
 using JetBrains.ReSharper.Psi.CSharp;

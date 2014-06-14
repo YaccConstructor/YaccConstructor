@@ -59,10 +59,7 @@ type Processor(file) =
              | Yard.Generators.RNGLR.Parser.Success (sppf, errors) -> addSPPF (sppf, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
-        
-
-    member this.Graphs () =  (new Approximator(file)).Approximate defLang
-     
+         
     let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
         let ranges = 
             brs |> Seq.groupBy (fun x -> x.back_ref)
@@ -120,6 +117,8 @@ type Processor(file) =
                 res.Add <| Seq.head treeNodeList
         res
 
+    member this.Graphs () =  (new Approximator(file)).Approximate defLang
+    
 //(provider: ICSharpContextActionDataProvider) = 
     member this.Process () = 
         let parserErrors = new ResizeArray<_>()

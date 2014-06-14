@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using GraphX.Controls;
@@ -11,7 +9,6 @@ using JetBrains.DataFlow;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.TextControl;
 using JetBrains.UI.Application;
-using JetBrains.UI.CrossFramework;
 using JetBrains.UI.ToolWindowManagement;
 using Microsoft.FSharp.Core;
 

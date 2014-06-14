@@ -22,9 +22,9 @@ do()
 
 [<AbstractClass>]
 [<TypeExtensionPoint>]
-type Frontend() as this =
+type Frontend() = //as this =
     abstract Name : string
     abstract ParseGrammar : obj -> Definition.t<Source.t,Source.t>
     abstract ProductionTypes : string list
-    interface Yard.Core.Manager.IComponent with
-        member self.Name : string = this.Name
+    //interface Yard.Core.Manager.IComponent with
+        //member self.Name : string = this.Name

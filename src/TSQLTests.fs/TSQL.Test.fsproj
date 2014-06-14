@@ -13,7 +13,7 @@
     <Name>TSQL.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
+     </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">

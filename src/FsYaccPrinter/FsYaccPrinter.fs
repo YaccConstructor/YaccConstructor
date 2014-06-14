@@ -19,7 +19,13 @@ namespace Yard.Generators.FsYaccPrinter
 
 open Yard.Core
 open Constraints
+open Mono.Addins
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type FsYaccPrinter() = 
     inherit Generator()
         override this.Name = "FsYaccPrinter"

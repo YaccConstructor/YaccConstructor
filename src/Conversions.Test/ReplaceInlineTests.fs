@@ -27,6 +27,7 @@ open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
+open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Inline tests`` () =
@@ -37,7 +38,7 @@ type ``Inline tests`` () =
     member test.``Inline 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"inline1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules = 
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}])

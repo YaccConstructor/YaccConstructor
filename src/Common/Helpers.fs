@@ -20,6 +20,7 @@ open Yard.Core.IL
 open Grammar
 open Production
 open Definition
+open Mono.Addins
 
 let errorToken = "error"
 
@@ -140,3 +141,17 @@ let metaRulesTbl grammar =
     )
     |> dict
 
+let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) =
+        AddinManager.Initialize()
+        AddinManager.Registry.Update(null)
+        let AddinConversion = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
+        let parameters = convNameWithParams.Split(' ')
+            //printfn "Conversion: %s" convNameWithParams
+        if parameters.Length = 0 then failwith "Missing Conversion name"
+        else
+            {ilTree
+                with grammar =
+                    match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) AddinConversion with 
+                    | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
+                    | None -> failwith <| "Conversion not found: " + parameters.[0]
+                    }

@@ -27,6 +27,7 @@ open Yard.Core.IL.Definition
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
+open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Expand inner alts tests`` () =
@@ -37,7 +38,7 @@ type ``Expand inner alts tests`` () =
     member test.``Alt in seq 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules = 
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("x"),None)}
@@ -60,7 +61,7 @@ type ``Expand inner alts tests`` () =
     member test.``Alt in seq 2`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq2.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "x",None)}
@@ -83,7 +84,7 @@ type ``Expand inner alts tests`` () =
     member test.``Alts in seq`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altsInSeq.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "x", None)}
@@ -112,7 +113,7 @@ type ``Expand inner alts tests`` () =
     member test.``Nested alts`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"nestedAlts.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}]

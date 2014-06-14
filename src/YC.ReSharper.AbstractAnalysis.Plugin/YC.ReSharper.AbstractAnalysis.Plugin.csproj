@@ -183,9 +183,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GraphCodeWindow\GraphXdll\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="GraphCodeWindow\XAML_Templates\GraphAreaTemplates.xaml">
       <SubType>Designer</SubType>

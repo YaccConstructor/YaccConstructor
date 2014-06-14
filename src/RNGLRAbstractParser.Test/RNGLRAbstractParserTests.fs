@@ -653,7 +653,7 @@ type ``RNGLR abstract parser tests`` () =
             printfn "Error in position %d on Token %A: %s" num tok message
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
             tree.PrintAst()
             RNGLR.ParseSimpleCalcDemo.defaultAstToDot tree "ast.dot"
             Assert.Pass()

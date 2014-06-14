@@ -124,7 +124,7 @@ type ``Conversions tests`` () =
             
 #if DEBUG
         let generator = 
-           match Seq.tryFind (fun (elem : Frontend) -> elem.Name = "TreeDump") GeneratorsManager with
+           match Seq.tryFind (fun (elem : Generator) -> elem.Name = "TreeDump") GeneratorsManager with
            | Some gen -> gen
            | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)

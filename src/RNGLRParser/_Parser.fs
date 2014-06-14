@@ -46,7 +46,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
+    | Success of Tree<'TokenType> * Dictionary<Family, ErrorNode>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
@@ -175,7 +175,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
         then
-            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], errDict)
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -526,7 +526,18 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 !fam
 
         let recovery() =
+            //let v = stateToVertex.Length
+            //printfn "VVVVV: %A ; %A" v stateToVertex
             let recVertNumber = 1
+            let curVertices = ref <| new Stack<_> (statesCount)
+            if usedStates.Count = 0
+            then
+                //decr curInd
+                //decr curNum
+                for i in simpleEdges do 
+                    for j,_ in i do 
+                        usedStates.Push j.State
+                        curVertices.Value.Push (j, [])
             if usedStates.Count <> 0 
             then 
                 let prevNum = !curNum
@@ -534,13 +545,13 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                 let errInd = !curInd
 
                 curNum := parserSource.ErrorIndex
-                let temp = new Queue<_>()
-                let curVertices = ref <| new Stack<_> (statesCount)
+                let temp = new Queue<_>()                
 
                 for vertex in usedStates do
                     expected := !expected + getExpectedTokens vertex
                     let path = []
-                    curVertices.Value.Push (stateToVertex.[vertex], path)
+                    let v = stateToVertex.[vertex]
+                    if v <> null then curVertices.Value.Push (v, path)
                     stateToVertex.[vertex] <- null
                 usedStates.Clear()
                 //pushes.count may be equal to 1
@@ -612,7 +623,20 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
         while not !isEnd && not !wasError do
             if usedStates.Count = 0 && reductions.Count = 0
             then 
-                wasError := true
+                // wasError := true
+                //incr curInd
+                //shift !curInd
+                recovery() 
+                makeReductions !curInd recovery
+                attachEdges()
+                if !curNum = parserSource.EofIndex then isEnd := true
+                elif pushes.Count = 0 then 
+                    if errorRuleExist 
+                    then recovery()
+                    else wasError := true
+                else
+                    incr curInd
+                    shift !curInd
             else
                 makeReductions !curInd recovery
                 attachEdges()
@@ -668,4 +692,4 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), [||], errDict)
+                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)

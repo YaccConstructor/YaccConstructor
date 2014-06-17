@@ -35,8 +35,8 @@ type LabelWithState =
 
 [<Struct>]
 type RuleIndexed = 
-    val Rule : rule
-    val Index : int
+    val mutable Rule : rule
+    val mutable Index : int
     new (rl, ind) = { Rule = rl; Index = ind }
 
 

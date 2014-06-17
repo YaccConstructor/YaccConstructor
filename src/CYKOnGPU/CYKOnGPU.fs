@@ -57,19 +57,48 @@ type CYKOnGPU() =
                                         )
             )
         *)
+
+
+        let printTbl () =
+            let needNewLine i =
+                if i = rowSize - 1 then true
+                else
+                    let mutable lnEndCounter = rowSize - 1
+                    let mutable newLine = rowSize - 1
+                    let mutable k = 0
+                    let mutable need = false
+                    while (k  <= rowSize - 1 && i <> newLine) do
+                        newLine <- newLine + lnEndCounter
+                        lnEndCounter <- lnEndCounter - 1
+                        k <- k + 1
+                        if newLine = i 
+                        then 
+                            need <- true
+                    need
+
+            [| 0..( rowSize * rowSize - calcDiff rowSize - 1) |] 
+            |> Array.iter( fun i -> 
+                                    let startIndex = i * nTermsCount // (i * rowSize + j - calcDiff i) * nTermsCount
+                                    let mutable count = 0
+                                    for m in startIndex..startIndex + nTermsCount - 1 do
+                                        let isEmpty = recTable.[m].rData = System.UInt64.MaxValue && recTable.[m]._k = 0ul
+                                        if not isEmpty then count <- count + 1
+                                    printf " %d |" count
+                                    if needNewLine i then printfn ""
+            )
+
         let fillTable rulesIndexed =
           let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
-          // todo
-          gpuWork.Run()
-          gpuWork.Dispose()
-          (*
           [|1..rowSize - 1|]
-          |> Array.iter (fun len ->
-                [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
-                |> Array(*.Parallel*).iter (fun i -> 
-                    ((*elem i len rulesIndexed*))
-                )
-         *)
+          |> Array.iter (fun l ->
+                printfn "row number %d" l
+                gpuWork.Run l
+          )
+          
+          gpuWork.Finish() |> ignore
+          gpuWork.Dispose()
+          printTbl()
+          
         (*
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]

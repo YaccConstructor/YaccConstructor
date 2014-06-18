@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 
-type CYKOnGPU() =
+type CYKOnGPU(debug) =
 
     // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
@@ -33,7 +33,6 @@ type CYKOnGPU() =
             !diff
 
     let recognitionTable (_,_) (s:Microsoft.FSharp.Core.uint16[]) weightCalcFun =
-
         nTermsCount <- 
             rules
             |> Array.map(fun r -> 
@@ -88,15 +87,22 @@ type CYKOnGPU() =
             )
 
         let fillTable rulesIndexed =
-          let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
-          [|1..rowSize - 1|]
-          |> Array.iter (fun l ->
-                printfn "row number %d" l
-                gpuWork.Run l
-          )
           
-          gpuWork.Finish() |> ignore
-          gpuWork.Dispose()
+          if (debug) then
+              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
+              [|1..rowSize - 1|]
+              |> Array.iter (fun l -> 
+                  [|0..rowSize - 1|]
+                  |> Array.iter ( fun i -> cpuWork.Run l i )
+              )          
+          else
+              let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed, indexes)
+              [|1..rowSize - 1|]
+              |> Array.iter (fun l -> gpuWork.Run l)          
+              gpuWork.Finish()
+              gpuWork.Dispose()
+
           printTbl()
           
         (*

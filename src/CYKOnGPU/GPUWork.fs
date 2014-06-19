@@ -9,13 +9,13 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Collections.Generic
 
-type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[], indexes:_[]) =
+type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[](*, indexes:_[]*)) =
 
     // Write quotation
     let command = 
         <@
-            fun (r:_1D) (rulesIndexed:_[]) (table:CellData[]) (rules:uint64[]) (rulesIndexedLenNum:_[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (indexes:_[])-> 
-                let i = r.GlobalID0 // column number, may be accessed parallel
+            fun (grid:_1D) (rulesIndexed:_[]) (table:CellData[]) (rules:uint64[]) (rulesIndexedLenNum:_[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (*(indexes:_[])*)-> 
+                let i = grid.GlobalID0 // column number, may be accessed parallel
                 let l = lNum.[0] // row number, must be accessed sequentially
                 let rowSize = rowSizeNum.[0]
                     
@@ -62,8 +62,11 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                     let isLeftEmpty = leftCell.rData = System.UInt64.MaxValue && leftCell._k = 0ul
                                     if not isLeftEmpty then
                                         (* get rule num *)
-                                        let leftRuleNum = int (uint32 ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)) // here
+                                        let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)
+
+                                        
                                         (* get rule name *)
+                                        //printfn "l r n %d" leftRuleNum
                                         let leftRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[leftRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
                                         (* get cell rule top *)
                                         let leftTop = Microsoft.FSharp.Core.Operators.uint16 ((leftRuleNamePart >>> 16) &&& 0xFFFFFFFFu)
@@ -74,11 +77,12 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                 let isRightEmpty = rightCell.rData = System.UInt64.MaxValue && rightCell._k = 0ul
                                                 if not isRightEmpty then
                                                     (* get rule num *)
-                                                    let rightRuleNum = int (uint32 ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)) // here                                        
+                                                    let rightRuleNum = int ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
                                                     (* get rule name *)
                                                     let rightRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[rightRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
                                                     (* get cell rule top *)
                                                     let rightTop = Microsoft.FSharp.Core.Operators.uint16 ((rightRuleNamePart >>> 16) &&& 0xFFFFFFFFu)
+                                                    (* is cell data empty *)             
                                                     if rightTop = r2 then
                                                     (* get rule label *)
                                                         let buf = Microsoft.FSharp.Core.Operators.uint16 (uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
@@ -166,10 +170,10 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                                 diffBuf := (!diffBuf + i)
                                                             diff <- !diffBuf
                                                         let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1 
-                                                                                                                
-                                                        indexes.[index] <- leftRuleNum
-                                                        indexes.[index + 1] <- rightRuleNum
                                                         
+                                                        //printfn "%d[%d]" leftRuleNum index
+                                                        //printfn "%d[%d]" rightRuleNum (index + 1)
+                               
                                                         table.[index].rData <- currentElem
                                                         table.[index]._k <- uint32 k
                     
@@ -221,7 +225,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
         let kernel, kernelPrepare, kernelRun = provider.Compile(command,_outCode = str)
         printfn "%s" !str
         // Prepare kernel. Pass actual parameters for computation:
-        kernelPrepare d rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|] indexes
+        kernelPrepare d rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|] //indexes
         // Add command into queue
         let _ = commandQueue.Add(kernelRun())
         ()
@@ -229,14 +233,15 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
     member this.Finish() =
         // Get result
         let _ = commandQueue.Add(recTable.ToHost(provider)).Finish()
-        let _ = commandQueue.Add(indexes.ToHost(provider)).Finish()
+        //let _ = commandQueue.Add(indexes.ToHost(provider)).Finish()
         commandQueue.Finish() |> ignore
-
+        (*
         let printIndexes = 
             indexes
             |> Array.iteri (fun i el -> if el<> 0 then printfn "%d[%d]" el i)
 
         printIndexes
+        *)
 
     member this.Dispose() =
         // Releasing of resources

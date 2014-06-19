@@ -61,9 +61,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                     let isLeftEmpty = leftCell.rData = System.UInt64.MaxValue && leftCell._k = 0ul
                                     if not isLeftEmpty then
                                         (* get rule num *)
-                                        let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)
-
-                                        
+                                        let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
                                         (* get rule name *)
                                         //printfn "l r n %d" leftRuleNum
                                         let leftRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[leftRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
@@ -73,17 +71,10 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                         if leftTop = r1 then
                                             for n in 0..nTermsCount - 1 do
                                                 let rightCell = table.[rightStart + n]
-                                                (* get r1 *)
-                                                (*
-                                                let r1 = Microsoft.FSharp.Core.Operators.uint32 ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)
-                                                let r1 = Microsoft.FSharp.Core.Operators.uint16 (r1 &&& 0xFFFFFFFFu)
-                                                *)
                                                 let isRightEmpty = rightCell.rData = System.UInt64.MaxValue && rightCell._k = 0ul
                                                 if not isRightEmpty then
                                                     (* get rule num *)
-                                                    let rightRuleNum = int ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)
-
-                                        
+                                                    let rightRuleNum = int ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
                                                     (* get rule name *)
                                                     let rightRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[rightRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
                                                     (* get cell rule top *)
@@ -175,11 +166,9 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                             for i in 1..l-1 do
                                                                 diffBuf := (!diffBuf + i)
                                                             diff <- !diffBuf
-                                                        let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1 
-                                                        
-                                                        printfn "%d[%d]" leftRuleNum index
-                                                        printfn "%d[%d]" rightRuleNum (index + 1)
-                               
+                                                        let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1                                                         
+                                                        //printfn "%d[%d]" leftRuleNum index
+                                                        //printfn "%d[%d]" rightRuleNum (index + 1)                               
                                                         table.[index].rData <- currentElem
                                                         table.[index]._k <- uint32 k
           

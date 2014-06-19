@@ -96,8 +96,8 @@ type CYKOnGPU(debug) =
                   |> Array.iter ( fun i -> cpuWork.Run l i )
               )          
           else
-              let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)
-              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed, indexes)
+              //let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed(*, indexes*))
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> gpuWork.Run l)          
               gpuWork.Finish()

@@ -86,24 +86,35 @@ type CYKOnGPU(debug) =
                                     if needNewLine i then printfn ""
             )
 
-        let fillTable rulesIndexed =
+        let printTblSqr () =
+            [| 0..( rowSize * rowSize (*- calcDiff rowSize*) - 1) |] 
+            |> Array.iter( fun i -> 
+                                    let startIndex = i * nTermsCount // (i * rowSize + j - calcDiff i) * nTermsCount
+                                    let mutable count = 0
+                                    for m in startIndex..startIndex + nTermsCount - 1 do
+                                        let isEmpty = recTable.[m].rData = System.UInt64.MaxValue && recTable.[m]._k = 0ul
+                                        if not isEmpty then count <- count + 1
+                                    printf " %d |" count
+                                    if i = 0 || i % (rowSize - 1) = 0 then printfn ""
+            )
+
+        let fillTable = //rulesIndexed =
           
           if (debug) then
-              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
+              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules(*, rulesIndexed*))
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> 
                   [|0..rowSize - 1|]
                   |> Array.iter ( fun i -> cpuWork.Run l i )
               )          
           else
-              //let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)
-              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed(*, indexes*))
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules(*, rulesIndexed*)(*, indexes*))
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> gpuWork.Run l)          
               gpuWork.Finish()
               gpuWork.Dispose()
 
-          printTbl()
+          printTblSqr()
           
         (*
         let fillTable2 symRuleArr = 
@@ -123,7 +134,7 @@ type CYKOnGPU(debug) =
                             | 0uy -> LblState.Undefined
                             | _   -> LblState.Defined
                         let currentElem = buildData ruleIndex lState rule.Label rule.Weight
-                        recTable.[(0 * rowSize + k - calcDiff 0) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) (*|> Some*))   
+                        recTable.[(0 * rowSize + k (*- calcDiff 0*)) * nTermsCount + int rule.RuleName - 1] <- new CellData(currentElem,0u) (*|> Some*))   
         //printfn "total rules count %d" rules.Length
                              
         let ntrIndexes = new ResizeArray<_>() // non-terminal rules indexes array
@@ -153,7 +164,7 @@ type CYKOnGPU(debug) =
         *)
         let fillStart = System.DateTime.Now
         printfn "Fill table started %s" (string fillStart)
-        fillTable nonTermRules
+        fillTable //nonTermRules
         let fillFinish = System.DateTime.Now
         printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
         (*

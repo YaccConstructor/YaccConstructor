@@ -7,12 +7,14 @@ open System.Collections.Generic
 //..
 type tblData = uint64
 
+type coordinate = uint32
+
 type symbol = Microsoft.FSharp.Core.uint16 
 
 [<Struct>]
 type CellData =
     val mutable rData : tblData
-    val mutable _k : uint32
+    val mutable _k : coordinate
     new (r, k) = {rData=r;_k=k}
 
 type LblState =

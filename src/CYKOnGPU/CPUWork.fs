@@ -32,7 +32,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                         for k in 0..(l - 1) do                                                    
                             (* process rule *)
                             (* get r2 *)
-                            let r2 = uint32 (currentRule &&& 0xFFFFFFFFUL)
+                            let r2 = Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL)
                             let r2 = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
                             if r2 <> 0us then
                                 (* calc diff *)
@@ -136,7 +136,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                             else newLabel := noLbl; newState := sConflict
                                                 
                                                         (* get rule weight *)
-                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
+                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
                                                         let weight = Microsoft.FSharp.Core.Operators.byte (buf &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
                                                         (* get cell weight *)
                                                         let buf = Microsoft.FSharp.Core.Operators.uint32 (leftCell.rData &&& 0xFFFFFFFFUL)
@@ -152,7 +152,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                         let currentLabel = 
                                                             (Microsoft.FSharp.Core.Operators.uint16 !newLabel <<< 8) 
                                                             ||| Microsoft.FSharp.Core.Operators.uint16 newWeight
-                                                        let currentR2 = (uint32 !newState <<< 16) ||| uint32 currentLabel
+                                                        let currentR2 = (Microsoft.FSharp.Core.Operators.uint32 !newState <<< 16) ||| Microsoft.FSharp.Core.Operators.uint32 currentLabel
                                                         let currentElem = (uint64 ruleIndex <<< 32) ||| uint64 currentR2
 
                                                         (* get rule name *)
@@ -170,7 +170,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                         //printfn "%d[%d]" leftRuleNum index
                                                         //printfn "%d[%d]" rightRuleNum (index + 1)                               
                                                         table.[index].rData <- currentElem
-                                                        table.[index]._k <- uint32 k
+                                                        table.[index]._k <- Microsoft.FSharp.Core.Operators.uint32 k
           
     let recTable: CellData[] = extRecTable //fillArray extRecTable createEmptyCellData        
     

@@ -11,7 +11,6 @@ open System.Collections.Generic
 
 type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[](*, indexes:_[]*)) =
 
-    // Write quotation
     let command = 
         <@
             fun (grid:_1D) (rulesIndexed:_[]) (table:CellData[]) (rules:uint64[]) (rulesIndexedLenNum:_[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (*(indexes:_[])*)-> 
@@ -33,7 +32,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                         for k in 0..(l - 1) do                                                    
                             (* process rule *)
                             (* get r2 *)
-                            let r2 = uint32 (currentRule &&& 0xFFFFFFFFUL)
+                            let r2 = Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL)
                             let r2 = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
                             if r2 <> 0us then
                                 (* calc diff *)
@@ -62,9 +61,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                     let isLeftEmpty = leftCell.rData = System.UInt64.MaxValue && leftCell._k = 0ul
                                     if not isLeftEmpty then
                                         (* get rule num *)
-                                        let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)
-
-                                        
+                                        let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
                                         (* get rule name *)
                                         //printfn "l r n %d" leftRuleNum
                                         let leftRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[leftRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
@@ -139,7 +136,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                             else newLabel := noLbl; newState := sConflict
                                                 
                                                         (* get rule weight *)
-                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
+                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
                                                         let weight = Microsoft.FSharp.Core.Operators.byte (buf &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
                                                         (* get cell weight *)
                                                         let buf = Microsoft.FSharp.Core.Operators.uint32 (leftCell.rData &&& 0xFFFFFFFFUL)
@@ -155,7 +152,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                         let currentLabel = 
                                                             (Microsoft.FSharp.Core.Operators.uint16 !newLabel <<< 8) 
                                                             ||| Microsoft.FSharp.Core.Operators.uint16 newWeight
-                                                        let currentR2 = (uint32 !newState <<< 16) ||| uint32 currentLabel
+                                                        let currentR2 = (Microsoft.FSharp.Core.Operators.uint32 !newState <<< 16) ||| Microsoft.FSharp.Core.Operators.uint32 currentLabel
                                                         let currentElem = (uint64 ruleIndex <<< 32) ||| uint64 currentR2
 
                                                         (* get rule name *)
@@ -169,13 +166,11 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                             for i in 1..l-1 do
                                                                 diffBuf := (!diffBuf + i)
                                                             diff <- !diffBuf
-                                                        let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1 
-                                                        
+                                                        let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1                                                         
                                                         //printfn "%d[%d]" leftRuleNum index
-                                                        //printfn "%d[%d]" rightRuleNum (index + 1)
-                               
+                                                        //printfn "%d[%d]" rightRuleNum (index + 1)                               
                                                         table.[index].rData <- currentElem
-                                                        table.[index]._k <- uint32 k
+                                                        table.[index]._k <- Microsoft.FSharp.Core.Operators.uint32 k
                     
         @>
 
@@ -215,25 +210,19 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
     let rulesIndexed = extRulesIndexed //fillArray extRulesIndexed createEmptyRuleIndexed
         
     let rules = extRules //fillArray extRules (fun () -> uint64 0)
-            
-    let d =(new _1D(rowSize, 1))
-        
+    
     member this.Run(l) = 
-        // Compile&Run
-        // kernel function compilation
         let str = ref ""
         let kernel, kernelPrepare, kernelRun = provider.Compile(command,_outCode = str)
         printfn "%s" !str
-        // Prepare kernel. Pass actual parameters for computation:
+        let d = new _1D(rowSize, rowSize)
         kernelPrepare d rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|] //indexes
-        // Add command into queue
-        let _ = commandQueue.Add(kernelRun())
+        let _ = commandQueue.Add(kernelRun()).Finish() |> ignore
         ()
 
     member this.Finish() =
         // Get result
         let _ = commandQueue.Add(recTable.ToHost(provider)).Finish()
-        //let _ = commandQueue.Add(indexes.ToHost(provider)).Finish()
         commandQueue.Finish() |> ignore
         (*
         let printIndexes = 

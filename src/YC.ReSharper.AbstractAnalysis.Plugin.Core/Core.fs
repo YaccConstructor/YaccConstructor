@@ -86,18 +86,18 @@ type Processor(file) =
             count <- 0 
             null
         else 
-            let mutable curAst, errors = List.nth forest count
+            let mutable curSppf, errors = List.nth forest count
             if unprocessed.Length = 0
             then 
-                unprocessed <- Array.init curAst.TokensCount (fun i -> i) |> List.ofArray
+                unprocessed <- Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
             
-            let nextTree, unproc = curAst.GetNextTree unprocessed (fun _ -> true)
+            let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
             if unproc.Length = 0
             then 
                 count <- count + 1
             unprocessed  <- unproc
-            let treeNodeList = translate nextTree errors :> seq<ITreeNode>
-            Seq.head treeNodeList
+
+            (Seq.head <| translate nextTree errors) :> ITreeNode
 
     let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
                             range (tokenData: 'TokenType -> obj)  translate = 
@@ -113,8 +113,8 @@ type Processor(file) =
         for ast, errors in forest do
             let trees = ast.GetForestWithToken range tokenToPos
             for tree in trees do
-                let treeNodeList = translate tree errors :> seq<ITreeNode>
-                res.Add <| Seq.head treeNodeList
+                let treeNode = Seq.head <| translate tree errors :> ITreeNode
+                res.Add treeNode
         res
 
     member this.Graphs () =  (new Approximator(file)).Approximate defLang

@@ -199,14 +199,14 @@ type Processor(file) =
         | Calc -> calcXmlPath 
         | JSON -> jsonXmlPath 
         | TSQL -> tsqlXmlPath
-        | _ -> System.String.Empty
+       // | _ -> System.String.Empty
     
     member this.CurrentLang = 
         match currentLang with
         | Calc -> "Calc"
         | JSON -> "JSON"
         | TSQL -> "TSQL"
-        | _ -> System.String.Empty
+       // | _ -> System.String.Empty
     
     member this.GetNextTree() = 
         let mutable res = null

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.AbstractAnalysis.Parsing.Common</id>
-    <version>0.0.6.5</version>
+    <version>0.0.8.5</version>
     <title>YC.AbstractAnalysis.Parsing.Common</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>

@@ -38,15 +38,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -89,7 +89,7 @@
     </ProjectReference>
     <Reference Include="System.Numerics" />
     <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

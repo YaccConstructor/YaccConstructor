@@ -14,6 +14,9 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.$(rshVer)\build\JetBrains.ReSharper.SDK.Props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -32,16 +35,20 @@
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net40\AbstractLexer.Common.dll</HintPath>
     </Reference>
     <Reference Include="AbstractParsing.Common, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.6.5\lib\net40\AbstractParsing.Common.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.8.5\lib\net40\AbstractParsing.Common.dll</HintPath>
     </Reference>
     <Reference Include="Common, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Common.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Common.dll</HintPath>
     </Reference>
     <Reference Include="Constraints, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Constraints.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Constraints.dll</HintPath>
     </Reference>
     <Reference Include="Conversions, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Conversions.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Conversions.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="FSharpx.Text.StructuredFormat, Version=1.8.41.0, Culture=neutral, processorArchitecture=MSIL">
@@ -51,13 +58,13 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
     </Reference>
     <Reference Include="GraphX.Common">
-      <HintPath>GraphCodeWindow\GraphXdll\GraphX.Common.dll</HintPath>
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Common.dll</HintPath>
     </Reference>
     <Reference Include="GraphX.Controls">
-      <HintPath>GraphCodeWindow\GraphXdll\GraphX.Controls.dll</HintPath>
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Controls.dll</HintPath>
     </Reference>
     <Reference Include="GraphX.Logic">
-      <HintPath>GraphCodeWindow\GraphXdll\GraphX.Logic.dll</HintPath>
+      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
@@ -77,13 +84,16 @@
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRAbstractParser.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRCommon, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRCommon.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRParser.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -99,10 +109,11 @@
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="YaccConstructor, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\YaccConstructor.exe</HintPath>
     </Reference>
     <Reference Include="YAXLib">
-      <HintPath>GraphCodeWindow\GraphXdll\YAXLib.dll</HintPath>
+      <HintPath>..\packages\YAXLib.2.13\lib\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +210,6 @@
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
-del JetBrains*</PostBuildEvent>
+del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
 </Project>

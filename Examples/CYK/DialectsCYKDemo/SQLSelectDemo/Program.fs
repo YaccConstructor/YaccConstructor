@@ -36,8 +36,9 @@ let runForGPU isDebug input =
         ts
         |> Yard.Generators.CYK.CodeTokenStream
         
-    let cyk = new Yard.Generators.CYKGenerator.CYKOnGPU(isDebug)//CYKCoreForGPU()
-    printfn "CYK on GPU"
+    let cyk = new Yard.Generators.CYKGenerator.CYKOnGPU(isDebug)
+    if isDebug then printfn "CYK on CPU"
+    else printfn "CYK on GPU"
     cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> x + y + z) Yard.Generators.CYK.lblName
 
 let time (run : System.IO.StreamReader -> string) =    

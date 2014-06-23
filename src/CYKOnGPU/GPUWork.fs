@@ -174,23 +174,19 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                     
         @>
 
-    let platformName = "AMD*"
+    let platformName = "*"//"AMD*"
     let deviceType = DeviceType.Default
     
-    // Configure provider
-    // device provider creating
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
         | ex -> failwith ex.Message
 
-    // command queue creating:
     let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
     //let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
     let maxLocalWorkSize = 1 // int <| lws.CastTo<uint64>()
         
-    //printfn "Using %A" provider
     let fillArray (arr:'a[]) (initFun:unit -> 'a) =
         let count = arr.Length
         if count % maxLocalWorkSize <> 0 
@@ -221,7 +217,6 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
         ()
 
     member this.Finish() =
-        // Get result
         let _ = commandQueue.Add(recTable.ToHost(provider)).Finish()
         commandQueue.Finish() |> ignore
         (*
@@ -233,9 +228,9 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
         *)
 
     member this.Dispose() =
-        // Releasing of resources
         commandQueue.Dispose()
-        provider.Dispose()
         provider.CloseAllBuffers()
+        provider.Dispose()
+        
 
 

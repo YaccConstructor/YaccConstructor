@@ -93,7 +93,7 @@ type CYKOnGPU(debug) =
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> 
                   [|0..rowSize - 1|]
-                  |> Array.iter ( fun i -> cpuWork.Run l i )
+                  |> Array.Parallel.iter ( fun i -> cpuWork.Run l i )
               )          
           else
               //let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)

@@ -14,7 +14,6 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
 
     let command = 
             fun i (rulesIndexed:_[]) (table:CellData[]) (rules:uint64[]) (rulesIndexedLenNum:_[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[])-> 
-                //let i = r.GlobalID0 // column number, may be accessed parallel
                 let l = lNum.[0] // row number, must be accessed sequentially
                 let rowSize = rowSizeNum.[0]
                     

@@ -210,10 +210,10 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
     member this.Run(l) = 
         let str = ref ""
         let kernel, kernelPrepare, kernelRun = provider.Compile(command,_outCode = str)
-        printfn "%s" !str
+        //printfn "%s" !str
         let d = new _1D(rowSize, rowSize)
         kernelPrepare d rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|] //indexes
-        let _ = commandQueue.Add(kernelRun()).Finish() |> ignore
+        let _ = commandQueue.Add(kernelRun())//.Finish() |> ignore
         ()
 
     member this.Finish() =

@@ -95,6 +95,10 @@
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
@@ -151,11 +155,6 @@
     <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
       <Name>ConstantPropagation</Name>
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\JSON_Parser\JSON_Parser.fsproj">
-      <Name>JSON_Parser</Name>
-      <Project>{560052d2-e44a-42c0-8f88-04f623276b35}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\TSQL\TSQL.fsproj">

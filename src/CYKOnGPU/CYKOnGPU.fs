@@ -2,9 +2,8 @@
 
 open System.Collections.Generic
 
-type CYKOnGPU(debug) =
+type CYKOnGPU(platformName, debug) =
 
-    // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
     let mutable recTable:_[] = null
@@ -40,7 +39,6 @@ type CYKOnGPU(debug) =
                             rule.RuleName)
             |> Set.ofArray
             |> Set.count
-
         rowSize <- s.Length
         recTable <- Array.init (rowSize * rowSize * nTermsCount) ( fun _ -> createEmptyCellData () )
 
@@ -56,7 +54,6 @@ type CYKOnGPU(debug) =
                                         )
             )
         *)
-
 
         let printTbl () =
             let needNewLine i =
@@ -77,17 +74,15 @@ type CYKOnGPU(debug) =
 
             [| 0..( rowSize * rowSize - calcDiff rowSize - 1) |] 
             |> Array.iter( fun i -> 
-                                    let startIndex = i * nTermsCount // (i * rowSize + j - calcDiff i) * nTermsCount
+                                    let startIndex = i * nTermsCount
                                     let mutable count = 0
                                     for m in startIndex..startIndex + nTermsCount - 1 do
                                         let isEmpty = recTable.[m].rData = System.UInt64.MaxValue && recTable.[m]._k = 0ul
                                         if not isEmpty then count <- count + 1
                                     printf " %d |" count
-                                    if needNewLine i then printfn ""
-            )
+                                    if needNewLine i then printfn "")
 
-        let fillTable rulesIndexed =
-          
+        let fillTable rulesIndexed =          
           if (debug) then
               let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
               [|1..rowSize - 1|]
@@ -96,8 +91,7 @@ type CYKOnGPU(debug) =
                   |> Array.Parallel.iter ( fun i -> cpuWork.Run l i )
               )          
           else
-              //let indexes = Array.init (recTable.Length * nTermsCount * 2) (fun i -> 0)
-              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed(*, indexes*))
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed, platformName)
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> gpuWork.Run l)          
               gpuWork.Finish()
@@ -135,6 +129,12 @@ type CYKOnGPU(debug) =
                     ntrIndexes.Add ruleIndex )
         let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
         //printfn "non terminal rules count %d" nonTermRules.Length
+        
+        let fillStart = System.DateTime.Now
+        printfn "Fill table started %s" (string fillStart)
+        fillTable nonTermRules
+        let fillFinish = System.DateTime.Now
+        printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
         (*
         // left parts of non-terminal rules array
         // needed only for 2nd realization
@@ -150,13 +150,7 @@ type CYKOnGPU(debug) =
             |> Array.map (fun (sym,rules) -> 
                             //printfn "Symbol %d rules count: %d" sym rules.Length
                             new SymbolRuleMapItem(sym,rules))
-        *)
-        let fillStart = System.DateTime.Now
-        printfn "Fill table started %s" (string fillStart)
-        fillTable nonTermRules
-        let fillFinish = System.DateTime.Now
-        printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
-        (*
+
         let fillImprStart = System.DateTime.Now
         printfn "Fill table improved started %s" (string fillImprStart)
         fillTable2 symRuleArr
@@ -167,17 +161,6 @@ type CYKOnGPU(debug) =
 
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
-        
-        let printTbl () =
-            for i in 0..s.Length-1 do
-                for j in 0..s.Length-1 do
-                    let startIndex = (i * rowSize + j) * nTermsCount
-                    let mutable count = 0
-                    for m in startIndex..startIndex + nTermsCount - 1 do
-                        if not (isCellDataEmpty (recTable.[m])) then count <- count + 1
-                    printf "! %s !" (string count)
-                printfn " "
-            printfn "" 
             
         let getString state lbl weight = 
             let stateString = 
@@ -186,7 +169,6 @@ type CYKOnGPU(debug) =
                 |LblState.Undefined -> "undefined"
                 |LblState.Conflict -> "conflict"
                 |_ -> ""
-
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
@@ -203,8 +185,7 @@ type CYKOnGPU(debug) =
                 else "" :: out (i+1) last
             else [""]
 
-        let lastIndex = nTermsCount - 1 //(recTable.[0 * rowSize + s.Length-1]).Length - 1
-        
+        let lastIndex = nTermsCount - 1        
         out 0 lastIndex
 
     let print lblValue weight leftI rightL leftL =
@@ -216,13 +197,11 @@ type CYKOnGPU(debug) =
         let ruleInd,_,curL,curW = getData cell.rData
         let rule = getRuleStruct rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
-        if l = 0
-        then if curL <> noLbl
-             then print curL curW leftI rightL leftL
+        if l = 0 then 
+            if curL <> noLbl then print curL curW leftI rightL leftL
         else 
             let checkIndex start ind tryFind ruleCheck =
-                if ind < start + nTermsCount - 1 then
-                    tryFind start (ind + 1) ruleCheck
+                if ind < start + nTermsCount - 1 then tryFind start (ind + 1) ruleCheck
                 else None
 
             let rec tryFind start index ruleCheck = 
@@ -278,7 +257,7 @@ type CYKOnGPU(debug) =
         // If dialect undefined or was conflict lblName = "0" 
         let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
-        | "" -> "Строка не выводима в заданной грамматике."
+        | "" -> "The string is not derivable in specified grammar"
         | _ -> 
             labelTracking (s.Length - 1)
             out

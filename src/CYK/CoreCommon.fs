@@ -4,12 +4,11 @@ open System.Collections.Generic
 
 //(32        |16       |8       |8        )
 //(ruleIndex |lblState |lblName |lblWeght )
-//..
 type tblData = uint64
 
 type coordinate = uint32
 
-type symbol = Microsoft.FSharp.Core.uint16 
+type symbol = uint16 
 
 [<Struct>]
 type CellData =

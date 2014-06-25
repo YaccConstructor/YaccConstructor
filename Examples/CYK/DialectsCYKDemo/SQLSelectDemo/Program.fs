@@ -50,7 +50,7 @@ let time (run : System.IO.StreamReader -> string) =
         printfn "%s" res
         printfn "%A" (System.DateTime.Now - start)
     | _ ->
-        printfn "%s" "Не задано имя входного файла."
+        printfn "%s" "Input file name not specified."
     
 do 
     //time (run)

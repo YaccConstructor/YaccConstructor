@@ -41,21 +41,11 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                         if r2 <> 0us then
                             (* calc diff *)
                             let index = k
-                            let diffBuf = ref 0
-                            let mutable leftDiff = 0 
-                            if index >= 2 then 
-                                for i in 1..index-1 do
-                                    diffBuf := (!diffBuf + i)
-                                leftDiff <- !diffBuf
+                            let leftDiff = index * (index - 1) / 2
                             let leftStart = ( k * rowSize + i - leftDiff ) * nTermsCount
                             (* calc diff *)
                             let index = l-k-1
-                            let diffBuf = ref 0
-                            let mutable rightDiff = 0 
-                            if index >= 2 then 
-                                for i in 1..index-1 do
-                                    diffBuf := (!diffBuf + i)
-                                rightDiff <- !diffBuf
+                            let rightDiff = index * (index - 1) / 2 
                             let rightStart = ( (l-k-1) * rowSize + k+i+1 - rightDiff ) * nTermsCount
                             for m in 0..nTermsCount - 1 do
                                 let leftCell:CellData = table.[leftStart + m]
@@ -163,12 +153,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                     (* get cell rule top *)
                                                     let ruleName = int (Microsoft.FSharp.Core.Operators.uint16 ((ruleNamePart >>> 16) &&& 0xFFFFFFFFu))
                                                     (* calc diff *)
-                                                    let diffBuf = ref 0
-                                                    let mutable diff = 0 
-                                                    if l >= 2 then 
-                                                        for i in 1..l-1 do
-                                                            diffBuf := (!diffBuf + i)
-                                                        diff <- !diffBuf
+                                                    let diff = l * (l - 1) / 2
                                                     let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1                                                         
                                                     table.[index].rData <- currentElem
                                                     table.[index]._k <- Microsoft.FSharp.Core.Operators.uint32 k
@@ -216,11 +201,11 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
         //printfn "%s" !str
         res
         
-    let d = new _2D(rowSize, rulesIndexed.Length, 1, 1)
+    let d = new _2D(rowSize, rulesIndexed.Length, 2, 1)
               
     member this.Run(l) = 
         kernelPrepare d rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|]
-        let _ = commandQueue.Add(kernelRun())//.Finish() |> ignore
+        let _ = commandQueue.Add(kernelRun())
         ()
 
     member this.Finish() =

@@ -95,14 +95,6 @@ type CYKCoreForGPU() =
                                 let currentElem = buildData ruleIndex lblWithState.State lblWithState.Label newWeight
                                 recTable.[ l * rowSize + i ].[int rule.RuleName - 1] <- new CellData(currentElem, uint32 k) |> Some
                     
-        let elem2 i len symRuleArr = 
-            // foreach symbol in grammar in parallel
-            symRuleArr
-            |> Array.Parallel.iter (fun (item:SymbolRuleMapItem) ->
-                                        // foreach rule r per symbol in parallel
-                                        item.Rules
-                                        |> Array.iter (fun curRule -> for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len))
-        
         let fillTable rulesIndexed =
           [|1..rowSize - 1|]
           |> Array.iter (fun len ->
@@ -115,7 +107,11 @@ type CYKCoreForGPU() =
             [|1..rowSize - 1|]
             |> Array.iter (fun len ->
                 [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
-                |> Array.Parallel.iter (fun i -> elem2 i len symRuleArr))
+                |> Array.Parallel.iter (fun i -> symRuleArr // foreach symbol in grammar in parallel
+                                                 |> Array.Parallel.iter (fun (item:SymbolRuleMapItem) ->
+                                                                            item.Rules // foreach rule r per symbol in parallel
+                                                                            |> Array.iter (fun curRule -> for k in 0..(len-1) do 
+                                                                                                            processRule curRule.Rule curRule.Index i k len))))
         
         rules
         |> Array.iteri 
@@ -148,8 +144,8 @@ type CYKCoreForGPU() =
         fillTable nonTermRules
         let fillFinish = System.DateTime.Now
         printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
-        
         (*
+        
         // left parts of non-terminal rules array
         // needed only for 2nd realization
         let symRuleMap = 
@@ -171,7 +167,6 @@ type CYKCoreForGPU() =
         let fillImprFinish = System.DateTime.Now
         printfn "Fill table improved finished %s [%s]" (string fillImprFinish) (string (fillImprFinish - fillImprStart))
         *)
-        
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =

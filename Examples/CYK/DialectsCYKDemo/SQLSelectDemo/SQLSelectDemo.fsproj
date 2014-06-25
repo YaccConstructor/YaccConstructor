@@ -79,9 +79,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Brahma">
-      <HintPath>..\..\..\..\src\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>
-    </Reference>
     <Reference Include="Common">
       <HintPath>..\..\..\yc\Common.dll</HintPath>
     </Reference>

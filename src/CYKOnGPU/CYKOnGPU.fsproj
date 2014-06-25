@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>D:\Projects\ YaccConstructor\src\..\Bin\Release\v40\</OutputPath>
+    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -69,7 +69,6 @@
     </Reference>
     <Reference Include="Brahma.OpenCL">
       <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.OpenCL.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
@@ -85,7 +84,6 @@
     </Reference>
     <Reference Include="OpenCL.Net">
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -97,16 +95,12 @@
     <Compile Include="CYKOnGPU.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="CPUWorkSymbol.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">
       <Name>CYKCommon</Name>
       <Project>{95fb7038-c27d-4c27-a149-d9c9b747c222}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\CYKGenerator\CYKGenerator.fsproj">
-      <Name>CYKGenerator</Name>
-      <Project>{94eeea1d-60e8-45f8-b6cb-ba0b0fb487b8}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\CYK\CYK.fsproj">

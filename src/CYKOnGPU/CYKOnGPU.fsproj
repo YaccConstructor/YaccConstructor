@@ -95,7 +95,6 @@
     <Compile Include="CYKOnGPU.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Compile Include="CPUWorkSymbol.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CYKCommon\CYKCommon.fsproj">

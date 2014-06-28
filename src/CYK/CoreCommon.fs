@@ -43,10 +43,11 @@ type RuleIndexed =
 
 [<Struct>]
 type SymbolRuleMapItem =
-    val Symbol : symbol
-    val Rules : RuleIndexed[]
+    val mutable Symbol : symbol
+    val mutable Rules : RuleIndexed[]
+    val mutable RulesCount : int
     new (symbol : symbol, rules : RuleIndexed[]) = 
-        { Symbol = symbol; Rules = rules }
+        { Symbol = symbol; Rules = rules; RulesCount = rules.Length }
 
 [<AutoOpen>]
 module CellHelpers =
@@ -96,8 +97,7 @@ module CommonHelpers =
     [<Literal>]
     let noLbl = 0uy
 
-    let initSymbol (s:uint16) : symbol = 
-        s
+    let initSymbol (s:uint16) : symbol = s
 
     let createEmptyCellData () = 
         new CellData(System.UInt64.MaxValue, 0ul)

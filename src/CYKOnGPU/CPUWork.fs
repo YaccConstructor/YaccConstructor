@@ -10,21 +10,23 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Collections.Generic
 
-type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[]) =
+type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extNTermRuleMap:_[]) =
 
     let command = 
-            fun i (rulesIndexed:_[]) (table:CellData[]) (rules:uint64[]) (rulesIndexedLenNum:_[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[])-> 
-                let l = lNum.[0] // row number, must be accessed sequentially
+            fun i s (table:CellData[]) (rules:uint64[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (nTermsRuleMap:SymbolRuleMapItem[])-> 
+                let l = lNum.[0] // row index, must be accessed sequentially
                 let rowSize = rowSizeNum.[0]
                     
                 // check is this cell in needed matrix part
                 if (i <= (rowSize - 1 - l)) then
                     let nTermsCount = nTermsCountNum.[0] 
-                    let ruleCount = rulesIndexedLenNum.[0]
+                    let symbol = nTermsRuleMap.[s]
+
                     let noLbl = 0uy
+                    let maxValue = System.UInt64.MaxValue
                     
-                    for r in 0..(ruleCount - 1) do // k is rule number. this level also may be parallized 
-                        let curRuleIndexed:RuleIndexed = rulesIndexed.[r]
+                    for r in 0..(symbol.RulesCount - 1) do
+                        let curRuleIndexed:RuleIndexed = symbol.Rules.[r]
                         let currentRule = curRuleIndexed.Rule
                         let ruleIndex = curRuleIndexed.Index
                         
@@ -34,35 +36,22 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                             let r2 = Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL)
                             let r2 = Microsoft.FSharp.Core.Operators.uint16 ((r2 >>> 16) &&& 0xFFFFFFFFu)
                             if r2 <> 0us then
-                                (* calc diff *)
                                 let index = k
-                                let diffBuf = ref 0
-                                let mutable leftDiff = 0 
-                                if index >= 2 then 
-                                    for i in 1..index-1 do
-                                        diffBuf := (!diffBuf + i)
-                                    leftDiff <- !diffBuf
+                                let leftDiff = index * (index - 1) / 2
                                 let leftStart = ( k * rowSize + i - leftDiff ) * nTermsCount
-                                (* calc diff *)
                                 let index = l-k-1
-                                let diffBuf = ref 0
-                                let mutable rightDiff = 0 
-                                if index >= 2 then 
-                                    for i in 1..index-1 do
-                                        diffBuf := (!diffBuf + i)
-                                    rightDiff <- !diffBuf
+                                let rightDiff = index * (index - 1) / 2 
                                 let rightStart = ( (l-k-1) * rowSize + k+i+1 - rightDiff ) * nTermsCount
                                 for m in 0..nTermsCount - 1 do
                                     let leftCell:CellData = table.[leftStart + m]
                                     (* get r1 *)
                                     let r1 = Microsoft.FSharp.Core.Operators.uint32 ((currentRule >>> 32) &&&  0xFFFFFFFFUL)
                                     let r1 = Microsoft.FSharp.Core.Operators.uint16 (r1 &&& 0xFFFFFFFFu)
-                                    let isLeftEmpty = leftCell.rData = System.UInt64.MaxValue && leftCell._k = 0ul
+                                    let isLeftEmpty = leftCell.rData = maxValue && leftCell._k = 0ul
                                     if not isLeftEmpty then
                                         (* get rule num *)
                                         let leftRuleNum = int ((leftCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
                                         (* get rule name *)
-                                        //printfn "l r n %d" leftRuleNum
                                         let leftRuleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((rules.[leftRuleNum] >>> 32) &&&  0xFFFFFFFFUL)
                                         (* get cell rule top *)
                                         let leftTop = Microsoft.FSharp.Core.Operators.uint16 ((leftRuleNamePart >>> 16) &&& 0xFFFFFFFFu)
@@ -70,7 +59,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                         if leftTop = r1 then
                                             for n in 0..nTermsCount - 1 do
                                                 let rightCell = table.[rightStart + n]
-                                                let isRightEmpty = rightCell.rData = System.UInt64.MaxValue && rightCell._k = 0ul
+                                                let isRightEmpty = rightCell.rData = maxValue && rightCell._k = 0ul
                                                 if not isRightEmpty then
                                                     (* get rule num *)
                                                     let rightRuleNum = int ((rightCell.rData >>> 32) &&&  0xFFFFFFFFUL)                                        
@@ -81,7 +70,7 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                     (* is cell data empty *)             
                                                     if rightTop = r2 then
                                                     (* get rule label *)
-                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
+                                                        let buf = Microsoft.FSharp.Core.Operators.uint16 (Microsoft.FSharp.Core.Operators.uint32 (currentRule &&& 0xFFFFFFFFUL) &&& 0xFFFFFFFFu)
                                                         let label = Microsoft.FSharp.Core.Operators.byte ((buf >>> 8) &&& Microsoft.FSharp.Core.Operators.uint16 0xFFFFFFFFu)
                                                         (* get cell label *)
                                                         let buf = Microsoft.FSharp.Core.Operators.uint32 (leftCell.rData &&& 0xFFFFFFFFUL)
@@ -158,29 +147,18 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extRulesIndexed:_[
                                                         let ruleNamePart = Microsoft.FSharp.Core.Operators.uint32 ((currentRule >>> 32) &&&  0xFFFFFFFFUL)
                                                         (* get cell rule top *)
                                                         let ruleName = int (Microsoft.FSharp.Core.Operators.uint16 ((ruleNamePart >>> 16) &&& 0xFFFFFFFFu))
-                                                        (* calc diff *)
-                                                        let diffBuf = ref 0
-                                                        let mutable diff = 0 
-                                                        if l >= 2 then 
-                                                            for i in 1..l-1 do
-                                                                diffBuf := (!diffBuf + i)
-                                                            diff <- !diffBuf
+                                                        let diff = l * (l - 1) / 2
                                                         let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1                                                         
-                                                        //printfn "%d[%d]" leftRuleNum index
-                                                        //printfn "%d[%d]" rightRuleNum (index + 1)                               
                                                         table.[index].rData <- currentElem
                                                         table.[index]._k <- Microsoft.FSharp.Core.Operators.uint32 k
           
     let recTable: CellData[] = extRecTable //fillArray extRecTable createEmptyCellData        
     
-    let rulesIndexed = extRulesIndexed //fillArray extRulesIndexed createEmptyRuleIndexed
+    //let rulesIndexed = extRulesIndexed //fillArray extRulesIndexed createEmptyRuleIndexed
         
     let rules = extRules //fillArray extRules (fun () -> uint64 0)
+    
+    let nTermRuleMap = extNTermRuleMap
             
-    member this.Run l i = 
-        command i rulesIndexed recTable rules [|rulesIndexed.Length|] (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|]
-
-        //if i = (rowSize - 1) then 
-            //printfn "eol"
-            //printIndexes 
-        
+    member this.Run l i s = 
+        command i s recTable rules (*[|realRecTableLen|]*) [|rowSize|] [|nTermsCount|] [|l|] nTermRuleMap

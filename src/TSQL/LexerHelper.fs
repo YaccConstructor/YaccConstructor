@@ -20,12 +20,21 @@ type Collections.Generic.IDictionary<'k,'v> with
 exception IdentToken
 
 let getKwTokenOrIdent = 
+    let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
+    let ucis = FSharpType.GetUnionCases (typeof<Token>) |> Array.map nameToUnionCtor  |> dict 
     let kws = getLiteralNames |> List.map (fun s -> s.ToLower()) |> Set.ofList
     fun (name:string) (defaultSourceText) ->
-        if kws.Contains (name.ToLowerInvariant()) then
-            genLiteral name defaultSourceText
-        else
-            Some <| IDENT defaultSourceText
+        let upperName = "KW_" + name.ToUpperInvariant()
+        let kw = 
+            ucis.TryGetValue' upperName
+            |> Option.map (fun ctor ->  ctor [| defaultSourceText |] :?>Token) 
+        match kw with 
+        | None ->
+            if kws.Contains (name.ToLowerInvariant()) then
+                genLiteral name defaultSourceText
+            else
+                Some <| IDENT defaultSourceText
+        | Some x -> kw
 
 //let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 

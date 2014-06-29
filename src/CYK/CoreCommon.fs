@@ -44,10 +44,10 @@ type RuleIndexed =
 [<Struct>]
 type SymbolRuleMapItem =
     val mutable Symbol : symbol
-    val mutable Rules : RuleIndexed[]
+    val mutable RuleIndexes : int[]
     val mutable RulesCount : int
-    new (symbol : symbol, rules : RuleIndexed[]) = 
-        { Symbol = symbol; Rules = rules; RulesCount = rules.Length }
+    new (symbol : symbol, ruleIndexes : int[]) = 
+        { Symbol = symbol; RuleIndexes = ruleIndexes; RulesCount = ruleIndexes.Length }
 
 [<AutoOpen>]
 module CellHelpers =

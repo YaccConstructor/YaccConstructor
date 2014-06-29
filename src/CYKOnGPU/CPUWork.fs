@@ -26,9 +26,8 @@ type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, extNTermRuleMap:_[
                     let maxValue = System.UInt64.MaxValue
                     
                     for r in 0..(symbol.RulesCount - 1) do
-                        let curRuleIndexed:RuleIndexed = symbol.Rules.[r]
-                        let currentRule = curRuleIndexed.Rule
-                        let ruleIndex = curRuleIndexed.Index
+                        let ruleIndex = symbol.RuleIndexes.[r]
+                        let currentRule = rules.[ruleIndex]
                         
                         for k in 0..(l - 1) do                                                    
                             (* process rule *)

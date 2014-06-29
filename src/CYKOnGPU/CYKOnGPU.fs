@@ -109,7 +109,7 @@ type CYKOnGPU(platformName, debug) =
             |> Map.toArray
             |> Array.map (fun (sym,rules) -> 
                             //printfn "Symbol %d rules count: %d" sym rules.Length
-                            new SymbolRuleMapItem(sym,rules))
+                            new SymbolRuleMapItem(sym, Array.init rules.Length (fun i -> rules.[i].Index)))
         
         let fillStart = System.DateTime.Now
         printfn "Fill table started %s" (string fillStart)

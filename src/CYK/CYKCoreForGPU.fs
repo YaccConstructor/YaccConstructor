@@ -102,7 +102,7 @@ type CYKCoreForGPU() =
                 |> Array.Parallel.iter (fun i -> rulesIndexed 
                                                  |> Array.iter (fun (curRule:RuleIndexed) -> for k in 0..(len-1) do 
                                                                                                 processRule curRule.Rule curRule.Index i k len)))
-        
+       (* 
         let fillTable2 symRuleArr = 
             [|1..rowSize - 1|]
             |> Array.iter (fun len ->
@@ -112,7 +112,7 @@ type CYKCoreForGPU() =
                                                                             item.Rules // foreach rule r per symbol in parallel
                                                                             |> Array.iter (fun curRule -> for k in 0..(len-1) do 
                                                                                                             processRule curRule.Rule curRule.Index i k len))))
-        
+        *)
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->

@@ -62,16 +62,16 @@ type CYKOnGPU(platformName, debug) =
                                     printf " %d |" count
                                     if needNewLine i then printfn "")
 
-        let fillTable nTermRuleMap =          
+        let fillTable (nTermRuleMap:SymbolRuleMapItem[]) indexesBySymbols biggestSymbol =          
           if (debug) then
-              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, nTermRuleMap)
+              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, indexesBySymbols, biggestSymbol)
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> 
                   [|0..rowSize - 1|]
                   |> Array.Parallel.iter ( fun i -> [|0..nTermRuleMap.Length - 1|] |> Array.Parallel.iter (fun s -> cpuWork.Run l i s) )
               )          
           else
-              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, platformName, nTermRuleMap)
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, platformName, indexesBySymbols, biggestSymbol)
               [|1..rowSize - 1|]
               |> Array.iter (fun l -> gpuWork.Run l)          
               gpuWork.Finish()
@@ -110,10 +110,25 @@ type CYKOnGPU(platformName, debug) =
             |> Array.map (fun (sym,rules) -> 
                             //printfn "Symbol %d rules count: %d" sym rules.Length
                             new SymbolRuleMapItem(sym, Array.init rules.Length (fun i -> rules.[i].Index)))
+
+        let biggestSymbol = 
+            (   
+                nTermRuleMap
+                |> Array.maxBy (fun pair -> pair.RulesCount)
+            ).RulesCount
+        printfn "biggest symbol size %d" biggestSymbol
+
+        let indexesBySymbols = Array.init (nTermRuleMap.Length * biggestSymbol) (fun i -> 
+                                                                                    let symbol = i / biggestSymbol
+                                                                                    let symRules = nTermRuleMap.[symbol]
+                                                                                    let ruleIndex = i % biggestSymbol
+                                                                                    if (ruleIndex < symRules.RulesCount) then symRules.RuleIndexes.[ruleIndex]
+                                                                                    else -1
+                                                                                )
         
         let fillStart = System.DateTime.Now
         printfn "Fill table started %s" (string fillStart)
-        fillTable nTermRuleMap
+        fillTable nTermRuleMap indexesBySymbols biggestSymbol
         let fillFinish = System.DateTime.Now
         printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
         

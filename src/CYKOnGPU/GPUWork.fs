@@ -9,7 +9,7 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Collections.Generic
 
-type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _indexesBySymbols:_[], biggestSym) =
+type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _indexesBySymbols:_[], biggestSym, nTermsWithRulesCount) =
 
     let command = 
         <@
@@ -205,7 +205,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _ind
         printfn "%s" !str
         res
         
-    let d = new _2D(rowSize, indexesBySymbols.Length, 1, 1)
+    let d = new _2D(rowSize, nTermsWithRulesCount, 1, 1)
               
     member this.Run(l) = 
         kernelPrepare d recTable rules (*[|realRecTableLen|]*) rowSizeArray nTermsCountArray [| l |] indexesBySymbols biggestSymArray

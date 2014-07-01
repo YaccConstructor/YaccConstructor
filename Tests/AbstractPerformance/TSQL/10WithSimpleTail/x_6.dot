@@ -1,0 +1,31 @@
+digraph G {
+0 ;
+1 ;
+2 ;
+3 ;
+4 ;
+5 ;
+0 -> 1 [ label="select "];
+1 -> 2 [ label=" x1 , y1 + z1, c1 "];
+1 -> 2 [ label=" x2 , y2 + z2, c2 "];
+1 -> 2 [ label=" x3 , y3 + z3, c3 "];
+1 -> 2 [ label=" x4 , y4 + z4, c4 "];
+1 -> 2 [ label=" x5 , y5 + z5, c5 "];
+1 -> 2 [ label=" x6 , y6 + z6, c6 "];
+1 -> 2 [ label=" x7 , y7 + z7, c7 "];
+1 -> 2 [ label=" x8 , y8 + z8, c8 "];
+1 -> 2 [ label=" x9 , y9 + z9, c9 "];
+1 -> 2 [ label=" x10 , y10 + z10, c10 "];
+2 -> 3 [ label=","];
+3 -> 4 [ label=" x1 , y1 + z1, c1 "];
+3 -> 4 [ label=" x2 , y2 + z2, c2 "];
+3 -> 4 [ label=" x3 , y3 + z3, c3 "];
+3 -> 4 [ label=" x4 , y4 + z4, c4 "];
+3 -> 4 [ label=" x5 , y5 + z5, c5 "];
+3 -> 4 [ label=" x6 , y6 + z6, c6 "];
+3 -> 4 [ label=" x7 , y7 + z7, c7 "];
+3 -> 4 [ label=" x8 , y8 + z8, c8 "];
+3 -> 4 [ label=" x9 , y9 + z9, c9 "];
+3 -> 4 [ label=" x10 , y10 + z10, c10 "];
+4 -> 5 [ label=" from y "];
+}

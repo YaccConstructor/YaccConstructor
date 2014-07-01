@@ -51,7 +51,7 @@ options {
 
 module Main
 
-open Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt
+open Select_crud, Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_table, Crud, Stmnt
 
 [<Start>]
 root_rule: (batch_body 'GO'?)*
@@ -69,4 +69,5 @@ batch_body:
      | drop_procedure 
      | create_table
      | insert
+	 | select_stmnt
 	 | stmt_block

@@ -1,0 +1,22 @@
+﻿{
+module Calc.Lexer
+open RNGLR.ParseCalc
+open AbstractLexer.Core
+
+}
+
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\r' '\n']
+
+rule token = parse
+| whitespace { None }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(0) |> Some }
+| '-' { MINUS(0)  |> Some }
+| '(' { LBRACE(0)  |> Some}
+| ')' { RBRACE(0)  |> Some}
+| '/' { DIV(0)  |> Some}
+| '+' { PLUS(0)  |> Some}
+| "**" { POW(0)  |> Some}
+| '*' { MULT(0)  |> Some}
+| eof { RNGLR_EOF (-10)  |> Some}
+| _ { failwithf "unexpected input: %s" <| "-" }

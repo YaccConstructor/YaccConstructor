@@ -1,0 +1,1 @@
+nuget pack ..\src\AbstractLexer.Common\YC.AbstractAnalysis.Lexing.Common.nuspec 

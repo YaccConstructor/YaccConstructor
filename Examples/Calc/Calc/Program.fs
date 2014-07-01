@@ -24,6 +24,7 @@ match buildAst tokens with
 //match buildAst tokens with
 | Error _ ->
     printfn "Error"
-| Success ast ->
+| Success (ast, errors) ->
     ast.PrintAst()
     
+    let result:List<double> = translate args ast errors

@@ -66,8 +66,9 @@ Target "CollectAllBinaries" (fun _ ->
 )
 
 Target "CollectLicensesStuff" (fun _ ->
-    [ combine rootDir "COPYING"
-     ;combine rootDir "README"]
+    [ combine rootDir "LICENSE"
+     ;combine rootDir "README"
+     ;combine rootDir "NOTICE"]
     |> customCopy distrDir
 )
 

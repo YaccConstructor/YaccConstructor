@@ -1,0 +1,275 @@
+﻿//   Copyright 2013, 2014 YaccConstructor Software Foundation
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+module YaccConstructor.Program
+
+open Mono.Addins
+open Yard.Core
+open Yard.Core.IL
+open Yard.Core.Helpers
+open Yard.Core.Checkers
+open Microsoft.FSharp.Text
+open System.IO
+open System.Reflection
+
+exception InvalidFEName of string
+exception InvalidGenName of string
+exception EmptyArg of string
+exception FEError of string
+exception GenError of string
+exception CheckerError of string
+
+let eol = System.Environment.NewLine
+
+let log (e:System.Exception) msg =
+    printfn "ERROR!"
+    "Stack trace: " + e.StackTrace
+    |> printfn "%s"
+    "Internal message: " + e.Message
+    |> printfn "%s"
+    "Message: " + msg
+    |> printfn "%s"
+
+let () =
+    let feName = ref None
+    let generatorName = ref None
+    let generatorParams = ref None
+    let testsPath = ref <| Some ""
+    let testFile = ref None
+    let conversions = new ResizeArray<string>()
+    let GeneratorsManager = GeneratorsManager.GeneratorsManager()
+    let ConversionsManager = ConversionsManager.ConversionsManager()
+    let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
+
+    AddinManager.Initialize()
+    AddinManager.Registry.Update(null)
+
+    let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
+
+    let userDefs = ref []
+    let userDefsStr = ref ""
+
+    feName := // Fill by default value
+        if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
+        then Some "YardFrontend"
+        else Seq.tryFind (fun _ -> true) FrontendsManager.Available
+            
+    generatorName :=
+        if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator
+        then Some "RNGLRGenerator"
+        else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
+
+    let generateSomething = ref true
+
+    let printItems iName items deft =
+        fun _ ->
+            generateSomething := false
+            printfn "\nAvailable %s: " iName
+            Seq.map (fun x -> x + (if Some x = deft then " (default)" else "")) items
+            |> String.concat "\n    "
+            |> fun x -> printf "    %s\n" x
+
+    let commandLineSpecs =
+        ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
+         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.Available !feName), "Available frontends"
+         "-g", ArgType.String 
+            (fun s -> 
+                match Array.toList (s.Split ' ') with
+                | name::[] -> generatorName := Some name; generatorParams := None
+                | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
+                | _ -> failwith "You need to specify generator name"
+            ), "Generator name. Use -ag to list available."
+         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
+         "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
+         "-ac", ArgType.Unit (printItems "conversions" ConversionsManager.Available None), "Available conversions"
+         "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
+         "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
+                "Remove previously defined constants for YardFrontend lexer."
+         "-i", ArgType.String (fun s ->
+                                   testFile := System.IO.Path.GetFileName s |> Some
+                                   testsPath := System.IO.Path.GetDirectoryName s |> Some), "Input grammar"         
+         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+    ArgParser.Parse commandLineSpecs
+
+    let run () =
+        match !testFile, !feName, !generatorName with
+        | Some fName, Some feName, Some generatorName ->
+            let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
+            let fe =
+                let _raise () = InvalidFEName feName |> raise
+                if Seq.exists (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend
+                then
+                    try
+                        match FrontendsManager.Component feName with
+                        | Some fe -> fe
+                        | None -> failwith "Frontend is not found."
+                    with
+                    | _ -> _raise ()
+                else _raise ()
+
+            // Parse grammar
+            let ilTree =
+                //try
+                    let defStr = String.concat ";" !userDefs
+                    if System.String.IsNullOrEmpty defStr
+                    then grammarFilePath
+                    else grammarFilePath + "%" + defStr
+                    |> fe.ParseGrammar
+                    |> ref
+                //with
+                //| e -> FEError (e.Message + " " + e.StackTrace) |> raise
+            Namer.initNamer ilTree.Value.grammar
+
+            let repeatedInnerRules, repeatedExportRules, undeclaredRules = GetUndeclaredNonterminalsList !ilTree
+
+            let processErrors (errorList : (_ * 'a list) list) msg map delimiter =
+                if errorList.Length > 0 then
+                    eprintfn  "%s" msg
+                    errorList |> List.iter (fun (m,rules) ->
+                        rules
+                        |> List.map map
+                        |> String.concat delimiter
+                        |> eprintfn "Module %s:%s%s" (getModuleName m) eol
+                    )
+                    
+            processErrors undeclaredRules
+                "Input grammar contains some undeclared nonterminals:"
+                (fun rule -> sprintf "%s (%s:%d:%d)" rule.text rule.file rule.startPos.line rule.startPos.column)
+                "; "
+            processErrors repeatedInnerRules
+                "There are more then one rule in one module for some nonterminals:"
+                id
+                ", "
+            processErrors repeatedExportRules
+                "There are rules, exported from different modules:"
+                (fun (rule, ms) -> sprintf "%s (%s)" rule (String.concat "," ms))
+                "; "
+            processErrors (GetIncorrectMetaArgsCount !ilTree)
+                "Some meta-rules have incorrect arguments number:"
+                (fun (rule, got, expected) -> sprintf "%s(%d,%d): %d (expected %d)" rule.text rule.startPos.line rule.startPos.column got expected)
+                eol
+//            printfn "%A" <| ilTree
+            let lostSources = ref false
+            // Let possible to know, after what conversion we lost reference to original code
+            let checkSources name il = 
+                if not !lostSources then
+                    match sourcesWithoutFileNames il with
+                    | [] -> ()
+                    | x ->
+                        lostSources := true
+                        x
+                        |> List.map(fun s -> s.text) |> String.concat "\n"
+                        |> printfn "Lost sources after frontend or conversion %s:\n %s" name
+            checkSources fe.Name !ilTree
+            // Apply Conversions
+            for conv in conversions do
+                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                checkSources conv !ilTree
+  //          printfn "========================================================"
+    //        printfn "%A" <| ilTree
+            let gen =
+                let _raise () = InvalidGenName generatorName |> raise
+                if Seq.exists (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator
+                then              
+                    try
+                        match GeneratorsManager.Component generatorName with
+                        | Some gen -> gen
+                        | None -> failwith "TreeDump is not found."
+                    with
+                    | _ -> _raise ()
+                else _raise ()
+                               
+            // Generate something
+            
+            let result =  
+                //if not (IsSingleStartRule !ilTree) then
+                //   raise <| CheckerError "Input grammar should contains only one start rule."
+                //try
+                //    let gen = new Yard.Generators.RNGLR.RNGLR()
+                    for constr in gen.Constraints do
+                        let grammar = ilTree.Value.grammar
+                        if not <| constr.Check grammar then
+                            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+                            ilTree := {!ilTree with grammar = constr.Fix grammar}
+
+                    match !generatorParams with
+                    | None -> gen.Generate !ilTree
+                       
+                    | Some genParams -> gen.Generate(!ilTree, genParams)
+                //with
+//                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 
+//                    -> GenError "Start rule cannot be found in input grammar. Please, specify start rule."
+//                       |> raise
+                //| e -> GenError e.Message |> raise
+
+            printf "%A" result
+            System.IO.File.WriteAllText("out", string result)
+            ()
+        | _, None, _          -> EmptyArg "frontend name (-f)" |> raise
+        | _, _, None          -> EmptyArg "generator name (-g)" |> raise
+        | None , _, _         -> EmptyArg "file name (-i)" |> raise 
+    try
+        if !generateSomething = true then 
+            run ()
+    with
+    | InvalidFEName feName as e  -> 
+        "Frontend with name " + feName + " is not available. Run \"Main.exe -af\" for get all available frontends.\n" 
+        |> log e
+    | InvalidGenName genName as e->
+        "Generator with name " + genName + " is not available. Run \"Main.exe -ag\" for get all available generators.\n"
+        |> log e
+    | EmptyArg argName as e ->
+        sprintf "Argument can not be empty: %s\n\nYou need to specify frontend, generator and input grammar. Example:
+YaccConstructor.exe -f YardFrontend -c BuildAST -g YardPrinter -i ../../../Tests/Conversions/buildast_1.yrd \n
+List of available frontends, generators and conversions can be obtained by -af -ag -ac keys" argName
+        |> log e
+    | FEError error as e ->
+        "Frontend error: " + error + "\n"
+        |> log e
+    | GenError error as e  ->
+        "Generator error: " + error + "\n"
+        |> log e
+    | CheckerError error as e  ->
+        error + "\n"
+        |> log e
+    | :? System.IO.IOException as e -> 
+        "Could not read input file.\n"
+        |> log e
+    | x -> "Unrecognized error." |> log x
+
+
+
+//Tests. Please do not remove
+//YaccConstructor.exe -f AntlrFrontend -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/ANTLR/C.g
+//YaccConstructor.exe -g YardPrinter -i ../../../../Tests/Basic/test_include/test_include_main.yrd
+//YaccConstructor.exe -g YardPrinter -i ../../../../Tests/Basic/test_seq/test_seq.yrd
+//YaccConstructor.exe -g YardPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g TreeDump -c AddEOF -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -i ../../../../Tests/RACC/claret/braces_1/test_simple_braces.yrd
+//YaccConstructor.exe -g YardPrinter -c ReplaceLiterals -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandEBNF -c ExpandMeta -c ExpandBrackets -c AddEOF -c ReplaceLiterals -i ..\..\..\FsYaccFrontend\fsyacc.yrd
+//YaccConstructor.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/antlr.fsy
+//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Basic/test_summator_1/test_summator_1.yrd
+//YaccConstructor.exe -f FsYaccFrontend -g YardPrinter -i ../../../../Tests/FsYacc/cparser.mly
+//YaccConstructor.exe -c "ReplaceLiterals KW_%s" -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -c ReplaceLiterals -g YardPrinter -i ../../../../Tests/TempTests/test1.yrd
+//YaccConstructor.exe -c BuildAST -g YardPrinter -i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "ReplaceLiterals KW_%s" -c BuildAST -i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c ExpandEbnfStrict -i ../../../../Tests/Conversions/expandebnfstrict_1.yrd
+//YaccConstructor.exe -g YardPrinter -c "BuildAST typed"-i ../../../../Tests/Conversions/buildast_1.yrd
+//YaccConstructor.exe -g YardPrinter -c MergeAlter -i ../../../../Tests/Conversions/mergealter_1.yrd
+//YaccConstructor.exe -g FsYaccPrinter -c ExpandMeta -c ExpandEbnfStrict -c ExpandBrackets -c AddEOF -i ../../../../Tests/Conversions/expandbrackets_1.yrd
+

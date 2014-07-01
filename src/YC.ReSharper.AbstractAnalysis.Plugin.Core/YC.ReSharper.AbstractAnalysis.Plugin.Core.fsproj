@@ -157,6 +157,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{f722fda7-cb4e-49ee-a301-19708c99ae16}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Calc\Calc.fsproj">
       <Name>Calc</Name>
       <Project>{016c2afb-d8aa-4dd4-94f9-83e0e6c93f72}</Project>

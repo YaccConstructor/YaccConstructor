@@ -66,6 +66,14 @@
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+            <Private>True</Private>
+            </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph">

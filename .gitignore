@@ -130,6 +130,7 @@ src/FsYaccFrontend/out
 **/FsYard.log
 src/TSQL/MsParser.fs
 Tests/Alvor/GenerateTestforAlvor/packages/*
+src/packages/*
 Tests/AbstractRNGLR/DOT/errors1.dot.pdf
 Tests/AbstractRNGLR/DOT/errors10.dot.pdf
 Tests/AbstractRNGLR/DOT/errors11.dot.pdf

@@ -24,6 +24,7 @@ open LexerHelper
 open System
 open System.IO
 open Yard.Generators.RNGLR.AST
+open AbstractAnalysis.Common
 
 let tokenize lexerInputGraph =
     let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
@@ -46,5 +47,16 @@ let args =
     }
 
 let printAstToDot ast name = defaultAstToDot ast name
+
+
 let xmlPath = xmlPath
 let translate ast errors = translate args ast errors
+
+type TSQLPars = 
+    interface IInjectedLanguageProcessor<Yard.Examples.MSParser.Token,JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression> with
+        member this.Name = "TSQL"
+        member this.Parse (inG) = parse (inG)
+        member this.NumToString (int) = Yard.Examples.MSParser.numToString(int)
+        member this.TokenData(token) = Yard.Examples.MSParser.tokenData(token)
+        member this.TokenToNumber(token) = Yard.Examples.MSParser.tokenToNumber(token)
+        member this.Tokenize(inG) = tokenize inG

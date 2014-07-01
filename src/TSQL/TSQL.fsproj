@@ -187,6 +187,13 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{f722fda7-cb4e-49ee-a301-19708c99ae16}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

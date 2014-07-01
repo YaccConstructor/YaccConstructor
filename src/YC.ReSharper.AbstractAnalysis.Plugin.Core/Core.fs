@@ -12,6 +12,7 @@ open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open YC.ReSharper.AbstractAnalysis.Languages
 open Yard.Examples.MSParser
+open AbstractAnalysis.Common
 
 type SupportedLangs =
     | Calc
@@ -48,7 +49,7 @@ type Processor(file) =
                tokenize g
                |> Some 
             with
-            | Calc.Lexer.LexerError(t,brs) ->
+            | LexerError(t,brs) ->
                 (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
                 |> addLError
                 None
@@ -131,42 +132,47 @@ type Processor(file) =
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
 
-        let addError tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                 calculatePos brs 
                 |> Seq.iter
                     (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            match tok with
-            | Calc.AbstractParser.MINUS (l,br) -> e "MINUS" l br
-            | Calc.AbstractParser.DIV (l,br) -> e "DIV" l br
-            | Calc.AbstractParser.PLUS (l,br) -> e "PLUS" l br
-            | Calc.AbstractParser.NUMBER (l,br) -> e "NUMBER" l br
-            | Calc.AbstractParser.LBRACE (l,br) -> e "LBRACE" l br
-            | Calc.AbstractParser.RBRACE (l,br) -> e "RBRACE" l br
-            | Calc.AbstractParser.POW (l,br) -> e "POW" l br
-            | Calc.AbstractParser.RNGLR_EOF (l,br) -> e "EOF" l br
-            | Calc.AbstractParser.ERROR (l,br) -> e "ERROR" l br
-            | Calc.AbstractParser.MULT (l,br) -> e "MULT" l br
+            let name = tok |> (tokenToNumberFunc >>  numToStringFunc)
+            let l,br = tokenDataFunc tok :?>_
+            e name l br
+
+        (*
+        let addErrorCalc tok =
+            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+                calculatePos brs 
+                |> Seq.iter
+                    (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
+            let name = tok |> (Calc.AbstractParser.tokenToNumber >>  Calc.AbstractParser.numToString)
+            let l,br = Calc.AbstractParser.tokenData tok :?>_
+            e name l br
+                    
         
         let addErrorJSON tok = 
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                 calculatePos brs 
-                |> Seq.iter (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            match tok with
-            | JSON.Parser.NUMBER (l,br) -> e "NUMBER" l br
-            | JSON.Parser.STRING1 (l,br) -> e "STRING1" l br
-            | _ -> failwith "error in addErrorJSON function"
-        
+                |> Seq.iter
+                    (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
+            let name = tok |> (JSON.Parser.tokenToNumber >> JSON.Parser.numToString)
+            let l, br = JSON.Parser.tokenData tok :?>_
+            e name l br
+                    
         let addErrorTSQL tok =
             let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
                 calculatePos brs 
                 |> Seq.iter
                     (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            let name = tok |> (tokenToNumber >>  numToString)
-            let l,br = tokenData tok :?>_
+            let name = tok |> (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
+            let l, br = Yard.Examples.MSParser.tokenData tok :?>_
             e name l br
                     
 
+        let errorCalc tok  = addError tok Calc.AbstractParser.tokenToNumber Calc.AbstractParser.numToString Calc.AbstractParser.tokenData 
+        let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
+        let errorTSQL tok  = addError tok Yard.Examples.MSParser.tokenToNumber Yard.Examples.MSParser.numToString Yard.Examples.MSParser.tokenData 
 
         let addCalcSPPF pair = calcForest <- calcForest @ [pair]
         let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]

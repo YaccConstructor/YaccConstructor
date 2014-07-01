@@ -2,10 +2,7 @@
 module Calc.Lexer
 open Calc.AbstractParser
 open AbstractLexer.Core
-
-//type eInfo<'brs> = 
-
-exception LexerError of string*obj
+open AbstractAnalysis.Common
 }
 
 let digit = ['0'-'9']

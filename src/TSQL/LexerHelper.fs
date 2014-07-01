@@ -60,7 +60,10 @@ let makeIdent notKeyWord (name:string) (startPos,endPos) =
   //else if name.[0] = '#' then TEMPOBJ name
   elif prefix = "%%" then STOREDPROCEDURE defaultSourceText
   elif notKeyWord then IDENT defaultSourceText
-  else (getKwTokenOrIdent name defaultSourceText).Value
+  else 
+    match getKwTokenOrIdent name defaultSourceText with
+    | Some x -> x
+    | None -> failwithf "Fail to get token with name %s " name
 
 
 let defaultSourceText id brs value =
@@ -72,7 +75,9 @@ let getLiteral id brs (*lexbuf : LexBuffer<_>*) value =
 //    let range = 
 //        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
 //                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
-    genLiteral value ((defaultSourceText id brs value),brs)
+    match genLiteral value ((defaultSourceText id brs value),brs) with
+    | Some x -> x
+    | None -> failwithf "Fail to get token with name %s " value
         
 let tokenPos token =
     let data = tokenData token

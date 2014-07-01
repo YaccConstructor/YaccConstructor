@@ -23,27 +23,28 @@ type Token =
     | NUMBER of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | STRING1 of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 15`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 16`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 17`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 18`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 19`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 20`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 21`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 22`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | ``L 23`` of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_comma_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_semi_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_left_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_right_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_false of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_null of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_true of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_left_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
+    | L_right_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
 let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | "," -> ``L 15`` data
-    | ":" -> ``L 16`` data
-    | "[" -> ``L 17`` data
-    | "]" -> ``L 18`` data
-    | "false" -> ``L 19`` data
-    | "null" -> ``L 20`` data
-    | "true" -> ``L 21`` data
-    | "{" -> ``L 22`` data
-    | "}" -> ``L 23`` data
+    | "," -> Some (L_comma_ data)
+    | ":" -> Some (L_semi_ data)
+    | "[" -> Some (L_left_square_bracket_ data)
+    | "]" -> Some (L_right_square_bracket_ data)
+    | "false" -> Some (L_false data)
+    | "null" -> Some (L_null data)
+    | "true" -> Some (L_true data)
+    | "{" -> Some (L_left_figure_bracket_ data)
+    | "}" -> Some (L_right_figure_bracket_ data)
+    | x -> None
 let tokenData = function
     | EMPTY x -> box x
     | KW_COLON x -> box x
@@ -53,6 +54,15 @@ let tokenData = function
     | NUMBER x -> box x
     | RNGLR_EOF x -> box x
     | STRING1 x -> box x
+    | L_comma_ x -> box x
+    | L_semi_ x -> box x
+    | L_left_square_bracket_ x -> box x
+    | L_right_square_bracket_ x -> box x
+    | L_false x -> box x
+    | L_null x -> box x
+    | L_true x -> box x
+    | L_left_figure_bracket_ x -> box x
+    | L_right_figure_bracket_ x -> box x
 
 let numToString = function
     | 0 -> "array1"
@@ -60,12 +70,12 @@ let numToString = function
     | 2 -> "highlight_EMPTY"
     | 3 -> "highlight_KW_COLON"
     | 4 -> "highlight_KW_FALSE"
-    | 5 -> "highlight_KW_NULL"
-    | 6 -> "highlight_KW_TRUE"
-    | 7 -> "highlight_NUMBER"
-    | 8 -> "highlight_STRING1"
-    | 9 -> "objects"
-    | 10 -> "pair"
+    | 5 -> "yard_exp_brackets_1603"
+    | 6 -> "yard_exp_brackets_1604"
+    | 7 -> "yard_many_177"
+    | 8 -> "yard_many_178"
+    | 9 -> "yard_rule_list_1601"
+    | 10 -> "yard_rule_list_1602"
     | 11 -> "value"
     | 12 -> "yard_rule_list_1"
     | 13 -> "yard_rule_list_3"
@@ -86,11 +96,15 @@ let tokenToNumber = function
     | EMPTY _ -> 17
     | KW_COLON _ -> 18
     | KW_FALSE _ -> 19
-    | KW_NULL _ -> 20
-    | KW_TRUE _ -> 21
-    | NUMBER _ -> 22
-    | RNGLR_EOF _ -> 23
-    | STRING1 _ -> 24
+    | L_comma_ _ -> 15
+    | L_semi_ _ -> 16
+    | L_left_square_bracket_ _ -> 17
+    | L_right_square_bracket_ _ -> 18
+    | L_false _ -> 19
+    | L_null _ -> 20
+    | L_true _ -> 21
+    | L_left_figure_bracket_ _ -> 22
+    | L_right_figure_bracket_ _ -> 23
 
 let isLiteral = function
     | EMPTY _ -> false
@@ -101,6 +115,15 @@ let isLiteral = function
     | NUMBER _ -> false
     | RNGLR_EOF _ -> false
     | STRING1 _ -> false
+    | L_comma_ _ -> true
+    | L_semi_ _ -> true
+    | L_left_square_bracket_ _ -> true
+    | L_right_square_bracket_ _ -> true
+    | L_false _ -> true
+    | L_null _ -> true
+    | L_true _ -> true
+    | L_left_figure_bracket_ _ -> true
+    | L_right_figure_bracket_ _ -> true
 
 let getLiteralNames = []
 let mutable private cur = 0

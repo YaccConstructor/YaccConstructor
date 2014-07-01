@@ -5,8 +5,9 @@ open LexerHelper
 open System
 open AbstractLexer.Core
 open JSON.Parser
+open AbstractAnalysis.Common
 
-# 9 "Lexer.fs"
+# 10 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -89,29 +90,29 @@ let rec _fslex_dummy () = _fslex_dummy()
 let fslex_actions_token  _fslex_state lexeme brs =
   match _fslex_state with
   | 0 -> ( 
-# 24 "Lexer.fsl"
+# 25 "Lexer.fsl"
                                None 
-# 94 "Lexer.fs"
+# 95 "Lexer.fs"
           )
   | 1 -> ( 
-# 25 "Lexer.fsl"
+# 26 "Lexer.fsl"
                           NUMBER(lexeme,brs) |> Some 
-# 99 "Lexer.fs"
+# 100 "Lexer.fs"
           )
   | 2 -> ( 
-# 26 "Lexer.fsl"
+# 27 "Lexer.fsl"
                            STRING1(lexeme,brs) |> Some 
-# 104 "Lexer.fs"
+# 105 "Lexer.fs"
           )
   | 3 -> ( 
-# 27 "Lexer.fsl"
+# 28 "Lexer.fsl"
                        RNGLR_EOF ("",[||]) |> Some 
-# 109 "Lexer.fs"
+# 110 "Lexer.fs"
           )
   | 4 -> ( 
-# 28 "Lexer.fsl"
+# 29 "Lexer.fsl"
                      None //getLiteral brs lexeme |> Some
-# 114 "Lexer.fs"
+# 115 "Lexer.fs"
           )
   | _ -> failwith "token"
 

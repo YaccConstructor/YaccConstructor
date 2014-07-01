@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Mono.Addins</id>
+    <version>1.1</version>
+    <title>Mono.Addins</title>
+    <authors>Lluis Sanchez</authors>
+    <owners>Lluis Sanchez</owners>
+    <licenseUrl>http://monoaddins.codeplex.com/license</licenseUrl>
+    <projectUrl>http://monoaddins.codeplex.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Mono.Addins is a framework for creating extensible applications, and for creating add-ins which extend applications.</description>
+    <language>en-US</language>
+  </metadata>
+</package>

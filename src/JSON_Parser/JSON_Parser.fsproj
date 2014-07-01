@@ -164,7 +164,6 @@
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
             <Private>True</Private>
     </ProjectReference>
-<Конфликт объединения>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{f722fda7-cb4e-49ee-a301-19708c99ae16}</Project>

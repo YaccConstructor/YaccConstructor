@@ -131,13 +131,13 @@ type Processor(file) =
         //let sourceFile = provider.SourceFile
         //let file = provider.SourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) :?> ICSharpFile
         let graphs = (new Approximator(file)).Approximate defLang
-
-            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
+        let addError tok tokenToNumberFunc numToStringFunc (tokenDataFunc: _ -> obj) =
+            let e t l (brs:array<AbstractLexer.Core.Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) = 
                 calculatePos brs 
                 |> Seq.iter
                     (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
             let name = tok |> (tokenToNumberFunc >>  numToStringFunc)
-            let l,br = tokenDataFunc tok :?>_
+            let (l:string),br = tokenDataFunc tok :?> _
             e name l br
 
         (*
@@ -169,7 +169,7 @@ type Processor(file) =
             let l, br = Yard.Examples.MSParser.tokenData tok :?>_
             e name l br
                     
-
+*)
         let errorCalc tok  = addError tok Calc.AbstractParser.tokenToNumber Calc.AbstractParser.numToString Calc.AbstractParser.tokenData 
         let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
         let errorTSQL tok  = addError tok Yard.Examples.MSParser.tokenToNumber Yard.Examples.MSParser.numToString Yard.Examples.MSParser.tokenData 
@@ -184,13 +184,13 @@ type Processor(file) =
                 match lang with
                 | Calc -> 
                     calcXmlPath <- Calc.xmlPath
-                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  addError Calc.translate Calc.printAstToDot addCalcSPPF
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate Calc.printAstToDot addCalcSPPF
                 | JSON -> 
                     jsonXmlPath <- JSON.xmlPath
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  addErrorJSON JSON.translate JSON.printAstToDot addJsonSPPF
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate JSON.printAstToDot addJsonSPPF
                 | TSQL -> 
                     tsqlXmlPath <- TSQL.xmlPath
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  addErrorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
             )
         lexerErrors, parserErrors
 

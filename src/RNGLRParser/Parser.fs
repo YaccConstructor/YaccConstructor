@@ -636,7 +636,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
 //            if errorRuleExist 
 //            then 
 //                 recovery()
-                 makeReductions (!curInd + 1) recovery
+//                 makeReductions (!curInd + 1) recovery
 //                 attachEdges()
 //            else wasError := true
 

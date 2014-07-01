@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Generators.RNGLR</id>
-    <version>0.0.8.5</version>
+    <version>0.2.8.7</version>
     <title>RNGLR parsers generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>

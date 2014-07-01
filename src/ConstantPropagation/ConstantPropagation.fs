@@ -25,9 +25,12 @@ type Approximator(file:ICSharpFile) =
         let rec go start _end (node:ITreeNode) =
             let processVar start _end (v:IReferenceExpression) =
                 let decl = v.Reference.CurrentResolveResult.DeclaredElement //.Resolve().DeclaredElement
-                let assignments = 
-                    defUses.[decl] 
-                    |> Seq.filter (fun kvp -> kvp.Value <> null && kvp.Value.Contains v) |> Seq.map (fun kvp -> 
+                let assignments =
+                    let x =  
+                        defUses.[decl] 
+                        |> Seq.filter (fun kvp -> kvp.Value <> null && kvp.Value.Contains v)
+                    x
+                    |> Seq.map (fun kvp -> 
                       match kvp.Key with
                       | :? ILocalVariableDeclaration as lvDecl -> (lvDecl.Initial :?> IExpressionInitializer).Value
                       | _ -> 

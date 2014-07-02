@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Core</id>
-    <version>0.0.6.5</version>
+    <version>0.0.6.6</version>
     <title>Core of YaccConstructor</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -17,6 +17,7 @@
     <dependencies> 
         <dependency id="FSharpX.Core" version="[1.8.41]" />
         <dependency id="YC.Tools" />
+        <dependency id="FSharp.Core.3" version="0.0.2"/>
     </dependencies> 
 
   </metadata>
@@ -31,7 +32,8 @@
     <file src="..\..\Bin\Release\v40\Common.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\Conversions.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\Constraints.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="lib\net40\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="lib\net40\" exclude="**\*.Test.*"/>
+    <file src="..\..\Bin\Release\v40\*.addins" target="lib\net40\"/>
 
 </files>
 <!--Dependences

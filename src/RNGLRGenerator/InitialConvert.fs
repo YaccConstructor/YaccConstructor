@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+
 module Yard.Generators.RNGLR.InitialConvert
 
 open Yard.Core.IL
@@ -67,6 +68,7 @@ let initialConvert (def : Definition.t<_,_>) =
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
             | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PAlt (x,y) -> reachable x && reachable y
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false

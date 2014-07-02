@@ -575,7 +575,9 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 incr k
                             
                             for i = !k to length-1 do
-                                res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                                if epsilons.[rules.[fam.prod].[i]] <> null
+                                then
+                                    res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                             
                             let errFamily = getFamilyWithError fam
                             if errFamily.IsSome
@@ -673,14 +675,15 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         let rec processFamily (family : Family) : obj = 
             let children = new ResizeArray<_>()
             
-            let inline processNode (node : obj) = 
+            let processNode (node : obj) = 
                 match node with 
                 | :? AST as ast -> 
                     let child = processFamily <| handleAST ast
                     children.Add child
-                | :? int as tok -> 
+                | :? int as tok when tok >= 0 -> 
                     processed.[tok] <- true
                     children.Add node
+                | :? int as tok when tok <= 0 -> ()
                 | _ -> failwithf "Error in generation one of highlighting tree"
 
             family.nodes.doForAll <| fun child -> processNode child

@@ -57,7 +57,9 @@ type Processor(file) =
         tokenize graph |> Option.map parse
         |> Option.iter
             (function 
-             | Yard.Generators.RNGLR.Parser.Success (sppf, _,errors) -> addSPPF (sppf, errors)
+             | Yard.Generators.RNGLR.Parser.Success (sppf, _,errors) -> 
+                printer sppf "ast.dot"
+                addSPPF (sppf, errors)
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
          

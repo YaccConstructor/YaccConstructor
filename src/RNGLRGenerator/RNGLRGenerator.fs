@@ -259,11 +259,13 @@ type RNGLR() =
                 then tables
                 else 
                     let xmlOpt = 
-                        if !namespaceName <> "" 
+                        if !needHighlighting && !namespaceName <> "" 
                         then Some <| !namespaceName
                         else None
+                                
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                        positionType fullPath output dummyPos caseSensitive xmlOpt
+                                    positionType fullPath output dummyPos caseSensitive xmlOpt
+
             let res = 
                 match definition.foot with
                 | None -> res

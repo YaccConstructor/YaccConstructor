@@ -566,7 +566,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             let length = 
                                 if fam.prod < this.RulesCount
                                 then rules.[fam.prod].Length
-                                else fam.nodes.Length
+                                else // it is possible if error recovery is used. 
+                                    fam.nodes.Length
                             
                             let res = Array.zeroCreate length
                             let k = ref 0
@@ -575,9 +576,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                                 incr k
                             
                             for i = !k to length-1 do
-                                if epsilons.[rules.[fam.prod].[i]] <> null
-                                then
-                                    res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                                res.[i] <- epsilons.[rules.[fam.prod].[i]].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
                             
                             let errFamily = getFamilyWithError fam
                             if errFamily.IsSome

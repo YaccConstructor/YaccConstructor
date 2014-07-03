@@ -296,7 +296,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
     let mainHighlightSemantic () = 
-        let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
+        
         
         let printAddSemantic = 
             let res  = new System.Text.StringBuilder()
@@ -363,7 +363,9 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             res.ToString()
 
         if highlightingOpt.IsSome 
-        then wordL <| System.String.Concat [| printXmlName; System.Environment.NewLine; 
+        then 
+            let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
+            wordL <| System.String.Concat [| printXmlName; System.Environment.NewLine; 
                                                 printAddSemantic; System.Environment.NewLine; 
                                                 printCalculatePos|] 
         else wordL ""
@@ -371,4 +373,3 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
-    

@@ -47,21 +47,28 @@ open Lexer2
 //open Lexer2
 //
 let run path astBuilder =
-    let tokens = Lexer2.tokens(path)
+    let tokens = Lexer2.tokens2(path)
     astBuilder tokens, tokens
 
 let parser = GLL.SimpleAmb.buildAst
-let path = @"..\..\input.txt"
+let r = run "B B B" parser
+//let path = @"..\..\input.txt"
 //let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
+//for i in [1..10] do
+//    let str = String.init (i * 50) (fun i -> "B ")
+//    let start = System.DateTime.Now
+//    let r = run (str.Trim()) parser
+//    let t = System.DateTime.Now - start
+//    printfn "%A" t.TotalSeconds
 
-
-match run path parser with
-| Parser.Error str, _ ->
-    printfn "%s" str
-| Parser.Success tree, tokens -> 
-    printfn "ff"   
+match r with
+    | Parser.Error str, _ ->
+        printfn "%s" str
+    | Parser.Success tree, tokens -> 
+    //printfn "ff"   
     //tree.PrintAst()
-    GLL.SimpleAmb.defaultAstToDot tree "ast.dot"
+        GLL.SimpleAmb.defaultAstToDot tree.[0] "ast1.dot"
+        GLL.SimpleAmb.defaultAstToDot tree.[1] "ast2.dot"
 
 
 printfn "ff"

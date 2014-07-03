@@ -79,7 +79,17 @@ and Nodes =
                         if arr.Length > 2 then
                             res.other <- arr.[2..]
             {fst = res.fst; snd = res.snd; other = res.other; leftExt = -1; rightExt = -1}
-            //match arr with
+
+        new (arr : array<_>, l, r, k) =
+            let mutable res = new Nodes()
+            if arr <> null then
+                if arr.Length > 0 then
+                    res.fst <- arr.[0]
+                    if arr.Length > 1 then
+                        res.snd <- arr.[1]
+                        if arr.Length > 2 then
+                            res.other <- arr.[2..]
+            {fst = res.fst; snd = res.snd; other = res.other; leftExt = l; rightExt = r}
 
 
         member nodes.doForAll f =

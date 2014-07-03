@@ -9,12 +9,25 @@ let tokens(path) =
     let toLexerTag (name:string) =
             printfn "%s" name
             match name with
-            | "A" -> A (2)
+           // | "A" -> A (2)
             | "B" -> B (2)
-            | "D" -> D (2)
+            //| "D" -> D (2)
             //| "S" -> S (2)
             | x -> failwithf "Unexpected token %s" x
 
     System.IO.File.ReadAllText(path)
         .Split([|' '|])
+    |> Array.map toLexerTag
+
+let tokens2(str : string) = 
+    let toLexerTag (name:string) =
+           // printfn "%s" name
+            match name with
+            //| "A" -> A (2)
+            | "B" -> B (2)
+            //| "D" -> D (2)
+            //| "S" -> S (2)
+            | x -> failwithf "Unexpected token %s" x
+
+    str.Split([|' '|])
     |> Array.map toLexerTag

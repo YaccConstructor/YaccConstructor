@@ -679,10 +679,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 | :? AST as ast -> 
                     let child = processFamily <| handleAST ast
                     children.Add child
-                | :? int as tok when tok >= 0 -> 
-                    processed.[tok] <- true
+                | :? int as tok -> 
+                    if tok >= 0
+                    then processed.[tok] <- true
                     children.Add node
-                | :? int as tok when tok <= 0 -> ()
                 | _ -> failwithf "Error in generation one of highlighting tree"
 
             family.nodes.doForAll <| fun child -> processNode child

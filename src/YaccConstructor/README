@@ -1,7 +1,0 @@
-YC.Core is a part of YaccConstructor project.
-
-YC.Core cintains of IL description, components' managers and common functions for IL manipulation.
-
-If you want to add new component to the project modify the "YaccConstructor.addins" file.
-
-For more details please visit progect's web site: https://code.google.com/p/recursive-ascent

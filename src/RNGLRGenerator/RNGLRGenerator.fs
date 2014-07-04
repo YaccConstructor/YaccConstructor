@@ -128,8 +128,8 @@ type RNGLR() =
                     out.Close()
 
                 let generateItemsGroup toksAndLits = 
-                    use out = new System.IO.StreamWriter (folder + "ItemsGroup.txt")
-                    let content = printItemsGroup toksAndLits !namespaceName 
+                    use out = new System.IO.StreamWriter (folder + "ItemsGroup.target")
+                    let content = printItemsGroup toksAndLits !namespaceName
                     out.WriteLine content
                     out.Close()
                 

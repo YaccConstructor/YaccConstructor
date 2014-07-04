@@ -442,15 +442,18 @@ let printItemsGroup nameOfClasses xmlName =
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 1) " ")
         printBr x
-
+    
+    printBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    printBrInd 0 "<!-- Generate file must be include in .csproj with help follow strings "
+    printBrInd 0 "<Import Project=\"ItemsGroup.target\" />"
+    printBrInd 0 "<ItemGroup> <Compile Include=\"@(ExternalCompile)\" /></ItemGroup> -->"
+    printBrInd 1 "<Project ToolsVersion=\"4.0\" DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">"
     printBrInd 1 "<ItemGroup>" 
-    printBrInd 2 "<Compile Include=\"Properties\AssemblyInfo.cs\" />"
+    printBrInd 2 "<ExternalCompile Include=\"Properties\AssemblyInfo.cs\" />"
     for className in nameOfClasses do
-        printBrInd 2 "<Compile Include=\"%s\" />" className
+        printBrInd 2 "<ExternalCompile Include=\"%s\" />" className
 
-    printBrInd 1 "</ItemGroup>"
-
-    printBrInd 1 "<ItemGroup>" 
     printBrInd 2 "<Content Include=\"%s.xml\" />" xmlName
     printBrInd 1 "</ItemGroup>"
+    printBrInd 1 "</Project>"
     res.ToString()

@@ -17,7 +17,7 @@ open Yard.Examples.MSParser
 open Yard.Utils.SourceText
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
-let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new SourceText("", new SourceRange(0UL,0UL)),[||])
+let eofToken = Yard.Examples.MSParser.RNGLR_EOF ("",[||])
 
 let loadLexerInputGraph gFile =
     let qGraph = loadDotToQG baseInputGraphsPath gFile

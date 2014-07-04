@@ -151,3 +151,4 @@ Tests/AbstractRNGLR/DOT/errors9.dot.pdf
 src/TSQL/Highlight_*.cs
 src/TSQL/*TermNode.cs
 src/TSQL/*LitNode.cs
+src/TSQL/TSQLHighlighting/*.cs

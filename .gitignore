@@ -154,3 +154,4 @@ src/TSQL/*LitNode.cs
 src/TSQL/TSQLHighlighting/*.cs
 src/TSQL/out
 src/TSQL/TSQLHighlighting/TSQLHighlighting.xml
+src/TSQL/TSQLHighlighting/ItemsGroup.target

@@ -152,3 +152,5 @@ src/TSQL/Highlight_*.cs
 src/TSQL/*TermNode.cs
 src/TSQL/*LitNode.cs
 src/TSQL/TSQLHighlighting/*.cs
+src/TSQL/out
+src/TSQL/TSQLHighlighting/TSQLHighlighting.xml

@@ -24,6 +24,7 @@
         <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v45\FsYARD.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>        
         <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools\FsYARD"/>
+        <file src="..\..\Bin\Release\v45\FSharp.Core.*" target="\tools\FsYARD"/>
         <file src="..\..\Bin\Release\v45\FSharpx.Text.StructuredFormat.*" target="\tools\FsYARD"/>
         <file src="..\..\Bin\Release\v45\FSharpx.Core.*" target="\tools\FsYARD"/>
         

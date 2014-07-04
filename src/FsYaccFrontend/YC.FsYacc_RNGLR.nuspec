@@ -16,16 +16,17 @@
     <tags>YaccConstructor F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF FsYacc</tags>
   </metadata>
     <files>
-        <file src="..\..\Bin\Release\v45\Common.*" target="\tools\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Constraints.*" target="\tools\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Conversions.*" target="\tools\" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\Abstract*.*.*" target="\tools\" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\RNGLR*" target="\tools\" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
-        <file src="..\..\Bin\Release\v45\FsYaccFrontend.*" target="\tools\" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\YaccConstructor.*" target="\tools\" exclude="**\*.Test.*"/>        
-        <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools\"/>
-        <file src="..\..\Bin\Release\v45\FSharpx.Text.StructuredFormat.*" target="\tools\"/>
-        <file src="..\..\Bin\Release\v45\FSharpx.Core.*" target="\tools\"/>
+        <file src="..\..\Bin\Release\v40\Common.*" target="\tools\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\Constraints.*" target="\tools\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\Conversions.*" target="\tools\" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v40\Abstract*.*.*" target="\tools\" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v40\RNGLR*" target="\tools\" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
+        <file src="..\..\Bin\Release\v40\FsYaccFrontend.*" target="\tools\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="\tools\" exclude="**\*.Test.*"/>        
+        <file src="..\..\Bin\Release\v40\FsYacc.exe" target="\tools\"/>
+	<file src="..\..\Bin\Release\v40\FSharp.Core.*" target="\tools\"/>
+        <file src="..\..\Bin\Release\v40\FSharpx.Text.StructuredFormat.*" target="\tools\"/>
+        <file src="..\..\Bin\Release\v40\FSharpx.Core.*" target="\tools\"/>
         
         <file src="README" target="README"/>
         <file src="..\..\LICENSE" target="LICENSE"/>

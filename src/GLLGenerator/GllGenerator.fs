@@ -17,7 +17,6 @@ open Option
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
-
 [<Extension>]
 type GLL() = 
     inherit Generator()
@@ -27,7 +26,7 @@ type GLL() =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
             let pairs = Array.zeroCreate <| args.Length / 2
-            for i = 0 to pairs.Length-1 do
+            for i = 0 to pairs.Length - 1 do
                 pairs.[i] <- args.[i * 2], args.[i * 2 + 1]
             let getOption name either f =
                 match definition.options.TryFind name with
@@ -75,26 +74,28 @@ type GLL() =
 
             let printRules () =
                 let printSymbol (symbol : int) =
-                    if symbol < grammar.indexator.nonTermCount then
-                        grammar.indexator.indexToNonTerm symbol
-                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd then
-                        grammar.indexator.indexToTerm symbol
+                    if symbol < grammar.indexator.nonTermCount
+                    then grammar.indexator.indexToNonTerm symbol
+                    elif symbol >= grammar.indexator.termsStart && symbol <= grammar.indexator.termsEnd
+                    then grammar.indexator.indexToTerm symbol
                     else grammar.indexator.indexToLiteral symbol
                 printfn "\nrules:"
-                for i = 0 to grammar.rules.rulesCount-1 do
+                for i = 0 to grammar.rules.rulesCount - 1 do
                     printf "%4d: %s = " i <| printSymbol (grammar.rules.leftSide i)
                     for j = 0 to grammar.rules.length i - 1 do
                         printf "%s " <| printSymbol (grammar.rules.symbol i j)
                     printfn ""
             printRules ()
 
-            if grammar.EpsilonCyclicNonTerms.Length > 0 then
+            if grammar.EpsilonCyclicNonTerms.Length > 0
+            then
                 eprintfn "Grammar contains non-terminals, which can infinitely infer epsilon:"
                 grammar.EpsilonCyclicNonTerms
                 |> List.map (String.concat " <- ")
                 |> List.iter (eprintfn "%s")
                 eprintfn ""
-                if printInfiniteEpsilonPath <> "" then
+                if printInfiniteEpsilonPath <> ""
+                then
                     System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
@@ -102,7 +103,7 @@ type GLL() =
                             grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)
             let res = new System.Text.StringBuilder()
@@ -140,8 +141,6 @@ type GLL() =
                 
                 fsHeaders()
                 
-            /////////////////////////////////////////////
-               
             printHeaders moduleName fullPath light output
             let table = printTableGLL grammar table moduleName tokenType res _class positionType caseSensitive
             let res =  table

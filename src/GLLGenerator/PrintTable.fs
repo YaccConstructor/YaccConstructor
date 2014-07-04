@@ -5,12 +5,10 @@ open Yard.Generators.GLL
 open System.Collections.Generic
 open Yard.Core.IL
 
-
 let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
     _class positionType caseSensitive : string =
-
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
     let inline printInd num (x : 'a) =
@@ -22,11 +20,7 @@ let printTableGLL
         Printf.kprintf (fun s -> res.Append(s) |> ignore) x
     let inline printBrInd num (x : 'a) =
          print "%s" (String.replicate (num <<< 2) " ")
-         printBr x
-    let andNum = (1 <<< 16) - 1
-
-    
-    let pack x y = (x <<< 16) ||| y    
+         printBr x  
 
     let printArr prefix lBr rBr sep (arr : 'a[]) printer =
             print prefix
@@ -54,12 +48,6 @@ let printTableGLL
 
     let printArr (arr : 'a[]) printer = printArr "" "[|" "|]" "; " (arr : 'a[]) printer
     let printArr2 (arr : 'a[]) printer = printArr2 "" "[|" "|]" "; " (arr : 'a[]) printer
-//    let printArr2 (arr : 'a[]) printer num = 
-//         print "%s" (String.replicate (num <<< 2) " ")
-//         printArr arr printer
-
-   // let printListAsArray l printer = printList "" "[|" "|]" "; " l printer
-   // let printList l printer = printList "" "[" "]" "; " l printer
 
     let leftSide = Array.zeroCreate grammar.rules.rulesCount
     for i = 0 to grammar.rules.rulesCount-1 do
@@ -81,8 +69,7 @@ let printTableGLL
     rulesStart.[grammar.rules.rulesCount] <- cur
 
 
-    let printTableToFSharp () =
-       
+    let printTable () =
         let indexator = grammar.indexator
         printBr "type Token ="
         let indexator = grammar.indexator
@@ -97,13 +84,10 @@ let printTableGLL
                     match defaultType with
                     | Some t -> t
                     | None -> failwithf "Type of token %s in not defined" name
-
             printBrInd 1 "| %s%s" name 
             <|  match type' with
                 | None -> ""
                 | Some s -> " of (" + s + ")"
-
-
 
         let literalType = 
             match defaultType with
@@ -165,7 +149,6 @@ let printTableGLL
         for i = indexator.literalsStart to indexator.literalsEnd do
             printBrInd 1 "| L_%s _ -> true" (indexator.getLiteralName i)
 
-
         printBr ""
 
         printBrInd 0 "let isTerminal = function"
@@ -191,7 +174,6 @@ let printTableGLL
             printBrInd 1 "| %d -> true" <| i
         printBrInd 1 "| _ -> false"
         printBr ""
-
 
         printBrInd 0 "let isNonTerminal = function"   
         for i = 0 to indexator.nonTermCount-1 do
@@ -221,8 +203,6 @@ let printTableGLL
         print " |]"
         printBr ""
 
-       
-
         print "let private rules = "
         printArr rules (print "%d")
 
@@ -249,16 +229,14 @@ let printTableGLL
         printBr "let literalEnd = %d" grammar.indexator.literalsEnd
         printBr "let literalsCount = %d" grammar.indexator.literalsCount
        
-
         printBr ""
 
         printBr ""
 
         printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
-        
                        
         printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()
-    printTableToFSharp ()
+    printTable ()

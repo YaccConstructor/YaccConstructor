@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
+# Visual Studio Express 2013 for Windows Desktop
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D273A088-F9CE-4DC7-BA4B-082007601C67}"
@@ -47,6 +47,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSQLHighlighting", "TSQL\TSQLHighlighting\TSQLHighlighting.csproj", "{6EE8BDD8-79E9-41F5-8A8E-E959835D60FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSONHighlighting", "JSON_Parser\JSONHighlighting\JSONHighlighting.csproj", "{D0FDE059-31E0-4C71-8573-7787B8DFB903}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Helper", "Helper\Helper.fsproj", "{FC9A166C-780D-4D15-B366-CA06277C803D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -134,6 +136,12 @@ Global
 		{D0FDE059-31E0-4C71-8573-7787B8DFB903}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0FDE059-31E0-4C71-8573-7787B8DFB903}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D0FDE059-31E0-4C71-8573-7787B8DFB903}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC9A166C-780D-4D15-B366-CA06277C803D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

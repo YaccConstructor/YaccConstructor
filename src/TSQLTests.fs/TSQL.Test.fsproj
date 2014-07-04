@@ -42,9 +42,6 @@
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\..\Bin\Release\v40\Helper.dll</HintPath>
-    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
       <Private>False</Private>
@@ -82,7 +79,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="Utils.SourceText">
-      <HintPath>..\..\YaccConstructor\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +88,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Helper\Helper.fsproj">
+      <Name>Helper</Name>
+      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\TSQL\TSQL.fsproj">
       <Name>TSQL</Name>
       <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>

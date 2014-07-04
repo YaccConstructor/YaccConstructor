@@ -19,6 +19,43 @@ type Collections.Generic.IDictionary<'k,'v> with
 
 exception IdentToken
 
+let replacementDict =
+    [
+        '.', "dot"
+        ',', "comma"
+        ':', "semi"
+        ';', "colon"
+        '+', "plus"
+        '-', "minus"
+        '*', "star"
+        '<', "less"
+        '>', "more"
+        '=', "equal"
+        '/', "slash"
+        '&', "and"
+        '|', "or"
+        '?', "question"
+        '$', "dollar"
+        '[', "left_square_bracket"
+        ']', "right_square_bracket"
+        '(', "left_bracket"
+        ')', "right_bracket"
+        '!', "not"
+        '~', "tilda"
+        '#', "sharp"
+        '%', "percent"
+        '^', "hat"
+        '{', "left_figure_bracket"
+        '}', "right_figure_bracket"
+        '\\', "reverse_slash"
+        '`', "reverse_quate"
+        ''', "quate"
+        '№', "number"
+    ]
+    |> dict
+
+        
+
 let getKwTokenOrIdent = 
     let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
     let ucis = FSharpType.GetUnionCases (typeof<Token>) |> Array.map nameToUnionCtor  |> dict 
@@ -30,9 +67,26 @@ let getKwTokenOrIdent =
             |> Option.map (fun ctor ->  ctor [| defaultSourceText |] :?>Token) 
         match kw with 
         | None ->
-            if kws.Contains (name.ToLowerInvariant()) then
-                genLiteral name defaultSourceText
-            else
+            //if kws.Contains (name.ToLowerInvariant()) then
+            let name = 
+                name
+                |> Seq.mapi  
+                    (fun i ch ->
+                        let exist,v = replacementDict.TryGetValue(ch)
+                        if exist
+                        then
+                            if i = 0 
+                            then v + "_"
+                            elif i = name.Length - 1
+                            then "_" + v
+                            else "_" + v + "_"
+                        else string ch
+                    )
+                |> String.concat ""
+            match genLiteral name defaultSourceText with
+            Some x as c -> c
+            | None ->
+            //else
                 Some <| IDENT defaultSourceText
         | Some x -> kw
 

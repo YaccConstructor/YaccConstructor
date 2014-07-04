@@ -1,0 +1,1 @@
+..\tools\Build.Tools\Fake\FAKE.exe ..\tools\Build.Tools\Core.fsx "tools=..\tools\Build.Tools" "solution=..\src\YC.Core.sln"

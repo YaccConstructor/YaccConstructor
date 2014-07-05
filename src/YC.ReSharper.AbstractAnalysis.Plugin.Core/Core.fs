@@ -20,10 +20,6 @@ type SupportedLangs =
     | JSON
 
 type Processor(file) =
-    let mutable calcXmlPath = ""
-    let mutable jsonXmlPath = ""
-    let mutable tsqlXmlPath = ""
-
     let mutable currentLang = Calc
     
     let mutable calcForest = []
@@ -185,13 +181,10 @@ type Processor(file) =
             (fun (lang, graph) ->
                 match lang with
                 | Calc -> 
-                    calcXmlPath <- Calc.xmlPath
                     processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate Calc.printAstToDot addCalcSPPF
                 | JSON -> 
-                    jsonXmlPath <- JSON.xmlPath
                     processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate JSON.printAstToDot addJsonSPPF
                 | TSQL -> 
-                    tsqlXmlPath <- TSQL.xmlPath
                     processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
             )
         lexerErrors, parserErrors

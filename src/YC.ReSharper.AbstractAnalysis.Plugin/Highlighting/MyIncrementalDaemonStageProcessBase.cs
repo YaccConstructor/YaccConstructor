@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using JetBrains.Application.Progress;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
@@ -43,22 +44,31 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public override void Execute(Action<DaemonStageResult> commiter)
         {
-            if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
-                return;
+            try
+            {
+                if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
+                    return;
 
-            Action globalHighlighter = () =>
-            {
-                ProcessThisAndDescendants(commiter);
-            };
-            
-            using (var fibers = DaemonProcess.CreateFibers())
-            {
-                fibers.EnqueueJob(globalHighlighter);
+                Action globalHighlighter = () =>
+                {
+                    ProcessThisAndDescendants(commiter);
+                };
+
+                using (var fibers = DaemonProcess.CreateFibers())
+                {
+                    fibers.EnqueueJob(globalHighlighter);
+                }
+
+                // remove all old highlightings
+                //if (DaemonProcess.FullRehighlightingRequired)
+                //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
             }
-            
-            // remove all old highlightings
-            //if (DaemonProcess.FullRehighlightingRequired)
-            //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
+            catch (Exception ex)
+            {
+                if (ex is ProcessCancelledException)
+                    return;
+                throw;
+            }
         }
 
         private void ProcessThisAndDescendants(Action<DaemonStageResult> commiter)

@@ -129,7 +129,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         private string GetLanguageFromRange(DocumentRange range)
         {
-            foreach (var treeNode in MatcherHelper.NodeCover)
+            var nodes = new List<ITreeNode>(MatcherHelper.NodeCover);
+            
+            foreach (var treeNode in nodes)
             {
                 var nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
                 if (nodeRange != null && nodeRange.Contains(range))

@@ -120,7 +120,8 @@ type RNGLR() =
 
             if !needHighlighting
             then
-                let folder = !namespaceName + "\\" 
+                let folder = System.IO.Path.GetFullPath (!namespaceName) + "\\"
+
                 let generateXML name toksAndLits = 
                     use out = new System.IO.StreamWriter (folder + name + ".xml")
                     let content = printXML name toksAndLits

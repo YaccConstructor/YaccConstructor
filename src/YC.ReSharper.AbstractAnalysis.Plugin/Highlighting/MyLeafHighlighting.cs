@@ -23,9 +23,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 attributeId = ColorHelper.DefaultColor;
             }
 
-            else if (ColorHelper.TokenToColor.ContainsKey(ycTokName))
+            else if (ColorHelper.TokenToColor.ContainsKey(ycTokName.ToLower()))
             {
-                attributeId = ColorHelper.TokenToColor[ycTokName];
+                attributeId = ColorHelper.TokenToColor[ycTokName.ToLower()];
             }
             else
             {

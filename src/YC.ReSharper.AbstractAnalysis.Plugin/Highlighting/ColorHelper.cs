@@ -100,7 +100,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private static string GetFullPath(string fileName)
         {
-            var res = Directory.GetFiles(@"..\..\..\src", fileName, SearchOption.AllDirectories);
+            var res = Directory.GetFiles(@"..\..\..", fileName, SearchOption.AllDirectories);
             if (res.Length > 0)
                 return res[0];
 
@@ -141,9 +141,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return;
 
             if (!string.IsNullOrEmpty(color) && mapping.ContainsKey(color))
-                dict.Add(content, mapping[color]);
+                dict.Add(content.ToLower(), mapping[color]);
             else
-                dict.Add(content, DefaultColor);
+                dict.Add(content.ToLower(), DefaultColor);
         }
 
         private static void ParseTokensGroup(XmlReader xmlReader, string color, Dictionary<string, string> dict)

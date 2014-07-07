@@ -433,12 +433,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     shift ()
 
         let isAcceptState() = 
-            let flag = ref false
-            for state in usedStates do
-                if not !flag 
-                then
-                    flag := parserSource.AccStates.[state]
-            !flag                    
+            usedStates.ToArray()
+            |> Array.exists (fun state -> parserSource.AccStates.[state])                  
 
         // if finish isn't accepting state then error
         if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 

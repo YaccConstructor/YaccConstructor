@@ -123,10 +123,13 @@ type RNGLR() =
                 let folder = System.IO.Path.GetFullPath (!namespaceName) + "\\"
 
                 let generateXML name toksAndLits = 
-                    use out = new System.IO.StreamWriter (folder + name + ".xml")
-                    let content = printXML name toksAndLits
-                    out.WriteLine content
-                    out.Close()
+                    let path = folder + name + ".xml"
+                    if not <| System.IO.File.Exists (path)
+                    then 
+                        use out = new System.IO.StreamWriter (path)
+                        let content = printXML name toksAndLits
+                        out.WriteLine content
+                        out.Close()
 
                 let generateItemsGroup toksAndLits = 
                     use out = new System.IO.StreamWriter (folder + "ItemsGroup.target")

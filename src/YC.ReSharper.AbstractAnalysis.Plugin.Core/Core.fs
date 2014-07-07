@@ -21,12 +21,22 @@ type SupportedLangs =
     | TSQL
     | JSON
 
-type LexingFinishedArgs (tokens : ResizeArray<ITreeNode>, lang : string, xml : string) =
+type TreeGenerationState = 
+    | Start
+    | InProgress of ITreeNode * int list
+    | End of ITreeNode
+
+type LexingFinishedArgs (tokens : ResizeArray<ITreeNode>, lang : SupportedLangs) =
      inherit System.EventArgs()
 
      member this.Tokens = tokens
      member this.Lang = lang
-     member this.Xml = xml
+
+type ParsingFinishedArgs((*sppf : Yard.Generators.RNGLR.AST.Tree<'TokenType> * System.Collections.Generic.Dictionary<_,_>, *)lang : SupportedLangs) = 
+    inherit System.EventArgs()
+//
+//    member this.Sppf = sppf
+    member this.Lang = lang
 
 type Processor(file) =
     let mutable currentLang = Calc
@@ -35,26 +45,9 @@ type Processor(file) =
     let mutable jsonForest = []
     let mutable tsqlForest = []
 
-    ///Needs for tree generation for highlighting
-    let mutable unprocessed = []
-    let mutable count = 0
-
     let lexingFinished = new Event<LexingFinishedArgs>()
+    let parsingFinished = new Event<ParsingFinishedArgs>()
 
-    let langToString lang = 
-        match lang with
-        | Calc -> "Calc"
-        | JSON -> "JSON"
-        | TSQL -> "TSQL"
-
-    let langToXml lang = 
-        match lang with
-        | Calc -> Calc.xmlPath
-        | JSON -> JSON.xmlPath
-        | TSQL -> xmlPath
-        | _ -> System.String.Empty
-        
-        
     let generateTreeNode (graphOpt : AbstractParsing.Common.ParserInputGraph<'token> option) tokenToTreeNode lang = 
         if graphOpt.IsSome
         then
@@ -68,14 +61,11 @@ type Processor(file) =
             let tokensList = new ResizeArray<_>()
             while enumerator.MoveNext() do
                 let t = enumerator.Current
-               // let tt = fst <| t.[0]
                 t |> Array.iter (fun i -> 
                     let treeNode = tokenToTreeNode i
                     tokensList.Add treeNode)
-//                tokensList.Add t
-            lexingFinished.Trigger(new LexingFinishedArgs(tokensList, langToString lang, langToXml lang))
-            ()
-            //|> Seq.filter (fun (_,a) -> a.Length > 0)
+
+            lexingFinished.Trigger(new LexingFinishedArgs(tokensList, lang))
 
     let defLang (n:ITreeNode) =
         match n with 
@@ -86,7 +76,7 @@ type Processor(file) =
             | "objnotation" -> JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError translate (*printer*) addSPPF tokenToTreeNode (lang : SupportedLangs) = 
+    let processLang graph tokenize parse addLError addPError translate addSPPF tokenToTreeNode (lang : SupportedLangs) = 
         let tokenize g =
             try 
                tokenize g
@@ -108,6 +98,7 @@ type Processor(file) =
              | Yard.Generators.RNGLR.Parser.Success (sppf, _,errors) -> 
                 //printer sppf "ast.dot"
                 addSPPF (sppf, errors)
+                parsingFinished.Trigger (new ParsingFinishedArgs (lang))
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
          
@@ -130,25 +121,30 @@ type Processor(file) =
                     brs.[0].back_ref.GetDocumentRange())
         ranges    
 
-
-    let getNextTree (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) translate (*printer*) = 
-        if forest.Length <= count 
+    let mutable generationState : TreeGenerationState = Start
+    
+    let getNextTree (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) translate index = 
+        if forest.Length <= index
         then
-            count <- 0 
-            null
-        else 
-            let mutable curSppf, errors = List.nth forest count
-            if unprocessed.Length = 0
-            then 
-                unprocessed <- Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
-            
+            generationState <- End (null)
+        else
+            let mutable curSppf, errors = List.nth forest index
+            let unprocessed = 
+                match generationState with
+                | Start ->              Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
+                | InProgress (_, unproc) ->  unproc
+                | _ -> failwith "Unexpected state in treeGeneration"
+                
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
-            if unproc.Length = 0
-            then 
-                count <- count + 1
-            unprocessed  <- unproc
+            
+            let treeNode = (Seq.head <| translate nextTree errors) :> ITreeNode
+            
+            if unproc.IsEmpty
+            then generationState <- End (treeNode)
+            else generationState <- InProgress (treeNode, unproc) 
 
-            (Seq.head <| translate nextTree errors) :> ITreeNode
+        generationState
+                
 
     let getForestWithToken (forest : list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _>) 
                             range (tokenData: 'TokenType -> obj)  translate = 
@@ -233,54 +229,59 @@ type Processor(file) =
             (fun (lang, graph) ->
                 match lang with
                 | Calc -> 
-                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate (*Calc.printAstToDot*) addCalcSPPF Calc.tokenToTreeNode lang
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate addCalcSPPF Calc.tokenToTreeNode lang
                 | JSON -> 
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate (*JSON.printAstToDot*) addJsonSPPF JSON.tokenToTreeNode lang
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate addJsonSPPF JSON.tokenToTreeNode lang
                 | TSQL -> 
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate (*TSQL.printAstToDot*) addTSqlSPPF TSQL.tokenToTreeNode lang
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate addTSqlSPPF TSQL.tokenToTreeNode lang
             )
         lexerErrors, parserErrors
 
-    member private this.langToString lang = langToString lang
-        
-
-    member this.CurrentLang = this.langToString currentLang
-    
     [<CLIEvent>]
     member this.LexingFinished = lexingFinished.Publish
 
-    member this.GetNextTree() = 
-        let mutable res = null
-        
-        match currentLang with
-        | Calc -> 
-                res <- getNextTree calcForest Calc.translate //Calc.printAstToDot
-                if res = null
-                then currentLang <- JSON
-        | _ -> ()
-        
-        match currentLang with
-        | JSON when res = null -> 
-                res <- getNextTree jsonForest JSON.translate //JSON.printAstToDot
-                if res = null
-                then currentLang <- TSQL
-        | _ -> ()
+    [<CLIEvent>]
+    member this.ParsingFinished = parsingFinished.Publish
 
-        match currentLang with 
-        | TSQL when res = null ->
-                res <- getNextTree tsqlForest TSQL.translate //TSQL.printAstToDot
-        | _ -> ()
-                
-        res
-
-    member this.XmlPath lang = langToXml lang
+    member this.GetNextTree lang index = 
+//        let mutable res = null
         
-
-    member this.CurrentXmlPath = this.XmlPath currentLang
+        let state = 
+            match lang with
+            | Calc -> getNextTree calcForest Calc.translate index //Calc.printAstToDot
+            | JSON -> getNextTree jsonForest JSON.translate index //JSON.printAstToDot
+            | TSQL -> getNextTree tsqlForest TSQL.translate index //TSQL.printAstToDot
         
-    member this.GetForestWithToken range (lang : string) = 
-        match lang.ToLower() with
-        | "calc" -> getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
-        | "json" -> getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
-        | "tsql" -> getForestWithToken tsqlForest range tokenData TSQL.translate 
+        match state with
+        | InProgress (treeNode, _) -> treeNode, false
+        | End (treeNode) -> 
+            generationState <- Start
+            treeNode, true
+        | _ -> failwith "Unexpected state in tree generation"
+
+    member this.StringToLang (str : string) = 
+        match str.ToLower() with
+        | "calc" -> Calc
+        | "json" -> JSON
+        | "tsql" -> TSQL
+        | _ -> failwith "Unexpected language"
+
+    member this.LangToString lang = 
+        match lang with
+        | Calc -> "calc"
+        | JSON -> "json"
+        | TSQL -> "tsql"
+
+    member this.XmlPath lang = 
+        match lang with
+        | Calc -> Calc.xmlPath
+        | JSON -> JSON.xmlPath
+        | TSQL -> TSQL.xmlPath
+
+    member this.GetForestWithToken range (str : string) =
+        let lang = this.StringToLang str 
+        match lang with
+        | Calc -> getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate
+        | JSON -> getForestWithToken jsonForest range JSON.Parser.tokenData JSON.translate 
+        | TSQL -> getForestWithToken tsqlForest range tokenData TSQL.translate 
         | _ -> new ResizeArray<_>()

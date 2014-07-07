@@ -28,6 +28,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         public static void UpdateMatchingValues(string lang)
         {
+            lang = lang.ToLower();
             foreach (KeyValuePair<string, string> pair in allMatch[lang])
             {
                 var strLeft = YcHelper.GetStringValue(pair.Key, lang);
@@ -83,6 +84,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         public static void ChangeLanguageTo(string lang)
         {
+            lang = lang.ToLower();
             if (!allMatch.ContainsKey(lang))
             {
                 allMatch.Add(lang, new Dictionary<string, string>());

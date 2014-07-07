@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
 using JetBrains.Application.Settings;
+using JetBrains.Application.Threading.Tasks;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
@@ -10,6 +12,7 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
+using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
@@ -19,6 +22,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private readonly IDaemonProcess myProcess;
         private readonly DaemonProcessKind myProcessKind;
         private Action<DaemonStageResult> commiter;
+        private Core.Processor ycProcessor = null;
+
+        private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
 
         protected MyIncrementalDaemonStageProcessBase(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
             : base(process, settingsStore)
@@ -28,40 +34,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myProcessKind = processKind;
         }
 
-        private Core.Processor UpdateYCProcessor()
-        {
-            // Getting PSI (AST) for the file being highlighted
-            var sourceFile = myDaemonProcess.SourceFile;
-            var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
-            if (file == null)
-                return null;
-
-            // Running visitor against the PSI
-            var ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
-            ycProcessor.LexingFinished += OnLexingFinished;
-            ycProcessor.Process();
-            
-            return ycProcessor;
-        }
-
-        private void OnLexingFinished(object sender, Core.LexingFinishedArgs args)
-        {
-            if (commiter == null)
-                return;
-
-            var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-            var processor = new ProcessorBase(this, consumer);
-
-            ColorHelper.ParseFile(args.Xml, args.Lang);
-
-            foreach (ITreeNode treeNode in args.Tokens)
-            {
-                processor.ProcessAfterInterior(treeNode);
-            }
-            commiter(new DaemonStageResult(consumer.Highlightings) { Layer = 1 });
-        }
-
-
         public override void Execute(Action<DaemonStageResult> commiter)
         {
             try
@@ -70,16 +42,14 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                     return;
 
                 this.commiter = commiter;
-                Action globalHighlighter = () =>
-                {
-                    ProcessThisAndDescendants(commiter);
-                };
+                MatcherHelper.ClearNodeCover();
+                //Action globalHighlighter = UpdateYCProcessor;
 
-                using (var fibers = DaemonProcess.CreateFibers())
-                {
-                    fibers.EnqueueJob(globalHighlighter);
-                }
-
+                //using (var fibers = DaemonProcess.CreateFibers())
+                //{
+                    //fibers.EnqueueJob(globalHighlighter);
+                //}
+                UpdateYCProcessor();
                 // remove all old highlightings
                 //if (DaemonProcess.FullRehighlightingRequired)
                 //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
@@ -92,38 +62,99 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
-        private void ProcessThisAndDescendants(Action<DaemonStageResult> commiter)
+        private void UpdateYCProcessor()
         {
-            Core.Processor ycProcessor = UpdateYCProcessor();
-            if (ycProcessor == null)
+            // Getting PSI (AST) for the file being highlighted
+            var sourceFile = myDaemonProcess.SourceFile;
+            var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            if (file == null)
                 return;
-            
-            MatcherHelper.YcProcessor = ycProcessor;
-            MatcherHelper.ClearNodeCover();
 
-            //var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-            //var processor = new ProcessorBase(this, consumer);
-
-            ITreeNode tree = ycProcessor.GetNextTree();
-            
-            while (tree != null)
-            {
-                //string lang = ycProcessor.CurrentLang.ToLower();
-                //ColorHelper.ParseFile(ycProcessor.CurrentXmlPath, lang);
-                //ProcessDescendants(tree, processor);
-                
-                //commiter(new DaemonStageResult(consumer.Highlightings) { Layer = 1 });
-                MatcherHelper.NodeCover.Add(tree);
-
-                tree = ycProcessor.GetNextTree();
-            }
-            //commiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
+            // Running visitor against the PSI
+            ycProcessor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
+            ycProcessor.LexingFinished += OnLexingFinished;
+            ycProcessor.ParsingFinished += OnParsingFinished;
+            ycProcessor.Process();
         }
 
+        /// <summary>
+        /// Do highlighting some tokens chunk.
+        /// </summary>
+        /// <param name="sender">Now always null</param>
+        /// <param name="args"></param>
+        private void OnLexingFinished(object sender, Core.LexingFinishedArgs args)
+        {
+            if (commiter == null)
+                return;
+
+            var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
+            var processor = new ProcessorBase(this, consumer);
+
+            string xmlPath = ycProcessor.XmlPath(args.Lang);
+            string lang = ycProcessor.LangToString(args.Lang);
+            ColorHelper.ParseFile(xmlPath, lang);
+
+            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
+            {
+                fibers.EnqueueJob(
+                    () =>
+                    {
+                        foreach (ITreeNode treeNode in args.Tokens)
+                        {
+                            processor.ProcessAfterInterior(treeNode);
+                        }
+                    }
+                );
+            }
+
+            commiter(new DaemonStageResult(consumer.Highlightings) { Layer = 1 });
+        }
+
+        /// <summary>
+        /// Do translate sppf to ReSharper trees. It is need further.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args">Now it contains only language</param>
+        private void OnParsingFinished(object sender, ParsingFinishedArgs args)
+        {
+            if (ycProcessor == null)
+                return;
+
+            var lang = args.Lang;
+            MatcherHelper.YcProcessor = ycProcessor;
+
+            string strLang = ycProcessor.LangToString(lang);
+
+            if (!parsedSppf.ContainsKey(strLang))
+            {
+                parsedSppf.Add(strLang, 0);
+            }
+            else
+            {
+                parsedSppf[strLang]++;
+            }
+
+            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
+            {
+                fibers.EnqueueJob(() =>
+                {
+                    var isEnd = false;
+
+                    while (!isEnd)
+                    {
+                        Tuple<ITreeNode, bool> res = ycProcessor.GetNextTree(lang, parsedSppf[strLang]);
+                        ITreeNode tree = res.Item1;
+                        isEnd = res.Item2;
+                        MatcherHelper.NodeCover.Add(tree);
+                    }
+                });
+            }
+        }
+        #region
         private void ProcessDescendants([NotNull] ITreeNode root, IRecursiveElementProcessor processor)
         {
             var treeNode = root;
-            
+
             while (!processor.ProcessingIsFinished)
             {
                 if (treeNode.FirstChild != null)
@@ -145,7 +176,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 }
             }
         }
-        
+        #endregion
+
         #region Nested type: ProcessorBase
 
         private class ProcessorBase : IRecursiveElementProcessor

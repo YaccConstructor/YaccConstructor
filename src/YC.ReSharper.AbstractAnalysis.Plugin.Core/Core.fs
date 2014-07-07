@@ -13,11 +13,20 @@ open Microsoft.FSharp.Collections
 open YC.ReSharper.AbstractAnalysis.Languages
 open Yard.Examples.MSParser
 open AbstractAnalysis.Common
+open QuickGraph
+open QuickGraph.Algorithms
 
 type SupportedLangs =
     | Calc
     | TSQL
     | JSON
+
+type LexingFinishedArgs (tokens : ResizeArray<ITreeNode>, lang : string, xml : string) =
+     inherit System.EventArgs()
+
+     member this.Tokens = tokens
+     member this.Lang = lang
+     member this.Xml = xml
 
 type Processor(file) =
     let mutable currentLang = Calc
@@ -30,16 +39,54 @@ type Processor(file) =
     let mutable unprocessed = []
     let mutable count = 0
 
+    let lexingFinished = new Event<LexingFinishedArgs>()
+
+    let langToString lang = 
+        match lang with
+        | Calc -> "Calc"
+        | JSON -> "JSON"
+        | TSQL -> "TSQL"
+
+    let langToXml lang = 
+        match lang with
+        | Calc -> Calc.xmlPath
+        | JSON -> JSON.xmlPath
+        | TSQL -> xmlPath
+        | _ -> System.String.Empty
+        
+        
+    let generateTreeNode (graphOpt : AbstractParsing.Common.ParserInputGraph<'token> option) tokenToTreeNode lang = 
+        if graphOpt.IsSome
+        then
+            let inGraph = graphOpt.Value 
+            let ts =  inGraph.TopologicalSort() |> Array.ofSeq
+            let ids = dict (ts |> Array.mapi (fun i v -> v,i))
+            let tokens = 
+                ts
+                |> Seq.mapi (fun i v -> inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag(*, ids.[e.Target]*))) |> Array.ofSeq)
+            let enumerator = tokens.GetEnumerator()
+            let tokensList = new ResizeArray<_>()
+            while enumerator.MoveNext() do
+                let t = enumerator.Current
+               // let tt = fst <| t.[0]
+                t |> Array.iter (fun i -> 
+                    let treeNode = tokenToTreeNode i
+                    tokensList.Add treeNode)
+//                tokensList.Add t
+            lexingFinished.Trigger(new LexingFinishedArgs(tokensList, langToString lang, langToXml lang))
+            ()
+            //|> Seq.filter (fun (_,a) -> a.Length > 0)
+
     let defLang (n:ITreeNode) =
         match n with 
         | :? IInvocationExpression as m ->
             match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
             | "executeimmediate" -> TSQL
             | "eval" -> Calc
-            | "objnotation" ->JSON
+            | "objnotation" -> JSON
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError translate printer addSPPF = 
+    let processLang graph tokenize parse addLError addPError translate (*printer*) addSPPF tokenToTreeNode (lang : SupportedLangs) = 
         let tokenize g =
             try 
                tokenize g
@@ -50,7 +97,12 @@ type Processor(file) =
                 |> addLError
                 None
 
-        tokenize graph |> Option.map parse
+        let tokenizedGraph = tokenize graph 
+        
+        generateTreeNode tokenizedGraph tokenToTreeNode lang 
+
+        tokenizedGraph 
+        |> Option.map parse
         |> Option.iter
             (function 
              | Yard.Generators.RNGLR.Parser.Success (sppf, _,errors) -> 
@@ -181,21 +233,22 @@ type Processor(file) =
             (fun (lang, graph) ->
                 match lang with
                 | Calc -> 
-                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate Calc.printAstToDot addCalcSPPF
+                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate (*Calc.printAstToDot*) addCalcSPPF Calc.tokenToTreeNode lang
                 | JSON -> 
-                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate JSON.printAstToDot addJsonSPPF
+                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate (*JSON.printAstToDot*) addJsonSPPF JSON.tokenToTreeNode lang
                 | TSQL -> 
-                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate TSQL.printAstToDot addTSqlSPPF
+                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate (*TSQL.printAstToDot*) addTSqlSPPF TSQL.tokenToTreeNode lang
             )
         lexerErrors, parserErrors
 
-    member this.CurrentLang = 
-        match currentLang with
-        | Calc -> "Calc"
-        | JSON -> "JSON"
-        | TSQL -> "TSQL"
-       // | _ -> System.String.Empty
+    member private this.langToString lang = langToString lang
+        
+
+    member this.CurrentLang = this.langToString currentLang
     
+    [<CLIEvent>]
+    member this.LexingFinished = lexingFinished.Publish
+
     member this.GetNextTree() = 
         let mutable res = null
         
@@ -220,13 +273,11 @@ type Processor(file) =
                 
         res
 
-    member this.XmlPath = 
-        match currentLang with
-        | Calc -> Calc.xmlPath
-        | JSON -> JSON.xmlPath
-        | TSQL -> xmlPath
-        | _ -> System.String.Empty
+    member this.XmlPath lang = langToXml lang
+        
 
+    member this.CurrentXmlPath = this.XmlPath currentLang
+        
     member this.GetForestWithToken range (lang : string) = 
         match lang.ToLower() with
         | "calc" -> getForestWithToken calcForest range Calc.AbstractParser.tokenData Calc.translate

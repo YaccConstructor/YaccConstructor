@@ -297,7 +297,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
     let mainHighlightSemantic () = 
         
-        
         let printAddSemantic = 
             let res  = new System.Text.StringBuilder()
 
@@ -362,12 +361,60 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             printBrInd 1 "ranges"
             res.ToString()
 
-        if highlightingOpt.IsSome 
-        then 
+        let printTokenToTreeNode = 
+            let res  = new System.Text.StringBuilder()
+
+            let toClassName (str : string) = 
+                let symbols = [| 
+                                for i = 0 to str.Length - 1 do
+                                    if i = 0 
+                                    then yield System.Char.ToUpper str.[0]
+                                    else yield str.[i] 
+                              |] 
+                new System.String(symbols)
+
+            let inline print (x : 'a) =
+                Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+            let inline printBr (x : 'a) =
+                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+            let inline printBrInd num (x : 'a) =
+                print "%s" (String.replicate (num <<< 2) " ")
+                printBr x
+
+            printBrInd 0 "let tokenToTreeNode token = "
+            printBrInd 1 "match token with"
+            
+            for i = grammar.indexator.termsStart to grammar.indexator.termsEnd do
+                let termNode = toClassName <| grammar.indexator.indexToTerm i
+                printBrInd 1 "| %s data -> " termNode
+                printBrInd 2 "let value = fst <| data"
+                printBrInd 2 "let temp = snd <| data"
+                printBrInd 2 "let ranges = calculatePos temp"
+//                printBrInd 2 "let ranges = calculatePos <| snd <| data"
+                printBrInd 2 "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" termNode termNode
+
+            for i = grammar.indexator.literalsStart to grammar.indexator.literalsEnd do
+                let litNode = toClassName <| grammar.indexator.indexToLiteral i
+//                 grammar.indexator.indexToLiteral i 
+                printBrInd 1 "| L_%s data -> " <| grammar.indexator.indexToLiteral i
+                printBrInd 2 "let value = fst <| data"
+                printBrInd 2 "let temp = snd <| data"
+                printBrInd 2 "let ranges = calculatePos temp"
+                printBrInd 2 "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode" litNode litNode
+
+            res.ToString()
+
+        if highlightingOpt.IsSome
+                then 
             let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
-            wordL <| System.String.Concat [| printXmlName; System.Environment.NewLine; 
-                                                printAddSemantic; System.Environment.NewLine; 
-                                                printCalculatePos|] 
+            wordL <| System.String.Concat [| 
+                                             printXmlName; System.Environment.NewLine; 
+                                             printAddSemantic; System.Environment.NewLine; 
+                                             printCalculatePos; System.Environment.NewLine;
+                                             printTokenToTreeNode; System.Environment.NewLine;
+                                          |] 
         else wordL ""
     
     [ mainHighlightSemantic(); (*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*)rules; funRes]

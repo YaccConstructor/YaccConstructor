@@ -50,6 +50,7 @@ let printAstToDot ast name = defaultAstToDot ast name
 
 
 let xmlPath = xmlPath
+let tokenToTreeNode = tokenToTreeNode
 let translate ast errors = translate args ast errors
 
 type TSQLPars = 

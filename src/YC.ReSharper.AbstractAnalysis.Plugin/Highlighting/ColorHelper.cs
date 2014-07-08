@@ -4,9 +4,8 @@ using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 using JetBrains.ReSharper.Daemon;
-using MatcherHelper = YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic.MatcherHelper;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
+namespace Highlighting.Core
 {
     public class ColorHelper
     {
@@ -24,61 +23,61 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private static Dictionary<string, string> mapping = new Dictionary<string, string>()
         {
-            {"ANALYSIS_ERROR_ERRORSTRIPE", HighlightingAttributeIds.ANALYSIS_ERROR_ERRORSTRIPE},
-            {"ANALYSIS_SUGGESTION_ERRORSTRIPE", HighlightingAttributeIds.ANALYSIS_SUGGESTION_ERRORSTRIPE},
-            {"ANALYSIS_WARNING_ERRORSTRIPE", HighlightingAttributeIds.ANALYSIS_WARNING_ERRORSTRIPE},
-            {"CLASS_IS_INHERITED_ATTRIBUTE", HighlightingAttributeIds.CLASS_IS_INHERITED_ATTRIBUTE},
-            {"CONSTANT_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.CONSTANT_IDENTIFIER_ATTRIBUTE},
-            {"DEADCODE_ATTRIBUTE", HighlightingAttributeIds.DEADCODE_ATTRIBUTE},
-            {"ERROR_ATTRIBUTE",HighlightingAttributeIds.ERROR_ATTRIBUTE},
-            {"EVENT_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.EVENT_IDENTIFIER_ATTRIBUTE},
-            {"EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE},
-            {"FIELD_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.FIELD_IDENTIFIER_ATTRIBUTE},
-            {"FORMAT_STRING_ITEM", HighlightingAttributeIds.FORMAT_STRING_ITEM},
-            {"HIDES_ATTRIBUTE", HighlightingAttributeIds.HIDES_ATTRIBUTE},
-            {"HINT_ATTRIBUTE", HighlightingAttributeIds.HINT_ATTRIBUTE},
-            {"IMPLEMENTS_AND_HIDES_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_AND_HIDES_ATTRIBUTE},
-            {"IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE},
-            {"IMPLEMENTS_ATTRIBUTE", HighlightingAttributeIds.IMPLEMENTS_ATTRIBUTE},
-            {"INTERFACE_IS_IMPLEMENTED_ATTRIBUTE", HighlightingAttributeIds.INTERFACE_IS_IMPLEMENTED_ATTRIBUTE},
-            {"JAVA_SCRIPT_XML_DOC_TAG", HighlightingAttributeIds.JAVA_SCRIPT_XML_DOC_TAG},
-            {"JS_FUNCTION_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.JS_FUNCTION_IDENTIFIER_ATTRIBUTE},
-            {"JS_LATEBOUND_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.JS_LATEBOUND_IDENTIFIER_ATTRIBUTE},
-            {"JS_LOCAL_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.JS_LOCAL_IDENTIFIER_ATTRIBUTE},
-            {"JS_PARAMETER_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.JS_PARAMETER_IDENTIFIER_ATTRIBUTE},
-            {"JS_PROPERTY_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.JS_PROPERTY_IDENTIFIER_ATTRIBUTE},
-            {"LATE_BOUND_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.LATE_BOUND_IDENTIFIER_ATTRIBUTE},
-            {"LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE},
-            {"MATCHED_BRACE", HighlightingAttributeIds.MATCHED_BRACE},
-            {"MATCHED_FORMAT_STRING_ITEM", HighlightingAttributeIds.MATCHED_FORMAT_STRING_ITEM},
-            {"METHOD_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.METHOD_IDENTIFIER_ATTRIBUTE},
+            {"ANALYSIS_ERROR_ERRORSTRIPE",                  HighlightingAttributeIds.ANALYSIS_ERROR_ERRORSTRIPE},
+            {"ANALYSIS_SUGGESTION_ERRORSTRIPE",             HighlightingAttributeIds.ANALYSIS_SUGGESTION_ERRORSTRIPE},
+            {"ANALYSIS_WARNING_ERRORSTRIPE",                HighlightingAttributeIds.ANALYSIS_WARNING_ERRORSTRIPE},
+            {"CLASS_IS_INHERITED_ATTRIBUTE",                HighlightingAttributeIds.CLASS_IS_INHERITED_ATTRIBUTE},
+            {"CONSTANT_IDENTIFIER_ATTRIBUTE",               HighlightingAttributeIds.CONSTANT_IDENTIFIER_ATTRIBUTE},
+            {"DEADCODE_ATTRIBUTE",                          HighlightingAttributeIds.DEADCODE_ATTRIBUTE},
+            {"ERROR_ATTRIBUTE",                             HighlightingAttributeIds.ERROR_ATTRIBUTE},
+            {"EVENT_IDENTIFIER_ATTRIBUTE",                  HighlightingAttributeIds.EVENT_IDENTIFIER_ATTRIBUTE},
+            {"EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE",       HighlightingAttributeIds.EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE},
+            {"FIELD_IDENTIFIER_ATTRIBUTE",                  HighlightingAttributeIds.FIELD_IDENTIFIER_ATTRIBUTE},
+            {"FORMAT_STRING_ITEM",                          HighlightingAttributeIds.FORMAT_STRING_ITEM},
+            {"HIDES_ATTRIBUTE",                             HighlightingAttributeIds.HIDES_ATTRIBUTE},
+            {"HINT_ATTRIBUTE",                              HighlightingAttributeIds.HINT_ATTRIBUTE},
+            {"IMPLEMENTS_AND_HIDES_ATTRIBUTE",              HighlightingAttributeIds.IMPLEMENTS_AND_HIDES_ATTRIBUTE},
+            {"IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE",          HighlightingAttributeIds.IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE},
+            {"IMPLEMENTS_ATTRIBUTE",                        HighlightingAttributeIds.IMPLEMENTS_ATTRIBUTE},
+            {"INTERFACE_IS_IMPLEMENTED_ATTRIBUTE",          HighlightingAttributeIds.INTERFACE_IS_IMPLEMENTED_ATTRIBUTE},
+            {"JAVA_SCRIPT_XML_DOC_TAG",                     HighlightingAttributeIds.JAVA_SCRIPT_XML_DOC_TAG},
+            {"JS_FUNCTION_IDENTIFIER_ATTRIBUTE",            HighlightingAttributeIds.JS_FUNCTION_IDENTIFIER_ATTRIBUTE},
+            {"JS_LATEBOUND_IDENTIFIER_ATTRIBUTE",           HighlightingAttributeIds.JS_LATEBOUND_IDENTIFIER_ATTRIBUTE},
+            {"JS_LOCAL_IDENTIFIER_ATTRIBUTE",               HighlightingAttributeIds.JS_LOCAL_IDENTIFIER_ATTRIBUTE},
+            {"JS_PARAMETER_IDENTIFIER_ATTRIBUTE",           HighlightingAttributeIds.JS_PARAMETER_IDENTIFIER_ATTRIBUTE},
+            {"JS_PROPERTY_IDENTIFIER_ATTRIBUTE",            HighlightingAttributeIds.JS_PROPERTY_IDENTIFIER_ATTRIBUTE},
+            {"LATE_BOUND_IDENTIFIER_ATTRIBUTE",             HighlightingAttributeIds.LATE_BOUND_IDENTIFIER_ATTRIBUTE},
+            {"LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE",         HighlightingAttributeIds.LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE},
+            {"MATCHED_BRACE",                               HighlightingAttributeIds.MATCHED_BRACE},
+            {"MATCHED_FORMAT_STRING_ITEM",                  HighlightingAttributeIds.MATCHED_FORMAT_STRING_ITEM},
+            {"METHOD_IDENTIFIER_ATTRIBUTE",                 HighlightingAttributeIds.METHOD_IDENTIFIER_ATTRIBUTE},
             {"MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.MUTABLE_LOCAL_VARIABLE_IDENTIFIER_ATTRIBUTE},
-            {"NAMESPACE_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.NAMESPACE_IDENTIFIER_ATTRIBUTE},
-            {"OPERATOR_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.OPERATOR_IDENTIFIER_ATTRIBUTE},
-            {"OUTLINE_BRACE", HighlightingAttributeIds.OUTLINE_BRACE},
-            {"OVERRIDES_ATTRIBUTE", HighlightingAttributeIds.OVERRIDES_ATTRIBUTE},
-            {"PARAMETER_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.PARAMETER_IDENTIFIER_ATTRIBUTE},
-            {"PATH_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.PATH_IDENTIFIER_ATTRIBUTE},
-            {"PUBLIC_DEADCODE_ATTRIBUTE", HighlightingAttributeIds.PUBLIC_DEADCODE_ATTRIBUTE},
-            {"RECURSION_ATTRIBUTE", HighlightingAttributeIds.RECURSION_ATTRIBUTE},
-            {"TODOITEM_ATTRIBUTE", HighlightingAttributeIds.TODOITEM_ATTRIBUTE},
-            {"TODOITEM_ERRORSTRIPE_ATTRIBUTE", HighlightingAttributeIds.TODOITEM_ERRORSTRIPE_ATTRIBUTE},
-            {"SUGGESTION_ATTRIBUTE", HighlightingAttributeIds.SUGGESTION_ATTRIBUTE},
-            {"TS_CLASS_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.TS_CLASS_IDENTIFIER_ATTRIBUTE},
-            {"TS_ENUM_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.TS_ENUM_IDENTIFIER_ATTRIBUTE},
-            {"TS_INTERFACE_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.TS_INTERFACE_IDENTIFIER_ATTRIBUTE},
-            {"TS_MODULE_IDENTIFIER_ATTRIBUTE", HighlightingAttributeIds.TS_MODULE_IDENTIFIER_ATTRIBUTE},
-            {"TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE",HighlightingAttributeIds.TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE},
-            {"TYPE_CLASS_ATTRIBUTE", HighlightingAttributeIds.TYPE_CLASS_ATTRIBUTE},
-            {"TYPE_STATIC_CLASS_ATTRIBUTE", HighlightingAttributeIds.TYPE_STATIC_CLASS_ATTRIBUTE},
-            {"TYPE_DELEGATE_ATTRIBUTE", HighlightingAttributeIds.TYPE_DELEGATE_ATTRIBUTE},
-            {"TYPE_ENUM_ATTRIBUTE", HighlightingAttributeIds.TYPE_ENUM_ATTRIBUTE},
-            {"TYPE_INTERFACE_ATTRIBUTE", HighlightingAttributeIds.TYPE_INTERFACE_ATTRIBUTE},
-            {"TYPE_PARAMETER_ATTRIBUTE", HighlightingAttributeIds.TYPE_ENUM_ATTRIBUTE},
-            {"TYPE_STRUCT_ATTRIBUTE", HighlightingAttributeIds.TYPE_STRUCT_ATTRIBUTE},
-            {"UNMATCHED_BRACE", HighlightingAttributeIds.UNMATCHED_BRACE},
-            {"UNRESOLVED_ERROR_ATTRIBUTE", HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE},
-            {"WARNING_ATTRIBUTE", HighlightingAttributeIds.WARNING_ATTRIBUTE},
+            {"NAMESPACE_IDENTIFIER_ATTRIBUTE",              HighlightingAttributeIds.NAMESPACE_IDENTIFIER_ATTRIBUTE},
+            {"OPERATOR_IDENTIFIER_ATTRIBUTE",               HighlightingAttributeIds.OPERATOR_IDENTIFIER_ATTRIBUTE},
+            {"OUTLINE_BRACE",                               HighlightingAttributeIds.OUTLINE_BRACE},
+            {"OVERRIDES_ATTRIBUTE",                         HighlightingAttributeIds.OVERRIDES_ATTRIBUTE},
+            {"PARAMETER_IDENTIFIER_ATTRIBUTE",              HighlightingAttributeIds.PARAMETER_IDENTIFIER_ATTRIBUTE},
+            {"PATH_IDENTIFIER_ATTRIBUTE",                   HighlightingAttributeIds.PATH_IDENTIFIER_ATTRIBUTE},
+            {"PUBLIC_DEADCODE_ATTRIBUTE",                   HighlightingAttributeIds.PUBLIC_DEADCODE_ATTRIBUTE},
+            {"RECURSION_ATTRIBUTE",                         HighlightingAttributeIds.RECURSION_ATTRIBUTE},
+            {"TODOITEM_ATTRIBUTE",                          HighlightingAttributeIds.TODOITEM_ATTRIBUTE},
+            {"TODOITEM_ERRORSTRIPE_ATTRIBUTE",              HighlightingAttributeIds.TODOITEM_ERRORSTRIPE_ATTRIBUTE},
+            {"SUGGESTION_ATTRIBUTE",                        HighlightingAttributeIds.SUGGESTION_ATTRIBUTE},
+            {"TS_CLASS_IDENTIFIER_ATTRIBUTE",               HighlightingAttributeIds.TS_CLASS_IDENTIFIER_ATTRIBUTE},
+            {"TS_ENUM_IDENTIFIER_ATTRIBUTE",                HighlightingAttributeIds.TS_ENUM_IDENTIFIER_ATTRIBUTE},
+            {"TS_INTERFACE_IDENTIFIER_ATTRIBUTE",           HighlightingAttributeIds.TS_INTERFACE_IDENTIFIER_ATTRIBUTE},
+            {"TS_MODULE_IDENTIFIER_ATTRIBUTE",              HighlightingAttributeIds.TS_MODULE_IDENTIFIER_ATTRIBUTE},
+            {"TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE",      HighlightingAttributeIds.TS_TYPE_PARAMETER_IDENTIFIER_ATTRIBUTE},
+            {"TYPE_CLASS_ATTRIBUTE",                        HighlightingAttributeIds.TYPE_CLASS_ATTRIBUTE},
+            {"TYPE_STATIC_CLASS_ATTRIBUTE",                 HighlightingAttributeIds.TYPE_STATIC_CLASS_ATTRIBUTE},
+            {"TYPE_DELEGATE_ATTRIBUTE",                     HighlightingAttributeIds.TYPE_DELEGATE_ATTRIBUTE},
+            {"TYPE_ENUM_ATTRIBUTE",                         HighlightingAttributeIds.TYPE_ENUM_ATTRIBUTE},
+            {"TYPE_INTERFACE_ATTRIBUTE",                    HighlightingAttributeIds.TYPE_INTERFACE_ATTRIBUTE},
+            {"TYPE_PARAMETER_ATTRIBUTE",                    HighlightingAttributeIds.TYPE_ENUM_ATTRIBUTE},
+            {"TYPE_STRUCT_ATTRIBUTE",                       HighlightingAttributeIds.TYPE_STRUCT_ATTRIBUTE},
+            {"UNMATCHED_BRACE",                             HighlightingAttributeIds.UNMATCHED_BRACE},
+            {"UNRESOLVED_ERROR_ATTRIBUTE",                  HighlightingAttributeIds.UNRESOLVED_ERROR_ATTRIBUTE},
+            {"WARNING_ATTRIBUTE",                           HighlightingAttributeIds.WARNING_ATTRIBUTE},
         };
 
         public static void ParseFile(string fileName, string lang)
@@ -86,6 +85,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (parsedFiles.ContainsKey(fileName))
             {
                 myTokenToColor = parsedFiles[fileName];
+                //MatcherHelper.ChangeLanguageTo(lang);
+                //YcHelper.Update(lang, );
                 return;
             }
 
@@ -104,7 +105,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
                 parsedFiles.Add(fileName, res);
                 MatcherHelper.UpdateMatchingValues(lang);
-
             }
         }
 

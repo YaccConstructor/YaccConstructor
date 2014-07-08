@@ -130,27 +130,17 @@
     <Compile Include="GraphCodeWindow\GraphCodeToolWindowAction.cs" />
     <Compile Include="GraphCodeWindow\GraphLoader.cs" />
     <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
+    <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\Matcher.cs" />
     <Compile Include="Highlighting\Dynamic\MatcherHelper.cs" />
-    <Compile Include="Highlighting\IdentifierHighlighterProcess.cs" />
-    <Compile Include="Highlighting\IdentifierHighlightingStage.cs" />
-    <Compile Include="Highlighting\InspectionProcess.cs" />
-    <Compile Include="Highlighting\InspectionStage.cs" />
-    <Compile Include="Highlighting\MyDaemonStageBase.cs" />
-    <Compile Include="Highlighting\MyDaemonStageProcessBase.cs" />
-    <Compile Include="Highlighting\MyFileIndexProcess.cs" />
-    <Compile Include="Highlighting\MyFileIndexStage.cs" />
-    <Compile Include="Highlighting\MyFileStructure.cs" />
+    <Compile Include="Highlighting\HighlightingProcess.cs" />
+    <Compile Include="Highlighting\HighlightingStage.cs" />
     <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
-    <Compile Include="Highlighting\MyHighlightingStage.cs" />
-    <Compile Include="Highlighting\MyIncrementalDaemonStageProcessBase.cs" />
-    <Compile Include="Highlighting\MyLeafHighlighting.cs" />
+    <Compile Include="Highlighting\Highlighting.cs" />
+    <Compile Include="Highlighting\RecursiveElementProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AboutAction.cs" />
     <Compile Include="ReverseStringAction.cs" />
-    <Compile Include="Highlighting\MySmartResolverProcess.cs" />
-    <Compile Include="Highlighting\MySmartResolverStage.cs" />
-    <Compile Include="Highlighting\ColorHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.txt" />

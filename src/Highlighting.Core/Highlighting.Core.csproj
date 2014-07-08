@@ -27,11 +27,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMyTreeNode.cs" />
     <Compile Include="MyTreeNode.cs" />
-    <Compile Include="KeyConstant.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ITreeNodeVisitor.cs" />
     <Compile Include="YcHelper.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
+﻿module YC.ReSharper.AbstractAnalysis.Plugin.Core
 
 open JetBrains.Application.Progress
 open JetBrains.ProjectModel
@@ -16,10 +16,19 @@ open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Algorithms
 
-type SupportedLangs =
-    | Calc
-    | TSQL
-    | JSON
+open System
+open Mono.Addins
+
+AddinManager.Initialize()
+AddinManager.Registry.Update(null)
+
+let injectedLanguages = 
+    AddinManager.GetExtensionObjects (typeof<IInjectedLanguageProcessor>)
+    |> Seq.cast<IInjectedLanguageProcessor>
+    |> Seq.map (fun x -> x.Name,x)
+    |> dict
+
+//let AddinJSONNames = Seq.map (fun (elem : IInjectedLanguageProcessor) -> elem.Name) AddinJSON
 
 type TreeGenerationState = 
     | Start
@@ -71,12 +80,13 @@ type Processor(file) =
         match n with 
         | :? IInvocationExpression as m ->
             match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
-            | "executeimmediate" -> TSQL
-            | "eval" -> Calc
-            | "objnotation" -> JSON
+            | "executeimmediate" -> injectedLanguages.["TSql"]
+            | "eval" -> injectedLanguages.["Calc"]
+            | "objnotation" -> injectedLanguages.["JSON"] 
             | _ -> failwith "Unsupported language for AA!"
         | _ -> failwith "Unexpected information type for language specification!"
-    let processLang graph tokenize parse addLError addPError translate addSPPF tokenToTreeNode (lang : SupportedLangs) = 
+
+(*    let processLang graph tokenize parse addLError addPError = 
         let tokenize g =
             try 
                tokenize g
@@ -101,7 +111,9 @@ type Processor(file) =
                 parsingFinished.Trigger (new ParsingFinishedArgs (lang))
              | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
+    *)
          
+(*    member this.Process () = 
     let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
         let ranges = 
             brs |> Seq.groupBy (fun x -> x.back_ref)
@@ -185,46 +197,16 @@ type Processor(file) =
             let name = tok |> (tokenToNumberFunc >>  numToStringFunc)
             let (l:string),br = tokenDataFunc tok :?> _
             e name l br
-
-        (*
-        let addErrorCalc tok =
-            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                calculatePos brs 
-                |> Seq.iter
-                    (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            let name = tok |> (Calc.AbstractParser.tokenToNumber >>  Calc.AbstractParser.numToString)
-            let l,br = Calc.AbstractParser.tokenData tok :?>_
-            e name l br
-                    
+*)
         
-        let addErrorJSON tok = 
-            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                calculatePos brs 
-                |> Seq.iter
-                    (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            let name = tok |> (JSON.Parser.tokenToNumber >> JSON.Parser.numToString)
-            let l, br = JSON.Parser.tokenData tok :?>_
-            e name l br
-                    
-        let addErrorTSQL tok =
-            let e t l (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) = 
-                calculatePos brs 
-                |> Seq.iter
-                    (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            let name = tok |> (Yard.Examples.MSParser.tokenToNumber >> Yard.Examples.MSParser.numToString)
-            let l, br = Yard.Examples.MSParser.tokenData tok :?>_
-            e name l br
+        //let error (l:IInjectedLanguageProcessor) tok  = addError tok l.TokenToNumber l.NumToString l.TokenData 
+        //let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
                     
 *)
-        let errorCalc tok  = addError tok Calc.AbstractParser.tokenToNumber Calc.AbstractParser.numToString Calc.AbstractParser.tokenData 
-        let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
-        let errorTSQL tok  = addError tok Yard.Examples.MSParser.tokenToNumber Yard.Examples.MSParser.numToString Yard.Examples.MSParser.tokenData 
-
         let addCalcSPPF pair = calcForest <- calcForest @ [pair]
         let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]
         let addTSqlSPPF pair = tsqlForest <- tsqlForest @ [pair]
 
-        graphs
         |> ResizeArray.iter 
             (fun (lang, graph) ->
                 match lang with

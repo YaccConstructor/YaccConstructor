@@ -139,15 +139,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -166,7 +166,7 @@
     <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
       <Name>Highlighting.Core</Name>
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
-            <Private>True</Private>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>

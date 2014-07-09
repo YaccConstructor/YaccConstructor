@@ -24,11 +24,11 @@ namespace Highlighting.Core
         }
     }
 
+    /// <summary>
+    /// UserData keys
+    /// </summary>
     public static class KeyConstant
     {
-        /// <summary>
-        /// UserData keys
-        /// </summary>
         public static readonly Key<string> YcTokName = new Key<string>("ycTokName");
         public static readonly Key<string> YcValue = new Key<string>("ycValue");
         public static readonly Key<List<DocumentRange>> Ranges = new Key<List<DocumentRange>>("ranges");

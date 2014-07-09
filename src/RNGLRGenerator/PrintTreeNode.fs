@@ -1,5 +1,10 @@
-﻿module PrintTreeNode
+﻿//This module prints the information that is needed for highlighting
 
+module PrintTreeNode
+
+open Yard.Generators.RNGLR
+
+//Print ITreeNode implementation
 let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
     let res  = new System.Text.StringBuilder()
 
@@ -105,14 +110,6 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : stri
     printBrInd 3 "UserData.PutData(KeyConstant.Ranges, ranges);"
     printBrInd 2 "}"
     printBr ""
-
-    (*
-    printBrInd 2 "public DocumentRange[] GetAllPositions()"
-    printBrInd 2 "{"
-    printBrInd 3 "return ranges.ToArray();"
-    printBrInd 2 "}"
-    printBr ""
-    *)
 
     printBrInd 2 "public IPsiServices GetPsiServices()"
     printBrInd 2 "{"
@@ -267,73 +264,13 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : stri
     printBrInd 3 "return null;"
     printBrInd 2 "}"
     printBr ""
-    (*
-    printBrInd 2 "public void SetParent(ITreeNode parent)"
-    printBrInd 2 "{"
-    printBrInd 3 "Parent = parent;"
-    printBrInd 2 "}"
-    printBr ""
-
-    printBrInd 2 "public void SetFirstChild(ITreeNode firstChild)"
-    printBrInd 2 "{"
-    printBrInd 3 "FirstChild = firstChild;"
-    printBrInd 2 "}"
-    printBr ""
-
-    printBrInd 2 "public void SetLastChild(ITreeNode lastChild)"
-    printBrInd 2 "{"
-    printBrInd 3 "LastChild = lastChild;"
-    printBrInd 2 "}"
-    printBr ""
-
-    printBrInd 2 "public void SetNextSibling(ITreeNode nextSibling)"
-    printBrInd 2 "{"
-    printBrInd 3 "NextSibling = nextSibling;"
-    printBrInd 2 "}"
-    printBr ""
-
-    printBrInd 2 "public void SetPrevSibling(ITreeNode prevSibling)"
-    printBrInd 2 "{"
-    printBrInd 3 "PrevSibling = prevSibling;"
-    printBrInd 2 "}"
-    
-    printBrInd 2 "public void SetPsiLanguageType(PsiLanguageType languageType)"
-    printBrInd 2 "{"
-    printBrInd 3 "Language = languageType;"
-    printBrInd 2 "}"
-    
-    printBrInd 2 "public void SetNodeUserData(NodeUserData userData)"
-    printBrInd 2 "{"
-    printBrInd 3 "UserData = userData;"
-    printBrInd 2 "}"
-
-    printBrInd 2 "public void SetPersistentUserData(NodeUserData persistentUserData)"
-    printBrInd 2 "{"
-    printBrInd 3 "PersistentUserData = persistentUserData;"
-    printBrInd 2 "}"
-    *)
-
-//    printBrInd 2 "public void Accept(TreeNodeVisitor visitor)"
-//    printBrInd 2 "{"
-//    printBrInd 3 "visitor.VisitNode(this);"
-//    printBrInd 2 "}"
-
-//    printBrInd 2 "public void Accept<TContext>(TreeNodeVisitor<TContext> visitor, TContext context)"
-//    printBrInd 2 "{"
-//    printBrInd 3 "visitor.VisitSomething(this, context);"
-//    printBrInd 2 "}"
-
-//    printBrInd 2 "public TResult Accept<TContext, TResult>(TreeNodeVisitor<TContext, TResult> visitor, TContext context)"
-//    printBrInd 2 "{"
-//    printBrInd 3 "visitor.VisitSomething(this, context);"
-//    printBrInd 3 "return default(TResult);"
-//    printBrInd 2 "}"
 
     printBrInd 1 "}"
     printBrInd 0 "}"
     res.ToString()
 
 
+//Prints .xml file which contains information about token to color mapping.
 let printXML (nameOfNamespace : string) tokens = 
     let res  = new System.Text.StringBuilder()
 
@@ -352,20 +289,12 @@ let printXML (nameOfNamespace : string) tokens =
             "ANALYSIS_ERROR_ERRORSTRIPE";
             "ANALYSIS_SUGGESTION_ERRORSTRIPE";
             "ANALYSIS_WARNING_ERRORSTRIPE";
-            "CLASS_IS_INHERITED_ATTRIBUTE";
             "CONSTANT_IDENTIFIER_ATTRIBUTE";
             "DEADCODE_ATTRIBUTE";
-            "ERROR_ATTRIBUTE";
             "EVENT_IDENTIFIER_ATTRIBUTE";
             "EXTENSION_METHOD_IDENTIFIER_ATTRIBUTE";
             "FIELD_IDENTIFIER_ATTRIBUTE";
             "FORMAT_STRING_ITEM";
-            "HIDES_ATTRIBUTE";
-            "HINT_ATTRIBUTE";
-            "IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE";
-            "IMPLEMENTS_AND_HIDES_ATTRIBUTE";
-            "IMPLEMENTS_ATTRIBUTE";
-            "INTERFACE_IS_IMPLEMENTED_ATTRIBUTE";
             "JAVA_SCRIPT_XML_DOC_TAG";
             "JS_FUNCTION_IDENTIFIER_ATTRIBUTE";
             "JS_LATEBOUND_IDENTIFIER_ATTRIBUTE";
@@ -381,12 +310,9 @@ let printXML (nameOfNamespace : string) tokens =
             "NAMESPACE_IDENTIFIER_ATTRIBUTE";
             "OPERATOR_IDENTIFIER_ATTRIBUTE";
             //"OUTLINE_BRACE";
-            "OVERRIDES_ATTRIBUTE";
             "PARAMETER_IDENTIFIER_ATTRIBUTE";
             "PATH_IDENTIFIER_ATTRIBUTE";
             "PUBLIC_DEADCODE_ATTRIBUTE";
-            "RECURSION_ATTRIBUTE";
-            "SUGGESTION_ATTRIBUTE";
             "TODOITEM_ATTRIBUTE";
             "TODOITEM_ERRORSTRIPE_ATTRIBUTE";
             "TS_CLASS_IDENTIFIER_ATTRIBUTE";
@@ -403,13 +329,45 @@ let printXML (nameOfNamespace : string) tokens =
             "TYPE_STRUCT_ATTRIBUTE";
             "UNMATCHED_BRACE";
             "UNRESOLVED_ERROR_ATTRIBUTE";
-            "WARNING_ATTRIBUTE"; 
         ]
 
-    printBrInd 0 "<?xml version=\"1.0\"?>"
-    printBrInd 0 "<!-- Available color definitions:"
+    printBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    printBrInd 0 "<!--"
+    printBrInd 2 "Available color definitions:"
+
     for color in availableColors do
         printBrInd 1 "%s" color
+    printBr ""
+
+    let availableIcons = 
+        [
+            "CLASS_IS_INHERITED_ATTRIBUTE";
+            "HIDES_ATTRIBUTE";
+            "IMPLEMENTS_AND_HIDES_ATTRIBUTE";
+            "IMPLEMENTS_AND_OVERRIDES_ATTRIBUTE";
+            "IMPLEMENTS_ATTRIBUTE";
+            "INTERFACE_IS_IMPLEMENTED_ATTRIBUTE";
+            "OVERRIDES_ATTRIBUTE";
+            "RECURSION_ATTRIBUTE";
+        ]
+
+    printBrInd 2 "Available icons:"
+    for icon in availableIcons do
+        printBrInd 1 "%s" icon
+
+    printBr ""
+    let availableUnderlying = 
+        [
+            "ERROR_ATTRIBUTE";
+            "HINT_ATTRIBUTE";
+            "SUGGESTION_ATTRIBUTE";
+            "WARNING_ATTRIBUTE";
+        ]
+
+    printBrInd 2 "Available underlying"
+    for underlying in availableUnderlying do
+        printBrInd 1 "%s" underlying
+
     printBrInd 0 "-->"
 
     printBrInd 0 "<SyntaxDefinition name=\"%s\">" nameOfNamespace
@@ -439,6 +397,120 @@ let printXML (nameOfNamespace : string) tokens =
 
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()
+
+//prints "addSemantic" function in parser file.
+//function addSemantic sets relations between nodes (father, child, brother)
+let printAddSemantic() = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
+
+    printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
+    printBrInd 1 "let mutable prev = null"
+    printBrInd 1 "let mutable curr = null"
+    printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
+    printBrInd 1 "for child in children do"
+    printBrInd 2 "prev <- curr"
+    printBrInd 2 "curr <- child"
+    printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
+    printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
+    printBrInd 2 "if prev = null"
+    printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
+    printBrInd 2 "else"
+    printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
+    printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
+    printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
+    printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
+    printBrInd 1 "parent"
+    res.ToString()
+
+//prints "calculatePos" function in parser file. 
+//function calculatePos returns token coordinates.
+let printCalculatePos() = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
+
+    printBrInd 0 "let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) ="
+    printBrInd 1 "let ranges = "
+    printBrInd 2 "brs |> Seq.groupBy (fun x -> x.back_ref)"
+    printBrInd 2 "|> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)"
+    printBrInd 2 "|> Seq.map(fun brs ->"
+    printBrInd 3 "try"
+    printBrInd 4 "let pos =  brs |> Array.map(fun i -> i.pos_cnum)"
+    printBrInd 4 "let lengthTok = pos.Length"
+    printBrInd 4 "let beginPosTok = pos.[0] + 1"
+    printBrInd 4 "let endPosTok = pos.[lengthTok-1] + 2"
+    printBrInd 4 "let endPos = "
+    printBrInd 5 "brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok"
+    printBrInd 5 "- brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset"
+    printBrInd 4 "brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)"
+    printBrInd 3 "with"
+    printBrInd 3 "| e -> brs.[0].back_ref.GetDocumentRange())"
+    printBrInd 1 "ranges"
+    res.ToString()
+
+//prints "tokenToTreeNode" function in parser file. 
+//function "tokenToTreeNode" needs in highlihgting after lexical analysis.
+let printTokenToTreeNode (indexator : Indexator)= 
+    let res  = new System.Text.StringBuilder()
+
+    let toClassName (str : string) = 
+        let symbols = [| 
+                        for i = 0 to str.Length - 1 do
+                            if i = 0 
+                            then yield System.Char.ToUpper str.[0]
+                            else yield str.[i] 
+                        |] 
+        new System.String(symbols)
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
+
+    printBrInd 0 "let tokenToTreeNode token = "
+    printBrInd 1 "match token with"
+            
+    for i = indexator.termsStart to indexator.termsEnd do
+        let termNode = toClassName <| indexator.indexToTerm i
+        printBrInd 1 "| %s data -> " termNode
+        printBrInd 2 "let value = fst <| data"
+        printBrInd 2 "let temp = snd <| data"
+        printBrInd 2 "let ranges = calculatePos temp"
+        printBrInd 2 "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" termNode termNode
+
+    for i = indexator.literalsStart to indexator.literalsEnd do
+        let litNode = toClassName <| indexator.indexToLiteral i
+        printBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
+        printBrInd 2 "let value = fst <| data"
+        printBrInd 2 "let temp = snd <| data"
+        printBrInd 2 "let ranges = calculatePos temp"
+        printBrInd 2 "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode" litNode litNode
+
+    res.ToString()
+
 
 let printItemsGroup nameOfClasses xmlName = 
     let res  = new System.Text.StringBuilder()

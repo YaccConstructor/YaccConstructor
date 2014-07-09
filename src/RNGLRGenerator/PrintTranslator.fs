@@ -297,123 +297,14 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
     let mainHighlightSemantic () = 
         
-        let printAddSemantic = 
-            let res  = new System.Text.StringBuilder()
-
-            let inline print (x : 'a) =
-                Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-            let inline printBr (x : 'a) =
-                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
-
-            let inline printBrInd num (x : 'a) =
-                print "%s" (String.replicate (num <<< 2) " ")
-                printBr x
-
-            printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
-            printBrInd 1 "let mutable prev = null"
-            printBrInd 1 "let mutable curr = null"
-            printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
-            printBrInd 1 "for child in children do"
-            printBrInd 2 "prev <- curr"
-            printBrInd 2 "curr <- child"
-            printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
-            printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
-            printBrInd 2 "if prev = null"
-            printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
-            printBrInd 2 "else"
-            printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
-            printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
-            printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
-            printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
-            printBrInd 1 "parent"
-            res.ToString()
-
-        let printCalculatePos = 
-            let res  = new System.Text.StringBuilder()
-
-            let inline print (x : 'a) =
-                Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-            let inline printBr (x : 'a) =
-                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
-
-            let inline printBrInd num (x : 'a) =
-                print "%s" (String.replicate (num <<< 2) " ")
-                printBr x
-
-            printBrInd 0 "let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) ="
-            printBrInd 1 "let ranges = "
-            printBrInd 2 "brs |> Seq.groupBy (fun x -> x.back_ref)"
-            printBrInd 2 "|> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)"
-            printBrInd 2 "|> Seq.map(fun brs ->"
-            printBrInd 3 "try"
-            printBrInd 4 "let pos =  brs |> Array.map(fun i -> i.pos_cnum)"
-            printBrInd 4 "let lengthTok = pos.Length"
-            printBrInd 4 "let beginPosTok = pos.[0] + 1"
-            printBrInd 4 "let endPosTok = pos.[lengthTok-1] + 2"
-            printBrInd 4 "let endPos = "
-            printBrInd 5 "brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok"
-            printBrInd 5 "- brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset"
-            printBrInd 4 "brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)"
-            printBrInd 3 "with"
-            printBrInd 3 "| e -> brs.[0].back_ref.GetDocumentRange())"
-            printBrInd 1 "ranges"
-            res.ToString()
-
-        let printTokenToTreeNode = 
-            let res  = new System.Text.StringBuilder()
-
-            let toClassName (str : string) = 
-                let symbols = [| 
-                                for i = 0 to str.Length - 1 do
-                                    if i = 0 
-                                    then yield System.Char.ToUpper str.[0]
-                                    else yield str.[i] 
-                              |] 
-                new System.String(symbols)
-
-            let inline print (x : 'a) =
-                Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-            let inline printBr (x : 'a) =
-                Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
-
-            let inline printBrInd num (x : 'a) =
-                print "%s" (String.replicate (num <<< 2) " ")
-                printBr x
-
-            printBrInd 0 "let tokenToTreeNode token = "
-            printBrInd 1 "match token with"
-            
-            for i = grammar.indexator.termsStart to grammar.indexator.termsEnd do
-                let termNode = toClassName <| grammar.indexator.indexToTerm i
-                printBrInd 1 "| %s data -> " termNode
-                printBrInd 2 "let value = fst <| data"
-                printBrInd 2 "let temp = snd <| data"
-                printBrInd 2 "let ranges = calculatePos temp"
-//                printBrInd 2 "let ranges = calculatePos <| snd <| data"
-                printBrInd 2 "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" termNode termNode
-
-            for i = grammar.indexator.literalsStart to grammar.indexator.literalsEnd do
-                let litNode = toClassName <| grammar.indexator.indexToLiteral i
-//                 grammar.indexator.indexToLiteral i 
-                printBrInd 1 "| L_%s data -> " <| grammar.indexator.indexToLiteral i
-                printBrInd 2 "let value = fst <| data"
-                printBrInd 2 "let temp = snd <| data"
-                printBrInd 2 "let ranges = calculatePos temp"
-                printBrInd 2 "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode" litNode litNode
-
-            res.ToString()
-
         if highlightingOpt.IsSome
-                then 
+        then 
             let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
             wordL <| System.String.Concat [| 
                                              printXmlName; System.Environment.NewLine; 
-                                             printAddSemantic; System.Environment.NewLine; 
-                                             printCalculatePos; System.Environment.NewLine;
-                                             printTokenToTreeNode; System.Environment.NewLine;
+                                             printAddSemantic(); System.Environment.NewLine; 
+                                             printCalculatePos(); System.Environment.NewLine;
+                                             printTokenToTreeNode (grammar.indexator); System.Environment.NewLine;
                                           |] 
         else wordL ""
     

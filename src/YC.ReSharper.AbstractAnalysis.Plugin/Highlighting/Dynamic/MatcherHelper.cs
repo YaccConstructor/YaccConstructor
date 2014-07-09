@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Highlighting.Core;
-using JetBrains.ReSharper.Feature.Services.CSharp;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.ReSharper.AbstractAnalysis.Plugin.Core;
+using YC.ReSharper.AbstractAnalysis.Core;
 
 public static class MatcherHelper
 {

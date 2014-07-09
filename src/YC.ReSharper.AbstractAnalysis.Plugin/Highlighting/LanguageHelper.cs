@@ -5,7 +5,6 @@ using Highlighting.Core;
 using JetBrains.ReSharper.Feature.Services.Intentions;
 using JetBrains.ReSharper.Feature.Services.Tips;
 using JetBrains.ReSharper.Psi.Impl;
-using Yard.Core;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {

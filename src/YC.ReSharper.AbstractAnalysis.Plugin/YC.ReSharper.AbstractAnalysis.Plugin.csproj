@@ -135,6 +135,7 @@
     <Compile Include="Highlighting\Dynamic\MatcherHelper.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />
     <Compile Include="Highlighting\HighlightingStage.cs" />
+    <Compile Include="Highlighting\LanguageHelper.cs" />
     <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
     <Compile Include="Highlighting\Highlighting.cs" />
     <Compile Include="Highlighting\RecursiveElementProcessor.cs" />

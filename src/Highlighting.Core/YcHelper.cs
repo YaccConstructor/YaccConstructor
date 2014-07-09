@@ -8,15 +8,15 @@ namespace Highlighting.Core
     public static class YcHelper
     {
         /// <summary>
-        /// For each language name returns ycTokenToString dictiionary
+        /// For each language name returns ycTokenToString dictionary
         /// </summary>
-        private static Dictionary<string, Dictionary<string, string>> allYcToString = new Dictionary<string, Dictionary<string, string>>();
-        //private static readonly Dictionary<string, List<string>> allUnunique = new Dictionary<string, List<string>>();
+        private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
         private static readonly LockObject lockObject = new LockObject();
 
         public static void AddYcItem(string key, string value, string lang)
         {
             lang = lang.ToLower();
+            key = key.ToLower();
             if (String.IsNullOrEmpty(key) ||
                 String.IsNullOrEmpty(value))
                 return;
@@ -25,79 +25,81 @@ namespace Highlighting.Core
             {
                 if (!allYcToString.ContainsKey(lang))
                 {
-                    allYcToString.Add(lang, new Dictionary<string, string>());
-                    //allUnunique.Add(lang, new List<string>());
+                    allYcToString.Add(lang, new Dictionary<string, StringValue>());
                 }
-                var ycTokenToString = allYcToString[lang];
-                //var ununique = allUnunique[lang];
 
-                if (ycTokenToString.ContainsKey(key))
+                var dict = allYcToString[lang];
+
+                if (dict.ContainsKey(key))
                 {
-                    if (ycTokenToString[key] != value)
+                    var strValue = dict[key];
+                    if (strValue.numOfValues == Value.OneValue)
                     {
-                        ycTokenToString.Remove(key);
-                        //ununique.Add(key);
+                        if (strValue.stringValue != value)
+                        {
+                            strValue.numOfValues = Value.ManyValues;
+                            strValue.stringValue = null;
+                        }
                     }
                 }
                 else
                 {
-                    ycTokenToString.Add(key, value);
+                    dict.Add(key, new StringValue()
+                    {
+                        numOfValues = Value.OneValue,
+                        stringValue = value,
+                    });
                 }
+
             }
         }
 
-        /// <summary>
-        /// Returns ycToken from string value.
-        /// For example if str is "(" then method returns LBRACE
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="lang">Name of language (Calc, JSON, TSQL)</param>
-        /// <returns></returns>
-        public static string GetYcTokenName(string str, string lang)
+        public static string GetYcName(string lang, string str)
         {
-            if (!allYcToString.ContainsKey(lang)) return null;
-
-            var ycTokenToString = allYcToString[lang];
-            if (!ycTokenToString.ContainsValue(str))
-                return null;
-
-            return ycTokenToString.First(pair => pair.Value == str).Key;
-        }
-
-        /// <summary>
-        /// Returns string value from ycToken.
-        /// For example if ycToken is LBRACE then method returns "("
-        /// </summary>
-        /// <param name="ycToken"></param>
-        /// <returns></returns>
-        public static string GetStringValue(string ycToken, string lang)
-        {
-            if (!allYcToString.ContainsKey(lang)) return null;
-
-            var ycTokenToString = allYcToString[lang];
-            if (!ycTokenToString.ContainsKey(ycToken))
-                return null;
-
-            return ycTokenToString[ycToken];
-        }
-
-
-        /// <summary>
-        /// Removes unnecessary key-value from table
-        /// </summary>
-        public static void Update(string lang, Dictionary<string, string> dictionary)
-        {
-            if (dictionary.Count == 0)
-                return;
-
-            Dictionary<string, string> ycToString = allYcToString[lang];
-
-            foreach (KeyValuePair<string, string> item in ycToString)
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
             {
-                if (dictionary.ContainsKey(item.Key) || dictionary.ContainsValue(item.Key))
-                    continue;
-                dictionary.Remove(item.Key);
+                return null;
             }
+
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(str))
+                return null;
+
+            return
+                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Value.stringValue == str)
+                    .Key;
+
         }
+
+        public static string GetStringName(string lang, string str)
+        {
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
+            {
+                return null;
+            }
+            
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(str))
+                return null;
+
+            return
+                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Key == str)
+                    .Value.stringValue;
+        }
+    }
+
+    public enum Value
+    {
+        NoValue,
+        OneValue,
+        ManyValues
+    }
+
+    public class StringValue
+    {
+        public Value numOfValues { get; set; }
+        public string stringValue { get; set; }
     }
 }

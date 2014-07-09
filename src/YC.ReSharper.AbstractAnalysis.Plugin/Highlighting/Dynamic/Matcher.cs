@@ -49,7 +49,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             //if (!MatcherHelper.AllMatchingValues.Contains(lBrotherText)) return;
 
             var lang = GetLanguageFromRange(lBraceRange);
-            var rBrotherText = MatcherHelper.GetRightMatch(lBrotherText, lang);
+            
+            var rBrotherText = LanguageHelper.GetBrother(lang, lBrotherText, Brother.Right);
             if (string.IsNullOrEmpty(rBrotherText))
                 return;
 
@@ -95,7 +96,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             //if (!MatcherHelper.AllMatchingValues.Contains(rBrotherText)) return;
 
             string lang = GetLanguageFromRange(rBraceRange);
-            string lBrotherText = MatcherHelper.GetLeftMatch(rBrotherText, lang);
+            string lBrotherText = LanguageHelper.GetBrother(lang, rBrotherText, Brother.Left);
 
             //possible it is unnecessary
             if (string.IsNullOrEmpty(lBrotherText))

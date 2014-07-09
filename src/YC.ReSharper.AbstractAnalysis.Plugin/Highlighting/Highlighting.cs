@@ -18,20 +18,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public Highlighting([NotNull] ITreeNode element)
         {
             myElement = element;
-            string ycTokName = element.UserData.GetData(KeyConstant.YcTokName);
-            if (ColorHelper.TokenToColor == null || string.IsNullOrEmpty(ycTokName))
-            {
-                attributeId = ColorHelper.DefaultColor;
-            }
-
-            else if (ColorHelper.TokenToColor.ContainsKey(ycTokName.ToLower()))
-            {
-                attributeId = ColorHelper.TokenToColor[ycTokName.ToLower()];
-            }
-            else
-            {
-                attributeId = ColorHelper.DefaultColor;
-            }
+            string lang = element.UserData.GetData(KeyConstant.YcLanguage);
+            string tokenName = element.UserData.GetData(KeyConstant.YcTokName);
+            attributeId = LanguageHelper.GetColor(lang, tokenName);
         }
 
         #region ICustomAttributeIdHighlighting Members

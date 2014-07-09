@@ -17,44 +17,7 @@ type Collections.Generic.IDictionary<'k,'v> with
     member d.Add'(k,v) =
         if not (d.ContainsKey k) then d.Add(k,v);true else false
 
-exception IdentToken
-
-let replacementDict =
-    [
-        '.', "dot"
-        ',', "comma"
-        ':', "semi"
-        ';', "colon"
-        '+', "plus"
-        '-', "minus"
-        '*', "star"
-        '<', "less"
-        '>', "more"
-        '=', "equal"
-        '/', "slash"
-        '&', "and"
-        '|', "or"
-        '?', "question"
-        '$', "dollar"
-        '[', "left_square_bracket"
-        ']', "right_square_bracket"
-        '(', "left_bracket"
-        ')', "right_bracket"
-        '!', "not"
-        '~', "tilda"
-        '#', "sharp"
-        '%', "percent"
-        '^', "hat"
-        '{', "left_figure_bracket"
-        '}', "right_figure_bracket"
-        '\\', "reverse_slash"
-        '`', "reverse_quate"
-        ''', "quate"
-        '№', "number"
-    ]
-    |> dict
-
-        
+exception IdentToken        
 
 let getKwTokenOrIdent = 
     let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
@@ -67,32 +30,11 @@ let getKwTokenOrIdent =
             |> Option.map (fun ctor ->  ctor [| defaultSourceText |] :?>Token) 
         match kw with 
         | None ->
-            //if kws.Contains (name.ToLowerInvariant()) then
-            let name = 
-                name
-                |> Seq.mapi  
-                    (fun i ch ->
-                        let exist,v = replacementDict.TryGetValue(ch)
-                        if exist
-                        then
-                            if i = 0 
-                            then v + "_"
-                            elif i = name.Length - 1
-                            then "_" + v
-                            else "_" + v + "_"
-                        else string ch
-                    )
-                |> String.concat ""
+            let name = Yard.Generators.RNGLR.Helper._getLiteralName name
             match genLiteral name defaultSourceText with
             Some x as c -> c
-            | None ->
-            //else
-                Some <| IDENT defaultSourceText
+            | None -> Some <| IDENT defaultSourceText
         | Some x -> kw
-
-//let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
-
-//function
 
 let commendepth = ref 0
 //let startPos = ref Position.Empty

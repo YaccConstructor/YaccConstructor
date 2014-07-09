@@ -36,6 +36,7 @@ let tokenToTreeNode = tokenToTreeNode
 let translate ast errors = translate args ast errors
 
 [<Extension>]
+type JSONPars () =
     interface IInjectedLanguageProcessor<JSON.Parser.Token, JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression> with
         member this.Name = "JSON"
         member this.Parse (inG) = parse (inG)

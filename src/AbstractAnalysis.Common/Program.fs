@@ -57,7 +57,7 @@ let processLang graph tokenize parse addLError addPError =
     tokenize graph |> Option.map parse
     |> Option.iter
         (function 
-            | Yard.Generators.RNGLR.Parser.Success(_,_) -> ()
+            | Yard.Generators.RNGLR.Parser.Success(_,_,_) -> ()
             | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
         )
 

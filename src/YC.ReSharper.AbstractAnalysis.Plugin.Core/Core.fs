@@ -202,7 +202,7 @@ type Processor(file) =
         //let error (l:IInjectedLanguageProcessor) tok  = addError tok l.TokenToNumber l.NumToString l.TokenData 
         //let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
                     
-*)
+
         let addCalcSPPF pair = calcForest <- calcForest @ [pair]
         let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]
         let addTSqlSPPF pair = tsqlForest <- tsqlForest @ [pair]

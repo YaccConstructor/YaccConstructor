@@ -69,6 +69,7 @@ match r with
     //tree.PrintAst()
         GLL.SimpleAmb.defaultAstToDot tree.[0] "ast1.dot"
         GLL.SimpleAmb.defaultAstToDot tree.[1] "ast2.dot"
+   //     GLL.SimpleAmb.defaultAstToDot tree.[2] "ast3.dot"
 
 
 printfn "ff"

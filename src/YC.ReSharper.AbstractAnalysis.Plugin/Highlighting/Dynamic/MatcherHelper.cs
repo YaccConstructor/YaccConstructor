@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.ReSharper.AbstractAnalysis.Core;
 
 public static class MatcherHelper
 {
-    public static Processor YcProcessor { get; set; }
+    public static YC.AbstractAnalysis.Helper.ReSharperHelper YcProcessor { get; set; }
     public static List<ITreeNode> NodeCover { get; private set; }
 
     static MatcherHelper()

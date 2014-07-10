@@ -54,7 +54,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (string.IsNullOrEmpty(rBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lBraceRange, lang);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, lBraceRange);
 
             var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -102,7 +102,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (string.IsNullOrEmpty(lBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(rBraceRange, lang);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, rBraceRange);
 
             var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);

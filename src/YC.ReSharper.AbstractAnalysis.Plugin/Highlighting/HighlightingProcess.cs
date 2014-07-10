@@ -13,7 +13,6 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.Util;
-using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -21,7 +20,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         private readonly DaemonProcessKind myProcessKind;
         private Action<DaemonStageResult> myCommiter;
-        private Processor ycProcessor = null;
+        private YC.AbstractAnalysis.Helper.ReSharperHelper ycProcessor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
 
         public IDaemonProcess DaemonProcess { get; private set; }
 
@@ -62,11 +61,16 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         }
 
         private void UpdateYCProcessor(ICSharpFile file)
-        {
-            ycProcessor = new Processor(file);
-            ycProcessor.LexingFinished += OnLexingFinished;
-            ycProcessor.ParsingFinished += OnParsingFinished;
-            ycProcessor.Process();
+        {            
+            foreach (var e in ycProcessor.LexingFinished)
+            {
+                e.AddHandler(OnLexingFinished);
+            }
+            foreach (var e in ycProcessor.ParsingFinished)
+            {
+                e.AddHandler(OnParsingFinished);
+            }            
+            ycProcessor.Process(file);
         }
 
         /// <summary>
@@ -74,7 +78,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// </summary>
         /// <param name="sender">Now always null</param>
         /// <param name="args"></param>
-        private void OnLexingFinished(object sender, LexingFinishedArgs args)
+        private void OnLexingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.LexingFinishedArgs args)
         {
             if (myCommiter == null)
                 return;
@@ -83,8 +87,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var processor = new RecursiveElementProcessor(consumer, File);
 
             string xmlPath = ycProcessor.XmlPath(args.Lang);
-            string lang = ycProcessor.LangToString(args.Lang);
-            ColorHelper.ParseFile(xmlPath, lang);
+            //string lang = ycProcessor.LangToString(args.Lang);
+            ColorHelper.ParseFile(xmlPath, args.Lang);
 
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
             {
@@ -107,7 +111,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// <param name="sender"></param>
         /// <param name="args">Now it contains only language</param>
         private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
-        private void OnParsingFinished(object sender, ParsingFinishedArgs args)
+        private void OnParsingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.ParsingFinishedArgs args)
         {
             if (ycProcessor == null)
                 return;
@@ -115,15 +119,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var lang = args.Lang;
             MatcherHelper.YcProcessor = ycProcessor;
 
-            string strLang = ycProcessor.LangToString(lang);
-
-            if (!parsedSppf.ContainsKey(strLang))
+            if (!parsedSppf.ContainsKey(lang))
             {
-                parsedSppf.Add(strLang, 0);
+                parsedSppf.Add(lang, 0);
             }
             else
             {
-                parsedSppf[strLang]++;
+                parsedSppf[lang]++;
             }
 
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
@@ -134,7 +136,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
                     while (!isEnd)
                     {
-                        Tuple<ITreeNode, bool> res = ycProcessor.GetNextTree(lang, parsedSppf[strLang]);
+                        Tuple<ITreeNode, bool> res = ycProcessor.GetNextTree(lang, parsedSppf[lang]);
                         ITreeNode tree = res.Item1;
                         isEnd = res.Item2;
                         MatcherHelper.NodeCover.Add(tree);

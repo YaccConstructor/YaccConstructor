@@ -188,6 +188,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         
         let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
         let astTemp = new List<obj>()
+        let familyTemp = new List<Family>() 
 
         let terminalNodes = new BlockResizeArray<Nodes>()
 
@@ -199,6 +200,20 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 then result <- false
             result
         
+        let findFamily prod (nodes : Nodes) lExt rExt : Family=
+            let mutable result = None
+            for fam in familyTemp do
+                if fam.prod = prod && fam.leftExt = lExt && fam.rightExt = rExt
+                then
+                    if nodes.fst.Equals fam.nodes.fst
+                    then result <- Some fam
+            if result.IsNone
+            then 
+                result <- Some <| new Family(prod, nodes, lExt, rExt)
+                familyTemp.Add(result.Value)
+            let r = result.Value
+            r
+
         let handleIntermidiate node prod = 
             let result = new List<obj>()
             let rec handle (o : obj) =
@@ -228,7 +243,9 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     n.rightExt
                 | :? AST as a -> a.rightExt 
                 | _ -> failwith "Unexpected type."
-            let family = new Family(prod, new Nodes(result, l, r, -1),l, r)
+            //let family = new Family(prod, new Nodes(result, l, r, -1),l, r)
+            let nodes = new Nodes(result, l, r, -1)
+            let family = findFamily prod nodes l r
             family
                
         let containsContext index (label : Label) (gssNode : Vertex) (ast : obj) =
@@ -312,12 +329,12 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 | :? AST as a -> 
                     if parser.LeftSide.[a.first.prod] = currentNonTerm && a.leftExt = lExt && a.rightExt = rExt
                     then
-                        if a.first.prod = prod
+                        if a.first.Equals family
                         then wasAdded <- true
                         elif a.other <> null
                         then
                             for fam in a.other do
-                                if fam.prod = prod
+                                if fam.Equals family
                                 then wasAdded <- true
                         if not wasAdded
                         then 
@@ -469,11 +486,15 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             | None -> Error ("String was not parsed")
             | Some res -> 
                     let r1 = new Tree<_> (tokens, res.[0], parser.Rules)
-                    let r2 = new Tree<_> (tokens, res.[1], parser.Rules)
-                   // let r3 = new Tree<_> (tokens, res.[2], parser.Rules)
+ //                   let r2 = new Tree<_> (tokens, res.[1], parser.Rules)
+//                    let r3 = new Tree<_> (tokens, res.[2], parser.Rules)
+//                    let r4 = new Tree<_> (tokens, res.[3], parser.Rules)
+//                    let r5 = new Tree<_> (tokens, res.[4], parser.Rules)
                     let rr = new List<Tree<'TokenType>>()
                     drawDot parser tokens "res.dot" gss
                     rr.Add(r1)
-                    rr.Add(r2)
-                 //   rr.Add(r3)
+ //                   rr.Add(r2)
+//                    rr.Add(r3)
+//                    rr.Add(r4)
+//                    rr.Add(r5)
                     Success (rr)       

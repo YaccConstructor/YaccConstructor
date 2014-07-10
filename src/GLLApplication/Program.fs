@@ -68,8 +68,10 @@ match r with
     //printfn "ff"   
     //tree.PrintAst()
         GLL.SimpleAmb.defaultAstToDot tree.[0] "ast1.dot"
-        GLL.SimpleAmb.defaultAstToDot tree.[1] "ast2.dot"
-   //     GLL.SimpleAmb.defaultAstToDot tree.[2] "ast3.dot"
+  //      GLL.SimpleAmb.defaultAstToDot tree.[1] "ast2.dot"
+//        GLL.SimpleAmb.defaultAstToDot tree.[2] "ast3.dot"
+//        GLL.SimpleAmb.defaultAstToDot tree.[3] "ast4.dot"
+//        GLL.SimpleAmb.defaultAstToDot tree.[4] "ast5.dot"
 
 
 printfn "ff"

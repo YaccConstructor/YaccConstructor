@@ -2,7 +2,7 @@
 module Calc.Lexer
 open Calc.AbstractParser
 open AbstractLexer.Core
-open AbstractAnalysis.Common
+open YC.AbstractAnalysis.CommonInterfaces
 }
 
 let digit = ['0'-'9']

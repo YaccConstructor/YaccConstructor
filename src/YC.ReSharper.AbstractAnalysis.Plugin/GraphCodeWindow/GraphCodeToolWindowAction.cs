@@ -24,28 +24,28 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
 
         public void Execute(IDataContext context, DelegateExecute nextExecute)
         {
-            textControl = context.GetData(JetBrains.TextControl.DataContext.DataConstants.TEXT_CONTROL);
-            GoToCodeEventHandler.InvokeGetCodeEvent += GetSourceCode;
-            var descriptor = DataConstantsExtensions.GetComponent<GraphCodeToolWindow>(context);
-            var manager = DataConstantsExtensions.GetComponent<ToolWindowManager>(context);
-            var lifetime = DataConstantsExtensions.GetComponent<Lifetime>(context);
-            var uiApplication = DataConstantsExtensions.GetComponent<UIApplication>(context);
-            //var registrar = new GraphCodeWindowRegistrar(lifetime, manager, descriptor, uiApplication);
-            //registrar.Show();
-            var graphs = (new GraphLoader()).Load();
-            var tabControl = new TabControl();
-            var zcontrols = new List<ZoomControl>();
-            foreach (var graph in graphs)
-            {
-                var gArea = InitializeGraphArea.Initialize(graph);
-                var zcontrol = new ZoomControl();
-                zcontrol.Content = gArea;
-                zcontrols.Add(zcontrol);
-            }
-            tabControl.ItemsSource = zcontrols;
-            Window w = new Window();
-            w.Content = tabControl;
-            w.Show();
+            //textControl = context.GetData(JetBrains.TextControl.DataContext.DataConstants.TEXT_CONTROL);
+            //GoToCodeEventHandler.InvokeGetCodeEvent += GetSourceCode;
+            //var descriptor = DataConstantsExtensions.GetComponent<GraphCodeToolWindow>(context);
+            //var manager = DataConstantsExtensions.GetComponent<ToolWindowManager>(context);
+            //var lifetime = DataConstantsExtensions.GetComponent<Lifetime>(context);
+            //var uiApplication = DataConstantsExtensions.GetComponent<UIApplication>(context);
+            ////var registrar = new GraphCodeWindowRegistrar(lifetime, manager, descriptor, uiApplication);
+            ////registrar.Show();
+            //var graphs = (new GraphLoader()).Load();
+            //var tabControl = new TabControl();
+            //var zcontrols = new List<ZoomControl>();
+            //foreach (var graph in graphs)
+            //{
+            //    var gArea = InitializeGraphArea.Initialize(graph);
+            //    var zcontrol = new ZoomControl();
+            //    zcontrol.Content = gArea;
+            //    zcontrols.Add(zcontrol);
+            //}
+            //tabControl.ItemsSource = zcontrols;
+            //Window w = new Window();
+            //w.Content = tabControl;
+            //w.Show();
         }
 
         public void GetSourceCode(object sender, EventArgs args)

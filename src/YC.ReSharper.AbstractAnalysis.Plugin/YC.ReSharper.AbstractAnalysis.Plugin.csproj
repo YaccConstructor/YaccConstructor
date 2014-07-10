@@ -40,6 +40,10 @@
     <Reference Include="GraphX.Logic">
       <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
@@ -56,15 +60,15 @@
     </Reference>
     <Reference Include="RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRAbstractParser.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRCommon, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRCommon.dll</HintPath>
     </Reference>
     <Reference Include="RNGLRParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net45\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -126,6 +130,10 @@
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
+      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
+      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

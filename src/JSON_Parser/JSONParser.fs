@@ -23,27 +23,9 @@ type Token =
     | NUMBER of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | RNGLR_EOF of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
     | STRING1 of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_comma_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_semi_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_left_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_right_square_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_false of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_null of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_true of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_left_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
-    | L_right_figure_bracket_ of (string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)
 
 let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | "," -> Some (L_comma_ data)
-    | ":" -> Some (L_semi_ data)
-    | "[" -> Some (L_left_square_bracket_ data)
-    | "]" -> Some (L_right_square_bracket_ data)
-    | "false" -> Some (L_false data)
-    | "null" -> Some (L_null data)
-    | "true" -> Some (L_true data)
-    | "{" -> Some (L_left_figure_bracket_ data)
-    | "}" -> Some (L_right_figure_bracket_ data)
     | x -> None
 let tokenData = function
     | EMPTY x -> box x
@@ -54,15 +36,6 @@ let tokenData = function
     | NUMBER x -> box x
     | RNGLR_EOF x -> box x
     | STRING1 x -> box x
-    | L_comma_ x -> box x
-    | L_semi_ x -> box x
-    | L_left_square_bracket_ x -> box x
-    | L_right_square_bracket_ x -> box x
-    | L_false x -> box x
-    | L_null x -> box x
-    | L_true x -> box x
-    | L_left_figure_bracket_ x -> box x
-    | L_right_figure_bracket_ x -> box x
 
 let numToString = function
     | 0 -> "array1"
@@ -70,12 +43,12 @@ let numToString = function
     | 2 -> "highlight_EMPTY"
     | 3 -> "highlight_KW_COLON"
     | 4 -> "highlight_KW_FALSE"
-    | 5 -> "yard_exp_brackets_1603"
-    | 6 -> "yard_exp_brackets_1604"
-    | 7 -> "yard_many_177"
-    | 8 -> "yard_many_178"
-    | 9 -> "yard_rule_list_1601"
-    | 10 -> "yard_rule_list_1602"
+    | 5 -> "highlight_KW_NULL"
+    | 6 -> "highlight_KW_TRUE"
+    | 7 -> "highlight_NUMBER"
+    | 8 -> "highlight_STRING1"
+    | 9 -> "objects"
+    | 10 -> "pair"
     | 11 -> "value"
     | 12 -> "yard_rule_list_1"
     | 13 -> "yard_rule_list_3"
@@ -96,15 +69,11 @@ let tokenToNumber = function
     | EMPTY _ -> 17
     | KW_COLON _ -> 18
     | KW_FALSE _ -> 19
-    | L_comma_ _ -> 15
-    | L_semi_ _ -> 16
-    | L_left_square_bracket_ _ -> 17
-    | L_right_square_bracket_ _ -> 18
-    | L_false _ -> 19
-    | L_null _ -> 20
-    | L_true _ -> 21
-    | L_left_figure_bracket_ _ -> 22
-    | L_right_figure_bracket_ _ -> 23
+    | KW_NULL _ -> 20
+    | KW_TRUE _ -> 21
+    | NUMBER _ -> 22
+    | RNGLR_EOF _ -> 23
+    | STRING1 _ -> 24
 
 let isLiteral = function
     | EMPTY _ -> false
@@ -115,15 +84,6 @@ let isLiteral = function
     | NUMBER _ -> false
     | RNGLR_EOF _ -> false
     | STRING1 _ -> false
-    | L_comma_ _ -> true
-    | L_semi_ _ -> true
-    | L_left_square_bracket_ _ -> true
-    | L_right_square_bracket_ _ -> true
-    | L_false _ -> true
-    | L_null _ -> true
-    | L_true _ -> true
-    | L_left_figure_bracket_ _ -> true
-    | L_right_figure_bracket_ _ -> true
 
 let getLiteralNames = []
 let mutable private cur = 0
@@ -237,6 +197,50 @@ let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
             | e -> brs.[0].back_ref.GetDocumentRange())
     ranges
 
+let tokenToTreeNode token = 
+    match token with
+    | EMPTY data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new EMPTYTermNode("EMPTY", value.ToString(), ranges) :> ITreeNode
+    | KW_COLON data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new KW_COLONTermNode("KW_COLON", value.ToString(), ranges) :> ITreeNode
+    | KW_FALSE data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new KW_FALSETermNode("KW_FALSE", value.ToString(), ranges) :> ITreeNode
+    | KW_NULL data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new KW_NULLTermNode("KW_NULL", value.ToString(), ranges) :> ITreeNode
+    | KW_TRUE data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new KW_TRUETermNode("KW_TRUE", value.ToString(), ranges) :> ITreeNode
+    | NUMBER data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new NUMBERTermNode("NUMBER", value.ToString(), ranges) :> ITreeNode
+    | RNGLR_EOF data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new RNGLR_EOFTermNode("RNGLR_EOF", value.ToString(), ranges) :> ITreeNode
+    | STRING1 data -> 
+        let value = fst <| data
+        let temp = snd <| data
+        let ranges = calculatePos temp
+        new STRING1TermNode("STRING1", value.ToString(), ranges) :> ITreeNode
+
+
 let _rnglr_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
 let _rnglr_filtered_epsilons : Tree<Token>[] = [|null; new Tree<_>(null,box (new AST(new Family(26, new Nodes([||])), null)), null); null; null; null; null; null; null; null; null; null; null; new Tree<_>(null,box (new AST(new Family(9, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(15, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(11, new Nodes([||])), null)), null); new Tree<_>(null,box (new AST(new Family(17, new Nodes([||])), null)), null); null|]
 for x in _rnglr_filtered_epsilons do if x <> null then x.ChooseSingleAst()
@@ -264,7 +268,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 227 "JSONParser.fs"
+# 271 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -287,7 +291,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 250 "JSONParser.fs"
+# 294 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -310,7 +314,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 273 "JSONParser.fs"
+# 317 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -333,7 +337,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 296 "JSONParser.fs"
+# 340 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -356,7 +360,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 319 "JSONParser.fs"
+# 363 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -379,7 +383,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 342 "JSONParser.fs"
+# 386 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -402,7 +406,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_value) 
-# 365 "JSONParser.fs"
+# 409 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -412,7 +416,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 23 "JSON.yrd"
                : '_rnglr_type_yard_start_rule) 
-# 375 "JSONParser.fs"
+# 419 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -439,7 +443,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 25 "JSON.yrd"
                : '_rnglr_type_array1) 
-# 402 "JSONParser.fs"
+# 446 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -460,7 +464,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 423 "JSONParser.fs"
+# 467 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -485,7 +489,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_1) 
-# 448 "JSONParser.fs"
+# 492 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -506,7 +510,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 469 "JSONParser.fs"
+# 513 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -533,7 +537,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_2) 
-# 496 "JSONParser.fs"
+# 540 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -560,7 +564,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 27 "JSON.yrd"
                : '_rnglr_type_pair) 
-# 523 "JSONParser.fs"
+# 567 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -587,7 +591,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 29 "JSON.yrd"
                : '_rnglr_type_objects) 
-# 550 "JSONParser.fs"
+# 594 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -608,7 +612,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 571 "JSONParser.fs"
+# 615 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -633,7 +637,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 4 "Common.yrd"
                : '_rnglr_type_yard_rule_list_3) 
-# 596 "JSONParser.fs"
+# 640 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -654,7 +658,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 617 "JSONParser.fs"
+# 661 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -681,7 +685,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 # 6 "Common.yrd"
                : '_rnglr_type_yard_rule_yard_many_1_4) 
-# 644 "JSONParser.fs"
+# 688 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -705,7 +709,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_STRING1) 
-# 668 "JSONParser.fs"
+# 712 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -729,7 +733,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_NUMBER) 
-# 692 "JSONParser.fs"
+# 736 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -753,7 +757,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_TRUE) 
-# 716 "JSONParser.fs"
+# 760 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -777,7 +781,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_FALSE) 
-# 740 "JSONParser.fs"
+# 784 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -801,7 +805,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_NULL) 
-# 764 "JSONParser.fs"
+# 808 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -825,7 +829,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_EMPTY) 
-# 788 "JSONParser.fs"
+# 832 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -849,7 +853,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_highlight_KW_COLON) 
-# 812 "JSONParser.fs"
+# 856 "JSONParser.fs"
       );
   (
     fun (_rnglr_children : array<_>) (parserRange : (array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> * array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>)) -> 
@@ -867,7 +871,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
             )
 
                : '_rnglr_type_error) 
-# 830 "JSONParser.fs"
+# 874 "JSONParser.fs"
       );
   |] , [|
     (fun (_rnglr_list : list<_>) -> 

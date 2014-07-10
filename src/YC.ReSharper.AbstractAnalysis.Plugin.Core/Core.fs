@@ -9,60 +9,133 @@ open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Files
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
-open YC.ReSharper.AbstractAnalysis.Languages
-open Yard.Examples.MSParser
-open AbstractAnalysis.Common
 open QuickGraph
 open QuickGraph.Algorithms
+open YC.AbstractAnalysis.CommonInterfaces
 
 open System
 open Mono.Addins
 
-AddinManager.Initialize()
-AddinManager.Registry.Update(null)
+type TreeGenerationState = 
+    | Start
+    | InProgress of ITreeNode * int list
+    | End of ITreeNode
 
-let injectedLanguages = 
-    AddinManager.GetExtensionObjects (typeof<IInjectedLanguageProcessor>)
-    |> Seq.cast<IInjectedLanguageProcessor>
-    |> Seq.map (fun x -> x.Name,x)
-    |> dict
+[<assembly:AddinRoot ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+do()
 
-//let AddinJSONNames = Seq.map (fun (elem : IInjectedLanguageProcessor) -> elem.Name) AddinJSON
+type LanguagesProcessor() =
+    do AddinManager.Initialize()
+    do AddinManager.Registry.Update(null)    
+    let injectedLanguages = 
+        let s = AddinManager.Registry.DefaultAddinsFolder
+        let a = AddinManager.IsInitialized
+        let r = AddinManager.Registry
+        let n = AddinManager.GetExtensionNodes ("C:\gsv\projects\recursive-ascent\Bin\Debug\v40")
+        let d = new System.Collections.Generic.Dictionary<_,_>(System.StringComparer.InvariantCultureIgnoreCase)
+        AddinManager.GetExtensionObjects (typeof<IInjectedLanguageModule>) 
+        |> Seq.cast<IInjectedLanguageModule>
+        |> Array.ofSeq
+        |> Array.iter (fun x -> d.Add(x.Name,x))  
+        d
 
-type LexingFinishedArgs (tokens : ResizeArray<ITreeNode>) =
-     inherit System.EventArgs()
+    member this.Process (graphs:ResizeArray<string*_>) =
+        graphs
+        |> ResizeArray.map(fun (l,g) -> injectedLanguages.[l].Process g)
 
-     member this.Tokens = tokens
-//     member this.Lang = lang
+    member this.LexingFinished =  injectedLanguages |> Seq.map (fun l -> l.Value.LexingFinished)
+    member this.ParsingFinished = injectedLanguages |> Seq.map (fun l -> l.Value.ParsingFinished)
+    member this.XmlPath l = injectedLanguages.[l].XmlPath
+    member this.GetNextTree l i = injectedLanguages.[l].GetNextTree i
+    member this.GetForestWithToken l rng = injectedLanguages.[l].GetForestWithToken rng
 
-type ParsingFinishedArgs() = 
-    inherit System.EventArgs()
-    member this.Lang = ""
-
-type Processor(file) =
-    
-    let mutable calcForest = []
-    let mutable jsonForest = []
-    let mutable tsqlForest = []
+type Processor<'TokenType,'br> 
+    (
+        tokenize: AbstractLexer.Common.LexerInputGraph<'br> -> AbstractParsing.Common.ParserInputGraph<'TokenType>
+        , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang) as this =
 
     let lexingFinished = new Event<LexingFinishedArgs>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
+    let mutable forest: list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _> = [] 
 
-    let defLang (n:ITreeNode) =
-        match n with 
-        | :? IInvocationExpression as m ->
-            match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
-            | "executeimmediate" -> injectedLanguages.["TSql"]
-            | "eval" -> injectedLanguages.["Calc"]
-            | "objnotation" -> injectedLanguages.["JSON"] 
-            | _ -> failwith "Unsupported language for AA!"
-        | _ -> failwith "Unexpected information type for language specification!"
+    let mutable generationState : TreeGenerationState = Start
+    
+    let generateTreeNode (graphOpt : AbstractParsing.Common.ParserInputGraph<'token> option) tokenToTreeNode = 
+        if graphOpt.IsSome
+        then
+            let inGraph = graphOpt.Value 
+            let ts =  inGraph.TopologicalSort() |> Array.ofSeq
+            let ids = dict (ts |> Array.mapi (fun i v -> v,i))
+            let tokens = 
+                ts
+                |> Seq.mapi (fun i v -> inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag)) |> Array.ofSeq)
+            let enumerator = tokens.GetEnumerator()
+            let tokensList = new ResizeArray<_>()
+            while enumerator.MoveNext() do
+                let t = enumerator.Current
+                t |> Array.iter (fun i -> 
+                    let treeNode = tokenToTreeNode i
+                    tokensList.Add treeNode)
 
-(*    let processLang graph tokenize parse addLError addPError = 
-         
-    static member CalculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
-    *)
-(*    member this.Process () = 
+            lexingFinished.Trigger(new LexingFinishedArgs(tokensList, lang))
+
+    let processLang graph addLError addPError =
+        let tokenize g =
+            try 
+                tokenize g
+                |> Some 
+            with
+            | LexerError(t,brs) ->
+                (t, (brs :?> array<AbstractLexer.Core.Position<ICSharpLiteralExpression>>).[0].back_ref.GetDocumentRange())
+                |> addLError
+                None
+
+        let tokenizedGraph = tokenize graph 
+        
+        generateTreeNode tokenizedGraph tokenToTreeNode 
+
+        tokenizedGraph |> Option.map parse
+        |> Option.iter
+            (function 
+                | Yard.Generators.RNGLR.Parser.Success(x,_,e) ->
+                    forest <- (x,e) :: forest
+                    //parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
+            )
+
+    let getNextTree index = 
+        if forest.Length <= index
+        then
+            generationState <- End (null)
+        else
+            let mutable curSppf, errors = List.nth forest index
+            let unprocessed = 
+                match generationState with
+                | Start ->              Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
+                | InProgress (_, unproc) ->  unproc
+                | _ -> failwith "Unexpected state in treeGeneration"
+                
+            let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
+            
+            let treeNode = this.TranslateToTreeNode nextTree errors
+            
+            if unproc.IsEmpty
+            then generationState <- End (treeNode)
+            else generationState <- InProgress (treeNode, unproc) 
+
+        generationState
+
+    let getForestWithToken
+                            range  = 
+        let res = new ResizeArray<_>()
+        for ast, errors in forest do
+            let trees = ast.GetForestWithToken range <| this.TokenToPos
+            for tree in trees do
+                let treeNode = this.TranslateToTreeNode tree errors
+                res.Add treeNode
+        res  
+          
+    member this.CalculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
         let ranges = 
             brs |> Seq.groupBy (fun x -> x.back_ref)
             |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
@@ -81,59 +154,47 @@ type Processor(file) =
                     brs.[0].back_ref.GetDocumentRange())
         ranges    
 
-    static member TokenToPos tokenData token = 
+    member this.GetNextTree index =         
+        let state = getNextTree index
+        match state with
+        | InProgress (treeNode, _) -> treeNode, false
+        | End (treeNode) -> 
+            generationState <- Start
+            treeNode, true
+        | _ -> failwith "Unexpected state in tree generation"
+
+    member this.TokenToPos token = 
         let data = unbox <| tokenData token
         let str : string = fst data
         let pos : array<AbstractLexer.Core.Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>> 
                 = snd data
                 
-        Processor.CalculatePos pos
+        this.CalculatePos pos
 
-    static member TranslateToTreeNode translate nextTree errors = (Seq.head <| translate nextTree errors) :> ITreeNode
+    member this.GetForestWithToken range =        
+        getForestWithToken range
 
-    member this.Graphs() =  (new Approximator(file)).Approximate defLang
+    member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors) :> ITreeNode    
     
-    member this.Process () = 
+    member this.Process (graph:AbstractLexer.Common.LexerInputGraph<_>) = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
         let filterBrs (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =
             let res = new ResizeArray<AbstractLexer.Core.Position<#ITreeNode>>(3)
             brs |> Array.iter(fun br -> if res.Exists(fun x -> obj.ReferenceEquals(x.back_ref,br.back_ref)) |> not then res.Add br)
             res.ToArray()
-        
-        let graphs = this.Graphs()
-        let addError tok tokenToNumberFunc numToStringFunc (tokenDataFunc: _ -> obj) =
+                    
+        let addError tok =
             let e t l (brs:array<AbstractLexer.Core.Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) = 
-                Processor.CalculatePos brs 
+                this.CalculatePos brs 
                 |> Seq.iter
                     (fun dr -> parserErrors.Add <| ((sprintf "%A(%A)" t l), dr))
-            let name = tok |> (tokenToNumberFunc >>  numToStringFunc)
-            let (l:string),br = tokenDataFunc tok :?> _
+            let name = tok |> (tokenToNumber >>  numToString)
+            let (l:string),br = tokenData tok :?> _
             e name l br
-*)
         
-        //let error (l:IInjectedLanguageProcessor) tok  = addError tok l.TokenToNumber l.NumToString l.TokenData 
-        //let errorJSON tok  = addError tok JSON.Parser.tokenToNumber JSON.Parser.numToString JSON.Parser.tokenData
+        processLang graph lexerErrors.Add addError
 
-        let tokenize = fun _ -> ()
-        let error tok = fun tok -> ()
-        let addSppf pair = fun pair -> ()
-        let func = fun _ -> ()
-//        let addCalcSPPF pair = calcForest <- calcForest @ [pair]
-//        let addJsonSPPF pair = jsonForest <- jsonForest @ [pair]
-//        let addTSqlSPPF pair = tsqlForest <- tsqlForest @ [pair]
-
-        |> ResizeArray.iter 
-            (fun (lang, graph) ->
-                processLang graph func func func func func func func 
-//                match lang with
-//                | Calc -> 
-//                    processLang graph Calc.tokenize Calc.parse lexerErrors.Add  errorCalc Calc.translate addCalcSPPF Calc.tokenToTreeNode lang
-//                | JSON -> 
-//                    processLang graph JSON.tokenize JSON.parse lexerErrors.Add  errorJSON JSON.translate addJsonSPPF JSON.tokenToTreeNode lang
-//                | TSQL -> 
-//                    processLang graph TSQL.tokenize TSQL.parse lexerErrors.Add  errorTSQL TSQL.translate addTSqlSPPF TSQL.tokenToTreeNode lang
-            )
         lexerErrors, parserErrors
 
     [<CLIEvent>]

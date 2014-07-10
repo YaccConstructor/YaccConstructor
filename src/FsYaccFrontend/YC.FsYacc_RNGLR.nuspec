@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYacc_RNGLR</id>
-    <version>0.0.6.5</version>
+    <version>0.0.6.6</version>
     <title>YC.FsYacc_RNGLR</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -24,7 +24,7 @@
         <file src="..\..\Bin\Release\v40\FsYaccFrontend.*" target="\tools\" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="\tools\" exclude="**\*.Test.*"/>        
         <file src="..\..\Bin\Release\v40\FsYacc.exe" target="\tools\"/>
-	<file src="..\..\Bin\Release\v40\FSharp.Core.*" target="\tools\"/>
+	<file src="..\..\Bin\Release\v40\FSharp.Core.dll" target="\tools\"/>
         <file src="..\..\Bin\Release\v40\FSharpx.Text.StructuredFormat.*" target="\tools\"/>
         <file src="..\..\Bin\Release\v40\FSharpx.Core.*" target="\tools\"/>
         

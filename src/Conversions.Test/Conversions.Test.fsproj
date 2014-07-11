@@ -53,14 +53,11 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="Common">
-      <HintPath>..\..\Bin\Release\v40\Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
@@ -87,10 +84,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="YardPrinter">
       <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.6\lib\net40\YardPrinter.dll</HintPath>
       <Private>True</Private>

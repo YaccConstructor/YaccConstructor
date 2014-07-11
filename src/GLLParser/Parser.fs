@@ -18,6 +18,9 @@ type Label =
         let mutable result = false
         if fst label1 = label2.Rule && snd label1 = label2.Position then result <- true
         result 
+    member this.labelToString () = 
+        let str = "(" + this.Rule.ToString() + ", " + this.Position.ToString() + ")"
+        str
     new (rule : int,position : int) = {Rule = rule; Position = position} 
 
 type IntermidiateNode =
@@ -45,29 +48,6 @@ and Edge =
         new (d, a) = {Dest = d; Ast = a}
     end
 
-let inline treeCompare (ast1 : obj) (ast2 : obj) inputLength =
-    let mutable result = false
-    let mutable leftChild1 = None
-    let mutable rightChild1 = None
-    let mutable leftChild2 = None
-    let mutable rightChild2 = None
-    let ext1, prod1 =
-        match ast1 with
-        | :? AST as a -> Some(a.leftExt, a.rightExt), a.first.prod
-        | :? IntermidiateNode as i -> Some i.Extention, fst i.Position
-        | _ -> None,0
-    let ext2, prod2 =
-        match ast2 with
-        | :? AST as a -> Some(a.leftExt, a.rightExt), a.first.prod
-        | :? IntermidiateNode as i -> Some i.Extention, fst i.Position
-        | _ -> None,0
-    
-    //if fst ext1.Value = 0 && snd ext1.Value = inputLength  && fst ext2.Value = 0 && snd ext2.Value = inputLength then result <- false
-    if ext1 = ext2 && prod1 = prod2
-    then
-        result <- true
-    result
-
 type Context =
     val Index         : int
     val Label         : Label
@@ -75,11 +55,11 @@ type Context =
     val Ast           : obj
     static member Equal1 (label1 : Label) (node1 : Vertex) (ast1 : obj) (label2 : Label) (node2 : Vertex) (ast2 : obj) inputLength =
         let mutable result = false
-        if Label.Equal1 label1 label2 && Vertex.Equal node1 node2 && (*(treeCompare ast1 ast2 inputLength)*) ast1.Equals ast2 then result <- true
+        if Label.Equal1 label1 label2 && Vertex.Equal node1 node2 && ast1.Equals ast2 then result <- true
         result
     static member Equal2 (label1 : (int*int)) (node1 : Vertex) (ast1 : obj) (label2 : Label) (node2 : Vertex) (ast2 : obj) inputLength =
         let mutable result = false
-        if Label.Equal2 label1 label2 && Vertex.Equal node1 node2 (*(treeCompare ast1 ast2 inputLength)*) 
+        if Label.Equal2 label1 label2 && Vertex.Equal node1 node2
         then 
             if ast1 = null && ast2 = null
             then result <- true
@@ -89,7 +69,8 @@ type Context =
     new (index, label, node, ast) = {Index = index; Label = label; Node = node; Ast = ast}
 
 type ParseResult<'TokenType> =
-    | Success of List<Tree<'TokenType>>
+    //| Success of List<Tree<'TokenType>>
+    | Success of Tree<'TokenType>
     | Error of string
 let mutable tempCount = 0
 
@@ -121,14 +102,8 @@ let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : 
         if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
         else
             levels.[u.Level] <- !curNum :: levels.[u.Level]
-        let tempStr = 
-            if u.Value.Rule = parser.StartRule && u.Value.Position = 1 
-            then "u0" 
-            elif u.Value.Rule = 0 && u.Value.Position = 1
-            then "rs1" 
-            elif u.Value.Rule = 0 && u.Value.Position = 2
-            then "rs2" else "b"
-        print <| sprintf "%d [label=\"%s, %d\"]" !curNum  tempStr u.Level
+        let labelStr = u.Value.labelToString()
+        print <| sprintf "%d [label=\"%s, %d\"]" !curNum  labelStr u.Level
         incr curNum
         if u.OutEdges.first <> Unchecked.defaultof<_> 
         then 
@@ -187,30 +162,20 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
         
         let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
-        let astTemp = new List<obj>()
-        let familyTemp = new List<Family>() 
+        //let astTemp = new List<obj>()
+        let familyTemp = Array.init parser.RulesCount (fun _ -> new List<Family>())  
 
         let terminalNodes = new BlockResizeArray<Nodes>()
-
-        let chainCanInferEpsilon rule pos =
-            let curRule = parser.Rules.[rule]
-            let mutable result = true
-            for i = pos to curRule.Length - 1 do
-                if result && not parser.canInferEpsilon.[curRule.[i]]
-                then result <- false
-            result
         
         let findFamily prod (nodes : Nodes) lExt rExt : Family=
             let mutable result = None
-            for fam in familyTemp do
-                if fam.prod = prod && fam.leftExt = lExt && fam.rightExt = rExt
-                then
-                    if nodes.fst.Equals fam.nodes.fst
-                    then result <- Some fam
+            result <- 
+                familyTemp.[prod]
+                |> Seq.tryFind (fun fam -> fam.leftExt = lExt && fam.rightExt = rExt && nodes.fst.Equals fam.nodes.fst) 
             if result.IsNone
             then 
                 result <- Some <| new Family(prod, nodes, lExt, rExt)
-                familyTemp.Add(result.Value)
+                familyTemp.[prod].Add(result.Value)
             let r = result.Value
             r
 
@@ -243,7 +208,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     n.rightExt
                 | :? AST as a -> a.rightExt 
                 | _ -> failwith "Unexpected type."
-            //let family = new Family(prod, new Nodes(result, l, r, -1),l, r)
             let nodes = new Nodes(result, l, r, -1)
             let family = findFamily prod nodes l r
             family
@@ -399,23 +363,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             else 
                 
                 stop := true  
-                printfn  "%A" setP
-                let v,ast =
-                    setP
-                    |> Seq.find 
-                        (fun (x,y) -> 
-                            let ast = unbox y :> AST
-                            x.Value.Rule = parser.StartRule && ast.leftExt = 0 && ast.rightExt = inputLength)
-                let mutable resList = []
-                let a = astTemp.Count
-                for pair in astTemp do
-                    let ast11 = unbox pair : AST      
-                    if ast11.leftExt = 0 && ast11.rightExt = inputLength && parser.LeftSide.[ast11.first.prod] = startNonTerm
-                    then
-                        printfn "UAAAAAAAAAAA"
-                        resList <- ast11 :: resList
-                //resultAST := Some ast 
-                resultAST := Some resList 
                               
         and processing () =  
             let getIndex(nTerm, term) = 
@@ -449,7 +396,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                                 currentIndex := !currentIndex + 1
                                 currentLabel := new Label(currentLabel.Value.Rule, currentLabel.Value.Position + 1)
                                 if !currentR <> null
-                                then currentN := getNodeP !currentLabel !currentN !currentR  //нужно ли тут всегда создавать упакованную ячейку или если только правый уже есть
+                                then currentN := getNodeP !currentLabel !currentN !currentR
                                 condition := false
                         else 
                             let index = getIndex(curSymbol, curToken)
@@ -467,34 +414,19 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     let curRight = unbox <| !currentN
                     let resTree = handleIntermidiate curRight currentLabel.Value.Rule
                     let resTree = findTree currentLabel.Value.Rule resTree.leftExt resTree.rightExt resTree
-                    //let resTree = new AST(resTree, null, resTree.leftExt, resTree.rightExt)
-                    if resTree.leftExt = 0 && resTree.rightExt = inputLength
-                    then astTemp.Add(resTree)
+                    if resTree.leftExt = 0 && resTree.rightExt = inputLength && currentLabel.Value.Rule = parser.StartRule
+                    then resultAST := Some resTree
                     pop !currentGSSNode !currentIndex resTree
         let control () =
             while not !stop do
-                
-                if !wasChanged then 
-                    let file = "res" + tempCount.ToString() + ".dot"
-                    drawDot parser tokens file gss
-                    tempCount <- tempCount + 1
-                    wasChanged := false
                 if !condition then dispatcher() else processing()
         control()
                  
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens, res.[0], parser.Rules)
- //                   let r2 = new Tree<_> (tokens, res.[1], parser.Rules)
-//                    let r3 = new Tree<_> (tokens, res.[2], parser.Rules)
-//                    let r4 = new Tree<_> (tokens, res.[3], parser.Rules)
-//                    let r5 = new Tree<_> (tokens, res.[4], parser.Rules)
-                    let rr = new List<Tree<'TokenType>>()
-                    drawDot parser tokens "res.dot" gss
-                    rr.Add(r1)
- //                   rr.Add(r2)
-//                    rr.Add(r3)
-//                    rr.Add(r4)
-//                    rr.Add(r5)
-                    Success (rr)       
+                    let r1 = new Tree<_> (tokens, res, parser.Rules)
+                    //let rr = new List<Tree<'TokenType>>()
+                   // drawDot parser tokens "res.dot" gss
+                    //rr.Add(r1)
+                    Success (r1)       

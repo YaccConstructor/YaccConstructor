@@ -6,40 +6,49 @@ open Yard.Generators.GLL
 open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open Yard.Generators.RNGLR.DataStructures
+open Microsoft.FSharp.Collections
 
-type Label =  
-    val Rule     : int
-    val Position : int 
-    static member Equal1 (label1 : Label) (label2 : Label) =
-        let mutable result = false
-        if label1.Rule = label2.Rule && label1.Position = label2.Position then result <- true
-        result
-    static member Equal2 (label1 : (int*int)) (label2 : Label) =
-        let mutable result = false
-        if fst label1 = label2.Rule && snd label1 = label2.Position then result <- true
-        result 
-    member this.labelToString () = 
-        let str = "(" + this.Rule.ToString() + ", " + this.Position.ToString() + ")"
-        str
-    new (rule : int,position : int) = {Rule = rule; Position = position} 
+//type Label =  
+//    val Rule     : int
+//    val Position : int 
+//    static member Equal (label1 : Label) (label2 : Label) =
+//        label1.Rule = label2.Rule && label1.Position = label2.Position
+//    member this.labelToString () = 
+//        let str = "(" + this.Rule.ToString() + ", " + this.Position.ToString() + ")"
+//        str
+//    new (rule : int,position : int) = {Rule = rule; Position = position} 
 
-type IntermidiateNode =
-    val LeftChild  : obj
-    val RightChild : obj
-    val Position   : int * int
-    val Extention  : int * int
-    new (l, r, p, e) = {LeftChild = l; RightChild = r; Position = p; Extention = e}
+let inline packToInt64 left right =  (int64 left <<< 32) ||| int64 right
+let inline takeLowBits long       = int32 <| (long &&& 0xffffffffL)
+let inline takeHighBits long      = int32 <| (long >>> 32)
+
+type [<CustomEquality;CustomComparison>] IntermidiateNode =
+    struct
+        val LeftChild  : obj
+        val RightChild : obj
+        val Position   : Int64
+        val Extension  : Int64
+        override x.Equals(intermidiateNode) =
+                match intermidiateNode with
+                | :? AST as a -> (obj.ReferenceEquals(x, a))
+                | :? Nodes as n -> (n.Equals x)
+                | _ -> false
+        interface System.IComparable with
+            member x.CompareTo n =
+                match n with
+                | :? AST as a -> compare x.Extension a.extension
+                | _ -> invalidArg "yobj" "cannot compare values of different types"
+        new (l, r, p, e) = {LeftChild = l; RightChild = r; Position = p; Extension = e}
+    end
 
 [<AllowNullLiteral>]
 type Vertex =
     val mutable OutEdges : UsualOne<Edge>
     val Level            : int
-    val Value            : Label
+    val Label            : Int64
     static member Equal (v1 : Vertex) (v2 : Vertex) =
-        let mutable result = false
-        if v1.Level = v2.Level && Label.Equal1 v1.Value v2.Value then result <- true
-        result
-    new (value, level) = {OutEdges = Unchecked.defaultof<_>; Value = value; Level = level}
+        v1.Level = v2.Level && v1.Label = v2.Label
+    new (level, label) = {OutEdges = Unchecked.defaultof<_>; Level = level; Label = label}
 
 and Edge =
     struct
@@ -48,31 +57,34 @@ and Edge =
         new (d, a) = {Dest = d; Ast = a}
     end
 
+type VComparer() =
+    interface IEqualityComparer<Vertex> with
+     member x.Equals(a,b) = Vertex.Equal a b
+     member x.GetHashCode y = y.GetHashCode()
+
+
+type PreviousContexts =
+    struct
+        val Label  : Int64
+        val Vertex : Vertex
+        val Ast    : obj
+        new (l, v, a) = {Label = l; Vertex = v; Ast = a}
+        member this.Equal l v a =
+            this.Label = l && Vertex.Equal this.Vertex v && obj.ReferenceEquals(this.Ast, a)
+    end
+
 type Context =
     val Index         : int
-    val Label         : Label
+    val Label         : Int64
     val Node          : Vertex
     val Ast           : obj
-    static member Equal1 (label1 : Label) (node1 : Vertex) (ast1 : obj) (label2 : Label) (node2 : Vertex) (ast2 : obj) inputLength =
-        let mutable result = false
-        if Label.Equal1 label1 label2 && Vertex.Equal node1 node2 && ast1.Equals ast2 then result <- true
-        result
-    static member Equal2 (label1 : (int*int)) (node1 : Vertex) (ast1 : obj) (label2 : Label) (node2 : Vertex) (ast2 : obj) inputLength =
-        let mutable result = false
-        if Label.Equal2 label1 label2 && Vertex.Equal node1 node2
-        then 
-            if ast1 = null && ast2 = null
-            then result <- true
-            elif ast1 <> null && ast2 <> null && ast1.Equals ast2
-            then result <- true 
-        result
+    static member Equal1 label1 (node1 : Vertex) (ast1 : obj) label2 (node2 : Vertex) (ast2 : obj) =
+        label1 = label2 && Vertex.Equal node1 node2 && ast1.Equals ast2
     new (index, label, node, ast) = {Index = index; Label = label; Node = node; Ast = ast}
 
 type ParseResult<'TokenType> =
-    //| Success of List<Tree<'TokenType>>
     | Success of Tree<'TokenType>
     | Error of string
-let mutable tempCount = 0
 
 let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) gss =
     use out = new System.IO.StreamWriter (path)
@@ -92,9 +104,9 @@ let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : 
                 else -1
             parser.NumToString parser.LeftSide.[nonT]
         | :? IntermidiateNode as iN ->
-            iN.Position.ToString() + iN.Extention.ToString()
+            iN.Position.ToString()
         | null -> "n"
-        | :? Nodes as n -> n.leftExt.ToString() + n.rightExt.ToString() 
+        | :? Nodes as n -> (takeHighBits n.extension).ToString() + (takeLowBits n.extension).ToString() 
         | _ -> failwith "Unexpected ast"
 
     let rec dfs (u : Vertex) =
@@ -102,8 +114,8 @@ let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : 
         if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
         else
             levels.[u.Level] <- !curNum :: levels.[u.Level]
-        let labelStr = u.Value.labelToString()
-        print <| sprintf "%d [label=\"%s, %d\"]" !curNum  labelStr u.Level
+        //let labelStr = u.Label.labelToString()
+        print <| sprintf "%d [label=\", %d\"]" !curNum  (*labelStr*) u.Level
         incr curNum
         if u.OutEdges.first <> Unchecked.defaultof<_> 
         then 
@@ -127,7 +139,6 @@ let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : 
 let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
-    let startNonTerm = parser.LeftSide.[parser.StartRule]
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let resultAST = ref None
     let getEpsilon =
@@ -143,17 +154,15 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let epsilon = new Nodes()
         let setR = new Queue<Context>();   
         let setP = new Queue<Vertex * obj>();    
-        let setU = Array.init (inputLength + 1) (fun _ -> new List<(int * int) * Vertex * obj>())  
+       // let setP = new System.Collections.Generic.Dictionary<Vertex,ResizeArray<obj>> (new VComparer())
+        let setU = Array.init (inputLength + 1) (fun _ -> new ResizeArray<PreviousContexts>())  //temp проверять не был ли уже такой добавлен
             
         let currentIndex = ref 0
-        let previousIndex = ref 0
 
-        let wasChanged = ref false
-
-        let currentRule = parser.StartRule
+        let currentrule = parser.Startrule
         let dummy = box <| null
-        let dummyGSSNode = new Vertex(new Label(-1, -1), !currentIndex)
-        let currentLabel = ref <| new Label(currentRule, 0)
+        let dummyGSSNode = new Vertex(!currentIndex, (packToInt64 -1 -1))
+        let currentLabel = ref <| packToInt64 currentrule 0
         
         let currentN = ref <| null
         let currentR = ref <| null
@@ -161,26 +170,32 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
         
-        let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
-        //let astTemp = new List<obj>()
-        let familyTemp = Array.init parser.RulesCount (fun _ -> new List<Family>())  
+        let gss = Array.init inputLength (fun _ -> new Microsoft.FSharp.Collections.ResizeArray<Vertex>())
+        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<Int64, Microsoft.FSharp.Collections.ResizeArray<Family>>())  
 
         let terminalNodes = new BlockResizeArray<Nodes>()
+        let finalExtension = packToInt64 0 inputLength
         
-        let findFamily prod (nodes : Nodes) lExt rExt : Family=
+        let findFamily prod (nodes : Nodes) extension : Family=
             let mutable result = None
-            result <- 
-                familyTemp.[prod]
-                |> Seq.tryFind (fun fam -> fam.leftExt = lExt && fam.rightExt = rExt && nodes.fst.Equals fam.nodes.fst) 
+            if createdFamilies.[prod].ContainsKey extension
+            then
+                result <- 
+                Microsoft.FSharp.Collections.ResizeArray.tryFind 
+                    (fun (fam : Family) -> obj.ReferenceEquals(nodes.fst, fam.nodes.fst))  
+                    <| createdFamilies.[prod].[extension]
+            else
+                createdFamilies.[prod].Add(extension, new Microsoft.FSharp.Collections.ResizeArray<Family>(5))
+                result <- Some <| new Family(prod, nodes)
+                createdFamilies.[prod].[extension].Add result.Value
             if result.IsNone
-            then 
-                result <- Some <| new Family(prod, nodes, lExt, rExt)
-                familyTemp.[prod].Add(result.Value)
-            let r = result.Value
-            r
+            then
+                result <- Some <| new Family(prod, nodes)
+                createdFamilies.[prod].[extension].Add result.Value
+            result.Value
 
         let handleIntermidiate node prod = 
-            let result = new List<obj>()
+            let result = new ResizeArray<obj>()
             let rec handle (o : obj) =
                 if o <> null 
                 then
@@ -199,58 +214,54 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let l =
                 match result.[0] with
                 | :? Nodes as n ->
-                    n.leftExt
-                | :? AST as a -> a.leftExt
+                    takeHighBits n.extension
+                | :? AST as a -> takeHighBits a.extension
                 | _ -> failwith "Unexpected type."
             let r =
                 match result.[result.Length - 1] with
                 | :? Nodes as n ->
-                    n.rightExt
-                | :? AST as a -> a.rightExt 
+                    takeLowBits n.extension
+                | :? AST as a -> takeLowBits a.extension 
                 | _ -> failwith "Unexpected type."
-            let nodes = new Nodes(result, l, r, -1)
-            let family = findFamily prod nodes l r
-            family
+            let extension = packToInt64 l r
+            let nodes = new Nodes(result, extension)
+            let family = findFamily prod nodes extension
+            family, extension
                
-        let containsContext index (label : Label) (gssNode : Vertex) (ast : obj) =
+        let containsContext index label  (gssNode : Vertex) (ast : obj) =
             let set = setU.[index]
-            let first (o, _, _)  = o
-            let second (_, o, _) = o
-            let third (_, _, o)  = o
-            let contains = set.Exists (fun cntxt -> (Context.Equal2 (first cntxt) (second cntxt) (third cntxt) label gssNode ast inputLength))
+            let contains = set.Exists (fun cntxt -> cntxt.Equal label gssNode ast)
             contains
 
-        let addContext (label : Label) (index : int) (node : Vertex) (ast : obj) =
+        let addContext label (index : int) (node : Vertex) (ast : obj) =
             if index <= inputLength + 1 && index >= 0 
             then
                 if not <| containsContext index label node ast
                 then
                     let cntxt = new Context(index, label, node, ast)
-                    setU.[index].Add ((label.Rule, label.Position), node, ast)
+                    setU.[index].Add (new PreviousContexts(label, node, ast))
                     setR.Enqueue(cntxt)  
         
-        let getNodeP (label : Label) (left : obj) (right : obj) =      
+        let getNodeP label (left : obj) (right : obj) =      
             let rExt =
                 match right with
-                | :? AST as a -> Some(a.leftExt, a.rightExt)
-                | :? Nodes as n -> Some(n.leftExt, n.rightExt) 
-                | :? IntermidiateNode as i -> Some i.Extention
-                | _ -> None
+                | :? AST as a -> a.extension
+                | :? Nodes as n -> n.extension 
+                | :? IntermidiateNode as i -> i.Extension
+                | _ -> failwith "Unexpected type."
             let mutable result = right
             if left <> null
             then
                 let lExt =    
                     match left with
-                    | :? AST as a -> (a.leftExt, a.rightExt)
-                    | :? Nodes as n -> (n.leftExt, n.rightExt) 
-                    | :? IntermidiateNode as i -> i.Extention
+                    | :? AST as a -> a.extension
+                    | :? Nodes as n -> n.extension 
+                    | :? IntermidiateNode as i -> i.Extension
                     | _ -> failwith "Unexpected type."
-                if left <> null && right <> null && lExt = (0,1) && rExt.Value = (1,3)
-                then
-                    printfn "this is debug"
-                result <- new IntermidiateNode(left, right, (label.Rule, label.Position), (fst lExt, snd rExt.Value))//(if rExt.IsNone then (snd lExt) else (rExt.Value)|> snd))) 
+
+                result <- new IntermidiateNode(left, right, label, packToInt64 (takeHighBits lExt) (takeLowBits rExt))
             else 
-                result <- new IntermidiateNode(left, right, (label.Rule, label.Position), (fst rExt.Value, snd rExt.Value))
+                result <- new IntermidiateNode(left, right, label, packToInt64 (takeHighBits rExt) (takeLowBits rExt))
             box <| result
                 
             
@@ -258,18 +269,17 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let mutable result = (terminalNodes.Item index).fst
             if result = null
             then
-                result <- box <| new Nodes(box <| tokens.[index], null, null, index, index + 1)
+                result <- box <| new Nodes(box <| tokens.[index], null, null, packToInt64 index (index + 1))
                 terminalNodes.Set !currentIndex (unbox <| result)
             else result <- box <| terminalNodes.Item index
             result
             
-        let containsGSSNode (l : Label) (i : int) =  
-            let curLevel = gss.[i] 
-            let mutable cond = true
-            let mutable result = curLevel.Find (fun v -> Label.Equal1 v.Value l)
+        let containsGSSNode l i =  
+            let curLevel = gss.[i]
+            let mutable result = curLevel.Find (fun v -> v.Label = l)
             if result = null
             then
-                result <- new Vertex(l, i)  
+                result <- new Vertex(i, l)  
                 curLevel.Add result   
             result
 
@@ -278,53 +288,46 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let mutable result = false
             if edges.first <> Unchecked.defaultof<_>
             then
-                if Vertex.Equal edges.first.Dest e && (*treeCompare edges.first.Ast ast inputLength*) ast.Equals edges.first.Ast
+                if Vertex.Equal edges.first.Dest e && ast.Equals edges.first.Ast
                 then result <- true
                 elif edges.other <> null
-                then result <- edges.other |> Array.exists (fun edge -> Vertex.Equal edge.Dest e && (*treeCompare edge.Ast ast inputLength*) ast.Equals edge.Ast)
+                then result <- edges.other |> Array.exists (fun edge -> Vertex.Equal edge.Dest e && ast.Equals edge.Ast)
             result
 
-        let findTree prod lExt rExt family =
+        let findTree prod extension family =
             let result = ref None
             let currentNonTerm = parser.LeftSide.[prod]
             let mutable wasAdded = false
             for pair in setP do
                 match snd pair with
                 | :? AST as a -> 
-                    if parser.LeftSide.[a.first.prod] = currentNonTerm && a.leftExt = lExt && a.rightExt = rExt
+                    if parser.LeftSide.[a.first.prod] = currentNonTerm && a.extension = extension
                     then
-                        if a.first.Equals family
-                        then wasAdded <- true
-                        elif a.other <> null
-                        then
-                            for fam in a.other do
-                                if fam.Equals family
-                                then wasAdded <- true
+                        wasAdded <- a.first.Equals family || (a.other <> null && a.other |> Array.exists(family.Equals))                        
                         if not wasAdded
-                        then 
+                        then
                             if a.other <> null
                             then a.other <- Array.append a.other [|family|]
                             else a.other <- [|family|]
-                        result := Some a                            
+                        result := Some a
                 | _ -> failwith "Unexpected type of tree."
             let result =
                 match !result with
                 | Some tree -> tree
-                | None -> new AST(family, null, lExt, rExt)
+                | None -> new AST(family, null, extension)
             result
 
-        let create (label : Label) (u : Vertex) (index : int) (ast : obj) = 
+        let create label (u : Vertex) (index : int) (ast : obj) = 
             let v = containsGSSNode label index
             if not (containsEdge v u ast)
             then
-                wasChanged := true
                 let newEdge = new Edge(u, ast)
                 for pair in setP do
                     if Vertex.Equal v (fst pair) 
                     then 
                         let y = getNodeP label ast (snd pair)
                         let temp : AST = unbox <| snd pair
-                        addContext label (temp.rightExt) u y //temp temp temp temp
+                        addContext label (takeLowBits temp.extension) u y
                 if v.OutEdges.first <> Unchecked.defaultof<_>
                 then
                     if v.OutEdges.other <> null
@@ -336,7 +339,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let pop (u : Vertex) (i : int) (z : obj) =
             if not (Vertex.Equal u dummyGSSNode)
             then
-                let label = u.Value
+                let label = u.Label
                 setP.Enqueue(u, z)
                 let processEdge (edge : Edge) =
                     let y1 = getNodeP label edge.Ast z
@@ -353,7 +356,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             if setR.Count <> 0
             then
                 currentContext := setR.Dequeue()
-                setU.[0].Count
                 currentIndex := currentContext.Value.Index
                 currentGSSNode := currentContext.Value.Node
                 currentLabel := currentContext.Value.Label
@@ -361,7 +363,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 currentR := null
                 condition := false
             else 
-                
                 stop := true  
                               
         and processing () =  
@@ -372,19 +373,20 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 index
 
             condition := true
-
-            if Array.length parser.Rules.[currentLabel.Value.Rule] = 0 
+            let rule = takeHighBits !currentLabel
+            let position = takeLowBits !currentLabel
+            if Array.length parser.rules.[rule] = 0 
             then
                 currentR := getNodeT !currentIndex
                 currentN := getNodeP !currentLabel !currentN !currentR  
                 //pop !currentGSSNode !currentIndex !currentN
             else
-                if Array.length parser.Rules.[currentLabel.Value.Rule] <> currentLabel.Value.Position
+                if Array.length parser.rules.[rule] <> position
                 then
                     if !currentIndex < inputLength 
                     then
                         let curToken = parser.TokenToNumber tokens.[!currentIndex]
-                        let curSymbol = parser.Rules.[currentLabel.Value.Rule].[currentLabel.Value.Position]
+                        let curSymbol = parser.rules.[rule].[position]
                         if parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol 
                         then
                             if curSymbol = curToken
@@ -394,27 +396,26 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                                     currentN := getNodeT !currentIndex
                                 else currentR := getNodeT !currentIndex
                                 currentIndex := !currentIndex + 1
-                                currentLabel := new Label(currentLabel.Value.Rule, currentLabel.Value.Position + 1)
+                                currentLabel := packToInt64 (rule) ((position) + 1)
                                 if !currentR <> null
                                 then currentN := getNodeP !currentLabel !currentN !currentR
                                 condition := false
                         else 
                             let index = getIndex(curSymbol, curToken)
-                            let temp = table.[index]
-                            currentGSSNode := create (new Label(currentLabel.Value.Rule, currentLabel.Value.Position + 1)) !currentGSSNode !currentIndex !currentN
+                            currentGSSNode := create (packToInt64 (rule) (position + 1)) !currentGSSNode !currentIndex !currentN
                             if Array.length table.[index] <> 0 
                             then
                                 let a rule = 
-                                    let newLabel = new Label(rule, 0)
+                                    let newLabel = packToInt64 rule 0
                                     addContext newLabel !currentIndex !currentGSSNode dummy    
                                 table.[index] |> Array.iter a
                      else condition := true
                                     
                 else
                     let curRight = unbox <| !currentN
-                    let resTree = handleIntermidiate curRight currentLabel.Value.Rule
-                    let resTree = findTree currentLabel.Value.Rule resTree.leftExt resTree.rightExt resTree
-                    if resTree.leftExt = 0 && resTree.rightExt = inputLength && currentLabel.Value.Rule = parser.StartRule
+                    let resTree, extension = handleIntermidiate curRight (rule)
+                    let resTree = findTree (rule) extension resTree
+                    if resTree.extension = finalExtension && rule = parser.Startrule
                     then resultAST := Some resTree
                     pop !currentGSSNode !currentIndex resTree
         let control () =
@@ -425,8 +426,5 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
-                    let r1 = new Tree<_> (tokens, res, parser.Rules)
-                    //let rr = new List<Tree<'TokenType>>()
-                   // drawDot parser tokens "res.dot" gss
-                    //rr.Add(r1)
+                    let r1 = new Tree<_> (tokens, res, parser.rules)
                     Success (r1)       

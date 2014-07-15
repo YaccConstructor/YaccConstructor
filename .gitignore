@@ -155,3 +155,9 @@ src/TSQL/TSQLHighlighting/*.cs
 src/TSQL/out
 src/TSQL/TSQLHighlighting/TSQLHighlighting.xml
 src/TSQL/TSQLHighlighting/ItemsGroup.target
+*log.txt
+**/out
+**/Calc.yrd.fs
+src/JSON_Parser/JSONHighlighting/JSONHighlighting.xml
+src/JSON_Parser/JSONHighlighting/ItemsGroup.target
+src/Calc/CalcHighlighting/ItemsGroup.target

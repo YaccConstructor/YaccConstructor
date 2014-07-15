@@ -1,4 +1,4 @@
-﻿module YC.ReSharper.AbstractAnalysis.Plugin.Core
+﻿namespace YC.ReSharper.AbstractAnalysis.Plugin.Core
 
 open JetBrains.Application.Progress
 open JetBrains.ProjectModel
@@ -24,19 +24,29 @@ type TreeGenerationState =
 [<assembly:AddinRoot ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
 do()
 
+
 type LanguagesProcessor() =
     do AddinManager.Initialize()
     do AddinManager.Registry.Update(null)    
     let injectedLanguages = 
+        let an = new System.Reflection.AssemblyName();
+        an.Name <- "Mono.Addins";
+        an.Version <- new System.Version(1, 1, 0);
+        System.Reflection.Assembly.Load(an);
         let s = AddinManager.Registry.DefaultAddinsFolder
         let a = AddinManager.IsInitialized
         let r = AddinManager.Registry
-        let n = AddinManager.GetExtensionNodes ("C:\gsv\projects\recursive-ascent\Bin\Debug\v40")
+        AddinManager.AddinLoadError.Add(
+            fun t -> 
+                let x = t.Message
+                printfn "%A" x)        
+        //let n = AddinManager.GetExtensionNodes (@"C:\gsv\projects\recursive-ascent\Bin\Debug\v40\Addins\")
         let d = new System.Collections.Generic.Dictionary<_,_>(System.StringComparer.InvariantCultureIgnoreCase)
         AddinManager.GetExtensionObjects (typeof<IInjectedLanguageModule>) 
         |> Seq.cast<IInjectedLanguageModule>
         |> Array.ofSeq
-        |> Array.iter (fun x -> d.Add(x.Name,x))  
+        |> Array.iter (fun x -> d.Add(x.Name,x))
+                
         d
 
     member this.Process (graphs:ResizeArray<string*_>) =
@@ -99,7 +109,7 @@ type Processor<'TokenType,'br>
             (function 
                 | Yard.Generators.RNGLR.Parser.Success(x,_,e) ->
                     forest <- (x,e) :: forest
-                    //parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
                 | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
 
@@ -155,7 +165,7 @@ type Processor<'TokenType,'br>
         ranges    
 
     member this.GetNextTree index =         
-        let state = getNextTree index
+        let state = getNextTree 0//index
         match state with
         | InProgress (treeNode, _) -> treeNode, false
         | End (treeNode) -> 

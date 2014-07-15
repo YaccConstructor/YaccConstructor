@@ -46,7 +46,6 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Calc.fs" />
     <None Include="packages.config" />
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AbstractLexer.Common">
@@ -181,8 +180,9 @@
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
-copy * $(TargetDir)..\Addins
-del JetBrains.*</PostBuildEvent>
+copy * ..\Addins\*
+del JetBrains.*
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

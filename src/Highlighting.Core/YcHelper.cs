@@ -17,8 +17,8 @@ namespace Highlighting.Core
         {
             lang = lang.ToLower();
             key = key.ToLower();
-            if (String.IsNullOrEmpty(key) ||
-                String.IsNullOrEmpty(value))
+            if (String.IsNullOrEmpty(key) /*||
+                String.IsNullOrEmpty(value)*/)
                 return;
 
             lock (lockObject)
@@ -54,8 +54,9 @@ namespace Highlighting.Core
             }
         }
 
-        public static string GetYcName(string lang, string str)
+        public static string GetYcName(string lang, string s)
         {
+            string str = Yard.Generators.RNGLR.Helper._getLiteralName(s);
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
             {
                 return null;
@@ -67,7 +68,7 @@ namespace Highlighting.Core
                 return null;
 
             return
-                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Value.stringValue == str)
+                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Key == str/*&& item.Value.stringValue == str*/)
                     .Key;
 
         }

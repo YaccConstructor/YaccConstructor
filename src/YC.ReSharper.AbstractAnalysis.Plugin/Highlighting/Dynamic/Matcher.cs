@@ -99,8 +99,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             string lBrotherText = LanguageHelper.GetBrother(lang, rBrotherText, Brother.Left);
 
             //possible it is unnecessary
-            if (string.IsNullOrEmpty(lBrotherText))
-                return;
+            //if (string.IsNullOrEmpty(lBrotherText))
+            //    return;
 
             List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, rBraceRange);
 
@@ -135,8 +135,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             foreach (var treeNode in nodes)
             {
                 List<DocumentRange> nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
-                if (nodeRange != null && nodeRange.Contains(range))
-                    return treeNode.UserData.GetData(KeyConstant.YcLanguage);
+               
+                if (nodeRange != null)
+                {
+                    foreach (var rng in nodeRange)
+                    {
+                        if (range.ContainedIn (rng))
+                               return treeNode.UserData.GetData(KeyConstant.YcLanguage);
+                    }
+                }
             }
             return string.Empty;
         }

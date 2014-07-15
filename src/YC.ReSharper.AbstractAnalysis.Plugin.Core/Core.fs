@@ -31,7 +31,7 @@ type LanguagesProcessor() =
         let s = AddinManager.Registry.DefaultAddinsFolder
         let a = AddinManager.IsInitialized
         let r = AddinManager.Registry
-        let n = AddinManager.GetExtensionNodes ("C:\gsv\projects\recursive-ascent\Bin\Debug\v40")
+        let n = AddinManager.GetExtensionNodes ("C:\gsv\projects\recursive-ascent\Bin\Debug\Addins")
         let d = new System.Collections.Generic.Dictionary<_,_>(System.StringComparer.InvariantCultureIgnoreCase)
         AddinManager.GetExtensionObjects (typeof<IInjectedLanguageModule>) 
         |> Seq.cast<IInjectedLanguageModule>

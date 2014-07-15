@@ -1,0 +1,1 @@
+..\tools\Build.Tools\FAKE\FAKE.exe ..\tools\Build.Tools\GeneralBuild.fsx

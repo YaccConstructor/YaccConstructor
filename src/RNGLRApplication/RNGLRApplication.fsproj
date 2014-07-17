@@ -14,7 +14,7 @@
   <Import Project="../YC.targets" />
   <ItemGroup>
     <None Include="Calc.yrd" />
-    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="SimpleLeftRecursion.yrd.fs" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

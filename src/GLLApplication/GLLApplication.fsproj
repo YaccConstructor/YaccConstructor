@@ -55,8 +55,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <None Include="App.config" />
     <Compile Include="SimpleAmb.yrd.fs" />
+    <None Include="App.config" />
     <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />

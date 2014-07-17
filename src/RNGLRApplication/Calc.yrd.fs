@@ -56,7 +56,7 @@ let mutable private cur = 0
 let leftSide = [|1; 1; 4; 2; 2; 3; 3|]
 let private rules = [|2; 1; 9; 1; 1; 3; 2; 8; 2; 6; 5|]
 let private rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
-let startRule = 2
+let startrule = 2
 
 let acceptEmptyInput = false
 
@@ -117,8 +117,8 @@ for i = 0 to 9 do
         accStates.[i] <- List.exists ((=) i) small_acc
 let eofIndex = 7
 let errorIndex = 0
-let errorRulesExists = false
-let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)
+let errorrulesExists = false
+let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startrule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorrulesExists)
 let buildAst : (seq<Token> -> ParseResult<Token>) =
     buildAst<Token> parserSource
 

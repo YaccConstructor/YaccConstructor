@@ -18,17 +18,17 @@ type Table (grammar : FinalGrammar) =
         while !wasChange do
             wasChange := false
             for ruleIndex in 0..grammar.rules.rulesCount-1 do            
-                let currentRuleLeft = grammar.rules.leftSide ruleIndex
-                let currentRuleRight = grammar.rules.rightSide ruleIndex
+                let currentruleLeft = grammar.rules.leftSide ruleIndex
+                let currentruleRight = grammar.rules.rightSide ruleIndex
                 let mutable previousNonTerms = []
                 for symbolIndex in 0..(grammar.rules.length ruleIndex)-1 do
-                    let currentSymbol = currentRuleRight.[symbolIndex]
+                    let currentSymbol = currentruleRight.[symbolIndex]
                     List.iter (addElementsToSet grammar.firstSet.[currentSymbol]) previousNonTerms
                     if not grammar.canInferEpsilon.[currentSymbol]
                     then previousNonTerms <- []
                     if grammar.indexator.isNonTerm currentSymbol
                     then previousNonTerms <- currentSymbol::previousNonTerms
-                List.iter (addElementsToSet followSets.[currentRuleLeft]) previousNonTerms
+                List.iter (addElementsToSet followSets.[currentruleLeft]) previousNonTerms
         followSets
 
     let follow = getFollowSets
@@ -41,16 +41,16 @@ type Table (grammar : FinalGrammar) =
         let mutable condition = true
         for i = 0 to ruleCount - 1 do
             let mutable condition = true
-            let curRule = grammar.rules.rightSide i
+            let currule = grammar.rules.rightSide i
             let mutable j = 0
             while condition do
-                if j <= curRule.Length - 1
+                if j <= currule.Length - 1
                 then
-                    let curFirst = grammar.firstSet.[curRule.[j]]
+                    let curFirst = grammar.firstSet.[currule.[j]]
                     result.[i] <- Set.union result.[i] curFirst
-                    if grammar.canInferEpsilon.[curRule.[j]]
+                    if grammar.canInferEpsilon.[currule.[j]]
                     then 
-                        if j < curRule.Length - 1
+                        if j < currule.Length - 1
                         then j <- j + 1
                         else 
                             condition <- false

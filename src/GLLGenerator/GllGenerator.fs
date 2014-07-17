@@ -10,7 +10,7 @@ open Yard.Generators.RNGLR.FinalGrammar
 open Yard.Generators.GLL
 open PrintTable
 open Printer
-open TranslatorPrinter2
+open Yard.Generators.GLL.TranslatorPrinter2
 open Option
 
 
@@ -72,7 +72,7 @@ type GLL() =
             let newDefinition = initialConvert definition
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
 
-            let printRules () =
+            let printrules () =
                 let printSymbol (symbol : int) =
                     if symbol < grammar.indexator.nonTermCount
                     then grammar.indexator.indexToNonTerm symbol
@@ -85,7 +85,7 @@ type GLL() =
                     for j = 0 to grammar.rules.length i - 1 do
                         printf "%s " <| printSymbol (grammar.rules.symbol i j)
                     printfn ""
-            printRules ()
+            printrules ()
 
             if grammar.EpsilonCyclicNonTerms.Length > 0
             then

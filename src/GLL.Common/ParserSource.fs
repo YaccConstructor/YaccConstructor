@@ -14,7 +14,7 @@ type ParserSource2<'TokenType> (
                                , rules              : int array
                                , rulesStart         : int array
                                , leftSide           : int array
-                               , startRule          : int
+                               , startrule          : int
                                , literalEnd         : int
                                , literalStart       : int
                                , termEnd            : int
@@ -51,11 +51,11 @@ type ParserSource2<'TokenType> (
     member this.IsNonTerminal      = isNonTerminal 
     member this.GetLiteralNames    = getLiteralNames                         
     member this.Table              = table
-    member this.Rules              = _rules
-    member this.RulesStart         = rulesStart
+    member this.rules              = _rules
+    member this.rulesStart         = rulesStart
     member this.Length             = length
     member this.LeftSide           = leftSide
-    member this.StartRule          = startRule
+    member this.Startrule          = startrule
     member this.TokenToNumber      = tokenToNumber
     member this.NumToString        = numToString
     member this.LiteralEnd         = literalEnd
@@ -66,7 +66,7 @@ type ParserSource2<'TokenType> (
     member this.NonTermCount       = nonTermCount
     member this.LiteralCount       = literalCount
     member this.IndexEOF           = indexEOF
-    member this.RulesCount         = rulesCount
+    member this.rulesCount         = rulesCount
     member this.IndexatorFullCount = indexatorFullCount
     member this.AcceptEmptyInput   = acceptEmptyInput
     member this.NumIsTerminal      = numIsTerminal

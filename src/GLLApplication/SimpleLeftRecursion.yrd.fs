@@ -1,6 +1,6 @@
 
-# 2 "SimpleAmb.yrd.fs"
-module GLL.SimpleAmb
+# 2 "SimpleLeftRecursion.yrd.fs"
+module GLL.SimpleLeftRecursion
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.GLL.Parser
 open Yard.Generators.GLL
@@ -65,7 +65,7 @@ let acceptEmptyInput = false
 
 let leftSide = [|1; 1; 2|]
 let table = [| [||];[||];[|1; 0|];[||];[|2|];[||]; |]
-let private rules = [|1; 1; 3; 1|]
+let private rules = [|1; 3; 3; 1|]
 let private canInferEpsilon = [|true; false; false; false; false|]
 let defaultAstToDot =
     (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)

@@ -28,7 +28,7 @@ type ``GLL parser tests with simple lexer`` () =
         let path = dir + "ADB.txt"
         let r = run path parser
         match r with
-        | Parser.Error str, _ -> printfn "%s" str
+        | Parser.Error str, _ -> Assert.Fail("")
         | Parser.Success tree, tokens ->
             GLL.SimpleAmb.defaultAstToDot tree "../../../src/GLLParser.SimpleTest/SimpleAmb.dot"
             
@@ -38,7 +38,7 @@ type ``GLL parser tests with simple lexer`` () =
         let parser () = GLL.SimpleRightRecursion.buildAst
         let path = dir + "BBB.txt"
         match run path parser with
-        | Parser.Error str, _ -> printfn "%s" str
+        | Parser.Error str, _ -> Assert.Fail("")
         | Parser.Success tree, tokens ->
             GLL.SimpleRightRecursion.defaultAstToDot tree "../../../src/GLLParser.SimpleTest/SimpleRightRecursion.dot"
 
@@ -48,7 +48,7 @@ type ``GLL parser tests with simple lexer`` () =
         let path = dir + "BBB.txt"
 
         match run path parser with
-        | Parser.Error str, _ -> printfn "%s" str
+        | Parser.Error str, _ -> Assert.Fail("")
         | Parser.Success tree, tokens ->
             GLL.SimpleLeftRecursion.defaultAstToDot tree "../../../src/GLLParser.SimpleTest/SimpleLeftRecursion.dot"
 
@@ -58,7 +58,7 @@ type ``GLL parser tests with simple lexer`` () =
         let path = dir + "BBB.txt"
 
         match run path getParser with
-        | Parser.Error str, _ -> printfn "%s" str
+        | Parser.Error str, _ -> Assert.Fail("")
         | Parser.Success tree, tokems ->
             GLL.BadLeftRecursion.defaultAstToDot tree "../../../src/GLLParser.SimpleTest/BadLeftRecursion.dot"
 [<EntryPoint>]

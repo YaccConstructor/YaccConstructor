@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>GLLGenerator</RootNamespace>
     <AssemblyName>GLLGenerator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>GLLGenerator</Name>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -34,9 +34,9 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="PrintTranslator.fs" />
     <Compile Include="Table.fs" />
     <Compile Include="PrintTable.fs" />
-    <Compile Include="PrintTranslator.fs" />
     <None Include="packages.config" />
     <Compile Include="GllGenerator.fs" />
   </ItemGroup>

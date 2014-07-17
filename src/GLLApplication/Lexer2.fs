@@ -25,7 +25,7 @@ let tokens2(str : string) =
             match name with
            // | "A" -> A (2)
             | "B" -> B (2)
-            //| "D" -> D (2)
+          //  | "D" -> D (2)
             //| "S" -> S (2)
             | x -> failwithf "Unexpected token %s" x
 

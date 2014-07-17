@@ -38,11 +38,10 @@ type UsualOne<'T> =
 type AST =
     val mutable first : Family
     val mutable other : Family[]
-    val mutable leftExt  : int
-    val mutable rightExt : int
+    val extension : Int64
     val mutable pos : int
-    new (f, o, l, r) = {pos = -1; first = f; other = o; leftExt = l; rightExt = r}
-    new (f, o) = {pos = -1; first = f; other = o; leftExt = -1; rightExt = -1}
+    new (f, o, e) = {pos = -1; first = f; other = o; extension = e}
+    new (f, o) = {pos = -1; first = f; other = o; extension = int64 -1}
     member inline this.findFamily f =
         if f this.first then Some this.first
         elif this.other <> null then
@@ -53,10 +52,9 @@ and Family =
     struct
         val prod : int
         val nodes : Nodes
-        val mutable leftExt  : int
-        val mutable rightExt : int
-        new (p,n) = {prod = p; nodes = n; leftExt = -1; rightExt = -1}
-        new (p,n, l, r) = {prod = p; nodes = n; leftExt = l; rightExt = r}
+        val extension : Int64
+        new (p,n) = {prod = p; nodes = n; extension = int64 -1}
+        new (p,n, l, r) = {prod = p; nodes = n; extension = int64 -1}
     end
 
 and Nodes =
@@ -64,10 +62,9 @@ and Nodes =
         val mutable fst : obj
         val mutable snd : obj
         val mutable other : obj[]
-        val mutable leftExt  : int
-        val mutable rightExt : int
-        new (f,s,o) = {fst = f; snd = s; other = o; leftExt = -1; rightExt = -1}
-        new (f, s, o, l, r) = {fst = f; snd = s; other = o; leftExt = l; rightExt = r}
+        val extension : Int64
+        new (f,s,o) = {fst = f; snd = s; other = o; extension = int64 -1}
+        new (f, s, o, e) = {fst = f; snd = s; other = o; extension = int64 -1}
 
         new (arr : array<_>) =
             let mutable res = new Nodes()
@@ -78,9 +75,9 @@ and Nodes =
                         res.snd <- arr.[1]
                         if arr.Length > 2 then
                             res.other <- arr.[2..]
-            {fst = res.fst; snd = res.snd; other = res.other; leftExt = -1; rightExt = -1}
+            {fst = res.fst; snd = res.snd; other = res.other; extension = int64 -1}
 
-        new (arr : array<_>, l, r, k) =
+        new (arr : array<_>, e) =
             let mutable res = new Nodes()
             if arr <> null then
                 if arr.Length > 0 then
@@ -89,7 +86,7 @@ and Nodes =
                         res.snd <- arr.[1]
                         if arr.Length > 2 then
                             res.other <- arr.[2..]
-            {fst = res.fst; snd = res.snd; other = res.other; leftExt = l; rightExt = r}
+            {fst = res.fst; snd = res.snd; other = res.other; extension = int64 -1}
 
 
         member nodes.doForAll f =

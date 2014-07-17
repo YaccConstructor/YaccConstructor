@@ -52,9 +52,7 @@ and Family =
     struct
         val prod : int
         val nodes : Nodes
-        val extension : Int64
-        new (p,n) = {prod = p; nodes = n; extension = int64 -1}
-        new (p,n, l, r) = {prod = p; nodes = n; extension = int64 -1}
+        new (p, n) = {prod = p; nodes = n}
     end
 
 and Nodes =
@@ -64,7 +62,7 @@ and Nodes =
         val mutable other : obj[]
         val extension : Int64
         new (f,s,o) = {fst = f; snd = s; other = o; extension = int64 -1}
-        new (f, s, o, e) = {fst = f; snd = s; other = o; extension = int64 -1}
+        new (f, s, o, e) = {fst = f; snd = s; other = o; extension = e}
 
         new (arr : array<_>) =
             let mutable res = new Nodes()
@@ -86,7 +84,7 @@ and Nodes =
                         res.snd <- arr.[1]
                         if arr.Length > 2 then
                             res.other <- arr.[2..]
-            {fst = res.fst; snd = res.snd; other = res.other; extension = int64 -1}
+            {fst = res.fst; snd = res.snd; other = res.other; extension = e}
 
 
         member nodes.doForAll f =

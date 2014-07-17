@@ -4,6 +4,7 @@ obj/
 *.user
 *.orig
 *.vspx
+*.dot
 
 [Rr]elease/
 *.suo
@@ -131,4 +132,5 @@ src/FsYaccFrontend/out
 **/FsYard.log
 src/TSQL/MsParser.fs
 src/RNGLRParser.SimpleTest/gen.cmd
+
 

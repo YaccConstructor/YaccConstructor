@@ -8,19 +8,24 @@ open Yard.Generators.RNGLR.AST
 open Yard.Generators.RNGLR.DataStructures
 open Microsoft.FSharp.Collections
 
-let inline pack2ToInt64 left right =  (int64 left <<< 32) ||| int64 right
-let inline getLowBits long         = int32 <| (long &&& 0xffffffffL)
-let inline getHighBits long        = int32 <| (long >>> 32)
+let inline packExtension left right =  (int64 left <<< 32) ||| int64 right
+let inline getRightExtension long         = int32 <| (long &&& 0xffffffffL)
+let inline getLeftExtension long        = int32 <| (long >>> 32)
+
+let inline packLabel rule position = (int32 rule <<< 16) ||| int32 position
+let inline getRule packedValue = int packedValue >>> 16
+let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
+
 let inline pack3ToInt64 p l r      = ((uint64 p) <<< 52) ||| ((uint64 l) <<< 26) ||| (uint64 r)
 let inline getProduction long      = int(long >>> 52)
-let inline getLeftExtension long   = int((long <<< 12) >>> 38)
-let inline getRightExtension long  = int((long <<< 38) >>> 38)
+let inline getLeftExtension3 long   = int((long <<< 12) >>> 38)
+let inline getRightExtension3 long  = int((long <<< 38) >>> 38)
 
 type [<CustomEquality;CustomComparison>] IntermidiateNode =
     struct
         val LeftChild  : obj
         val RightChild : obj
-        val Position   : Int64
+        val Position   : Int32
         val Extension  : Int64
         override x.Equals(intermidiateNode) =
                 match intermidiateNode with
@@ -39,7 +44,7 @@ type [<CustomEquality;CustomComparison>] IntermidiateNode =
 type Vertex =
     val mutable OutEdges : UsualOne<Edge>
     val Level            : int
-    val Label            : Int64
+    val Label            : Int32
     static member Equal (v1 : Vertex) (v2 : Vertex) =
         v1.Level = v2.Level && v1.Label = v2.Label
     new (level, label) = {OutEdges = Unchecked.defaultof<_>; Level = level; Label = label}
@@ -65,7 +70,7 @@ type PoppedPair =
 
 type PreviousContexts =
     struct
-        val Label  : Int64
+        val Label  : Int32
         val Vertex : Vertex
         val Ast    : obj
         new (l, v, a) = {Label = l; Vertex = v; Ast = a}
@@ -75,7 +80,7 @@ type PreviousContexts =
 
 type Context =
     val Index         : int
-    val Label         : Int64
+    val Label         : Int32
     val Node          : Vertex
     val Ast           : obj
     static member Equal1 label1 (node1 : Vertex) (ast1 : obj) label2 (node2 : Vertex) (ast2 : obj) =
@@ -106,7 +111,7 @@ let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : 
         | :? IntermidiateNode as iN ->
             iN.Position.ToString()
         | null -> "n"
-        | :? Nodes as n -> (getHighBits n.extension).ToString() + (getLowBits n.extension).ToString() 
+        | :? Nodes as n -> (getLeftExtension n.extension).ToString() + (getRightExtension n.extension).ToString() 
         | _ -> failwith "Unexpected ast"
 
     let rec dfs (u : Vertex) =
@@ -161,8 +166,8 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let currentrule = parser.Startrule
         let dummy = box <| null
-        let dummyGSSNode = new Vertex(!currentIndex, (pack2ToInt64 -1 -1))
-        let currentLabel = ref <| pack2ToInt64 currentrule 0
+        let dummyGSSNode = new Vertex(!currentIndex, (packLabel -1 -1))
+        let currentLabel = ref <| packLabel currentrule 0
         
         let currentN = ref <| null
         let currentR = ref <| null
@@ -174,7 +179,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<Int64, Microsoft.FSharp.Collections.ResizeArray<Family>>())  
 
         let terminalNodes = new BlockResizeArray<Nodes>()
-        let finalExtension = pack2ToInt64 0 inputLength
+        let finalExtension = packExtension 0 inputLength
         
         let findFamily prod (nodes : Nodes) extension : Family =
             let mutable result = None
@@ -214,16 +219,16 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let l =
                 match result.[0] with
                 | :? Nodes as n ->
-                    getHighBits n.extension
-                | :? AST as a -> getHighBits a.extension
+                    getLeftExtension n.extension
+                | :? AST as a -> getLeftExtension a.extension
                 | _ -> failwith "Unexpected type."
             let r =
                 match result.[result.Length - 1] with
                 | :? Nodes as n ->
-                    getLowBits n.extension
-                | :? AST as a -> getLowBits a.extension 
+                    getRightExtension n.extension
+                | :? AST as a -> getRightExtension a.extension 
                 | _ -> failwith "Unexpected type."
-            let extension = pack2ToInt64 l r
+            let extension = packExtension l r
             let nodes = new Nodes(result, extension)
             let family = findFamily prod nodes extension
             family, extension
@@ -257,9 +262,9 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     | :? IntermidiateNode as i -> i.Extension
                     | _ -> failwith "Unexpected type."
 
-                result <- new IntermidiateNode(left, right, label, pack2ToInt64 (getHighBits lExt) (getLowBits rExt))
+                result <- new IntermidiateNode(left, right, label, packExtension (getLeftExtension lExt) (getRightExtension rExt))
             else 
-                result <- new IntermidiateNode(left, right, label, pack2ToInt64 (getHighBits rExt) (getLowBits rExt))
+                result <- new IntermidiateNode(left, right, label, packExtension (getLeftExtension rExt) (getRightExtension rExt))
             box <| result
                 
             
@@ -267,7 +272,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let mutable result = (terminalNodes.Item index).fst
             if result = null
             then
-                result <- box <| new Nodes(box <| tokens.[index], null, null, pack2ToInt64 index (index + 1))
+                result <- box <| new Nodes(box <| tokens.[index], null, null, packExtension index (index + 1))
                 terminalNodes.Set !currentIndex (unbox <| result)
             else result <- box <| terminalNodes.Item index
             result
@@ -288,7 +293,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                  || (edges.other <> null && edges.other |> Array.exists (fun edge -> Vertex.Equal edge.Dest e && ast.Equals edge.Ast)))
 
         let findTree prod extension family =      
-            let key = pack3ToInt64 prod (getHighBits extension) (getLowBits extension)      
+            let key = pack3ToInt64 prod (getLeftExtension extension) (getRightExtension extension)      
             let result = 
                 if astDictionary.ContainsKey key
                 then
@@ -317,7 +322,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     let handleTree ast2 =
                         let y = getNodeP label ast ast2
                         let temp : AST = unbox <| ast2
-                        addContext label (getLowBits temp.extension) u y
+                        addContext label (getRightExtension temp.extension) u y
                     trees |> ResizeArray.iter handleTree
                         
                 if v.OutEdges.first <> Unchecked.defaultof<_>
@@ -374,8 +379,8 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 index
 
             condition := true
-            let rule = getHighBits !currentLabel
-            let position = getLowBits !currentLabel
+            let rule = getRule !currentLabel
+            let position = getPosition !currentLabel
             if Array.length parser.rules.[rule] = 0 
             then
                 currentR := getNodeT !currentIndex
@@ -394,17 +399,17 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                             then currentN := getNodeT !currentIndex
                             else currentR := getNodeT !currentIndex
                             currentIndex := !currentIndex + 1
-                            currentLabel := pack2ToInt64 (rule) ((position) + 1)
+                            currentLabel := packLabel (rule) ((position) + 1)
                             if !currentR <> null
                             then currentN := getNodeP !currentLabel !currentN !currentR
                             condition := false
                         else 
                             let index = getIndex(curSymbol, curToken)
-                            currentGSSNode := create (pack2ToInt64 (rule) (position + 1)) !currentGSSNode !currentIndex !currentN
+                            currentGSSNode := create (packLabel (rule) (position + 1)) !currentGSSNode !currentIndex !currentN
                             if Array.length table.[index] <> 0 
                             then
                                 let a rule = 
-                                    let newLabel = pack2ToInt64 rule 0
+                                    let newLabel = packLabel rule 0
                                     addContext newLabel !currentIndex !currentGSSNode dummy    
                                 table.[index] |> Array.iter a
                     else condition := true

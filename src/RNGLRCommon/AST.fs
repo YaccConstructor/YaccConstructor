@@ -144,6 +144,24 @@ and Nodes =
                             res.[i+2] <- f nodes.other.[i]
             res
         end
+and [<CustomEquality;CustomComparison>] IntermidiateNode =
+    struct
+        val LeftChild  : obj
+        val RightChild : obj
+        val Position   : Int32
+        val Extension  : Int64
+        override x.Equals(intermidiateNode) =
+                match intermidiateNode with
+                | :? AST as a -> (obj.ReferenceEquals(x, a))
+                | :? Nodes as n -> (n.Equals x)
+                | _ -> false
+        interface System.IComparable with
+            member x.CompareTo n =
+                match n with
+                | :? AST as a -> compare x.Extension a.extension
+                | _ -> invalidArg "yobj" "cannot compare values of different types"
+        new (l, r, p, e) = {LeftChild = l; RightChild = r; Position = p; Extension = e}
+    end
 
 let inline getFamily (node : obj) =
     match node with

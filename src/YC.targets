@@ -9,8 +9,8 @@
     <NuGetNetNum Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">40</NuGetNetNum>
     <TargetFSharpCoreVersion Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">4.3.0.0</TargetFSharpCoreVersion>
     <TargetFSharpCoreVersion Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">4.3.0.0</TargetFSharpCoreVersion>
-    <FsYardPath>$(SolutionDir)\packages\YC.FsYARD.0.2.8.1\tools\FsYARD\FsYard.targets</FsYardPath>
-    <YCToolsPath>$(SolutionDir)\packages\YC.Tools.0.0.6.7\lib\net40\</YCToolsPath>
+    <FsYardPath>$(SolutionDir)\packages\YC.FsYARD.0.2.8.7\tools\FsYARD\FsYard.targets</FsYardPath>
+    <YCToolsPath>$(SolutionDir)\packages\YC.Tools.0.0.6.8\lib\net40\</YCToolsPath>
 </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

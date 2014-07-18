@@ -53,23 +53,24 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.6\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -77,9 +78,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -87,12 +85,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\YaccConstructor.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="YardPrinter">
-      <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.5\lib\net40\YardPrinter.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.6\lib\net40\YardPrinter.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

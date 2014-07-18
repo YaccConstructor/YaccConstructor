@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2013 for Windows Desktop
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{62D91EA2-A776-44C2-8891-2CA45A01A365}"
@@ -143,7 +143,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JSON_Parser", "JSON_Parser\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JSONParser.Test", "JSONParser.Test\JSONParser.Test.fsproj", "{13716B0C-860D-428C-A281-C70D8DC029F9}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Test", "Utils.SourceText.Test\Utils.SourceText.Test.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Tests", "Utils.SourceText.Test\Utils.SourceText.Tests.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CYKOnGPU", "CYKOnGPU\CYKOnGPU.fsproj", "{93FA1948-F76A-4ED1-82B7-542A448C78DC}"
 EndProject

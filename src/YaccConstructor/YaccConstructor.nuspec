@@ -1,38 +1,36 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>YC.Core</id>
-    <version>0.0.8.5</version>
-    <title>Core of YaccConstructor</title>
+    <id>YaccConstructor</id>
+    <version>0.0.8.11</version>
+    <title>YaccConstructor</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
     <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
     <projectUrl>https://code.google.com/p/recursive-ascent</projectUrl>
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Core of YaccConstructor: IL, common functions, grammar transformations, managers and checkers.</description>
+    <description>Core of YaccConstructor Tool</description>
     <releaseNotes>Support for .NET 4.0 .</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
     <tags>Parsing Reengineering YaccConstructor YC Core Grammarware .NET F# FSharp</tags>
-    <dependencies> 
-        <dependency id="FSharpX.Core" version="[1.8.41]" />
-        <dependency id="YC.Tools" />
+    <dependencies>
     </dependencies> 
 
   </metadata>
 <files>
-    <file src="README" target="README" /> 
+    <file src="README YaccConstructor.txt" target="README.txt" /> 
     <file src="..\..\LICENSE" target="LICENSE" /> 
     <file src="..\..\NOTICE" target="NOTICE" />
-    <file src="..\..\Bin\Release\v45\Common.*" target="lib\net45\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v45\Conversions.*" target="lib\net45\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v45\Constraints.*" target="lib\net45\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v45\YaccConstructor.*" target="lib\net45\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\Common.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\Conversions.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\Constraints.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-
+    <file src="..\..\Bin\Release\v40\Common.*" target="tools\YaccConstructor\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\Conversions.*" target="tools\YaccConstructor\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\Constraints.*" target="tools\YaccConstructor\" exclude="**\*.Test.*"/>
+    <file src="..\..\Bin\Release\v40\FSharp.Core.dll" target="tools\YaccConstructor\"/> 
+    <file src="..\..\Bin\Release\v40\FSharpx.Core.dll" target="tools\YaccConstructor\" exclude="**\*.Test.*"/>
+    <file src="..\..\Bin\Release\v40\FsYacc.*" target="tools\YaccConstructor\"/>
+    <file src="..\..\Bin\Release\v40\Mono.Addins.dll" target="tools\YaccConstructor\"/>
+    <file src="..\..\Bin\Release\v40\YaccConstructor.*" target="tools\YaccConstructor\" exclude="**\*.Test.*"/>
+    <file src="..\..\Bin\Release\v40\*.addins" target="tools\YaccConstructor\"/>
 </files>
 <!--Dependences
 FSharpX.Text.StructuredFormat  -->

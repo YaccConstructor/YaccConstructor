@@ -53,15 +53,11 @@
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Constraints.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -72,8 +68,8 @@
       <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Graphviz4Net">
@@ -86,6 +82,10 @@
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -131,10 +131,6 @@
       <Project>{560052d2-e44a-42c0-8f88-04f623276b35}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.8.5\lib\net40\YaccConstructor.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>

@@ -9,12 +9,26 @@ open Microsoft.FSharp.Collections
 
 [<Class>]
 type ReSharperHelper() =
-    let processor = new LanguagesProcessor()
-    member this.XmlPath l = processor.XmlPath l
-    member this.ParsingFinished = processor.ParsingFinished
-    member this.GetNextTree l i = processor.GetNextTree l i
-    member this.LexingFinished = processor.LexingFinished
-    member this.GetForestWithToken l rng = processor.GetForestWithToken l rng
+    let processors = 
+        [
+            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule)
+            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule)
+            ]
+        |> dict
+    //let processor = new LanguagesProcessor()
+    member this.XmlPath (l:string) = processors.[l.ToLowerInvariant()].XmlPath
+    member this.ParsingFinished = 
+        processors |> Seq.map(fun kvp -> kvp.Value.ParsingFinished) |> (fun x -> new ResizeArray<_>(x))
+        //processor.ParsingFinished
+    member this.GetNextTree (l:string) i = 
+        processors.[l.ToLowerInvariant()].GetNextTree i
+        //processor.GetNextTree l i
+    member this.LexingFinished = 
+        processors |> Seq.map(fun kvp -> kvp.Value.LexingFinished) |> (fun x -> new ResizeArray<_>(x))
+        //processor.LexingFinished
+    member this.GetForestWithToken (l:string) rng = 
+        processors.[l.ToLowerInvariant()].GetForestWithToken rng
+        //processor.GetForestWithToken l rng
     member this.Process(file) =
         let defLang (n:ITreeNode) =
             match n with 
@@ -29,8 +43,10 @@ type ReSharperHelper() =
         let graphs = (new Approximator(file)).Approximate defLang
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
-        processor.Process graphs
+//        processor.Process graphs
+//        |> ResizeArray.iter(fun (x,y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
+        graphs
+        |> ResizeArray.map (fun (l,g) -> processors.[l.ToLowerInvariant()].Process g)
         |> ResizeArray.iter(fun (x,y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         
         lexerErrors,parserErrors
-        

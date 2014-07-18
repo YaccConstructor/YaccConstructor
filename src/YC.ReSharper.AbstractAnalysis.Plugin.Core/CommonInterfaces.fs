@@ -20,9 +20,9 @@ type LexingFinishedArgs (tokens : ResizeArray<ITreeNode>, lang:string) =
      member this.Tokens = tokens
      member this.Lang = lang
 
-type ParsingFinishedArgs() = 
+type ParsingFinishedArgs(lang:string) = 
     inherit System.EventArgs()
-    member this.Lang = ""
+    member this.Lang = lang
 
 
 exception LexerError of string*obj

@@ -161,7 +161,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.PowerPack.Build.Task
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JSON_Parser", "JSON_Parser\JSON_Parser.fsproj", "{560052D2-E44A-42C0-8F88-04F623276B35}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Test", "Utils.SourceText.Test\Utils.SourceText.Test.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.SourceText.Tests", "Utils.SourceText.Test\Utils.SourceText.Tests.fsproj", "{24AC8FF8-638D-437E-A806-859C0A0C701D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLL.Common", "GLL.Common\GLL.Common.fsproj", "{A24B88C9-0236-4575-A304-231E3B040E56}"
 EndProject

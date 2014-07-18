@@ -28,6 +28,7 @@ open Yard.Core.IL.Definition
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
+open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Conversions expand metarules tests`` () =
@@ -41,7 +42,7 @@ type ``Conversions expand metarules tests`` () =
         let srcPathFile = System.IO.Path.Combine(basePath, srcFile)                                         
         let ilTree = frontend.ParseGrammar srcPathFile                
         Namer.initNamer ilTree.grammar
-        let ilTreeConverted = ConversionsManager.ApplyConversion conversion ilTree 
+        let ilTreeConverted = apply_Conversion conversion ilTree 
         let expected =
             try
                 srcPathFile + ".ans" |> frontend.ParseGrammar

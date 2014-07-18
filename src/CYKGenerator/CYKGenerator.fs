@@ -26,6 +26,7 @@ open System.Collections.Generic
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open System.IO
+open Mono.Addins
 
 type GrammarInfo =
     {        
@@ -196,6 +197,11 @@ type CYKGeneartorImpl () =
         let grammarInfo = grammarFromIL grammar
         grammarInfo.rules, startNTerm grammar grammarInfo.nTermDict, grammarInfo.lblNames
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type CYKGenerator() =    
     inherit Generator()
         override this.Name = "CYKGenerator"

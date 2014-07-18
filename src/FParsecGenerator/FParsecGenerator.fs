@@ -21,7 +21,13 @@ namespace Yard.Generators.FParsecGenerator
 
 open Yard.Core
 open Constraints
+open Mono.Addins
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type FParsecGenerator() = 
     inherit Generator()
         override this.Name = "FParsecGenerator"

@@ -20,7 +20,13 @@
 namespace Yard.Frontends.IronyFrontend
 
 open Yard.Core
+open Mono.Addins
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type IronyFrontend() = 
     inherit Frontend() 
         override this.Name = "IronyFrontend"

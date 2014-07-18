@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.AbstractAnalysis.Lexing.Generator</id>
-    <version>0.0.6.5</version>
+    <version>0.0.6.6</version>
     <title>YC.AbstractAnalysis.Lexing.Generator</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -16,6 +16,7 @@
     <tags>YaccConstructor F#  FSharp .NET AbstractLexing LexersGenerator lexing grammarware reengineering string-embedded SQL</tags>
   </metadata>
     <files>
+	<file src="..\..\Bin\Release\v45\FSharp.Core.dll" target="\tools"/>
         <file src="..\..\Bin\Release\v45\QuickGraph.*" target="\tools" exclude="**\*.Test.*"/>		
         <file src="..\..\Bin\Release\v45\AbstractLexer.Generator.*" target="\tools" exclude="**\*.Test.*"/>		
         <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools"/>

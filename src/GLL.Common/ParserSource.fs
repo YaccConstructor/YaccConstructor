@@ -14,7 +14,7 @@ type ParserSource2<'TokenType> (
                                , rules              : int array
                                , rulesStart         : int array
                                , leftSide           : int array
-                               , startrule          : int
+                               , startRule          : int
                                , literalEnd         : int
                                , literalStart       : int
                                , termEnd            : int
@@ -55,7 +55,7 @@ type ParserSource2<'TokenType> (
     member this.rulesStart         = rulesStart
     member this.Length             = length
     member this.LeftSide           = leftSide
-    member this.Startrule          = startrule
+    member this.StartRule          = startRule
     member this.TokenToNumber      = tokenToNumber
     member this.NumToString        = numToString
     member this.LiteralEnd         = literalEnd

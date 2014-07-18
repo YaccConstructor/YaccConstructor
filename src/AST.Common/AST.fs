@@ -12,10 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.AST
+module Yard.Generators.Common.AST
 open System
 open System.Collections.Generic
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.DataStructures
 
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {

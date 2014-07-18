@@ -3,7 +3,7 @@
 module RNGLRApplication
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open Yard.Generators
 open LexCommon
 

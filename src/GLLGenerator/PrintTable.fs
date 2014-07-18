@@ -1,6 +1,6 @@
 ﻿module Yard.Generators.GLL.PrintTable
 
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.GLL
 open System.Collections.Generic
 open Yard.Core.IL

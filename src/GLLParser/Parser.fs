@@ -3,9 +3,8 @@ open Yard.Generators.GLL
 open System 
 open System.Collections.Generic
 open Yard.Generators.GLL
-open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 
 let inline packExtension left right =  (int64 left <<< 32) ||| int64 right
@@ -145,7 +144,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             
         let currentIndex = ref 0
 
-        let currentrule = parser.Startrule
+        let currentrule = parser.StartRule
         let dummy = box <| null
         let dummyGSSNode = new Vertex(!currentIndex, (packLabel -1 -1))
         let currentLabel = ref <| packLabel currentrule 0
@@ -156,8 +155,8 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex,!currentLabel,!currentGSSNode, dummy)
         
-        let gss = Array.init inputLength (fun _ -> new Microsoft.FSharp.Collections.ResizeArray<Vertex>())
-        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<Int64, Microsoft.FSharp.Collections.ResizeArray<Family>>())  
+        let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
+        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<Int64, ResizeArray<Family>>())  
 
         let terminalNodes = new BlockResizeArray<Nodes>()
         let finalExtension = packExtension 0 inputLength
@@ -167,11 +166,11 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             if createdFamilies.[prod].ContainsKey extension
             then
                 result <- 
-                Microsoft.FSharp.Collections.ResizeArray.tryFind 
+                ResizeArray.tryFind 
                     (fun (fam : Family) -> obj.ReferenceEquals(nodes.fst, fam.nodes.fst))  
                     <| createdFamilies.[prod].[extension]
             else
-                createdFamilies.[prod].Add(extension, new Microsoft.FSharp.Collections.ResizeArray<Family>(5))
+                createdFamilies.[prod].Add(extension, new ResizeArray<Family>(5))
                 result <- Some <| new Family(prod, nodes)
                 createdFamilies.[prod].[extension].Add result.Value
             if result.IsNone
@@ -180,39 +179,48 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 createdFamilies.[prod].[extension].Add result.Value
             result.Value
 
-        let handleIntermidiate node prod = 
-            let result = new ResizeArray<obj>()
-            let rec handle (o : obj) =
-                if o <> null 
-                then
-                    match o with
-                    | :? IntermidiateNode as i ->
-                        let t : IntermidiateNode = unbox i
-                        handle t.LeftChild
-                        handle t.RightChild
-                    | :? Nodes as n -> 
-                        result.Add (box <| n)     
-                    | :? AST as a -> 
-                            result.Add (box <| a)
-                    | _ -> failwith "Unexpected type."
-            handle node
-            let result = result.ToArray()
-            let l =
-                match result.[0] with
-                | :? Nodes as n ->
-                    getLeftExtension n.extension
-                | :? AST as a -> getLeftExtension a.extension
-                | _ -> failwith "Unexpected type."
-            let r =
-                match result.[result.Length - 1] with
-                | :? Nodes as n ->
-                    getRightExtension n.extension
-                | :? AST as a -> getRightExtension a.extension 
-                | _ -> failwith "Unexpected type."
-            let extension = packExtension l r
-            let nodes = new Nodes(result, extension)
-            let family = findFamily prod nodes extension
-            family, extension
+        let handleIntermidiate (node : obj) prod =
+            let extension =
+                match node with
+                | :? Nodes as n -> n.extension
+                | :? IntermidiateNode as i -> i.Extension
+            let nodes = new Nodes(node, null, null, extension)
+            let family = findFamily prod nodes nodes.extension
+            family, nodes.extension
+//
+//        let handleIntermidiate node prod = 
+//            let result = new ResizeArray<obj>()
+//            let rec handle (o : obj) =
+//                if o <> null 
+//                then
+//                    match o with
+//                    | :? IntermidiateNode as i ->
+//                        let t : IntermidiateNode = unbox i
+//                        handle t.LeftChild
+//                        handle t.RightChild
+//                    | :? Nodes as n -> 
+//                        result.Add (box <| n)     
+//                    | :? AST as a -> 
+//                            result.Add (box <| a)
+//                    | _ -> failwith "Unexpected type."
+//            handle node
+//            let result = result.ToArray()
+//            let l =
+//                match result.[0] with
+//                | :? Nodes as n ->
+//                    getLeftExtension n.extension
+//                | :? AST as a -> getLeftExtension a.extension
+//                | _ -> failwith "Unexpected type."
+//            let r =
+//                match result.[result.Length - 1] with
+//                | :? Nodes as n ->
+//                    getRightExtension n.extension
+//                | :? AST as a -> getRightExtension a.extension 
+//                | _ -> failwith "Unexpected type."
+//            let extension = packExtension l r
+//            let nodes = new Nodes(result, extension)
+//            let family = findFamily prod nodes extension
+//            family, extension
                
         let containsContext index label  (gssNode : Vertex) (ast : obj) =
             let set = setU.[index]
@@ -396,11 +404,12 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     let curRight = unbox <| !currentN
                     let resTree, extension = handleIntermidiate curRight (rule)
                     let resTree = findTree rule extension resTree
-                    if  resTree.extension = finalExtension && rule = parser.Startrule
+                    let tempExt = resTree.extension
+                    if  tempExt = finalExtension && rule = parser.StartRule
                     then resultAST := Some resTree
                     pop !currentGSSNode !currentIndex resTree
         let control () =
-            while not !stop do
+             while not !stop do
                 if !condition then dispatcher() else processing()
         control()
                  

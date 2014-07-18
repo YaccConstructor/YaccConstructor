@@ -41,6 +41,16 @@
     <Compile Include="GllGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -82,16 +92,6 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

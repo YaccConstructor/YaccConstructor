@@ -10,12 +10,21 @@ open Microsoft.FSharp.Reflection
 open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser    
 open Microsoft.FSharp.Text.Lexing
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open GLL.SimpleAmb
 
 open Yard.Generators.GLL
 open Yard.Generators
 open Lexer2
+
+let inline packExtension left right =  (int64 left <<< 32) ||| int64 right
+let inline getRightExtension long         = int32 <| (long &&& 0xffffffffL)
+let inline getLeftExtension long        = int32 <| (long >>> 32)
+
+let packed = (packExtension 0 2)
+printf "%d" packed
+printf "%d" (getLeftExtension packed)
+printf "%d" (getRightExtension packed)
 
 let run path astBuilder =
     let tokens = Lexer2.tokens2(path)

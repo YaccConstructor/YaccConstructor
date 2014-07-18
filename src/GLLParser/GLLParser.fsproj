@@ -78,6 +78,16 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GLL.Common\GLL.Common.fsproj">
       <Name>GLL.Common</Name>
       <Project>{a24b88c9-0236-4575-a304-231e3b040e56}</Project>
@@ -86,16 +96,6 @@
     <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
       <Name>GLLGenerator</Name>
       <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">

@@ -1,34 +1,24 @@
+Assambly GLLParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLR, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
 Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
+Assambly GLLParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLR, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
 Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
+Assambly GLLParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLR, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
+Assambly RNGLRParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.
 Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-
-rules:
-   0: s = s s 
-   1: s = B 
-   2: yard_start_rule = s 
-<null>Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-
-rules:
-   0: s = s B 
-   1: s = B 
-   2: yard_start_rule = s 
-<null>Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-
-rules:
-   0: s = B s 
-   1: s = B 
-   2: yard_start_rule = s 
-<null>Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-Assambly yWorks.yFilesWPF.Viewer, Version=2.3.0.4, Culture=neutral, PublicKeyToken=1010a0d8d6380325 could not de loaded.
-
-rules:
-   0: s = A D B 
-   1: s = A d B 
-   2: yard_start_rule = s 
-   3: d = D 
-<null>
+WARNING: [] Could not load some add-in assemblies: Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
+ERROR!
+Stack trace:    at Yard.Frontends.YardFrontend.GrammarParser.get_parseFile()
+   at Yard.Frontends.YardFrontend.Main.ParseFile(String args) in C:\Users\User\recursive-ascent\src\YardFrontend\Main.fs:line 192
+   at YaccConstructor.Program.run@109-1.Invoke(Unit unitVar) in C:\Users\User\recursive-ascent\src\YaccConstructor\Program.fs:line 128
+   at <StartupCode$YaccConstructor>.$YaccConstructor.Program.main@() in C:\Users\User\recursive-ascent\src\YaccConstructor\Program.fs:line 225
+Internal message: The type initializer for 'Yard.Frontends.YardFrontend.GrammarParser' threw an exception.
+Message: Unrecognized error.
+Assambly GLLParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null could not de loaded.

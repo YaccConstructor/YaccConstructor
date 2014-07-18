@@ -4,12 +4,11 @@ open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 open InitialConvert
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.GLL
 open PrintTable
-open Printer
 open Yard.Generators.GLL.TranslatorPrinter2
 open Option
 
@@ -102,7 +101,7 @@ type GLL() =
                         grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
                             grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
                             (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
-                grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
+                //grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
 
             let table = new Table(grammar)
             use out = new System.IO.StreamWriter (output)
@@ -131,7 +130,7 @@ type GLL() =
 
                     println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
-                    println "open Yard.Generators.RNGLR.AST"
+                    println "open Yard.Generators.Common.AST"
 
                     match definition.head with
                     | None -> ()

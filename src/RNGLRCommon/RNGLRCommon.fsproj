@@ -31,8 +31,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="DataStructures.fs" />
-    <Compile Include="AST.fs" />
     <Compile Include="ParserSource.fs" />
     <None Include="packages.config" />
   </ItemGroup>

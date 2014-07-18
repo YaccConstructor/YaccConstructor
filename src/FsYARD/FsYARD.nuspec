@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>0.2.8.0</version>
+    <version>0.2.8.7</version>
     <title>YC.FsYARD</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -24,6 +24,7 @@
         <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
         <file src="..\..\Bin\Release\v45\FsYARD.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>        
         <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools\FsYARD"/>
+        <file src="..\..\Bin\Release\v45\FSharp.Core.dll" target="\tools\FsYARD"/>
         <file src="..\..\Bin\Release\v45\FSharpx.Text.StructuredFormat.*" target="\tools\FsYARD"/>
         <file src="..\..\Bin\Release\v45\FSharpx.Core.*" target="\tools\FsYARD"/>
         

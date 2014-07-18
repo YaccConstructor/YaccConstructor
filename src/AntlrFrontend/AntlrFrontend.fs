@@ -18,7 +18,13 @@
 namespace Yard.Frontends.AntlrFrontend
 
 open Yard.Core
+open Mono.Addins
 
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type AntlrFrontend() = 
     inherit Frontend()
         override  this.Name = "AntlrFrontend"

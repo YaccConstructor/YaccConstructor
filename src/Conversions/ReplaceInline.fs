@@ -18,6 +18,7 @@ open Yard.Core
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
+open Mono.Addins
 
 let private replaceInline (rules : Rule.t<_,_> list) =
     let closure (inlines : (string * t<_,_>) list) = 
@@ -65,7 +66,13 @@ let private replaceInline (rules : Rule.t<_,_> list) =
             if inlines.ContainsKey rule.name.text && not rule.isStart
             then None
             else Some <| {rule with body = modifyBody rule.body})
-            
+
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]            
 type ReplaceInline() = 
     inherit Conversion()
         override this.Name = "ReplaceInline"

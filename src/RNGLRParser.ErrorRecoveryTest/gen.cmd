@@ -1,4 +1,4 @@
-@echo off
+::@echo off
 del log1.txt
 del log2.txt
 

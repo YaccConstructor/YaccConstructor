@@ -134,3 +134,4 @@ src/TSQL/MsParser.fs
 src/RNGLRParser.SimpleTest/gen.cmd
 
 
+src/GLLParser.SimpleTest/log.txt

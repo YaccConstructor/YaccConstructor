@@ -4,9 +4,9 @@ open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 open InitialConvert
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.GLL
 open PrintTable
 open Printer

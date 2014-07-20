@@ -4,7 +4,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files %28x86%29\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe</StartProgram>
     <StartArguments>/log "C:\VS.log" /ReSharper.LogFile "C:\resharper.log" /ReSharper.Plugin YC.ReSharper.AbstractAnalysis.Plugin.dll</StartArguments>
-    <StartWorkingDirectory>C:\yc\Bin\Debug\v40\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\gsv\projects\recursive-ascent\Bin\Debug\v40\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartAction>Program</StartAction>

@@ -45,6 +45,10 @@
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net40\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="AbstractLexer.Core">
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.6.5\lib\net40\AbstractLexer.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="AbstractParsing.Common">
       <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.6.5\lib\net40\AbstractParsing.Common.dll</HintPath>
       <Private>True</Private>
@@ -73,6 +77,31 @@
       <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.DocumentModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.DocumentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.ProjectModel">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Util">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Daemon">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Daemon.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.CSharp">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -94,15 +123,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.0\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -112,11 +141,20 @@
       <HintPath>..\packages\YC.Core.0.0.6.5\lib\net40\YaccConstructor.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="YC.ReSharper.AbstractAnalysis.Plugin.Core">
+      <HintPath>..\YC.ReSharper.AbstractAnalysis.Plugin.Core\obj\Debug\YC.ReSharper.AbstractAnalysis.Plugin.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.fs" />
-    <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ConstantPropagation\ConstantPropagation.fsproj">
+      <Name>ConstantPropagation</Name>
+      <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

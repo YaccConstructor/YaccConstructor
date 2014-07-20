@@ -19,11 +19,11 @@ namespace RShT1
                 whereCond = "v > 5";
             }
 
-            Program.ExecuteImmediate("select x from y where " + whereCond);
-            Program.ExecuteImmediate("select x from y where v > b and b < 2");
+            //Program.ExecuteImmediate("select x from y where " + whereCond);
+            Program.ExecuteImmediate("select x from y where v > 4  and b < 2");
 
             string insStmt = "insert into x(a, b, c, d)";
-            Program.ExecuteImmediate(insStmt + "values(@a, @b, @c, @d)");
+            //Program.ExecuteImmediate(insStmt + "values(@a, @b, @c, @d)");
 
             string stmt;
             if (cond > 0)
@@ -34,8 +34,8 @@ namespace RShT1
             {
                 stmt = "select x from y";
             }
-            Program.ExecuteImmediate(stmt + "where" + whereCond);
-            Program.ExecuteImmediate(stmt + "where a > 3");
+            //Program.ExecuteImmediate(stmt + "where" + whereCond);
+            //Program.ExecuteImmediate(stmt + " where a > 3");
         }
     }
 }

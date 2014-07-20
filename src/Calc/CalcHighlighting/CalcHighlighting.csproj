@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="ItemsGroup.target" />
   <Import Project="..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props" Condition="Exists('..\..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -37,45 +38,15 @@
     <Reference Include="JetBrains.ReSharper.Psi, Version=8.1.23.523, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ErrorNonTermNode.cs" />
-    <Compile Include="ExprNonTermNode.cs" />
-    <Compile Include="FactorNonTermNode.cs" />
-    <Compile Include="FactorOpNonTermNode.cs" />
-    <Compile Include="PowExprNonTermNode.cs" />
-    <Compile Include="PowOpNonTermNode.cs" />
-    <Compile Include="TermNonTermNode.cs" />
-    <Compile Include="TermOpNonTermNode.cs" />
-    <Compile Include="Yard_rule_binExpr_1NonTermNode.cs" />
-    <Compile Include="Yard_rule_binExpr_3NonTermNode.cs" />
-    <Compile Include="Yard_rule_binExpr_5NonTermNode.cs" />
-    <Compile Include="Yard_rule_yard_many_1_2NonTermNode.cs" />
-    <Compile Include="Yard_rule_yard_many_1_4NonTermNode.cs" />
-    <Compile Include="Yard_rule_yard_many_1_6NonTermNode.cs" />
-    <Compile Include="Yard_start_ruleNonTermNode.cs" />
-    <Compile Include="DIVTermNode.cs" />
-    <Compile Include="ERRORTermNode.cs" />
-    <Compile Include="LBRACETermNode.cs" />
-    <Compile Include="MINUSTermNode.cs" />
-    <Compile Include="MULTTermNode.cs" />
-    <Compile Include="NUMBERTermNode.cs" />
-    <Compile Include="PLUSTermNode.cs" />
-    <Compile Include="POWTermNode.cs" />
-    <Compile Include="RBRACETermNode.cs" />
-    <Compile Include="RNGLR_EOFTermNode.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CalcHighlighting.xml" />
+	  <Compile Include="@(ExternalCompile)" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />	
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">

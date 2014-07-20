@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 using GraphX.Controls;
 using JetBrains.Application;
 using JetBrains.DataFlow;
@@ -43,48 +41,48 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow
             _lifetime = lifetime;
             
             _toolWindowClass = toolWindowManager.Classes[descriptor];
-            _toolWindowClass.RegisterEmptyContent(
-              lifetime,
-              lt =>
-              {
-                  var graphs = (new GraphLoader()).Load();
-                  var tabControl = new System.Windows.Controls.TabControl();
-                  var zcontrols = new List<ZoomControl>();
-                  foreach (var graph in graphs)
-                  {
-                      var gArea = InitializeGraphArea.Initialize(graph);
-                      var zcontrol = new ZoomControl();
-                      zcontrol.Content = gArea;
-                      zcontrols.Add(zcontrol);
-                  }
-                  tabControl.ItemsSource = zcontrols;
-                  return (new EitherControl(tabControl)).BindToLifetime(lt);
-              });
+            //_toolWindowClass.RegisterEmptyContent(
+            //  lifetime,
+            //  lt =>
+            //  {
+            //      var graphs = (new GraphLoader()).Load();
+            //      var tabControl = new System.Windows.Controls.TabControl();
+            //      var zcontrols = new List<ZoomControl>();
+            //      foreach (var graph in graphs)
+            //      {
+            //          var gArea = InitializeGraphArea.Initialize(graph);
+            //          var zcontrol = new ZoomControl();
+            //          zcontrol.Content = gArea;
+            //          zcontrols.Add(zcontrol);
+            //      }
+            //      tabControl.ItemsSource = zcontrols;
+            //      return (new EitherControl(tabControl)).BindToLifetime(lt);
+            //  });
         }
 
         public void Show()
         {
-            ToolWindowInstance instance = _toolWindowClass.RegisterInstance(
-              _lifetime,
-              "Graph of code", // title of your window; tip: StringUtil.MakeTitle
-              null, // return a System.Drawing.Image to be displayed
-              (lt, twi) =>
-              {
+            //ToolWindowInstance instance = _toolWindowClass.RegisterInstance(
+            //  _lifetime,
+            //  "Graph of code", // title of your window; tip: StringUtil.MakeTitle
+            //  null, // return a System.Drawing.Image to be displayed
+            //  (lt, twi) =>
+            //  {
 
-                  var graphs = (new GraphLoader()).Load();
-                  var tabControl = new System.Windows.Controls.TabControl();
-                  var zcontrols = new List<ZoomControl>();
-                  foreach (var graph in graphs)
-                  {
-                      var gArea = InitializeGraphArea.Initialize(graph);
-                      var zcontrol = new ZoomControl();
-                      zcontrol.Content = gArea;
-                      zcontrols.Add(zcontrol);
-                  }
-                  tabControl.ItemsSource = zcontrols;
-                  return (new EitherControl(tabControl)).BindToLifetime(lt);
-              });
-            instance.EnsureControlCreated().Show();
+            //      var graphs = (new GraphLoader()).Load();
+            //      var tabControl = new System.Windows.Controls.TabControl();
+            //      var zcontrols = new List<ZoomControl>();
+            //      foreach (var graph in graphs)
+            //      {
+            //          var gArea = InitializeGraphArea.Initialize(graph);
+            //          var zcontrol = new ZoomControl();
+            //          zcontrol.Content = gArea;
+            //          zcontrols.Add(zcontrol);
+            //      }
+            //      tabControl.ItemsSource = zcontrols;
+            //      return (new EitherControl(tabControl)).BindToLifetime(lt);
+            //  });
+            //instance.EnsureControlCreated().Show();
         }
     }
 }

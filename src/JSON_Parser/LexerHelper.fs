@@ -7,6 +7,7 @@ open JSON.Parser
 open Yard.Utils.SourceText
 open Yard.Utils.StructClass
 open AbstractAnalysis.Common
+open YC.AbstractAnalysis.CommonInterfaces
 
 open System
 

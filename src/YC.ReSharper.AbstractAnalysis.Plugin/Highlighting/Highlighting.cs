@@ -1,4 +1,5 @@
 ﻿using Highlighting.Core;
+using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Impl;
@@ -9,28 +10,17 @@ using JetBrains.ReSharper.Psi.Tree;
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [ConfigurableSeverityHighlighting("Variable", "MyLang", OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = "Variable")]
-    internal class MyLeafHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
+    internal class Highlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
     {
-        private string attributeId;
+        [NotNull] private readonly string attributeId;
         private readonly ITreeNode myElement;
 
-        public MyLeafHighlighting(ITreeNode element)
+        public Highlighting([NotNull] ITreeNode element)
         {
             myElement = element;
-            string ycTokName = element.UserData.GetData(KeyConstant.YcTokName);
-            if (ColorHelper.TokenToColor == null || string.IsNullOrEmpty(ycTokName))
-            {
-                attributeId = ColorHelper.DefaultColor;
-            }
-
-            else if (ColorHelper.TokenToColor.ContainsKey(ycTokName))
-            {
-                attributeId = ColorHelper.TokenToColor[ycTokName];
-            }
-            else
-            {
-                attributeId = ColorHelper.DefaultColor;
-            }
+            string lang = element.UserData.GetData(KeyConstant.YcLanguage);
+            string tokenName = element.UserData.GetData(KeyConstant.YcTokName);
+            attributeId = LanguageHelper.GetColor(lang, tokenName);
         }
 
         #region ICustomAttributeIdHighlighting Members

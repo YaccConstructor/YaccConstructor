@@ -28,7 +28,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open Yard.Utils.StructClass
-open AbstractAnalysis.Common
+open YC.AbstractAnalysis.CommonInterfaces
 
 let mutable id = 0<id>
 
@@ -55,20 +55,20 @@ rule tokens = parse
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } *)
  | decnumber    { DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some }
  | whitespaces  { None }
- | "."          { getLiteral id brs "." }
- | ","          { getLiteral id brs "," }
- | "="          { getLiteral id brs "=" }
- | ">"          { getLiteral id brs ">"}
- | "<"          { getLiteral id brs "<"}
- | ";"          { getLiteral id brs ";"}
- | "("      { getLiteral id brs "(" }
- | ")"      { getLiteral id brs ")" }
- | "["      { getLiteral id brs "[" }
- | "]"      { getLiteral id brs "]" }
- | "+"      { getLiteral id brs "+" }
- | "-"      { getLiteral id brs "-" }
- | "~"      { getLiteral id brs "~" }
- | "*"      { getLiteral id brs "*" }
+ | "."        //  { getLiteral id brs "." }
+ | ","        //  { getLiteral id brs "," }
+ | "="        //  { getLiteral id brs "=" }
+ | ">"        //  { getLiteral id brs ">"}
+ | "<"        //  { getLiteral id brs "<"}
+ | ";"        //  { getLiteral id brs ";"}
+ | "("     // { getLiteral id brs "(" }
+ | ")"     // { getLiteral id brs ")" }
+ | "["     // { getLiteral id brs "[" }
+ | "]"     // { getLiteral id brs "]" }
+ | "+"     // { getLiteral id brs "+" }
+ | "-"     // { getLiteral id brs "-" }
+ | "~"     // { getLiteral id brs "~" }
+ | "*"     // { getLiteral id brs "*" }*)
  //| "$"      { getLiteral brs "$" } 
  | ident {  let tok = makeIdent false lexeme (brs, brs)
             Some tok }

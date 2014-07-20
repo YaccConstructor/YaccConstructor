@@ -82,11 +82,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Name>Highlighting.Core</Name>
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

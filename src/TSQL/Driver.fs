@@ -24,7 +24,10 @@ open LexerHelper
 open System
 open System.IO
 open Yard.Generators.RNGLR.AST
-open AbstractAnalysis.Common
+open YC.AbstractAnalysis.CommonInterfaces
+open YC.ReSharper.AbstractAnalysis.Plugin.Core
+open Mono.Addins
+
 
 let tokenize lexerInputGraph =
     let eof = Yard.Examples.MSParser.RNGLR_EOF("",[||])
@@ -50,13 +53,25 @@ let printAstToDot ast name = defaultAstToDot ast name
 
 
 let xmlPath = xmlPath
+let tokenToTreeNode = tokenToTreeNode
 let translate ast errors = translate args ast errors
 
-type TSQLPars = 
-    interface IInjectedLanguageProcessor<Yard.Examples.MSParser.Token,JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression> with
+type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
+
+
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+do()
+
+[<Extension>]
+type TSQLInjectedLangugeModule () =
+    let processor = new Processor<Token,br>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL")
+    interface IInjectedLanguageModule with
         member this.Name = "TSQL"
-        member this.Parse (inG) = parse (inG)
-        member this.NumToString (int) = Yard.Examples.MSParser.numToString(int)
-        member this.TokenData(token) = Yard.Examples.MSParser.tokenData(token)
-        member this.TokenToNumber(token) = Yard.Examples.MSParser.tokenToNumber(token)
-        member this.Tokenize(inG) = tokenize inG
+        member this.Process graphs = processor.Process graphs
+        member this.LexingFinished = processor.LexingFinished
+        member this.ParsingFinished = processor.ParsingFinished
+        member this.XmlPath = xmlPath
+        member this.GetNextTree i = processor.GetNextTree i
+        member this.GetForestWithToken rng = processor.GetForestWithToken rng

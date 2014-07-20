@@ -1,80 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.ReSharper.Daemon.CSharp.Errors;
+using JetBrains.Util.Concurrency;
 
 namespace Highlighting.Core
 {
     public static class YcHelper
     {
         /// <summary>
-        /// For each language name returns ycTokenToString dictiionary
+        /// For each language name returns ycTokenToString dictionary
         /// </summary>
-        private static Dictionary<string, Dictionary<string, string>> allYcToString = new Dictionary<string, Dictionary<string, string>>();
-        private static Dictionary<string, List<string>> allUnunique = new Dictionary<string, List<string>>();
-        
+        private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
+        private static readonly LockObject lockObject = new LockObject();
+
         public static void AddYcItem(string key, string value, string lang)
         {
             lang = lang.ToLower();
+            key = key.ToLower();
             if (String.IsNullOrEmpty(key) ||
                 String.IsNullOrEmpty(value))
                 return;
 
-            if (!allYcToString.ContainsKey(lang))
+            lock (lockObject)
             {
-                allYcToString.Add(lang, new Dictionary<string, string>());
-                allUnunique.Add(lang, new List<string>());
-            }
-            var ycTokenToString = allYcToString[lang];
-            var ununique = allUnunique[lang];
-
-            if (ycTokenToString.ContainsKey(key))
-            {
-                if (ycTokenToString[key] != value)
+                if (!allYcToString.ContainsKey(lang))
                 {
-                    ycTokenToString.Remove(key);
-                    ununique.Add(key);
+                    allYcToString.Add(lang, new Dictionary<string, StringValue>());
                 }
+
+                var dict = allYcToString[lang];
+
+                if (dict.ContainsKey(key))
+                {
+                    var strValue = dict[key];
+                    if (strValue.numOfValues == Value.OneValue)
+                    {
+                        if (strValue.stringValue != value)
+                        {
+                            strValue.numOfValues = Value.ManyValues;
+                            strValue.stringValue = null;
+                        }
+                    }
+                }
+                else
+                {
+                    dict.Add(key, new StringValue()
+                    {
+                        numOfValues = Value.OneValue,
+                        stringValue = value,
+                    });
+                }
+
             }
-            else
+        }
+
+        public static string GetYcName(string lang, string str)
+        {
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
             {
-                ycTokenToString.Add(key, value);
+                return null;
             }
+
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(str))
+                return null;
+
+            return
+                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Value.stringValue == str)
+                    .Key;
+
         }
 
-        /// <summary>
-        /// Returns ycToken from string value.
-        /// For example if str is "(" then method returns LBRACE
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="lang">Name of language (Calc, JSON, TSQL)</param>
-        /// <returns></returns>
-        public static string GetYcTokenName(string str, string lang)
+        public static string GetStringName(string lang, string str)
         {
-            if (!allYcToString.ContainsKey(lang)) return null;
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
+            {
+                return null;
+            }
             
-            var ycTokenToString = allYcToString[lang];
-            if (!ycTokenToString.ContainsValue(str))
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(str))
                 return null;
 
-            return ycTokenToString.First(pair => pair.Value == str).Key;
+            return
+                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Key == str)
+                    .Value.stringValue;
         }
+    }
 
-        /// <summary>
-        /// Returns string value from ycToken.
-        /// For example if ycToken is LBRACE then method returns "("
-        /// </summary>
-        /// <param name="ycToken"></param>
-        /// <returns></returns>
-        public static string GetStringValue(string ycToken, string lang)
-        {
-            if (!allYcToString.ContainsKey(lang)) return null;
+    public enum Value
+    {
+        NoValue,
+        OneValue,
+        ManyValues
+    }
 
-            var ycTokenToString = allYcToString[lang];
-            if (!ycTokenToString.ContainsKey(ycToken))
-                return null;
-
-            return ycTokenToString[ycToken];
-        }
+    public class StringValue
+    {
+        public Value numOfValues { get; set; }
+        public string stringValue { get; set; }
     }
 }

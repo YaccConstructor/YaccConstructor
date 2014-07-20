@@ -31,7 +31,7 @@ using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
 using JetBrains.ReSharper.Psi.Xml.XmlDocComments;
 using JetBrains.TextControl;
 using JetBrains.Util.dataStructures.TypedIntrinsics;
-using YC.ReSharper.AbstractAnalysis.Plugin.Core;
+//using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
@@ -45,8 +45,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             myDaemonProcess = daemonProcess;
             myThreshold = threshold;
-            GraphLoader.InvokeLoadGrapFromCoreEvent += GetGraphs;
+            //GraphLoader.InvokeLoadGrapFromCoreEvent += GetGraphs;
         }
+
+        private YC.AbstractAnalysis.Helper.ReSharperHelper _processor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
 
         public void Execute(Action<DaemonStageResult> commiter)
         {
@@ -57,10 +59,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             if (file == null)
                 return;
 
-            // Running visitor against the PSI
-            var processor = new YC.ReSharper.AbstractAnalysis.Plugin.Core.Processor(file);
-            var parserRes = processor.Process();
-            _processor = processor;
+            // Running visitor against the PSI            
+            var parserRes = _processor.Process(file);            
             // Checking if the daemon is interrupted by user activity
             if (myDaemonProcess.InterruptFlag)
             throw new ProcessCancelledException();
@@ -76,7 +76,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             try
             {
                 //return graph to show
-                GraphLoader.OnEvent(this, new LoadGraphEventArgs(_processor));
+                //GraphLoader.OnEvent(this, new LoadGraphEventArgs(_processor));
             }
             catch (NullReferenceException e) { } // if GraphLoader is not created then nothing else to do
         }
@@ -94,6 +94,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             get { return myDaemonProcess; }
         }
 
-        private Processor _processor ;
+        
     }
 }

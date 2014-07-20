@@ -17,7 +17,7 @@ type Collections.Generic.IDictionary<'k,'v> with
     member d.Add'(k,v) =
         if not (d.ContainsKey k) then d.Add(k,v);true else false
 
-exception IdentToken
+exception IdentToken        
 
 let getKwTokenOrIdent = 
     let nameToUnionCtor (uci:UnionCaseInfo) = (uci.Name, FSharpValue.PreComputeUnionConstructor(uci))
@@ -30,15 +30,11 @@ let getKwTokenOrIdent =
             |> Option.map (fun ctor ->  ctor [| defaultSourceText |] :?>Token) 
         match kw with 
         | None ->
-            if kws.Contains (name.ToLowerInvariant()) then
-                genLiteral name defaultSourceText
-            else
-                Some <| IDENT defaultSourceText
+            let name = Yard.Generators.RNGLR.Helper._getLiteralName name
+            match genLiteral name defaultSourceText with
+            Some x as c -> c
+            | None -> Some <| IDENT defaultSourceText
         | Some x -> kw
-
-//let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
-
-//function
 
 let commendepth = ref 0
 //let startPos = ref Position.Empty

@@ -116,6 +116,10 @@
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
@@ -134,15 +138,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRCommon.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.7\lib\net40\RNGLRParser.dll</HintPath>
+      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -163,20 +167,23 @@
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
+      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
+      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="CalcHighlighting\CalcHighlighting.csproj">
       <Name>CalcHighlighting</Name>
       <Project>{0af126e6-f923-4b88-bc42-97cd3696e7e7}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{f722fda7-cb4e-49ee-a301-19708c99ae16}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+copy * $(TargetDir)..\Addins
+del JetBrains.*</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

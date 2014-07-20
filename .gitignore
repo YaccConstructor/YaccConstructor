@@ -151,3 +151,13 @@ Tests/AbstractRNGLR/DOT/errors9.dot.pdf
 src/TSQL/Highlight_*.cs
 src/TSQL/*TermNode.cs
 src/TSQL/*LitNode.cs
+src/TSQL/TSQLHighlighting/*.cs
+src/TSQL/out
+src/TSQL/TSQLHighlighting/TSQLHighlighting.xml
+src/TSQL/TSQLHighlighting/ItemsGroup.target
+*log.txt
+**/out
+**/Calc.yrd.fs
+src/JSON_Parser/JSONHighlighting/JSONHighlighting.xml
+src/JSON_Parser/JSONHighlighting/ItemsGroup.target
+src/Calc/CalcHighlighting/ItemsGroup.target

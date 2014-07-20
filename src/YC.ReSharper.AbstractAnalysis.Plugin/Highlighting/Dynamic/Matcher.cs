@@ -15,10 +15,10 @@ using JetBrains.ReSharper.Psi.Tree;
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
     [ContainsContextConsumer]
-    public class CalcMatchingBraceContextHighlighter : MatchingBraceContextHighlighterBase
+    public class MatchingBraceContextHighlighter : MatchingBraceContextHighlighterBase
     {
         private IContextActionDataProvider myProvider;
-        public CalcMatchingBraceContextHighlighter(IContextActionDataProvider provider)
+        public MatchingBraceContextHighlighter(IContextActionDataProvider provider)
         {
             myProvider = provider;
         }
@@ -30,7 +30,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             InvisibleBraceHintManager invisibleBraceHintManager, 
             MatchingBraceSuggester matchingBraceSuggester)
         {
-            return new CalcMatchingBraceContextHighlighter(dataProvider).ProcessDataContextImpl(lifetime, dataProvider, invisibleBraceHintManager, matchingBraceSuggester);
+            return new MatchingBraceContextHighlighter(dataProvider).ProcessDataContextImpl(lifetime, dataProvider, invisibleBraceHintManager, matchingBraceSuggester);
         }
 
         // We have left brace. We'll find all right braces.
@@ -49,11 +49,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             //if (!MatcherHelper.AllMatchingValues.Contains(lBrotherText)) return;
 
             var lang = GetLanguageFromRange(lBraceRange);
-            var rBrotherText = MatcherHelper.GetRightMatch(lBrotherText, lang);
+            
+            var rBrotherText = LanguageHelper.GetBrother(lang, lBrotherText, Brother.Right);
             if (string.IsNullOrEmpty(rBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lBraceRange, lang);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, lBraceRange);
 
             var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -91,17 +92,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
 
-            var rBrotherText = rBraceRange.GetText();
+            string rBrotherText = rBraceRange.GetText();
             //if (!MatcherHelper.AllMatchingValues.Contains(rBrotherText)) return;
 
-            var lang = GetLanguageFromRange(rBraceRange);
-            var lBrotherText = MatcherHelper.GetLeftMatch(rBrotherText, lang);
+            string lang = GetLanguageFromRange(rBraceRange);
+            string lBrotherText = LanguageHelper.GetBrother(lang, rBrotherText, Brother.Left);
 
             //possible it is unnecessary
             if (string.IsNullOrEmpty(lBrotherText))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(rBraceRange, lang);
+            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, rBraceRange);
 
             var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -129,9 +130,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         private string GetLanguageFromRange(DocumentRange range)
         {
-            foreach (var treeNode in MatcherHelper.NodeCover)
+            var nodes = new List<ITreeNode>(MatcherHelper.NodeCover);
+            
+            foreach (var treeNode in nodes)
             {
-                var nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
+                List<DocumentRange> nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
                 if (nodeRange != null && nodeRange.Contains(range))
                     return treeNode.UserData.GetData(KeyConstant.YcLanguage);
             }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Linq;
 using GraphX.Models;
 using JetBrains.DocumentModel;

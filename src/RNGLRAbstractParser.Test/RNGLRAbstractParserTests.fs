@@ -66,13 +66,13 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``Load graph test from DOT`` () =
-        let g = loadGraphFromDOT(path baseInputGraphsPath "IFExists_lex.dot")
+        let g = loadGraphFromDOT(path "IFExists_lex.dot")
         Assert.AreEqual(g.Edges |> Seq.length, 29)
         Assert.AreEqual(g.Vertices |> Seq.length, 25)
 
     [<Test>]
     member this.``Load graph test from DOT to QuickGraph`` () =
-        let g = loadGraphFromDOT(path baseInputGraphsPath "IFExists_lex.dot")
+        let g = loadGraphFromDOT(path "IFExists_lex.dot")
         let qGraph = new AdjacencyGraph<int, TaggedEdge<_,string>>()
         g.Edges 
         |> Seq.iter(
@@ -641,7 +641,33 @@ type ``RNGLR abstract parser tests`` () =
             RNGLR.SimpleCalcWithNTerms_4.defaultAstToDot tree "ast.dot"
             Assert.Pass()
 
-
+    member this.tsqlPerpT() =
+        let loadLexerInputGraph gFile =
+            let qGraph = loadDotToQG baseInputGraphsPath gFile
+            let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
+            lexerInputG.StartVertex <- 0
+            for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, null)))
+            lexerInputG
+        for i in [10..10] do
+            let bp = System.IO.Path.Combine(baseInputGraphsPath,@"..\..\AbstractPerformance\TSQL\" + string i)
+            let times = new ResizeArray<_>(250)
+            for f in System.IO.Directory.GetFiles(bp,"*.dot") 
+                     |> Array.filter(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int <= 55)
+                     |> Array.sortBy(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int)
+                      do
+                let lexerInputGraph = loadLexerInputGraph(f)
+                let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
+                let qGraph = MSLexer._fslex_tables.Tokenize(MSLexer.fslex_actions_tokens, lexerInputGraph, eof)
+                let start = System.DateTime.Now
+                let r = (new Parser<_>()).Parse Yard.Examples.MSParser.buildAstAbstract qGraph
+                let t = (System.DateTime.Now-start) 
+                match r with 
+                |  Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+                    let f = System.IO.Path.GetFileName f
+                    times.Add (f + " " + string t.TotalSeconds)
+                    printfn "%i %s %A" i f t.TotalSeconds  
+                | _ -> ()
+            System.IO.File.WriteAllLines(System.IO.Path.Combine(bp,sprintf "arnglr_%i" i),times)
 [<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
@@ -649,7 +675,7 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-    
+    t.tsqlPerpT()
     t.``Errors 1``()
     t.``Errors 2``()
     //t.``Errors 3``()

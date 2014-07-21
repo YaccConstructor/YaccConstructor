@@ -34,7 +34,6 @@ open System.IO
 let justParse (path:string) =
     let lastTokenNum = ref 0L
     let traceStep = 50000L
-    let c = ref 0
 
     use reader = new System.IO.StreamReader(path)
 
@@ -93,12 +92,8 @@ let justParse (path:string) =
         clearAST = false
         filterEpsilons = true
     }
-    
-    let res = 
-        //buildAstAbstract 
-        //  allTokens
-       //     (allTokens |> Seq.map (fun t -> let r = !c,[|t,!c+1|] in incr c; r))
-       buildAst allTokens
+
+    let res = buildAst allTokens
     printfn "Time for parse file %s = %A" path (System.DateTime.Now - start)
     res
 
@@ -161,7 +156,7 @@ let ParseAllDirectory (directoryName:string) =
     |> Array.iter Parse
 
 do 
-    let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\test.sql" 
+    let inPath = ref @"test.sql" 
     //let inPath = ref @"..\..\..\..\..\Tests\Materials\ms-sql\sysprocs\sp_addserver.sql"
     let parseDir = ref false
     let commandLineSpecs =

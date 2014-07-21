@@ -41,22 +41,28 @@ let getResultFileName path pref =
                                   //path.Substring(path.LastIndexOf("\\") + 1)
 
 let PrintGraph (srcFilePath:string) =
-    let outFile = (System.IO.Path.GetFileNameWithoutExtension(srcFilePath)) + @"Alvor.txt";
+    if not <| System.IO.Directory.Exists(!resultDirectoryPath)
+    then System.IO.Directory.CreateDirectory(!resultDirectoryPath) |> ignore
+    let outFile = System.IO.Path.Combine(!resultDirectoryPath,(System.IO.Path.GetFileNameWithoutExtension(srcFilePath)))
+    let res = ref ""
     let print srcFilePath =
         let InputGraph = loadInputGraph srcFilePath
         let Vertex = InputGraph.Vertices |> Array.ofSeq
         let countVert = Vertex.Length
-        for k in 1..countVert - 3 do //for break literals
-        //for k in 0..countVert - 1 do  //for literals without break
+        //for k in 1..countVert - 3 do //for break literals
+        for k in 0..countVert - 1 do  //for literals without break
             let outEdges = InputGraph.OutEdges(Vertex.[k]) |> Array.ofSeq
             let count = outEdges.Length
-            if count = 1 then File.AppendAllText(outFile, "\"" + outEdges.[0].Tag + "\" ")
+            if count = 1 then res := !res + "\"" + outEdges.[0].Tag + "\" "
             if count > 1 then
-                File.AppendAllText(outFile, "{ ")
+                res := !res  + "{ "
                 for i in 0..count-2 do
-                    File.AppendAllText(outFile, "\"" + outEdges.[i].Tag + "\"" + ", ")
-                File.AppendAllText(outFile, "\"" + outEdges.[count-1].Tag + "\"" + " } ")
+                    res := !res + "\"" + outEdges.[i].Tag + "\"" + ", "
+                res := !res + "\"" + outEdges.[count-1].Tag + "\"" + " } "
     print srcFilePath 
+    File.WriteAllText(outFile,!res)
+    
+   
                     
                    
 let PrintGraphAllDirectory (directoryName:string) =

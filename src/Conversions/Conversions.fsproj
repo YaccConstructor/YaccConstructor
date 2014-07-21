@@ -40,7 +40,7 @@
     <Compile Include="ReplaceLiterals.fs" />
     <Compile Include="LeaveLast.fs" />
     <Compile Include="BuildAST.fs" />
-    <Compile Include="ExpandEbnf.fs" />
+    <Compile Include="ExpandEBNF.fs" />
     <Compile Include="MergeAlter.fs" />
     <Compile Include="BuildAstSimple.fs" />
     <Compile Include="AddDefaultAC.fs" />
@@ -76,7 +76,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
              Other similar extension points exist, see Microsoft.Common.targets.
         <Target Name="BeforeBuild">
         </Target>

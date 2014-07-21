@@ -193,11 +193,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _ind
         
     let rules = extRules //fillArray extRules (fun () -> uint64 0)
 
-    let indexesBySymbols = _indexesBySymbols
-            try 
-                provider.Compile(command,_outCode = str)
-            with e ->
-                failwith e.Message
+    let indexesBySymbols = _indexesBySymbols            
 
     let rowSizeArray = [| rowSize |]
     let nTermsCountArray = [| nTermsCount |]

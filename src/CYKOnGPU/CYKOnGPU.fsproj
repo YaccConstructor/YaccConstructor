@@ -16,7 +16,6 @@
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
-    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
   <ItemGroup>
     <Reference Include="Brahma">
       <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>

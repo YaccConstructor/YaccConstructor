@@ -28,21 +28,28 @@ let toClassName (str : string) =
 let litToClassName (lit : string) = 
     toClassName <| lit.ToLower()
 
-let getLeafSemantic leaf isTok = 
+let getLeafSemanticForToken token = 
     let res = new System.Text.StringBuilder()
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
 
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
     printBr "let value = fst <| _rnglr_var_0"
 
-    if isTok
-    then printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName leaf <| leaf
-    else printBr "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode"  <| litToClassName leaf <| leaf
+    printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName token <| token.ToLower()
+    res.ToString()
+
+let getLeafSemanticForLiteral litName litText = 
+    let res = new System.Text.StringBuilder()
+
+    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    printBr "let pos = snd <| _rnglr_var_0"
+    printBr "let ranges = calculatePos pos"
+    printBr "let stringValue = \"%s\"" litText
+
+    printBr "new %sLitNode(\"%s\", stringValue, ranges) :> ITreeNode"  <| litToClassName litName <| litName.ToLower()
 
     res.ToString()
                                
@@ -72,7 +79,8 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
         |> indexator.getLiteralName
         
 
-    let termsAndLitsList = ref []
+    let terminals = ref []
+    let literals = ref []
 
     let createNewBinding (numOpt : int ref option) = 
         let newBinding = 
@@ -127,8 +135,8 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
             result := !result @ [!newElem]
 
         | t.PToken tok -> 
-            if not <| List.exists (fun symbol -> fst symbol = tok.text) !termsAndLitsList
-            then termsAndLitsList := (tok.text, true) :: !termsAndLitsList
+            if not <| List.exists (fun symbol -> symbol = tok.text) !terminals
+            then terminals := tok.text :: !terminals
             
             let newBinding = createNewBinding <| Some count
             newElem := getNewElem newBinding <| createHighlightRefRule tok.text
@@ -136,8 +144,8 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
         
         | t.PLiteral lit -> 
             let litName = literalToName lit.text
-            if not <| List.exists (fun symbol -> fst symbol = litName) !termsAndLitsList
-            then termsAndLitsList := (litName, false) :: !termsAndLitsList
+            if not <| List.exists (fun symbol -> fst symbol = litName) !literals
+            then literals := (litName, lit.text) :: !literals
         
             let newBinding = createNewBinding <| Some count
             newElem := getNewElem <| newBinding <| createHighlightRefRule litName
@@ -165,15 +173,30 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
 
     let addHighlightRules() = 
         let mutable res = []
-        for tok, isTok in !termsAndLitsList do 
-            let actionCode, newElem =
-                if isTok 
-                then new Source.t(getLeafSemantic tok isTok), getNewElem None <| t.PToken (new Source.t(tok))
-                else new Source.t(getLeafSemantic tok isTok), getNewElem None <| t.PLiteral (new Source.t(tok))
+
+
+        for token in !terminals do 
+            let actionCode = new Source.t(getLeafSemanticForToken token)
+            let newElem = getNewElem None <| t.PToken (new Source.t(token))
 
             let newRule : Rule.t<Source.t, Source.t> = 
                 {
-                    name = new Source.t("highlight_" + tok)
+                    name = new Source.t("highlight_" + token)
+                    args = []
+                    body = PSeq([newElem], Some <| actionCode, None)
+                    isStart = false
+                    isPublic = false
+                    metaArgs = []
+                }
+            res <- newRule :: res
+        
+        for litName, litText in !literals do
+            let actionCode = new Source.t (getLeafSemanticForLiteral litName litText)
+            let newElem =  getNewElem None <| t.PLiteral (new Source.t (litName))
+
+            let newRule : Rule.t<Source.t, Source.t> = 
+                {
+                    name = new Source.t("highlight_" + litName)
                     args = []
                     body = PSeq([newElem], Some <| actionCode, None)
                     isStart = false

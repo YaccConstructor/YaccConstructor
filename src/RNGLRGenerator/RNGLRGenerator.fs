@@ -137,9 +137,9 @@ type RNGLR() =
                     out.WriteLine content
                     out.Close()
                 
-                let generateFile name = 
+                let generateFile name isTerminal = 
                     use out = new System.IO.StreamWriter (folder + name + ".cs")
-                    let tables = printTreeNode !namespaceName name <| namespaceName.Value.Replace ("Highlighting", "")
+                    let tables = printTreeNode !namespaceName name <| isTerminal <| namespaceName.Value.Replace ("Highlighting", "")
                     out.WriteLine tables
                     out.Close()
 
@@ -152,21 +152,21 @@ type RNGLR() =
                     if not <| prefix.Contains ("Highlight_")
                     then 
                         nameOfClasses <- prefix + "NonTermNode.cs" :: nameOfClasses
-                        generateFile <| prefix + "NonTermNode"
+                        generateFile <| prefix + "NonTermNode" <| false
 
                 for i = indexator.termsStart to indexator.termsEnd do
                     let prefix = toClassName <| grammar.indexator.indexToTerm i
                     
                     nameOfClasses <- prefix + "TermNode.cs" :: nameOfClasses
                     tokensAndLits <- prefix :: tokensAndLits
-                    generateFile <| prefix + "TermNode"
+                    generateFile <| prefix + "TermNode" <| true
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
                     let prefix = toClassName <| grammar.indexator.getLiteralName i
                     
                     nameOfClasses <- prefix + "LitNode.cs" :: nameOfClasses
                     tokensAndLits <- prefix :: tokensAndLits
-                    generateFile <| prefix + "LitNode"
+                    generateFile <| prefix + "LitNode" <| true
                     
 
                 generateXML !namespaceName <| List.rev tokensAndLits

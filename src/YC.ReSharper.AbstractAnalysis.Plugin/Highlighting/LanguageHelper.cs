@@ -74,23 +74,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (string.IsNullOrEmpty(ycName))
                 return null;
 
-            string pair = null;
             if (tokenInfos.ContainsKey(ycName))
             {
-                string ycPair = null;
                 if (brother == Brother.Left)
                 {
-                    ycPair =  tokenInfos[ycName].LeftPair;
+                    return tokenInfos[ycName].LeftPair;
 
                 }
                 else if (brother == Brother.Right)
                 {
-                    ycPair = tokenInfos[ycName].RightPair;
+                    return tokenInfos[ycName].RightPair;
                 }
-                pair = GetStringFromYcName(ycPair);
             }
-            
-            return pair;
+            return null;
         }
 
         /// <summary>
@@ -104,10 +100,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             return YcHelper.GetYcName(LanguageName, str);
         }
 
-        private string GetStringFromYcName(string str)
-        {
-            return YcHelper.GetStringName(LanguageName, str);
-        }
+        //private string GetStringFromYcName(string str)
+        //{
+        //    return YcHelper.GetStringName(LanguageName, str);
+        //}
 
         //private string GetYcValue(string ycName)
         //{

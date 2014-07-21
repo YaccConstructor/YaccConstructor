@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
@@ -13,12 +12,12 @@ namespace Highlighting.Core
     {
         private static NodeUserDataHolder nodeUserDataHolder = new NodeUserDataHolder();
 
-        public static NodeUserData GetNodeUserData([NotNull] ITreeNode treeNode)
+        public static NodeUserData GetNodeUserData(ITreeNode treeNode)
         {
             return nodeUserDataHolder.GetNodeUserData(treeNode);
         }
 
-        public static NodeUserData GetNodePersistentUserData([NotNull] ITreeNode treeNode)
+        public static NodeUserData GetNodePersistentUserData(ITreeNode treeNode)
         {
             return nodeUserDataHolder.GetNodePersistentUserData(treeNode);
         }

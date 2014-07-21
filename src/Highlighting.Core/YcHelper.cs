@@ -57,9 +57,7 @@ namespace Highlighting.Core
         {
             //string str = Yard.Generators.RNGLR.Helper._getLiteralName(s);
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
-            {
                 return null;
-            }
 
             var dict = allYcToString[lang];
 
@@ -75,9 +73,7 @@ namespace Highlighting.Core
         public static string GetStringName(string lang, string str)
         {
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
-            {
                 return null;
-            }
             
             var dict = allYcToString[lang];
 

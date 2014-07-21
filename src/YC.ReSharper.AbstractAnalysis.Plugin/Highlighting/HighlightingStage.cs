@@ -26,7 +26,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             return ErrorStripeRequest.NONE;
         }
 
-        public bool IsSupported(IPsiSourceFile sourceFile)
+        private bool IsSupported(IPsiSourceFile sourceFile)
         {
             if (sourceFile == null || !sourceFile.IsValid())
             {

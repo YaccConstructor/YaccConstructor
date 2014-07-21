@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Highlighting.Core;
-using JetBrains.ReSharper.Feature.Services.Intentions;
-using JetBrains.ReSharper.Feature.Services.Tips;
-using JetBrains.ReSharper.Psi.Impl;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -48,23 +44,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
     class Language
     {
-        private enum MatchedParsed
-        {
-            TRUE, 
-            FALSE
-        }
-        
         public string LanguageName { get; private set; }
 
         private Dictionary<string, TokenInfo> tokenInfos = new Dictionary<string, TokenInfo>();
         
-        private MatchedParsed state = MatchedParsed.FALSE;
-
         public Language(string lang, Dictionary<string, TokenInfo> tokenInfos)
         {
             LanguageName = lang;
             this.tokenInfos = tokenInfos;
-            Update();
+            //Update();
         }
 
         public string GetBrother(string str, Brother brother)
@@ -79,9 +67,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 if (brother == Brother.Left)
                 {
                     return tokenInfos[ycName].LeftPair;
-
                 }
-                else if (brother == Brother.Right)
+                if (brother == Brother.Right)
                 {
                     return tokenInfos[ycName].RightPair;
                 }
@@ -131,9 +118,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         private void Update()
         {
-            //Dictionary<string, string> dict = YcHelper.GetYcTokenToString(LanguageName);
-
-            //YcHelper.Clear(LanguageName);
         }
     }
 

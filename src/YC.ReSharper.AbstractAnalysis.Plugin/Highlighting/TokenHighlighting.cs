@@ -10,12 +10,12 @@ using JetBrains.ReSharper.Psi.Tree;
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     [ConfigurableSeverityHighlighting("Variable", "MyLang", OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = "Variable")]
-    internal class Highlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
+    internal class TokenHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
     {
-        [NotNull] private readonly string attributeId;
+        private readonly string attributeId;
         private readonly ITreeNode myElement;
 
-        public Highlighting([NotNull] ITreeNode element)
+        public TokenHighlighting(ITreeNode element)
         {
             myElement = element;
             string lang = element.UserData.GetData(KeyConstant.YcLanguage);

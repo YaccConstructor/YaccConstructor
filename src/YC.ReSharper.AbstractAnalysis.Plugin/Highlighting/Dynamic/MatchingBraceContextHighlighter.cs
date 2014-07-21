@@ -17,6 +17,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
     [ContainsContextConsumer]
     public class MatchingBraceContextHighlighter : MatchingBraceContextHighlighterBase
     {
+        public static List<ITreeNode> ExistingTrees = new List<ITreeNode>();
+
         private IContextActionDataProvider myProvider;
         public MatchingBraceContextHighlighter(IContextActionDataProvider provider)
         {
@@ -40,23 +42,22 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (MatcherHelper.YcProcessor == null || MatcherHelper.NodeCover.Count == 0)
+            if (HighlightingProcess.YCProcessor == null || ExistingTrees.Count == 0)
                 return;
 
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
 
             string lBrotherText = lBraceRange.GetText();
-            //if (!MatcherHelper.AllMatchingValues.Contains(lBrotherText)) return;
 
             string lang = GetLanguageFromRange(lBraceRange);
             if (string.IsNullOrEmpty(lang))
                 return;
 
             string rBrother = LanguageHelper.GetBrother(lang, lBrotherText, Brother.Right);
-            if (string.IsNullOrEmpty(rBrother))
+            if (String.IsNullOrEmpty(rBrother))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, lBraceRange);
+            List<ITreeNode> forest = HighlightingProcess.YCProcessor.GetForestWithToken(lang, lBraceRange);
 
             var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -89,13 +90,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (MatcherHelper.YcProcessor == null || MatcherHelper.NodeCover.Count == 0)
+            if (HighlightingProcess.YCProcessor == null || ExistingTrees.Count == 0)
                 return;
 
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
 
             string rBrotherText = rBraceRange.GetText();
-            //if (!MatcherHelper.AllMatchingValues.Contains(rBrotherText)) return;
 
             string lang = GetLanguageFromRange(rBraceRange);
             if (string.IsNullOrEmpty(lang))
@@ -105,7 +105,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (string.IsNullOrEmpty(lbrother))
                 return;
 
-            List<ITreeNode> forest = MatcherHelper.YcProcessor.GetForestWithToken(lang, rBraceRange);
+            List<ITreeNode> forest = HighlightingProcess.YCProcessor.GetForestWithToken(lang, rBraceRange);
 
             var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -133,18 +133,18 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         private string GetLanguageFromRange(DocumentRange needRange)
         {
-            var nodes = new List<ITreeNode>(MatcherHelper.NodeCover);
-
-            foreach (var treeNode in nodes)
+            var currentList = new List<ITreeNode>(ExistingTrees);
+            foreach (ITreeNode tree in currentList)
             {
-                List<DocumentRange> nodeRange = treeNode.UserData.GetData(KeyConstant.Ranges);
+                List<DocumentRange> treeRanges = tree.UserData.GetData(KeyConstant.Ranges);
 
-                if (nodeRange == null) continue;
+                if (treeRanges == null) 
+                    continue;
                 
-                foreach (var rng in nodeRange)
+                foreach (var range in treeRanges)
                 {
-                    if (needRange.ContainedIn(rng))
-                        return treeNode.UserData.GetData(KeyConstant.YcLanguage);
+                    if (needRange.ContainedIn(range))
+                        return tree.UserData.GetData(KeyConstant.YcLanguage);
                 }
             }
             return null;

@@ -6,11 +6,10 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-    class RecursiveElementProcessor
+    class RecursiveElementProcessor : IRecursiveElementProcessor
     {
         private readonly IHighlightingConsumer myConsumer;
         private readonly IFile file;
@@ -45,7 +44,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         #endregion
 
-        private readonly List<TextRange> addedRanges = new List<TextRange>();
         public void VisitLeaf(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
             ICollection<DocumentRange> colorConstantRange = treeNode.UserData.GetData(KeyConstant.Ranges);
@@ -55,10 +53,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
             foreach (DocumentRange range in colorConstantRange)
             {
-                if (range.Document == null || addedRanges.Contains(range.TextRange))
-                    continue;
-
-                AddHighLighting(range, consumer, new Highlighting(treeNode));
+                AddHighLighting(range, consumer, new TokenHighlighting(treeNode));
             }
         }
 
@@ -68,7 +63,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (file != null)
             {
                 consumer.AddHighlighting(info.Highlighting, file);
-                addedRanges.Add(range.TextRange);
             }
         }
     }

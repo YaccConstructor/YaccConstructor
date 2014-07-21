@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Highlighting.Core;
-using JetBrains.Application.Progress;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading.Tasks;
-using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
@@ -12,7 +9,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -20,7 +17,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
     {
         private readonly DaemonProcessKind myProcessKind;
         private Action<DaemonStageResult> myCommiter;
-        private YC.AbstractAnalysis.Helper.ReSharperHelper ycProcessor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
+        private IContextBoundSettingsStore mySettingsStore;
+
+        public static YC.AbstractAnalysis.Helper.ReSharperHelper YCProcessor;
 
         public IDaemonProcess DaemonProcess { get; private set; }
 
@@ -33,10 +32,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
-        private IContextBoundSettingsStore mySettingsStore;
-
         public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
         {
+            if (YCProcessor == null)
+            {
+                CreateYCProcessor();
+            }
+
             DaemonProcess = process;
             mySettingsStore = settingsStore;
             myProcessKind = processKind;
@@ -52,25 +54,26 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return;
 
             myCommiter = commiter;
-            MatcherHelper.ClearNodeCover();
+            MatchingBraceContextHighlighter.ExistingTrees.Clear();
 
-            UpdateYCProcessor(file);
+            CreateYCProcessor();
+            YCProcessor.Process(file);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
             //myCommiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
-        private void UpdateYCProcessor(ICSharpFile file)
-        {            
-            foreach (var e in ycProcessor.LexingFinished)
+        private void CreateYCProcessor()
+        {
+            YCProcessor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
+            foreach (var e in YCProcessor.LexingFinished)
             {
                 e.AddHandler(OnLexingFinished);
             }
-            foreach (var e in ycProcessor.ParsingFinished)
+            foreach (var e in YCProcessor.ParsingFinished)
             {
                 e.AddHandler(OnParsingFinished);
-            }            
-            ycProcessor.Process(file);
+            }
         }
 
         /// <summary>
@@ -86,20 +89,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
             var processor = new RecursiveElementProcessor(consumer, File);
 
-            string xmlPath = ycProcessor.XmlPath(args.Lang);
-            //string lang = ycProcessor.LangToString(args.Lang);
+            string xmlPath = YCProcessor.XmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
 
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
             {
-                fibers.EnqueueJob(() =>
-                    {
-                        foreach (ITreeNode treeNode in args.Tokens)
-                        {
-                            processor.ProcessAfterInterior(treeNode);
-                        }
-                    }
-                );
+                fibers.EnqueueJob(
+                    () => args.Tokens.ForEach(node => processor.ProcessAfterInterior(node)));
             }
 
             myCommiter(new DaemonStageResult(consumer.Highlightings));
@@ -113,11 +109,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
         private void OnParsingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.ParsingFinishedArgs args)
         {
-            if (ycProcessor == null)
+            if (YCProcessor == null)
                 return;
 
             var lang = args.Lang;
-            MatcherHelper.YcProcessor = ycProcessor;
 
             if (!parsedSppf.ContainsKey(lang))
             {
@@ -136,10 +131,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
                     while (!isEnd)
                     {
-                        Tuple<ITreeNode, bool> res = ycProcessor.GetNextTree(lang, parsedSppf[lang]);
+                        Tuple<ITreeNode, bool> res = YCProcessor.GetNextTree(lang, parsedSppf[lang]);
                         ITreeNode tree = res.Item1;
                         isEnd = res.Item2;
-                        MatcherHelper.NodeCover.Add(tree);
+                        MatchingBraceContextHighlighter.ExistingTrees.Add(tree);
                     }
                 });
             }

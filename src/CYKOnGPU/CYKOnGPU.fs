@@ -2,9 +2,8 @@
 
 open System.Collections.Generic
 
-type CYKOnGPU() =
+type CYKOnGPU(platformName, debug) =
 
-    // правила грамматики, инициализируются в Recognize
     let mutable rules : array<rule> = [||]
 
     let mutable recTable:_[] = null
@@ -23,17 +22,9 @@ type CYKOnGPU() =
                 | 0uy -> "0"
                 | _ -> lblNameArr.[(int lbl) - 1]
                 
-    let calcDiff columnIndex =
-        if columnIndex < 2
-        then 0
-        else 
-            let diff = ref 0
-            [|1..columnIndex-1|]
-            |> Array.iter (fun i -> diff := (!diff + i))
-            !diff
+    let calcDiff columnIndex = columnIndex * (columnIndex - 1) / 2
 
     let recognitionTable (_,_) (s:Microsoft.FSharp.Core.uint16[]) weightCalcFun =
-
         nTermsCount <- 
             rules
             |> Array.map(fun r -> 
@@ -41,42 +32,51 @@ type CYKOnGPU() =
                             rule.RuleName)
             |> Set.ofArray
             |> Set.count
-
         rowSize <- s.Length
         recTable <- Array.init (rowSize * rowSize * nTermsCount) ( fun _ -> createEmptyCellData () )
 
-        (*
-        let elem2 i len symRuleArr = 
-            // foreach symbol in grammar in parallel
-            symRuleArr
-            |> Array.Parallel.iter (fun (item:SymbolRuleMapItem) ->
-                                        // foreach rule r per symbol in parallel
-                                        item.Rules
-                                        |> Array.iter (
-                                            fun curRule -> ()(*for k in 0..(len-1) do processRule curRule.Rule curRule.Index i k len*)
-                                        )
-            )
-        *)
-        let fillTable rulesIndexed =
-          let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, rulesIndexed)
-          // todo
-          gpuWork.Run()
-          gpuWork.Dispose()
-          (*
-          [|1..rowSize - 1|]
-          |> Array.iter (fun len ->
-                [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
-                |> Array(*.Parallel*).iter (fun i -> 
-                    ((*elem i len rulesIndexed*))
-                )
-         *)
-        (*
-        let fillTable2 symRuleArr = 
-            [|1..rowSize - 1|]
-            |> Array.iter (fun len ->
-                [|0..rowSize - 1 - len|] // for start = 0 to nWords - length in parallel
-                |> Array.Parallel.iter (fun i -> elem2 i len symRuleArr))
-        *)
+        let printTbl () =
+            let needNewLine i =
+                if i = rowSize - 1 then true
+                else
+                    let mutable lnEndCounter = rowSize - 1
+                    let mutable newLine = rowSize - 1
+                    let mutable k = 0
+                    let mutable need = false
+                    while (k  <= rowSize - 1 && i <> newLine) do
+                        newLine <- newLine + lnEndCounter
+                        lnEndCounter <- lnEndCounter - 1
+                        k <- k + 1
+                        if newLine = i 
+                        then 
+                            need <- true
+                    need
+
+            [| 0..( rowSize * rowSize - calcDiff rowSize - 1) |] 
+            |> Array.iter( fun i -> 
+                                    let startIndex = i * nTermsCount
+                                    let mutable count = 0
+                                    for m in startIndex..startIndex + nTermsCount - 1 do
+                                        let isEmpty = recTable.[m].rData = System.UInt64.MaxValue && recTable.[m]._k = 0ul
+                                        if not isEmpty then count <- count + 1
+                                    printf " %d |" count
+                                    if needNewLine i then printfn "")
+
+        let fillTable indexesBySymbols biggestSymbol nTermsWithRulesCount =          
+          if (debug) then
+              let cpuWork = new CPUWork(rowSize, nTermsCount, recTable, rules, indexesBySymbols, biggestSymbol)
+              [|1..rowSize - 1|]
+              |> Array.iter (fun l -> 
+                  [|0..rowSize - 1|]
+                  |> Array.Parallel.iter ( fun i -> [|0..nTermsWithRulesCount - 1|] |> Array.Parallel.iter (fun s -> cpuWork.Run l i s) )
+              )          
+          else
+              let gpuWork = new GPUWork(rowSize, nTermsCount, recTable, rules, platformName, indexesBySymbols, biggestSymbol, nTermsWithRulesCount)
+              [|1..rowSize - 1|]
+              |> Array.iter (fun l -> gpuWork.Run l)          
+              gpuWork.Finish()
+              gpuWork.Dispose()
+
         rules
         |> Array.iteri 
             (fun ruleIndex rule ->
@@ -100,49 +100,46 @@ type CYKOnGPU() =
                     ntrIndexes.Add ruleIndex )
         let nonTermRules = Array.init ntrIndexes.Count (fun i -> new RuleIndexed(rules.[ntrIndexes.[i]], ntrIndexes.[i]) )        
         //printfn "non terminal rules count %d" nonTermRules.Length
-        (*
-        // left parts of non-terminal rules array
-        // needed only for 2nd realization
-        let symRuleMap = 
+        
+        let nTermRuleMap = 
             nonTermRules
             |> Seq.groupBy (fun rule -> initSymbol (getRuleStruct rule.Rule).RuleName )
             |> Map.ofSeq
             |> Map.map (fun k v -> Array.ofSeq v)
-        
-        let symRuleArr =
-            symRuleMap
             |> Map.toArray
             |> Array.map (fun (sym,rules) -> 
                             //printfn "Symbol %d rules count: %d" sym rules.Length
-                            new SymbolRuleMapItem(sym,rules))
-        *)
+                            new SymbolRuleMapItem(sym, Array.init rules.Length (fun i -> rules.[i].Index)))
+        let nTermsWithRulesCount = nTermRuleMap.Length // TODO put in cell only this length arrays
+        //printfn "non term sym with rules count %d" nTermsWithRulesCount
+
+        let biggestSymbol = 
+            (   
+                nTermRuleMap
+                |> Array.maxBy (fun pair -> pair.RulesCount)
+            ).RulesCount
+        //printfn "biggest symbol size %d" biggestSymbol
+
+        let indexesBySymbols = Array.init (nTermRuleMap.Length * biggestSymbol) (fun i -> 
+                                                                                    let symbol = i / biggestSymbol
+                                                                                    let symRules = nTermRuleMap.[symbol]
+                                                                                    let ruleIndex = i % biggestSymbol
+                                                                                    if (ruleIndex < symRules.RulesCount) then symRules.RuleIndexes.[ruleIndex]
+                                                                                    else -1
+                                                                                )
+        
         let fillStart = System.DateTime.Now
         printfn "Fill table started %s" (string fillStart)
-        fillTable nonTermRules
+        fillTable indexesBySymbols biggestSymbol nTermsWithRulesCount
         let fillFinish = System.DateTime.Now
         printfn "Fill table finished %s [%s]" (string fillFinish) (string (fillFinish - fillStart))
-        (*
-        let fillImprStart = System.DateTime.Now
-        printfn "Fill table improved started %s" (string fillImprStart)
-        fillTable2 symRuleArr
-        let fillImprFinish = System.DateTime.Now
-        printfn "Fill table improved finished %s [%s]" (string fillImprFinish) (string (fillImprFinish - fillImprStart))
-        *)
+        
+        printTbl()
+
         recTable
 
     let recognize ((grules, start) as g) s weightCalcFun =
         let recTable = recognitionTable g s weightCalcFun
-        
-        let printTbl () =
-            for i in 0..s.Length-1 do
-                for j in 0..s.Length-1 do
-                    let startIndex = (i * rowSize + j) * nTermsCount
-                    let mutable count = 0
-                    for m in startIndex..startIndex + nTermsCount - 1 do
-                        if not (isCellDataEmpty (recTable.[m])) then count <- count + 1
-                    printf "! %s !" (string count)
-                printfn " "
-            printfn "" 
             
         let getString state lbl weight = 
             let stateString = 
@@ -151,7 +148,6 @@ type CYKOnGPU() =
                 |LblState.Undefined -> "undefined"
                 |LblState.Conflict -> "conflict"
                 |_ -> ""
-
             String.concat " " [stateString; ":"; "label ="; lblString lbl; "weight ="; string weight]
             
         let rec out i last =
@@ -168,8 +164,7 @@ type CYKOnGPU() =
                 else "" :: out (i+1) last
             else [""]
 
-        let lastIndex = nTermsCount - 1 //(recTable.[0 * rowSize + s.Length-1]).Length - 1
-        
+        let lastIndex = nTermsCount - 1        
         out 0 lastIndex
 
     let print lblValue weight leftI rightL leftL =
@@ -181,13 +176,11 @@ type CYKOnGPU() =
         let ruleInd,_,curL,curW = getData cell.rData
         let rule = getRuleStruct rules.[int ruleInd]
         let (leftI,leftL),(rightI,rightL) = getSubsiteCoordinates i l (int cell._k)
-        if l = 0
-        then if curL <> noLbl
-             then print curL curW leftI rightL leftL
+        if l = 0 then 
+            if curL <> noLbl then print curL curW leftI rightL leftL
         else 
             let checkIndex start ind tryFind ruleCheck =
-                if ind < start + nTermsCount - 1 then
-                    tryFind start (ind + 1) ruleCheck
+                if ind < start + nTermsCount - 1 then tryFind start (ind + 1) ruleCheck
                 else None
 
             let rec tryFind start index ruleCheck = 
@@ -243,7 +236,7 @@ type CYKOnGPU() =
         // If dialect undefined or was conflict lblName = "0" 
         let out = recognize g s weightCalcFun |> List.filter ((<>)"") |> String.concat "\n"
         match out with
-        | "" -> "Строка не выводима в заданной грамматике."
+        | "" -> "The string is not derivable in specified grammar"
         | _ -> 
             labelTracking (s.Length - 1)
             out

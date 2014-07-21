@@ -18,11 +18,11 @@ let run input =
         ts
         |> Yard.Generators.CYK.CodeTokenStream
         
-    let cyk = new Yard.Generators.CYKGenerator.CYKCore()
+    let cyk = new Yard.Generators.CYKGenerator.CYKCoreForGPU()
     printfn "CYK"
     cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> x + y + z) Yard.Generators.CYK.lblName
 
-let runForGPU input =
+let runForGPU isDebug input =
     let  buf = Lexing.LexBuffer<_>.FromTextReader input
     let ts =  
         seq { 
@@ -36,8 +36,9 @@ let runForGPU input =
         ts
         |> Yard.Generators.CYK.CodeTokenStream
         
-    let cyk = new Yard.Generators.CYKGenerator.CYKOnGPU() //CYKCoreForGPU()
-    printfn "CYK for GPU"
+    let cyk = new Yard.Generators.CYKGenerator.CYKOnGPU("*", isDebug)
+    if isDebug then printfn "CYK on CPU"
+    else printfn "CYK on GPU"
     cyk.Recognize (Yard.Generators.CYK.rules, Yard.Generators.CYK.StartNTerm) tokens (fun x y z -> x + y + z) Yard.Generators.CYK.lblName
 
 let time (run : System.IO.StreamReader -> string) =    
@@ -49,10 +50,10 @@ let time (run : System.IO.StreamReader -> string) =
         printfn "%s" res
         printfn "%A" (System.DateTime.Now - start)
     | _ ->
-        printfn "%s" "Не задано имя входного файла."
+        printfn "%s" "Input file name not specified."
     
 do 
-    time (runForGPU)
     //time (run)
-    
+    //time (runForGPU true)
+    time (runForGPU false)
     

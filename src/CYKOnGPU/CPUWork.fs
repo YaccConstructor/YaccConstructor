@@ -1,4 +1,5 @@
-﻿namespace Yard.Generators.CYKGenerator
+﻿// For debug
+namespace Yard.Generators.CYKGenerator
 
 open Brahma.Helpers
 open OpenCL.Net
@@ -9,13 +10,10 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Collections.Generic
 
-type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _indexesBySymbols:_[], biggestSym, nTermsWithRulesCount) =
+type CPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, _indexesBySymbols, biggestSym) =
 
     let command = 
-        <@
-            fun (grid:_2D) (table:CellData[]) (rules:uint64[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (indexesBySymbols:int[]) (biggestSymNum:_[])-> 
-                let i = grid.GlobalID0 // column index, may be accessed parallel
-                let s = grid.GlobalID1 // symbol index
+            fun i s (table:CellData[]) (rules:uint64[]) (*(tableLenNum:_[])*) (rowSizeNum:_[]) (nTermsCountNum:_[]) (lNum:_[]) (indexesBySymbols:int[]) (biggestSymNum:_[])-> 
                 let l = lNum.[0] // row index, must be accessed sequentially
                 let rowSize = rowSizeNum.[0]
                     
@@ -155,73 +153,16 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _ind
                                                             let index = ( l * rowSize + i - diff ) * nTermsCount + ruleName - 1                                                         
                                                             table.[index].rData <- currentElem
                                                             table.[index]._k <- Microsoft.FSharp.Core.Operators.uint32 k
-                    
-        @>
-
-    let deviceType = DeviceType.Default
-    
-    let provider =
-        try  
-            let res = ComputeProvider.Create(platformName, deviceType)
-            printfn "provider: %A" res
-            res
-        with 
-        | ex -> failwith ex.Message
-
-    let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
-    //let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
-    let maxLocalWorkSize = 1 // int <| lws.CastTo<uint64>()
-        
-    let fillArray (arr:'a[]) (initFun:unit -> 'a) =
-        let count = arr.Length
-        if count % maxLocalWorkSize <> 0 
-        then 
-            let div = count / maxLocalWorkSize
-            Array.init ((div + 1) * maxLocalWorkSize) (fun i -> if i < count then arr.[i]
-                                                                else initFun())
-        else arr
-        
-    //let realRecTableLen = extRecTable.Length
+          
     let recTable: CellData[] = extRecTable //fillArray extRecTable createEmptyCellData        
-        
-    let createEmptyRuleIndexed () =
-        new RuleIndexed((buildRule 0 0 0 0 0),0)
-
-    //let realRulesIndexedLen = extRulesIndexed.Length
+    
     //let rulesIndexed = extRulesIndexed //fillArray extRulesIndexed createEmptyRuleIndexed
         
     let rules = extRules //fillArray extRules (fun () -> uint64 0)
-
-    let indexesBySymbols = _indexesBySymbols
-            try 
-                provider.Compile(command,_outCode = str)
-            with e ->
-                failwith e.Message
-
+    
     let rowSizeArray = [| rowSize |]
     let nTermsCountArray = [| nTermsCount |]
     let biggestSymArray = [| biggestSym |]
-    
-    let kernel, kernelPrepare, kernelRun = 
-        let str = ref ""
-        let res = provider.Compile(command,_outCode = str)
-        printfn "%s" !str
-        res
-        
-    let d = new _2D(rowSize, nTermsWithRulesCount, 1, 1)
-              
-    member this.Run(l) = 
-        kernelPrepare d recTable rules (*[|realRecTableLen|]*) rowSizeArray nTermsCountArray [| l |] indexesBySymbols biggestSymArray
-        let _ = commandQueue.Add(kernelRun())
-        ()
-
-    member this.Finish() =
-        let _ = commandQueue.Add(recTable.ToHost(provider)).Finish()
-        commandQueue.Finish() |> ignore
-
-    member this.Dispose() =
-        commandQueue.Dispose()
-        provider.CloseAllBuffers()
-        provider.Dispose()
-
+            
+    member this.Run l i s = 
+        command i s recTable rules (*[|realRecTableLen|]*) rowSizeArray nTermsCountArray [|l|] _indexesBySymbols biggestSymArray

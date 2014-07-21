@@ -23,7 +23,7 @@ let getKwTokenOrIdent =
     let kws = getLiteralNames |> List.map (fun s -> s.ToLower()) |> Set.ofList
     fun (name:string) (defaultSourceText : SourceText) ->
         if kws.Contains (name.ToLowerInvariant()) then
-            genLiteral name defaultSourceText.Range.start defaultSourceText.Range.end_
+            genLiteral name defaultSourceText//defaultSourceText.Range.start defaultSourceText.Range.end_
         else
             IDENT defaultSourceText
 
@@ -60,15 +60,17 @@ let defaultSourceText id (lexbuf : LexBuffer<_>) value =
                                , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
 
 let getLiteral id (lexbuf : LexBuffer<_>) value =
-    let range = 
-        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
-                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
-    genLiteral value range.start range.End
+//    let range = 
+//        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
+//                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
+//    genLiteral value range.start range.End
+    genLiteral value <| defaultSourceText id lexbuf value
         
 let tokenPos token =
     let data = tokenData token
     if isLiteral token then
-        data :?> uint64 * uint64
+        let range = (data :?> SourceText).range
+        range.Start, range.End
     else
         let x = data :?> SourceText
         x.Range.Start, x.Range.End

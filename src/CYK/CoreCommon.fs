@@ -4,15 +4,16 @@ open System.Collections.Generic
 
 //(32        |16       |8       |8        )
 //(ruleIndex |lblState |lblName |lblWeght )
-//..
 type tblData = uint64
 
-type symbol = Microsoft.FSharp.Core.uint16 
+type coordinate = uint32
+
+type symbol = uint16 
 
 [<Struct>]
 type CellData =
     val mutable rData : tblData
-    val mutable _k : uint32
+    val mutable _k : coordinate
     new (r, k) = {rData=r;_k=k}
 
 type LblState =
@@ -35,17 +36,18 @@ type LabelWithState =
 
 [<Struct>]
 type RuleIndexed = 
-    val Rule : rule
-    val Index : int
+    val mutable Rule : rule
+    val mutable Index : int
     new (rl, ind) = { Rule = rl; Index = ind }
 
 
 [<Struct>]
 type SymbolRuleMapItem =
-    val Symbol : symbol
-    val Rules : RuleIndexed[]
-    new (symbol : symbol, rules : RuleIndexed[]) = 
-        { Symbol = symbol; Rules = rules }
+    val mutable Symbol : symbol
+    val mutable RuleIndexes : int[]
+    val mutable RulesCount : int
+    new (symbol : symbol, ruleIndexes : int[]) = 
+        { Symbol = symbol; RuleIndexes = ruleIndexes; RulesCount = ruleIndexes.Length }
 
 [<AutoOpen>]
 module CellHelpers =
@@ -95,8 +97,7 @@ module CommonHelpers =
     [<Literal>]
     let noLbl = 0uy
 
-    let initSymbol (s:uint16) : symbol = 
-        s
+    let initSymbol (s:uint16) : symbol = s
 
     let createEmptyCellData () = 
         new CellData(System.UInt64.MaxValue, 0ul)

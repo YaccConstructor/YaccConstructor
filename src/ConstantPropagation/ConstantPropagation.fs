@@ -35,7 +35,10 @@ type Approximator(file:ICSharpFile) =
                       | :? ILocalVariableDeclaration as lvDecl -> (lvDecl.Initial :?> IExpressionInitializer).Value
                       | _ -> 
                         match kvp.Key.Parent with 
-                        | :? IAssignmentExpression as ae -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
+                        | :? IAssignmentExpression as ae -> 
+                            match ae.AssignmentType with
+                            | AssignmentType.PLUSEQ -> ae :> ICSharpExpression
+                            | _ -> (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
                         | x -> failwithf "Unexpected parent type: %A" x
                       //| :? IMultipleLocalVariableDeclaration as vd -> vd.Declarators.[0] )
                       )
@@ -53,6 +56,14 @@ type Approximator(file:ICSharpFile) =
             | :? IConditionalTernaryExpression as tern -> 
                 go start _end tern.ElseResult
                 go start _end tern.ThenResult
+//            | :? INullCoalescingExpression as nce ->
+//                go start _end nce.RightOperand
+//                go ??startVertex?? _end nce.LeftOperand
+            | :? IAssignmentExpression as ae -> 
+                let n = incr count; !count
+                go start n (ae.Arguments.[0] :?> ExpressionArgumentInfo).Expression
+                go n _end  (ae.Arguments.[1] :?> ExpressionArgumentInfo).Expression
+
             | x -> failwithf "Unexpected node type: %A" x
 
         go 0 (incr count; !count) args.[0].Value

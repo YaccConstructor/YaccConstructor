@@ -6,15 +6,16 @@ using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-    class RecursiveElementProcessor : IRecursiveElementProcessor
+    class TreeNodeProcessor : IRecursiveElementProcessor
     {
         private readonly IHighlightingConsumer myConsumer;
         private readonly IFile file;
 
-        public RecursiveElementProcessor([NotNull] IHighlightingConsumer consumer, IFile file)
+        public TreeNodeProcessor(IHighlightingConsumer consumer, [NotNull] IFile file)
         {
             myConsumer = consumer;
             this.file = file;
@@ -51,19 +52,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (colorConstantRange == null)
                 return;
 
-            foreach (DocumentRange range in colorConstantRange)
-            {
-                AddHighLighting(range, consumer, new TokenHighlighting(treeNode));
-            }
+            colorConstantRange.ForEach(
+                range =>
+                AddHighLighting(range, consumer, new TokenHighlighting(treeNode)));
         }
 
         private void AddHighLighting(DocumentRange range, IHighlightingConsumer consumer, IHighlighting highlighting)
         {
             var info = new HighlightingInfo(range, highlighting, new Severity?());
-            if (file != null)
-            {
-                consumer.AddHighlighting(info.Highlighting, file);
-            }
+            consumer.AddHighlighting(info.Highlighting, file);
         }
     }
 }

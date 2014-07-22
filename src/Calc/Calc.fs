@@ -57,6 +57,10 @@ type CalcInjectedLanguageModule () =
     let processor =
         new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
                       , getRange)
+    
+    static let instance = new CalcInjectedLanguageModule()
+    static member Instance = instance
+
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "calc"
         member this.Process graphs = processor.Process graphs
@@ -65,3 +69,5 @@ type CalcInjectedLanguageModule () =
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
         member this.GetForestWithToken rng = processor.GetForestWithToken rng
+
+    

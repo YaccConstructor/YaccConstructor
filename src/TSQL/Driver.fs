@@ -61,6 +61,9 @@ do()
 [<Extension>]
 type TSQLInjectedLangugeModule () =
     let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
+
+    static let instance = new TSQLInjectedLangugeModule()
+    static member Instance = instance
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "TSQL"
         member this.Process graphs = processor.Process graphs

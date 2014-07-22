@@ -10,6 +10,7 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
+using YC.AbstractAnalysis;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -19,7 +20,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private Action<DaemonStageResult> myCommiter;
         private IContextBoundSettingsStore mySettingsStore;
 
-        public static YC.AbstractAnalysis.Helper.ReSharperHelper YCProcessor;
+        private static Helper.ReSharperHelper YcProcessor = Helper.ReSharperHelper.Instance;
 
         public IDaemonProcess DaemonProcess { get; private set; }
 
@@ -34,14 +35,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
         {
-            if (YCProcessor == null)
-            {
-                CreateYCProcessor();
-            }
-
             DaemonProcess = process;
             mySettingsStore = settingsStore;
             myProcessKind = processKind;
+            SubscribeYc();
         }
 
         public void Execute(Action<DaemonStageResult> commiter)
@@ -56,21 +53,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myCommiter = commiter;
             MatchingBraceContextHighlighter.ExistingTrees.Clear();
 
-            CreateYCProcessor();
-            YCProcessor.Process(file);
+            YcProcessor.Process(file);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
             //myCommiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
-        private void CreateYCProcessor()
+        private void SubscribeYc()
         {
-            YCProcessor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
-            foreach (var e in YCProcessor.LexingFinished)
+            foreach (var e in YcProcessor.LexingFinished)
             {
                 e.AddHandler(OnLexingFinished);
             }
-            foreach (var e in YCProcessor.ParsingFinished)
+            foreach (var e in YcProcessor.ParsingFinished)
             {
                 e.AddHandler(OnParsingFinished);
             }
@@ -89,7 +84,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
             var processor = new RecursiveElementProcessor(consumer, File);
 
-            string xmlPath = YCProcessor.XmlPath(args.Lang);
+            string xmlPath = YcProcessor.XmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
 
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
@@ -109,7 +104,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
         private void OnParsingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.ParsingFinishedArgs args)
         {
-            if (YCProcessor == null)
+            if (YcProcessor == null)
                 return;
 
             var lang = args.Lang;
@@ -131,7 +126,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
                     while (!isEnd)
                     {
-                        Tuple<ITreeNode, bool> res = YCProcessor.GetNextTree(lang, parsedSppf[lang]);
+                        Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
                         ITreeNode tree = res.Item1;
                         isEnd = res.Item2;
                         MatchingBraceContextHighlighter.ExistingTrees.Add(tree);

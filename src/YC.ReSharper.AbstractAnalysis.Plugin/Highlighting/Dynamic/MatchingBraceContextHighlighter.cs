@@ -11,6 +11,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
+using YC.AbstractAnalysis;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
@@ -42,7 +43,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (HighlightingProcess.YCProcessor == null || ExistingTrees.Count == 0)
+            if (Helper.ReSharperHelper.Instance == null || ExistingTrees.Count == 0)
                 return;
 
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
@@ -57,7 +58,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (String.IsNullOrEmpty(rBrother))
                 return;
 
-            List<ITreeNode> forest = HighlightingProcess.YCProcessor.GetForestWithToken(lang, lBraceRange);
+            List<ITreeNode> forest = Helper.ReSharperHelper.Instance.GetForestWithToken(lang, lBraceRange);
 
             var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);
@@ -90,7 +91,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (HighlightingProcess.YCProcessor == null || ExistingTrees.Count == 0)
+            if (Helper.ReSharperHelper.Instance == null || ExistingTrees.Count == 0)
                 return;
 
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
@@ -105,7 +106,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (string.IsNullOrEmpty(lbrother))
                 return;
 
-            List<ITreeNode> forest = HighlightingProcess.YCProcessor.GetForestWithToken(lang, rBraceRange);
+            List<ITreeNode> forest = Helper.ReSharperHelper.Instance.GetForestWithToken(lang, rBraceRange);
 
             var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
             var lBraceTextRange = new TreeTextRange(offset, 1);

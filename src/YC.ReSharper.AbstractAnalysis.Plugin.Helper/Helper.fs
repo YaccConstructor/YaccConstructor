@@ -10,11 +10,14 @@ open Microsoft.FSharp.Collections
 type ReSharperHelper() =
     let processors = 
         [
-            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
-            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
+            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
+            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
             ]
         |> dict    
 
+    static let instance = new ReSharperHelper()
+    static member Instance = instance
+    
     //let processor = new LanguagesProcessor()
     member this.XmlPath (l:string) = processors.[l.ToLowerInvariant()].XmlPath
     member this.ParsingFinished = 

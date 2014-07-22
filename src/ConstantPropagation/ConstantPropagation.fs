@@ -84,5 +84,6 @@ type Approximator(file:ICSharpFile) =
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)
         processor.Process file
-        let graphs = ResizeArray.map (fun (l,h) -> l, propagate h) hotspots
+        let graphs = ResizeArray.map (fun (l : string, h) -> l, propagate h) hotspots
         graphs
+        

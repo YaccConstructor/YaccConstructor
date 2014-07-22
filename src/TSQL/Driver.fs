@@ -27,6 +27,7 @@ open Yard.Generators.RNGLR.AST
 open YC.AbstractAnalysis.CommonInterfaces
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open Mono.Addins
+open YC.EL.ReSharper.Common
 
 
 let tokenize lexerInputGraph =
@@ -37,9 +38,7 @@ let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
 let getTokenName = tokenToNumber >> numToString
 
-let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
-    
-    fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
+let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
 
 let args = 
     {
@@ -51,14 +50,9 @@ let args =
 
 let printAstToDot ast name = defaultAstToDot ast name
 
-
 let xmlPath = xmlPath
 let tokenToTreeNode = tokenToTreeNode
 let translate ast errors = translate args ast errors
-
-type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
-
-
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -66,8 +60,8 @@ do()
 
 [<Extension>]
 type TSQLInjectedLangugeModule () =
-    let processor = new Processor<Token,br>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL")
-    interface IInjectedLanguageModule with
+    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
+    interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "TSQL"
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished

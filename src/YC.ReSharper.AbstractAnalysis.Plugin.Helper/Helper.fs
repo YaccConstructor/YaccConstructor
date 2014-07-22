@@ -6,15 +6,15 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 
-
 [<Class>]
 type ReSharperHelper() =
     let processors = 
         [
-            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule)
-            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule)
+            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
+            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule():>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
             ]
-        |> dict
+        |> dict    
+
     //let processor = new LanguagesProcessor()
     member this.XmlPath (l:string) = processors.[l.ToLowerInvariant()].XmlPath
     member this.ParsingFinished = 

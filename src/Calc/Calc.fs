@@ -7,6 +7,7 @@ open Yard.Generators.RNGLR.AST
 open YC.AbstractAnalysis.CommonInterfaces
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open Mono.Addins
+open YC.EL.ReSharper.Common
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -53,8 +54,10 @@ type CalcInjectedLanguageModule () =
     let xmlPath = xmlPath
     let translate ast errors = translate args ast errors
 
-    let processor = new Processor<Token,br>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc")
-    interface IInjectedLanguageModule with
+    let processor =
+        new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
+                      , getRange)
+    interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "calc"
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished

@@ -173,6 +173,11 @@
       <Project>{f722fda7-cb4e-49ee-a301-19708c99ae16}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.EL.ReSharper.Common.fsproj">
+      <Name>YC.EL.ReSharper.Common</Name>
+      <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
       <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>

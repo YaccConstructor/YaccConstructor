@@ -81,7 +81,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// </summary>
         /// <param name="sender">Now always null</param>
         /// <param name="args"></param>
-        private void OnLexingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.LexingFinishedArgs args)
+        private void OnLexingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
         {
             if (myCommiter == null)
                 return;

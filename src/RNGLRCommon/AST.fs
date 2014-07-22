@@ -16,6 +16,7 @@ module Yard.Generators.RNGLR.AST
 open System
 open System.Collections.Generic
 open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.RNGLR.AstNode
 
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {
@@ -25,126 +26,11 @@ type TranslateArguments<'Token, 'Position> = {
     filterEpsilons : bool
 }
 
-[<Struct>]
-type UsualOne<'T> =
-    val mutable first : 'T
-    val mutable other : 'T[]
-    new (f,o) = {first = f; other = o}
-
-/// Non-terminal expansion: production, family of children
-/// All nodes are stored in array, so there is a correspondence between integer and node.
-/// Family of children - For one nonTerminal there can be a lot of derivation trees.
-[<AllowNullLiteral>]
-type AST =
-    val mutable first : Family
-    val mutable other : Family[]
-    val mutable pos : int
-    new (f, o) = {pos = -1; first = f; other = o}
-    member inline this.findFamily f =
-        if f this.first then Some this.first
-        elif this.other <> null then
-            Array.tryFind f this.other
-        else None
-
-and Family =
-    struct
-        val prod : int
-        val nodes : Nodes
-        new (p,n) = {prod = p; nodes = n}
-    end
-
-and Nodes =
-    struct
-        val mutable fst : obj
-        val mutable snd : obj
-        val mutable other : obj[]
-        new (f,s,o) = {fst = f; snd = s; other = o}
-
-        new (arr : array<_>) =
-            let mutable res = new Nodes()
-            if arr <> null then
-                if arr.Length > 0 then
-                    res.fst <- arr.[0]
-                    if arr.Length > 1 then
-                        res.snd <- arr.[1]
-                        if arr.Length > 2 then
-                            res.other <- arr.[2..]
-            {fst = res.fst; snd = res.snd; other = res.other}
-            //match arr with
-
-        member nodes.doForAll f =
-            if nodes.fst <> null then
-                f nodes.fst
-                if nodes.snd <> null then
-                    f nodes.snd
-                    if nodes.other <> null then
-                        for x in nodes.other do
-                            f x
-
-        member nodes.doForAllRev f =
-            if nodes.fst <> null then
-                if nodes.snd <> null then
-                    if nodes.other <> null then
-                        for i = nodes.other.Length - 1 downto 0 do
-                            f nodes.other.[i]
-                    f nodes.snd
-                f nodes.fst
-
-        member nodes.isForAll f =
-            if nodes.fst <> null then
-                if not <| f nodes.fst then false
-                elif nodes.snd <> null then
-                        if not <| f nodes.snd then false
-                        elif nodes.other <> null then
-                            nodes.other |> Array.forall f
-                        else true
-                else true
-            else true
-
-        member inline nodes.Length = 
-            if nodes.fst <> null then
-                if nodes.snd <> null then
-                    if nodes.other <> null then
-                        2 + nodes.other.Length
-                    else 2
-                else 1
-            else 0
-
-        member inline nodes.Item
-            with get i =
-                match i with
-                | 0 -> nodes.fst
-                | 1 -> nodes.snd
-                | i -> nodes.other.[i-2]
-
-        member inline nodes.map f =
-            let length = nodes.Length
-            let res = Array.zeroCreate length
-            if nodes.fst <> null then
-                res.[0] <- f nodes.fst
-                if nodes.snd <> null then
-                    res.[1] <- f nodes.snd
-                    if nodes.other <> null then
-                        for i = 0 to nodes.other.Length-1 do
-                            res.[i+2] <- f nodes.other.[i]
-            res
-        end
-
-let inline getFamily (node : obj) =
-    match node with
-    | :? AST as ast -> ast
-    | _ -> failwith "Attempt to get family of not-AST"
-
-let inline getSingleNode (node : obj) =
-    match node with
-    | :? int as i  -> i
-    | _ -> failwith "Attempt to get singleNode of NonTerm"
-
 let inline private getPos (x : obj) = match x with :? AST as n -> n.pos | _ -> failwith "Attempt to get num of single node"
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
 
 let private emptyArr = [||]
-type private DotNodeType = Prod | AstNode
+type private DotNodeType = Prod | AstNodeType
 
 type ErrorNode = 
     val errorOn : obj     // token on which error occurs
@@ -638,7 +524,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 else cur + " !"
             let shape =
                 match nodeType with
-                | AstNode -> ",shape=box"
+                | AstNodeType -> ",shape=box"
                 | Prod -> ""
             let color =
                 if not isAmbiguous then ""
@@ -652,14 +538,14 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
         let createEpsilon ind = 
             let res = next()
-            createNode res false AstNode ("n " + indToString (-1-ind))
+            createNode res false AstNodeType ("n " + indToString (-1-ind))
             let u = next()
-            createNode u false AstNode "eps"
+            createNode u false AstNodeType "eps"
             createEdge res u true ""
             res
         let createTerm t =
             let res = next()
-            createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
+            createNode res false AstNodeType ("t " + indToString (tokenToNumber tokens.[t]))
             res
         if not isEpsilon then
             //for i in order do
@@ -672,7 +558,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
                         else "error"
                      
-                    createNode i (children.other <> null) AstNode ("n " + label)
+                    createNode i (children.other <> null) AstNodeType ("n " + label)
                      
                     let inline handle (family : Family) =
                         let u = next()

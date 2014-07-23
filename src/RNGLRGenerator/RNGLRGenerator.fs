@@ -163,6 +163,8 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
+                    println "open Yard.Generators.RNGLR.AstNode"
+
 
                     match definition.head with
                     | None -> ()

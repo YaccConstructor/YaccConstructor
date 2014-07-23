@@ -18,6 +18,7 @@ open Yard.Generators.RNGLR
 open Yard.Generators.RNGLR.AST
 open Yard.Core.IL
 open Yard.Core.IL.Production
+open Yard.Generators.RNGLR.AstNode
 
 let emptyName = "empty"
 let emptyNum (indexator : Indexator) = indexator.nonTermToIndex emptyName
@@ -112,7 +113,7 @@ let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
                                         pos.[w] <- order.Count
                                         order.Add w
                                         res.Add (new AST (Unchecked.defaultof<_>, null))
-                                    box res.[pos.[w]])
+                                    res.[pos.[w]] :> AstNode)
                         children.Add <| new Family(rule, new Nodes(nodes))
                 if v = indexator.errorIndex 
                 then

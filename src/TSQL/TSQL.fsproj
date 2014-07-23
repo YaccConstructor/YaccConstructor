@@ -190,8 +190,8 @@
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.EL.ReSharper.Common.fsproj">
-      <Name>YC.EL.ReSharper.Common</Name>
+    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj">
+      <Name>YC.SEL.ReSharper.Common</Name>
       <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
       <Private>True</Private>
     </ProjectReference>

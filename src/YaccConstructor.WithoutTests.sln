@@ -127,7 +127,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SELSDK.ReSharper", "SELSDK.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Helper", "YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj", "{F86A2827-4C61-4BC5-82C5-19C2B60AB831}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.EL.ReSharper.Common", "YC.EL.ReSharper.Common\YC.EL.ReSharper.Common.fsproj", "{6A086756-9F01-4117-A5CF-CE40AD8B01C4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.SEL.ReSharper.Common", "YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj", "{6A086756-9F01-4117-A5CF-CE40AD8B01C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

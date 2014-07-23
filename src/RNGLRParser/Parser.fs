@@ -119,16 +119,16 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     let print s = out.WriteLine ("    " + s)
     let curNum = ref 0
     print "rankdir=RL"
-    let getAstString (ast : obj) =
+    let getAstString (ast : AstNode) =
         match ast with
-        | :? int as i when i >= 0 -> tokens.[i] |> tokenToNumber |> numToString |> sprintf "%s"    
-        | :? int as i when i < 0 -> "eps " + numToString (-i-1)
+        | :? Terminal as t -> tokens.[t.TokenNumber] |> tokenToNumber |> numToString |> sprintf "%s"    
+        | :? Epsilon as e -> "eps " + numToString e.EpsilonNonTerm
         | :? AST as ast -> 
             let nonT = 
                 if ast.first.prod < leftSide.Length then ast.first.prod
                 else errInd
             numToString leftSide.[nonT]
-        | _ -> failwith "Unexpected ast"
+        | x -> failwithf "Unexpected ast %A" x
 
     let rec dfs (u : Vertex) =
         was.Add (u, !curNum)

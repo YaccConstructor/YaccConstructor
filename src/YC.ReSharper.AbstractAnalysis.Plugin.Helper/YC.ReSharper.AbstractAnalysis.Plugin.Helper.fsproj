@@ -44,6 +44,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj">
+      <Name>YC.SEL.ReSharper.Common</Name>
+      <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
+      <Name>YC.SEL.SDK.Core</Name>
+      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="AbstractLexer.Common">
       <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net45\AbstractLexer.Common.dll</HintPath>
       <Private>True</Private>
@@ -158,16 +168,6 @@
     <ProjectReference Include="..\TSQL\TSQL.fsproj">
       <Name>TSQL</Name>
       <Project>{5c8b9089-f612-4761-b712-09ecb5317c76}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.EL.ReSharper.Common.fsproj">
-      <Name>YC.EL.ReSharper.Common</Name>
-      <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

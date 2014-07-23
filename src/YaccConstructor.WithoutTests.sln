@@ -61,7 +61,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Calc", "Calc\Calc.fsproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YC.ReSharper.AbstractAnalysis.Plugin", "YC.ReSharper.AbstractAnalysis.Plugin\YC.ReSharper.AbstractAnalysis.Plugin.csproj", "{BC086B93-FA4B-41BD-9E95-3ED442592A01}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Core", "YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj", "{5FBF733C-9F3D-4831-89F2-68A500A2916C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.SEL.SDK.Core", "YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj", "{5FBF733C-9F3D-4831-89F2-68A500A2916C}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrFrontend", "AntlrFrontend\AntlrFrontend.fsproj", "{B75AEC02-64BD-4B31-8115-6708C64EE5DC}"
 EndProject
@@ -121,13 +121,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSQLHighlighting", "TSQL\TSQLHighlighting\TSQLHighlighting.csproj", "{6EE8BDD8-79E9-41F5-8A8E-E959835D60FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ELSDK", "ELSDK", "{C5101F9B-C218-4A45-A167-5A07127D15A2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SELSDK", "SELSDK", "{C5101F9B-C218-4A45-A167-5A07127D15A2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ELSDK.ReSharper", "ELSDK.ReSharper", "{C5101F9B-C218-4A45-A167-5A07127D15A3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SELSDK.ReSharper", "SELSDK.ReSharper", "{C5101F9B-C218-4A45-A167-5A07127D15A3}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.ReSharper.AbstractAnalysis.Plugin.Helper", "YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj", "{F86A2827-4C61-4BC5-82C5-19C2B60AB831}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.EL.ReSharper.Common", "YC.EL.ReSharper.Common\YC.EL.ReSharper.Common.fsproj", "{6A086756-9F01-4117-A5CF-CE40AD8B01C4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC.SEL.ReSharper.Common", "YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj", "{6A086756-9F01-4117-A5CF-CE40AD8B01C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

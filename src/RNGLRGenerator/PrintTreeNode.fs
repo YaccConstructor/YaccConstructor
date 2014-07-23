@@ -545,3 +545,31 @@ let printItemsGroup nameOfClasses xmlName =
     printBrInd 1 "</ItemGroup>"
     printBrInd 1 "</Project>"
     res.ToString()
+
+let printHotspotFile() = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 1) " ")
+        printBr x
+
+    printBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    printBrInd 0 "<Body>"
+    printBrInd 1 "<Language name=\"TSQL\">"
+    printBrInd 2 "<Hotspot>"
+    printBrInd 2 "<!-- Format: \"Class.Method\". For example, \"Program.Eval\" -->"
+    printBrInd 3 "<Fullname></Fullname>"
+    printBrInd 3 "<ArgumentsTypeList>"
+    printBrInd 2 "<!-- Example: string, int, void -->"
+    printBrInd 4 "<ArgumentType></ArgumentType>"
+    printBrInd 3 "</ArgumentsTypeList>"
+    printBrInd 3 "<ReturnType></ReturnType>"
+    printBrInd 2 "</Hotspot>"
+    printBrInd 1 "</Language>"
+    res.ToString()

@@ -121,6 +121,15 @@ type RNGLR() =
             if !needHighlighting
             then
                 let folder = System.IO.Path.GetFullPath (!namespaceName) + "\\"
+                
+                (*let generateHotspotXMLFile (filename : string)= 
+                    eprintfn "generateHotspotXMLFile "
+                    if not <| System.IO.File.Exists filename 
+                    then 
+                        use out = new System.IO.StreamWriter (filename)
+                        let content = printHotspotFile()
+                        out.WriteLine content
+                        out.Close()*)
 
                 let generateXML name toksAndLits = 
                     let path = folder + name + ".xml"
@@ -168,7 +177,7 @@ type RNGLR() =
                     tokensAndLits <- prefix :: tokensAndLits
                     generateFile <| prefix + "LitNode" <| true
                     
-
+                //generateHotspotXMLFile "Hotspots.xml"
                 generateXML !namespaceName <| List.rev tokensAndLits
                 generateItemsGroup <| List.rev nameOfClasses
 

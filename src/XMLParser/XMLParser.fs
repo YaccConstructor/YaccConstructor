@@ -3,19 +3,20 @@
 open System.Xml
 
 type Hotspot = 
-    val Namespace : string
+//    val Namespace : string
     val Class : string
     val Method : string
     val ArgumentsType : string list 
     val ReturnType : string
 
-    new (n, c, m, a, r) = {Namespace = n; Class = c; Method = m; ArgumentsType = a; ReturnType = r}
-    new (full : string array, a, r) = new Hotspot(full.[0], full.[1], full.[2], a, r)
+//    new (n, c, m, a, r) = {Namespace = n; Class = c; Method = m; ArgumentsType = a; ReturnType = r}
+    new (c, m, a, r) = {Class = c; Method = m; ArgumentsType = a; ReturnType = r}
+    new (full : string array, a, r) = new Hotspot(full.[0], full.[1], a, r)
 
 let parseHotspots (path : string) = 
     let xmlParser = new XmlTextReader(path)
     
-    let inline readAllSpaces() = while xmlParser.NodeType = XmlNodeType.Whitespace do xmlParser.Read() |> ignore
+    let inline skipSpaces() = while xmlParser.NodeType = XmlNodeType.Whitespace do xmlParser.Read() |> ignore
     
     let parseHotspot() = 
         let mutable hotName = null
@@ -23,46 +24,46 @@ let parseHotspots (path : string) =
         let mutable returnType = null
 
         xmlParser.Read() |> ignore
-        readAllSpaces()
+        skipSpaces()
         match xmlParser.Name.ToLowerInvariant() with
         | "fullname" -> 
             xmlParser.Read() |> ignore
             hotName <- xmlParser.ReadContentAsString().ToLowerInvariant().Split('.')
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
         | _ -> failwithf "Unexpected %s. Expected <FullName>" xmlParser.Name
 
         match xmlParser.Name.ToLowerInvariant() with
         | "argumentstypelist" -> 
-            readAllSpaces()
+            skipSpaces()
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
             
             while xmlParser.NodeType = XmlNodeType.Element do
                 match xmlParser.Name.ToLower() with
                 | "argumenttype" -> 
                     xmlParser.Read() |> ignore
-                    readAllSpaces()
+                    skipSpaces()
                     args <- xmlParser.ReadContentAsString().ToLowerInvariant().Trim() :: args
                     xmlParser.Read() |> ignore
-                    readAllSpaces()
+                    skipSpaces()
                 | _ -> failwithf "Unexpected %s. Expected <ArgumentType>" xmlParser.Name
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
         | _ -> failwithf "Unexpected %s. Expected <ArgumentTypeList>" xmlParser.Name
 
 
         match xmlParser.Name.ToLowerInvariant() with
         | "returntype" -> 
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
             returnType <- xmlParser.ReadContentAsString().ToLowerInvariant().Trim()
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
         | _ -> failwithf "Unexpected %s. Expected <ReturnType>" xmlParser.Name
 
         xmlParser.Read() |> ignore
-        readAllSpaces()
+        skipSpaces()
         
         args <- args |> List.rev
         
@@ -71,13 +72,13 @@ let parseHotspots (path : string) =
     let mutable resultDict = []
     xmlParser.MoveToContent() |> ignore
     xmlParser.Read() |> ignore
-    readAllSpaces()
+    skipSpaces()
     while xmlParser.NodeType <> XmlNodeType.EndElement do 
         match xmlParser.Name.ToLower() with
         | "language" -> 
             let lang = xmlParser.GetAttribute("name").ToLowerInvariant().Trim()
             xmlParser.Read() |> ignore
-            readAllSpaces()
+            skipSpaces()
 
             while xmlParser.NodeType = XmlNodeType.Element do
                 match xmlParser.Name.ToLowerInvariant() with
@@ -88,9 +89,6 @@ let parseHotspots (path : string) =
                 | _ -> failwithf "unexpected %s. Expected <Hotspot>" <| xmlParser.Name
         | x -> failwith "Unexpected %s. Expected <Language>" x
         xmlParser.Read() |> ignore
-        readAllSpaces()
+        skipSpaces()
     resultDict
     
-//let res = parseHotspots "Hotspots.xml"
-//res |> ignore
-//()

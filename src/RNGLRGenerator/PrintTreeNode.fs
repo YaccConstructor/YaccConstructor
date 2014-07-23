@@ -538,7 +538,10 @@ let printItemsGroup nameOfClasses xmlName =
     for className in nameOfClasses do
         printBrInd 2 "<ExternalCompile Include=\"%s\" />" className
 
-    printBrInd 2 "<Content Include=\"%s.xml\" />" xmlName
+    printBrInd 2 "<Content Include=\"%s.xml\">" xmlName
+    printBrInd 3 "<CopyToOutputDirectory>Always</CopyToOutputDirectory>"
+    printBrInd 2 "</Content>"
+
     printBrInd 1 "</ItemGroup>"
     printBrInd 1 "</Project>"
     res.ToString()

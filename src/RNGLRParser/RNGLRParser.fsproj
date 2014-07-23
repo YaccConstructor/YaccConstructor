@@ -46,6 +46,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

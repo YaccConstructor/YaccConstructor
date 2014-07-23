@@ -1,10 +1,24 @@
 ﻿module Yard.Generators.RNGLR.AstNode
 
+[<AllowNullLiteral>]
+type AstNode =
+    interface
+    end
+
+type Terminal (tokenNumber : int) =
+    interface AstNode
+    member this.TokenNumber = tokenNumber
+
+type Epsilon (epsilonNonTerm : int) =
+    interface AstNode
+    member this.EpsilonNonTerm = epsilonNonTerm
+
 /// Non-terminal expansion: production, family of children
 /// All nodes are stored in array, so there is a correspondence between integer and node.
 /// Family of children - For one nonTerminal there can be a lot of derivation trees.
 [<AllowNullLiteral>]
 type AST =
+    interface AstNode
     val mutable first : Family
     val mutable other : Family[]
     val mutable pos : int
@@ -24,9 +38,9 @@ and Family =
 
 and Nodes =
     struct
-        val mutable fst : obj
-        val mutable snd : obj
-        val mutable other : obj[]
+        val mutable fst : AstNode
+        val mutable snd : AstNode
+        val mutable other : AstNode[]
         new (f,s,o) = {fst = f; snd = s; other = o}
 
         new (arr : array<_>) =
@@ -99,12 +113,16 @@ and Nodes =
             res
         end
 
-let inline getFamily (node : obj) =
+let inline getFamily (node : AstNode) =
     match node with
     | :? AST as ast -> ast
     | _ -> failwith "Attempt to get family of not-AST"
 
-let inline getSingleNode (node : obj) =
+let inline getSingleNode (node : AstNode) =
     match node with
-    | :? int as i  -> i
+    | :? Epsilon as e  -> e.EpsilonNonTerm
+    | :? Terminal as t  -> t.TokenNumber
     | _ -> failwith "Attempt to get singleNode of NonTerm"
+
+let inline isEpsilon (x : AstNode) =
+    match x with | :? Epsilon -> true | _ -> false

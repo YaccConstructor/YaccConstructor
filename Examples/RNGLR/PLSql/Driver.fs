@@ -115,6 +115,7 @@ let Parse (srcFilePath:string) =
             None
     match res  with
     | Some(Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg, _)) ->
+        let tok = tok.[0]
         let coordinates = 
             let x,y = tokenPos tok
             

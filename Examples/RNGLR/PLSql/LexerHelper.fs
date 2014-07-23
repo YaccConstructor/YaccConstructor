@@ -22,10 +22,9 @@ exception IdentToken
 let getKwTokenOrIdent = 
     let kws = getLiteralNames |> List.map (fun s -> s.ToLower()) |> Set.ofList
     fun (name:string) (defaultSourceText : SourceText) ->
-        if kws.Contains (name.ToLowerInvariant()) then
-            genLiteral name defaultSourceText.Range.start defaultSourceText.Range.end_
-        else
-            IDENT defaultSourceText
+        match genLiteral name defaultSourceText with
+        | Some literal -> literal
+        | None -> IDENT defaultSourceText
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
@@ -60,10 +59,7 @@ let defaultSourceText id (lexbuf : LexBuffer<_>) value =
                                , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL)))
 
 let getLiteral id (lexbuf : LexBuffer<_>) value =
-    let range = 
-        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
-                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
-    genLiteral value range.start range.End
+    (genLiteral value <| defaultSourceText id lexbuf value).Value
         
 let tokenPos token =
     let data = tokenData token

@@ -22,10 +22,13 @@ exception IdentToken
 let getKwTokenOrIdent = 
     let kws = getLiteralNames |> List.map (fun s -> s.ToLower()) |> Set.ofList
     fun (name:string) (defaultSourceText : SourceText) ->
-        if kws.Contains (name.ToLowerInvariant()) then
-            genLiteral name defaultSourceText//defaultSourceText.Range.start defaultSourceText.Range.end_
+        let lowerName = name.ToLower()
+        if not <| kws.Contains lowerName then
+          IDENT defaultSourceText
         else
-            IDENT defaultSourceText
+          match genLiteral name defaultSourceText with
+          | Some literal -> literal
+          | None -> failwith "'kws' set must already check whether name is keyword"
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
@@ -64,7 +67,7 @@ let getLiteral id (lexbuf : LexBuffer<_>) value =
 //        SourceRange.ofTuple(new Pair (id,int64 lexbuf.StartPos.AbsoluteOffset * _symbolL)
 //                               , new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
 //    genLiteral value range.start range.End
-    genLiteral value <| defaultSourceText id lexbuf value
+    (genLiteral value <| defaultSourceText id lexbuf value).Value
         
 let tokenPos token =
     let data = tokenData token

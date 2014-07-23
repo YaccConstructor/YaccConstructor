@@ -95,7 +95,14 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup> 
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XMLParser\XMLParser.fsproj">
+      <Name>XMLParser</Name>
+      <Project>{bd567e70-345d-4110-bf03-cef8d8cab7b8}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

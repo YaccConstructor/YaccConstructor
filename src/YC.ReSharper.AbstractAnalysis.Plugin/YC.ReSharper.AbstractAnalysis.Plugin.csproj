@@ -131,9 +131,9 @@
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Name>Highlighting.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
+      <Name>YC.SEL.SDK.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
       <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>

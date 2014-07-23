@@ -195,8 +195,8 @@
       <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.ReSharper.AbstractAnalysis.Plugin.Core.fsproj">
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Core</Name>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
+      <Name>YC.SEL.SDK.Core</Name>
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
       <Private>True</Private>
     </ProjectReference>

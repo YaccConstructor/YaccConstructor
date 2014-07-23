@@ -727,11 +727,14 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             let mutable forestTree = []
             let filter (family : Family) = 
                 let nodes = this.getTokensFromFamily family
-                not <| List.exists (fun fam -> 
+                if List.exists (fun tok -> tok = token) nodes
+                then 
+                    not <| List.exists (fun fam -> 
                                         let famNodes = this.getTokensFromFamily fam
                                         let newList = List.filter (fun node1 -> List.exists (fun node2 -> node1 = node2) famNodes) nodes
                                         newList.Length = nodes.Length
                                     ) !forestFam 
+                else false
 
             let filterTree (tree : Tree<_>) = 
                 match tree.Root with

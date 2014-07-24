@@ -69,5 +69,3 @@ type CalcInjectedLanguageModule () =
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
         member this.GetForestWithToken rng = processor.GetForestWithToken rng
-
-    

@@ -63,8 +63,8 @@ namespace Highlighting.Core
         {
             UserData = DataHelper.GetNodeUserData(this);
             PersistentUserData = DataHelper.GetNodeUserData(this);
-            UserData.PutData(KeyConstant.YcTokName, ycTokName);
-            UserData.PutData(KeyConstant.YcValue, ycValue);
+            UserData.PutData(KeyConstant.YcTokenName, ycTokName);
+            UserData.PutData(KeyConstant.YcTextValue, ycValue);
             UserData.PutData(KeyConstant.YcLanguage, "Calc");
             
             YcHelper.AddYcItem(ycTokName, ycValue, "Calc");
@@ -76,16 +76,15 @@ namespace Highlighting.Core
             var ranges = positions.ToList();
             if (ranges.Count > 0)
             {
-                UserData.PutData(KeyConstant.Document, ranges[0].Document);
+                var document = ranges[0].Document;
+
+                UserData.PutData(KeyConstant.Document, document);
+                var doc2 = UserData.GetData(KeyConstant.Document);
                 UserData.PutData(KeyConstant.Ranges, ranges);
             }
+            var doc3 = UserData.GetData(KeyConstant.Document);
         }
-
-        private void SetPositions(IEnumerable<DocumentRange> positions)
-        {
-            
-        }
-
+        
         public IPsiServices GetPsiServices()
         {
             return default(IPsiServices);

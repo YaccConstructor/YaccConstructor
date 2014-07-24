@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Highlighting.Core;
 using JetBrains.DataFlow;
 using JetBrains.DocumentModel;
@@ -18,9 +19,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
     [ContainsContextConsumer]
     public class MatchingBraceContextHighlighter : MatchingBraceContextHighlighterBase
     {
-        public static List<ITreeNode> ExistingTrees = new List<ITreeNode>();
-
         private IContextActionDataProvider myProvider;
+
         public MatchingBraceContextHighlighter(IContextActionDataProvider provider)
         {
             myProvider = provider;
@@ -43,7 +43,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (Helper.ReSharperHelper.Instance == null || ExistingTrees.Count == 0)
+            if (ExistingTreeNodes.ExistingTrees.Count == 0)
                 return;
 
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
@@ -60,20 +60,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
             List<ITreeNode> forest = Helper.ReSharperHelper.Instance.GetForestWithToken(lang, lBraceRange);
 
-            var offset = new TreeOffset(lBraceRange.TextRange.StartOffset);
-            var lBraceTextRange = new TreeTextRange(offset, 1);
+            var lBraceTextRange = new TreeTextRange(treeOffset, 1);
 
             var rightRanges = new List<DocumentRange>();
 
             foreach (ITreeNode tree in forest)
             {
                 var lbraceNode = tree.FindNodeAt(lBraceTextRange);
-                if (lbraceNode == null)
-                //in general, this should not be. But while such a situation occurs
-                    continue;
+                //if (lbraceNode == null)
+                ////in general, this should not be. But while such a situation occurs
+                //    continue;
                 var rBraceNode = lbraceNode.NextSibling;
                 while (rBraceNode != null
-                    && rBraceNode.UserData.GetData(KeyConstant.YcTokName) != rBrother)
+                    && rBraceNode.UserData.GetData(KeyConstant.YcTokenName) != rBrother)
                 {
                     rBraceNode = rBraceNode.NextSibling;
                 }
@@ -94,7 +93,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             if (selectedToken.GetTokenType() != CSharpTokenType.STRING_LITERAL)
                 return;
 
-            if (Helper.ReSharperHelper.Instance == null || ExistingTrees.Count == 0)
+            if (ExistingTreeNodes.ExistingTrees.Count == 0)
                 return;
 
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
@@ -111,21 +110,20 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
             List<ITreeNode> forest = Helper.ReSharperHelper.Instance.GetForestWithToken(lang, rBraceRange);
 
-            var offset = new TreeOffset(rBraceRange.TextRange.StartOffset);
-            var lBraceTextRange = new TreeTextRange(offset, 1);
+            var lBraceTextRange = new TreeTextRange(treeOffset.Shift(-1), 1);
 
             var leftRanges = new List<DocumentRange>();
 
             foreach (ITreeNode tree in forest)
             {
                 var rBraceNode = tree.FindNodeAt(lBraceTextRange);
-                if (rBraceNode == null)
-                    //in general, this should not be. But while such a situation occurs
-                    continue;
+                //if (rBraceNode == null)
+                //    //in general, this should not be. But while such a situation occurs
+                //    continue;
 
                 var lbraceNode = rBraceNode.PrevSibling;
                 while (lbraceNode != null
-                    && lbraceNode.UserData.GetData(KeyConstant.YcTokName) != lbrother)
+                    && lbraceNode.UserData.GetData(KeyConstant.YcTokenName) != lbrother)
                 {
                     lbraceNode = lbraceNode.PrevSibling;
                 }
@@ -141,8 +139,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         private string GetLanguageFromRange(DocumentRange needRange)
         {
-            var currentList = new List<ITreeNode>(ExistingTrees);
-            foreach (ITreeNode tree in currentList)
+            IDocument doc = needRange.Document;
+
+            var treeList = new List<ITreeNode>(ExistingTreeNodes.GeTreeNodes(doc));
+            foreach (ITreeNode tree in treeList)
             {
                 List<DocumentRange> treeRanges = tree.UserData.GetData(KeyConstant.Ranges);
 

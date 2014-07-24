@@ -106,6 +106,7 @@
     <Compile Include="GraphCodeWindow\GraphLoader.cs" />
     <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
     <Compile Include="Highlighting\ColorHelper.cs" />
+    <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />

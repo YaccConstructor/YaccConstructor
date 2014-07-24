@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
@@ -42,6 +43,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             mySettingsStore = settingsStore;
             myProcessKind = processKind;
             SubscribeYc();
+            //DocumentManager.Instance.AnalyzeDocument(DaemonProcess.Document);
         }
 
         public void Execute(Action<DaemonStageResult> commiter)
@@ -54,8 +56,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return;
 
             myCommiter = commiter;
-            MatchingBraceContextHighlighter.ExistingTrees.Clear();
-
+            ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
             var errors = YcProcessor.Process(file);
             OnErrors(errors);
             // remove all old highlightings
@@ -132,8 +133,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                     {
                         Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
                         ITreeNode tree = res.Item1;
+                        ExistingTreeNodes.AddTree(tree);
                         isEnd = res.Item2;
-                        MatchingBraceContextHighlighter.ExistingTrees.Add(tree);
                     }
                 });
             }

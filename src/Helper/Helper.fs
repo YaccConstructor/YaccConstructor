@@ -1,10 +1,5 @@
 ﻿module YC.Tests.Helper
 
-open Yard.Core
-open Yard.Core.IL
-open Yard.Core.IL.Production
-open Yard.Core.IL.Definition
-open Yard.Core.Checkers
 open NUnit.Framework
 open System.Linq
 open System.IO

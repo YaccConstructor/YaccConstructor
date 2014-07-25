@@ -5,8 +5,6 @@ open AbstractAnalysis.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
 open QuickGraph.Graphviz
-open AbstractParsing.Common
-
 
 type Position<'br> =
         { pos_fname : string;

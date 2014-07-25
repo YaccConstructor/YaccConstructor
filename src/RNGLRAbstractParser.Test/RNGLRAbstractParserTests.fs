@@ -20,24 +20,24 @@ open System.IO
 open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
-open AbstractParsing.Common
+open AbstractAnalysis.Common
 open RNGLR.ParseSimpleCalc
 open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
-open AbstractLexer.Common
-open AbstractParsing.Common
 open YC.Tests.Helper
 open Yard.Generators.RNGLR.Parser
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
+let path = path baseInputGraphsPath
+
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)
 let loadLexerInputGraph gFile =
-    let qGraph = loadDotToQG gFile
-    let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
+    let qGraph = loadDotToQG baseInputGraphsPath gFile
+    let lexerInputG = new LexerInputGraph<_>()
     lexerInputG.StartVertex <- 0
-    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
+    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 let errorTest inputFilePath shouldContainsSuccess errorsCount =
     printfn "==============================================================="
@@ -579,44 +579,44 @@ type ``RNGLR abstract parser tests`` () =
             RNGLR.SimpleCalcWithNTerms_3.defaultAstToDot tree "ast.dot"
             Assert.Pass()
 
-    [<Test>]
-    member this.``Calc demo`` () =
-        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
-        //qGraph.AddVertexRange[0;1;2;3] |> ignore
-        let n = RNGLR.ParseSimpleCalcDemo.NUM 
-        let p = RNGLR.ParseSimpleCalcDemo.PLUS 
-        let m = RNGLR.ParseSimpleCalcDemo.MULT
-        let l = RNGLR.ParseSimpleCalcDemo.LBR
-        let r = RNGLR.ParseSimpleCalcDemo.RBR
-        qGraph.AddVerticesAndEdgeRange
-            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| n 1)
-             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| p 0)
-             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| n 4)
-             new AbstractParsing.Common.ParserEdge<_>(3,8,lbl <| m 4)
-             new AbstractParsing.Common.ParserEdge<_>(1,4,lbl <| m 5)
-             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| n 5)
-             new AbstractParsing.Common.ParserEdge<_>(5,8,lbl <| p 1)
-             new AbstractParsing.Common.ParserEdge<_>(1,6,lbl <| p 2)
-             new AbstractParsing.Common.ParserEdge<_>(6,7,lbl <| n 6)
-             new AbstractParsing.Common.ParserEdge<_>(7,8,lbl <| p 3)
-             new AbstractParsing.Common.ParserEdge<_>(8,9,lbl <| l 0)
-             new AbstractParsing.Common.ParserEdge<_>(9,10,lbl <| n 7)
-             new AbstractParsing.Common.ParserEdge<_>(10,11,lbl <| m 6)
-             new AbstractParsing.Common.ParserEdge<_>(11,12,lbl <| n 8)
-             new AbstractParsing.Common.ParserEdge<_>(12,13,lbl <| r 1)
-             ] |> ignore
-
-        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalcDemo.buildAstAbstract qGraph
-        printfn "%A" r
-        match r with
-        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
-            printfn "Error in position %d on Token %A: %s" num tok message
-            debug.drawGSSDot "out.dot"
-            Assert.Fail "!!!!!!"
-        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
-            tree.PrintAst()
-            RNGLR.ParseSimpleCalcDemo.defaultAstToDot tree "ast.dot"
-            Assert.Pass()
+//    [<Test>]
+//    member this.``Calc demo`` () =
+//        let qGraph = new AbstractParsing.Common.ParserInputGraph<_>()
+//        //qGraph.AddVertexRange[0;1;2;3] |> ignore
+//        let n = RNGLR.ParseSimpleCalcDemo.NUM 
+//        let p = RNGLR.ParseSimpleCalcDemo.PLUS 
+//        let m = RNGLR.ParseSimpleCalcDemo.MULT
+//        let l = RNGLR.ParseSimpleCalcDemo.LBR
+//        let r = RNGLR.ParseSimpleCalcDemo.RBR
+//        qGraph.AddVerticesAndEdgeRange
+//            [new AbstractParsing.Common.ParserEdge<_>(0,1,lbl <| n 1)
+//             new AbstractParsing.Common.ParserEdge<_>(1,2,lbl <| p 0)
+//             new AbstractParsing.Common.ParserEdge<_>(2,3,lbl <| n 4)
+//             new AbstractParsing.Common.ParserEdge<_>(3,8,lbl <| m 4)
+//             new AbstractParsing.Common.ParserEdge<_>(1,4,lbl <| m 5)
+//             new AbstractParsing.Common.ParserEdge<_>(4,5,lbl <| n 5)
+//             new AbstractParsing.Common.ParserEdge<_>(5,8,lbl <| p 1)
+//             new AbstractParsing.Common.ParserEdge<_>(1,6,lbl <| p 2)
+//             new AbstractParsing.Common.ParserEdge<_>(6,7,lbl <| n 6)
+//             new AbstractParsing.Common.ParserEdge<_>(7,8,lbl <| p 3)
+//             new AbstractParsing.Common.ParserEdge<_>(8,9,lbl <| l 0)
+//             new AbstractParsing.Common.ParserEdge<_>(9,10,lbl <| n 7)
+//             new AbstractParsing.Common.ParserEdge<_>(10,11,lbl <| m 6)
+//             new AbstractParsing.Common.ParserEdge<_>(11,12,lbl <| n 8)
+//             new AbstractParsing.Common.ParserEdge<_>(12,13,lbl <| r 1)
+//             ] |> ignore
+//
+//        let r = (new Parser<_>()).Parse  RNGLR.ParseSimpleCalcDemo.buildAstAbstract qGraph
+//        printfn "%A" r
+//        match r with
+//        | Yard.Generators.RNGLR.Parser.Error (num, tok, message, debug, _) ->
+//            printfn "Error in position %d on Token %A: %s" num tok message
+//            debug.drawGSSDot "out.dot"
+//            Assert.Fail "!!!!!!"
+//        | Yard.Generators.RNGLR.Parser.Success(tree, _, _) ->
+//            tree.PrintAst()
+//            RNGLR.ParseSimpleCalcDemo.defaultAstToDot tree "ast.dot"
+//            Assert.Pass()
 
 
     [<Test>]
@@ -641,33 +641,34 @@ type ``RNGLR abstract parser tests`` () =
             RNGLR.SimpleCalcWithNTerms_4.defaultAstToDot tree "ast.dot"
             Assert.Pass()
 
-    member this.tsqlPerpT() =
-        let loadLexerInputGraph gFile =
-            let qGraph = loadDotToQG baseInputGraphsPath gFile
-            let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
-            lexerInputG.StartVertex <- 0
-            for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, null)))
-            lexerInputG
-        for i in [10..10] do
-            let bp = System.IO.Path.Combine(baseInputGraphsPath,@"..\..\AbstractPerformance\TSQL\" + string i)
-            let times = new ResizeArray<_>(250)
-            for f in System.IO.Directory.GetFiles(bp,"*.dot") 
-                     |> Array.filter(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int <= 55)
-                     |> Array.sortBy(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int)
-                      do
-                let lexerInputGraph = loadLexerInputGraph(f)
-                let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
-                let qGraph = MSLexer._fslex_tables.Tokenize(MSLexer.fslex_actions_tokens, lexerInputGraph, eof)
-                let start = System.DateTime.Now
-                let r = (new Parser<_>()).Parse Yard.Examples.MSParser.buildAstAbstract qGraph
-                let t = (System.DateTime.Now-start) 
-                match r with 
-                |  Yard.Generators.RNGLR.Parser.Success(tree, _) ->
-                    let f = System.IO.Path.GetFileName f
-                    times.Add (f + " " + string t.TotalSeconds)
-                    printfn "%i %s %A" i f t.TotalSeconds  
-                | _ -> ()
-            System.IO.File.WriteAllLines(System.IO.Path.Combine(bp,sprintf "arnglr_%i" i),times)
+//    member this.tsqlPerpT() =
+//        let loadLexerInputGraph gFile =
+//            let qGraph = loadDotToQG baseInputGraphsPath gFile
+//            let lexerInputG = new AbstractLexer.Common.LexerInputGraph<_>()
+//            lexerInputG.StartVertex <- 0
+//            for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new AbstractLexer.Common.LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, null)))
+//            lexerInputG
+//        for i in [10..10] do
+//            let bp = System.IO.Path.Combine(baseInputGraphsPath,@"..\..\AbstractPerformance\TSQL\" + string i)
+//            let times = new ResizeArray<_>(250)
+//            for f in System.IO.Directory.GetFiles(bp,"*.dot") 
+//                     |> Array.filter(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int <= 55)
+//                     |> Array.sortBy(fun x -> System.IO.Path.GetFileNameWithoutExtension x |> int)
+//                      do
+//                let lexerInputGraph = loadLexerInputGraph(f)
+//                let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
+//                let qGraph = MSLexer._fslex_tables.Tokenize(MSLexer.fslex_actions_tokens, lexerInputGraph, eof)
+//                let start = System.DateTime.Now
+//                let r = (new Parser<_>()).Parse Yard.Examples.MSParser.buildAstAbstract qGraph
+//                let t = (System.DateTime.Now-start) 
+//                match r with 
+//                |  Yard.Generators.RNGLR.Parser.Success(tree, _) ->
+//                    let f = System.IO.Path.GetFileName f
+//                    times.Add (f + " " + string t.TotalSeconds)
+//                    printfn "%i %s %A" i f t.TotalSeconds  
+//                | _ -> ()
+//            System.IO.File.WriteAllLines(System.IO.Path.Combine(bp,sprintf "arnglr_%i" i),times)
+
 [<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
@@ -675,7 +676,7 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-    t.tsqlPerpT()
+    //t.tsqlPerpT()
     t.``Errors 1``()
     t.``Errors 2``()
     //t.``Errors 3``()

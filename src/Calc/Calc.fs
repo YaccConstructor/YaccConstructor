@@ -1,7 +1,6 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.Languages.Calc
 
 open Calc.AbstractParser
-open AbstractLexer.Common
 open AbstractLexer.Core
 open Yard.Generators.RNGLR.AST
 open YC.AbstractAnalysis.CommonInterfaces

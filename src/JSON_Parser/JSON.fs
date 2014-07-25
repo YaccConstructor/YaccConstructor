@@ -5,10 +5,10 @@ open AbstractAnalysis.Common
 open AbstractLexer.Core
 open JSON.Parser
 open Yard.Generators.RNGLR.AST
-open YC.AbstractAnalysis.CommonInterfaces
-open YC.ReSharper.AbstractAnalysis.Plugin.Core
-open Mono.Addins
 open YC.EL.ReSharper.Common
+open Mono.Addins
+open YC.AbstractAnalysis.CommonInterfaces
+open  YC.ReSharper.AbstractAnalysis.Plugin.Core
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]

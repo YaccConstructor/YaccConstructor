@@ -41,18 +41,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AbstractLexer.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Common.0.0.6.5\lib\net40\AbstractLexer.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="AbstractLexer.Core">
-      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Core.0.0.6.5\lib\net40\AbstractLexer.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.8.5\lib\net40\AbstractParsing.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
@@ -106,6 +94,18 @@
     <Compile Include="Common.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
+      <Name>AbstractLexer.Core</Name>
+      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

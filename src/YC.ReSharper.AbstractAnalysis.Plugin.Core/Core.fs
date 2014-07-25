@@ -4,6 +4,7 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open QuickGraph.Algorithms
 open YC.AbstractAnalysis.CommonInterfaces
+open AbstractAnalysis.Common
 
 open System
 open Mono.Addins
@@ -53,7 +54,7 @@ type LanguagesProcessor<'br,'range, 'node>() =
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
-        tokenize: AbstractLexer.Common.LexerInputGraph<'br> -> AbstractParsing.Common.ParserInputGraph<'TokenType>
+        tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange:'br -> 'range) as this =
 
@@ -63,7 +64,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
-    let generateTreeNode (graphOpt : AbstractParsing.Common.ParserInputGraph<'token> option) tokenToTreeNode = 
+    let generateTreeNode (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
             let inGraph = graphOpt.Value 
@@ -179,7 +180,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
-    member this.Process (graph:AbstractLexer.Common.LexerInputGraph<'br>) = 
+    member this.Process (graph:LexerInputGraph<'br>) = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
         let filterBrs (brs:array<AbstractLexer.Core.Position<'br>>) =

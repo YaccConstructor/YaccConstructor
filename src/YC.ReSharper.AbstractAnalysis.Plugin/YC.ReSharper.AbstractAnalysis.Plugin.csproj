@@ -75,18 +75,6 @@
     <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="RNGLRAbstractParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRAbstractParser.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLRCommon, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLRParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Generators.RNGLR.0.2.8.9\lib\net40\RNGLRParser.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
@@ -135,9 +123,21 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Name>AbstractAnalysis.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Name>Highlighting.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
+      <Name>RNGLRAbstractParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj">
+      <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
+      <Name>YC.SEL.ReSharper.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>

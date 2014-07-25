@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using JetBrains.DocumentModel;
@@ -12,6 +11,7 @@ using JetBrains.Text;
 
 namespace Highlighting.Core
 {
+    [Obsolete("Do not use this class. It is for experiments only.")]
     public class MyTreeNode : ITreeNode
     {
         public ITreeNode Parent
@@ -70,20 +70,20 @@ namespace Highlighting.Core
             YcHelper.AddYcItem(ycTokName, ycValue, "Calc");
         }
 
-        public MyTreeNode(string ycName, string ycValue, object positions)
+        public MyTreeNode(string ycName, string ycValue, IEnumerable<DocumentRange> positions)
             : this(ycName, ycValue)
         {
-            SetPositions(positions as IEnumerable<DocumentRange>);
+            var ranges = positions.ToList();
+            if (ranges.Count > 0)
+            {
+                UserData.PutData(KeyConstant.Document, ranges[0].Document);
+                UserData.PutData(KeyConstant.Ranges, ranges);
+            }
         }
 
         private void SetPositions(IEnumerable<DocumentRange> positions)
         {
-            if (positions != null)
-            {
-                var ranges = positions.ToList();
-
-                UserData.PutData(KeyConstant.Ranges, ranges);
-            }
+            
         }
 
         public IPsiServices GetPsiServices()
@@ -195,19 +195,29 @@ namespace Highlighting.Core
         // TODO: Normal implementation
         public ITreeNode FindNodeAt(TreeTextRange treeTextRange)
         {
-            if (this.FirstChild == null)
-                return this;
+            if (UserData.GetData(KeyConstant.Document) == null)
+                return null;
             
-            ITreeNode needNode = this;
-            for (ITreeNode child = this.FirstChild; child != null; child = child.NextSibling.Copy())
-            {
-                if (child.GetTreeStartOffset() <= treeTextRange.StartOffset)
-                    needNode = child;
-                else
-                    break;
-            }
+            var needRange = new DocumentRange(UserData.GetData(KeyConstant.Document), treeTextRange.GetTextRange());
+            
 
-            return needNode.FindNodeAt(treeTextRange);
+            List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);
+            bool exists = ranges.Exists(range => range.Contains(needRange));
+
+            if (!exists)
+                return null;
+            
+            //FirstChild null. It means that it node is leaf. 
+            if (exists && FirstChild == null)
+                return this;
+
+            for (ITreeNode child = this.FirstChild; child != null; child = child.NextSibling)
+            {
+                ITreeNode node = child.FindNodeAt(treeTextRange);
+                if (node != null)
+                    return node;
+            }
+            return null;
         }
 
         public ICollection<ITreeNode> FindNodesAt(TreeOffset treeTextOffset)

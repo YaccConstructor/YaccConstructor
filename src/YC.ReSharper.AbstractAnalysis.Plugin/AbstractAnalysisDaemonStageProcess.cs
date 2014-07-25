@@ -16,23 +16,14 @@
 
 using System;
 using JetBrains.Application.Progress;
-using JetBrains.DocumentManagers;
-using JetBrains.DocumentModel;
-using JetBrains.IDE;
-using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.ExtensionsAPI;
 using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
-using JetBrains.ReSharper.Psi.Impl.Shared.InjectedPsi;
-using JetBrains.ReSharper.Psi.Xml.XmlDocComments;
-using JetBrains.TextControl;
-using JetBrains.Util.dataStructures.TypedIntrinsics;
 //using YC.ReSharper.AbstractAnalysis.Plugin.Core;
-using YC.ReSharper.AbstractAnalysis.Plugin.GraphCodeWindow;
+using YC.AbstractAnalysis;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {
@@ -48,27 +39,27 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             //GraphLoader.InvokeLoadGrapFromCoreEvent += GetGraphs;
         }
 
-        private YC.AbstractAnalysis.Helper.ReSharperHelper _processor = new YC.AbstractAnalysis.Helper.ReSharperHelper();
+        private Helper.ReSharperHelper _processor = Helper.ReSharperHelper.Instance;
 
         public void Execute(Action<DaemonStageResult> commiter)
         {
             // Getting PSI (AST) for the file being highlighted
-            var sourceFile = myDaemonProcess.SourceFile;
-            var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
+            //var sourceFile = myDaemonProcess.SourceFile;
+            //var file = sourceFile.GetPsiServices().Files.GetDominantPsiFile<CSharpLanguage>(sourceFile) as ICSharpFile;
             
-            if (file == null)
-                return;
+            //if (file == null)
+            //    return;
 
-            // Running visitor against the PSI            
-            var parserRes = _processor.Process(file);            
-            // Checking if the daemon is interrupted by user activity
-            if (myDaemonProcess.InterruptFlag)
-            throw new ProcessCancelledException();
+            //// Running visitor against the PSI            
+            //var parserRes = _processor.Process(file);            
+            //// Checking if the daemon is interrupted by user activity
+            //if (myDaemonProcess.InterruptFlag)
+            //throw new ProcessCancelledException();
 
-            var highlightings = (from e in parserRes.Item2 select new HighlightingInfo(e.Item2, new ComplexityWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
-                                from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ComplexityWarning("Unexpected symbol: " + e.Item1 + ".")));
-            // Commit the result into document
-            commiter(new DaemonStageResult(highlightings.ToArray()));
+            //var highlightings = (from e in parserRes.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
+            //                    from e in parserRes.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));
+            //// Commit the result into document
+            //commiter(new DaemonStageResult(highlightings.ToArray()));
         }
 
         public void GetGraphs(object sender, EventArgs args)
@@ -93,7 +84,5 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
         {
             get { return myDaemonProcess; }
         }
-
-        
     }
 }

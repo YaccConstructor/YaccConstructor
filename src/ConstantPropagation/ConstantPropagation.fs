@@ -1,5 +1,6 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 
+open XMLParser
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
@@ -12,6 +13,8 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
 
 type Approximator(file:ICSharpFile) = 
+    static let langToHotspot : (string * Hotspot) list = parseHotspots "Hotspots.xml"
+    
     let propagate (hotspot:IInvocationExpression) =
         let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)
         let graph = CSharpControlFlowBuilder.Build(declaration :?> ICSharpFunctionDeclaration)
@@ -73,13 +76,41 @@ type Approximator(file:ICSharpFile) =
         res.StartVertex <- 0
         res
 
+    member this.TryDefineLang (node : IInvocationExpression) = 
+        let typeDecl = node.InvokedExpression.GetText().Split('.')
+        let className = typeDecl.[0].ToLowerInvariant()
+        let methodName = typeDecl.[1].ToLowerInvariant()
+                
+        let args = node.AllArguments(false)
+        let argTypes = ref []
+        for argument in args do
+            argTypes := argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant() :: !argTypes
+        
+        let retType = node.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
+
+        argTypes := List.rev !argTypes
+
+        let langAndHot = 
+            langToHotspot
+            |> List.tryFind (fun record -> 
+                            let hot = snd record
+                            hot.Class = className && hot.Method = methodName 
+                            && hot.ArgumentsType = !argTypes && hot.ReturnType = retType)
+        if langAndHot.IsSome 
+        then fst langAndHot.Value |> Some
+        else None
+
+
     member this.Approximate (defineLang: ITreeNode -> 'a) =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
             match node with 
             | :? IInvocationExpression as m 
-                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
-                -> hotspots.Add (defineLang node , m)
+//                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
+                -> 
+                let lang = this.TryDefineLang (m)
+                if lang.IsSome
+                then hotspots.Add (lang.Value, m)
             | _ -> ()
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)

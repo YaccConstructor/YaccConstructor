@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Body>
+  <Language name="TSQL">
+    <Hotspot>
+      <Fullname>Program.ExecuteImmediate</Fullname>
+      <ArgumentsTypeList>
+        <ArgumentType> string </ArgumentType>
+      </ArgumentsTypeList>
+      <ReturnType> void </ReturnType>
+    </Hotspot>
+  </Language>
+  <Language name="Calc">
+    <Hotspot>
+      <Fullname>Program.Eval</Fullname>
+      <ArgumentsTypeList>
+        <ArgumentType> string </ArgumentType>
+      </ArgumentsTypeList>
+      <ReturnType> int </ReturnType>
+    </Hotspot>
+  </Language>
+</Body>

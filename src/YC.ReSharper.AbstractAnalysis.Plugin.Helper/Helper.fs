@@ -7,7 +7,7 @@ open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 
 [<Class>]
-type ReSharperHelper() =
+type ReSharperHelper private() =
     let processors = 
         [
             ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)

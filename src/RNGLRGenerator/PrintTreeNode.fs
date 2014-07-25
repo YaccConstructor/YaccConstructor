@@ -97,20 +97,24 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
     printBrInd 2 "}"
     printBr ""
         
-    printBrInd 2 "public %s (string ycTokName, string ycValue, object positions) : this (ycTokName, ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
     printBrInd 2 "{"
-    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
-    printBrInd 2 "}"
-    printBr ""
+//    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
+//    printBrInd 2 "}"
+//    printBr ""
     // printing all methods
 
-    printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
-    printBrInd 2 "{"
-    printBrInd 3 "if (positions == null)"
-    printBrInd 4 "return;"
-    printBr ""
+//    printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
+//    printBrInd 2 "{"
+//    printBrInd 3 "if (positions == null)"
+//    printBrInd 4 "return;"
+//    printBr ""
     printBrInd 3 "var ranges = positions.ToList();"
-    printBrInd 3 "UserData.PutData(KeyConstant.Ranges, ranges);"
+    printBrInd 3 "if (ranges.Count > 0)"
+    printBrInd 3 "{"
+    printBrInd 4 "UserData.PutData(KeyConstant.Document, ranges[0].Document);"
+    printBrInd 4 "UserData.PutData(KeyConstant.Ranges, ranges);"
+    printBrInd 3 "}"
     printBrInd 2 "}"
     printBr ""
 
@@ -238,21 +242,27 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
 
     printBrInd 2 "public ITreeNode FindNodeAt(TreeTextRange treeTextRange)"
     printBrInd 2 "{"
-    printBrInd 3 "ITreeNode needNode = null;"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "if (ranges == null || ranges.Count == 0)"
+    printBrInd 4 "return null;"
+    printBrInd 3 "var needRange = new DocumentRange(ranges[0].Document, treeTextRange.GetTextRange());"
+    printBr  ""
+    printBrInd 3 "bool exists = ranges.Exists(range => range.Contains(needRange));"
+    printBr ""
+    printBrInd 3 "if (!exists)"
+    printBrInd 4 "return null;"
+    printBr ""
+    printBrInd 3 "if (FirstChild == null)"
+    printBrInd 4 "return this;"
+    printBr ""
     printBrInd 3 "for (ITreeNode child = this.FirstChild; child != null; child = child.NextSibling)"
     printBrInd 3 "{"
-    printBrInd 4 "var childOffset = child.GetTreeStartOffset();"
-    printBrInd 4 "if (!childOffset.IsValid())"
-    printBrInd 5 "continue;"
-    printBrInd 4 "if (child.GetTreeStartOffset() <= treeTextRange.StartOffset)"
-    printBrInd 5 "needNode = child;"
-    printBrInd 4 "else"
-    printBrInd 5 "break;"
+    printBrInd 4 "ITreeNode node = child.FindNodeAt(treeTextRange);"
+    printBrInd 4 "if (node != null)"
+    printBrInd 5 "return node;"
     printBrInd 3 "}"
-    printBrInd 3 "//needNode = needNode.PrevSibling;"
     printBr ""
-    printBrInd 3 "if (needNode == null || needNode.FirstChild == null) return needNode;"
-    printBrInd 3 "else return needNode.FindNodeAt(treeTextRange);"
+    printBrInd 3 "return null;"
     printBrInd 2 "}"
     printBr ""
 
@@ -538,7 +548,38 @@ let printItemsGroup nameOfClasses xmlName =
     for className in nameOfClasses do
         printBrInd 2 "<ExternalCompile Include=\"%s\" />" className
 
-    printBrInd 2 "<Content Include=\"%s.xml\" />" xmlName
+    printBrInd 2 "<Content Include=\"%s.xml\">" xmlName
+    printBrInd 3 "<CopyToOutputDirectory>Always</CopyToOutputDirectory>"
+    printBrInd 2 "</Content>"
+
     printBrInd 1 "</ItemGroup>"
     printBrInd 1 "</Project>"
+    res.ToString()
+
+let printHotspotFile() = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 1) " ")
+        printBr x
+
+    printBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    printBrInd 0 "<Body>"
+    printBrInd 1 "<Language name=\"TSQL\">"
+    printBrInd 2 "<Hotspot>"
+    printBrInd 2 "<!-- Format: \"Class.Method\". For example, \"Program.Eval\" -->"
+    printBrInd 3 "<Fullname></Fullname>"
+    printBrInd 3 "<ArgumentsTypeList>"
+    printBrInd 2 "<!-- Example: string, int, void -->"
+    printBrInd 4 "<ArgumentType></ArgumentType>"
+    printBrInd 3 "</ArgumentsTypeList>"
+    printBrInd 3 "<ReturnType></ReturnType>"
+    printBrInd 2 "</Hotspot>"
+    printBrInd 1 "</Language>"
     res.ToString()

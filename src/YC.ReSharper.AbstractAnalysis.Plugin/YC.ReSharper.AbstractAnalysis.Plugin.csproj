@@ -91,7 +91,6 @@
   <ItemGroup>
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
-    <Compile Include="AbstractAnalysisWarning.cs" />
     <Compile Include="GraphCodeWindow\GoToCode.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataGraph.cs" />
     <Compile Include="GraphCodeWindow\GraphClasses\DataEdge.cs" />
@@ -104,12 +103,13 @@
     <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
     <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
+    <Compile Include="Highlighting\ErrorWarning.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />
     <Compile Include="Highlighting\HighlightingStage.cs" />
     <Compile Include="Highlighting\LanguageHelper.cs" />
     <Compile Include="Highlighting\MyFileStructureExplorer.cs" />
     <Compile Include="Highlighting\TokenHighlighting.cs" />
-    <Compile Include="Highlighting\RecursiveElementProcessor.cs" />
+    <Compile Include="Highlighting\TreeNodeProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AboutAction.cs" />
     <Compile Include="ReverseStringAction.cs" />

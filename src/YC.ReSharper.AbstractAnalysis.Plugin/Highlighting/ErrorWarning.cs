@@ -16,17 +16,17 @@
 
 using JetBrains.ReSharper.Daemon;
 
-namespace YC.ReSharper.AbstractAnalysis.Plugin
+namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
   /// <summary>
   /// The highlighting that warns about high complexity
   /// </summary>
   [StaticSeverityHighlighting(Severity.ERROR, "CSharpInfo")]
-  public class ComplexityWarning : IHighlighting
+  public class ErrorWarning : IHighlighting
   {
     private readonly string myTooltip;
 
-    public ComplexityWarning(string toolTip)
+    public ErrorWarning(string toolTip)
     {
       myTooltip = toolTip;
     }

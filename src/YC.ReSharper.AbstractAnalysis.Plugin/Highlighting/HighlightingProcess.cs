@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading.Tasks;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
@@ -9,6 +11,7 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.ReSharper.Psi.VB.Tree;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 using YC.AbstractAnalysis;
 
@@ -53,22 +56,27 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             myCommiter = commiter;
             MatchingBraceContextHighlighter.ExistingTrees.Clear();
 
-            YcProcessor.Process(file);
+            var errors = YcProcessor.Process(file);
+            OnErrors(errors);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
             //myCommiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
+        private void OnErrors(Tuple<List<Tuple<string, DocumentRange>>, List<Tuple<string, DocumentRange>>> errors)
+        {
+            var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
+                                from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));
+            myCommiter(new DaemonStageResult(highlightings.ToArray()));
+        }
+
         private void SubscribeYc()
         {
             foreach (var e in YcProcessor.LexingFinished)
-            {
                 e.AddHandler(OnLexingFinished);
-            }
+         
             foreach (var e in YcProcessor.ParsingFinished)
-            {
                 e.AddHandler(OnParsingFinished);
-            }
         }
 
         /// <summary>
@@ -76,13 +84,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// </summary>
         /// <param name="sender">Now always null</param>
         /// <param name="args"></param>
-        private void OnLexingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
+        private void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
         {
             if (myCommiter == null)
                 return;
 
             var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-            var processor = new RecursiveElementProcessor(consumer, File);
+            var processor = new TreeNodeProcessor(consumer, File);
 
             string xmlPath = YcProcessor.XmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
@@ -102,7 +110,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// <param name="sender"></param>
         /// <param name="args">Now it contains only language</param>
         private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
-        private void OnParsingFinished(object sender, YC.AbstractAnalysis.CommonInterfaces.ParsingFinishedArgs args)
+        private void OnParsingFinished(object sender, CommonInterfaces.ParsingFinishedArgs args)
         {
             if (YcProcessor == null)
                 return;
@@ -110,13 +118,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             var lang = args.Lang;
 
             if (!parsedSppf.ContainsKey(lang))
-            {
                 parsedSppf.Add(lang, 0);
-            }
             else
-            {
                 parsedSppf[lang]++;
-            }
 
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
             {

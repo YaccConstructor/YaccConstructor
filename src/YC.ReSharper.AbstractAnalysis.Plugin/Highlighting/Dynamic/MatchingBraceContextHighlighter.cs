@@ -68,6 +68,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             foreach (ITreeNode tree in forest)
             {
                 var lbraceNode = tree.FindNodeAt(lBraceTextRange);
+                if (lbraceNode == null)
+                //in general, this should not be. But while such a situation occurs
+                    continue;
                 var rBraceNode = lbraceNode.NextSibling;
                 while (rBraceNode != null
                     && rBraceNode.UserData.GetData(KeyConstant.YcTokName) != rBrother)
@@ -116,6 +119,10 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             foreach (ITreeNode tree in forest)
             {
                 var rBraceNode = tree.FindNodeAt(lBraceTextRange);
+                if (rBraceNode == null)
+                    //in general, this should not be. But while such a situation occurs
+                    continue;
+
                 var lbraceNode = rBraceNode.PrevSibling;
                 while (lbraceNode != null
                     && lbraceNode.UserData.GetData(KeyConstant.YcTokName) != lbrother)

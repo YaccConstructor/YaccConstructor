@@ -1,7 +1,7 @@
 namespace AbstractLexer.Core
 
 open System.Collections.Generic
-open AbstractLexer.Common
+open AbstractAnalysis.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
 open QuickGraph.Graphviz

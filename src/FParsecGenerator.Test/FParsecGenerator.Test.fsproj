@@ -72,6 +72,9 @@
     <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
+    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
       <Private>True</Private>
     </Reference>
@@ -92,11 +95,6 @@
     <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
       <Name>FParsecGenerator</Name>
       <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Helper\Helper.fsproj">
-      <Name>Helper</Name>
-      <Project>{fc9a166c-780d-4d15-b366-ca06277c803d}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">

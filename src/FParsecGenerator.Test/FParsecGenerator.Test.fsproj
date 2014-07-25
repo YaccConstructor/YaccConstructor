@@ -89,6 +89,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="RNGLR, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -97,11 +100,9 @@
       <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
-      <Name>YardFrontend</Name>
-      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
+    <Reference Include="YardFrontend, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
-    </ProjectReference>
+    </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

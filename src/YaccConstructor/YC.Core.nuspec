@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Core</id>
-    <version>0.0.8.11</version>
+    <version>0.0.8.10</version>
     <title>Core of YaccConstructor</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -25,9 +25,13 @@
     <file src="README YC.Core.txt" target="README.txt" /> 
     <file src="..\..\LICENSE" target="LICENSE" /> 
     <file src="..\..\NOTICE" target="NOTICE" />
-    <!--file src="..\..\Bin\Release\v45\Common.*" target="lib\net45\" exclude="**\*.Test.*"/> 
+
+<!--
+    <file src="..\..\Bin\Release\v45\Common.*" target="lib\net45\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v45\Conversions.*" target="lib\net45\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v45\Constraints.*" target="lib\net45\" exclude="**\*.Test.*"/-->
+    <file src="..\..\Bin\Release\v45\Constraints.*" target="lib\net45\" exclude="**\*.Test.*"/>
+-->
+
     <file src="..\..\Bin\Release\v40\Common.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\Conversions.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\Constraints.*" target="lib\net40\" exclude="**\*.Test.*"/>

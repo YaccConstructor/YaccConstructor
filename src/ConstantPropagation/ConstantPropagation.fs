@@ -13,7 +13,7 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
 
 type Approximator(file:ICSharpFile) = 
-    static let langToHotspot : (string * Hotspot) list = parseHotspots "Hotspots.xml"
+    static let langToHotspot : (string * Hotspot) list = parseXml "Hotspots.xml"
     
     let propagate (hotspot:IInvocationExpression) =
         let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)

@@ -47,20 +47,20 @@
     ANALYSIS_SUGGESTION_ERRORSTRIPE
 -->
 <SyntaxDefinition name="CalcHighlighting">
-    <Tokens color="CONSTANT_IDENTIFIER_ATTRIBUTE">
-        <Token>NUMBER</Token>
-    </Tokens>
-    <Tokens color="OPERATOR_IDENTIFIER_ATTRIBUTE">
-        <Token>DIV</Token>
-        <Token>MINUS</Token>
-        <Token>MULT</Token>
-        <Token>PLUS</Token>
-        <Token>POW</Token>
-    </Tokens>	
-    <Tokens color = "MATCHED_BRACE">
-        <Token>RBRACE</Token>
-        <Token>LBRACE</Token>	
-    </Tokens>
+    <Colors>
+        <Tokens color="CONSTANT_IDENTIFIER_ATTRIBUTE">
+            <Token>  NUMBER  </Token>
+        </Tokens>
+        <Tokens color="OPERATOR_IDENTIFIER_ATTRIBUTE">
+            <Token >DIV  </Token>
+            <Token>MINUS              </Token>
+            <Token>            MULT</Token>
+            <Token>PLUS</Token>
+            <Token>POW</Token>
+	    <Token >RBRACE</Token>
+            <Token>LBRACE</Token>
+        </Tokens>	
+    </Colors>
     <Matched>
         <Pair>
             <Left> LBRACE </Left>

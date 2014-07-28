@@ -8,8 +8,8 @@
     <ProjectGuid>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Constraints</RootNamespace>
-    <AssemblyName>Constraints</AssemblyName>
-    <Name>Constraints</Name>
+    <AssemblyName>YC.Constraints</AssemblyName>
+    <Name>YC.Constraints</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -60,13 +60,15 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YC.Common\YC.Common.fsproj">
+      <Name>YC.Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
+    <ProjectReference Include="..\YC.Conversions\YC.Conversions.fsproj">
+      <Name>YC.Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>

@@ -8,8 +8,8 @@
     <ProjectGuid>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions</RootNamespace>
-    <AssemblyName>Conversions</AssemblyName>
-    <Name>Conversions</Name>
+    <AssemblyName>YC.Conversions</AssemblyName>
+    <Name>YC.Conversions</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -69,8 +69,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YC.Common\YC.Common.fsproj">
+      <Name>YC.Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>

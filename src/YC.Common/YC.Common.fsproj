@@ -8,8 +8,8 @@
     <ProjectGuid>{10EA63AB-6F4E-4925-B0A3-4F9BF8E17A08}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
-    <Name>Common</Name>
+    <AssemblyName>YC.Common</AssemblyName>
+    <Name>YC.Common</Name>
     <SccProjectName>
     </SccProjectName>
     <SccProvider>

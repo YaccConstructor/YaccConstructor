@@ -5,17 +5,17 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{42244dcc-4326-4e7a-bb6b-ccd8ca544d85}</ProjectGuid>
+    <ProjectGuid>{8eaac2a1-d03a-4f42-9182-d294a3db9fdf}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Common.Test</RootNamespace>
-    <AssemblyName>Common.Test</AssemblyName>
-    <Name>Common.Test</Name>
+    <RootNamespace>Conversions.Test</RootNamespace>
+    <AssemblyName>YC.Conversions.Test</AssemblyName>
+    <Name>YC.Conversions.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
-  <!--Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" /-->
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
       <PropertyGroup>
@@ -31,21 +31,24 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="CommonTests.fs" />
-    <Compile Include="Manager.fs" />
+    <Compile Include="ConversionsTests.fs" />
+    <Compile Include="ExpandMetaTests.fs" />
+    <Compile Include="ExpandInnerAltTests.fs" />
+    <Compile Include="ExpandSubseqTests.fs" />
+    <Compile Include="ReplaceInlineTests.fs" />
+    <Compile Include="EliminateLeftRecursionTests.fs" />
+    <Compile Include="ToCNFTests.fs" />
+    <Compile Include="EntryPoint.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -61,22 +64,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLR">
-      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\RNGLR.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YardFrontend">
-      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\YardFrontend.dll</HintPath>
+    <Reference Include="YardPrinter">
+      <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.6\lib\net40\YardPrinter.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

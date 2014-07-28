@@ -1,11 +1,10 @@
+[Rr]elease/
 [Bb]in/
 obj/
 *.suo
 *.user
 *.orig
 
-[Rr]elease/
-*.suo
 GNESCCGeneratedTests/
 src/Development/Utils/tests.fsproj.inc
 ook_based_test/report/picts/*
@@ -149,13 +148,11 @@ Tests/AbstractRNGLR/DOT/errors9.dot.pdf
 src/TSQL/Highlight_*.cs
 src/TSQL/*TermNode.cs
 src/TSQL/*LitNode.cs
-src/TSQL/TSQLHighlighting/*.cs
 src/TSQL/out
-src/TSQL/TSQLHighlighting/TSQLHighlighting.xml
-src/TSQL/TSQLHighlighting/ItemsGroup.target
 *log.txt
 **/out
 **/Calc.yrd.fs
 src/Calc/CalcHighlighting/*
 src/JSON_Parser/JSONHighlighting/*
 src/TSQL/TSQLHighlighting/*
+src/YC.ReSharper.AbstractAnalysis.Plugin/*.csproj.user

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Highlighting.Core;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
@@ -12,7 +11,6 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.ReSharper.Psi.VB.Tree;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 using YC.AbstractAnalysis;
 

@@ -37,9 +37,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractParsing.Common\AbstractParsing.Common.fsproj">
-      <Name>AbstractParsing.Common</Name>
-      <Project>{78c84740-5f30-4ae3-b6b9-19f1ad56d4de}</Project>
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
+      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
@@ -52,9 +52,6 @@
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="Antlr3.Runtime">
-      <HintPath>..\..\3rdParty\graphviz4net-beta\Antlr3.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Common">
       <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
       <Private>True</Private>
@@ -73,13 +70,6 @@
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Graphviz4Net">
-      <HintPath>..\..\3rdParty\graphviz4net-beta\Graphviz4Net.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>

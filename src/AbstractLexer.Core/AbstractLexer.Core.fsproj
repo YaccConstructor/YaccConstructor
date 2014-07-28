@@ -40,10 +40,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.8.5\lib\net40\AbstractParsing.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core">
       <Private>True</Private>
     </Reference>
@@ -71,8 +67,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
-      <Name>AbstractLexer.Common</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>

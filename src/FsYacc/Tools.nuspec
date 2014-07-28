@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Tools</id>
-    <version>0.0.6.8</version>
+    <version>0.0.6.10</version>
     <title>3rd party tools for YaccConstructor</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -16,6 +16,7 @@
     <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
     <references>
     	<reference file="FsYacc.exe" />
+        <reference file="Helper.dll" />
     </references>
   </metadata>
 <files>
@@ -29,6 +30,7 @@
  
     <file src="..\..\Bin\Release\v40\FsYacc.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\FsLex.*" target="lib\net40\" exclude="**\*.Test.*"/>
+    <file src="..\..\Bin\Release\v40\Helper.*" target="lib\net40\" />
     <file src="..\..\Bin\Release\v40\FSharp.Core.dll" target="lib\net40\"/> 	 
     <file src="..\..\Bin\Release\v40\FSharp.PowerPack.Build.Tasks.*" target="lib\net40\" exclude="**\*.Test.*"/> 
     <file src="..\..\Bin\Release\v40\FSharp.PowerPack.targets*" target="lib\net40\"/> 

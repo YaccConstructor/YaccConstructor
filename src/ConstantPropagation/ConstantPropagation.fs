@@ -6,7 +6,7 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Files
-open AbstractLexer.Common
+open AbstractAnalysis.Common
 open Microsoft.FSharp.Collections
 open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp

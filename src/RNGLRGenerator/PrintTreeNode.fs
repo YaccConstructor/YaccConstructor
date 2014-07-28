@@ -386,13 +386,14 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 0 "-->"
 
     printBrInd 0 "<SyntaxDefinition name=\"%s\">" nameOfNamespace
-    printBrInd 1 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
+    printBrInd 1 "<Colors>"
+    printBrInd 2 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
 
     for tok in tokens do
-        printBrInd 2 "<Token> %s </Token>" tok
+        printBrInd 3 "<Token> %s </Token>" tok
 
-    printBrInd 1 "</Tokens>"
-
+    printBrInd 2 "</Tokens>"
+    printBrInd 1 "<Colors>"
     
     printBrInd 0 "<!-- Dynamic highlighting:"
     printBrInd 1 "<Matched>"

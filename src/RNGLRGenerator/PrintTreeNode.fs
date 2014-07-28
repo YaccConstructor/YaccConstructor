@@ -393,7 +393,7 @@ let printXML (nameOfNamespace : string) tokens =
         printBrInd 3 "<Token> %s </Token>" tok
 
     printBrInd 2 "</Tokens>"
-    printBrInd 1 "<Colors>"
+    printBrInd 1 "</Colors>"
     
     printBrInd 0 "<!-- Dynamic highlighting:"
     printBrInd 1 "<Matched>"

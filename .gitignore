@@ -1,4 +1,4 @@
-bin/
+[Bb]in/
 obj/
 *.suo
 *.user
@@ -6,11 +6,8 @@ obj/
 
 [Rr]elease/
 *.suo
-[Bb]in/
 GNESCCGeneratedTests/
 src/Development/Utils/tests.fsproj.inc
-*.orig
-*.user
 ook_based_test/report/picts/*
 *.ompv
 *.csproj.user
@@ -159,6 +156,6 @@ src/TSQL/TSQLHighlighting/ItemsGroup.target
 *log.txt
 **/out
 **/Calc.yrd.fs
-src/JSON_Parser/JSONHighlighting/JSONHighlighting.xml
-src/JSON_Parser/JSONHighlighting/ItemsGroup.target
-src/Calc/CalcHighlighting/ItemsGroup.target
+src/Calc/CalcHighlighting/*
+src/JSON_Parser/JSONHighlighting/*
+src/TSQL/TSQLHighlighting/*

@@ -43,10 +43,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TSQLHighlighting, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Release\TSQLHighlighting.dll</HintPath>
-    </Reference>
   </ItemGroup>
   
   <ItemGroup>

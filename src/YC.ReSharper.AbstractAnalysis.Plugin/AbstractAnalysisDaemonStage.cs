@@ -27,7 +27,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
     /// Daemon stage for comlexity analysis. This class is automatically loaded by ReSharper daemon 
     /// because it's marked with the attribute.
     /// </summary>
-    [DaemonStage]
+    //[DaemonStage]
     public class ComplexityAnalysisDaemonStage : IDaemonStage
     {
         /// <summary>

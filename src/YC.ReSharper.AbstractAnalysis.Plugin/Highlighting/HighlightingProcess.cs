@@ -18,7 +18,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     public class HighlightingProcess : IDaemonStageProcess
     {
-        private readonly DaemonProcessKind myProcessKind;
         private Action<DaemonStageResult> myCommiter;
         private IContextBoundSettingsStore mySettingsStore;
 
@@ -26,36 +25,37 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public IDaemonProcess DaemonProcess { get; private set; }
 
-        public IFile File
-        {
-            get
-            {
-                IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
-                return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile);
-            }
-        }
+        private ICSharpFile csFile;
 
-        public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore, DaemonProcessKind processKind)
+        public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
         {
             DaemonProcess = process;
             mySettingsStore = settingsStore;
-            myProcessKind = processKind;
+            csFile = GetCSFile();
             SubscribeYc();
             //DocumentManager.Instance.AnalyzeDocument(DaemonProcess.Document);
         }
 
+        private ICSharpFile GetCSFile()
+        {
+            IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
+            return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile) as ICSharpFile;
+        }
+
+        public void Update(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
+        {
+            DaemonProcess = process;
+            mySettingsStore = settingsStore;
+        }
+
         public void Execute(Action<DaemonStageResult> commiter)
         {
-            if (myProcessKind != DaemonProcessKind.VISIBLE_DOCUMENT)
-                return;
-
-            var file = File as ICSharpFile;
-            if (file == null)
+            if (csFile == null)
                 return;
 
             myCommiter = commiter;
             ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
-            var errors = YcProcessor.Process(file);
+            var errors = YcProcessor.Process(csFile);
             OnErrors(errors);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
@@ -89,15 +89,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return;
 
             var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-            var processor = new TreeNodeProcessor(consumer, File);
+            var processor = new TreeNodeProcessor(consumer, csFile);
 
             string xmlPath = YcProcessor.XmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
 
+            Action action = 
+                () => args.Tokens.ForEach(node => processor.ProcessAfterInterior(node));
+            
             using (TaskBarrier fibers = DaemonProcess.CreateFibers())
             {
-                fibers.EnqueueJob(
-                    () => args.Tokens.ForEach(node => processor.ProcessAfterInterior(node)));
+                fibers.EnqueueJob(action);
             }
 
             myCommiter(new DaemonStageResult(consumer.Highlightings));
@@ -114,27 +116,28 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (YcProcessor == null)
                 return;
 
-            var lang = args.Lang;
+            string lang = args.Lang;
 
             if (!parsedSppf.ContainsKey(lang))
                 parsedSppf.Add(lang, 0);
             else
                 parsedSppf[lang]++;
 
-            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
-            {
-                fibers.EnqueueJob(() =>
+            Action action = 
+                () =>
                 {
                     var isEnd = false;
-
                     while (!isEnd)
                     {
                         Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
-                        ITreeNode tree = res.Item1;
-                        ExistingTreeNodes.AddTree(tree);
+                        ExistingTreeNodes.AddTree(res.Item1);
                         isEnd = res.Item2;
                     }
-                });
+                };
+
+            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
+            {
+                fibers.EnqueueJob(action);
             }
         }
     }

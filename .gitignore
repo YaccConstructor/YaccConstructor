@@ -155,4 +155,4 @@ src/TSQL/out
 src/Calc/CalcHighlighting/*
 src/JSON_Parser/JSONHighlighting/*
 src/TSQL/TSQLHighlighting/*
-src/YC.ReSharper.AbstractAnalysis.Plugin/*.csproj.user
+BuildScripts/packages/*

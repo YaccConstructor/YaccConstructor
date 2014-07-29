@@ -13,11 +13,18 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
 
 type Approximator(file:ICSharpFile) = 
-    static let langToHotspot : (string * Hotspot) list = parseHotspots "Hotspots.xml"
+    static let langToHotspot : (string * Hotspot) list = parseXml "Hotspots.xml"
     
     let propagate (hotspot:IInvocationExpression) =
-        let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)
-        let graph = CSharpControlFlowBuilder.Build(declaration :?> ICSharpFunctionDeclaration)
+        
+//        let declaration = hotspot.FindPrevNode(fun node -> match node with :? ICSharpFunctionDeclaration -> TreeNodeActionType.ACCEPT |_ ->  TreeNodeActionType.CONTINUE)
+        let declaration = 
+            let mutable parent = hotspot :> ITreeNode
+            while not <| parent :? ICSharpFunctionDeclaration do
+                parent <- parent.Parent
+            parent :?> ICSharpFunctionDeclaration
+
+        let graph = CSharpControlFlowBuilder.Build(declaration (*:?> ICSharpFunctionDeclaration*))
         let x = graph.Inspect(ValueAnalysisMode.OPTIMISTIC)
         let defUses = x.AssignmentsUsage
         let count = ref 0
@@ -100,7 +107,6 @@ type Approximator(file:ICSharpFile) =
         then fst langAndHot.Value |> Some
         else None
 
-
     member this.Approximate (defineLang: ITreeNode -> 'a) =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
@@ -115,6 +121,6 @@ type Approximator(file:ICSharpFile) =
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)
         processor.Process file
-        let graphs = ResizeArray.map (fun (l : string, h) -> l, propagate h) hotspots
+        let graphs = ResizeArray.map (fun (lang, hotspot) -> lang, propagate hotspot) hotspots
         graphs
         

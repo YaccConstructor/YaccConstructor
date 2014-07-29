@@ -31,7 +31,7 @@ let litToClassName (lit : string) =
 let getLeafSemanticForToken token = 
     let res = new System.Text.StringBuilder()
 
-    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
@@ -43,7 +43,7 @@ let getLeafSemanticForToken token =
 let getLeafSemanticForLiteral litName litText = 
     let res = new System.Text.StringBuilder()
 
-    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
@@ -59,7 +59,7 @@ let getNodeSemantic parent children =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
 
     let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
@@ -173,7 +173,6 @@ let highlightingConvertions (def : Definition.t<Source.t, Source.t>) =
 
     let addHighlightRules() = 
         let mutable res = []
-
 
         for token in !terminals do 
             let actionCode = new Source.t(getLeafSemanticForToken token)

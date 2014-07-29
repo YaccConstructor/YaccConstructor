@@ -25,14 +25,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
-        //public static void AddMatchedTokens(Dictionary<string, string> matched, string lang)
-        //{
-        //    Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang);
-        //    if (language == null)
-        //        throw new Exception("Error in LanguageHelper");
-        //    language.AddMatchedPaired(matched);
-        //}
-
         public static string GetColor(string lang, string token)
         {
             Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLower());
@@ -47,12 +39,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public string LanguageName { get; private set; }
 
         private Dictionary<string, TokenInfo> tokenInfos = new Dictionary<string, TokenInfo>();
-        
+
         public Language(string lang, Dictionary<string, TokenInfo> tokenInfos)
         {
             LanguageName = lang;
             this.tokenInfos = tokenInfos;
-            //Update();
         }
 
         public string GetBrother(string str, Brother brother)
@@ -87,27 +78,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             return YcHelper.GetYcName(LanguageName, str);
         }
 
-        //private string GetStringFromYcName(string str)
-        //{
-        //    return YcHelper.GetStringName(LanguageName, str);
-        //}
-
-        //private string GetYcValue(string ycName)
-        //{
-        //    if (string.IsNullOrEmpty(ycName))
-        //        return null;
-
-        //    if (ycToString.ContainsKey(ycName))
-        //        return ycToString[ycName];
-
-        //    return null;
-        //}
-
-        //public void AddMatchedPaired(Dictionary<string, string> pairs)
-        //{
-        //    state = MatchedParsed.TRUE;
-        //}
-
         public string GetColor(string token)
         {
             if (tokenInfos.ContainsKey(token))
@@ -115,17 +85,13 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
             return ColorHelper.DefaultColor;
         }
-
-        private void Update()
-        {
-        }
     }
 
     class TokenInfo
     {
         //possible it is unnecessary
-        public string YcName { get; set; }
-        public string LeftPair { get; set; } 
+        //public string YcName { get; set; }
+        public string LeftPair { get; set; }
         public string RightPair { get; set; }
         public string Color { get; set; }
     }

@@ -19,7 +19,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             myElement = element;
             string lang = element.UserData.GetData(KeyConstant.YcLanguage);
-            string tokenName = element.UserData.GetData(KeyConstant.YcTokName);
+            string tokenName = element.UserData.GetData(KeyConstant.YcTokenName);
             attributeId = LanguageHelper.GetColor(lang, tokenName);
         }
 

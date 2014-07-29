@@ -12,7 +12,7 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
         Printf.kprintf (fun s -> res.Append s |> ignore) x
 
     let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
@@ -86,8 +86,8 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
     printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
     printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
     printBr ""
-    printBrInd 3 "UserData.PutData(KeyConstant.YcTokName, ycTokName);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcValue, ycValue);"
+    printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
+    printBrInd 3 "UserData.PutData(KeyConstant.YcTextValue, ycValue);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLower()
     
     if isTerminal
@@ -242,10 +242,12 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
 
     printBrInd 2 "public ITreeNode FindNodeAt(TreeTextRange treeTextRange)"
     printBrInd 2 "{"
+    printBrInd 3 "IDocument doc = UserData.GetData(KeyConstant.Document);"
+//    printBrInd 3 "if (ranges == null || ranges.Count == 0)"
+//    printBrInd 4 "return null;"
+//    printBrInd 3 "var needRange = new DocumentRange(ranges[0].Document, treeTextRange.GetTextRange());"
+    printBrInd 3 "var needRange = new DocumentRange(doc, treeTextRange.GetTextRange());"
     printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
-    printBrInd 3 "if (ranges == null || ranges.Count == 0)"
-    printBrInd 4 "return null;"
-    printBrInd 3 "var needRange = new DocumentRange(ranges[0].Document, treeTextRange.GetTextRange());"
     printBr  ""
     printBrInd 3 "bool exists = ranges.Exists(range => range.Contains(needRange));"
     printBr ""
@@ -291,7 +293,7 @@ let printXML (nameOfNamespace : string) tokens =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
 
     let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
@@ -384,13 +386,14 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 0 "-->"
 
     printBrInd 0 "<SyntaxDefinition name=\"%s\">" nameOfNamespace
-    printBrInd 1 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
+    printBrInd 1 "<Colors>"
+    printBrInd 2 "<Tokens color=\"CONSTANT_IDENTIFIER_ATTRIBUTE\">"
 
     for tok in tokens do
-        printBrInd 2 "<Token> %s </Token>" tok
+        printBrInd 3 "<Token> %s </Token>" tok
 
-    printBrInd 1 "</Tokens>"
-
+    printBrInd 2 "</Tokens>"
+    printBrInd 1 "</Colors>"
     
     printBrInd 0 "<!-- Dynamic highlighting:"
     printBrInd 1 "<Matched>"
@@ -420,7 +423,7 @@ let printAddSemantic() =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
 
     let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")
@@ -442,6 +445,8 @@ let printAddSemantic() =
     printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
     printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
     printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
+    printBrInd 1 "if ranges <> null && ranges.Count > 0"
+    printBrInd 1 "then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)"
     printBrInd 1 "parent"
     res.ToString()
 
@@ -454,7 +459,7 @@ let printCalculatePos() =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
 
     let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append('\n') |> ignore) x
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
     let inline printBrInd num (x : 'a) =
         print "%s" (String.replicate (num <<< 2) " ")

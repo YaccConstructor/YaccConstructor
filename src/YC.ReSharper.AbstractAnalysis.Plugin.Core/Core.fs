@@ -64,22 +64,18 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
-    let generateTreeNode (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
+    let prepareToHighlighting (graphOpt : ParserInputGraph<'token> option) tokenToTreeNode = 
         if graphOpt.IsSome
         then
-            let inGraph = graphOpt.Value 
-            let ts =  inGraph.TopologicalSort() |> Array.ofSeq
-            let ids = dict (ts |> Array.mapi (fun i v -> v,i))
-            let tokens = 
-                ts
-                |> Seq.mapi (fun i v -> inGraph.OutEdges v |> (Seq.map (fun e -> e.Tag)) |> Array.ofSeq)
-            let enumerator = tokens.GetEnumerator()
             let tokensList = new ResizeArray<_>()
-            while enumerator.MoveNext() do
-                let t = enumerator.Current
-                t |> Array.iter (fun i -> 
-                    let treeNode = tokenToTreeNode i
-                    tokensList.Add treeNode)
+
+            let inGraph = graphOpt.Value 
+            inGraph.TopologicalSort()
+            |> Seq.iter 
+                (fun vertex -> 
+                        inGraph.OutEdges vertex 
+                        |> Seq.iter (fun edge -> tokensList.Add <| tokenToTreeNode edge.Tag)
+                )
 
             lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang))
 
@@ -96,13 +92,14 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
         let tokenizedGraph = tokenize graph 
         
-        generateTreeNode tokenizedGraph tokenToTreeNode 
+        prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
-        tokenizedGraph |> Option.map parse
+        tokenizedGraph 
+        |> Option.map parse
         |> Option.iter
             (function 
-                | Yard.Generators.RNGLR.Parser.Success(x,_,e) ->
-                    forest <- (x,e) :: forest
+                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
+                    forest <- (tree, errors) :: forest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
                 | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
             )
@@ -115,7 +112,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let mutable curSppf, errors = List.nth forest index
             let unprocessed = 
                 match generationState with
-                | Start ->              Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
+                | Start ->   Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
                 | InProgress (_, unproc) ->  unproc
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
@@ -137,25 +134,6 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 let treeNode = (this.TranslateToTreeNode tree errors)
                 res.Add treeNode
         res
-          
-//    member this.CalculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
-//        let ranges = 
-//            brs |> Seq.groupBy (fun x -> x.back_ref)
-//            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-//            |> Seq.map(fun brs ->
-//                try
-//                    let pos =  brs |> Array.map(fun i -> i.pos_cnum)
-//                    let lengthTok = pos.Length
-//                    let beginPosTok = pos.[0] + 1
-//                    let endPosTok = pos.[lengthTok-1] + 2 
-//                    let endPos = 
-//                        brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-//                        - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-//                    brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-//                with
-//                | e -> 
-//                    brs.[0].back_ref.GetDocumentRange())
-//        ranges    
 
     member this.GetNextTree index =         
         let state = getNextTree 0//index
@@ -167,13 +145,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos token = 
-        let data = unbox <| tokenData token
-        let str : string = fst data
-        let pos : array<AbstractLexer.Core.Position<'br>> 
-                = snd data
-                
-        //this.CalculatePos pos
-        calculatePos pos
+        let data : string * array<AbstractLexer.Core.Position<'br>> = unbox <| tokenData token
+        calculatePos <| snd data
 
     member this.GetForestWithToken range =        
         getForestWithToken range
@@ -189,13 +162,13 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             res.ToArray()
                     
         let addError tok =
-            let e t l (brs:array<AbstractLexer.Core.Position<'br>>) = 
+            let e tokName lang (brs:array<AbstractLexer.Core.Position<'br>>) = 
                 brs |> calculatePos
                 |> Seq.iter
-                    (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" t l), br))
+                    (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" tokName lang), br))
             let name = tok |> (tokenToNumber >>  numToString)
-            let (l:string),br = tokenData tok :?> _
-            e name l br
+            let (language : string), br = tokenData tok :?> _
+            e name language br
         
         processLang graph lexerErrors.Add addError
 

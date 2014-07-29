@@ -33,6 +33,7 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <ItemGroup>
+    <Compile Include="XMLParser.fs" />
     <Compile Include="ConstantPropagation.fs" />
     <None Include="packages.config" />
     <Content Include="Hotspots.xml">
@@ -91,11 +92,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\XMLParser\XMLParser.fsproj">
-      <Name>XMLParser</Name>
-      <Project>{bd567e70-345d-4110-bf03-cef8d8cab7b8}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">

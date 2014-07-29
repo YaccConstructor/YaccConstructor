@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Xml.Schema;
 using JetBrains.ReSharper.Daemon;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
@@ -82,21 +81,18 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
 
             var path = GetFullPath(fileName);
-            
+
             if (string.IsNullOrEmpty(path))
                 throw new Exception(string.Format("File {0} doesn't exist", fileName));
 
-            using (XmlReader reader = new XmlTextReader
-                (new StreamReader(path)))
-            {
-                reader.MoveToContent();
-                var xmlReader = GetValidatingReader(reader, new XmlSchemaSet());
-                xmlReader.Read();
-                Dictionary<string, TokenInfo> res = ParseDefinition(xmlReader);
+            var xmlDocument = new XmlDocument();
+            xmlDocument.Load(fileName);
 
-                parsedFiles.Add(fileName);
-                LanguageHelper.Update(lang, res);
-            }
+            Dictionary<string, TokenInfo> res = ParseDefinition(xmlDocument.DocumentElement);
+
+            parsedFiles.Add(fileName);
+            LanguageHelper.Update(lang, res);
+
         }
 
         private static string GetFullPath(string fileName)
@@ -108,121 +104,68 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             return string.Empty;
         }
 
-        private static Dictionary<string, TokenInfo> ParseDefinition(XmlReader xmlReader)
+        private static Dictionary<string, TokenInfo> ParseDefinition(XmlNode root)
+        {
+            XmlNode currentNode = root.FirstChild;
+            Dictionary<string, TokenInfo> tokenToColor = ParseColors(currentNode);
+
+            currentNode = currentNode.NextSibling;
+            if (currentNode != null)
+            {
+                ParseParenthesis(currentNode, tokenToColor);
+            }
+            return tokenToColor;
+        }
+
+        private static void ParseParenthesis(XmlNode element, Dictionary<string, TokenInfo> tokenToColor)
+        {
+            foreach (XmlNode item in element)
+            {
+                if (item.Name.ToLowerInvariant() != "pair")
+                    continue;
+
+                XmlNode first = item.FirstChild;
+
+                if (first.Name.ToLowerInvariant() != "left")
+                    continue;
+
+                string left = first.InnerText.Trim().ToLowerInvariant();
+
+                XmlNode snd = first.NextSibling;
+                if (snd.Name.ToLowerInvariant() != "right")
+                    continue;
+
+                string right = snd.InnerText.Trim().ToLowerInvariant();
+
+                tokenToColor[left].RightPair = right;
+                tokenToColor[right].LeftPair = left;
+            }
+        }
+
+        private static Dictionary<string, TokenInfo> ParseColors(XmlNode element)
         {
             var dict = new Dictionary<string, TokenInfo>();
-            while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
+            foreach (XmlNode item in element.ChildNodes)
             {
-                if (xmlReader.Name == "Tokens")
+                if (item.Name.ToLowerInvariant() != "tokens")
+                    continue;
+
+                string colorText = item.Attributes.GetNamedItem("color").Value.Trim().ToUpperInvariant();
+                string resharperColor = mapping.ContainsKey(colorText)
+                    ? mapping[colorText]
+                    : DefaultColor;
+
+                foreach (XmlNode token in item.ChildNodes)
                 {
-                    ParseTokensGroup(xmlReader, xmlReader.GetAttribute("color"), dict);
-                }
-                else if (xmlReader.Name == "Token")
-                {
-                    ParseToken(xmlReader, xmlReader.GetAttribute("color"), dict);
-                }
-                else if (xmlReader.Name == "Matched")
-                {
-                    ParseMatching(xmlReader, dict);
-                }
-                else
-                {
-                    throw new Exception(string.Format("Unexpected element"));
+                    if (token.Name.ToLowerInvariant() != "token")
+                        continue;
+
+                    string tokenName = token.InnerText.Trim().ToLowerInvariant();
+                    dict.Add(tokenName, new TokenInfo() {Color = resharperColor});
                 }
             }
+            
             return dict;
-        }
-
-        private static void ParseToken(XmlReader xmlReader, string color, Dictionary<string, TokenInfo> dict)
-        {
-            xmlReader.Read();
-            var content = xmlReader.ReadContentAsString().Trim();
-
-            if (dict.ContainsKey(content))
-                return;
-
-            if (!string.IsNullOrEmpty(color) && mapping.ContainsKey(color))
-            {
-                var tokInfo = new TokenInfo()
-                {
-                    YcName = content,
-                    Color = mapping[color],
-                };
-                dict.Add(content.ToLower(), tokInfo);
-            }
-            else
-            {
-                var tokInfo = new TokenInfo()
-                {
-                    YcName = content,
-                    Color = DefaultColor,
-                };
-                dict.Add(content.ToLower(), tokInfo);
-            }
-        }
-
-        private static void ParseTokensGroup(XmlReader xmlReader, string color, Dictionary<string, TokenInfo> dict)
-        {
-            while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
-            {
-                ParseToken(xmlReader, color, dict);
-            }
-        }
-
-        private static void ParseMatching(XmlReader xmlReader, Dictionary<string, TokenInfo> dict)
-        {
-            while (xmlReader.Read() && xmlReader.NodeType != XmlNodeType.EndElement)
-            {
-                xmlReader.Read();
-
-                var left = ParseLeftMatcher(xmlReader);
-                var right = ParseRightMatcher(xmlReader);
-
-                dict[left].RightPair = right;
-                dict[right].LeftPair = left;
-            }
-        }
-
-        private static string ParseLeftMatcher(XmlReader xmlReader)
-        {
-
-            if (xmlReader.Name == "Left")
-            {
-                xmlReader.Read();
-                string res = xmlReader.ReadContentAsString().Trim();
-                xmlReader.Read();
-                return res.ToLower();
-            }
-            throw new Exception("Unexpected left element in matching");
-        }
-
-        private static string ParseRightMatcher(XmlReader xmlReader)
-        {
-            if (xmlReader.Name == "Right")
-            {
-                xmlReader.Read();
-                string res = xmlReader.ReadContentAsString().Trim();
-                xmlReader.Read();
-                return res.ToLower();
-            }
-            throw new Exception("Unexpected right element in matching");
-        }
-
-        private static XmlReader GetValidatingReader(XmlReader input, XmlSchemaSet schemaSet)
-        {
-            var settings = new XmlReaderSettings
-            {
-                CloseInput = true,
-                IgnoreComments = true,
-                IgnoreWhitespace = true
-            };
-
-            if (schemaSet != null)
-            {
-                settings.Schemas = schemaSet;
-                settings.ValidationType = ValidationType.Schema;
-            }
-            return XmlReader.Create(input, settings);
         }
     }
 }

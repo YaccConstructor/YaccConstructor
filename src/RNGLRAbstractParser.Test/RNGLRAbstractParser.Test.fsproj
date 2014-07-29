@@ -95,10 +95,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
       <Private>False</Private>
@@ -110,6 +106,9 @@
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Utils.SourceText, Version=0.1.5119.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

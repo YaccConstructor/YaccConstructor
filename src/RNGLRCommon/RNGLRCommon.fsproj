@@ -49,8 +49,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Utils.SourceText">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6000.0\lib\net40\Utils.SourceText.dll</HintPath>
+    <Reference Include="Utils.SourceText, Version=0.1.5119.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
   </ItemGroup>

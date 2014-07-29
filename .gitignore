@@ -162,3 +162,4 @@ src/TSQL/TSQLHighlighting/ItemsGroup.target
 src/JSON_Parser/JSONHighlighting/JSONHighlighting.xml
 src/JSON_Parser/JSONHighlighting/ItemsGroup.target
 src/Calc/CalcHighlighting/ItemsGroup.target
+BuildScripts/packages/*

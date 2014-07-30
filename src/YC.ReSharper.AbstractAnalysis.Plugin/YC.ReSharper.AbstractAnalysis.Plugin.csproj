@@ -124,10 +124,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractLexer.Common\AbstractAnalysis.Common.fsproj">
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Name>AbstractAnalysis.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Name>Highlighting.Core</Name>

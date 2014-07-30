@@ -232,11 +232,7 @@ let main() =
     printLinesIfCodeDefined spec.BottomCode
     cfprintfn os "# 3000000 \"%s\"" output;
   
-    let printTable filePath =
-//        for state in dfaNodes do
-//            for i = 0 to 256 do
-//                System.IO.File.AppendAllText(filePath, string (tableTransitions.[state.Id].[i]) + " ") 
-//            System.IO.File.AppendAllText(filePath, "\n")                                   
+    let printTable filePath =                                
         let strs =
             tableTransitions
             |> ResizeArray.map(fun x -> 
@@ -259,14 +255,9 @@ let main() =
         for state in dfaNodes do
             for i in 0..256 do
                 let st = tableTransitions.[state.Id].[i]
-                if i = 256
-                then
-                    printfn "!!!!"
                 if st <> sentinel 
                 then 
-                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore  
-                    //resFST.FinalState.Add(st)  
-                    //new TaggedEdge<_,_>(st,  stEOF, new EdgeLbl<_,_>(Smbl (char Eof), Smbl (actionFunc.[state.Id].[0]))) |> resFST.AddVerticesAndEdge |> ignore                      
+                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                 else 
                     if state.Id <> 0
                     then 
@@ -288,6 +279,36 @@ let main() =
         let fst = new FST<_,_>(startState, finishState, transitions)
         let r = FST<_,_>.Compos(fst, resFST)
         r.PrintToDOT(@"C:\recursive-ascent\src\AbstractFsLex\outPrint1.txt")
+
+
+        let getVal printV s = 
+            match s with
+            | Smbl y -> "Smbl " + printV y
+            | Eps -> "Eps"
+            | _ -> ""
+
+        let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.txt"
+        let fstStream = new StreamWriter(filePathFst)
+
+        fstStream.WriteLine("module YC.FST.Fstlexer")
+        fstStream.WriteLine()
+        fstStream.WriteLine("open Microsoft.FSharp.Collections")
+        fstStream.WriteLine("open YC.FST.GraphBasedFst")
+        fstStream.WriteLine()
+        fstStream.WriteLine(sprintf "let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
+        fstStream.WriteLine(sprintf "let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
+        fstStream.WriteLine("let transitions = new ResizeArray<_>()")
+        
+        for edge in resFST.Edges do         
+            fstStream.WriteLine(
+                sprintf  
+                    "transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
+                    edge.Source
+                    (getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
+                    (getVal (string) edge.Tag.OutSymb) edge.Target)
+
+        fstStream.WriteLine("let fst = new FST<_,_>(startState, finishState, transitions)")
+        fstStream.Close()
 
     ToGraphBasedFst    
     

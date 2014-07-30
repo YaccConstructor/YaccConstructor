@@ -62,8 +62,6 @@ let errorTest inputFilePath shouldContainsSuccess errorsCount =
 [<TestFixture>]
 type ``RNGLR abstract parser tests`` () =
 
-
-
     [<Test>]
     member this.``Load graph test from DOT`` () =
         let g = loadGraphFromDOT(path "IFExists_lex.dot")

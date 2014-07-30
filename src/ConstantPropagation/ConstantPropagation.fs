@@ -96,16 +96,14 @@ type Approximator(file:ICSharpFile) =
         let retType = node.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
 
         argTypes := List.rev !argTypes
-
-        let langAndHot = 
-            langToHotspot
-            |> List.tryFind (fun record -> 
-                            let hot = snd record
-                            hot.Class = className && hot.Method = methodName 
-                            && hot.ArgumentsType = !argTypes && hot.ReturnType = retType)
-        if langAndHot.IsSome 
-        then fst langAndHot.Value |> Some
-        else None
+         
+        langToHotspot
+        |> List.tryFind (fun record -> 
+                        let hot = snd record
+                        hot.Class = className && hot.Method = methodName 
+                        && hot.ArgumentsType = !argTypes && hot.ReturnType = retType)
+        
+        |> Option.map fst        
 
     member this.Approximate (defineLang: ITreeNode -> 'a) =
         let hotspots = new ResizeArray<_>() 
@@ -114,9 +112,8 @@ type Approximator(file:ICSharpFile) =
             | :? IInvocationExpression as m 
 //                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
                 -> 
-                let lang = this.TryDefineLang (m)
-                if lang.IsSome
-                then hotspots.Add (lang.Value, m)
+                this.TryDefineLang m
+                |> Option.iter (fun l -> hotspots.Add (l, m))
             | _ -> ()
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)

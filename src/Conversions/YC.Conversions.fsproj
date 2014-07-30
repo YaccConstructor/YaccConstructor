@@ -71,7 +71,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YC.Common\YC.Common.fsproj">
+    <ProjectReference Include="..\Common\YC.Common.fsproj">
       <Name>YC.Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>

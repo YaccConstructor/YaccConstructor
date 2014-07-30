@@ -4,7 +4,7 @@ open System
 open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.AST2
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
@@ -103,27 +103,27 @@ let printTranslator2 (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sour
 
 
     let toStr (x : int) = x.ToString()
-    let defineEpsilonTrees =
-        let rec printAst : (obj -> _) =
-            function
-            | :? AST as arr ->
-                "box (new AST(" + printChild arr.first
-                        + ", " + printArr arr.other printChild + "))"
-            | _ -> failwith "SingleNode was not expected in epsilon tree"
-        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
-                                            + printArr (family.nodes.map id) printAst + "))"
-        let printEps name = 
-            "let " + name + " : Tree<Token>[] = " +
-                printArr grammar.epsilonTrees
-                    (function
-                     | null -> "null"
-                     | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
-            |> wordL
-        printEps epsilonName
-        @@
-        printEps epsilonNameFiltered
-        @@
-        (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
+//    let defineEpsilonTrees =
+//        let rec printAst : (obj -> _) =
+//            function
+//            | :? AST as arr ->
+//                "box (new AST(" + printChild arr.first
+//                        + ", " + printArr arr.other printChild + "))"
+//            | _ -> failwith "SingleNode was not expected in epsilon tree"
+//        and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
+//                                            + printArr (family.nodes.map id) printAst + "))"
+//        let printEps name = 
+//            "let " + name + " : Tree<Token>[] = " +
+//                printArr grammar.epsilonTrees
+//                    (function
+//                     | null -> "null"
+//                     | tree -> "new Tree<_>(null," + printAst tree.Root + ", null)")
+//            |> wordL
+//        printEps epsilonName
+//        @@
+//        printEps epsilonNameFiltered
+//        @@
+//        (wordL <| "for x in " + epsilonNameFiltered + " do if x <> null then x.ChooseSingleAst()")
 
     // Realise rules
     let rec getProductionLayout num = function
@@ -263,7 +263,7 @@ let printTranslator2 (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sour
 
     //let nowarn = wordL "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-    [(*nowarn; *)defineEpsilonTrees; (*declareNonTermsArrays;*) rules; funRes]
+    [(*nowarn; *)(*defineEpsilonTrees;*) (*declareNonTermsArrays;*) rules; funRes]
     |> aboveListL
     |> Display.layout_to_string(FormatOptions.Default)
     

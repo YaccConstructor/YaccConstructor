@@ -1,6 +1,6 @@
 
-# 2 "SimpleLeftRecursion.yrd.fs"
-module RNGLR.SimpleLeftRecursion
+# 2 "SimpleRightRecursion.yrd.fs"
+module RNGLR.SimpleRightRecursion
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
@@ -35,7 +35,7 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 1; 2|]
-let private rules = [|1; 3; 3; 1|]
+let private rules = [|3; 1; 3; 1|]
 let private rulesStart = [|0; 2; 3; 4|]
 let startRule = 2
 
@@ -44,9 +44,9 @@ let acceptEmptyInput = false
 let defaultAstToDot =
     (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private lists_gotos = [|1; 3; 2|]
+let private lists_gotos = [|1; 2; 3|]
 let private small_gotos =
-        [|2; 65536; 196609; 65537; 196610|]
+        [|2; 65536; 196609; 131074; 65538; 196609|]
 let gotos = Array.zeroCreate 4
 for i = 0 to 3 do
         gotos.[i] <- Array.zeroCreate 5
@@ -60,9 +60,9 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|0,2|]; [|1,1|]|]
+let private lists_reduces = [|[|1,1|]; [|0,2|]|]
 let private small_reduces =
-        [|131074; 196608; 262144; 196610; 196609; 262145|]
+        [|131073; 262144; 196609; 262145|]
 let reduces = Array.zeroCreate 4
 for i = 0 to 3 do
         reduces.[i] <- Array.zeroCreate 5
@@ -103,3 +103,4 @@ let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces,
 
 let buildAst : (seq<'TokenType> -> ParseResult<Token>) =
     buildAst<Token> parserSource
+

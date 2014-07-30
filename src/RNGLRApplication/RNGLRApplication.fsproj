@@ -15,6 +15,9 @@
   <ItemGroup>
     <None Include="Calc.yrd" />
     <Compile Include="SimpleLeftRecursion.yrd.fs" />
+    <Compile Include="SimpleRightRecursion.yrd.fs" />
+    <Compile Include="SimpleAmb.yrd.fs" />
+    <Compile Include="Mixed.yrd.fs" />
     <Compile Include="LexCommon.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -28,6 +31,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>

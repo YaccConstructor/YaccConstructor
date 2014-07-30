@@ -1,46 +1,72 @@
 ﻿// Learn more about F# at http://fsharp.net
 
 module RNGLRApplication
+open System.IO
+open System
+open Microsoft.FSharp.Text
+open Microsoft.FSharp.Reflection
+
 
 open Yard.Generators.RNGLR
-open Yard.Generators.Common.AST
+open Yard.Generators.RNGLR.Parser 
+open Yard.Generators.Common.AST2
+open RNGLR.SimpleLeftRecursion
+open RNGLR.SimpleAmb
+open RNGLR.SimpleRightRecursion
+
+open Yard.Generators.RNGLR
 open Yard.Generators
 open LexCommon
 
-let run path astBuilder =
-    let tokens = LexCommon.tokens(path)
+let run1 path astBuilder =
+    let tokens = LexCommon.tokens1(path)
     astBuilder tokens, tokens
 
-let parser = RNGLR.SimpleLeftRecursion.buildAst
-let path = @"..\..\input.txt"
-//let rightValue = [ANode [ALeaf; ANode[ALeaf; ANode[ALeaf; ANode[ALeaf]]]]]
 
+let parser1 = RNGLR.SimpleLeftRecursion.buildAst
+printfn "Simple left recursion"
 for i in [1..100] do
     let str = String.init (i * 100) (fun i -> "B ")
     let start = System.DateTime.Now
-    let r = run (str.Trim()) parser
+    let r = run1 (str.Trim()) parser1
     let t = System.DateTime.Now - start
     printfn "%A" t.TotalSeconds
+//
+let run2 path astBuilder =
+    let tokens = LexCommon.tokens3(path)
+    astBuilder tokens, tokens
 
-//match run path parser with
-//| Parser.Error (num, tok, message, debug, _),_ ->
-//    printfn "Error in position %d on Token %A: %s" num tok message
-//    debug.drawGSSDot "out.dot"
-//| Parser.Success (tree, _), tokens ->
-//    tree.PrintAst()
-//    RNGLR.ParseCalc.defaultAstToDot tree "ast.dot"
-//    //tree.Nodes |> Array.iteri (fun i x -> printfn "%2d: %A" i x)
-//    //printfn "%A" tree.Order
-//    let args = {
-//        tokenToRange = fun _ -> 0,0
-//        zeroPosition = 0
-//        clearAST = false
-//        filterEpsilons = true
-//    }
+let parser2 = RNGLR.Mixed.buildAst
+//let str = String.init 5 (fun i -> "B ") + "A" 
+//let r = run2 str parser2
+printfn "Mixed"
+//for i in [1..100] do
+//    let str = String.init (100) (fun i -> "B ") + "A "
+//    let str2 = String.init (i) (fun i -> str)
+//    let start = System.DateTime.Now
+//    let r = run2 (str2.Trim()) parser2
+//    let t = System.DateTime.Now - start
+//    printfn "%A" t.TotalSeconds
 //
+//let run3 path astBuilder =
+//    let tokens = LexCommon.tokens4(path)
+//    astBuilder tokens, tokens
 //
-//    printfn "Result: %A" (RNGLR.ParseCalc.translate args tree)
-//    tree.ChooseSingleAst()
-//    tree.PrintAst()
-//    printfn "fff"
-//|> (fun x -> Assert.IsTrue <| compareRes x rightValue)
+//let parser3 = RNGLR.SimpleRightRecursion.buildAst
+////let r = run ((String.init (10000) (fun i -> "B ")).Trim()) parser
+////let r = run "A D B" parser
+//printfn "Simple right recursion"
+//for i in [1..100] do
+//    let str = String.init (i * 100) (fun i -> "B ")
+//    let start = System.DateTime.Now
+//    let r = run3 (str.Trim()) parser3
+//    let t = System.DateTime.Now - start
+//    printfn "%A" t.TotalSeconds
+//
+////match r with
+////    | Parser.Error str, _ ->
+////        printfn "%s" str
+////    | Parser.Success tree, tokens ->
+////        RNGLR.SimpleLeftRecursion.defaultAstToDot tree "ast.dot"
+////
+////printfn "ff"

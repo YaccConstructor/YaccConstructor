@@ -14,7 +14,7 @@
 
 namespace Yard.Generators.RNGLR
 
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.RNGLR.States
 open Yard.Generators.RNGLR
 

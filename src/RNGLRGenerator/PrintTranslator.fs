@@ -15,14 +15,15 @@
 module Yard.Generators.RNGLR.TranslatorPrinter
 
 open System
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
-open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common
+open Yard.Generators.Common.AST
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
+open Yard.Generators.Common.Epsilon
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =

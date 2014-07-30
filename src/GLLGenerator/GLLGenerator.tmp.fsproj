@@ -10,7 +10,7 @@
     <RootNamespace>GLLGenerator</RootNamespace>
     <AssemblyName>GLLGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>GLLGenerator</Name>
+    <Name>GLLGenerator.tmp</Name>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -18,12 +18,6 @@
   <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Users\User\recursive-ascent\Bin\Release\v40\YaccConstructor.exe</StartProgram>
-    <StartArguments>-i BadLeftRecursion.yrd   -g "GLLGenerator -pos int -token int -module GLL.BadLeftRecursion -o BadLeftRecursion.yrd.fs"</StartArguments>
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -47,11 +41,6 @@
     <Compile Include="GllGenerator.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
-      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
       <Name>Common.Generators</Name>
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>

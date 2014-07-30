@@ -4,7 +4,7 @@ module GLL.SimpleAmb
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.GLL.Parser
 open Yard.Generators.GLL
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 type Token =
     | A of (int)
     | B of (int)

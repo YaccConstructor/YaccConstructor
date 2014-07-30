@@ -248,15 +248,8 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             else packVertex i index
 
         let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
-            let b = gss.[getIndex2Vertex b].[getIndex1Vertex b]
-            let edges = b.OutEdges
-            edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e && ast.Equals edges.first.Ast.tree || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e && ast.Equals edge.Ast.tree)))
-
-//        let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
-//            let curEdges = edges.[gss.[getIndex2Vertex b].[getIndex1Vertex b].Level, gss.[getIndex2Vertex e].[getIndex1Vertex e].Level]
-//            curEdges.Exists (fun a -> a.Ast.tree = null && ast = null || ast.Equals a.Ast.tree)
-
-
+            let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
+            edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
 
         let findTree prod extension family =            
             let result = 

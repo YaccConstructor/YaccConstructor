@@ -63,21 +63,26 @@ and TerminalNode =
         new(v) = {value = v}
     end
 
-and [<CustomEquality;CustomComparison>] IntermidiateNode =
+and [<CustomEquality;NoComparison>] IntermidiateNode =
     struct
     interface INode
         val LeftChild  : INode
         val RightChild : INode
         val Position   : Int32
-        override x.Equals(intermidiateNode) =
+        override x.Equals(intermidiateNode) =                
                 match intermidiateNode with
-                | :? AST as a -> (obj.ReferenceEquals(x, a))
+                | :? IntermidiateNode as i ->
+                    let y =  
+                        i.Position = x.Position
+                        && (i.RightChild = x.RightChild)
+                        && (i.LeftChild = x.LeftChild)
+                    y
                 | _ -> false
-        interface System.IComparable with
-            member x.CompareTo n =
-                match n with
-                | :? AST as a -> compare 2 3  //temp
-                | _ -> invalidArg "yobj" "cannot compare values of different types"
+//        interface System.IComparable with
+//            member x.CompareTo n =
+//                match n with
+//                | :? AST as a -> compare 2 3  //temp
+//                | _ -> invalidArg "yobj" "cannot compare values of different types"
         new (l, r, p) = {LeftChild = l; RightChild = r; Position = p}
     end
 
@@ -95,23 +100,9 @@ let inline getSingleNode (node : obj) =
 
 let private emptyArr = [||]
 type private DotNodeType = Prod | AstNode | IntermidiateNode
+let inline getRule packedValue = int packedValue >>> 16
+let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
 
-type ErrorNode = 
-    val errorOn : obj     // token on which error occurs
-    val production : int  // now it doesn't work. Production number where error occured
-    val expected : array<string>  // parser was expecting one of the these tokens
-
-    val mutable tokens : array<obj>  //skipped tokens during error recovery
-    val recTokens : array<string> // parser was look for one of these tokens during recovery
-
-    new (errOn, prod, exp, (*skip,*) recToks) = 
-        {
-            errorOn = errOn; 
-            production = prod; 
-            expected = exp; 
-            tokens = Unchecked.defaultof<_>;(*skip;*)
-            recTokens = recToks
-        }
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
@@ -121,92 +112,69 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         | :? int as x when x < 0 -> Unchecked.defaultof<_>, true
         | _ -> failwith "Strange tree - singleNode with non-negative value"
 
-
-   // member this.Order = order
     member this.Root = root
     member this.RulesCount = rules.GetLength(0)
 
+  
 
+    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
+        
+        let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
+                                                                    override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
+                                                                    override this.GetHashCode x = x.GetHashCode()})
+        use out = new System.IO.StreamWriter (path : string)
+        out.WriteLine("digraph AST {")
+        let createNode num isAmbiguous nodeType (str : string) =
+            let label =
+                let cur = str.Replace("\n", "\\n").Replace ("\r", "")
+                if not isAmbiguous then cur
+                else cur + " !"
+            let shape =
+                match nodeType with
+                | AstNode -> ",shape=box"
+                | Prod -> ""
+            let color =
+                if not isAmbiguous then ""
+                else ",style=\"filled\",fillcolor=red"
+            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
+        let createEdge (b : int) (e : int) isBold (str : string) =
+            let label = str.Replace("\n", "\\n").Replace ("\r", "")
+            let bold = 
+                if not isBold then ""
+                else "style=bold,width=10,"
+            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
+       
+        let num = ref 0
+        let rec dfs (node : obj) parentNum =
+            num := !num + 1
+            let cur = !num 
+            match node with 
+            | :? AST as a -> 
+                createNode cur false AstNode (indToString leftSide.[a.first.prod])
+                createEdge parentNum cur false ""
+                dfs a.first cur
+                if a.other <> Unchecked.defaultof<_> 
+                then 
+                    for t in a.other do
+                        dfs t cur
+            | :? Family as f ->
+                createNode cur false AstNode (indToString leftSide.[f.prod])
+                createEdge parentNum cur false ""
+                dfs f.node cur
+            | :? IntermidiateNode as i ->
+                createNode cur false AstNode ((getRule i.Position).ToString() + " " + (getPosition i.Position).ToString())
+                createEdge parentNum cur false ""
+                dfs i.LeftChild cur
+                dfs i.RightChild cur
+            | :? TerminalNode as t ->
+                createNode cur false AstNode ("t " + indToString (tokenToNumber tokens.[t.value]))
+                createEdge parentNum cur false ""
+            | null -> ()
+            
+        let root = root :?> AST
+        createNode !num false AstNode (indToString leftSide.[root.first.prod])
+        dfs root.first !num
 
-//    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
-//        let next =
-//            let cur = ref order.Length
-//            fun () ->
-//                incr cur
-//                !cur
-//
-//        let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
-//                                                                    override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
-//                                                                    override this.GetHashCode x = x.GetHashCode()})
-//        use out = new System.IO.StreamWriter (path : string)
-//        out.WriteLine("digraph AST {")
-//        let createNode num isAmbiguous nodeType (str : string) =
-//            let label =
-//                let cur = str.Replace("\n", "\\n").Replace ("\r", "")
-//                if not isAmbiguous then cur
-//                else cur + " !"
-//            let shape =
-//                match nodeType with
-//                | AstNode -> ",shape=box"
-//                | Prod -> ""
-//            let color =
-//                if not isAmbiguous then ""
-//                else ",style=\"filled\",fillcolor=red"
-//            out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
-//        let createEdge (b : int) (e : int) isBold (str : string) =
-//            let label = str.Replace("\n", "\\n").Replace ("\r", "")
-//            let bold = 
-//                if not isBold then ""
-//                else "style=bold,width=10,"
-//            out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
-//        let createEpsilon ind = 
-//            let res = next()
-//            createNode res false AstNode ("n " + indToString (-1 - ind))
-//            let u = next()
-//            createNode u false AstNode "eps"
-//            createEdge res u true ""
-//            res
-//        let createTerm t =
-//            let res = next()
-//            createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
-//            res
-//        let createTerm2 t =
-//            let res = next()
-//            createNode res false AstNode ("t " + indToString (tokenToNumber t))
-//            res
-//        if not isEpsilon then
-//            //for i in order do
-//            for i = order.Length - 1 downto 0 do
-//                let x = order.[i]
-//                if x.pos <> -1 then
-//                    let children = x
-//                    
-//                    let label = 
-//                        if children.first.prod < leftSide.Length then indToString leftSide.[children.first.prod]
-//                        else "error"
-//                     
-//                    createNode i (children.other <> null) AstNode ("n " + label)
-//                     
-//                    let handle (family : Family) =
-//                        let u = next()
-//                        createNode u false Prod ("prod " + family.prod.ToString())
-//                        createEdge i u true ""
-//                        family.nodes.doForAll <| fun child ->
-//                            let v = 
-//                                match child with
-//                                | :? AST as v -> v.pos
-//                                | :? int as e when e < 0 -> createEpsilon e
-//                                | :? Nodes as n -> 
-//                                    let tok : 'TokenType = unbox <| n.fst
-//                                    createTerm2 tok 
-//                                | :? int as t -> createTerm t
-//                                | _ -> failwith ""
-//                            createEdge u v false ""
-//                    children.first |> handle
-//                    if children.other <> null then 
-//                        children.other |> Array.iter handle
-//        else createEpsilon (getSingleNode root) |> ignore
-//        
-//        out.WriteLine("}")
-//        out.Close()
+        out.WriteLine("}")
+        out.Close()
 

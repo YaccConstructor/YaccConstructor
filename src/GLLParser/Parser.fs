@@ -65,56 +65,6 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
-//let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) gss =
-//    use out = new System.IO.StreamWriter (path)
-//    let was = new Dictionary<_,_>()
-//    let levels = new Dictionary<_,_>()
-//    out.WriteLine "digraph GSS {"
-//    let print s = out.WriteLine ("    " + s)
-//    let curNum = ref 0
-//    print "rankdir=RL"
-//    let getAstString (ast : obj) =
-//        match ast with
-//        | :? int as i when i >= 0 -> tokens.[i] |> parser.TokenToNumber |> parser.NumToString |> sprintf "%s"    
-//        | :? int as i when i < 0 -> "eps " + parser.NumToString (-i - 1)
-//        | :? AST as ast -> 
-//            let nonT = 
-//                if ast.first.prod < parser.LeftSide.Length then ast.first.prod
-//                else -1
-//            parser.NumToString parser.LeftSide.[nonT]
-//        | :? IntermidiateNode as iN ->
-//            iN.Position.ToString()
-//        | null -> "n"
-//        | :? Nodes as n -> ""
-//        | _ -> failwith "Unexpected ast"
-//
-//    let rec dfs (u : Vertex) =
-//        was.Add (u, !curNum)
-//        if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
-//        else
-//            levels.[u.Level] <- !curNum :: levels.[u.Level]
-//        //let labelStr = u.Label.labelToString()
-//        print <| sprintf "%d [label=\", %d\"]" !curNum  (*labelStr*) u.Level
-//        incr curNum
-//        if u.OutEdges.first <> Unchecked.defaultof<_> 
-//        then 
-//            handleEdge u u.OutEdges.first
-//            if u.OutEdges.other <> null then u.OutEdges.other |> Array.iter (handleEdge u)
-//
-//    and handleEdge u (e : Edge) =
-//        let v = e.Dest
-//        if not <| was.ContainsKey v then dfs v
-//        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
-//    for levels in gss do
-//        for v in levels do
-//            if not <| was.ContainsKey v then dfs v
-//    
-//    for level in levels do
-//        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
-//
-//    out.WriteLine "}"
-//    out.Close()
-
 let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
@@ -134,7 +84,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let setR = new Queue<Context>()   
         let setP = new System.Collections.Generic.Dictionary<int64<vertex>,ResizeArray<ExtensionTree>> ()
         let astDictionary = new System.Collections.Generic.Dictionary<int64<key>,AST> ()
-        let setU = Array.init (inputLength+1) (fun _ -> new Dictionary<_*_, INode>())
+        let setU = Array.init (inputLength+1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
             
         let currentIndex = ref 0
 
@@ -155,42 +105,31 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentGSSNode = ref <| packVertex !currentIndex (gss.[!currentIndex].Count - 1)
         let dummyGSSNode = packVertex !currentIndex (gss.[!currentIndex].Count - 1)
         let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummyAST)
-        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<int64<key>, Family>())  
+        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<int64<key>, ResizeArray<Family>>())  
 
         let terminalNodes = new BlockResizeArray<ExtensionTree>()
         let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
    
         let findFamily prod (nodes : INode) extension : Family =
             let mutable result = None
-            let res = ref <| dummyFam
-            let exists = createdFamilies.[prod].TryGetValue(extension,res)
+            let res = ref <| null
+            let exists = createdFamilies.[prod].TryGetValue(extension, res)
             if exists
-            then !res
+            then 
+                let fams = !res
+                let contains = fams |> ResizeArray.tryFind (fun f -> f.node = nodes )
+                if not contains.IsSome
+                then
+                    let temp = new Family(prod, nodes)
+                    createdFamilies.[prod].[extension].Add temp
+                    temp
+                else contains.Value
             else
                 let temp = new Family(prod, nodes)
-                createdFamilies.[prod].Add(extension, temp)
+                let v = new ResizeArray<Family>()
+                v.Add temp
+                createdFamilies.[prod].Add(extension, v)
                 temp
-
-//        let handleIntermidiate node prod extension = 
-//            let result = new ResizeArray<obj>()
-//            let rec handle (o : obj) =
-//                if o <> null 
-//                then
-//                    match o with
-//                    | :? IntermidiateNode as i ->
-//                        let t : IntermidiateNode = unbox i
-//                        handle t.LeftChild
-//                        handle t.RightChild
-//                    | :? Nodes as n -> 
-//                        result.Add (box <| n)     
-//                    | :? AST as a -> 
-//                            result.Add (box <| a)
-//                    | _ -> failwith "Unexpected type."
-//            handle node
-//            let result = result.ToArray()
-//            let nodes = new Nodes(result)
-//            let family = findFamily prod nodes extension
-//            family
 
         let handleIntermidiate (node : INode) prod extension =
             let family = findFamily prod node extension
@@ -200,15 +139,27 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let set = setU.[index]
             let key = (label, gssNode)
             let res = ref null
-            let contains = set.TryGetValue(key,res)
-            contains && obj.ReferenceEquals(!res,ast), key
+            let contains = set.TryGetValue(key, res)
+            if contains
+            then
+                let t = ResizeArray.exists (fun e -> e = null && ast = null || (ast <> null && e <> null && e = ast)) !res
+                contains, t , key
+                
+            else false, false, key
+            
 
         let addContext label (index : int) (node : int64<vertex>) (ast : ExtensionTree) =
-            let contains, key = containsContext index label node ast.tree
-            if index <= inputLength + 1 && index >= 0 && not contains
+            let containsKey, containsTree, key = containsContext index label node ast.tree
+            if index <= inputLength + 1 && index >= 0 && not containsTree
             then
                 let cntxt = new Context(index, label, node, ast)
-                setU.[index].Add (key, ast.tree)
+                if containsKey
+                then 
+                    setU.[index].[key].Add ast.tree
+                else 
+                    let t = new ResizeArray<INode>()
+                    t.Add ast.tree
+                    setU.[index].Add (key, t)
                 setR.Enqueue(cntxt)  
         
         let getNodeP label (left : ExtensionTree) (right : ExtensionTree) =      
@@ -251,12 +202,16 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
             edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
 
-        let findTree prod extension family =            
+        let findTree prod extension (family : Family) =            
             let result = 
                 if astDictionary.ContainsKey extension
                 then
-                    let a = astDictionary.[extension] :?> AST
-                    if not <| (a.first.Equals family || (a.other <> null && a.other |> Array.exists(family.Equals)))
+                    let a = astDictionary.[extension]
+                    let eq (fam : Family) =
+                        fam.prod = family.prod
+                        && obj.ReferenceEquals(fam.node, family.node)                    
+                    
+                    if not (eq a.first || (a.other <> null && a.other |> Array.exists eq))
                     then
                         if a.other <> null
                         then a.other <- Array.append a.other [|family|]

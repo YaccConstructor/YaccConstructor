@@ -8,7 +8,7 @@
     <ProjectGuid>4049cf0a-8f86-48b7-98ba-d062625ba281</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Common</RootNamespace>
-    <AssemblyName>AbstractAnalysis.Common</AssemblyName>
+    <AssemblyName>YC.AbstractAnalysis.Common</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>AbstractAnalysis.Common</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

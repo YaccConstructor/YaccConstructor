@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions.Test</RootNamespace>
     <AssemblyName>YC.Conversions.Test</AssemblyName>
-    <Name>YC.Conversions.Test</Name>
+    <Name>Conversions.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

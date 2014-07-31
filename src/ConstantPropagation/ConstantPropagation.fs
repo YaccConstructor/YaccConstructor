@@ -88,7 +88,7 @@ type Approximator(file:ICSharpFile) =
         let className = typeDecl.[0].ToLowerInvariant()
         let methodName = typeDecl.[1].ToLowerInvariant()
                 
-        let args = node.AllArguments(false)
+        let args = node.AllArguments false
         let argTypes = new ResizeArray<_>()
         for argument in args do
             argTypes.Add <| argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
@@ -106,9 +106,7 @@ type Approximator(file:ICSharpFile) =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
             match node with 
-            | :? IInvocationExpression as m 
-//                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
-                -> 
+            | :? IInvocationExpression as m  -> 
                 this.TryDefineLang m
                 |> Option.iter (fun l -> hotspots.Add (l, m))
             | _ -> ()

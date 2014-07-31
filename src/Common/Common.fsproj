@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Common</RootNamespace>
     <AssemblyName>YC.Common</AssemblyName>
-    <Name>YC.Common</Name>
+    <Name>Common</Name>
     <SccProjectName>
     </SccProjectName>
     <SccProvider>

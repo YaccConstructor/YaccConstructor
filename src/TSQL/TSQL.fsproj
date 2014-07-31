@@ -8,7 +8,7 @@
     <ProjectGuid>5c8b9089-f612-4761-b712-09ecb5317c76</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TSQL</RootNamespace>
-    <AssemblyName>TSQL</AssemblyName>
+    <AssemblyName>YC.TSQL</AssemblyName>
     <Name>TSQL</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

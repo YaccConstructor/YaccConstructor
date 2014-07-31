@@ -287,27 +287,28 @@ let main() =
             | Eps -> "Eps"
             | _ -> ""
 
-        let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.txt"
+        let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.fs"
         let fstStream = new StreamWriter(filePathFst)
 
-        fstStream.WriteLine("module YC.FST.Fstlexer")
+        fstStream.WriteLine("module YC.FST.AbstractLexing.FstLexer")
         fstStream.WriteLine()
         fstStream.WriteLine("open Microsoft.FSharp.Collections")
         fstStream.WriteLine("open YC.FST.GraphBasedFst")
         fstStream.WriteLine()
-        fstStream.WriteLine(sprintf "let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
-        fstStream.WriteLine(sprintf "let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
-        fstStream.WriteLine("let transitions = new ResizeArray<_>()")
+        fstStream.WriteLine("let fstLexer () = ")
+        fstStream.WriteLine(sprintf "\tlet startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
+        fstStream.WriteLine(sprintf "\tlet finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
+        fstStream.WriteLine("\tlet transitions = new ResizeArray<_>()")
         
         for edge in resFST.Edges do         
             fstStream.WriteLine(
                 sprintf  
-                    "transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
+                    "\ttransitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
                     edge.Source
                     (getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
                     (getVal (string) edge.Tag.OutSymb) edge.Target)
 
-        fstStream.WriteLine("let fst = new FST<_,_>(startState, finishState, transitions)")
+        fstStream.WriteLine("\tnew FST<_,_>(startState, finishState, transitions)")
         fstStream.Close()
 
     ToGraphBasedFst    

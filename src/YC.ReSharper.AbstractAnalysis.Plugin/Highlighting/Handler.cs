@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Application.Settings;
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.ReSharper.Daemon;
-using JetBrains.ReSharper.Daemon.CSharp.Errors;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -17,10 +15,17 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     static class Handler
     {
-        public static Action<DaemonStageResult> Commiter { get; set; }
-        public static IDaemonStageProcess Process { get; set; }
-        public static IContextBoundSettingsStore Settings { get; set; }
+        public static HighlightingProcess Process { get; set; }
         private static Helper.ReSharperHelper YcProcessor = Helper.ReSharperHelper.Instance;
+
+        static Handler()
+        {
+            foreach (var e in YcProcessor.LexingFinished)
+                e.AddHandler(OnLexingFinished);
+
+            foreach (var e in YcProcessor.ParsingFinished)
+                e.AddHandler(OnParsingFinished);
+        }
 
         private static ICSharpFile GetCSFile()
         {
@@ -35,11 +40,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// <param name="args"></param>
         private static void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
         {
-            if (Commiter == null)
-                return;
-
-            var consumer = new DefaultHighlightingConsumer(Process, Settings);
-            var processor = new TreeNodeProcessor(consumer, GetCSFile());
+            IHighlightingConsumer consumer = Process.Consumer;
+            var processor = new TreeNodeProcessor(consumer, Process.CSharpFile);
 
             string xmlPath = YcProcessor.XmlPath(args.Lang);
             ColorHelper.ParseFile(xmlPath, args.Lang);
@@ -52,16 +54,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 fibers.EnqueueJob(action);
             }
 
-            Commiter(new DaemonStageResult(consumer.Highlightings));
-        }
-
-        private static void SubscribeYc()
-        {
-            foreach (var e in YcProcessor.LexingFinished)
-                e.AddHandler(OnLexingFinished);
-
-            foreach (var e in YcProcessor.ParsingFinished)
-                e.AddHandler(OnParsingFinished);
+            Process.DoHighlighting(new DaemonStageResult(consumer.Highlightings));
         }
 
         /// <summary>
@@ -95,6 +88,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             {
                 fibers.EnqueueJob(action);
             }
+        }
+
+        public static void Init()
+        {
+            
         }
     }
 }

@@ -12,7 +12,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{bd2284a5-aa4d-442d-b4fb-e43b2fe7dd2a}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AssemblyName>AbstractLexer.Generator</AssemblyName>
+    <AssemblyName>YC.AbstractLexer.Generator</AssemblyName>
     <Name>AbstractLexer.Generator</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />

@@ -8,7 +8,7 @@
     <ProjectGuid>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLR</RootNamespace>
-    <AssemblyName>RNGLR</AssemblyName>
+    <AssemblyName>YC.RNGLR</AssemblyName>
     <Name>RNGLRGenerator</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

@@ -8,7 +8,7 @@
     <ProjectGuid>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRAbstractParser</RootNamespace>
-    <AssemblyName>RNGLRAbstractParser</AssemblyName>
+    <AssemblyName>YC.RNGLRAbstractParser</AssemblyName>
     <Name>RNGLRAbstractParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

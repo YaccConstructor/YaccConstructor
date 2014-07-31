@@ -8,7 +8,7 @@
     <ProjectGuid>{e33864e1-96da-4838-b088-a61901a1eca0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRParserErrorRecoveryTest</RootNamespace>
-    <AssemblyName>RNGLRParserErrorRecoveryTest</AssemblyName>
+    <AssemblyName>YC.RNGLRParserErrorRecoveryTest</AssemblyName>
     <Name>RNGLRParser.ErrorRecoveryTest</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

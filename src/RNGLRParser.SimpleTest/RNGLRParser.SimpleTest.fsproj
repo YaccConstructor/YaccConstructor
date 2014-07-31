@@ -8,7 +8,7 @@
     <ProjectGuid>{d65bde42-d396-458c-be08-104477314657}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
-    <AssemblyName>RNGLRParser.SimpleTest</AssemblyName>
+    <AssemblyName>YC.RNGLRParser.SimpleTest</AssemblyName>
     <Name>RNGLRParser.SimpleTest</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

@@ -8,7 +8,7 @@
     <ProjectGuid>{1c719cd3-0559-4a12-8b57-f58053947dc1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRCommon</RootNamespace>
-    <AssemblyName>RNGLRCommon</AssemblyName>
+    <AssemblyName>YC.RNGLRCommon</AssemblyName>
     <Name>RNGLRCommon</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

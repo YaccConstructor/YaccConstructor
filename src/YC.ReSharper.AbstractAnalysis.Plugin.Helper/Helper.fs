@@ -19,29 +19,29 @@ type ReSharperHelper private() =
     static member Instance = instance
     
     //let processor = new LanguagesProcessor()
-    member this.XmlPath (l:string) = processors.[l.ToLowerInvariant()].XmlPath
+    member this.XmlPath (lang : string) = processors.[lang.ToLowerInvariant()].XmlPath
     member this.ParsingFinished = 
         processors |> Seq.map(fun kvp -> kvp.Value.ParsingFinished) |> (fun x -> new ResizeArray<_>(x))
         //processor.ParsingFinished
-    member this.GetNextTree (l:string) i = 
-        processors.[l.ToLowerInvariant()].GetNextTree i
+    member this.GetNextTree (lang : string) i = 
+        processors.[lang.ToLowerInvariant()].GetNextTree i
         //processor.GetNextTree l i
     member this.LexingFinished = 
         processors |> Seq.map(fun kvp -> kvp.Value.LexingFinished) |> (fun x -> new ResizeArray<_>(x))
         //processor.LexingFinished
-    member this.GetForestWithToken (l:string) rng = 
-        processors.[l.ToLowerInvariant()].GetForestWithToken rng
+    member this.GetForestWithToken (lang : string) rng = 
+        processors.[lang.ToLowerInvariant()].GetForestWithToken rng
         //processor.GetForestWithToken l rng
     member this.Process(file) =
-        let defLang (n:ITreeNode) =
-            match n with 
-            | :? IInvocationExpression as m ->
-                match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
-                | "executeimmediate" -> "TSQL"
-                | "eval" -> "Calc"
-                | "objnotation" -> "JSON"
-                | _ -> failwith "Unsupported language for AA!"
-            | _ -> failwith "Unexpected information type for language specification!" 
+//        let defLang (n:ITreeNode) =
+//            match n with 
+//            | :? IInvocationExpression as m ->
+//                match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
+//                | "executeimmediate" -> "TSQL"
+//                | "eval" -> "Calc"
+//                | "objnotation" -> "JSON"
+//                | _ -> failwith "Unsupported language for AA!"
+//            | _ -> failwith "Unexpected information type for language specification!" 
 
         let graphs = (new Approximator(file)).Approximate() //defLang
         let lexerErrors = new ResizeArray<_>()
@@ -49,7 +49,7 @@ type ReSharperHelper private() =
 //        processor.Process graphs
 //        |> ResizeArray.iter(fun (x,y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         graphs
-        |> ResizeArray.map (fun (l,g) -> processors.[l.ToLowerInvariant()].Process g)
-        |> ResizeArray.iter(fun (x,y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
+        |> ResizeArray.map (fun (lang, graph) -> processors.[lang.ToLowerInvariant()].Process graph)
+        |> ResizeArray.iter(fun (x, y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         
-        lexerErrors,parserErrors
+        lexerErrors, parserErrors

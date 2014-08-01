@@ -26,7 +26,7 @@ let toClassName (str : string) =
         new System.String(symbols)
 
 let litToClassName (lit : string) = 
-    toClassName <| lit.ToLower()
+    toClassName <| lit.ToLowerInvariant()
 
 let getLeafSemanticForToken token = 
     let res = new System.Text.StringBuilder()
@@ -37,7 +37,7 @@ let getLeafSemanticForToken token =
     printBr "let ranges = calculatePos pos"
     printBr "let value = fst <| _rnglr_var_0"
 
-    printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName token <| token.ToLower()
+    printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName token <| token.ToLowerInvariant()
     res.ToString()
 
 let getLeafSemanticForLiteral litName litText = 
@@ -49,7 +49,7 @@ let getLeafSemanticForLiteral litName litText =
     printBr "let ranges = calculatePos pos"
     printBr "let stringValue = \"%s\"" litText
 
-    printBr "new %sLitNode(\"%s\", stringValue, ranges) :> ITreeNode"  <| litToClassName litName <| litName.ToLower()
+    printBr "new %sLitNode(\"%s\", stringValue, ranges) :> ITreeNode"  <| litToClassName litName <| litName.ToLowerInvariant()
 
     res.ToString()
                                

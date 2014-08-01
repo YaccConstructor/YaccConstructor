@@ -88,12 +88,12 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
     printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcTextValue, ycValue);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLower()
+    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
     
     if isTerminal
     then 
         printBr ""
-        printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, \"%s\");" <| lang.ToLower()
+        printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, \"%s\");" <| lang.ToLowerInvariant()
     printBrInd 2 "}"
     printBr ""
         

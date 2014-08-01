@@ -15,8 +15,8 @@ namespace Highlighting.Core
 
         public static void AddYcItem(string key, string value, string lang)
         {
-            lang = lang.ToLower();
-            key = key.ToLower();
+            lang = lang.ToLowerInvariant();
+            key = key.ToLowerInvariant();
             if (String.IsNullOrEmpty(key) || String.IsNullOrEmpty(value))
                 return;
 
@@ -32,12 +32,12 @@ namespace Highlighting.Core
                 if (dict.ContainsKey(key))
                 {
                     var strValue = dict[key];
-                    if (strValue.numOfValues == Value.OneValue)
+                    if (strValue.NumOfValues == Value.OneValue)
                     {
-                        if (strValue.stringValue != value)
+                        if (strValue.TextValue != value)
                         {
-                            strValue.numOfValues = Value.ManyValues;
-                            strValue.stringValue = null;
+                            strValue.NumOfValues = Value.ManyValues;
+                            strValue.TextValue = null;
                         }
                     }
                 }
@@ -45,8 +45,8 @@ namespace Highlighting.Core
                 {
                     dict.Add(key, new StringValue()
                     {
-                        numOfValues = Value.OneValue,
-                        stringValue = value,
+                        NumOfValues = Value.OneValue,
+                        TextValue = value,
                     });
                 }
 
@@ -55,7 +55,6 @@ namespace Highlighting.Core
 
         public static string GetYcName(string lang, string str)
         {
-            //string str = Yard.Generators.RNGLR.Helper._getLiteralName(s);
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
                 return null;
 
@@ -65,7 +64,7 @@ namespace Highlighting.Core
                 return null;
 
             return
-                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue /*&& item.Key == str*/&& item.Value.stringValue == str)
+                dict.FirstOrDefault(item => item.Value.NumOfValues == Value.OneValue && item.Value.TextValue == str)
                     .Key;
 
         }
@@ -81,8 +80,9 @@ namespace Highlighting.Core
                 return null;
 
             return
-                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Key == str)
-                    .Value.stringValue;
+                dict.FirstOrDefault(item => 
+                    item.Value.NumOfValues == Value.OneValue && item.Key == str)
+                    .Value.TextValue;
         }
     }
 
@@ -95,7 +95,7 @@ namespace Highlighting.Core
 
     public class StringValue
     {
-        public Value numOfValues { get; set; }
-        public string stringValue { get; set; }
+        public Value NumOfValues { get; set; }
+        public string TextValue { get; set; }
     }
 }

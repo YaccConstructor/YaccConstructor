@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using JetBrains.Application.Threading.Tasks;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
-using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Files;
 using JetBrains.ReSharper.Psi.Tree;
 using YC.AbstractAnalysis;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
@@ -20,17 +16,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         static Handler()
         {
-            foreach (var e in YcProcessor.LexingFinished)
-                e.AddHandler(OnLexingFinished);
+            foreach (var lexEvent in YcProcessor.LexingFinished)
+                lexEvent.AddHandler(OnLexingFinished);
 
-            foreach (var e in YcProcessor.ParsingFinished)
-                e.AddHandler(OnParsingFinished);
-        }
-
-        private static ICSharpFile GetCSFile()
-        {
-            IPsiServices psiServices = Process.DaemonProcess.SourceFile.GetPsiServices();
-            return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(Process.DaemonProcess.SourceFile) as ICSharpFile;
+            foreach (var parseEvent in YcProcessor.ParsingFinished)
+                parseEvent.AddHandler(OnParsingFinished);
         }
 
         /// <summary>

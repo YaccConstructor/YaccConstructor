@@ -108,7 +108,7 @@ type Approximator(file:ICSharpFile) =
             match node with 
             | :? IInvocationExpression as m  -> 
                 this.TryDefineLang m
-                |> Option.iter (fun l -> hotspots.Add (l, m))
+                |> Option.iter (fun lang -> hotspots.Add (lang, m))
             | _ -> ()
         //InvocationExpressionNavigator.
         let processor = RecursiveElementProcessor(fun x -> addHotspot x)

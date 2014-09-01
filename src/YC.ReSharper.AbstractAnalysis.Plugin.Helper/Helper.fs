@@ -10,7 +10,7 @@ open Microsoft.FSharp.Collections
 type ReSharperHelper private() =
     let processors = 
         [
-            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLangugeModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
+            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLanguageModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
             ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
             ]
         |> dict    

@@ -59,10 +59,10 @@ let translate ast errors = translate args ast errors
 do()
 
 [<Extension>]
-type TSQLInjectedLangugeModule () =
+type TSQLInjectedLanguageModule () =
     let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
 
-    static let instance = new TSQLInjectedLangugeModule()
+    static let instance = new TSQLInjectedLanguageModule()
     static member Instance = instance
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "TSQL"

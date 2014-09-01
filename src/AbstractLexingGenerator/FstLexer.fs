@@ -2,7 +2,13 @@ module YC.FST.AbstractLexing.FstLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FST.AbstractLexing.Interpreter
 
+type Token =
+    | PLUS of (string*array<Position<string>>)
+    | POW of (string*array<Position<string>>)
+    | MULT of (string*array<Position<string>>)
+     
 let fstLexer () = 
     let startState = ResizeArray.singleton 0
     let finishState = ResizeArray.singleton 65535
@@ -20,3 +26,10 @@ let fstLexer () =
     transitions.Add(3, new EdgeLbl<_,_>(Smbl '+', Smbl 1), 1)
     transitions.Add(3, new EdgeLbl<_,_>(Smbl (char 65535), Smbl 1), 65535)
     new FST<_,_>(startState, finishState, transitions)
+
+let actions () =
+                 [|
+                (fun (lb : StateInfo<_>) -> PLUS(lb.GetString(), lb.GetPosition ()) |> Some); 
+                (fun lb -> POW(lb.GetString(), lb.GetPosition ()) |> Some); 
+                (fun lb -> MULT(lb.GetString(), lb.GetPosition ()) |> Some)
+                |] 

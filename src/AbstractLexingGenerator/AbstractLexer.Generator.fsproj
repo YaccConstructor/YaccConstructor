@@ -59,6 +59,13 @@
     <Compile Include="FstLexer.fs" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
+      <Name>AbstractLexer.Interpreter</Name>
+      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

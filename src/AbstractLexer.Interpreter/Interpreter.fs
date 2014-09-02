@@ -5,6 +5,7 @@ open AbstractAnalysis.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open QuickGraph
+open YC.FST.FstApproximation
 
 type Position<'br> =
     val start_offset: int
@@ -41,7 +42,7 @@ type StateInfo<'br> =
         
     //new (startV, str, endV, so, eo) = {StartV = startV; AccumulatedString = str; Positions = new ResizeArray<_>(); EndV = endV; start_offset = so; end_offset = eo}
 
-let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) =   
+let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofToken =   
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)
     let edges = new ResizeArray<_>()
@@ -145,12 +146,46 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) =
 //    let edg = new Edg(lb._form,tok,lb._to)
 //    lb.Reset
 //    lb.Add ch
+    
+    let final = new ResizeArray<_>()
+    for edge in inputFstLexer.Edges do
+        if  edge.Target = inputFstLexer.FinalState.[0]
+        then final.Add edge.Source
 
-         
-    let res = new ParserInputGraph<_>()
-    res.AddVerticesAndEdgeRange edges |> ignore    
+    for v in final do 
+        edges.Add(new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken))
+             
+    let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0])
+    res.AddVerticesAndEdgeRange edges |> ignore  
     res
 
 
-    
+let Tokenize (fstLexer : FST<_,_>) (actions : array<StateInfo<_> -> _>) eofToken (inputGraph : Appr<_>) =    
+    let inputFst = inputGraph.ToFST()
+    let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
+    let parserInputGraph = Interpret inputFstLexer actions eofToken 
+    let epsRes = EpsClosure.NfaToDfa parserInputGraph
+    epsRes 
 
+let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
+    let rank s l =
+        "{ rank=" + s + "; " + (l |> string) + " }\n"
+    let s = 
+        "digraph G {\n" 
+        + "rankdir = LR\n"
+        + "node [shape = circle]\n"
+        + sprintf "%i[style=filled, fillcolor=green]\n" parserInputGraph.InitState 
+        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" parserInputGraph.FinalState
+        + rank "same" parserInputGraph.InitState
+        + rank "min" parserInputGraph.InitState  
+        + rank "same" parserInputGraph.FinalState 
+        + rank "max" parserInputGraph.FinalState
+    
+    let strs =
+            parserInputGraph.Edges
+            |> Seq.map (fun edge ->
+                sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target  (toStr edge.Tag)) 
+                                      
+    System.IO.File.WriteAllText(filePrintPath, s + (String.concat "" strs) + "\n}")
+    ()
+    

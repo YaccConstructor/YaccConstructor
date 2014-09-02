@@ -8,6 +8,24 @@ open YC.FST.AbstractLexing.FstLexer
 open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 
+let eof = RNGLR_EOF("", [||])
+
+let printTok =
+     fun x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])
+
+let printBref =
+    let printBrs brs =
+        "["
+        + (brs |> Array.map (fun (pos:Position<_>) -> pos.back_ref ) |> String.concat "; ")
+        + "]"
+    
+    fun x ->
+        match x with
+            | PLUS(v,br) -> "+: " + printBrs br
+            | MULT(v,br) -> "*: " + printBrs br
+            | POW(v,br)  -> "**: " + printBrs br
+            | x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0]) 
+     
 [<TestFixture>]
 type ``Lexer FST Tests`` () =            
     [<Test>]
@@ -34,13 +52,37 @@ type ``Lexer FST Tests`` () =
         transitions.Add(2, Smb("*", "*1"), 1)
         transitions.Add(1, Smb("*", "*2"), 3)
         let appr = new Appr<_>(startState, finishState, transitions)
-        let fstInputLexer = appr.ToFST()
-        let resFST = FST<_,_>.Compos(fstInputLexer, fstLexer())
-        resFST.PrintToDOT @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test2.dot"                      
-        Interpret resFST (actions())
+        //let fstInputLexer = appr.ToFST()
+        //let resFST = FST<_,_>.Compos(fstInputLexer, fstLexer())
+        //resFST.PrintToDOT @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test2.dot"                      
+        //Interpret resFST (actions()) 
+        let parserInputGraph = tokenize eof appr
+        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\testDOT2.dot" printBref
+
+    [<Test>]
+    member this.``Lexer FST Tests. Test with back_ref 1.`` () = 
+        let startState = ResizeArray.singleton 0
+        let finishState = ResizeArray.singleton 1
+        let transitions = new ResizeArray<_>()
+        transitions.Add(0, Smb("++", "+1"), 1)
+        let appr = new Appr<_>(startState, finishState, transitions)
+        let parserInputGraph = tokenize eof appr
+        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test3.dot" printBref
+
+    [<Test>]
+    member this.``Lexer FST Tests. Test with back_ref 2.`` () = 
+        let startState = ResizeArray.singleton 0
+        let finishState = ResizeArray.singleton 2
+        let transitions = new ResizeArray<_>()
+        transitions.Add(0, Smb("+*", "+1"), 1)
+        transitions.Add(1, Smb("**", "2"), 2)
+        let appr = new Appr<_>(startState, finishState, transitions)
+        let parserInputGraph = tokenize eof appr
+        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test4.dot" printBref
+    
 [<EntryPoint>]
 let f x =
       let t = new ``Lexer FST Tests`` () 
-      let a = t.``Lexer FST Tests. Test 1.``()
+      let a = t.``Lexer FST Tests. Test with back_ref 2.``()
       printfn "%A" a      
       1

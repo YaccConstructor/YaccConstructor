@@ -3,12 +3,14 @@ module YC.FST.AbstractLexing.FstLexer
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
 
 type Token =
     | PLUS of (string*array<Position<string>>)
     | POW of (string*array<Position<string>>)
     | MULT of (string*array<Position<string>>)
-     
+    | RNGLR_EOF of (string*array<Position<string>>) 
+
 let fstLexer () = 
     let startState = ResizeArray.singleton 0
     let finishState = ResizeArray.singleton 65535
@@ -33,3 +35,5 @@ let actions () =
                 (fun lb -> POW(lb.GetString(), lb.GetPosition ()) |> Some); 
                 (fun lb -> MULT(lb.GetString(), lb.GetPosition ()) |> Some)
                 |] 
+
+let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation

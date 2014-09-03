@@ -290,25 +290,47 @@ let main() =
         let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.fs"
         let fstStream = new StreamWriter(filePathFst)
 
+
         fstStream.WriteLine("module YC.FST.AbstractLexing.FstLexer")
         fstStream.WriteLine()
         fstStream.WriteLine("open Microsoft.FSharp.Collections")
         fstStream.WriteLine("open YC.FST.GraphBasedFst")
+        fstStream.WriteLine("open YC.FST.AbstractLexing.Interpreter")
+        fstStream.WriteLine("open AbstractAnalysis.Common")
         fstStream.WriteLine()
         fstStream.WriteLine("let fstLexer () = ")
-        fstStream.WriteLine(sprintf "\tlet startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
-        fstStream.WriteLine(sprintf "\tlet finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
-        fstStream.WriteLine("\tlet transitions = new ResizeArray<_>()")
+        fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
+        fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
+        fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
         
         for edge in resFST.Edges do         
             fstStream.WriteLine(
                 sprintf  
-                    "\ttransitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
+                    "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
                     edge.Source
                     (getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
                     (getVal (string) edge.Tag.OutSymb) edge.Target)
 
-        fstStream.WriteLine("\tnew FST<_,_>(startState, finishState, transitions)")
+        fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
+
+        fstStream.WriteLine("\nlet actions () =")
+        fstStream.WriteLine("   [|")
+        
+        let strs = ref ""
+        for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+                actions |> Seq.iteri (fun i (code,pos) -> 
+                    strs := !strs + "\n      (fun (lb : StateInfo<_>) ->\n"  
+
+                    let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
+                    for line in lines do
+                        strs := !strs +  (sprintf "               %s" line);
+                    strs := !strs + ");")
+    
+        fstStream.WriteLine(!strs)
+        fstStream.WriteLine()
+
+        fstStream.WriteLine("   |]\n")
+        fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation")
         fstStream.Close()
 
     ToGraphBasedFst    

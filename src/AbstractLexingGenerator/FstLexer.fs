@@ -30,10 +30,14 @@ let fstLexer () =
     new FST<_,_>(startState, finishState, transitions)
 
 let actions () =
-                 [|
-                (fun (lb : StateInfo<_>) -> PLUS(lb.GetString(), lb.GetPosition ()) |> Some); 
-                (fun lb -> POW(lb.GetString(), lb.GetPosition ()) |> Some); 
-                (fun lb -> MULT(lb.GetString(), lb.GetPosition ()) |> Some)
-                |] 
+    [|
+        (fun (lb : StateInfo<_>) ->
+                        PLUS(lb.GetString(), lb.GetPosition ()) |> Some );
+        (fun (lb : StateInfo<_>) ->
+                        POW(lb.GetString(), lb.GetPosition ()) |> Some );
+        (fun (lb : StateInfo<_>) ->
+                        MULT(lb.GetString(), lb.GetPosition ()) |> Some );
+
+    |] 
 
 let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation

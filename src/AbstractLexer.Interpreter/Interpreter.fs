@@ -104,7 +104,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                             match v.Tag.InSymb with
                                 | Smbl (x,br) -> 
                                     if br = curStt.curBr
-                                    then curStt.cur_offset + 1, curStt.cur_offset + 2, curStt.curBr
+                                    then curStt.cur_offset, curStt.cur_offset + 1, curStt.curBr
                                     else 0,1,br
                                 | x -> failwith "Unexpected symbol in BR calculation:%A" x
                         let newStt =

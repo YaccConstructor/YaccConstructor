@@ -8,7 +8,7 @@
     <ProjectGuid>560052d2-e44a-42c0-8f88-04f623276b35</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>JSON_Parser</RootNamespace>
-    <AssemblyName>JSON_Parser</AssemblyName>
+    <AssemblyName>YC.JSON_Parser</AssemblyName>
     <Name>JSON_Parser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

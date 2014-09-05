@@ -8,7 +8,7 @@
     <ProjectGuid>bf113c47-3763-4940-9746-bbe53d58458b</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Core</RootNamespace>
-    <AssemblyName>AbstractLexer.Core</AssemblyName>
+    <AssemblyName>YC.AbstractLexer.Core</AssemblyName>
     <Name>AbstractLexer.Core</Name>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

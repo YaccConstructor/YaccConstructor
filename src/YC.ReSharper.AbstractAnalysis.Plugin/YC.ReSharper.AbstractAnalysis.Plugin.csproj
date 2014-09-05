@@ -105,6 +105,7 @@
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
     <Compile Include="Highlighting\ErrorWarning.cs" />
+    <Compile Include="Highlighting\Handler.cs" />
     <Compile Include="Highlighting\HighlightingProcess.cs" />
     <Compile Include="Highlighting\HighlightingStage.cs" />
     <Compile Include="Highlighting\LanguageHelper.cs" />

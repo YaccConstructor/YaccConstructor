@@ -30,7 +30,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="'$(OS)' == 'Windows_NT'" />
-    Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets') And '$(OS)' != 'Windows_NT'" />
   <ItemGroup>
     <Compile Include="Parser.fs" />
     <None Include="Lexer.fsl" />
@@ -42,21 +41,19 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="AbstractParsing.Common">
-      <HintPath>..\packages\YC.AbstractAnalysis.Parsing.Common.0.0.8.5\lib\net40\AbstractParsing.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Constraints">
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -68,18 +65,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Graphviz4Net">
       <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
-    <Reference Include="Helper">
-      <HintPath>..\..\Bin\Release\v40\Helper.dll</HintPath>
-    </Reference>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
@@ -102,25 +100,13 @@
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RNGLRAbstractParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRAbstractParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLRCommon">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRCommon.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RNGLRParser">
-      <HintPath>..\packages\YC.Generators.RNGLR.0.0.8.5\lib\net40\RNGLRParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractLexer.Common\AbstractLexer.Common.fsproj">
-      <Name>AbstractLexer.Common</Name>
+    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
+      <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
@@ -132,6 +118,21 @@
     <ProjectReference Include="..\AbstractLexer.Generator\AbstractLexer.Generator.fsproj">
       <Name>AbstractLexer.Generator</Name>
       <Project>{bd2284a5-aa4d-442d-b4fb-e43b2fe7dd2a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+      <Name>RNGLRAbstractParser</Name>
+      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
+      <Name>RNGLRCommon</Name>
+      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
+      <Name>RNGLRParser</Name>
+      <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

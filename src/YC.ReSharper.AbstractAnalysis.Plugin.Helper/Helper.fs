@@ -43,7 +43,7 @@ type ReSharperHelper private() =
                 | _ -> failwith "Unsupported language for AA!"
             | _ -> failwith "Unexpected information type for language specification!" 
 
-        let graphs = (new Approximator(file)).Approximate defLang
+        let graphs = (new Approximator(file)).Approximate() //defLang
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
 //        processor.Process graphs

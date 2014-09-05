@@ -88,30 +88,25 @@ type Approximator(file:ICSharpFile) =
         let className = typeDecl.[0].ToLowerInvariant()
         let methodName = typeDecl.[1].ToLowerInvariant()
                 
-        let args = node.AllArguments(false)
-        let argTypes = ref []
+        let args = node.AllArguments false
+        let argTypes = new ResizeArray<_>()
         for argument in args do
-            argTypes := argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant() :: !argTypes
+            argTypes.Add <| argument.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
         
         let retType = node.GetExpressionType().GetLongPresentableName(CSharpLanguage.Instance).ToLowerInvariant()
 
-        argTypes := List.rev !argTypes
-         
         langToHotspot
         |> List.tryFind (fun record -> 
                         let hot = snd record
                         hot.Class = className && hot.Method = methodName 
-                        && hot.ArgumentsType = !argTypes && hot.ReturnType = retType)
-        
+                        && argTypes.[hot.QueryPosition] = "string" && hot.ReturnType = retType)
         |> Option.map fst        
 
-    member this.Approximate (defineLang: ITreeNode -> 'a) =
+    member this.Approximate ((*defineLang: ITreeNode -> 'a*)) =
         let hotspots = new ResizeArray<_>() 
         let addHotspot (node:ITreeNode) =
             match node with 
-            | :? IInvocationExpression as m 
-//                when Array.exists ((=) (m.InvocationExpressionReference.GetName().ToLowerInvariant())) [|"executeimmediate"; "eval"; "objnotation"|] 
-                -> 
+            | :? IInvocationExpression as m  -> 
                 this.TryDefineLang m
                 |> Option.iter (fun l -> hotspots.Add (l, m))
             | _ -> ()

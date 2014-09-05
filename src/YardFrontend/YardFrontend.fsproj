@@ -8,7 +8,7 @@
     <ProjectGuid>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>YardFrontend</RootNamespace>
-    <AssemblyName>YardFrontend</AssemblyName>
+    <AssemblyName>YC.YardFrontend</AssemblyName>
     <Name>YardFrontend</Name>
     <UsePartialTypes>false</UsePartialTypes>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -56,11 +56,11 @@
       <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
     </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>

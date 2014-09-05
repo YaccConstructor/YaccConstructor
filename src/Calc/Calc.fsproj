@@ -8,7 +8,7 @@
     <ProjectGuid>016c2afb-d8aa-4dd4-94f9-83e0e6c93f72</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Calc</RootNamespace>
-    <AssemblyName>Calc</AssemblyName>
+    <AssemblyName>YC.Calc</AssemblyName>
     <Name>Calc</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

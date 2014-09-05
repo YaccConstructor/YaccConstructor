@@ -5,12 +5,11 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4ecdce13-b8eb-4b36-84d1-7882f030a80c</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>AbstractLexer.Core.Test</RootNamespace>
-    <AssemblyName>AbstractLexer.Core.Test</AssemblyName>
-    <Name>AbstractLexer.Core.Test</Name>
-    <TargetFrameworkProfile />
+    <ProjectGuid>fc9a166c-780d-4d15-b366-ca06277c803d</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Helper</RootNamespace>
+    <AssemblyName>YC.Helper</AssemblyName>
+    <Name>Helper</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -33,45 +32,41 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="Helper.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="Graphviz4Net">
+      <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph">
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Data">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Data.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Serialization">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\QuickGraph.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
-      <Name>AbstractAnalysis.Common</Name>
-      <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
-      <Name>AbstractLexer.Core</Name>
-      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

@@ -5,7 +5,7 @@ open System.IO
 open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
-open AbstractLexer.Common
+open AbstractAnalysis.Common
 open AbstractLexer.Core
 open QuickGraph.Algorithms
 open AbstractLexer.Test.Calc.Parser
@@ -22,7 +22,7 @@ type ``Abstract lexer tests`` () =
 
     let printG res (fName:string) =
         let f = GraphvizAlgorithm(res)
-        let printEdg (e:AbstractParsing.Common.ParserEdge<_>) =
+        let printEdg (e:ParserEdge<_>) =
             let printBrs brs =
                 "["
                 + (brs |> Array.map (fun (pos:Position<_>) -> pos.back_ref ) |> String.concat "; ")
@@ -60,7 +60,7 @@ type ``Abstract lexer tests`` () =
 
     let check_brs = 
        Seq.iter
-        (fun (e:AbstractParsing.Common.ParserEdge<_>) -> 
+        (fun (e:ParserEdge<_>) -> 
                 match e.Tag with
                 | NUMBER (n,brs) 
                 | PLUS (n,brs) ->

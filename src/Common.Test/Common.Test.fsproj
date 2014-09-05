@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Common.Test</RootNamespace>
     <AssemblyName>YC.Common.Test</AssemblyName>
-    <Name>YC.Common.Test</Name>
+    <Name>Common.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -18,6 +18,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public IEnumerable<IDaemonStageProcess> CreateProcess(IDaemonProcess process, IContextBoundSettingsStore settings, DaemonProcessKind processKind)
         {
+            Handler.Init();
             if (processKind != DaemonProcessKind.VISIBLE_DOCUMENT ||
                 !IsSupported(process.SourceFile))
             {

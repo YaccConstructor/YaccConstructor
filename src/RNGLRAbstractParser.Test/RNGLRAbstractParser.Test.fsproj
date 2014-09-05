@@ -8,7 +8,7 @@
     <ProjectGuid>{b1d8c4fb-23e7-46ff-81b0-4ea3cd6e716e}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRAbstractParser.Tests</RootNamespace>
-    <AssemblyName>RNGLRAbstractParser.Test</AssemblyName>
+    <AssemblyName>YC.RNGLRAbstractParser.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -107,7 +107,8 @@
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Utils.SourceText, Version=0.1.5119.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

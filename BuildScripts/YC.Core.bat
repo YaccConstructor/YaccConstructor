@@ -1,1 +1,1 @@
-..\tools\Build.Tools\Fake\FAKE.exe ..\tools\Build.Tools\YC.Core.fsx
+..\tools\Build.Tools\Fake\FAKE.exe ..\tools\Build.Tools\YC.Core.fsx %1 %2

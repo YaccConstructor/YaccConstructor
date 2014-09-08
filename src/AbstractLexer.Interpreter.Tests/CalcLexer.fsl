@@ -1,0 +1,24 @@
+{
+module YC.FST.AbstractLexing.CalcLexer
+
+open Microsoft.FSharp.Collections
+open YC.FST.GraphBasedFst
+open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
+open AbstractParser.Tokens
+}
+
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\r' '\n']
+
+rule token = parse
+| whitespace { None }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lb.GetString(), lb.GetPosition ()) |> Some }
+| '-' { MINUS(lb.GetString(), lb.GetPosition ()) |> Some }
+| '(' { LBRACE(lb.GetString(), lb.GetPosition ()) |> Some }
+| ')' { RBRACE(lb.GetString(), lb.GetPosition ()) |> Some }
+| '/' { DIV(lb.GetString(), lb.GetPosition ())|> Some }
+| '+' { PLUS(lb.GetString(), lb.GetPosition ())|> Some }
+| "**" { POW(lb.GetString(), lb.GetPosition ())|> Some }
+| '*' { MULT(lb.GetString(), lb.GetPosition ())|> Some }
+

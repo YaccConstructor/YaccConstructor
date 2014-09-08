@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>114e4775-bf85-464f-bb3d-d68de62615bd</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>AbstractLexer.Interpreter.Tests</RootNamespace>
     <AssemblyName>AbstractLexer.Interpreter.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -39,12 +39,18 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime">
+      <HintPath>..\..\3rdParty\graphviz4net\Antlr3.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FST">
       <HintPath>..\..\..\YC.FST\FST\FST\bin\Debug\FST.dll</HintPath>
+    </Reference>
+    <Reference Include="Graphviz4Net">
+      <HintPath>..\..\3rdParty\graphviz4net\Graphviz4Net.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -72,7 +78,13 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserTokens.fs" />
+    <Compile Include="CalcLexer_Abstract.fs" />
+    <Compile Include="LiteralsLexer_Abstract.fs" />
+    <Compile Include="FstLexer.fs" />
+    <Compile Include="CommonTestChecker.fs" />
     <Compile Include="InterpreterTests.fs" />
+    <Compile Include="CalcTests.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -85,11 +97,6 @@
     <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
       <Name>AbstractLexer.Interpreter</Name>
       <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\AbstractLexingGenerator\AbstractLexer.Generator.fsproj">
-      <Name>AbstractLexer.Generator</Name>
-      <Project>{baa4ea05-ff42-40e1-8f0d-3a10ab045df8}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

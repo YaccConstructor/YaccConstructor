@@ -9,25 +9,15 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ProjectGuid>{bd2284a5-aa4d-442d-b4fb-e43b2fe9dd2a}</ProjectGuid>
+    <Name>AbstractLexer.Generator</Name>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <!-- Always use x86 emulation for this binary... -->
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{BD2284A5-AA4D-442D-B4FB-E43B2FE9DD2A}</ProjectGuid>
-    <TreatWarningsAsErrors>
-    </TreatWarningsAsErrors>
-    <!-- 5310 tracks reenabling -->
-    <OutputType>Exe</OutputType>
-    <AssemblyName>FsLex</AssemblyName>
     <DefineConstants>INTERNALIZED_POWER_PACK;$(DefineConstants)</DefineConstants>
-    <AllowCrossTargeting>true</AllowCrossTargeting>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <!-- These dummy entries are needed for F# Beta2 -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -90,8 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\FsLex\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharpx.Core, Version=1.8.41.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -112,7 +101,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\YC.FST\FST\FST\FST.fsproj">
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
       <Name>FST</Name>
       <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
       <Private>True</Private>

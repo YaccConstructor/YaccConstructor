@@ -46,7 +46,8 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)
     let edges = new ResizeArray<_>()
-
+    let reduced = ref false
+    let flag = ref false
     let bfs vertex (stt: StateInfo<_>) =
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex,stt)
@@ -56,9 +57,11 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
             let idF = ref 0
             let topV,curStt = queueV.Dequeue()
             
-            if curStt.curBr <> null 
-            then curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
-            
+//            if curStt.curBr <> null && !reduce
+//            then 
+//                curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
+//                reduce := false           
+
             if not <| visited.[topV]
             then
                 visited.[topV] <- true
@@ -66,13 +69,16 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                 for v in inputFstLexer.OutEdges(topV) do
                     if v.Tag.OutSymb = Eps
                     then
-                        //добавляем информацию                        
+                        //добавляем информацию                       
                         let so,co,br =
                             match v.Tag.InSymb with
                             | Smbl (x,br) -> 
                                 if curStt.curBr = null || br = curStt.curBr
                                 then curStt.start_offset, curStt.cur_offset + 1, br
-                                else 0,1,br
+                                else
+                                    if !reduced = false then curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, br))
+                                    if !flag = true then reduced := false
+                                    0,1,br
                             | x -> failwith "Unexpected symbol in BR calculation:%A" x
                         let newStt = 
                             new StateInfo<_>(
@@ -84,9 +90,12 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                                 , co
                                 , br)
                         queueV.Enqueue(v.Target, newStt)
-                    else
+                    else  
+                        reduced := true
+                        flag := true                    
+                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))                         
                         if !isNotActionPerformed //один раз выполняем action код, потому что входящие дуги в одну вершину возвращают одинаковый action код
-                        then
+                        then                            
                             isNotActionPerformed := false
                             idF := match v.Tag.OutSymb with
                                     | Smbl x -> x
@@ -99,6 +108,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                                 (curStt.AccumulatedString 
                                     |> ResizeArray.map (function | Smbl x -> x.ToString() | Eps -> "Eps" | Exclosure y -> y.ToString())
                                     |> String.concat "") 
+                                    
                      
                         let so,co,br =
                             match v.Tag.InSymb with
@@ -122,7 +132,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                 for v in inputFstLexer.OutEdges(topV) do                    
                     if not <| (v.Tag.OutSymb = Eps)  
                     then
-                    //еще раз пройтись, чтобы найти невыполненные action
+                    //еще раз пройтись, чтобы найти невыполненные action                        
                         idF := match v.Tag.OutSymb with
                                 | Smbl x -> x
                                 | x -> failwith "Unexpected symbol in function calculation:%A" x 

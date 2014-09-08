@@ -232,17 +232,6 @@ let main() =
     printLinesIfCodeDefined spec.BottomCode
     cfprintfn os "# 3000000 \"%s\"" output;
   
-    let printTable filePath =                                
-        let strs =
-            tableTransitions
-            |> ResizeArray.map(fun x -> 
-                (x
-                 |> ResizeArray.map string
-                 |> String.concat " ")
-                + "\n")           
-            |> String.concat ""
-        System.IO.File.WriteAllText(filePath, strs)
-    printTable @"C:\recursive-ascent\src\AbstractFsLex\outTable.txt"
     
     let ToGraphBasedFst  =
         let resFST = new FST<_,_>()
@@ -266,19 +255,19 @@ let main() =
                         then  
                             new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
-            resFST.PrintToDOT <| @"C:\recursive-ascent\src\AbstractFsLex\outPrint.txt"
+            //resFST.PrintToDOT <| @"C:\recursive-ascent\src\AbstractFsLex\outPrint.txt"
                      
-        let startState = ResizeArray.singleton 0
-        let finishState = ResizeArray.singleton 4
-        let transitions = new ResizeArray<_>()
-        transitions.Add(0, new EdgeLbl<_,_>(Smbl "+", Smbl '+'), 1)
-        transitions.Add(1, new EdgeLbl<_,_>(Smbl "*", Smbl '*'), 2)
-        transitions.Add(2, new EdgeLbl<_,_>(Smbl "*", Smbl '*'), 1)
-        transitions.Add(2, new EdgeLbl<_,_>(Smbl "+", Smbl '+'), 3)
-        transitions.Add(3, new EdgeLbl<_,_>(Smbl "eof", Smbl (char Eof)), 4)
-        let fst = new FST<_,_>(startState, finishState, transitions)
-        let r = FST<_,_>.Compos(fst, resFST)
-        r.PrintToDOT(@"C:\recursive-ascent\src\AbstractFsLex\outPrint1.txt")
+//        let startState = ResizeArray.singleton 0
+//        let finishState = ResizeArray.singleton 4
+//        let transitions = new ResizeArray<_>()
+//        transitions.Add(0, new EdgeLbl<_,_>(Smbl "+", Smbl '+'), 1)
+//        transitions.Add(1, new EdgeLbl<_,_>(Smbl "*", Smbl '*'), 2)
+//        transitions.Add(2, new EdgeLbl<_,_>(Smbl "*", Smbl '*'), 1)
+//        transitions.Add(2, new EdgeLbl<_,_>(Smbl "+", Smbl '+'), 3)
+//        transitions.Add(3, new EdgeLbl<_,_>(Smbl "eof", Smbl (char Eof)), 4)
+//        let fst = new FST<_,_>(startState, finishState, transitions)
+//        let r = FST<_,_>.Compos(fst, resFST)
+//        r.PrintToDOT(@"C:\recursive-ascent\src\AbstractFsLex\outPrint1.txt")
 
 
         let getVal printV s = 
@@ -287,30 +276,33 @@ let main() =
             | Eps -> "Eps"
             | _ -> ""
 
-        let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.fs"
+        let filePathFst = 
+            match !out with 
+            | Some x -> Path.Combine (Path.GetDirectoryName x,Path.GetFileNameWithoutExtension(x)) + "_Abstract.fs" 
+            | _ -> Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + "_Abstract.fs"
+        //let filePathFst = @"C:\recursive-ascent\src\AbstractFsLex\FstLexer.fs"
         let fstStream = new StreamWriter(filePathFst)
 
+        let printIfCodeDefined (code,pos:Position) =
+            if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
+            then 
+                 fstStream.WriteLine(sprintf "%s" code);
 
-        fstStream.WriteLine("module YC.FST.AbstractLexing.FstLexer")
-        fstStream.WriteLine()
-        fstStream.WriteLine("open Microsoft.FSharp.Collections")
-        fstStream.WriteLine("open YC.FST.GraphBasedFst")
-        fstStream.WriteLine("open YC.FST.AbstractLexing.Interpreter")
-        fstStream.WriteLine("open AbstractAnalysis.Common")
-        fstStream.WriteLine()
+        printIfCodeDefined spec.TopCode
+
         fstStream.WriteLine("let fstLexer () = ")
         fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
         fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
         fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
-        
         for edge in resFST.Edges do         
             fstStream.WriteLine(
                 sprintf  
                     "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
                     edge.Source
-                    (getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
+                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
+                    //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
                     (getVal (string) edge.Tag.OutSymb) edge.Target)
-
+                                    
         fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
         fstStream.WriteLine("\nlet actions () =")

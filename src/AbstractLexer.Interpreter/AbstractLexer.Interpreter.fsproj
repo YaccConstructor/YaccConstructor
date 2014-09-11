@@ -42,9 +42,6 @@
     <Reference Include="FSharpx.Core, Version=1.8.41.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FST">
-      <HintPath>..\..\..\YC.FST\FST\FST\bin\Debug\FST.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -75,6 +72,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
+      <Name>FST</Name>
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>

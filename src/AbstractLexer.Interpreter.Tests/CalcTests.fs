@@ -75,16 +75,17 @@ type ``Lexer Calc Fst Tests`` () =
         let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_2.dot"
         let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
         checkGraph res 3 3
+        ToDot res @"..\..\Tests\CalcTest.dot" printBref   
         let startPos = positions res (fun p -> p.start_offset)
         let endPos = positions res (fun p -> p.end_offset)
         let backref = positions res (fun p -> p.back_ref)
-        checkArr startPos [|0; 0|]
-        checkArr endPos [|2; 1|]
-        checkArr backref [|"12"; "3"|]  
+        checkArr startPos [|0; 0; 0; 0|]
+        checkArr endPos [|2; 1; 2; 1|]
+        checkArr backref [|"12"; "4"; "12"; "3"|]  
 
-[<EntryPoint>]
-let f x =
-      let t = new ``Lexer Calc Fst Tests`` () 
-      let a = t.``Test with position. Ident on edgs with branch``()
-      //printfn "%A" a      
-      1
+//[<EntryPoint>]
+//let f x =
+//      let t = new ``Lexer Calc Fst Tests`` () 
+//      let a = t.``Test with position. Ident on edgs with branch``()
+//      //printfn "%A" a      
+//      1

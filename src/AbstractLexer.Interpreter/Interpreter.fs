@@ -46,8 +46,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)
     let edges = new ResizeArray<_>()
-    let reduced = ref false
-    let flag = ref false
+    let saved = ref false
+    let pos = ref (new Position<_>(0, 0, Unchecked.defaultof<'br>))
+
     let bfs vertex (stt: StateInfo<_>) =
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex,stt)
@@ -61,11 +62,13 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
 //            then 
 //                curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
 //                reduce := false           
+//            if !save 
+//            then curStt.Positions.Add(!pos)
 
             if not <| visited.[topV]
             then
                 visited.[topV] <- true
-                
+                saved := false
                 for v in inputFstLexer.OutEdges(topV) do
                     if v.Tag.OutSymb = Eps
                     then
@@ -74,33 +77,38 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                             match v.Tag.InSymb with
                             | Smbl (x,br) -> 
                                 if curStt.curBr = null || br = curStt.curBr
-                                then curStt.start_offset, curStt.cur_offset + 1, br
-                                else
-                                    if !reduced = false then curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, br))
-                                    if !flag = true then reduced := false
+                                then 
+                                    //if !save 
+                                    //then save := false
+                                    curStt.start_offset, curStt.cur_offset + 1, br
+                                else   
+                                    //pos := new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)
+                                    if not !saved
+                                    then
+                                        saved := true
+                                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))
                                     0,1,br
                             | x -> failwith "Unexpected symbol in BR calculation:%A" x
                         let newStt = 
                             new StateInfo<_>(
                                 curStt.StartV
                                 , ResizeArray.append curStt.AccumulatedString (ResizeArray.singleton v.Tag.InSymb)
-                                , curStt.Positions
+                                , new ResizeArray<_>(curStt.Positions)
                                 , v.Target
                                 , so
                                 , co
                                 , br)
                         queueV.Enqueue(v.Target, newStt)
                     else  
-                        reduced := true
-                        flag := true                    
-                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))                         
                         if !isNotActionPerformed //один раз выполняем action код, потому что входящие дуги в одну вершину возвращают одинаковый action код
                         then                            
                             isNotActionPerformed := false
                             idF := match v.Tag.OutSymb with
                                     | Smbl x -> x
                                     | x -> failwith "Unexpected symbol in function calculation:%A" x 
+                            curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
                             let tok = actions.[!idF] curStt
+                            //save := false
                             edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok)) 
                             printfn 
                                 "startV %i string %s" 
@@ -136,7 +144,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                         idF := match v.Tag.OutSymb with
                                 | Smbl x -> x
                                 | x -> failwith "Unexpected symbol in function calculation:%A" x 
-                        let tok = actions.[!idF] curStt
+                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))
+                        let tok = actions.[!idF] curStt                        
+                        //save := false 
                         edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok))
                         printfn 
                             "startV %i string %s" 
@@ -169,10 +179,10 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
     res.AddVerticesAndEdgeRange edges |> ignore  
     res
 
-
 let Tokenize (fstLexer : FST<_,_>) (actions : array<StateInfo<_> -> _>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST()
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
+    inputFstLexer.PrintToDOT  @"..\..\Tests\testDebug.dot"
     let parserInputGraph = Interpret inputFstLexer actions eofToken 
     let epsRes = EpsClosure.NfaToDfa parserInputGraph
     epsRes 

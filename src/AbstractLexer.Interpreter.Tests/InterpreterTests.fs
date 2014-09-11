@@ -23,7 +23,7 @@ type ``Lexer FST Tests`` () =
         let appr = new Appr<_>(startState, finishState, transitions)
         let fstInputLexer = appr.ToFST()
         let resFST = FST<_,_>.Compos(fstInputLexer, YC.FST.AbstractLexing.FstLexer.fstLexer())
-        resFST.PrintToDOT @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test1.dot"
+        resFST.PrintToDOT @"..\..\Tests\test1.dot"
         checkGraph resFST 6 6
 
     [<Test>]
@@ -41,7 +41,7 @@ type ``Lexer FST Tests`` () =
         //resFST.PrintToDOT @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test2.dot"                      
         //Interpret resFST (actions()) 
         let parserInputGraph = YC.FST.AbstractLexing.FstLexer.tokenize eof appr
-        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test2.dot" printBref
+        ToDot parserInputGraph @"..\..\Tests\test2.dot" printBref
         checkGraph parserInputGraph 8 7
 
     [<Test>]
@@ -52,7 +52,7 @@ type ``Lexer FST Tests`` () =
         transitions.Add(0, Smb("++", "+1"), 1)
         let appr = new Appr<_>(startState, finishState, transitions)
         let parserInputGraph = YC.FST.AbstractLexing.FstLexer.tokenize eof appr
-        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test3.dot" printBref
+        ToDot parserInputGraph  @"..\..\Tests\test3.dot" printBref
         checkGraph parserInputGraph 3 4
         let startPos = positions parserInputGraph (fun p -> p.start_offset)
         let endPos = positions parserInputGraph (fun p -> p.end_offset)
@@ -70,7 +70,7 @@ type ``Lexer FST Tests`` () =
         transitions.Add(1, Smb("**", "2"), 2)
         let appr = new Appr<_>(startState, finishState, transitions)
         let parserInputGraph = YC.FST.AbstractLexing.FstLexer.tokenize eof appr
-        ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\test4.dot" printBref
+        ToDot parserInputGraph  @"..\..\Tests\test4.dot" printBref
         checkGraph parserInputGraph 4 5
         let startPos = positions parserInputGraph (fun p -> p.start_offset)
         let endPos = positions parserInputGraph (fun p -> p.end_offset)
@@ -89,7 +89,7 @@ type ``Lexer FST Tests`` () =
         transitions.Add(1, new EdgeLbl<_,_>(Eps, Smbl '*'), 1)
         let fst = new FST<_,_>(startState, finishState, transitions)
         let resFST = FST<_,_>.Compos(fst, YC.FST.AbstractLexing.FstLexer.fstLexer())
-        resFST.PrintToDOT @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\testCompose.dot"   
+        resFST.PrintToDOT @"..\..\Tests\testCompose.dot"   
         //let parserInputGraph = Interpret resFST (actions()) eof
         //ToDot parserInputGraph  @"C:\recursive-ascent\src\AbstractLexer.Interpreter.Tests\Tests\testComposeGraph.dot" printBref   
 

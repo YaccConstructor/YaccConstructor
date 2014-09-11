@@ -258,6 +258,11 @@ let printTables
 
         printBr ""
 
+        printBr "let otherAstToDot ="
+        printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+
+        printBr ""
+
         print2DArrList tables.gotos
             (fun x -> not x.IsEmpty)
             (fun x -> print "%d" x.[0])

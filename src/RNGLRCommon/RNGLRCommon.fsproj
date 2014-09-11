@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
+    <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
     <None Include="packages.config" />

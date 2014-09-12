@@ -15,7 +15,6 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
         let GeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) GeneratorsManager
         let allGenerators = 
@@ -34,7 +33,6 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``All frontends`` () =
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
         let FrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) FrontendsManager 
         let allFrontends = 
@@ -53,7 +51,6 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``All conversions`` () =
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
         let ConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) ConversionsManager
         let allConversions = 
@@ -73,7 +70,6 @@ type ``Components loader tests`` () =
     [<Test>]
     member test.``Get generators name`` () =
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 

@@ -30,6 +30,9 @@ exception FEError of string
 exception GenError of string
 exception CheckerError of string
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
 let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =

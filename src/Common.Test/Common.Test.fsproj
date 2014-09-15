@@ -32,7 +32,6 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="CommonTests.fs" />
-    <Compile Include="Manager.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

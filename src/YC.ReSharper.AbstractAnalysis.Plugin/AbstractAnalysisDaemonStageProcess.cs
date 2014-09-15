@@ -16,6 +16,7 @@
 
 using System;
 using JetBrains.Application.Progress;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -23,6 +24,7 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
 //using YC.ReSharper.AbstractAnalysis.Plugin.Core;
+using JetBrains.ReSharper.Psi.Tree;
 using YC.AbstractAnalysis;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
@@ -39,7 +41,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin
             //GraphLoader.InvokeLoadGrapFromCoreEvent += GetGraphs;
         }
 
-        private Helper.ReSharperHelper _processor = Helper.ReSharperHelper.Instance;
+        private Helper.ReSharperHelper<DocumentRange, ITreeNode> _processor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         public void Execute(Action<DaemonStageResult> commiter)
         {

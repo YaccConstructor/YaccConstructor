@@ -47,18 +47,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -91,6 +79,18 @@
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="YC.Common">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Common.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Constraints.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Conversions.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

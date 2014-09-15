@@ -3,53 +3,38 @@
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
+open JetBrains.Application
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
+open ReSharperExtension
 
 [<Class>]
-type ReSharperHelper private() =
-    let processors = 
-        [
-            ("tsql",YC.ReSharper.AbstractAnalysis.Languages.TSQL.TSQLInjectedLanguageModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
-            ("calc",YC.ReSharper.AbstractAnalysis.Languages.Calc.CalcInjectedLanguageModule.Instance:>YC.AbstractAnalysis.CommonInterfaces.IInjectedLanguageModule<_,_,_>)
-            ]
-        |> dict    
+type ReSharperHelper<'range, 'node> private() =
+    let getAllProcessors() =
+        Shell.Instance.GetComponents<IReSharperLanguage>()
+        
 
-    static let instance = new ReSharperHelper()
-    static member Instance = instance
+    let getProcessor (lang  : string) = 
+        let processors = getAllProcessors() |> Array.ofSeq
+        let l = lang.ToLowerInvariant()
+        processors
+        |> Array.find (fun processor -> processor.Name.ToLowerInvariant() = l)
     
-    //let processor = new LanguagesProcessor()
-    member this.XmlPath (lang : string) = processors.[lang.ToLowerInvariant()].XmlPath
-    member this.ParsingFinished = 
-        processors |> Seq.map(fun kvp -> kvp.Value.ParsingFinished) |> (fun x -> new ResizeArray<_>(x))
-        //processor.ParsingFinished
-    member this.GetNextTree (lang : string) i = 
-        processors.[lang.ToLowerInvariant()].GetNextTree i
-        //processor.GetNextTree l i
-    member this.LexingFinished = 
-        processors |> Seq.map(fun kvp -> kvp.Value.LexingFinished) |> (fun x -> new ResizeArray<_>(x))
-        //processor.LexingFinished
-    member this.GetForestWithToken (lang : string) rng = 
-        processors.[lang.ToLowerInvariant()].GetForestWithToken rng
-        //processor.GetForestWithToken l rng
-    member this.Process(file) =
-//        let defLang (n:ITreeNode) =
-//            match n with 
-//            | :? IInvocationExpression as m ->
-//                match m.InvocationExpressionReference.GetName().ToLowerInvariant() with
-//                | "executeimmediate" -> "TSQL"
-//                | "eval" -> "Calc"
-//                | "objnotation" -> "JSON"
-//                | _ -> failwith "Unsupported language for AA!"
-//            | _ -> failwith "Unexpected information type for language specification!" 
 
-        let graphs = (new Approximator(file)).Approximate() //defLang
+    static let instance = new ReSharperHelper<'range, 'node>()
+    static member Instance = instance
+
+    member this.XmlPath (lang : string) = (getProcessor lang).XmlPath
+    member this.ParsingFinished = getAllProcessors() |> Seq.map (fun pr -> pr.ParsingFinished) |> (fun x -> new ResizeArray<_>(x))
+    member this.GetNextTree (lang : string) i = (getProcessor lang).GetNextTree i
+    member this.LexingFinished = getAllProcessors() |> Seq.map(fun pr -> pr.LexingFinished) |> (fun x -> new ResizeArray<_>(x))
+    member this.GetForestWithToken (lang : string) rng = (getProcessor lang).GetForestWithToken rng
+    member this.Process(file) =
+        let graphs = (new Approximator(file)).Approximate()
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
-//        processor.Process graphs
-//        |> ResizeArray.iter(fun (x,y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         graphs
-        |> ResizeArray.map (fun (lang, graph) -> processors.[lang.ToLowerInvariant()].Process graph)
+        |> ResizeArray.map (fun (lang, graph) -> (getProcessor lang).Process graph)
         |> ResizeArray.iter(fun (x, y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         
         lexerErrors, parserErrors

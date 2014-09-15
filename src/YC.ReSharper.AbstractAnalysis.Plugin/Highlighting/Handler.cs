@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Application.Threading.Tasks;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi.Tree;
 using YC.AbstractAnalysis;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
     static class Handler
     {
         public static HighlightingProcess Process { get; set; }
-        private static Helper.ReSharperHelper YcProcessor = Helper.ReSharperHelper.Instance;
+        private static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         static Handler()
         {

@@ -9,6 +9,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
+using JetBrains.ReSharper.Psi.Tree;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 using YC.AbstractAnalysis;
 
@@ -19,7 +20,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private Action<DaemonStageResult> myCommiter;
         private IContextBoundSettingsStore mySettingsStore;
 
-        private static Helper.ReSharperHelper YcProcessor = Helper.ReSharperHelper.Instance;
+        private static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         public IDaemonProcess DaemonProcess { get; private set; }
         public IHighlightingConsumer Consumer
@@ -36,12 +37,12 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             get
             {
                 if (csFile == null)
-                    csFile = GetCSFile();
+                    csFile = GetCsFile();
                 return csFile;
             }
         }
 
-        private ICSharpFile GetCSFile()
+        private ICSharpFile GetCsFile()
         {
             IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
             return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile) as ICSharpFile;

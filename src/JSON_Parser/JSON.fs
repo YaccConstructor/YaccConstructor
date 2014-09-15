@@ -9,6 +9,8 @@ open YC.EL.ReSharper.Common
 open Mono.Addins
 open YC.AbstractAnalysis.CommonInterfaces
 open  YC.ReSharper.AbstractAnalysis.Plugin.Core
+open JetBrains.Application
+open ReSharperExtension
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -41,8 +43,9 @@ let translate ast errors = translate args ast errors
 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 
+[<ShellComponent>]
 [<Extension>]
-type JSONPars () =
+type JSONInjectedLanguageModule () =
     let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "calc", calculatePos, getRange)
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "json"
@@ -52,3 +55,5 @@ type JSONPars () =
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
         member this.GetForestWithToken rng = processor.GetForestWithToken rng
+
+    interface IReSharperLanguage

@@ -12,7 +12,6 @@ open ReSharperExtension
 type ReSharperHelper<'range, 'node> private() =
     let getAllProcessors() =
         Shell.Instance.GetComponents<IReSharperLanguage>()
-        
 
     let getProcessor (lang  : string) = 
         let processors = getAllProcessors() |> Array.ofSeq

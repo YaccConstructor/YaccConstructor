@@ -1,3 +1,0 @@
-[submodule "tools/Build.Tools"]
-	path = tools/Build.Tools
-	url = https://github.com/YaccConstructor/Build.Tools.git

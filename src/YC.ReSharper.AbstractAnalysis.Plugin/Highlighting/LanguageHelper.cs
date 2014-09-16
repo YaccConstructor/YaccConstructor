@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Highlighting.Core;
+using JetBrains.TextControl.Graphics;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -32,6 +33,25 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             if (language == null)
                 return null;
             return language.GetColor(token.ToLowerInvariant());
+        }
+
+        public static int GetNumberFromTextValue(string lang, string text)
+        {
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (language == null)
+                return -1;
+
+            string ycName = language.GetYcName(text);
+            return language.GetNumber(ycName);
+        }
+
+        public static int GetNumberFromYcName(string lang, string ycName)
+        {
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (language == null)
+                return -1;
+
+            return language.GetNumber(ycName);
         }
     }
 
@@ -70,7 +90,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         /// Maps token name from YaccConstructor. For example if str is "(" then returned value is "LBRACE"
         /// This method contains definition only for paired tokens.
         /// </summary>
-        private string GetYcName(string str)
+        public string GetYcName(string str)
         {
             return YcHelper.GetYcName(LanguageName, str);
         }
@@ -81,6 +101,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
                 return tokenInfos[token].Color;
 
             return ColorHelper.DefaultColor;
+        }
+
+        public int GetNumber(string ycName)
+        {
+            return YcHelper.GetNumber(LanguageName, ycName);
         }
     }
 

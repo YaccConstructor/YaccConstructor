@@ -17,7 +17,7 @@ let run path astBuilder =
 let dir = @"../../../../../yc/Tests/AstToAst/"
 
 let lbl tokenId = tokenId
-let edg f t l = new ParserEdge<_>(f,t,lbl l)
+let edg from _to label = new ParserEdge<_>(from, _to, lbl label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
@@ -116,6 +116,13 @@ type ``RNGLR ast to ast translation test`` () =
 
 [<TestFixture>]
 type ``Brackets matching`` () =
+    
+    let tokenToPos (tokenData : _ -> obj) token = 
+        let t = tokenData token
+        match t with
+        | :? int as i -> [i] |> Seq.ofList
+        | _ -> failwith ""
+
     [<Test>]
     member test.``Simple test``() =
         let qGraph = new ParserInputGraph<_>()
@@ -142,8 +149,9 @@ type ``Brackets matching`` () =
             let tokToNumber = RNGLR.ParseBrackets_1.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_1.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_1.Token.CLOSE -1
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_1.tokenData
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
             Assert.AreEqual (1, pairs.Count)
 
             match pairs.[0] with
@@ -176,8 +184,9 @@ type ``Brackets matching`` () =
             let tokToNumber = RNGLR.ParseBrackets_2.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_2.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_2.Token.CLOSE -1
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_2.tokenData
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
             Assert.AreEqual (1, pairs.Count)
             
             match pairs.[0] with
@@ -209,8 +218,9 @@ type ``Brackets matching`` () =
             let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
             
@@ -244,15 +254,15 @@ type ``Brackets matching`` () =
             let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 1 true tokToNumber
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 1 true tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
             
             match pairs.[0] with
             | RNGLR.ParseBrackets_3.Token.CLOSE pos -> Assert.AreEqual (3, pos)
             | _ -> Assert.Fail ("Expected CLOSE token")
-
-    
 
     [<Test>]
     member test.``AbstractAnalysis case``() =
@@ -281,7 +291,9 @@ type ``Brackets matching`` () =
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (2, pairs.Count)
 
@@ -321,7 +333,9 @@ type ``Brackets matching`` () =
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
 
@@ -362,7 +376,9 @@ type ``Brackets matching`` () =
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
 
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber
+            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
 

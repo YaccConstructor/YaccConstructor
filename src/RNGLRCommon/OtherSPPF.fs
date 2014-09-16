@@ -305,21 +305,30 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         calcTokens root.first |> ignore
         dict
 
-    let findLeaves now = 
+    let findLeaves (now : 'range) (tokenToPos : 'TokenType -> seq<'range>)= 
         let leaf = ref []
         let nd = ref null
+
+        let containsRange number = 
+            tokenToPos tokens.[number]
+            |> Seq.exists (fun range -> range = now)
+
         let rec handleFamily (fam : OtherFamily) = 
             fam.nodes.doForAll (fun node -> 
                 match node with
                 | :? OtherAST as ast -> 
-                    if List.exists (fun t -> t = now) familyToTokens.[ast.first]
-                    then handleFamily ast.first
-                    if ast.other <> null 
+                    if List.exists (fun t -> containsRange t) familyToTokens.[ast.first]
                     then
-                        for f in ast.other do
-                            if List.exists (fun t -> t = now) familyToTokens.[f]
-                            then handleFamily f
-                | :? int as t when t >= 0 && t = now -> 
+                        handleFamily ast.first
+                        if ast.other <> null 
+                        then
+                            for f in ast.other do
+                                if List.exists (fun t -> containsRange t) familyToTokens.[f]
+                                then handleFamily f
+                
+                | :? int as t when t >= 0 -> 
+                    if tokenToPos tokens.[t] |> Seq.exists (fun range -> range = now)
+                    then
                         leaf := fam :: !leaf
                         nd := node
                 | _ -> ()
@@ -329,8 +338,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
     /// search
     /// for example for left_bracket it returns all paired right_brackets
-    member this.FindAllPair left right now toRight tokenToNumber = 
-        let nd, cur = findLeaves now
+    member this.FindAllPair (left : int) (right : int) (now : 'range) toRight tokenToNumber (tokenToPos : 'TokenType -> seq<'range>)= 
+        let nd, cur = findLeaves now tokenToPos
         let res = new ResizeArray<_>()
 
         let nowNumber, pairNumber = if toRight then left, right else right, left
@@ -339,11 +348,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then family.nodes.doForAllAfterNode node f
             else family.nodes.doForAllBeforeNode node f
 
-//        let stack = new System.Collections.Generic.Stack<_>()
-
         for family in cur do
             let mutable current = box family
-            // I have left_bracket. I search matching right_bracket
             let count = ref 1
 
             let rec processFamily (family : OtherFamily) = 
@@ -363,7 +369,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                         | _ -> ()
             
                     if family.nodes.exist (fun node -> node = !nd)
-                    then handleSomeNodes !nd family handle //family.nodes.doForAllAfterNode !nd handle
+                    then handleSomeNodes !nd family handle 
                     else family.nodes.doForAll (fun node -> handle node)
 
             and processAST (ast : OtherAST) = 

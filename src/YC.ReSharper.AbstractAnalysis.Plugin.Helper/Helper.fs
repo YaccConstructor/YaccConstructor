@@ -19,15 +19,17 @@ type ReSharperHelper<'range, 'node> private() =
         processors
         |> Array.find (fun processor -> processor.Name.ToLowerInvariant() = l)
     
-
     static let instance = new ReSharperHelper<'range, 'node>()
     static member Instance = instance
 
-    member this.XmlPath (lang : string) = (getProcessor lang).XmlPath
+    member this.XmlPath lang = (getProcessor lang).XmlPath
     member this.ParsingFinished = getAllProcessors() |> Seq.map (fun pr -> pr.ParsingFinished) |> (fun x -> new ResizeArray<_>(x))
-    member this.GetNextTree (lang : string) i = (getProcessor lang).GetNextTree i
+    member this.GetNextTree lang i = (getProcessor lang).GetNextTree i
     member this.LexingFinished = getAllProcessors() |> Seq.map(fun pr -> pr.LexingFinished) |> (fun x -> new ResizeArray<_>(x))
-    member this.GetForestWithToken (lang : string) rng = (getProcessor lang).GetForestWithToken rng
+    
+    member this.GetForestWithToken lang range = (getProcessor lang).GetForestWithToken range
+    member this.GetPairedRanges lang left right range toRight = (getProcessor lang).GetPairedRanges left right range toRight
+    
     member this.Process(file) =
         let graphs = (new Approximator(file)).Approximate()
         let lexerErrors = new ResizeArray<_>()

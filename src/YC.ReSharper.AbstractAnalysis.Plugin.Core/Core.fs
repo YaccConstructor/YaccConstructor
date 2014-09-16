@@ -5,6 +5,8 @@ open QuickGraph
 open QuickGraph.Algorithms
 open YC.AbstractAnalysis.CommonInterfaces
 open AbstractAnalysis.Common
+open Yard.Generators.RNGLR.AST
+open Yard.Generators.RNGLR.OtherSPPF
 
 open System
 open Mono.Addins
@@ -60,7 +62,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _> = [] 
+    let mutable forest: list<Tree<'TokenType> * _> = [] 
+    let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
@@ -100,8 +103,9 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             (function 
                 | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
                     forest <- (tree, errors) :: forest
+                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -144,12 +148,25 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             treeNode, true
         | _ -> failwith "Unexpected state in tree generation"
 
-    member this.TokenToPos calculatePos token = 
+    member this.TokenToPos calculatePos (token : 'TokenType)= 
         let data : string * array<AbstractLexer.Core.Position<'br>> = unbox <| tokenData token
         calculatePos <| snd data
 
-    member this.GetForestWithToken range =        
-        getForestWithToken range
+    member this.GetForestWithToken range = getForestWithToken range
+
+    member this.GetPairedRanges leftNumber rightNumber range toRight = 
+        let tokens = new ResizeArray<_>()
+        let tokToPos = this.TokenToPos calculatePos
+
+        for otherTree in otherForest do
+            tokens.AddRange <| otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos
+        
+        let ranges = new ResizeArray<_>()
+        tokens 
+        |> ResizeArray.iter (fun token -> 
+            Seq.iter (fun r -> ranges.Add r) <| tokToPos token)
+
+        ranges
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     

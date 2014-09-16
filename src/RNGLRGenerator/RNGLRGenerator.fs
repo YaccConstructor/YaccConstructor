@@ -121,7 +121,8 @@ type RNGLR() =
             if !needHighlighting
             then
                 let folder = System.IO.Path.GetFullPath (!namespaceName) + "\\"
-                
+                let langName = namespaceName.Value.Replace ("Highlighting", "")
+                let baseClass = langName + "BaseTreeNode"
                 (*let generateHotspotXMLFile (filename : string)= 
                     eprintfn "generateHotspotXMLFile "
                     if not <| System.IO.File.Exists filename 
@@ -146,40 +147,58 @@ type RNGLR() =
                     out.WriteLine content
                     out.Close()
                 
-                let generateFile name isTerminal = 
-                    use out = new System.IO.StreamWriter (folder + name + ".cs")
-                    let tables = printTreeNode !namespaceName name <| isTerminal <| namespaceName.Value.Replace ("Highlighting", "")
+                let generateFile name _class number isTerminal = 
+                    use out = new System.IO.StreamWriter (folder + _class + ".cs")
+                    let tables = printTreeNode !namespaceName _class name baseClass number isTerminal langName
                     out.WriteLine tables
                     out.Close()
+
+                let generateBaseClass() = 
+                    use out = new System.IO.StreamWriter(folder + baseClass + ".cs")
+                    let text = printBaseTreeNode !namespaceName baseClass langName 
+                    out.WriteLine text
+                    out.Close()
+
+                generateBaseClass()
 
                 let indexator = grammar.indexator
                 let mutable tokensAndLits = []
                 let mutable nameOfClasses = []
                 
                 for i = 0 to indexator.nonTermCount - 1 do
-                    let prefix = toClassName <| indexator.indexToNonTerm i
-                    if not <| prefix.Contains ("Highlight_")
+                    let name = indexator.indexToNonTerm i
+                    if not <| name.Contains ("Highlight_")
                     then 
-                        nameOfClasses <- prefix + "NonTermNode.cs" :: nameOfClasses
-                        generateFile <| prefix + "NonTermNode" <| false
+                        nameOfClasses <- name + "NonTermNode.cs" :: nameOfClasses
+                        generateFile <| name <| name + "NonTermNode" <| i <| false
 
                 for i = indexator.termsStart to indexator.termsEnd do
-                    let prefix = toClassName <| grammar.indexator.indexToTerm i
+                    let name = grammar.indexator.indexToTerm i
                     
-                    nameOfClasses <- prefix + "TermNode.cs" :: nameOfClasses
-                    tokensAndLits <- prefix :: tokensAndLits
-                    generateFile <| prefix + "TermNode" <| true
+                    nameOfClasses <- name + "TermNode.cs" :: nameOfClasses
+                    tokensAndLits <- name :: tokensAndLits
+                    generateFile <| name <| name + "TermNode" <| i <| true
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
-                    let prefix = toClassName <| grammar.indexator.getLiteralName i
+                    let name = toClassName <| grammar.indexator.getLiteralName i
                     
-                    nameOfClasses <- prefix + "LitNode.cs" :: nameOfClasses
-                    tokensAndLits <- prefix :: tokensAndLits
-                    generateFile <| prefix + "LitNode" <| true
+                    nameOfClasses <- name + "LitNode.cs" :: nameOfClasses
+                    tokensAndLits <- name :: tokensAndLits
+                    generateFile <| name <| name + "LitNode" <| i <| true
                     
                 //generateHotspotXMLFile "Hotspots.xml"
-                generateXML !namespaceName <| List.rev tokensAndLits
-                generateItemsGroup <| List.rev nameOfClasses
+                tokensAndLits <- 
+                    tokensAndLits 
+                    |> List.map (fun elem -> toClassName elem)
+                    |> List.rev
+                generateXML !namespaceName tokensAndLits
+
+                nameOfClasses <- 
+                    nameOfClasses 
+                    |> List.map (fun elem -> toClassName elem)
+                    |> List.rev
+
+                generateItemsGroup <| List.rev (langName + "BaseTreeNode.cs" :: nameOfClasses)
 
             let printRules () =
                 let printSymbol (symbol : int) =

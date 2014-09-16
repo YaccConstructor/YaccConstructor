@@ -8,7 +8,7 @@ open Yard.Generators.RNGLR.AST
 open YC.EL.ReSharper.Common
 open Mono.Addins
 open YC.AbstractAnalysis.CommonInterfaces
-open  YC.ReSharper.AbstractAnalysis.Plugin.Core
+open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open JetBrains.Application
 open ReSharperExtension
 
@@ -54,6 +54,7 @@ type JSONInjectedLanguageModule () =
         member this.ParsingFinished = processor.ParsingFinished
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken rng = processor.GetForestWithToken rng
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage

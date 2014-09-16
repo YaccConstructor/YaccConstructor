@@ -6,7 +6,7 @@
       <!-- comment about tsql -->
       <Language> TSQL </Language>
       <!-- comment about fullName -->
-      <Fullname>Program.ExecuteImmediate</Fullname>
+      <Method>Program.ExecuteImmediate</Method>
       <!-- zero-based -->
       <ArgumentPosition> 0 </ArgumentPosition>
       <!-- comment about return type -->
@@ -14,7 +14,7 @@
   </Hotspot>
   <Hotspot>
       <Language> Calc </Language>
-      <Fullname>Program.Eval</Fullname>
+      <Method>Program.Eval</Method>
       <ArgumentPosition> 0 </ArgumentPosition>
       <ReturnType> int </ReturnType>
   </Hotspot>

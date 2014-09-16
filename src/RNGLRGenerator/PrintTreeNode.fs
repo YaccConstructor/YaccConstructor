@@ -4,6 +4,30 @@ module PrintTreeNode
 
 open Yard.Generators.RNGLR
 
+type TokenKind = 
+    | Terminal 
+    | Literal
+    | NonTerminal
+
+type TokenInfo = 
+    {
+        _namespace : string
+        _name : string
+        _lang : string
+        _type : TokenKind
+        _baseClass : string
+        _number : int
+    }
+
+let toClassName (str : string) = 
+        let symbols = [| 
+                        for i = 0 to str.Length - 1 do
+                            if i = 0 
+                            then yield System.Char.ToUpper str.[0]
+                            else yield str.[i] 
+                        |] 
+        new System.String(symbols)
+
 //Print ITreeNode implementation
 let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
     let res  = new System.Text.StringBuilder()
@@ -92,7 +116,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 2 "}"
     
     printBr ""
-    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
     printBrInd 2 "{"
 //    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
 //    printBrInd 2 "}"
@@ -279,7 +303,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 0 "}"
     res.ToString()
 
-let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (baseClass : string) (name : string) (number : int) isTerminal (lang : string) = 
+let printTreeNode (tokenInfo : TokenInfo) = 
     let res  = new System.Text.StringBuilder()
 
     let inline print (x : 'a) =
@@ -297,30 +321,55 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (baseClass :
     printBrInd 0 "using JetBrains.DocumentModel;"
     printBrInd 0 ""
 
-    printBrInd 0 "namespace %s" nameOfNamespace
+    printBrInd 0 "namespace %s" tokenInfo._namespace
     printBrInd 0 "{"
 
-    printBrInd 1 "public class %s : %s" nameOfClass baseClass
+
+    let className = 
+        let suffix = 
+            match tokenInfo._type with
+            | Terminal -> "TermNode"
+            | Literal -> "LitNode"
+            | NonTerminal -> "NonTermNode"
+        toClassName tokenInfo._name + suffix
+
+    printBrInd 1 "public class %s : %s" className tokenInfo._baseClass
     printBrInd 1 "{"
 
-    printBrInd 2 "private static string ycTokName = %s;" name
-
-    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" nameOfClass
+    printBrInd 2 "private static string ycTokName = \"%s\";" tokenInfo._name
+    printBr ""
+    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" className
     printBrInd 3 ": base(ycTokName, ycValue, positions)"
     printBrInd 2 "{"
-    if isTerminal
-    then 
-        printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, %d, \"%s\");" number <| lang.ToLowerInvariant()
+
+    match tokenInfo._type with
+    | Literal 
+    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
+    | _ -> ()
     printBrInd 2 "}"
 
     printBrInd 0 ""
-    printBrInd 2 "public %s() : base(ycTokName)" nameOfClass
+    printBrInd 2 "public %s() : base(ycTokName)" className
     printBrInd 2 "{"
     printBrInd 2 "}"
 
     printBrInd 1 "}"
     printBrInd 0 "}"
     res.ToString()
+
+let generateTreeNodeFile folder tokenInfo = 
+    let className = 
+        let suffix = 
+            match tokenInfo._type with
+            | Terminal -> "TermNode"
+            | Literal -> "LitNode"
+            | NonTerminal -> "NonTermNode"
+        toClassName <| tokenInfo._name + suffix
+
+    use out = new System.IO.StreamWriter (folder + className + ".cs")
+    let tables = printTreeNode tokenInfo
+    out.WriteLine tables
+    out.Close()
 
 //Prints .xml file which contains information about token to color mapping.
 let printXML (nameOfNamespace : string) tokens = 
@@ -525,15 +574,6 @@ let printCalculatePos() =
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 
     let res  = new System.Text.StringBuilder()
-
-    let toClassName (str : string) = 
-        let symbols = [| 
-                        for i = 0 to str.Length - 1 do
-                            if i = 0 
-                            then yield System.Char.ToUpper str.[0]
-                            else yield str.[i] 
-                        |] 
-        new System.String(symbols)
 
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x

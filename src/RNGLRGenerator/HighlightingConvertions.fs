@@ -65,8 +65,8 @@ let getNodeSemantic parent children =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| toClassName parent <| parent
-    printBrInd 0 "let children (*: ITreeNode list*) = %A" children
+    printBrInd 0 "let parent = new %sNonTermNode()" <| toClassName parent
+    printBrInd 0 "let children = %A" children
     printBrInd 0 "addSemantic parent children"
     res.ToString()
 

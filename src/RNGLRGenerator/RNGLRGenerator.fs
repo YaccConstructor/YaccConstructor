@@ -147,12 +147,6 @@ type RNGLR() =
                     out.WriteLine content
                     out.Close()
                 
-                let generateFile name _class number isTerminal = 
-                    use out = new System.IO.StreamWriter (folder + _class + ".cs")
-                    let tables = printTreeNode !namespaceName _class name baseClass number isTerminal langName
-                    out.WriteLine tables
-                    out.Close()
-
                 let generateBaseClass() = 
                     use out = new System.IO.StreamWriter(folder + baseClass + ".cs")
                     let text = printBaseTreeNode !namespaceName baseClass langName 
@@ -167,24 +161,54 @@ type RNGLR() =
                 
                 for i = 0 to indexator.nonTermCount - 1 do
                     let name = indexator.indexToNonTerm i
-                    if not <| name.Contains ("Highlight_")
+                    if not <| name.Contains ("highlight_")
                     then 
                         nameOfClasses <- name + "NonTermNode.cs" :: nameOfClasses
-                        generateFile <| name <| name + "NonTermNode" <| i <| false
+                        let info : TokenInfo =  
+                            {
+                                _baseClass = baseClass
+                                _namespace = !namespaceName
+                                _name = name
+                                _type = TokenKind.NonTerminal
+                                _number = i
+                                _lang = langName
+                            }
+
+                        generateTreeNodeFile folder info
 
                 for i = indexator.termsStart to indexator.termsEnd do
                     let name = grammar.indexator.indexToTerm i
                     
                     nameOfClasses <- name + "TermNode.cs" :: nameOfClasses
                     tokensAndLits <- name :: tokensAndLits
-                    generateFile <| name <| name + "TermNode" <| i <| true
+                    let info : TokenInfo =  
+                            {
+                                _baseClass = baseClass
+                                _namespace = !namespaceName
+                                _name = name
+                                _type = TokenKind.Terminal
+                                _number = i
+                                _lang = langName
+                            }
+
+                    generateTreeNodeFile folder info
                 
                 for i = indexator.literalsStart to indexator.literalsEnd do
                     let name = toClassName <| grammar.indexator.getLiteralName i
                     
                     nameOfClasses <- name + "LitNode.cs" :: nameOfClasses
                     tokensAndLits <- name :: tokensAndLits
-                    generateFile <| name <| name + "LitNode" <| i <| true
+                    let info : TokenInfo =  
+                            {
+                                _baseClass = baseClass
+                                _namespace = !namespaceName
+                                _name = name
+                                _type = TokenKind.Literal
+                                _number = i
+                                _lang = langName
+                            }
+
+                    generateTreeNodeFile folder info
                     
                 //generateHotspotXMLFile "Hotspots.xml"
                 tokensAndLits <- 

@@ -11,7 +11,6 @@ namespace Highlighting.Core
         /// For each language name returns ycTokenToString dictionary
         /// </summary>
         private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
-        //private static readonly LockObject lockObject = new LockObject();
 
         public static void AddYcItem(string key, string value, int ycNumber, string lang)
         {
@@ -20,8 +19,6 @@ namespace Highlighting.Core
             if (String.IsNullOrEmpty(key) || String.IsNullOrEmpty(value))
                 return;
 
-            //lock (lockObject)
-            //{
             if (!allYcToString.ContainsKey(lang))
             {
                 allYcToString.Add(lang, new Dictionary<string, StringValue>());
@@ -47,8 +44,6 @@ namespace Highlighting.Core
                     YcNumber = ycNumber,
                 });
             }
-
-            //}
         }
 
         public static string GetYcName(string lang, string str)

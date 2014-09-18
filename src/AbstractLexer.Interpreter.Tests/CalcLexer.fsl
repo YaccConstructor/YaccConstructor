@@ -13,7 +13,7 @@ let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
 | whitespace { None }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lb.GetString(), lb.GetPosition ()) |> Some }
+| digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lb.GetString(), lb.GetPosition ()) |> Some }
 | '-' { MINUS(lb.GetString(), lb.GetPosition ()) |> Some }
 | '(' { LBRACE(lb.GetString(), lb.GetPosition ()) |> Some }
 | ')' { RBRACE(lb.GetString(), lb.GetPosition ()) |> Some }

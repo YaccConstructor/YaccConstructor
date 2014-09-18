@@ -147,16 +147,16 @@ let fstLexer () =
    transitions.Add(3, new EdgeLbl<_,_>(Smbl '+', Smbl 2), 7)
    transitions.Add(3, new EdgeLbl<_,_>(Smbl '-', Smbl 2), 3)
    transitions.Add(3, new EdgeLbl<_,_>(Smbl '/', Smbl 2), 6)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '0', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '1', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '2', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '3', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '4', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '5', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '6', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '7', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '8', Eps), 2)
-   transitions.Add(3, new EdgeLbl<_,_>(Smbl '9', Eps), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '0', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '1', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '2', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '3', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '4', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '5', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '6', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '7', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '8', Smbl 2), 2)
+   transitions.Add(3, new EdgeLbl<_,_>(Smbl '9', Smbl 2), 2)
    transitions.Add(3, new EdgeLbl<_,_>(Smbl (char 65535), Smbl 2), 65535)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl '\t', Smbl 5), 1)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl '\n', Smbl 5), 1)
@@ -386,7 +386,7 @@ let actions () =
       (fun (lb : StateInfo<_>) ->
                               None );
       (fun (lb : StateInfo<_>) ->
-                                                                  NUMBER(lb.GetString(), lb.GetPosition ()) |> Some );
+                                                           NUMBER(lb.GetString(), lb.GetPosition ()) |> Some );
       (fun (lb : StateInfo<_>) ->
                        MINUS(lb.GetString(), lb.GetPosition ()) |> Some );
       (fun (lb : StateInfo<_>) ->

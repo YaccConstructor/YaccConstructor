@@ -6,6 +6,10 @@ open NUnit.Framework
 open Microsoft.FSharp.Collections 
 open QuickGraph 
 open AbstractAnalysis.Common
+open Graphviz4Net.Dot.AntlrParser
+open Graphviz4Net.Dot
+open YC.FST.FstApproximation
+open System.IO
 
 let eof = RNGLR_EOF("", [||])
 
@@ -62,3 +66,21 @@ let positions (parserInputGraph : ParserInputGraph<_>) getVal =
                         br |> Array.map getVal
                     | RNGLR_EOF _ -> [||])
         |> Array.ofSeq
+
+let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
+
+let loadGraphFromDOT filePath =
+    let parser = AntlrParserAdapter<string>.GetParser()
+    parser.Parse(new StreamReader(File.OpenRead filePath))
+
+let loadDotToQG baseInputGraphsPath gFile =
+    let qGraph = loadGraphFromDOT(path baseInputGraphsPath gFile)
+    let graphAppr = new Appr<_>()
+    graphAppr.InitState <- ResizeArray.singleton 0
+
+    for e in qGraph.Edges do
+        let edg = e :?> DotEdge<string>
+        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (Smb(edg.Label, edg.Label))) |> graphAppr.AddVerticesAndEdge |> ignore
+
+    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
+    graphAppr

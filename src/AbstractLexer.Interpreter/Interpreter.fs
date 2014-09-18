@@ -47,7 +47,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
     let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)
     let edges = new ResizeArray<_>()
     let saved = ref false
-    let pos = ref (new Position<_>(0, 0, Unchecked.defaultof<'br>))
 
     let bfs vertex (stt: StateInfo<_>) =
         let queueV = new Queue<_>()
@@ -57,13 +56,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
             let isNotActionPerformed = ref true
             let idF = ref 0
             let topV,curStt = queueV.Dequeue()
-            
-//            if curStt.curBr <> null && !reduce
-//            then 
-//                curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
-//                reduce := false           
-//            if !save 
-//            then curStt.Positions.Add(!pos)
 
             if not <| visited.[topV]
             then
@@ -77,12 +69,8 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                             match v.Tag.InSymb with
                             | Smbl (x,br) -> 
                                 if curStt.curBr = null || br = curStt.curBr
-                                then 
-                                    //if !save 
-                                    //then save := false
-                                    curStt.start_offset, curStt.cur_offset + 1, br
+                                then curStt.start_offset, curStt.cur_offset + 1, br
                                 else   
-                                    //pos := new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)
                                     if not !saved
                                     then
                                         saved := true
@@ -106,9 +94,8 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                             idF := match v.Tag.OutSymb with
                                     | Smbl x -> x
                                     | x -> failwith "Unexpected symbol in function calculation:%A" x 
-                            curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
+                            if !saved = false then curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
                             let tok = actions.[!idF] curStt
-                            //save := false
                             edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok)) 
                             printfn 
                                 "startV %i string %s" 
@@ -146,7 +133,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
                                 | x -> failwith "Unexpected symbol in function calculation:%A" x 
                         curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))
                         let tok = actions.[!idF] curStt                        
-                        //save := false 
                         edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok))
                         printfn 
                             "startV %i string %s" 
@@ -158,14 +144,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
     for v in inputFstLexer.InitState do
         let stt = new StateInfo<_>(v, new ResizeArray<_>(), new ResizeArray<_>(), v, 0, 0, Unchecked.defaultof<'br>)
         bfs v stt
-
-//    let actions = [|(fun lb -> printfn lb.dsfs ; Some NUM(1) ); (fun lb -> None); (fun x -> x*2)|]
-//        
-//    let lb = 2
-//    let tok = actions.[1] lb
-//    let edg = new Edg(lb._form,tok,lb._to)
-//    lb.Reset
-//    lb.Add ch
     
     let final = new ResizeArray<_>()
     for edge in inputFstLexer.Edges do
@@ -181,8 +159,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofT
 
 let Tokenize (fstLexer : FST<_,_>) (actions : array<StateInfo<_> -> _>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST()
+    //inputFst.PrintToDOT @"..\..\Tests\CalcTestInput.dot"  
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
-    inputFstLexer.PrintToDOT  @"..\..\Tests\testDebug.dot"
+    //inputFstLexer.PrintToDOT @"..\..\Tests\CalcTestLexer.dot"  
     let parserInputGraph = Interpret inputFstLexer actions eofToken 
     let epsRes = EpsClosure.NfaToDfa parserInputGraph
     epsRes 

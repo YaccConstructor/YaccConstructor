@@ -56,7 +56,7 @@ type CalcInjectedLanguageModule () =
 
     let processor =
         new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
-                      , getRange)
+                      , getRange, printAstToDot, otherAstToDot)
     
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "calc"

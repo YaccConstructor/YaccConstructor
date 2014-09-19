@@ -58,7 +58,9 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
     (
         tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange:'br -> 'range) as this =
+        , getDocumentRange:'br -> 'range
+        , printAst: Tree<'TokenType> -> string -> unit
+        , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -94,7 +96,12 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 None
 
         let tokenizedGraph = tokenize graph 
-        
+
+        (*
+        info for debug
+        let tokenToString (token : 'TokenType) = token |> tokenToNumber |> numToString
+        tokenizedGraph.Value.PrintToDot "parser_input.dot" tokenToString
+        *)
         prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
         tokenizedGraph 
@@ -158,7 +165,11 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         let tokens = new ResizeArray<_>()
         let tokToPos = this.TokenToPos calculatePos
 
+        (*let count = ref 0
+        let name = "sppf_"*)
         for otherTree in otherForest do
+            (*printOtherAst otherTree <| name + (!count).ToString() + ".dot"
+            incr count*)
             tokens.AddRange <| otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos
         
         let ranges = new ResizeArray<_>()
@@ -186,6 +197,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let name = tok |> (tokenToNumber >>  numToString)
             let (language : string), br = tokenData tok :?> _
             e name language br
+        
         
         processLang graph lexerErrors.Add addError
 

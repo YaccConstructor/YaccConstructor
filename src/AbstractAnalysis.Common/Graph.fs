@@ -70,3 +70,18 @@ type ParserInputGraph<'token>() =
         this.AddVertex e.Source |> ignore
         this.AddVertex e.Target |> ignore
         this.AddEdge e |> ignore
+
+    member this.PrintToDot name (tokenToString : 'token -> string) = 
+        use out = new System.IO.StreamWriter (name : string)
+        out.WriteLine("digraph AST {")
+        out.WriteLine "rankdir=LR"
+        for i=0 to this.VertexCount-1 do
+            out.Write (i.ToString() + "; ")
+        out.WriteLine()
+        for i in this.Vertices do
+            let edges = this.OutEdges i
+            for e in edges do
+                let tokenName = e.Tag |> tokenToString
+                out.WriteLine (e.Source.ToString() + " -> " + e.Target.ToString() + "[label=\"" + tokenName + "\"]")
+        out.WriteLine("}")
+        out.Close()

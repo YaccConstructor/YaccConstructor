@@ -158,3 +158,5 @@ src/TSQL/TSQLHighlighting/*
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
 *.csproj.user
+src/RNGLR.AstToAstTest/log*.txt
+src/RNGLR.AstToAstTest/*.yrd.fs

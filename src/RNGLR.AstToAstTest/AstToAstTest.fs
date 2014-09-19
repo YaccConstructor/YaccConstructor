@@ -113,7 +113,6 @@ type ``RNGLR ast to ast translation test`` () =
             RNGLR.ParseCycles.otherAstToDot other "Cycles after.dot"
             Assert.Pass()
 
-
 [<TestFixture>]
 type ``Brackets matching`` () =
     
@@ -126,71 +125,35 @@ type ``Brackets matching`` () =
     [<Test>]
     member test.``Simple test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;4;5;6] |> ignore
+        qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseBrackets_1.OPEN 0)
-                edg 1 2 (RNGLR.ParseBrackets_1.A 1)
-                edg 2 3 (RNGLR.ParseBrackets_1.B 2)
-                edg 3 4 (RNGLR.ParseBrackets_1.C 3)
-                edg 4 5 (RNGLR.ParseBrackets_1.D 4)
-                edg 5 6 (RNGLR.ParseBrackets_1.CLOSE 5)
+                edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+                edg 1 2 (RNGLR.ParseCalc.NUMBER 1)
+                edg 2 3 (RNGLR.ParseCalc.PLUS 2)
+                edg 3 4 (RNGLR.ParseCalc.NUMBER 3)
+                edg 4 5 (RNGLR.ParseCalc.RBRACE 4)
              ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseBrackets_1.buildAstAbstract qGraph
+        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseBrackets_1.defaultAstToDot mAst "Bracket before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Bracket before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_1.otherAstToDot other "Bracket after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Bracket after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_1.tokenToNumber
-            let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_1.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_1.Token.CLOSE -1
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_1.tokenData
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
             Assert.AreEqual (1, pairs.Count)
 
             match pairs.[0] with
-            | RNGLR.ParseBrackets_1.Token.CLOSE pos -> Assert.AreEqual (5, pos)
-            | _ -> Assert.Fail ("Expected CLOSE token")
-
-    [<Test>]
-    member test.``More complicated test``() =
-        let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;4;5;6] |> ignore
-        qGraph.AddVerticesAndEdgeRange
-            [
-                edg 0 1 (RNGLR.ParseBrackets_2.OPEN 0)
-                edg 1 2 (RNGLR.ParseBrackets_2.A 1)
-                edg 2 3 (RNGLR.ParseBrackets_2.B 2)
-                edg 3 4 (RNGLR.ParseBrackets_2.C 3)
-                edg 4 5 (RNGLR.ParseBrackets_2.D 4)
-                edg 5 6 (RNGLR.ParseBrackets_2.CLOSE 5)
-             ] |> ignore
-
-        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseBrackets_2.buildAstAbstract qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseBrackets_2.defaultAstToDot mAst "Complicated Bracket before.dot"
-            let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_2.otherAstToDot other "Complicated Bracket after.dot"
-
-            let tokToNumber = RNGLR.ParseBrackets_2.tokenToNumber
-            let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_2.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_2.Token.CLOSE -1
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_2.tokenData
-
-            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
-            Assert.AreEqual (1, pairs.Count)
-            
-            match pairs.[0] with
-            | RNGLR.ParseBrackets_2.Token.CLOSE pos -> Assert.AreEqual (5, pos)
+            | RNGLR.ParseCalc.Token.RBRACE pos -> Assert.AreEqual (4, pos)
             | _ -> Assert.Fail ("Expected CLOSE token")
 
     [<Test>]
@@ -199,33 +162,33 @@ type ``Brackets matching`` () =
         qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseBrackets_3.OPEN 0)
-                edg 1 2 (RNGLR.ParseBrackets_3.OPEN 1)
-                edg 2 3 (RNGLR.ParseBrackets_3.A 2)
-                edg 3 4 (RNGLR.ParseBrackets_3.CLOSE 3)
-                edg 4 5 (RNGLR.ParseBrackets_3.CLOSE 4)
+                edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+                edg 1 2 (RNGLR.ParseCalc.LBRACE 1)
+                edg 2 3 (RNGLR.ParseCalc.NUMBER 2)
+                edg 3 4 (RNGLR.ParseCalc.RBRACE 3)
+                edg 4 5 (RNGLR.ParseCalc.RBRACE 4)
              ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseBrackets_3.buildAstAbstract qGraph
+        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseBrackets_3.defaultAstToDot mAst "Many brackets before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Many brackets before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_3.otherAstToDot other "Many brackets after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Many brackets after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
-            let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
             
             match pairs.[0] with
-            | RNGLR.ParseBrackets_3.Token.CLOSE pos -> Assert.AreEqual (4, pos)
+            | RNGLR.ParseCalc.Token.RBRACE pos -> Assert.AreEqual (4, pos)
             | _ -> Assert.Fail ("Expected CLOSE token")
 
     [<Test>]
@@ -234,34 +197,34 @@ type ``Brackets matching`` () =
         qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseBrackets_3.OPEN 0)
-                edg 1 2 (RNGLR.ParseBrackets_3.OPEN 1)
-                edg 2 3 (RNGLR.ParseBrackets_3.A 2)
-                edg 3 4 (RNGLR.ParseBrackets_3.CLOSE 3)
-                edg 4 5 (RNGLR.ParseBrackets_3.CLOSE 4)
+                edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+                edg 1 2 (RNGLR.ParseCalc.LBRACE 1)
+                edg 2 3 (RNGLR.ParseCalc.NUMBER 2)
+                edg 3 4 (RNGLR.ParseCalc.RBRACE 3)
+                edg 4 5 (RNGLR.ParseCalc.RBRACE 4)
              ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse  RNGLR.ParseBrackets_3.buildAstAbstract qGraph
+        let parseResult = (new Parser<_>()).Parse RNGLR.ParseCalc.buildAstAbstract qGraph
         
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseBrackets_3.defaultAstToDot mAst "Many brackets before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Many brackets before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_3.otherAstToDot other "Many brackets after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Many brackets after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
-            let leftBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
 
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 1 true tokToNumber tokToPos
 
             Assert.AreEqual (1, pairs.Count)
             
             match pairs.[0] with
-            | RNGLR.ParseBrackets_3.Token.CLOSE pos -> Assert.AreEqual (3, pos)
+            | RNGLR.ParseCalc.Token.RBRACE pos -> Assert.AreEqual (3, pos)
             | _ -> Assert.Fail ("Expected CLOSE token")
 
     [<Test>]
@@ -269,13 +232,13 @@ type ``Brackets matching`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseBrackets_3.OPEN  0)
-             edg 1 2 (RNGLR.ParseBrackets_3.A 1)
-             edg 2 3 (RNGLR.ParseBrackets_3.CLOSE 2)
-             edg 2 3 (RNGLR.ParseBrackets_3.CLOSE 3)
+            [edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+             edg 1 2 (RNGLR.ParseCalc.NUMBER 1)
+             edg 2 3 (RNGLR.ParseCalc.RBRACE 2)
+             edg 2 3 (RNGLR.ParseCalc.RBRACE 3)
              ] |> ignore
 
-        let result = (new Parser<_>()).Parse  RNGLR.ParseBrackets_3.buildAstAbstract qGraph
+        let result = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         printfn "%A" result
         match result with
         | Parser.Error (num, tok, message, debug, _) ->
@@ -283,15 +246,15 @@ type ``Brackets matching`` () =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-            RNGLR.ParseBrackets_3.defaultAstToDot mAst "Abstract brackets before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Abstract brackets before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_3.otherAstToDot other "Abstract brackets after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Abstract brackets after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
-            let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber  = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
 
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
 
@@ -300,7 +263,55 @@ type ``Brackets matching`` () =
             let expected = [|2; 3|]
             for right in pairs do
                 match right with
-                | RNGLR.ParseBrackets_3.CLOSE pos -> 
+                | RNGLR.ParseCalc.RBRACE pos -> 
+                    if not <| Array.exists (fun num -> pos = num) expected
+                    then Assert.Fail()
+                | _ -> Assert.Fail()
+
+            Assert.Pass()
+
+
+    [<Test>]
+    member test.``AbstractAnalysis case 2``() =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVertexRange[0;1;2;3;4;5;6;7] |> ignore
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+             edg 1 2 (RNGLR.ParseCalc.NUMBER 1)
+             edg 2 3 (RNGLR.ParseCalc.PLUS 2)
+             edg 3 4 (RNGLR.ParseCalc.NUMBER 3)
+             edg 3 5 (RNGLR.ParseCalc.NUMBER 4)
+             edg 4 6 (RNGLR.ParseCalc.RBRACE 5)
+             edg 5 6 (RNGLR.ParseCalc.RBRACE 6)
+             edg 6 7 (RNGLR.ParseCalc.RNGLR_EOF 7)
+             ] |> ignore
+
+        let result = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
+        printfn "%A" result
+        match result with
+        | Parser.Error (num, tok, message, debug, _) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+            Assert.Fail "!!!!"
+        | Parser.Success(mAst, _, _) ->
+            RNGLR.ParseCalc.defaultAstToDot mAst "Abstract brackets 2 before.dot"
+            let other = new OtherTree<_>(mAst)
+            RNGLR.ParseCalc.otherAstToDot other "Abstract brackets 2 after.dot"
+            
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber  = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
+
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
+
+            let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
+
+            Assert.AreEqual (2, pairs.Count)
+
+            let expected = [|5; 6|]
+            for right in pairs do
+                match right with
+                | RNGLR.ParseCalc.RBRACE pos -> 
                     if not <| Array.exists (fun num -> pos = num) expected
                     then Assert.Fail()
                 | _ -> Assert.Fail()
@@ -312,12 +323,12 @@ type ``Brackets matching`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseBrackets_3.OPEN  0)
-             edg 1 2 (RNGLR.ParseBrackets_3.A 1)
-             edg 2 3 (RNGLR.ParseBrackets_3.CLOSE 2)
+            [edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+             edg 1 2 (RNGLR.ParseCalc.NUMBER 1)
+             edg 2 3 (RNGLR.ParseCalc.RBRACE 2)
              ] |> ignore
 
-        let result = (new Parser<_>()).Parse  RNGLR.ParseBrackets_3.buildAstAbstract qGraph
+        let result = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         printfn "%A" result
         match result with
         | Parser.Error (num, tok, message, debug, _) ->
@@ -325,15 +336,15 @@ type ``Brackets matching`` () =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-            RNGLR.ParseBrackets_3.defaultAstToDot mAst "Simple right to left before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Simple right to left before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_3.otherAstToDot other "Simple right to left after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Simple right to left after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
-            let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber  = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
 
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber tokToPos
 
@@ -342,7 +353,7 @@ type ``Brackets matching`` () =
             let expected = [|0|]
             for right in pairs do
                 match right with
-                | RNGLR.ParseBrackets_3.OPEN pos -> 
+                | RNGLR.ParseCalc.LBRACE pos -> 
                     if not <| Array.exists (fun num -> pos = num) expected
                     then Assert.Fail()
                 | _ -> Assert.Fail()
@@ -354,13 +365,16 @@ type ``Brackets matching`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseBrackets_3.OPEN  0)
-             edg 1 2 (RNGLR.ParseBrackets_3.A 1)
-             edg 2 3 (RNGLR.ParseBrackets_3.CLOSE 2)
-             edg 2 3 (RNGLR.ParseBrackets_3.CLOSE 3)
+            [edg 0 1 (RNGLR.ParseCalc.LBRACE 0)
+             edg 1 2 (RNGLR.ParseCalc.NUMBER 1)
+             edg 2 3 (RNGLR.ParseCalc.PLUS 2)
+             edg 3 4 (RNGLR.ParseCalc.NUMBER 3)
+             edg 4 5 (RNGLR.ParseCalc.RBRACE 4)
+             edg 3 6 (RNGLR.ParseCalc.NUMBER 5)
+             edg 6 5 (RNGLR.ParseCalc.RBRACE 6)
              ] |> ignore
 
-        let result = (new Parser<_>()).Parse  RNGLR.ParseBrackets_3.buildAstAbstract qGraph
+        let result = (new Parser<_>()).Parse  RNGLR.ParseCalc.buildAstAbstract qGraph
         printfn "%A" result
         match result with
         | Parser.Error (num, tok, message, debug, _) ->
@@ -368,15 +382,15 @@ type ``Brackets matching`` () =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-            RNGLR.ParseBrackets_3.defaultAstToDot mAst "Abstract brackets before.dot"
+            RNGLR.ParseCalc.defaultAstToDot mAst "Abstract brackets before.dot"
             let other = new OtherTree<_>(mAst)
-            RNGLR.ParseBrackets_3.otherAstToDot other "Abstract brackets after.dot"
+            RNGLR.ParseCalc.otherAstToDot other "Abstract brackets after.dot"
             
-            let tokToNumber = RNGLR.ParseBrackets_3.tokenToNumber
-            let leftBraceNumber  = tokToNumber <| RNGLR.ParseBrackets_3.Token.OPEN -1
-            let rightBraceNumber = tokToNumber <| RNGLR.ParseBrackets_3.Token.CLOSE -1
+            let tokToNumber = RNGLR.ParseCalc.tokenToNumber
+            let leftBraceNumber  = tokToNumber <| RNGLR.ParseCalc.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseCalc.Token.RBRACE -1
 
-            let tokToPos = tokenToPos RNGLR.ParseBrackets_3.tokenData
+            let tokToPos = tokenToPos RNGLR.ParseCalc.tokenData
 
             let pairs = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber tokToPos
 
@@ -385,7 +399,7 @@ type ``Brackets matching`` () =
             let expected = [|0|]
             for right in pairs do
                 match right with
-                | RNGLR.ParseBrackets_3.OPEN pos -> 
+                | RNGLR.ParseCalc.LBRACE pos -> 
                     if not <| Array.exists (fun num -> pos = num) expected
                     then Assert.Fail()
                 | _ -> Assert.Fail()
@@ -406,6 +420,7 @@ let f x =
     brackets.``Many brackets 1``()
     brackets.``Many brackets 2``()
     brackets.``AbstractAnalysis case``()*)
+    brackets.``AbstractAnalysis case 2``()
     brackets.``Simple right to left``()
-//    brackets.``AbstractAnalysis case. Right to left``()
+    brackets.``AbstractAnalysis case. Right to left``()
     1

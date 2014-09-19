@@ -433,7 +433,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
-        let createNode num isAmbiguous nodeType (str : string) =
+        let createNode num isAmbiguous isTerminal nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
                 if not isAmbiguous then cur
@@ -443,7 +443,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 | AstNode -> ",shape=box"
                 | Prod -> ""
             let color =
-                if not isAmbiguous then ""
+                if isTerminal then ",style=\"filled\",fillcolor=gray"
+                elif not isAmbiguous then ""
                 else ",style=\"filled\",fillcolor=red"
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
@@ -454,14 +455,14 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
         let createEpsilon ind = 
             let res = next()
-            createNode res false AstNode ("n " + indToString (-1-ind))
+            createNode res false false AstNode ("n " + indToString (-1-ind))
             let u = next()
-            createNode u false AstNode "eps"
+            createNode u false false AstNode "eps"
             createEdge res u true ""
             res
         let createTerm t =
             let res = next()
-            createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
+            createNode res false true AstNode ("t " + indToString (tokenToNumber tokens.[t]))
             res
         (*if not isEpsilon then*)
         //for i in order do
@@ -475,11 +476,11 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     then indToString leftSide.[children.first.prod]
                     else "error"
                      
-                createNode i (children.other <> null) AstNode ("n " + label)
+                createNode i (children.other <> null) false AstNode ("n " + label)
                      
                 let inline handle (family : OtherFamily) =
                     let u = next()
-                    createNode u false Prod ("prod " + family.prod.ToString())
+                    createNode u false false Prod ("prod " + family.prod.ToString())
                     createEdge i u true ""
                     family.nodes.doForAll <| fun child ->
                         let v = 

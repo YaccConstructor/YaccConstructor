@@ -10,7 +10,7 @@
     <RootNamespace>RNGLR.AstToAstTest</RootNamespace>
     <AssemblyName>RNGLR.AstToAstTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RNGLR.AstToAstTest</Name>
+    <Name>RNGLR.OtherSppfTest</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,7 +67,7 @@
     <Compile Include="Elementary.yrd.fs" />
     <Compile Include="Ambiguous.yrd.fs" />
     <Compile Include="Cycles.yrd.fs" />
-    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="Summator.yrd.fs" />
     <Compile Include="AstToAstTest.fs" />
   </ItemGroup>
   <ItemGroup>

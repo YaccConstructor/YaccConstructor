@@ -75,7 +75,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractAnalysis.Common", "
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AbstractLexer.Test", "AbstractLexer.Test\AbstractLexer.Test.fsproj", "{99D2F7E1-07C5-4D45-890C-880E36CB8905}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLR.AstToAstTest", "RNGLR.AstToAstTest\RNGLR.AstToAstTest.fsproj", "{318CBB01-2B57-40CC-82F9-509CD73D666C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RNGLR.OtherSppfTest", "RNGLR.AstToAstTest\RNGLR.OtherSppfTest.fsproj", "{318CBB01-2B57-40CC-82F9-509CD73D666C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharperExtension", "ReSharperExtension\ReSharperExtension.csproj", "{70133FEA-83F5-416A-8869-0E745EF37778}"
 EndProject

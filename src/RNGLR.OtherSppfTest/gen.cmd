@@ -1,7 +1,7 @@
 ::@echo off
 del log1.txt
 
-for %%i in (Elementary, Ambiguous, Cycles, Calc) do (
+for %%i in (Elementary, Ambiguous, Cycles, Summator) do (
 	echo.  >> log1.txt
 	echo %%i >> log1.txt
 	..\packages\YaccConstructor.0.0.8.12\tools\YaccConstructor\YC.YaccConstructor.exe  -i %%i.yrd ^

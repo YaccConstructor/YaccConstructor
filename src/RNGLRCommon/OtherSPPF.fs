@@ -1,5 +1,6 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
+open System.Collections.Generic
 open Yard.Generators.RNGLR.AST
 open Yard.Generators.RNGLR.DataStructures
 
@@ -17,25 +18,22 @@ type OtherAST =
         elif this.other <> null then Array.tryFind f this.other
         else None
 
-    member this.addParent (newParent : UsualOne<obj>) = 
+    member this.addParent (p : obj) = 
+        let newParent = 
+            if this.parent.first = Unchecked.defaultof<obj> 
+            then new UsualOne<_>(p, [||])
+            else new UsualOne<_>(this.parent.first, Seq.append this.parent.other [|p|] |> Array.ofSeq)
         this.parent <- newParent
 
 and OtherFamily =
-//    struct
-        val mutable parent : UsualOne<obj>
+        val mutable parent : obj
         val prod : int
         val mutable nodes : OtherNodes
         new (pro, n) = {prod = pro; nodes = n; parent = Unchecked.defaultof<UsualOne<obj>>}
 
-        member this.addParent (p : obj) = 
-            let newParent = 
-                if this.parent.first = Unchecked.defaultof<obj> 
-                then new UsualOne<_>(p, [||])
-                else new UsualOne<_>(this.parent.first, Seq.append this.parent.other [|p|] |> Array.ofSeq)
-            this.parent <- newParent
+        member this.addParent (p : obj) = this.parent <- p
 
         member this.ReplaceNodes (nodes) = this.nodes <- nodes
-//    end
 
 and OtherNodes =
         val mutable parent : UsualOne<obj>
@@ -71,17 +69,24 @@ and OtherNodes =
                                 f x
 
             member this.addParent (p : obj) = 
+                this.doForAll (fun node -> 
+                        match node with 
+                        | :? OtherAST as ast -> ast.addParent p
+                        | _ -> ()
+                    )
+                
                 let newParent = 
                     if this.parent.first = Unchecked.defaultof<obj> 
                     then new UsualOne<_>(p, [||])
                     else new UsualOne<_>(this.parent.first, Seq.append this.parent.other [|p|] |> Array.ofSeq)
-                this.doForAll (fun node -> 
-                        match node with 
-                        | :? OtherAST as ast -> ast.addParent newParent
-                        | _ -> ()
-                    )
+                
                 this.parent <- newParent
 
+            
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="f"></param>
             member nodes.exist f = 
                 if nodes.fst <> null 
                 then 
@@ -97,8 +102,12 @@ and OtherNodes =
                         else false
                 else false
             
+            /// <summary>
             /// applies function to nodes which are located to the right than node nd. 
             /// Right sibling of nd is first.
+            /// </summary>
+            /// <param name="nd"></param>
+            /// <param name="f"></param>
             member nodes.doForAllAfterNode nd f =
                 let mutable needDo = false
                 if nodes.fst <> null 
@@ -116,8 +125,12 @@ and OtherNodes =
                                     f nodes.other.[i]
                                 needDo <- needDo || nodes.other.[i] = nd
 
-            /// applies function to nodes which are located to the left than node nd. 
+            /// <summary>
+            /// applies function f to nodes which are located to the left than node nd. 
             /// Left sibling of nd is first.
+            /// </summary>
+            /// <param name="nd"></param>
+            /// <param name="f"></param>
             member nodes.doForAllBeforeNode nd f = 
                 if nodes.fst <> null && nodes.fst <> nd
                 then 
@@ -134,7 +147,11 @@ and OtherNodes =
                                 f nodes.other.[i]
                         f nodes.snd
                     f nodes.fst
-
+            
+            /// <summary>
+            /// Applies function to all nodes (right node is first)
+            /// </summary>
+            /// <param name="f"></param>
             member nodes.doForAllRev f =
                 if nodes.fst <> null then
                     if nodes.snd <> null then
@@ -144,7 +161,17 @@ and OtherNodes =
                         f nodes.snd
                     f nodes.fst
 
+                    
 type private DotNodeType = Prod | AstNode
+
+type private Context = 
+    struct
+        val parent : OtherFamily
+        val child : obj
+        val count : int
+
+        new (p, ch, co) = {parent = p; child = ch; count = co}
+    end
 
 [<AllowNullLiteral>]
 type OtherTree<'TokenType> (tree : Tree<'TokenType>) = 
@@ -159,8 +186,9 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         let dict = new System.Collections.Generic.Dictionary<AST, OtherAST>()
         
         // to avoid problems with cycles
-        let knownNodes = new ResizeArray<_>() 
+        let knownNodes = new ResizeArray<_>()
         
+        let nodesDict = System.Collections.Generic.Dictionary<Nodes, OtherNodes>()
         // reverse edges that will be added after all
         let postActions = new System.Collections.Generic.Dictionary<OtherFamily, Nodes>() 
         let rec processFamily (family : Family) = 
@@ -186,7 +214,10 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             let processNode (node : obj) (newNodes : list<_> ref)= 
                 let newElem = 
                     match node with 
-                    | :? AST as ast -> box <| processAST ast
+                    | :? AST as ast -> 
+                        if dict.ContainsKey ast
+                        then box <| dict.[ast]
+                        else box <| processAST ast
                     | :? int as token -> box token
                     | _ -> failwithf "Unexpected AST element in OtherSPPF"
                 
@@ -196,52 +227,58 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then
                 let fakeNodes = new OtherNodes(new obj())
                 let newFamily = new OtherFamily (family.prod, fakeNodes)
-                postActions.Add ((*ref*) newFamily, family.nodes)
+                postActions.Add (newFamily, family.nodes)
                 newFamily
             else
                 let newNodes = ref []
                 family.nodes.doForAll (fun node -> 
                     knownNodes.Add node
                     processNode node newNodes)
-                let nodes = new OtherNodes(!newNodes |> List.rev |> Array.ofList)
-                let newFamily = new OtherFamily (family.prod, nodes)
-                nodes.addParent newFamily
+                let newNodes = new OtherNodes(!newNodes |> List.rev |> Array.ofList)
+                nodesDict.Add (family.nodes, newNodes)
+                let newFamily = new OtherFamily (family.prod, newNodes)
+                newNodes.addParent newFamily
                 newFamily
 
-        // reverse edges are returned back. I.e. returns cycles back
         let addReverseEdges() = 
             for pair in postActions do
                 let otherFamily = pair.Key
                 let oldNodes = pair.Value
                 
-                let children = ref []
-                let handle (node : obj) = 
-                    let newElem = 
-                        match node with 
-                        | :? AST as ast -> 
-                            if dict.ContainsKey ast
-                            then box <| dict.[ast]
-                            else failwith "Unexpected AST"
-                        | :? int as token -> box token
-                        | _ -> failwithf "Unexpected AST element in OtherSPPF"
+                let newNodes = 
+                    if nodesDict.ContainsKey oldNodes 
+                    then 
+                        nodesDict.[oldNodes]
+                    else
+                        // possible that it occurs never
+                        let children = ref []
+                        let handle (node : obj) = 
+                            let newElem = 
+                                match node with 
+                                | :? AST as ast -> 
+                                    if dict.ContainsKey ast
+                                    then box <| dict.[ast]
+                                    else failwith "Unexpected AST"
+                                | :? int as token -> box token
+                                | _ -> failwithf "Unexpected AST element in OtherSPPF"
                 
-                    children := newElem :: !children
+                            children := newElem :: !children
                 
-                oldNodes.doForAll (fun node -> handle node)
-                let newNodes = new OtherNodes(!children |> List.rev |> Array.ofList)
+                        oldNodes.doForAll (fun node -> handle node)
+                        new OtherNodes(!children |> List.rev |> Array.ofList)
+                
                 otherFamily.ReplaceNodes newNodes
                 newNodes.addParent otherFamily
 
         let family = processFamily root.first
         
         addReverseEdges()
-
         let rootAST = new OtherAST(family)
         family.addParent rootAST
         rootAST
 
     let order =
-        let stack = new System.Collections.Generic.Stack<_>()
+        let stack = new Stack<_>()
         match root with
         | :? OtherAST as ast -> stack.Push ast
         | _ -> ()
@@ -271,7 +308,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         res.ToArray()
 
     let familyToTokens = 
-        let dict = new System.Collections.Generic.Dictionary<OtherFamily, int list>()
+        let dict = new Dictionary<OtherFamily, int list>()
         // to avoid problems with cycles
         let visitingAST = new ResizeArray<OtherAST>()
 
@@ -293,21 +330,22 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                                 for fam in ast.other do
                                     temp := !temp @ calcTokens fam
                             tokens := !tokens @ !temp
-
+                            visitingAST.Remove ast |> ignore
                     | :? int as t when t >= 0 ->
                         tokens := t :: !tokens
                     | _ -> ()
                 )
                 
                 dict.Add (family, !tokens)
+                
                 !tokens
 
         calcTokens root.first |> ignore
         dict
 
-    let findLeaves (now : 'range) (tokenToPos : 'TokenType -> seq<'range>)= 
-        let leaf = ref []
-        let nd = ref null
+    let findNodeWithParents (now : 'range) (tokenToPos : 'TokenType -> seq<'range>)= 
+        let parents = ref []
+        let child = ref null
 
         let containsRange number = 
             tokenToPos tokens.[number]
@@ -320,27 +358,42 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     if List.exists (fun t -> containsRange t) familyToTokens.[ast.first]
                     then
                         handleFamily ast.first
-                        if ast.other <> null 
-                        then
-                            for f in ast.other do
-                                if List.exists (fun t -> containsRange t) familyToTokens.[f]
-                                then handleFamily f
+                    if ast.other <> null 
+                    then
+                        for f in ast.other do
+                            let test = familyToTokens.[f]
+                            if List.exists (fun t -> containsRange t) test
+                            then handleFamily f
                 
                 | :? int as t when t >= 0 -> 
                     if tokenToPos tokens.[t] |> Seq.exists (fun range -> range = now)
                     then
-                        leaf := fam :: !leaf
-                        nd := node
+                        if not <| List.exists (fun f -> f = fam) parents.Value
+                        then 
+                            parents := fam :: !parents
+                            child := node
                 | _ -> ()
                 )
         handleFamily root.first
-        nd, !leaf
+        !child, !parents
 
-    /// search
-    /// for example for left_bracket it returns all paired right_brackets
+    /// <summary>
+    /// Returnes all paired tokens for token which is located in range. 
+    /// For example for left_bracket it returns all paired right_brackets 
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <param name="now"></param>
+    /// <param name="toRight"></param>
+    /// <param name="tokenToNumber"></param>
+    /// <param name="tokenToPos"></param>
     member this.FindAllPair (left : int) (right : int) (now : 'range) toRight tokenToNumber (tokenToPos : 'TokenType -> seq<'range>)= 
-        let nd, cur = findLeaves now tokenToPos
+        let firstNd, cur = findNodeWithParents now tokenToPos
         let res = new ResizeArray<_>()
+        let contexts = new Stack<_>()
+
+        for family in cur do
+            contexts.Push <| new Context (family, firstNd, 1)
 
         let nowNumber, pairNumber = if toRight then left, right else right, left
         let handleSomeNodes node (family : OtherFamily) f = 
@@ -348,13 +401,17 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then family.nodes.doForAllAfterNode node f
             else family.nodes.doForAllBeforeNode node f
 
-        for family in cur do
-            let mutable current = box family
-            let count = ref 1
+        while contexts.Count > 0 do
+            let c = contexts.Pop()
+            let mutable current = box c.parent
+            let nd = ref c.child
+            let count = ref c.count
 
             let rec processFamily (family : OtherFamily) = 
                 if familyToTokens.ContainsKey family && 
-                    not <| List.exists (fun t -> tokenToNumber tokens.[t] = pairNumber) familyToTokens.[family]
+                    not <| List.exists (fun t -> 
+                        let tokNumber = tokenToNumber tokens.[t]
+                        tokNumber = pairNumber || tokNumber = nowNumber) familyToTokens.[family]
                 then ()
                 else
                     let handle (node : obj) =
@@ -374,31 +431,47 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
             and processAST (ast : OtherAST) = 
                 let value = !count
+                let oldNd = !nd
                 processFamily ast.first
                 
                 if ast.other <> null
-                then Array.iter (fun fam -> count := value; processFamily fam) ast.other
+                then 
+                    Array.iter (fun fam -> 
+                        count := value
+                        nd := oldNd
+                        processFamily fam) ast.other
 
             match current with
             | :? OtherFamily as fam -> processFamily fam
             | :? OtherAST as ast -> processAST ast
-            | _ -> failwith "Unexpected error"
+            | _ -> failwith ""
 
             while !count <> 0 do
                 let father = 
                     match current with
-                    | :? OtherFamily as fam -> fam.parent.first
-                    | :? OtherAST as ast -> ast.parent.first
-                    | _ -> failwith ""
-
-                nd := box current
+                    | :? OtherAST as ast -> 
+                        nd := box current
+                        if ast.parent.other.Length > 0 
+                        then
+                            ast.parent.other
+                            |> Array.iter (fun parent -> contexts.Push <| new Context (parent :?> OtherFamily, !nd, !count))
+                        
+                        ast.parent.first
+                    | :? OtherFamily as fam -> fam.parent
+                    | _ -> failwithf "Unexpected error."
+                
                 match father with
                 | :? OtherAST as ast -> processAST ast
                 | :? OtherFamily as fam -> processFamily fam
-                | _ -> ()
+                | _ -> failwithf "Unexpected error. Father node doesn't be null"
+                
                 current <- father
         res
 
+    ///
+    /// <summary>
+    /// Prints ast in console
+    /// </summary>
     member this.PrintAst() =            
         let rec printAst ind ast =
             let printInd num (x : 'a) =
@@ -424,6 +497,13 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             | _ -> failwith ""
         printAst 0 root
 
+    /// <summary>
+    /// Prints sppf in .dot file
+    /// </summary>
+    /// <param name="indToString"></param>
+    /// <param name="tokenToNumber"></param>
+    /// <param name="leftSide"></param>
+    /// <param name="path">File name</param>
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =
             let cur = ref order.Length
@@ -465,7 +545,6 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             createNode res false true AstNode ("t " + indToString (tokenToNumber tokens.[t]))
             res
         (*if not isEpsilon then*)
-        //for i in order do
         for i = order.Length-1 downto 0 do
             let x = order.[i]
             if x.pos <> -1 then

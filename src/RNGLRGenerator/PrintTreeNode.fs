@@ -2,7 +2,7 @@
 
 module PrintTreeNode
 
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 
 type TokenKind = 
     | Terminal 

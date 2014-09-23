@@ -24,6 +24,7 @@ open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Yard.Generators.Common.Epsilon
+open PrintTreeNode
 
 let getPosFromSource fullPath dummyPos (src : Source.t) =
     let file =

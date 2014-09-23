@@ -17,7 +17,6 @@ module Yard.Generators.RNGLR.States
 open System.Collections.Generic
 open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.Common
-
 type OutTable = LR | LALR
 
 type Kernel = int

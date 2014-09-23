@@ -52,6 +52,10 @@
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>

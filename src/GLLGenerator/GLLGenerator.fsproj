@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>GLLGenerator</RootNamespace>
     <AssemblyName>GLLGenerator</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>GLLGenerator</Name>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -58,6 +57,7 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>

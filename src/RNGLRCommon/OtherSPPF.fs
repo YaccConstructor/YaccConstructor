@@ -1,7 +1,7 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
-open Yard.Generators.RNGLR.AST
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.DataStructures
 
 [<AllowNullLiteral>]
 type OtherAST =

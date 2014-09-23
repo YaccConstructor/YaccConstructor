@@ -40,7 +40,7 @@ include "create_table.yrd"
 include "transaction.yrd"
 
 tokens {
-    _ of SourceText*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
 }
 
 options {

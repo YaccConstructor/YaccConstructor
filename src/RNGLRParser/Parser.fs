@@ -46,7 +46,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * Dictionary<Family, ErrorNode>
+    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 /// Compare vertex like a pair: (level, state)
@@ -160,6 +160,11 @@ let drawDot (tokenToNumber : _ -> int) (tokens : BlockResizeArray<_>) (leftSide 
     out.Close()
 
 
+let isEpsilonAst (ast : obj) =
+    match ast with
+    | :? int as e when e < 0 -> true
+    | _ -> false
+
 let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq<'TokenType>) =
     let enum = tokens.GetEnumerator()
     // Change if it doesn't equal to zero. Now it's true according to states building algorithm
@@ -176,7 +181,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
     if not <| enum.MoveNext() || parserSource.EofIndex = parserSource.TokenToNumber enum.Current then
         if parserSource.AcceptEmptyInput 
         then
-            Success (new Tree<_>(null, getEpsilon startNonTerm, null), errDict)
+            Success (new Tree<_>(null, getEpsilon startNonTerm, null), [||], errDict)
         else
             Error (0, [||], "This grammar cannot accept empty string",
                     {
@@ -217,7 +222,7 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         reductions.Push (v, prod, 0, None)
                 usedStates.Push state
             let v = dict.[state]
-            if edgeOpt.IsSome then 
+            if edgeOpt.IsSome && not (isEpsilonAst <| snd edgeOpt.Value) then 
                 let arr = parserSource.Reduces.[state].[!curNum]
                 if arr <> null then
                     for (prod, pos) in arr do
@@ -241,11 +246,12 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                         let family = new Family(prod, new Nodes(Array.copy path))
                         if not <| containsEdge final family edges.[state] then
                             let isCreated, edgeLabel = addEdge final family edges.[state] false
-                            if (pos > 0 && isCreated) then
+                            if pos > 0 && isCreated && not (isEpsilonAst edgeLabel) then
                                 let arr = parserSource.Reduces.[state].[!curNum]
+                                let edgeOpt = Some (final, box edgeLabel)
                                 if arr <> null then
                                     for (prod, pos) in arr do
-                                        reductions.Push (newVertex, prod, pos, Some (final, box edgeLabel))
+                                        reductions.Push (newVertex, prod, pos, edgeOpt)
 
                 let rec walk remainLength (vertex : Vertex) path =
                     if remainLength = 0 then handlePath path vertex
@@ -426,9 +432,10 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     let arr = parserSource.Reduces.[vertex.State].[!curNum]
                     if arr <> null
                     then 
-                        for (prod, pos) in arr do
+                        if  not (isEpsilonAst vertex.OutEdges.first.Ast) then
                             let edgeOpt = Some (vertex.OutEdges.first.Dest, vertex.OutEdges.first.Ast)
-                            reductions.Push (vertex, prod, pos, edgeOpt)
+                            for (prod, pos) in arr do
+                                reductions.Push (vertex, prod, pos, edgeOpt)
                         makeReductions !curInd recovery
                         temp.Enqueue path
                     //if shift is possible
@@ -486,10 +493,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     then
                         addSimpleEdge vertex ast simpleEdges.[state]
                         let arr = parserSource.Reduces.[state].[!curNum]
-                        if arr <> null 
+                        if arr <> null  && not (isEpsilonAst ast)
                         then
+                            let edgeOpt = Some (vertex, ast)
                             for (prod, pos) in arr do
-                                reductions.Push (vertex, prod, pos, Some (vertex, ast))
+                                reductions.Push (vertex, prod, pos, edgeOpt)
                     new Family(prodNumber, new Nodes([|ast|]))
                 else
                     let family = new Family(prodNumber, new Nodes(unbrowsed))
@@ -498,10 +506,11 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
                     then
                         let _, edgeLabel = addEdge vertex family edges.[state] true
                         let arr = parserSource.Reduces.[state].[!curNum]
-                        if arr <> null 
+                        if arr <> null && not (isEpsilonAst edgeLabel)
                         then
+                            let edgeOpt = Some (vertex, box edgeLabel)
                             for (prod, pos) in arr do
-                                reductions.Push (vertex, prod, pos, Some (vertex, box edgeLabel))
+                                reductions.Push (vertex, prod, pos, edgeOpt)
                     family
                            
             let state = snd <| pushes.Peek()
@@ -669,4 +678,4 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             | None -> Error (!curInd, [|!curToken|], "Input was fully processed, but it's not complete correct string.", debugFuns (), errDict)
             | Some res -> 
             //    debugFuns().drawGSSDot "res.dot"
-                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), errDict)
+                Success (new Tree<_> (tokens.ToArray(), res, parserSource.Rules), [||], errDict)

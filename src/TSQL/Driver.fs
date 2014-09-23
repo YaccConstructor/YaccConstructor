@@ -23,15 +23,55 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open System.IO
+open Yard.Generators.RNGLR.AST
+open YC.AbstractAnalysis.CommonInterfaces
+open YC.ReSharper.AbstractAnalysis.Plugin.Core
+open YC.EL.ReSharper.Common
+open Mono.Addins
+open ReSharperExtension
+open JetBrains.Application
 
 let tokenize lexerInputGraph =
-    let eof = Yard.Examples.MSParser.RNGLR_EOF(Yard.Utils.SourceText.SourceText(),[||])
+    let eof = Yard.Examples.MSParser.RNGLR_EOF("",[||])
     Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eof)
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
 let getTokenName = tokenToNumber >> numToString
 
-let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
-    
-    fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
+let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGraph
+
+let args = 
+    {
+        tokenToRange = fun _ -> [||],[||]
+        zeroPosition = [||]
+        clearAST = false
+        filterEpsilons = true
+    }
+
+let printAstToDot ast name = defaultAstToDot ast name
+
+let xmlPath = xmlPath
+let tokenToTreeNode = tokenToTreeNode
+let translate ast errors = translate args ast errors
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
+do()
+
+[<ShellComponent>]
+[<Extension>]
+type TSQLInjectedLanguageModule () =
+    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
+
+    interface IInjectedLanguageModule<br,range,node> with
+        member this.Name = "TSQL"
+        member this.Process graphs = processor.Process graphs
+        member this.LexingFinished = processor.LexingFinished
+        member this.ParsingFinished = processor.ParsingFinished
+        member this.XmlPath = xmlPath
+        member this.GetNextTree i = processor.GetNextTree i
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
+
+    interface IReSharperLanguage

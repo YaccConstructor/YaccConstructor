@@ -8,7 +8,7 @@
     <ProjectGuid>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Conversions</RootNamespace>
-    <AssemblyName>Conversions</AssemblyName>
+    <AssemblyName>YC.Conversions</AssemblyName>
     <Name>Conversions</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
@@ -45,7 +45,7 @@
     <Compile Include="ReplaceLiterals.fs" />
     <Compile Include="LeaveLast.fs" />
     <Compile Include="BuildAST.fs" />
-    <Compile Include="ExpandEbnf.fs" />
+    <Compile Include="ExpandEBNF.fs" />
     <Compile Include="MergeAlter.fs" />
     <Compile Include="BuildAstSimple.fs" />
     <Compile Include="AddDefaultAC.fs" />
@@ -74,6 +74,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -82,7 +84,7 @@
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
              Other similar extension points exist, see Microsoft.Common.targets.
         <Target Name="BeforeBuild">
         </Target>

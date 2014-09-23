@@ -8,7 +8,7 @@
     <ProjectGuid>{42244dcc-4326-4e7a-bb6b-ccd8ca544d85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Common.Test</RootNamespace>
-    <AssemblyName>Common.Test</AssemblyName>
+    <AssemblyName>YC.Common.Test</AssemblyName>
     <Name>Common.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -32,10 +32,25 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="CommonTests.fs" />
-    <Compile Include="Manager.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Constraints">
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Conversions">
+      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FsYacc">
       <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
@@ -52,28 +67,16 @@
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RNGLR">
+      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\RNGLR.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
-      <Name>TreeDump</Name>
-      <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Reference Include="YardFrontend">
+      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\YardFrontend.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

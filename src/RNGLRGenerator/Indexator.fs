@@ -109,58 +109,7 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
                 else string ch
             )
         |> String.concat ""
-    let _getLiteralName i =
-        let (lit:string) = Indexator.sub literalsShift (Indexator.snd literalsConnect) i
-        let replacementDict =
-            [
-                '.', "dot"
-                ',', "comma"
-                ':', "semi"
-                ';', "colon"
-                '+', "plus"
-                '-', "minus"
-                '*', "star"
-                '<', "less"
-                '>', "more"
-                '=', "equal"
-                '/', "slash"
-                '&', "and"
-                '|', "or"
-                '?', "question"
-                '$', "dollar"
-                '[', "left_square_bracket"
-                ']', "right_square_bracket"
-                '(', "left_bracket"
-                ')', "right_bracket"
-                '!', "not"
-                '~', "tilda"
-                '#', "sharp"
-                '%', "percent"
-                '^', "hat"
-                '{', "left_figure_bracket"
-                '}', "right_figure_bracket"
-                '\\', "reverse_slash"
-                '`', "reverse_quate"
-                ''', "quate"
-                '?', "number"
-            ]
-            |> dict
-
-        lit
-        |> Seq.mapi  
-            (fun i ch ->
-                let exist,v = replacementDict.TryGetValue(ch)
-                if exist
-                then
-                    if i = 0 
-                    then v + "_"
-                    elif i = lit.Length - 1
-                    then "_" + v
-                    else "_" + v + "_"
-                else string ch
-            )
-        |> String.concat ""
-
+                '¹', "number"
     static member inline private fst (x,_,_) = x
     static member inline private snd (_,x,_) = x
     static member inline private trd (_,_,x) = x
@@ -186,7 +135,9 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     member this.literalToIndex lit = Indexator.add literalsShift (Indexator.fst literalsConnect) lit
     member this.indexToLiteral i = Indexator.sub literalsShift (Indexator.snd literalsConnect) i
     member this.literalsCount = Indexator.trd literalsConnect
-    member this.getLiteralName i = _getLiteralName i
+    member this.getLiteralName i = 
+        let (lit:string) = Indexator.sub literalsShift (Indexator.snd literalsConnect) i
+        Yard.Generators.RNGLR.Helper._getLiteralName lit
     member this.literalsStart = literalsShift
     member this.literalsEnd = literalsShift + this.literalsCount - 1
 

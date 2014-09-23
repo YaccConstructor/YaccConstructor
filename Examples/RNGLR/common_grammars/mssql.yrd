@@ -1,6 +1,6 @@
 (*
   mssql.yrd contains grammar of MS-SQL\T-SQL.
-  
+
   Copyright 2012, 2013 Anastasiya Ragozina <ragozina.anastasiya@gmail.com>
 
   This file is part of YaccConctructor.
@@ -14,7 +14,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-   
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
@@ -27,16 +27,16 @@ open Yard.Utils.SourceText
 include "../../../GrammarTemplates/Common.yrd"
 include "MsCommon.yrd"
 include "set_stmnt.yrd"
-include "../mssql/expr.yrd"
-include "../mssql/create_proc.yrd"
-include "../mssql/cycles_stmnt.yrd"
-include "../mssql/datatype.yrd"
-include "../mssql/stmnt.yrd"
-include "../mssql/execute_stmnt.yrd"
-include "../mssql/crud.yrd"
-include "../mssql/select_crud.yrd"
-include "../mssql/create_table.yrd"
-include "../mssql/transaction.yrd"
+include "../MSSql/expr.yrd"
+include "../MSSql/create_proc.yrd"
+include "../MSSql/cycles_stmnt.yrd"
+include "../MSSql/datatype.yrd"
+include "../MSSql/stmnt.yrd"
+include "../MSSql/execute_stmnt.yrd"
+include "../MSSql/crud.yrd"
+include "../MSSql/select_crud.yrd"
+include "../MSSql/create_table.yrd"
+include "../MSSql/transaction.yrd"
 
 tokens {
     _ of SourceText
@@ -56,7 +56,7 @@ open Select_crud, Create_proc, Set_stmnt, Transaction, Cycles_stmnt, Create_tabl
 [<Start>]
 root_rule: (batch_body 'GO'?)*
 
-batch_body: 
+batch_body:
        create_proc
      | set_stmnt
      | 'USE' '[' 'mdw_control' ']'
@@ -65,8 +65,8 @@ batch_body:
      | declare
      | case (**&&&***)
      | rollback_transaction
-     | if_stmt 
-     | drop_procedure 
+     | if_stmt
+     | drop_procedure
      | create_table
      | insert
 	 | select_stmnt

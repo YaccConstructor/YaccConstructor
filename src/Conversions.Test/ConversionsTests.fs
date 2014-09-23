@@ -90,7 +90,6 @@ type ``Conversions tests`` () =
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
         let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
         let frontend =
@@ -124,8 +123,8 @@ type ``Conversions tests`` () =
             
 #if DEBUG
         let generator = 
-           match Seq.tryFind (fun (elem : Frontend) -> elem.Name = "TreeDump") GeneratorsManager with
-           | Some gen -> gen
+           match Seq.tryFind (fun (elem : Generator) -> elem.Name = "TreeDump") GeneratorsManager with
+           | Some gen -> gen    
            | None -> failwith "TreeDump is not found."
         printfn "%A\n" (generator.Generate ilTreeConverted)
 #endif

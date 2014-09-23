@@ -21,7 +21,7 @@ open Yard.Core.Conversions
 open Yard.Core.IL
 
 [<Class>] 
-type FsYard() =
+type FsYard() as this =
     let mutable engine = Unchecked.defaultof<IBuildEngine>
     let mutable host = Unchecked.defaultof<ITaskHost>
 
@@ -60,7 +60,6 @@ type FsYard() =
         |> (fun il -> be.Generate(il,rnglrArgs))
         |> ignore
 
-    [<EntryPoint>]
     let cmdRun _ =
         let userDefs = ref []
         let userDefsStr = ref ""
@@ -92,7 +91,9 @@ type FsYard() =
             generate !inFile !rnglrArgs
             0 
         with
-        | _ -> 1
+        | e -> 
+            printfn "FATAL!!!\n %A" e
+            1
         
 
     [<Required>]
@@ -138,6 +139,9 @@ type FsYard() =
         with get() = projectBasePath
         and set v = projectBasePath <- v
 
+     //[<EntryPoint>]
+    member this.CmdRun x = cmdRun x
+
     interface ITask with
         override this.Execute() =
             use sw = new StreamWriter(Path.Combine(projectBasePath,"FsYard.log"))
@@ -175,3 +179,8 @@ type FsYard() =
         override this.BuildEngine
             with get () = engine
             and set v =  engine <- v
+
+    module X =
+        [<EntryPoint>]    
+        let f x =
+            FsYard().CmdRun x

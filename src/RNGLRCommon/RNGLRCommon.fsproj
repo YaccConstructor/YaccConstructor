@@ -8,7 +8,7 @@
     <ProjectGuid>{1c719cd3-0559-4a12-8b57-f58053947dc1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRCommon</RootNamespace>
-    <AssemblyName>RNGLRCommon</AssemblyName>
+    <AssemblyName>YC.RNGLRCommon</AssemblyName>
     <Name>RNGLRCommon</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -31,7 +31,9 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
+    <Compile Include="Helper.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -46,10 +48,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
-      <Name>Common.AST</Name>
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>

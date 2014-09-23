@@ -193,7 +193,7 @@ type GPUWork(rowSize, nTermsCount, extRecTable:_[], extRules, platformName, _ind
         
     let rules = extRules //fillArray extRules (fun () -> uint64 0)
 
-    let indexesBySymbols = _indexesBySymbols
+    let indexesBySymbols = _indexesBySymbols            
 
     let rowSizeArray = [| rowSize |]
     let nTermsCountArray = [| nTermsCount |]

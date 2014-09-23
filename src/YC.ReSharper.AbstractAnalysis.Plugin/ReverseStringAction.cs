@@ -1,7 +1,5 @@
 using System;
-using System.Drawing;
 using System.Linq;
-//using FSharpx;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Daemon.CSharp.Stages;

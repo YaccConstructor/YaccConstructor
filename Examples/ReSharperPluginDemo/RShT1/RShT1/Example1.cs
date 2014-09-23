@@ -22,7 +22,7 @@ namespace RShT1
             }
             var s = "insert into y (x,v) values (1++,2)";
             Program.ExecuteImmediate(s);
-           // Program.ExecuteImmediate("select x from y where" + "v > b" );
+            Program.ExecuteImmediate("select x from y where" + "v > b" );
             Program.Eval("123 ++" + " 23 ** 3 +  14");
             Program.Objnotation("{\"Name\" : \"Ivan\"}");
            // Program.Eval("123 +" + " 14");

@@ -42,6 +42,7 @@ type ``MS-SQL parser tests`` () =
         counter <- counter + 1<id>
         match MSSqlParser.justParse file with
         | Yard.Generators.RNGLR.Parser.Error (num, tok, msg, dbg, _) ->
+            let tok = tok.[0]
             let coordinates = 
                 let x,y = tokenPos tok
                 let x = p.GetCoordinates x

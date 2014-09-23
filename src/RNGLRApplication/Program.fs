@@ -23,6 +23,8 @@ let run1 path astBuilder =
     let tokens = LexCommon.tokens1(path)
     astBuilder tokens, tokens
 
+let path = @"..\..\input.txt"
+| Parser.Success (tree, _), tokens ->
 
 let parser1 = RNGLR.BadLeftRecursion.buildAst
 //let str = String.init (50) (fun i -> "B ")

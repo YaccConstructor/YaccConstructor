@@ -29,6 +29,17 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
+        | Parser.Success (mAst, _, _) ->
+        | Parser.Success (mAst, _, _) ->
+        | Parser.Success (mAst, _, _) -> mAst.PrintAst()
+        | Parser.Success (mAst, _, _) ->
+        | Parser.Success (mAst, _, _) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
     [<Test>]
     member test.``SIMPLE epsilon``() =
         let parser = RNGLR.SimpleEpsilon.buildAst
@@ -36,7 +47,11 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
+        | Parser.Success (mAst, _, errors) ->
             RNGLR.SimpleEpsilon.defaultAstToDot mAst "SimpleEpsilon.dot"
            // mAst.ChooseLongestMatch()
 //            let res = translate RNGLR.ParseLongest.translate mAst errors
@@ -50,7 +65,7 @@ type ``RNGLR parser tests with simple lexer`` () =
 
         match run path parser with
         | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, errors) ->
+        | Parser.Success (mAst, _, errors) ->
             let res = translate RNGLR.ParseOmit.translate mAst errors
             printfn "%A" res
             Assert.AreEqual([[1; 3]], res)

@@ -7,6 +7,7 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <TargetFrameworkProfile />
+    <Name>FSharp.PowerPack.Build.Tasks</Name>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -18,7 +19,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{a9566921-4193-4ec8-83fb-f5a0dc257678}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>FSharp.PowerPack.Build.Tasks</AssemblyName>
+    <AssemblyName>YC.FSharp.PowerPack.Build.Tasks</AssemblyName>
     <AllowCrossTargeting>true</AllowCrossTargeting>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DocumentationFile>FSharp.PowerPack.Build.Tasks.xml</DocumentationFile>

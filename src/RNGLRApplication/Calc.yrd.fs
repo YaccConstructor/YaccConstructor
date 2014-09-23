@@ -56,7 +56,7 @@ let mutable private cur = 0
 let leftSide = [|1; 1; 4; 2; 2; 3; 3|]
 let private rules = [|2; 1; 9; 1; 1; 3; 2; 8; 2; 6; 5|]
 let private rulesStart = [|0; 1; 4; 5; 6; 9; 10; 11|]
-let startrule = 2
+let startRule = 2
 
 let acceptEmptyInput = false
 

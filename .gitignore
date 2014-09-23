@@ -136,3 +136,5 @@ src/RNGLRParser.SimpleTest/gen.cmd
 
 src/GLLParser.SimpleTest/log.txt
 src/TSQL/TSQLHighlighting/*
+src/GLLParser.SimpleTest/log.txt
+src/TSQL/FsYard.log

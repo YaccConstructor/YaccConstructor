@@ -25,7 +25,7 @@ type Token =
 
 let genLiteral (str : string) (data : string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>) =
     match str.ToLower() with
-    | x -> failwithf "Literal %s undefined" x
+    | x -> None
 let tokenData = function
     | DIV x -> box x
     | ERROR x -> box x

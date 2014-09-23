@@ -4,6 +4,7 @@ open Microsoft.FSharp.Text
 open Yard.Generators.RNGLR.Parser
 open Microsoft.FSharp.Reflection
 open RNGLR.SimpleLeftRecursion
+open RNGLR.BadLeftRecursion
 open RNGLR.SimpleRightRecursion
 open RNGLR.SimpleAmb
 open RNGLR.Mixed
@@ -11,7 +12,7 @@ open RNGLR.Mixed
 let tokens1(str : string) = 
     let toLexerTag (name:string) =
             match name with
-            | "B" -> RNGLR.SimpleLeftRecursion.B (2)
+            | "B" -> RNGLR.BadLeftRecursion.B (2)
             | x -> failwithf "Unexpected token %s" x
 
     str.Split([|' '|])

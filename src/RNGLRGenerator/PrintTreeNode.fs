@@ -336,7 +336,7 @@ let printTreeNode (tokenInfo : TokenInfo) =
     printBrInd 1 "public class %s : %s" className tokenInfo._baseClass
     printBrInd 1 "{"
 
-    printBrInd 2 "private static string ycTokName = \"%s\";" tokenInfo._name
+    printBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo._name.ToLowerInvariant()
     printBr ""
     printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" className
     printBrInd 3 ": base(ycTokName, ycValue, positions)"

@@ -65,6 +65,56 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
+let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) (gss : array<ResizeArray<Vertex>>) =
+    use out = new System.IO.StreamWriter (path)
+    let was = new Dictionary<_,_>()
+    let levels = new Dictionary<_,_>()
+    out.WriteLine "digraph GSS {"
+    let print s = out.WriteLine ("    " + s)
+    let curNum = ref 0
+    print "rankdir=RL"
+    let getAstString (ast : ExtensionTree) =
+        let ast = ast.tree
+        match ast with
+       // | :? int as i when i >= 0 -> tokens.[i] |> parser.TokenToNumber |> parser.NumToString |> sprintf "%s"    
+       // | :? int as i when i < 0 -> "eps " + parser.NumToString (-i - 1)
+        | :? AST as ast -> 
+            let nonT = 
+                if ast.first.prod < parser.LeftSide.Length then ast.first.prod
+                else -1
+            nonT.ToString()
+        | :? IntermidiateNode as iN ->
+            (getRule iN.Position).ToString()
+        | null -> "null" 
+        | _ -> failwith "Unexpected ast"
+
+    let rec dfs (u : Vertex) =
+        was.Add (u, !curNum)
+        if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
+        else
+            levels.[u.Level] <- !curNum :: levels.[u.Level]
+        if (getRule u.Label = -1) then print <| sprintf "%d [label=\"%s\"]" !curNum "dummy node"
+        else print <| sprintf "%d [label=\"(%d, %d), %d\"]" !curNum (getRule u.Label) (getPosition u.Label) u.Level
+        incr curNum
+        if u.OutEdges.first <> Unchecked.defaultof<_> 
+        then 
+            handleEdge u u.OutEdges.first
+            if u.OutEdges.other <> null then u.OutEdges.other |> Array.iter (handleEdge u)
+
+    and handleEdge u (e : Edge) =
+        let v = gss.[getIndex2Vertex e.Dest].[getIndex1Vertex e.Dest]
+        if not <| was.ContainsKey v then dfs v
+        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+    for levels in gss do
+        for v in levels do
+            if not <| was.ContainsKey v then dfs v
+    
+    for level in levels do
+        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+
+    out.WriteLine "}"
+    out.Close()
+
 let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
@@ -109,7 +159,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let terminalNodes = new BlockResizeArray<ExtensionTree>()
         let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
-   
+
         let findFamily prod (nodes : INode) extension : Family =
             let mutable result = None
             let res = ref <| null
@@ -353,6 +403,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         match !resultAST with
             | None -> Error ("String was not parsed")
             | Some res -> 
+                    drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
                     Success (r1)   
                         

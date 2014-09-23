@@ -111,7 +111,6 @@ let printTableGLL
         for i = indexator.literalsStart to indexator.literalsEnd do
             printBrInd 1 "| \"%s\" -> Some (L_%s data)" (escapeQuotes <| indexator.indexToLiteral i) (indexator.getLiteralName i)
         printBrInd 1 "| x -> None"
-        //
 
         printBr "let tokenData = function"
 
@@ -230,13 +229,43 @@ let printTableGLL
         printBr "let literalsCount = %d" grammar.indexator.literalsCount
        
         printBr ""
-
         printBr ""
-
         printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
                        
         printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
+        let funNumeration = new System.Collections.Generic.Dictionary<string, int> ()
+        let numberOfAlternates =
+            let rules = grammar.rules
+            let mutable index = 0
+            let mutable count = 1
+            let result = Array.zeroCreate indexator.nonTermCount
+            let previousNonTerm = ref <| rules.leftSide 0
+            let currentNonTerm = ref <| rules.leftSide 0 
+            for j in 0..rules.rulesCount - 1 do
+                currentNonTerm := rules.leftSide j
+                if !currentNonTerm = !previousNonTerm
+                then count <- count + 1
+                else 
+                    result.[index] <- count
+                    count <- 1
+                    previousNonTerm := !currentNonTerm
+                    index <- index + 1
+            result
+        let printFuns =
+            let rules = grammar.rules
+            for i = 0 to rules.rulesCount - 1  do
+            //сначала нужно написать L_S для правых частей
+            //потом нужно понять, сколько альтернатив существует для данного нетерминала
+            //потом нужно пойти по длине правила текущего
+                let currentFunName = "L_" + indexator.indexToNonTerm (rules.leftSide i)
+                let str = ("let " + currentFunName + (" : (seq<Token> -> ParseResult<_>) ="))
+                printBr <| PrintfFormat<_,_,_,_>(str)
+                //let s = 
+                printBrInd 1 "buildAst<Token> parserSource"
+                printBr ""
+
+        printFuns
         res.ToString()
     printTable ()

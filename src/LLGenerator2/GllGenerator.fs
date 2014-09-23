@@ -17,9 +17,9 @@ open Option
 [<assembly:AddinDependency ("YaccConstructor", "1.0")>]
 do()
 [<Extension>]
-type GLL() = 
+type GLL2() = 
     inherit Generator()
-        override this.Name = "GLLGenerator"
+        override this.Name = "GLLGenerator2"
         override this.Constraints = [|noEbnf; noMeta; noInnerAlt; noInnerAlt; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now

@@ -1,8 +1,0 @@
-tokens {
-    _ of string
-}
-
-[<Start>]
-expr: a b | b a
-a: A
-b: B | C

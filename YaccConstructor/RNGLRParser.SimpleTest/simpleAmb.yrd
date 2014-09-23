@@ -1,9 +1,0 @@
-tokens {
-    _ of string
-}
-
-[<Start>]
-s1 : s
-s : b | B | f
-f : s s
-b : B

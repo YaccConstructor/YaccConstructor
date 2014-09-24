@@ -26,9 +26,10 @@ open System.IO
 open Yard.Generators.RNGLR.AST
 open YC.AbstractAnalysis.CommonInterfaces
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
-open Mono.Addins
 open YC.EL.ReSharper.Common
-
+open Mono.Addins
+open ReSharperExtension
+open JetBrains.Application
 
 let tokenize lexerInputGraph =
     let eof = Yard.Examples.MSParser.RNGLR_EOF("",[||])
@@ -58,12 +59,11 @@ let translate ast errors = translate args ast errors
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
 do()
 
+[<ShellComponent>]
 [<Extension>]
-type TSQLInjectedLangugeModule () =
+type TSQLInjectedLanguageModule () =
     let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
 
-    static let instance = new TSQLInjectedLangugeModule()
-    static member Instance = instance
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "TSQL"
         member this.Process graphs = processor.Process graphs
@@ -71,4 +71,7 @@ type TSQLInjectedLangugeModule () =
         member this.ParsingFinished = processor.ParsingFinished
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken rng = processor.GetForestWithToken rng
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
+
+    interface IReSharperLanguage

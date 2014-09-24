@@ -1,17 +1,21 @@
 ﻿using Highlighting.Core;
-using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Impl;
 using JetBrains.ReSharper.Psi.Tree;
+using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting;
 
-[assembly: RegisterConfigurableSeverity("Variable", null, HighlightingGroupIds.LanguageUsage, "Variable", @"
-          Variable", Severity.INFO, false, Internal = false)]
+[assembly: RegisterConfigurableSeverity(TokenHighlighting.SEVERITY_ID, null, HighlightingGroupIds.LanguageUsage, TokenHighlighting.SEVERITY_ID, TokenHighlighting.SEVERITY_ID, 
+    Severity.INFO, false, Internal = false)]
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
-    [ConfigurableSeverityHighlighting("Variable", "MyLang", OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = "Variable")]
+    [ConfigurableSeverityHighlighting(SEVERITY_ID, LANGUAGE_NAME, OverlapResolve = OverlapResolveKind.NONE, ToolTipFormatString = null)]
     internal class TokenHighlighting : ICustomAttributeIdHighlighting, IHighlightingWithRange
     {
+        //public const string HIGHLIGHTING_ID = "YC.SEL.SDK Highlighting";
+        public const string SEVERITY_ID = "YC.SEL.SDK Highlighting";
+        public const string LANGUAGE_NAME = "Embedded language";
+
         private readonly string attributeId;
         private readonly ITreeNode myElement;
 

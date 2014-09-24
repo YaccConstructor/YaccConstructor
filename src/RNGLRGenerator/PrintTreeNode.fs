@@ -4,8 +4,32 @@ module PrintTreeNode
 
 open Yard.Generators.RNGLR
 
+type TokenKind = 
+    | Terminal 
+    | Literal
+    | NonTerminal
+
+type TokenInfo = 
+    {
+        _namespace : string
+        _name : string
+        _lang : string
+        _type : TokenKind
+        _baseClass : string
+        _number : int
+    }
+
+let toClassName (str : string) = 
+        let symbols = [| 
+                        for i = 0 to str.Length - 1 do
+                            if i = 0 
+                            then yield System.Char.ToUpper str.[0]
+                            else yield str.[i] 
+                        |] 
+        new System.String(symbols)
+
 //Print ITreeNode implementation
-let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal : bool) (lang : string) = 
+let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
     let res  = new System.Text.StringBuilder()
 
     let inline print (x : 'a) =
@@ -88,15 +112,10 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
     printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcTextValue, ycValue);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLower()
-    
-    if isTerminal
-    then 
-        printBr ""
-        printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, \"%s\");" <| lang.ToLower()
+    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
     printBrInd 2 "}"
+    
     printBr ""
-        
     printBrInd 2 "public %s (string ycTokName, string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
     printBrInd 2 "{"
 //    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
@@ -284,6 +303,73 @@ let printTreeNode (nameOfNamespace : string) (nameOfClass : string) (isTerminal 
     printBrInd 0 "}"
     res.ToString()
 
+let printTreeNode (tokenInfo : TokenInfo) = 
+    let res  = new System.Text.StringBuilder()
+
+    let inline print (x : 'a) =
+        Printf.kprintf (fun s -> res.Append s |> ignore) x
+
+    let inline printBr (x : 'a) =
+        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
+
+    let inline printBrInd num (x : 'a) =
+        print "%s" (String.replicate (num <<< 2) " ")
+        printBr x
+    
+    printBrInd 0 "using Highlighting.Core;"
+    printBrInd 0 "using System.Collections.Generic;"
+    printBrInd 0 "using JetBrains.DocumentModel;"
+    printBrInd 0 ""
+
+    printBrInd 0 "namespace %s" tokenInfo._namespace
+    printBrInd 0 "{"
+
+
+    let className = 
+        let suffix = 
+            match tokenInfo._type with
+            | Terminal -> "TermNode"
+            | Literal -> "LitNode"
+            | NonTerminal -> "NonTermNode"
+        toClassName tokenInfo._name + suffix
+
+    printBrInd 1 "public class %s : %s" className tokenInfo._baseClass
+    printBrInd 1 "{"
+
+    printBrInd 2 "private static string ycTokName = \"%s\";" tokenInfo._name
+    printBr ""
+    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" className
+    printBrInd 3 ": base(ycTokName, ycValue, positions)"
+    printBrInd 2 "{"
+
+    match tokenInfo._type with
+    | Literal 
+    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
+    | _ -> ()
+    printBrInd 2 "}"
+
+    printBrInd 0 ""
+    printBrInd 2 "public %s() : base(ycTokName)" className
+    printBrInd 2 "{"
+    printBrInd 2 "}"
+
+    printBrInd 1 "}"
+    printBrInd 0 "}"
+    res.ToString()
+
+let generateTreeNodeFile folder tokenInfo = 
+    let className = 
+        let suffix = 
+            match tokenInfo._type with
+            | Terminal -> "TermNode"
+            | Literal -> "LitNode"
+            | NonTerminal -> "NonTermNode"
+        toClassName <| tokenInfo._name + suffix
+
+    use out = new System.IO.StreamWriter (folder + className + ".cs")
+    let tables = printTreeNode tokenInfo
+    out.WriteLine tables
+    out.Close()
 
 //Prints .xml file which contains information about token to color mapping.
 let printXML (nameOfNamespace : string) tokens = 
@@ -486,17 +572,8 @@ let printCalculatePos() =
 
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
-let printTokenToTreeNode (indexator : Indexator)= 
+let printTokenToTreeNode (indexator : Indexator) = 
     let res  = new System.Text.StringBuilder()
-
-    let toClassName (str : string) = 
-        let symbols = [| 
-                        for i = 0 to str.Length - 1 do
-                            if i = 0 
-                            then yield System.Char.ToUpper str.[0]
-                            else yield str.[i] 
-                        |] 
-        new System.String(symbols)
 
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -517,7 +594,7 @@ let printTokenToTreeNode (indexator : Indexator)=
         printBrInd 2 "let value = fst <| data"
         printBrInd 2 "let temp = snd <| data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" termNode termNode
+        printBrInd 2 "new %sTermNode(value.ToString(), ranges) :> ITreeNode" termNode
 
     for i = indexator.literalsStart to indexator.literalsEnd do
         let litNode = toClassName <| indexator.indexToLiteral i
@@ -525,10 +602,9 @@ let printTokenToTreeNode (indexator : Indexator)=
         printBrInd 2 "let value = fst <| data"
         printBrInd 2 "let temp = snd <| data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sLitNode(\"%s\", value.ToString(), ranges) :> ITreeNode" litNode litNode
+        printBrInd 2 "new %sLitNode(value.ToString(), ranges) :> ITreeNode" litNode
 
     res.ToString()
-
 
 let printItemsGroup nameOfClasses xmlName = 
     let res  = new System.Text.StringBuilder()
@@ -576,14 +652,14 @@ let printHotspotFile() =
 
     printBrInd 0 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
     printBrInd 0 "<Body>"
-    printBrInd 1 "<Language name=\"TSQL\">"
+    printBrInd 0 "<!-- enter name of language. For example, TSQL-->"
+    printBrInd 1 "<Language name=\"\">"
     printBrInd 2 "<Hotspot>"
-    printBrInd 2 "<!-- Format: \"Class.Method\". For example, \"Program.Eval\" -->"
+    printBrInd 2 "<!-- Format: \"<Class>.<Method>\". For example, \"Program.Eval\" -->"
     printBrInd 3 "<Fullname></Fullname>"
-    printBrInd 3 "<ArgumentsTypeList>"
-    printBrInd 2 "<!-- Example: string, int, void -->"
-    printBrInd 4 "<ArgumentType></ArgumentType>"
-    printBrInd 3 "</ArgumentsTypeList>"
+    printBrInd 3 "<!-- If you call Program.Eval(query, parameters) where variable parameters is parameters of connection, then value ArgumentPosition is 0 (zero-based)-->"
+    printBrInd 3 "<ArgumentPosition> 0 </ArgumentPosition>"
+    printBrInd 3 "type of result of query: int, string, void etc"
     printBrInd 3 "<ReturnType></ReturnType>"
     printBrInd 2 "</Hotspot>"
     printBrInd 1 "</Language>"

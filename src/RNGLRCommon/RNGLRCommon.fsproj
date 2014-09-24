@@ -8,7 +8,7 @@
     <ProjectGuid>{1c719cd3-0559-4a12-8b57-f58053947dc1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRCommon</RootNamespace>
-    <AssemblyName>RNGLRCommon</AssemblyName>
+    <AssemblyName>YC.RNGLRCommon</AssemblyName>
     <Name>RNGLRCommon</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
+    <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
     <None Include="packages.config" />
@@ -49,7 +50,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Utils.SourceText, Version=0.1.5119.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="Utils.SourceText">
+      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

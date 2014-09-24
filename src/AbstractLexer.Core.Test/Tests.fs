@@ -1,6 +1,6 @@
 ﻿module AbstractLexer.Core.Test
 
-open AbstractParsing.Common
+open AbstractAnalysis.Common
 
 
 type Class1() = 

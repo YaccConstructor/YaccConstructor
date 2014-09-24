@@ -67,7 +67,7 @@ namespace Highlighting.Core
             UserData.PutData(KeyConstant.YcTextValue, ycValue);
             UserData.PutData(KeyConstant.YcLanguage, "Calc");
             
-            YcHelper.AddYcItem(ycTokName, ycValue, "Calc");
+            YcHelper.AddYcItem(ycTokName, ycValue, -2, "Calc");
         }
 
         public MyTreeNode(string ycName, string ycValue, IEnumerable<DocumentRange> positions)

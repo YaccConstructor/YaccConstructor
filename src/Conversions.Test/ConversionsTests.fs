@@ -90,7 +90,6 @@ type ``Conversions tests`` () =
     [<Test>]
     member test.``ExpandBrackets. Sequence as sequence element test.``()=
         AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         //let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager() 
         let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
         let frontend =

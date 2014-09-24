@@ -8,7 +8,7 @@
     <ProjectGuid>{1b09eacc-608a-4965-8b46-2746fac220fc}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParser</RootNamespace>
-    <AssemblyName>RNGLRParser</AssemblyName>
+    <AssemblyName>YC.RNGLRParser</AssemblyName>
     <Name>RNGLRParser</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

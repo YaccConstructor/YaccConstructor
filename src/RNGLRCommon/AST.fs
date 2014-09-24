@@ -203,6 +203,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
     member this.Order = order
     member this.Root = root
     member this.RulesCount = rules.GetLength(0)
+    member this.Tokens = tokens
     member this.TokensCount = tokens.Length
 
     static member inline private smaller pos : (obj -> _) = function

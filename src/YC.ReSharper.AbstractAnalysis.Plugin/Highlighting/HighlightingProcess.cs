@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Application.Settings;
-using JetBrains.Application.Threading.Tasks;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
@@ -21,25 +20,38 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         private Action<DaemonStageResult> myCommiter;
         private IContextBoundSettingsStore mySettingsStore;
 
-        private static Helper.ReSharperHelper YcProcessor = Helper.ReSharperHelper.Instance;
+        private static Helper.ReSharperHelper<DocumentRange, ITreeNode> YcProcessor = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
         public IDaemonProcess DaemonProcess { get; private set; }
+        public IHighlightingConsumer Consumer
+        {
+            get
+            {
+                return new DefaultHighlightingConsumer(this, mySettingsStore);
+            }
+        }
 
         private ICSharpFile csFile;
+        public ICSharpFile CSharpFile
+        {
+            get
+            {
+                if (csFile == null)
+                    csFile = GetCsFile();
+                return csFile;
+            }
+        }
+
+        private ICSharpFile GetCsFile()
+        {
+            IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
+            return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile) as ICSharpFile;
+        }
 
         public HighlightingProcess(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
         {
             DaemonProcess = process;
             mySettingsStore = settingsStore;
-            csFile = GetCSFile();
-            SubscribeYc();
-            //DocumentManager.Instance.AnalyzeDocument(DaemonProcess.Document);
-        }
-
-        private ICSharpFile GetCSFile()
-        {
-            IPsiServices psiServices = DaemonProcess.SourceFile.GetPsiServices();
-            return psiServices.Files.GetDominantPsiFile<CSharpLanguage>(DaemonProcess.SourceFile) as ICSharpFile;
         }
 
         public void Update(IDaemonProcess process, IContextBoundSettingsStore settingsStore)
@@ -50,95 +62,49 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public void Execute(Action<DaemonStageResult> commiter)
         {
-            if (csFile == null)
+            if (CSharpFile == null)
                 return;
 
             myCommiter = commiter;
+            UpdateHandler();
+
             ExistingTreeNodes.ClearExistingTree(DaemonProcess.Document);
-            var errors = YcProcessor.Process(csFile);
+            var errors = YcProcessor.Process(CSharpFile);
             OnErrors(errors);
             // remove all old highlightings
             //if (DaemonProcess.FullRehighlightingRequired)
             //myCommiter(new DaemonStageResult(EmptyArray<HighlightingInfo>.Instance));
         }
 
+        private void UpdateHandler()
+        {
+            Handler.Process = this;
+        }
+
         private void OnErrors(Tuple<List<Tuple<string, DocumentRange>>, List<Tuple<string, DocumentRange>>> errors)
         {
-            var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning("Syntax error. Unexpected token " + e.Item1))).Concat(
-                                from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));
-            myCommiter(new DaemonStageResult(highlightings.ToArray()));
-        }
-
-        private void SubscribeYc()
-        {
-            foreach (var e in YcProcessor.LexingFinished)
-                e.AddHandler(OnLexingFinished);
-         
-            foreach (var e in YcProcessor.ParsingFinished)
-                e.AddHandler(OnParsingFinished);
-        }
-
-        /// <summary>
-        /// Do highlighting some tokens chunk.
-        /// </summary>
-        /// <param name="sender">Now always null</param>
-        /// <param name="args"></param>
-        private void OnLexingFinished(object sender, CommonInterfaces.LexingFinishedArgs<ITreeNode> args)
-        {
-            if (myCommiter == null)
-                return;
-
-            var consumer = new DefaultHighlightingConsumer(this, mySettingsStore);
-            var processor = new TreeNodeProcessor(consumer, csFile);
-
-            string xmlPath = YcProcessor.XmlPath(args.Lang);
-            ColorHelper.ParseFile(xmlPath, args.Lang);
-
-            Action action = 
-                () => args.Tokens.ForEach(node => processor.ProcessAfterInterior(node));
-            
-            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
+            var parserErrors = errors.Item2;
+            var highlightings = new List<HighlightingInfo>();
+            if (parserErrors.Count > 0)
             {
-                fibers.EnqueueJob(action);
+                highlightings.AddRange(from error in parserErrors
+                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Syntax error. Unexpected token " /*+ error.Item1*/)));
             }
 
-            myCommiter(new DaemonStageResult(consumer.Highlightings));
+            var lexerErrors = errors.Item1;
+            if (lexerErrors.Count > 0)
+            {
+                highlightings.AddRange(from error in lexerErrors
+                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Unexpected symbol: " + error.Item1 + ".")));
+            }
+            //var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning())).Concat(
+            //                    from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));
+            DoHighlighting(new DaemonStageResult(highlightings));
         }
 
-        /// <summary>
-        /// Do translate sppf to ReSharper trees and store result. It is need further.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args">Now it contains only language</param>
-        private Dictionary<string, int> parsedSppf = new Dictionary<string, int>();
-        private void OnParsingFinished(object sender, CommonInterfaces.ParsingFinishedArgs args)
+        public void DoHighlighting(DaemonStageResult result)
         {
-            if (YcProcessor == null)
-                return;
-
-            string lang = args.Lang;
-
-            if (!parsedSppf.ContainsKey(lang))
-                parsedSppf.Add(lang, 0);
-            else
-                parsedSppf[lang]++;
-
-            Action action = 
-                () =>
-                {
-                    var isEnd = false;
-                    while (!isEnd)
-                    {
-                        Tuple<ITreeNode, bool> res = YcProcessor.GetNextTree(lang, parsedSppf[lang]);
-                        ExistingTreeNodes.AddTree(res.Item1);
-                        isEnd = res.Item2;
-                    }
-                };
-
-            using (TaskBarrier fibers = DaemonProcess.CreateFibers())
-            {
-                fibers.EnqueueJob(action);
-            }
+            myCommiter(result);
         }
     }
 }

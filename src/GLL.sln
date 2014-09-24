@@ -68,6 +68,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.AST", "AST.Common\Co
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLGenerator2", "LLGenerator2\GLLGenerator2.fsproj", "{6FD45034-AD73-4274-867A-CF80443344BE}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "YaccConstructor\YaccConstructor.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -202,6 +204,12 @@ Global
 		{6FD45034-AD73-4274-867A-CF80443344BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FD45034-AD73-4274-867A-CF80443344BE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6FD45034-AD73-4274-867A-CF80443344BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -231,8 +239,5 @@ Global
 		{FC9A166C-780D-4D15-B366-CA06277C803D} = {D1DEE998-9E2E-4157-9790-5B14C9D0CA74}
 		{F46A55CF-A97F-4DFC-9483-340C631C80FE} = {F103FFDB-6232-4775-991A-9A072DA890A7}
 		{F61CAE49-B511-431A-BC1B-49A04C38BEE9} = {F103FFDB-6232-4775-991A-9A072DA890A7}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

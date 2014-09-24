@@ -1,4 +1,4 @@
-﻿namespace Yard.Generators.GLL
+﻿namespace Yard.Generators.GLL2
 
 open Mono.Addins
 open Yard.Core

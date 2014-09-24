@@ -56,16 +56,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net45\FsYacc.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Addins">
-      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

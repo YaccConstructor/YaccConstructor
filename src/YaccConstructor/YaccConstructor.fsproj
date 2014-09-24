@@ -28,7 +28,7 @@
     </StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-ag -af -ac</StartArguments>
+    <StartArguments>-i C:\Users\User\recursive-ascent\src\GLLParser.SimpleTest\BadLeftRecursion.yrd</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
   </PropertyGroup>
@@ -82,6 +82,11 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\LLGenerator2\GLLGenerator2.fsproj">
+      <Name>GLLGenerator2</Name>
+      <Project>{6fd45034-ad73-4274-867a-cf80443344be}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

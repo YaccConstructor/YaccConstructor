@@ -11,45 +11,38 @@ namespace Highlighting.Core
         /// For each language name returns ycTokenToString dictionary
         /// </summary>
         private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
-        private static readonly LockObject lockObject = new LockObject();
 
-        public static void AddYcItem(string key, string value, string lang)
+        public static void AddYcItem(string key, string value, int ycNumber, string lang)
         {
             lang = lang.ToLowerInvariant();
             key = key.ToLowerInvariant();
             if (String.IsNullOrEmpty(key) || String.IsNullOrEmpty(value))
                 return;
 
-            lock (lockObject)
+            if (!allYcToString.ContainsKey(lang))
             {
-                if (!allYcToString.ContainsKey(lang))
-                {
-                    allYcToString.Add(lang, new Dictionary<string, StringValue>());
-                }
+                allYcToString.Add(lang, new Dictionary<string, StringValue>());
+            }
 
-                var dict = allYcToString[lang];
+            var dict = allYcToString[lang];
 
-                if (dict.ContainsKey(key))
+            if (dict.ContainsKey(key))
+            {
+                StringValue strValue = dict[key];
+                if (strValue.NumOfValues == Value.OneValue && strValue.TextValue != value)
                 {
-                    var strValue = dict[key];
-                    if (strValue.NumOfValues == Value.OneValue)
-                    {
-                        if (strValue.TextValue != value)
-                        {
-                            strValue.NumOfValues = Value.ManyValues;
-                            strValue.TextValue = null;
-                        }
-                    }
+                    strValue.NumOfValues = Value.ManyValues;
+                    strValue.TextValue = null;
                 }
-                else
+            }
+            else
+            {
+                dict.Add(key, new StringValue()
                 {
-                    dict.Add(key, new StringValue()
-                    {
-                        NumOfValues = Value.OneValue,
-                        TextValue = value,
-                    });
-                }
-
+                    NumOfValues = Value.OneValue,
+                    TextValue = value,
+                    YcNumber = ycNumber,
+                });
             }
         }
 
@@ -69,18 +62,31 @@ namespace Highlighting.Core
 
         }
 
+        public static int GetNumber(string lang, string key)
+        {
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
+                return -1;
+
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(key) || !dict.ContainsKey(key))
+                return -1;
+
+            return dict[key].YcNumber;
+        }
+
         public static string GetStringName(string lang, string str)
         {
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
                 return null;
-            
+
             var dict = allYcToString[lang];
 
             if (string.IsNullOrEmpty(str))
                 return null;
 
             return
-                dict.FirstOrDefault(item => 
+                dict.FirstOrDefault(item =>
                     item.Value.NumOfValues == Value.OneValue && item.Key == str)
                     .Value.TextValue;
         }
@@ -88,7 +94,7 @@ namespace Highlighting.Core
 
     public enum Value
     {
-        NoValue,
+        //NoValue,
         OneValue,
         ManyValues
     }
@@ -97,5 +103,6 @@ namespace Highlighting.Core
     {
         public Value NumOfValues { get; set; }
         public string TextValue { get; set; }
+        public int YcNumber { get; set; }
     }
 }

@@ -37,7 +37,7 @@ let getLeafSemanticForToken token =
     printBr "let ranges = calculatePos pos"
     printBr "let value = fst <| _rnglr_var_0"
 
-    printBr "new %sTermNode(\"%s\", value.ToString(), ranges) :> ITreeNode" <| toClassName token <| token.ToLowerInvariant()
+    printBr "new %sTermNode(value.ToString(), ranges) :> ITreeNode" <| toClassName token
     res.ToString()
 
 let getLeafSemanticForLiteral litName litText = 
@@ -49,7 +49,7 @@ let getLeafSemanticForLiteral litName litText =
     printBr "let ranges = calculatePos pos"
     printBr "let stringValue = \"%s\"" litText
 
-    printBr "new %sLitNode(\"%s\", stringValue, ranges) :> ITreeNode"  <| litToClassName litName <| litName.ToLowerInvariant()
+    printBr "new %sLitNode(stringValue, ranges) :> ITreeNode"  <| litToClassName litName
 
     res.ToString()
                                
@@ -65,8 +65,8 @@ let getNodeSemantic parent children =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
 
-    printBrInd 0 "let parent = new %sNonTermNode(\"%s\")" <| toClassName parent <| parent
-    printBrInd 0 "let children (*: ITreeNode list*) = %A" children
+    printBrInd 0 "let parent = new %sNonTermNode()" <| toClassName parent
+    printBrInd 0 "let children = %A" children
     printBrInd 0 "addSemantic parent children"
     res.ToString()
 

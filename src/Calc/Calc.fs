@@ -65,6 +65,7 @@ type CalcInjectedLanguageModule () =
         member this.ParsingFinished = processor.ParsingFinished
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken rng = processor.GetForestWithToken rng
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
 
     interface IReSharperLanguage

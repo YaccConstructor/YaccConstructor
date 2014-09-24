@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- comment about body -->
 <Body>
-  <!-- comment about tsql -->
-  <Language name="TSQL">
     <!-- comment about hotspot -->
-    <Hotspot>
+  <Hotspot>
+      <!-- comment about tsql -->
+      <Language> TSQL </Language>
       <!-- comment about fullName -->
-      <Fullname>Program.ExecuteImmediate</Fullname>
+      <Method>Program.ExecuteImmediate</Method>
       <!-- zero-based -->
       <ArgumentPosition> 0 </ArgumentPosition>
       <!-- comment about return type -->
       <ReturnType> void </ReturnType>
-    </Hotspot>
-  </Language>
-  <Language name="Calc">
-    <Hotspot>
-      <Fullname>Program.Eval</Fullname>
-        <!-- zero-based -->
-        <ArgumentPosition> 0 </ArgumentPosition>
+  </Hotspot>
+  <Hotspot>
+      <Language> Calc </Language>
+      <Method>Program.Eval</Method>
+      <ArgumentPosition> 0 </ArgumentPosition>
       <ReturnType> int </ReturnType>
-    </Hotspot>
-  </Language>
+  </Hotspot>
 </Body>

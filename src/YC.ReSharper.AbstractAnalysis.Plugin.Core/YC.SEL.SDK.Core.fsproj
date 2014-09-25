@@ -51,6 +51,10 @@
     </Reference>
     <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>

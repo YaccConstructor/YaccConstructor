@@ -269,9 +269,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
     let order =
         let stack = new Stack<_>()
-        match root with
-        | :? OtherAST as ast -> stack.Push ast
-        | _ -> ()
+        stack.Push root
         let res = new BlockResizeArray<_>()
         //if not isEpsilon then
         while stack.Count > 0 do

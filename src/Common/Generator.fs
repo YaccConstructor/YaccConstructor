@@ -17,6 +17,9 @@ namespace Yard.Core
 open Yard.Core.IL
 open Mono.Addins
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
 [<TypeExtensionPoint>]
 [<AbstractClass>]
 type Generator() = //as this =
@@ -25,5 +28,3 @@ type Generator() = //as this =
     abstract Generate : Definition.t<Source.t,Source.t> * string -> obj
     default this.Generate(grammar, string) = this.Generate grammar
     abstract Constraints : Constraint []
-//    interface Yard.Core.Manager.IComponent with
-//        member self.Name : string =  this.Name

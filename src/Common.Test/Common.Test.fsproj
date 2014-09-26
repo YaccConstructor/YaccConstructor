@@ -35,24 +35,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -67,15 +59,24 @@
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RNGLR">
-      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\RNGLR.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YardFrontend">
-      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.10\lib\net40\YardFrontend.dll</HintPath>
+    <Reference Include="YC.Common">
+      <HintPath>..\..\..\..\..\university\project\recursive-ascent\Bin\Release\v40\YC.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\..\Bin\Release\v40\YC.Constraints.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\..\Bin\Release\v40\YC.Conversions.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.RNGLR">
+      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.11\lib\net40\YC.RNGLR.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.YardFrontend">
+      <HintPath>..\packages\YC.Frontends.Yard.0.0.6.11\lib\net40\YC.YardFrontend.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

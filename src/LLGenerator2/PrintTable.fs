@@ -1,9 +1,11 @@
-﻿module Yard.Generators.GLL.PrintTable
+﻿module Yard.Generators.GLL2.PrintTable
 
 open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.GLL
 open System.Collections.Generic
 open Yard.Core.IL
+open Microsoft.FSharp.Text.StructuredFormat
+open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 
 let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
@@ -235,37 +237,47 @@ let printTableGLL
         printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
         printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
-        let funNumeration = new System.Collections.Generic.Dictionary<string, int> ()
-        let numberOfAlternates =
-            let rules = grammar.rules
-            let mutable index = 0
-            let mutable count = 1
-            let result = Array.zeroCreate indexator.nonTermCount
-            let previousNonTerm = ref <| rules.leftSide 0
-            let currentNonTerm = ref <| rules.leftSide 0 
-            for j in 0..rules.rulesCount - 1 do
-                currentNonTerm := rules.leftSide j
-                if !currentNonTerm = !previousNonTerm
-                then count <- count + 1
-                else 
-                    result.[index] <- count
-                    count <- 1
-                    previousNonTerm := !currentNonTerm
-                    index <- index + 1
-            result
-        let printFuns =
-            let rules = grammar.rules
-            for i = 0 to rules.rulesCount - 1  do
-            //сначала нужно написать L_S для правых частей
-            //потом нужно понять, сколько альтернатив существует для данного нетерминала
-            //потом нужно пойти по длине правила текущего
-                let currentFunName = "L_" + indexator.indexToNonTerm (rules.leftSide i)
-                let str = ("let " + currentFunName + (" : (seq<Token> -> ParseResult<_>) ="))
-                printBr <| PrintfFormat<_,_,_,_>(str)
-                //let s = 
-                printBrInd 1 "buildAst<Token> parserSource"
-                printBr ""
 
-        printFuns
+        let rules = grammar.rules
+        //в дескрипторы пихаем номер функции
+        //по ходу дела просто присваиваем номера и имена функциям
+        let functionsNames = new System.Collections.Generic.Dictionary<string, int> ()
+        
+        let genFunctions =
+            let currentFunNumber = ref 0
+            let mutable previousNonTerm = rules.leftSide 0
+            let count = ref 0
+            let generateForAlternative num =
+                let currentFunName = "L_" + (indexator.indexToNonTerm <| rules.leftSide num).ToString() + "_" + count.ToString()
+                printBrInd 0 "let %s = " currentFunName
+                count := !count + 1
+                for sym in rules.rightSide num do
+                    if indexator.isNonTerm sym
+                    then
+                        
+                    //если нетерминалы то нужно сгенерировать функцию возвратную
+                    //нужно сгенерировать новую ячейку в стеке
+                    //нужно вызвать функцию для разбора нетерминала
+                    //добавить новый дескриптор, короче 
+                        printBrInd 1 "if table.[getIndex]"
+                    else
+                        printBrInd 1 "if table.[getIndex]"
+
+            for i in 0..rules.rulesCount - 1 do
+                if previousNonTerm = rules.leftSide i then
+                    generateForAlternative i
+                else               
+                    let currentNonTerm = rules.leftSide i
+                    let currentFunName = "L_" + (indexator.indexToNonTerm <| currentNonTerm).ToString()
+                    printBrInd 0 "let %s = " currentFunName
+                    //в теле функции должна быть проверка на то, что текущий символ подходит и вызов добавления дескрипторов
+                    //в конце функции должен быть вызов функции диспетчера
+                    printBrInd 1 "if table.[getIndex %d]" currentNonTerm
+                    printBrInd 1 "then"
+                    printBrInd 1 "addContext"
+                    generateForAlternative i
+                 
+                
+       
         res.ToString()
     printTable ()

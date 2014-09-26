@@ -651,13 +651,13 @@ let generate (indexator : Indexator) namespaceName =
     generateXML()
 
     let mutable tokensAndLits = []
-    let mutable nameOfClasses = []
+    let nameOfClasses = ref []
                 
     for i = 0 to indexator.nonTermCount - 1 do
         let name = indexator.indexToNonTerm i
         if not <| name.Contains ("highlight_")
         then 
-            nameOfClasses <- name + nonTermSuffix + extension :: nameOfClasses
+            nameOfClasses := name + nonTermSuffix + extension :: !nameOfClasses
             let info : TokenInfo =  
                 {
                     _baseClass = baseClass
@@ -673,7 +673,7 @@ let generate (indexator : Indexator) namespaceName =
     for i = indexator.termsStart to indexator.termsEnd do
         let name = indexator.indexToTerm i
                     
-        nameOfClasses <- name + termSuffix + extension :: nameOfClasses
+        nameOfClasses := name + termSuffix + extension :: !nameOfClasses
         tokensAndLits <- name :: tokensAndLits
         let info : TokenInfo =  
             {
@@ -690,7 +690,7 @@ let generate (indexator : Indexator) namespaceName =
     for i = indexator.literalsStart to indexator.literalsEnd do
         let name = toClassName <| indexator.getLiteralName i
                     
-        nameOfClasses <- name + literalSuffix + extension :: nameOfClasses
+        nameOfClasses := name + literalSuffix + extension :: !nameOfClasses
         tokensAndLits <- name :: tokensAndLits
         let info : TokenInfo =  
             {
@@ -715,11 +715,11 @@ let generate (indexator : Indexator) namespaceName =
             generateFile path text
     generateXML namespaceName tokensAndLits
     
-    nameOfClasses <- nameOfClasses |> List.rev
+    nameOfClasses := !nameOfClasses |> List.rev
 
     let generateItemGroup() =
         let fileName = folder + "ItemsGroup.target"
-        let text = printItemsGroup <| List.rev (baseClass + extension :: nameOfClasses) <| namespaceName
+        let text = printItemsGroup <| List.rev (baseClass + extension :: !nameOfClasses) <| namespaceName
         generateFile fileName text
     
     generateItemGroup()

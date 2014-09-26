@@ -46,13 +46,13 @@ type LanguagesProcessor<'br,'range, 'node>() =
 
     member this.Process (graphs:ResizeArray<string*_>) =
         graphs
-        |> ResizeArray.map(fun (l,g) -> injectedLanguages.[l].Process g)
+        |> ResizeArray.map(fun (lang, graph) -> injectedLanguages.[lang].Process graph)
 
     member this.LexingFinished =  injectedLanguages |> Seq.map (fun l -> l.Value.LexingFinished)
     member this.ParsingFinished = injectedLanguages |> Seq.map (fun l -> l.Value.ParsingFinished)
-    member this.XmlPath l = injectedLanguages.[l].XmlPath
-    member this.GetNextTree l i = injectedLanguages.[l].GetNextTree i
-    member this.GetForestWithToken l rng = injectedLanguages.[l].GetForestWithToken rng
+    member this.XmlPath lang = injectedLanguages.[lang].XmlPath
+    member this.GetNextTree lang i = injectedLanguages.[lang].GetNextTree i
+    member this.GetForestWithToken lang rng = injectedLanguages.[lang].GetForestWithToken rng
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
@@ -95,13 +95,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 |> addLError
                 None
 
+        
         let tokenizedGraph = tokenize graph 
-
-        (*
-        info for debug
-        let tokenToString (token : 'TokenType) = token |> tokenToNumber |> numToString
-        tokenizedGraph.Value.PrintToDot "parser_input.dot" tokenToString
-        *)
         prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
         tokenizedGraph 
@@ -165,11 +160,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         let tokens = new ResizeArray<_>()
         let tokToPos = this.TokenToPos calculatePos
 
-        (*let count = ref 0
-        let name = "sppf_"*)
         for otherTree in otherForest do
-            (*printOtherAst otherTree <| name + (!count).ToString() + ".dot"
-            incr count*)
             tokens.AddRange <| otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos
         
         let ranges = new ResizeArray<_>()

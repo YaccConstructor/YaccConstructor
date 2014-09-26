@@ -83,10 +83,6 @@ and OtherNodes =
                 this.parent <- newParent
 
             
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="f"></param>
             member nodes.exist f = 
                 if nodes.fst <> null 
                 then 
@@ -106,8 +102,6 @@ and OtherNodes =
             /// applies function to nodes which are located to the right than node nd. 
             /// Right sibling of nd is first.
             /// </summary>
-            /// <param name="nd"></param>
-            /// <param name="f"></param>
             member nodes.doForAllAfterNode nd f =
                 let mutable needDo = false
                 if nodes.fst <> null 
@@ -129,8 +123,6 @@ and OtherNodes =
             /// applies function f to nodes which are located to the left than node nd. 
             /// Left sibling of nd is first.
             /// </summary>
-            /// <param name="nd"></param>
-            /// <param name="f"></param>
             member nodes.doForAllBeforeNode nd f = 
                 if nodes.fst <> null && nodes.fst <> nd
                 then 
@@ -194,8 +186,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         let rec processFamily (family : Family) = 
             let processAST (ast : AST) = 
                 if dict.ContainsKey ast 
-                then 
-                    dict.[ast]
+                then dict.[ast]
                 else
                     let fstChild = processFamily ast.first
                     let otherChildren = 
@@ -247,8 +238,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 
                 let newNodes = 
                     if nodesDict.ContainsKey oldNodes 
-                    then 
-                        nodesDict.[oldNodes]
+                    then nodesDict.[oldNodes]
                     else
                         // possible that it occurs never
                         let children = ref []
@@ -314,8 +304,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
         let rec calcTokens (family : OtherFamily) = 
             if dict.ContainsKey family 
-            then 
-                dict.[family]
+            then dict.[family]
             else
                 let tokens = ref []
                 family.nodes.doForAll (fun node -> 
@@ -356,8 +345,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 match node with
                 | :? OtherAST as ast -> 
                     if List.exists (fun t -> containsRange t) familyToTokens.[ast.first]
-                    then
-                        handleFamily ast.first
+                    then handleFamily ast.first
+                    
                     if ast.other <> null 
                     then
                         for f in ast.other do
@@ -379,14 +368,11 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
 
     /// <summary>
     /// Returnes all paired tokens for token which is located in range. 
-    /// For example for left_bracket it returns all paired right_brackets 
+    /// For example it returns all paired right_brackets for left_bracket 
     /// </summary>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <param name="now"></param>
-    /// <param name="toRight"></param>
-    /// <param name="tokenToNumber"></param>
-    /// <param name="tokenToPos"></param>
+    /// <param name="left">Number of left paired token</param>
+    /// <param name="right">Number of right paired token</param>
+    /// <param name="toRight">True, if we search close token.</param>
     member this.FindAllPair (left : int) (right : int) (now : 'range) toRight tokenToNumber (tokenToPos : 'TokenType -> seq<'range>)= 
         let firstNd, cur = findNodeWithParents now tokenToPos
         let res = new ResizeArray<_>()
@@ -402,10 +388,10 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             else family.nodes.doForAllBeforeNode node f
 
         while contexts.Count > 0 do
-            let c = contexts.Pop()
-            let mutable current = box c.parent
-            let nd = ref c.child
-            let count = ref c.count
+            let state = contexts.Pop()
+            let mutable current = box state.parent
+            let nd = ref state.child
+            let count = ref state.count
 
             let rec processFamily (family : OtherFamily) = 
                 if familyToTokens.ContainsKey family && 
@@ -468,7 +454,6 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 current <- father
         res
 
-    ///
     /// <summary>
     /// Prints ast in console
     /// </summary>
@@ -500,10 +485,6 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
     /// <summary>
     /// Prints sppf in .dot file
     /// </summary>
-    /// <param name="indToString"></param>
-    /// <param name="tokenToNumber"></param>
-    /// <param name="leftSide"></param>
-    /// <param name="path">File name</param>
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
         let next =
             let cur = ref order.Length

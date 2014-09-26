@@ -1,5 +1,0 @@
-[<Start>]
-start: left a right
-a: A B C D
-left: OPEN
-right: CLOSE

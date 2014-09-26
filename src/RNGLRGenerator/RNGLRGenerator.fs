@@ -62,7 +62,7 @@ type RNGLR() =
                                     | x -> failwithf "Unsupported table type: %s." x
             let mutable fullPath = getBoolOption "fullpath" false
             let mutable positionType = getOption "pos" "" id
-            let mutable needTranslate = getBoolOption "translate" true
+            let needTranslate = ref <| getBoolOption "translate" true
             let needHighlighting = ref <| getBoolOption "highlighting" false
             let namespaceName = ref <| getOption "namespace" "NamespaceName" id
             let mutable light = getBoolOption "light" true
@@ -96,7 +96,7 @@ type RNGLR() =
                         | x -> failwith "Unexpected table type %s" x
                 | "-caseSensitive" -> caseSensitive <- getBoolValue "caseSensitive" value
                 | "-fullpath" -> fullPath <- getBoolValue "fullPath" value
-                | "-translate" -> needTranslate <- getBoolValue "translate" value
+                | "-translate" -> needTranslate := getBoolValue "translate" value
                 | "-highlighting" -> needHighlighting := getBoolValue "highlighting" value
                 | "-namespace" -> if value.Trim() <> "" then namespaceName := value
                 | "-light" -> light <- getBoolValue "light" value
@@ -113,12 +113,11 @@ type RNGLR() =
             
             if !needHighlighting 
             then
-                needTranslate <- true
                 newDefinition <- highlightingConvertions newDefinition
 
             let grammar = new FinalGrammar(newDefinition.grammar.[0].rules, caseSensitive)
 
-            if !needHighlighting
+            if !needHighlighting && !needTranslate
             then
                 let folder = System.IO.Path.GetFullPath (!namespaceName) + "\\"
                 let langName = namespaceName.Value.Replace ("Highlighting", "")
@@ -285,7 +284,7 @@ type RNGLR() =
                     println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.RNGLR.AST"
 
-                    if !needHighlighting 
+                    if !needHighlighting && !needTranslate
                     then 
                         println "open JetBrains.ReSharper.Psi.Tree"
                         println "open Highlighting.Core"
@@ -311,7 +310,7 @@ type RNGLR() =
             printHeaders moduleName fullPath light output targetLanguage
             let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
             let res = 
-                if not needTranslate || targetLanguage = Scala 
+                if not !needTranslate || targetLanguage = Scala 
                 then tables
                 else 
                     let xmlOpt = 

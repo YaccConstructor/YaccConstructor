@@ -15,8 +15,8 @@
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
 <references>
-<reference file="YC.FsYacc.0.0.6-dev-80-ci.exe" />
-<reference file="YC.Helper.0.0.6-dev-80-ci.dll" />
+<reference file="YC.FsYacc.0.0.6-dev-82-ci.exe" />
+<reference file="YC.Helper.0.0.6-dev-82-ci.dll" />
 </references>
 </metadata>
 <files>

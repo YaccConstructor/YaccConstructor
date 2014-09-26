@@ -36,6 +36,7 @@ let args =
     }
 
 let printAstToDot ast name = defaultAstToDot ast name
+let printOtherAstToDot ast name = otherAstToDot ast name
 
 let xmlPath = xmlPath
 let tokenToTreeNode = tokenToTreeNode
@@ -46,7 +47,7 @@ type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 [<ShellComponent>]
 [<Extension>]
 type JSONInjectedLanguageModule () =
-    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "calc", calculatePos, getRange)
+    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "calc", calculatePos, getRange, printAstToDot, printOtherAstToDot)
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "json"
         member this.Process graphs = processor.Process graphs

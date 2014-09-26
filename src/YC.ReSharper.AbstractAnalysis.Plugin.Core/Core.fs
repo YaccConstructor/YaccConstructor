@@ -46,19 +46,21 @@ type LanguagesProcessor<'br,'range, 'node>() =
 
     member this.Process (graphs:ResizeArray<string*_>) =
         graphs
-        |> ResizeArray.map(fun (l,g) -> injectedLanguages.[l].Process g)
+        |> ResizeArray.map(fun (lang, graph) -> injectedLanguages.[lang].Process graph)
 
     member this.LexingFinished =  injectedLanguages |> Seq.map (fun l -> l.Value.LexingFinished)
     member this.ParsingFinished = injectedLanguages |> Seq.map (fun l -> l.Value.ParsingFinished)
-    member this.XmlPath l = injectedLanguages.[l].XmlPath
-    member this.GetNextTree l i = injectedLanguages.[l].GetNextTree i
-    member this.GetForestWithToken l rng = injectedLanguages.[l].GetForestWithToken rng
+    member this.XmlPath lang = injectedLanguages.[lang].XmlPath
+    member this.GetNextTree lang i = injectedLanguages.[lang].GetNextTree i
+    member this.GetForestWithToken lang rng = injectedLanguages.[lang].GetForestWithToken rng
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
         tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange:'br -> 'range) as this =
+        , getDocumentRange:'br -> 'range
+        , printAst: Tree<'TokenType> -> string -> unit
+        , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
@@ -93,8 +95,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 |> addLError
                 None
 
-        let tokenizedGraph = tokenize graph 
         
+        let tokenizedGraph = tokenize graph 
         prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
         tokenizedGraph 
@@ -186,6 +188,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let name = tok |> (tokenToNumber >>  numToString)
             let (language : string), br = tokenData tok :?> _
             e name language br
+        
         
         processLang graph lexerErrors.Add addError
 

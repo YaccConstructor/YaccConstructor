@@ -10,7 +10,7 @@
     <RootNamespace>RNGLR.AstToAstTest</RootNamespace>
     <AssemblyName>RNGLR.AstToAstTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RNGLR.OtherSppfTest</Name>
+    <Name>RNGLROtherSppfTest</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

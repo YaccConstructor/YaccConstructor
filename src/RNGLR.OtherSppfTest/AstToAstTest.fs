@@ -8,22 +8,16 @@ open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.RNGLR.OtherSPPF
 open NUnit.Framework
 open Yard.Generators
-open LexCommon
-
-let run path astBuilder =
-    let tokens = LexCommon.tokens(path) 
-    astBuilder tokens
 
 let dir = @"../../../../../yc/Tests/AstToAst/"
 
-let lbl tokenId = tokenId
-let edg from _to label = new ParserEdge<_>(from, _to, lbl label)
+let createEdge from _to label = new ParserEdge<_>(from, _to, label)
 
 let inline printErr (num, token : 'a, msg) =
     printfn "Error in position %d on Token %A: %s" num token msg
     Assert.Fail(sprintf "Error in position %d on Token %A: %s" num token msg)
 
-let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
+let inline translate (f : TranslateArguments<_, _> -> 'b -> 'c) (ast : 'b) =
     let args = {
         tokenToRange = fun _ -> 0,0
         zeroPosition = 0
@@ -46,10 +40,10 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3;4] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseElementary.A 0)
-             edg 1 2 (RNGLR.ParseElementary.B 1)
-             edg 2 3 (RNGLR.ParseElementary.C 2)
-             edg 3 4 (RNGLR.ParseElementary.D 3)
+            [createEdge 0 1 (RNGLR.ParseElementary.A 0)
+             createEdge 1 2 (RNGLR.ParseElementary.B 1)
+             createEdge 2 3 (RNGLR.ParseElementary.C 2)
+             createEdge 3 4 (RNGLR.ParseElementary.D 3)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseElementary.buildAstAbstract qGraph
@@ -68,8 +62,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseElementary.A 0)
-             edg 1 2 (RNGLR.ParseElementary.C 1)
+            [createEdge 0 1 (RNGLR.ParseElementary.A 0)
+             createEdge 1 2 (RNGLR.ParseElementary.C 1)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseElementary.buildAstAbstract qGraph
@@ -88,9 +82,9 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseAmbiguous.A 0)
-             edg 1 2 (RNGLR.ParseAmbiguous.A 1)
-             edg 2 3 (RNGLR.ParseAmbiguous.A 2)
+            [createEdge 0 1 (RNGLR.ParseAmbiguous.A 0)
+             createEdge 1 2 (RNGLR.ParseAmbiguous.A 1)
+             createEdge 2 3 (RNGLR.ParseAmbiguous.A 2)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseAmbiguous.buildAstAbstract qGraph
@@ -109,8 +103,8 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseAmbiguous.B 0)
-             edg 1 2 (RNGLR.ParseAmbiguous.RNGLR_EOF 1)
+            [createEdge 0 1 (RNGLR.ParseAmbiguous.B 0)
+             createEdge 1 2 (RNGLR.ParseAmbiguous.RNGLR_EOF 1)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseAmbiguous.buildAstAbstract qGraph
@@ -129,7 +123,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseCycles.A 0)
+            [createEdge 0 1 (RNGLR.ParseCycles.A 0)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseCycles.buildAstAbstract qGraph
@@ -152,11 +146,11 @@ type ``Classic case: matching brackets``() =
         qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-                edg 1 2 (RNGLR.ParseSummator.NUMBER 1)
-                edg 2 3 (RNGLR.ParseSummator.PLUS 2)
-                edg 3 4 (RNGLR.ParseSummator.NUMBER 3)
-                edg 4 5 (RNGLR.ParseSummator.RBRACE 4)
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+                createEdge 2 3 (RNGLR.ParseSummator.PLUS 2)
+                createEdge 3 4 (RNGLR.ParseSummator.NUMBER 3)
+                createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -190,11 +184,11 @@ type ``Classic case: matching brackets``() =
         qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-                edg 1 2 (RNGLR.ParseSummator.LBRACE 1)
-                edg 2 3 (RNGLR.ParseSummator.NUMBER 2)
-                edg 3 4 (RNGLR.ParseSummator.RBRACE 3)
-                edg 4 5 (RNGLR.ParseSummator.RBRACE 4)
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.LBRACE 1)
+                createEdge 2 3 (RNGLR.ParseSummator.NUMBER 2)
+                createEdge 3 4 (RNGLR.ParseSummator.RBRACE 3)
+                createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -228,11 +222,11 @@ type ``Classic case: matching brackets``() =
         qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
-                edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-                edg 1 2 (RNGLR.ParseSummator.LBRACE 1)
-                edg 2 3 (RNGLR.ParseSummator.NUMBER 2)
-                edg 3 4 (RNGLR.ParseSummator.RBRACE 3)
-                edg 4 5 (RNGLR.ParseSummator.RBRACE 4)
+                createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+                createEdge 1 2 (RNGLR.ParseSummator.LBRACE 1)
+                createEdge 2 3 (RNGLR.ParseSummator.NUMBER 2)
+                createEdge 3 4 (RNGLR.ParseSummator.RBRACE 3)
+                createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -266,9 +260,9 @@ type ``Classic case: matching brackets``() =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-             edg 1 2 (RNGLR.ParseSummator.NUMBER 1)
-             edg 2 3 (RNGLR.ParseSummator.RBRACE 2)
+            [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+             createEdge 2 3 (RNGLR.ParseSummator.RBRACE 2)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -312,10 +306,10 @@ type ``Abstract case: matching brackets``() =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-             edg 1 2 (RNGLR.ParseSummator.NUMBER 1)
-             edg 2 3 (RNGLR.ParseSummator.RBRACE 2)
-             edg 2 3 (RNGLR.ParseSummator.RBRACE 3)
+            [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+             createEdge 2 3 (RNGLR.ParseSummator.RBRACE 2)
+             createEdge 2 3 (RNGLR.ParseSummator.RBRACE 3)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -358,16 +352,16 @@ type ``Abstract case: matching brackets``() =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 4; 5; 6; 7] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-//             edg 1 2 (RNGLR.ParseSummator.NUMBER 1)
-//             edg 2 3 (RNGLR.ParseSummator.PLUS 2)
-//             edg 3 4 (RNGLR.ParseSummator.NUMBER 3)
-//             edg 3 5 (RNGLR.ParseSummator.NUMBER 4)
-             edg 1 4 (RNGLR.ParseSummator.NUMBER 3)
-             edg 1 5 (RNGLR.ParseSummator.NUMBER 4)
-             edg 4 6 (RNGLR.ParseSummator.RBRACE 5)
-             edg 5 6 (RNGLR.ParseSummator.RBRACE 6)
-             edg 6 7 (RNGLR.ParseSummator.RNGLR_EOF 7)
+            [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+//             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+//             createEdge 2 3 (RNGLR.ParseSummator.PLUS 2)
+//             createEdge 3 4 (RNGLR.ParseSummator.NUMBER 3)
+//             createEdge 3 5 (RNGLR.ParseSummator.NUMBER 4)
+             createEdge 1 4 (RNGLR.ParseSummator.NUMBER 3)
+             createEdge 1 5 (RNGLR.ParseSummator.NUMBER 4)
+             createEdge 4 6 (RNGLR.ParseSummator.RBRACE 5)
+             createEdge 5 6 (RNGLR.ParseSummator.RBRACE 6)
+             createEdge 6 7 (RNGLR.ParseSummator.RNGLR_EOF 7)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -411,13 +405,13 @@ type ``Abstract case: matching brackets``() =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.ParseSummator.LBRACE 0)
-             edg 1 2 (RNGLR.ParseSummator.NUMBER 1)
-             edg 2 3 (RNGLR.ParseSummator.PLUS 2)
-             edg 3 4 (RNGLR.ParseSummator.NUMBER 3)
-             edg 4 5 (RNGLR.ParseSummator.RBRACE 4)
-             edg 3 6 (RNGLR.ParseSummator.NUMBER 5)
-             edg 6 5 (RNGLR.ParseSummator.RBRACE 6)
+            [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+             createEdge 2 3 (RNGLR.ParseSummator.PLUS 2)
+             createEdge 3 4 (RNGLR.ParseSummator.NUMBER 3)
+             createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
+             createEdge 3 6 (RNGLR.ParseSummator.NUMBER 5)
+             createEdge 6 5 (RNGLR.ParseSummator.RBRACE 6)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph

@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Tools</id>
-<version>0.0.6-dev-80-ci</version>
+<version>0.0.6.100-dev-ci</version>
 <title>3rd party tools for YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>

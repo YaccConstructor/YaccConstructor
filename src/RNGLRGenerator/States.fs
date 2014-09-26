@@ -114,7 +114,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
     let incount = ref 0
     let rec dfsLALR initKernelsAndLookAheads =
         incr incount
-        //if !incount % 100 = 0 then eprintf "%d " !incount
+//        if !incount % 5000 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map string)
         let vertex, newLookAheads, needDfs =
@@ -161,7 +161,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
 
     let rec dfsLR initKernelsAndLookAheads =
         incr incount
-        if !incount % 5000 = 0 then eprintf "%d " !incount
+//        if !incount % 5000 = 0 then eprintf "%d " !incount
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let setToStr = Set.map (sprintf "%d") >> String.concat ","
         let key = String.concat "|" (Array.map2 (fun x y -> sprintf "%d(%s)" x (setToStr y)) kernels lookaheads)
@@ -199,7 +199,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
         | LALR -> dfsLALR
         | LR -> dfsLR
     |> ignore
-    //eprintfn "Dfs calls count: %d" !incount
+    eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()
         (*

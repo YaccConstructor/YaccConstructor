@@ -18,6 +18,7 @@ open Yard.Core
 open Yard.Core.IL
 open TransformAux
 open Yard.Core.IL.Production
+open Mono.Addins
 
 let dummyPos s = new Source.t(s)
 
@@ -55,6 +56,12 @@ let private expandInnerAlts (ruleList: Rule.t<_,_> list) =
         ()
     List.rev !expanded
 
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type ExpandInnerAlt() = 
     inherit Conversion()
         override this.Name = "ExpandInnerAlt"

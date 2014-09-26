@@ -1,12 +1,10 @@
 namespace AbstractLexer.Core
 
 open System.Collections.Generic
-open AbstractLexer.Common
+open AbstractAnalysis.Common
 open QuickGraph.Algorithms
 open Microsoft.FSharp.Collections
 open QuickGraph.Graphviz
-open AbstractParsing.Common
-
 
 type Position<'br> =
         { pos_fname : string;
@@ -44,8 +42,8 @@ type Position<'br> =
 [<Struct>]
 type StateInfo<'a, 'br> =
     val StartV: int
-    val AccumulatedString: ResizeArray<'a>
-    val Positions: ResizeArray<Position<'br>>
+    val AccumulatedString: list<'a> 
+    val Positions: list<Position<'br>>
     new (startV, str, positions) = {StartV = startV; AccumulatedString = str; Positions = positions}
 
 [<Struct>]
@@ -79,7 +77,7 @@ type LexBuffer<'char,'br>(inGraph:LexerInputGraph<'br>) =
         let g = new LexerInnerGraph<'br>(inGraph)
         let sorted = g.TopologicalSort() |> Array.ofSeq
         let states = Array.init ((Array.max sorted)+1) (fun _ -> new ResizeArray<_>())
-        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, new ResizeArray<_>(), new ResizeArray<_>())))
+        let startState = new State<_,'br>(0,-1, ResizeArray.singleton (new StateInfo<_,'br>(0, [], [])))
         do states.[g.StartVertex] <- ResizeArray.singleton startState
         let edgesSeq = seq{ for v in sorted do
                                 yield g.OutEdges v |> Array.ofSeq    
@@ -220,16 +218,18 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
     let tokenize actions (lexbuf:LexBuffer<_,_>) printG =
         //let edgesSeq = edgesSeq |> Array.ofSeq
         let add (edg:LexerEdge<_,_>) (newStt:State<_,_>) =
-            match lexbuf.States.[edg.Target]
-                  |> ResizeArray.tryFind(fun (x:State<_,_>) -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
-                with
+            let x = 
+                lexbuf.States.[edg.Target]
+                |> ResizeArray.tryFind 
+                    (fun (x:State<_,_>) -> x.AcceptAction = newStt.AcceptAction && x.StateID = newStt.StateID)
+            match x with
             | Some x ->
                 newStt.Info
                 |> ResizeArray.iter(
                     fun i -> 
                         if x.Info.Exists(fun j -> j.StartV = i.StartV
-                                                  && i.AccumulatedString.Count = j.AccumulatedString.Count
-                                                  && ResizeArray.forall2 (=) i.AccumulatedString j.AccumulatedString) 
+                                                  && i.AccumulatedString.Length = j.AccumulatedString.Length
+                                                  && List.forall2 (=) i.AccumulatedString j.AccumulatedString) 
                            |> not
                         then x.Info.Add i)
             | None -> lexbuf.States.[edg.Target].Add newStt
@@ -250,7 +250,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                 | _ ->
                     {
                         pos_fname = ""
-                        pos_lnum = 0
+                        pos_lnum = 0 
                         pos_bol = 0
                         pos_cnum = 0
                         back_ref = edg.BackRef.Value
@@ -264,21 +264,21 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                     (
                         fun i ->
                             let pos = 
-                                if i.Positions.Count = 0 then None else Some i.Positions.[0] 
+                                if i.Positions.Length = 0 then None else Some i.Positions.[0] 
                                 |> newPos
                             new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> i.StartV)
-                            , ResizeArray.concat [i.AccumulatedString; ResizeArray.singleton ch]
-                            , ResizeArray.concat [ResizeArray.singleton pos; i.Positions])
+                            , ch :: i.AccumulatedString
+                            , pos :: i.Positions)
                     )
             else 
                 new StateInfo<_,'br>((match stt.PreviousV with | Some x -> x | None -> edg.Source)
-                , ResizeArray.singleton ch
-                , ResizeArray.singleton (newPos (Some lexbuf.CurrentPos)))
+                , [ch]
+                , [newPos (Some lexbuf.CurrentPos)])
                 |> ResizeArray.singleton
 
         let processToken onAccept (p: StateInfo<_,_>) =
-            let s = (new string(p.AccumulatedString |> Array.ofSeq))
-            actions onAccept (new string(p.AccumulatedString |> Array.ofSeq)) (p.Positions |> Array.ofSeq |> Array.rev)                          
+            let s = (new string(p.AccumulatedString |> Array.ofList |> Array.rev))
+            actions onAccept s (p.Positions |> Array.ofSeq |> Array.rev)                          
 
         let processEdg (edg:LexerEdge<_,_>) stt reduced =
             let acc = new ResizeArray<_>(10) 
@@ -299,10 +299,7 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
                         let newStt = new State<_,_>(news,onAccept,acc,stt.PreviousV)
                         add edg newStt
                 go stt
-            | None -> 
-                      let acc = mkNewString edg stt
-                      let newStt = new State<_,_>(0,-1,acc,stt.PreviousV)
-                      add edg newStt
+            | None -> add edg stt
             acc 
 
         let res_edg_seq = 
@@ -326,13 +323,11 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         let lexbuf = new LexBuffer<_,'br>(inG) 
         let newEdgs = 
             tokenize actions lexbuf printG
-            |> Array.ofSeq
+            //|> Array.ofSeq
         let res = new ParserInputGraph<_>()
-        let r = newEdgs
-        res.AddVerticesAndEdgeRange r
+        //let r = newEdgs
+        res.AddVerticesAndEdgeRange newEdgs
         |> ignore
-        //EpsClosure.NfaToDfa res
-        //|> ignore
         let eps_res = EpsClosure.NfaToDfa res
         eps_res
                           
@@ -357,8 +352,3 @@ type UnicodeTables(trans: uint16[] array, accept: uint16[]) =
         res
 
     static member Create(trans, accept) = new UnicodeTables(trans, accept)
-
-//    let query = "select \" f , " + (if x < 2 then "x" else "y") + "from z"
-//    let DB = new MS_DB("")
-//    let res = DB.exec query
-//    res |> Seq.iter (printfn "%A")

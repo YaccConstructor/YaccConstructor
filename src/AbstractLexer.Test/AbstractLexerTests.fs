@@ -5,16 +5,13 @@ open System.IO
 open Graphviz4Net.Dot
 open QuickGraph
 open NUnit.Framework
-open AbstractLexer.Common
+open AbstractAnalysis.Common
 open AbstractLexer.Core
 open QuickGraph.Algorithms
 open AbstractLexer.Test.Calc.Parser
 open QuickGraph.Algorithms
 open QuickGraph.Graphviz
-
-let loadGraphFromDOT filePath = 
-    let parser = AntlrParserAdapter<string>.GetParser()
-    parser.Parse(new StreamReader(File.OpenRead filePath))
+open YC.Tests.Helper
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 let eofToken = AbstractLexer.Test.Calc.Parser.RNGLR_EOF ("",[||])
@@ -25,7 +22,7 @@ type ``Abstract lexer tests`` () =
 
     let printG res (fName:string) =
         let f = GraphvizAlgorithm(res)
-        let printEdg (e:AbstractParsing.Common.ParserEdge<_>) =
+        let printEdg (e:ParserEdge<_>) =
             let printBrs brs =
                 "["
                 + (brs |> Array.map (fun (pos:Position<_>) -> pos.back_ref ) |> String.concat "; ")
@@ -45,22 +42,8 @@ type ``Abstract lexer tests`` () =
                                        fun (name:string) ch -> name.Replace(ch,'_')) fName
         System.IO.File.WriteAllText(@"../../" + fName1 + ".dot" ,str)
 
-    let path name = System.IO.Path.Combine(baseInputGraphsPath,name)
-
-    let loadDotToQG gFile =
-        let g = loadGraphFromDOT(path gFile)
-        let qGraph = new AdjacencyGraph<int, TaggedEdge<_,string>>()
-        g.Edges 
-        |> Seq.iter(
-            fun e -> 
-                let edg = e :?> DotEdge<string>
-                qGraph.AddVertex(int edg.Source.Id) |> ignore
-                qGraph.AddVertex(int edg.Destination.Id) |> ignore
-                qGraph.AddEdge(new TaggedEdge<_,_>(int edg.Source.Id,int edg.Destination.Id,edg.Label)) |> ignore)
-        qGraph
-
     let loadLexerInputGraph gFile =
-        let qGraph = loadDotToQG gFile
+        let qGraph = loadDotToQG baseInputGraphsPath gFile
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
         for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag, e.Tag+"|")))
@@ -77,7 +60,7 @@ type ``Abstract lexer tests`` () =
 
     let check_brs = 
        Seq.iter
-        (fun (e:AbstractParsing.Common.ParserEdge<_>) -> 
+        (fun (e:ParserEdge<_>) -> 
                 match e.Tag with
                 | NUMBER (n,brs) 
                 | PLUS (n,brs) ->
@@ -103,21 +86,21 @@ type ``Abstract lexer tests`` () =
 
     [<Test>]
     member this.``Load graph test from DOT`` () =
-        let g = loadGraphFromDOT(path "test_00.dot")
+        let g = loadGraphFromDOT(path baseInputGraphsPath "test_00.dot")
         //checkGraph g 4 4
         Assert.AreEqual(g.Edges |> Seq.length, 4)
         Assert.AreEqual(g.Vertices |> Seq.length, 4)
 
     [<Test>]
     member this.``Load graph test from DOT to QuickGraph`` () =
-        let qGraph = loadDotToQG "test_00.dot"
+        let qGraph = loadDotToQG baseInputGraphsPath "test_00.dot"
         //checkGraph g 4 4
         Assert.AreEqual(qGraph.Edges |> Seq.length, 4)
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 4)
 
     [<Test>]
     member this.``Load graph test from DOT to lexer input graph`` () =
-        let qGraph = loadDotToQG "test_00.dot"
+        let qGraph = loadDotToQG baseInputGraphsPath "test_00.dot"
         let lexerInputG = new LexerInputGraph<_>()
         lexerInputG.StartVertex <- 0
         for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag, e.Tag)))
@@ -522,11 +505,52 @@ type ``Abstract lexer tests`` () =
         checkGraph res 1 2
         Assert.AreEqual(eofToken, (res.Edges |> Seq.nth 0).Tag)
 
+    [<Test>]
+    member this.``Check break literals 1.`` () =
+        calcTokenizationTest "test_break_1.dot" 2 3 
+
+    [<Test>]
+    member this.``Check break literals 2.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_break_2.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        checkGraph res 3 3
+        let positions =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        checkArr [|0; 1; 0; 1; 0; 1; 0; 1; 0; 1|] positions
+
+    [<Test>]
+    member this.``Check break literals 3.`` () =
+        let lexerInputGraph = loadLexerInputGraph "test_break_3.dot"
+        let res = Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eofToken)
+        checkGraph res 4 5
+        let positions =
+            res.Edges 
+              |> Seq.collect
+                  (fun e -> 
+                    match e.Tag with
+                    | NUMBER (n,brs)
+                    | PLUS (n,brs) ->
+                        brs |> Array.map (fun p -> p.pos_cnum)
+                    | RNGLR_EOF _ -> [||]
+                    | t -> failwith (sprintf "Unexpected token: %A" t))
+            |> Array.ofSeq
+        checkArr [|0; 1; 2; 0; 1|] positions
+
+
+
 
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Abstract lexer tests`` () 
-//      t.``Test with position. With branch and several tokens on the one edge_1``()
+//      t.``Check break literals 3.``()
 //      //``Test with space at the end of previous tokens at the end of branch.``()
 //      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
 //     // printfn "%A" t

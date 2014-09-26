@@ -146,7 +146,7 @@ let private parse buf userDefs =
     //let tokens = List.ofSeq (filterByDefs buf userDefs)
     //tokens |> Seq.iter (fun t -> printfn "%A: %A" t (rangeToString <| tokenToRange t))
     match GrammarParser.buildAst (filterByDefs buf userDefs) with
-    | Parser.Success (ast, dict) ->
+    | Parser.Success (ast, _, dict) ->
         ast.collectWarnings tokenToRange
         |> ResizeArray.iter (fun (x,y) -> fprintfn stderr "Ambiguity: %s %A" (rangeToString x) y)
         let args = {

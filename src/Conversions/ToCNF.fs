@@ -20,6 +20,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.IL.Rule
+open Mono.Addins
 
 //--Функция для удаления эпсилон-правил------------------------------------------------------------
 
@@ -273,21 +274,30 @@ let toCNF (ruleList: Rule.t<_, _> list) =
     |> deleteChainRule
     |> renameTerm
 
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type CNF() = 
     inherit Conversion()
         override this.Name = "CNF"
         override this.ConvertGrammar (ruleList,_) = mapGrammar cnf ruleList
 
+[<Extension>]
 type ToCNF() = 
     inherit Conversion()
         override this.Name = "ToCNF"
         override this.ConvertGrammar (grammar,_) = mapGrammar toCNF grammar
 
+[<Extension>]
 type DeleteEpsRule() = 
     inherit Conversion()
         override this.Name = "DeleteEpsRule"
         override this.ConvertGrammar (grammar,_) = mapGrammar deleteEpsRule grammar
 
+[<Extension>]
 type DeleteChainRule() = 
     inherit Conversion()
         override this.Name = "DeleteChainRule"

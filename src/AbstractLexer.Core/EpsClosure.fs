@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 open Microsoft.FSharp.Text
-open AbstractParsing.Common
+open AbstractAnalysis.Common
 
 type DfaNode<'a> = 
     { Id: int;
@@ -73,7 +73,7 @@ let newDfaNodeId, reset =
     fun () -> let res = !i in incr i; res
     , fun () -> i := 0
    
-let NfaToDfa (inGraph: AbstractParsing.Common.ParserInputGraph<_>)= 
+let NfaToDfa (inGraph: ParserInputGraph<_>)= 
     reset ()
     let numNfaNodes = inGraph.VertexCount
     let rec EClosure1 (acc:NfaNodeIdSetBuilder) n = 
@@ -118,9 +118,10 @@ let NfaToDfa (inGraph: AbstractParsing.Common.ParserInputGraph<_>)=
                 { Id= newDfaNodeId()
                   Name = nfaSet.Fold (fun s nid -> string nid + "-" + s) ""
                   Transitions=[]
-                  Accepted= nfaSet.Elements 
-                            |> Seq.map (fun nid -> [])//nfaNodeMap.[nid].Accepted)
-                            |> List.concat }
+                  Accepted= [] (*nfaSet.Elements 
+                            |> Array.collect (fun nid -> [])//nfaNodeMap.[nid].Accepted)
+                            |> List.concat*)
+                             }
             //Printf.printfn "id = %d" dfaNode.Id;
 
             dfaNodes := (!dfaNodes).Add(nfaSet,dfaNode)

@@ -1,1 +1,0 @@
-nuget pack ..\src\AbstractParsing.Common\YC.AbstractAnalysis.Parsing.Common.nuspec 

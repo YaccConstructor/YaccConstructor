@@ -30,6 +30,9 @@ exception FEError of string
 exception GenError of string
 exception CheckerError of string
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
 let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =
@@ -48,28 +51,37 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let conversions = new ResizeArray<string>()
-    let GeneratorsManager = GeneratorsManager.GeneratorsManager()
-    let ConversionsManager = ConversionsManager.ConversionsManager()
-    let FrontendsManager = Yard.Core.FrontendsManager.FrontendsManager()
 
     AddinManager.Initialize()
     AddinManager.Registry.Update(null)
 
-    let AddinFrontend = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
-    let AddinGenerator = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> 
+    let addinFrontends = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray
+    let addinConversions = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion> |> Seq.toArray
+    let addinGenerators = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator> |> Seq.toArray
+    let addinFrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) addinFrontends |> Seq.toArray
+    let addinConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) addinConversions |> Seq.toArray
+    let addinGeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) addinGenerators |> Seq.toArray
 
     let userDefs = ref []
     let userDefsStr = ref ""
 
     feName := // Fill by default value
-        if Seq.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") AddinFrontend
+        if Array.exists (fun (elem : Frontend) -> elem.Name = "YardFrontend") addinFrontends
         then Some "YardFrontend"
-        else Seq.tryFind (fun _ -> true) FrontendsManager.Available
+        elif not <| Array.isEmpty addinFrontends
+        then 
+            let tmpName = addinFrontends.[0].Name
+            Some tmpName
+        else None
             
     generatorName :=
-        if Seq.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") AddinGenerator
+        if Array.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") addinGenerators
         then Some "RNGLRGenerator"
-        else Seq.tryFind (fun _ -> true) GeneratorsManager.Available
+        elif not <| Array.isEmpty addinGenerators
+        then 
+            let tmpName = addinGenerators.[0].Name
+            Some tmpName
+        else None
 
     let generateSomething = ref true
 
@@ -83,7 +95,7 @@ let () =
 
     let commandLineSpecs =
         ["-f", ArgType.String (fun s -> feName := Some s), "Frontend name. Use -af to list available."
-         "-af", ArgType.Unit (printItems "frontends" FrontendsManager.Available !feName), "Available frontends"
+         "-af", ArgType.Unit (printItems "frontends" addinFrontendNames !feName), "Available frontends"
          "-g", ArgType.String 
             (fun s -> 
                 match Array.toList (s.Split ' ') with
@@ -91,9 +103,9 @@ let () =
                 | name::parameters -> generatorName := Some name; generatorParams := Some (String.concat " " parameters)
                 | _ -> failwith "You need to specify generator name"
             ), "Generator name. Use -ag to list available."
-         "-ag", ArgType.Unit (printItems "generators" GeneratorsManager.Available !generatorName), "Available generators"
+         "-ag", ArgType.Unit (printItems "generators" addinGeneratorNames !generatorName), "Available generators"
          "-c", ArgType.String (fun s -> conversions.Add s), "Conversion applied in order. Use -ac to list available."
-         "-ac", ArgType.Unit (printItems "conversions" ConversionsManager.Available None), "Available conversions"
+         "-ac", ArgType.Unit (printItems "conversions" addinConversionNames None), "Available conversions"
          "-D", ArgType.String (fun s -> userDefs := !userDefs @ [s]), "User defined constants for YardFrontend lexer."
          "-U", ArgType.String (fun s -> userDefs := List.filter ((<>) s) !userDefs), 
                 "Remove previously defined constants for YardFrontend lexer."
@@ -103,16 +115,17 @@ let () =
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
 
+
     let run () =
         match !testFile, !feName, !generatorName with
         | Some fName, Some feName, Some generatorName ->
             let grammarFilePath = System.IO.Path.Combine(testsPath.Value.Value, fName)
             let fe =
                 let _raise () = InvalidFEName feName |> raise
-                if Seq.exists (fun (elem : Frontend) -> elem.Name = feName) AddinFrontend
+                if Array.exists (fun (elem : Frontend) -> elem.Name = feName) addinFrontends
                 then
                     try
-                        match FrontendsManager.Component feName with
+                        match Array.tryFind (fun (elem : Frontend) -> elem.Name = feName) addinFrontends with
                         | Some fe -> fe
                         | None -> failwith "Frontend is not found."
                     with
@@ -174,17 +187,30 @@ let () =
                         |> printfn "Lost sources after frontend or conversion %s:\n %s" name
             checkSources fe.Name !ilTree
             // Apply Conversions
+
+            let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) = 
+                let parameters = convNameWithParams.Split(' ')
+                    //printfn "Conversion: %s" convNameWithParams
+                if parameters.Length = 0 then failwith "Missing Conversion name"
+                else
+                    {ilTree
+                     with grammar =
+                            match Seq.tryFind (fun (elem : Conversion) -> elem.Name = parameters.[0]) addinConversions with 
+                            | Some conv -> conv.ConvertGrammar (ilTree.grammar, parameters.[1..parameters.Length - 1])
+                            | None -> failwith <| "Conversion not found: " + parameters.[0]
+                            }
+
             for conv in conversions do
-                ilTree := ConversionsManager.ApplyConversion conv !ilTree
+                ilTree := apply_Conversion conv !ilTree
                 checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
             let gen =
                 let _raise () = InvalidGenName generatorName |> raise
-                if Seq.exists (fun (elem : Generator) -> elem.Name = generatorName) AddinGenerator
+                if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators
                 then              
                     try
-                        match GeneratorsManager.Component generatorName with
+                        match Array.tryFind (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators with
                         | Some gen -> gen
                         | None -> failwith "TreeDump is not found."
                     with

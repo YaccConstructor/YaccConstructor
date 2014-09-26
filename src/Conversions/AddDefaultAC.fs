@@ -20,6 +20,7 @@ open Yard.Core.IL
 open Yard.Core.IL.Production
 open System.Collections.Generic
 open Yard.Core.Conversions.TransformAux
+open Mono.Addins
 
 //let dummyPos s = new Source.t(s)
 
@@ -101,6 +102,12 @@ let addDefaultAC (ruleList: Rule.t<Source.t, Source.t> list)  =
                     |> ignore
                     !ruleRef)
 
+
+[<assembly:Addin>]
+[<assembly:AddinDependency ("YaccConstructor", "1.0")>]
+do()
+
+[<Extension>]
 type AddDefaultAC() = 
     inherit Conversion()
         override this.Name = "AddDefaultAC"

@@ -1,0 +1,12 @@
+digraph g{0;
+1;
+2;
+3;
+4;
+5;
+0 -> 1 [ label="select "];
+1 -> 2 [ label=" x1 , y1 + z1, c1 "];
+2 -> 3 [ label=" x1 , y1 + z1, c1 "];
+3 -> 4 [ label=" from y where z > 20 and x < 30 and"];
+4 -> 5 [ label=" xx1 < 10 or  yy1 > 10 and zz1 <20 or cc1 > 20 "];
+}

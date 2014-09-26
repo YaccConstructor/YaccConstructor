@@ -4,6 +4,7 @@ open LexerHelper
 open System
 open AbstractLexer.Core
 open JSON.Parser
+open AbstractAnalysis.Common
 }
 //don`t support symbol '\f' and \u  four-hex-digits
 let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
@@ -25,4 +26,4 @@ rule token = parse
 | number { NUMBER(lexeme,brs) |> Some }
 | string1 { STRING1(lexeme,brs) |> Some }
 | eof { RNGLR_EOF ("",[||]) |> Some }
-| _ { getLiteral brs lexeme |> Some}
+(*| _ { getLiteral brs lexeme |> Some}*)

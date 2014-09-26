@@ -28,6 +28,7 @@ open Yard.Core.Helpers
 open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
+open Yard.Core.Helpers
 
 [<TestFixture>]
 type ``Expand subseq tests`` () =
@@ -38,7 +39,7 @@ type ``Expand subseq tests`` () =
     member test.``Subseq 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
@@ -58,7 +59,7 @@ type ``Expand subseq tests`` () =
     member test.``Subseq 2`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq2.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
@@ -83,7 +84,7 @@ type ``Expand subseq tests`` () =
     member test.``Inner subseq`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"innerSubseq.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = ConversionsManager.ApplyConversion conversion loadIL
+        let result = apply_Conversion conversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]

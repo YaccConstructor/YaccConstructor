@@ -8,7 +8,7 @@
     <ProjectGuid>{e9a0e63b-ead7-43de-8823-13faa6b2b972}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Main</RootNamespace>
-    <AssemblyName>YaccConstructor</AssemblyName>
+    <AssemblyName>YC.YaccConstructor</AssemblyName>
     <Name>YaccConstructor</Name>
     <SccProjectName>
     </SccProjectName>
@@ -23,7 +23,14 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-f YardFrontend -i D:\University\Project\recursive-ascent\Tests\YardFrontend\Options\options_test_0.yrd</StartArguments>
+    <StartArguments>-i "C:\yc\recursive-ascent\src\Calc\calc.yrd" -c ExpandEbnf -c ExpandMeta -g "RNGLRGenerator -pos uint64 -token string*array&lt;Position&lt;JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression&gt;&gt; -module Calc.AbstractParser -translate true -highlighting true -namespace CalcHighlighting -table LALR -o Calc.yrd.fs"</StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartArguments>-ag -af -ac</StartArguments>
+    <RemoteDebugEnabled>false</RemoteDebugEnabled>
+    <RemoteDebugMachine />
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
@@ -47,11 +54,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="YaccConstructor.addins">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -62,6 +72,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>

@@ -16,7 +16,7 @@ module Yard.Generators.RNGLR.AbstractParser
 
 open QuickGraph
 open QuickGraph.Algorithms
-open AbstractParsing.Common
+open AbstractAnalysis.Common
 
 type Parser<'token>() =
 

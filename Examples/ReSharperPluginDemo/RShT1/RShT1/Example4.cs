@@ -10,6 +10,10 @@ namespace RShT1
         private void Go(int cond)
         {
             var x = "234";
+            /*while(cond > 1)
+            {
+                 x = x + "+2";
+            }*/
             if (cond > 1)
             {
                 if (cond > 2)
@@ -22,7 +26,7 @@ namespace RShT1
                 }
                 Program.Eval(x + "123 + " + " 23 ** 3 + 14");
             }
-            Program.Eval(x + "123 + " + " 23 ** 3 + 14");
+            Program.Eval(x + "+3");
         }
     }
 }

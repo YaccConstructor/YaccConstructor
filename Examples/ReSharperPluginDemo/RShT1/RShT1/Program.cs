@@ -7,9 +7,10 @@ namespace RShT1
 {
     class Program
     {
+        
         public static void ExecuteImmediate(string s)
         {
-            
+                
         }
 
         public static void Objnotation(string s)

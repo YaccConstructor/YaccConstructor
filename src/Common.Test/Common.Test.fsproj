@@ -62,15 +62,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YC.Common">
-      <HintPath>..\..\..\..\..\university\project\recursive-ascent\Bin\Release\v40\YC.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Constraints">
-      <HintPath>..\..\Bin\Release\v40\YC.Constraints.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Conversions">
-      <HintPath>..\..\Bin\Release\v40\YC.Conversions.dll</HintPath>
-    </Reference>
     <Reference Include="YC.RNGLR">
       <HintPath>..\packages\YC.Frontends.Yard.0.0.6.11\lib\net40\YC.RNGLR.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +70,23 @@
       <HintPath>..\packages\YC.Frontends.Yard.0.0.6.11\lib\net40\YC.YardFrontend.dll</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

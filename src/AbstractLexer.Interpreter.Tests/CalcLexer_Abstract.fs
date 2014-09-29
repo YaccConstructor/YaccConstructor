@@ -383,24 +383,24 @@ let fstLexer () =
 let actions () =
    [|
 
-      (fun (lb : StateInfo<_>) ->
+      (fun (gr : GraphTokenValue<_>) ->
                               None );
-      (fun (lb : StateInfo<_>) ->
-                                                           NUMBER(lb.GetString(), lb.GetPosition ()) |> Some );
-      (fun (lb : StateInfo<_>) ->
-                       MINUS(lb.GetString(), lb.GetPosition ()) |> Some );
-      (fun (lb : StateInfo<_>) ->
-                       LBRACE(lb.GetString(), lb.GetPosition ()) |> Some );
-      (fun (lb : StateInfo<_>) ->
-                       RBRACE(lb.GetString(), lb.GetPosition ()) |> Some );
-      (fun (lb : StateInfo<_>) ->
-                       DIV(lb.GetString(), lb.GetPosition ())|> Some );
-      (fun (lb : StateInfo<_>) ->
-                       PLUS(lb.GetString(), lb.GetPosition ())|> Some );
-      (fun (lb : StateInfo<_>) ->
-                        POW(lb.GetString(), lb.GetPosition ())|> Some );
-      (fun (lb : StateInfo<_>) ->
-                       MULT(lb.GetString(), lb.GetPosition ())|> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                                                           NUMBER(gr) |> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       MINUS(gr) |> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       LBRACE(gr) |> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       RBRACE(gr) |> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       DIV(gr)|> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       PLUS(gr)|> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                        POW(gr)|> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                       MULT(gr)|> Some );
 
    |]
 

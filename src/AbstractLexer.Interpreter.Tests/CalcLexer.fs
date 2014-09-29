@@ -61,42 +61,42 @@ and _fslex_token  _fslex_state lexbuf =
           )
   | 1 -> ( 
 # 16 "CalcLexer.fsl"
-                                                           NUMBER(lb.GetString(), lb.GetPosition ()) |> Some 
+                                                           NUMBER(gr) |> Some 
 # 65 "CalcLexer.fs"
           )
   | 2 -> ( 
 # 17 "CalcLexer.fsl"
-                       MINUS(lb.GetString(), lb.GetPosition ()) |> Some 
+                       MINUS(gr) |> Some 
 # 70 "CalcLexer.fs"
           )
   | 3 -> ( 
 # 18 "CalcLexer.fsl"
-                       LBRACE(lb.GetString(), lb.GetPosition ()) |> Some 
+                       LBRACE(gr) |> Some 
 # 75 "CalcLexer.fs"
           )
   | 4 -> ( 
 # 19 "CalcLexer.fsl"
-                       RBRACE(lb.GetString(), lb.GetPosition ()) |> Some 
+                       RBRACE(gr) |> Some 
 # 80 "CalcLexer.fs"
           )
   | 5 -> ( 
 # 20 "CalcLexer.fsl"
-                       DIV(lb.GetString(), lb.GetPosition ())|> Some 
+                       DIV(gr)|> Some 
 # 85 "CalcLexer.fs"
           )
   | 6 -> ( 
 # 21 "CalcLexer.fsl"
-                       PLUS(lb.GetString(), lb.GetPosition ())|> Some 
+                       PLUS(gr)|> Some 
 # 90 "CalcLexer.fs"
           )
   | 7 -> ( 
 # 22 "CalcLexer.fsl"
-                        POW(lb.GetString(), lb.GetPosition ())|> Some 
+                        POW(gr)|> Some 
 # 95 "CalcLexer.fs"
           )
   | 8 -> ( 
 # 23 "CalcLexer.fsl"
-                       MULT(lb.GetString(), lb.GetPosition ())|> Some 
+                       MULT(gr)|> Some 
 # 100 "CalcLexer.fs"
           )
   | _ -> failwith "token"

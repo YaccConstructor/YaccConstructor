@@ -3,13 +3,13 @@ module AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
 
 type Token =
-    | NUMBER of (string*array<Position<string>>)
-    | MINUS of (string*array<Position<string>>)
-    | LBRACE of (string*array<Position<string>>)
-    | RBRACE of (string*array<Position<string>>)
-    | DIV of (string*array<Position<string>>)
-    | PLUS of (string*array<Position<string>>)
-    | POW of (string*array<Position<string>>)
-    | MULT of (string*array<Position<string>>)
-    | LITERAL of (string*array<Position<string>>)
-    | RNGLR_EOF of (string*array<Position<string>>)
+    | NUMBER of GraphTokenValue<string>
+    | MINUS of GraphTokenValue<string>
+    | LBRACE of GraphTokenValue<string>
+    | RBRACE of GraphTokenValue<string>
+    | DIV of GraphTokenValue<string>
+    | PLUS of GraphTokenValue<string>
+    | POW of GraphTokenValue<string>
+    | MULT of GraphTokenValue<string>
+    | LITERAL of GraphTokenValue<string>
+    | RNGLR_EOF of GraphTokenValue<string>

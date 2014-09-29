@@ -26,12 +26,12 @@ let fstLexer () =
 
 let actions () =
     [|
-        (fun (lb : StateInfo<_>) ->
-                        PLUS(lb.GetString(), lb.GetPosition ()) |> Some );
-        (fun (lb : StateInfo<_>) ->
-                        POW(lb.GetString(), lb.GetPosition ()) |> Some );
-        (fun (lb : StateInfo<_>) ->
-                        MULT(lb.GetString(), lb.GetPosition ()) |> Some );
+        (fun (gr : GraphTokenValue<_>) ->
+                        PLUS(gr) |> Some );
+        (fun (gr : GraphTokenValue<_>) ->
+                        POW(gr) |> Some );
+        (fun (gr : GraphTokenValue<_>) ->
+                        MULT(gr) |> Some );
 
     |] 
 

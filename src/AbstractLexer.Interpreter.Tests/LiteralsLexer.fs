@@ -33,7 +33,7 @@ and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
 # 15 "LiteralsLexer.fsl"
-                                   LITERAL(lb.GetString(), lb.GetPosition ()) |> Some 
+                                   LITERAL(gr) |> Some 
 # 37 "LiteralsLexer.fs"
           )
   | _ -> failwith "token"

@@ -57,8 +57,8 @@ let fstLexer () =
 let actions () =
    [|
 
-      (fun (lb : StateInfo<_>) ->
-                                   LITERAL(lb.GetString(), lb.GetPosition ()) |> Some );
+      (fun (gr : GraphTokenValue<_>) ->
+                                   LITERAL(gr) |> Some );
 
    |]
 

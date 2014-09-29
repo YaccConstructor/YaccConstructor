@@ -21,7 +21,7 @@
   </PropertyGroup>
   <!-- These dummy entries are needed for F# Beta2 -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>C:\recursive-ascent\src\AbstractFsLex\Lexer.fsl -o C:\recursive-ascent\src\AbstractFsLex\output</StartArguments>
+    <StartArguments>C:\yc\recursive-ascent\src\AbstractFsLex\Lexer.fsl -o C:\yc\recursive-ascent\src\AbstractFsLex\output</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>

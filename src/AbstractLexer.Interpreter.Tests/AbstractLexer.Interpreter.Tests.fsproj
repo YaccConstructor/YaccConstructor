@@ -82,7 +82,10 @@
     <Compile Include="CalcLexer_Abstract.fs" />
     <Compile Include="LiteralsLexer_Abstract.fs" />
     <Compile Include="FstLexer.fs" />
+    <Compile Include="CommonTestChecker.fs" />
     <Compile Include="InterpreterTests.fs" />
+    <Compile Include="CalcTests.fs" />
+    <Compile Include="LiteralsTests.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

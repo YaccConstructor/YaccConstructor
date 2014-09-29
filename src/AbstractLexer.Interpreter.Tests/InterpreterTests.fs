@@ -8,38 +8,8 @@ open YC.FST.GraphBasedFst
 open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 open AbstractParser.Tokens
-
-let checkGraph (graph:AdjacencyGraph<_,_>) countE countV  =
-    Assert.AreEqual(graph.EdgeCount, countE, "Count of edges not equal expected number. ")
-    Assert.AreEqual(graph.VertexCount, countV, "Count of vertices not equal expected number. ")
-
-let printSmbString (x:char*Position<_>) = 
-        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
-
-let eof = RNGLR_EOF(new GraphTokenValue<_>())    
-
-let printBref =       
-    let printGr (gr:GraphTokenValue<_>) = 
-        printf "%A\n" gr.EdgeCount
-        let strs = ref ""
-        for edge in gr.Edges do
-            strs := !strs + "[" + edge.Source.ToString() + ", " + 
-                                  "{" + edge.Label.ToString() + "_br: " + edge.BackRef + "(" + edge.StartPos.ToString() + ", " + edge.EndPos.ToString() + ")"+ "}" +
-                                  edge.Target.ToString() + "] ;"
-        !strs        
-             
-    fun x ->
-        match x with
-            | NUMBER(gr) -> "NUM: " + printGr gr
-            | MINUS(gr) -> "MINUS: " + printGr gr
-            | LBRACE(gr) -> "LBRACE: " + printGr gr
-            | RBRACE(gr) -> "RBRACE: " + printGr gr
-            | DIV(gr) -> "DIV: " + printGr gr
-            | PLUS(gr) -> "PLUS: "  + printGr gr
-            | POW(gr)  -> "POW: "  + printGr gr
-            | MULT(gr) -> "MULT: " + printGr gr
-            | LITERAL(gr) -> "LITERAL: " + printGr gr
-            | x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])        
+open YC.FST.AbstractLexing.Tests.CommonTestChecker
+      
  
 [<TestFixture>]
 type ``Lexer FST Tests`` () =            

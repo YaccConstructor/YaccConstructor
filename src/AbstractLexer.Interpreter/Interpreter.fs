@@ -7,161 +7,172 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open YC.FST.FstApproximation
 
-type Position<'br> =
-    val start_offset: int
-    val end_offset: int
-    val back_ref: 'br
-    new (so, eo, br) = {start_offset = so; end_offset = eo; back_ref = br}
+
+type TokenEdge<'br when 'br:comparison>(s,e,t)=
+    inherit TaggedEdge<int, char*Position<'br>>(s,e,t)
+        
+    member this.BackRef = (snd t).back_ref
+    member this.StartPos = (snd t).start_offset
+    member this.EndPos = (snd t).end_offset
+    member this.Label = fst t
+
+type GraphTokenValue<'br when 'br:comparison>() =
+    inherit AdjacencyGraph<int,TokenEdge<'br>>()
+
+    member this.AddEdgeForsed (e:TokenEdge<_>) =
+        this.AddVertex e.Source |> ignore
+        this.AddVertex e.Target |> ignore
+        this.AddEdge e |> ignore
 
 [<Struct>]
-type StateInfo<'br> =
-    val start_offset: int
-    val cur_offset: int
-    val curBr: 'br
-    val StartV: int
-    val AccumulatedString: ResizeArray<Smbl<char*'br>> 
-    val Positions: ResizeArray<Position<'br>>
-    val EndV: int
-    new (startV, str, pos, endV, so, co, br) = 
-        {
-            StartV = startV
-            AccumulatedString = str
-            Positions = pos
-            EndV = endV
-            start_offset = so
-            cur_offset = co
-            curBr = br
-        }
-    member this.GetString () =
-        this.AccumulatedString
-        |> ResizeArray.map (function Smbl (ch,_) -> ch| x -> failwith "Symbol type %A unexpected in accumulated string." x)
-        |> ResizeArray.toArray
-        |> fun chs -> new string(chs)
+type GraphAction<'br when 'br:comparison> =
+    val startAct: int
+    val endActs: HashSet<int>
+    val graph: GraphTokenValue<'br>
+    new (sa, ea, gr) = {startAct = sa; endActs = ea; graph = gr}   
 
-    member this.GetPosition () = this.Positions |> ResizeArray.toArray
-        
-    //new (startV, str, endV, so, eo) = {StartV = startV; AccumulatedString = str; Positions = new ResizeArray<_>(); EndV = endV; start_offset = so; end_offset = eo}
 
-let Interpret (inputFstLexer: FST<_,_>) (actions: array<StateInfo<_> -> _>) eofToken =   
+let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>) eofToken =   
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
-    let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)
-    let edges = new ResizeArray<_>()
-    let saved = ref false
+    let edgesParserGraph = new ResizeArray<_>()
+         
+    let actionV = [|for v in inputFstLexer.InitState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
+    let tokens = new ResizeArray<_>()
 
-    let bfs vertex (stt: StateInfo<_>) =
+    let FstInverse = new FST<_,_>()   
+    for edge in inputFstLexer.Edges do
+        new TaggedEdge<_,_>(edge.Target, edge.Source, edge.Tag) |>  FstInverse.AddVerticesAndEdge |> ignore
+
+     
+    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
+    let tokensInv = new ResizeArray<_>() 
+
+    let bfs vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
+        let targetAct = new HashSet<_>()
+        let edgesToks = new ResizeArray<_>()            
         let queueV = new Queue<_>()
-        queueV.Enqueue(vertex,stt)
-        
-        while queueV.Count > 0 do
-            let isNotActionPerformed = ref true
-            let idF = ref 0
-            let topV,curStt = queueV.Dequeue()
+        queueV.Enqueue(vertex)               
 
+        let isStartV v = ResizeArray.exists ((=) v) inputFstLexer.InitState
+        while queueV.Count > 0 do
+            let topV = queueV.Dequeue()
             if not <| visited.[topV]
             then
                 visited.[topV] <- true
-                saved := false
-                for v in inputFstLexer.OutEdges(topV) do
+                for v in graphFst.OutEdges(topV) do
                     if v.Tag.OutSymb = Eps
-                    then
-                        //добавляем информацию                       
-                        let so,co,br =
-                            match v.Tag.InSymb with
-                            | Smbl (x,br) -> 
-                                if curStt.curBr = null || br = curStt.curBr
-                                then curStt.start_offset, curStt.cur_offset + 1, br
-                                else   
-                                    if not !saved
-                                    then
-                                        saved := true
-                                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))
-                                    0,1,br
-                            | x -> failwith "Unexpected symbol in BR calculation:%A" x
-                        let newStt = 
-                            new StateInfo<_>(
-                                curStt.StartV
-                                , ResizeArray.append curStt.AccumulatedString (ResizeArray.singleton v.Tag.InSymb)
-                                , new ResizeArray<_>(curStt.Positions)
-                                , v.Target
-                                , so
-                                , co
-                                , br)
-                        queueV.Enqueue(v.Target, newStt)
-                    else  
-                        if !isNotActionPerformed //один раз выполняем action код, потому что входящие дуги в одну вершину возвращают одинаковый action код
-                        then                            
-                            isNotActionPerformed := false
-                            idF := match v.Tag.OutSymb with
-                                    | Smbl x -> x
-                                    | x -> failwith "Unexpected symbol in function calculation:%A" x 
-                            if !saved = false then curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr)) 
-                            let tok = actions.[!idF] curStt
-                            edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok)) 
-                            printfn 
-                                "startV %i string %s" 
-                                curStt.StartV 
-                                (curStt.AccumulatedString 
-                                    |> ResizeArray.map (function | Smbl x -> x.ToString() | Eps -> "Eps" | Exclosure y -> y.ToString())
-                                    |> String.concat "") 
-                                    
-                     
-                        let so,co,br =
-                            match v.Tag.InSymb with
-                                | Smbl (x,br) -> 
-                                    if br = curStt.curBr
-                                    then curStt.cur_offset, curStt.cur_offset + 1, curStt.curBr
-                                    else 0,1,br
-                                | x -> failwith "Unexpected symbol in BR calculation:%A" x
-                        let newStt =
-                            new StateInfo<_>(
-                                topV
-                                , ResizeArray.singleton v.Tag.InSymb
-                                , new ResizeArray<_>()
-                                , v.Target
-                                , so
-                                , co
-                                , br) 
-                        queueV.Enqueue(v.Target, newStt)    
+                    then 
+                        if (v.Source <> vertex || (isStartV v.Source))
+                        then 
+                            new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                            if (v.Target = vertex) then targetAct.Add(vertex) |> ignore
+                            queueV.Enqueue(v.Target)
+                    else 
+                        if v.Source = vertex 
+                        then 
+                            new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                            if (v.Target = graphFst.FinalState.[0]) 
+                            then targetAct.Add(v.Target) |> ignore
+                            else queueV.Enqueue(v.Target)
+                        else 
+                            targetAct.Add(v.Source) |> ignore   
+                                           
+        let gr = new GraphTokenValue<_>() 
+        gr.AddVerticesAndEdgeRange edgesToks |> ignore
+        new GraphAction<_>(vertex, targetAct, gr)      
+            
+    for act in actionV do 
+        let visited = ResizeArray.init (!maxV + 1) (fun _ -> false) 
+        bfs act inputFstLexer visited |> tokens.Add |> ignore
 
-            else
-                for v in inputFstLexer.OutEdges(topV) do                    
-                    if not <| (v.Tag.OutSymb = Eps)  
-                    then
-                    //еще раз пройтись, чтобы найти невыполненные action                        
-                        idF := match v.Tag.OutSymb with
-                                | Smbl x -> x
-                                | x -> failwith "Unexpected symbol in function calculation:%A" x 
-                        curStt.Positions.Add(new Position<_>(curStt.start_offset, curStt.cur_offset, curStt.curBr))
-                        let tok = actions.[!idF] curStt                        
-                        edges.Add(new ParserEdge<_>(curStt.StartV, curStt.EndV, tok))
-                        printfn 
-                            "startV %i string %s" 
-                            curStt.StartV 
-                            (curStt.AccumulatedString 
-                                |> ResizeArray.map (function | Smbl x -> x.ToString() | Eps -> "Eps" | Exclosure y -> y.ToString())
-                                |> String.concat "")
-                 
-    for v in inputFstLexer.InitState do
-        let stt = new StateInfo<_>(v, new ResizeArray<_>(), new ResizeArray<_>(), v, 0, 0, Unchecked.defaultof<'br>)
-        bfs v stt
+    let bfsInv vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
+        let targetAct = new HashSet<_>()
+        let edgesToks = new ResizeArray<_>()            
+        let queueV = new Queue<_>()
+        queueV.Enqueue(vertex)               
+
+        let isAct v = Set.exists ((=) v) actionVInv
+
+        let flag = ref false
+        let isEps v = 
+            for edge in inputFstLexer.OutEdges(v) do
+                if edge.Tag.OutSymb = Eps
+                then flag := true
+            !flag
+
+        while queueV.Count > 0 do
+            let topV = queueV.Dequeue()
+            if not <| visited.[topV]
+            then
+                visited.[topV] <- true
+                for v in graphFst.OutEdges(topV) do
+                    if (isAct v.Target)
+                    then 
+                        new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                        if (isEps v.Target) then queueV.Enqueue(v.Target)
+                    else 
+                        new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                        queueV.Enqueue(v.Target)  
+                                           
+        let gr = new GraphTokenValue<_>() 
+        gr.AddVerticesAndEdgeRange edgesToks |> ignore
+        new GraphAction<_>(vertex, targetAct, gr) 
+
+    for act in actionVInv do
+        let visitedInv = ResizeArray.init (!maxV + 1) (fun _ -> false)
+        bfsInv act FstInverse visitedInv |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
+
+    let EqualEdges (edg1:TokenEdge<_>) (edg2:TokenEdge<_>) = 
+        (edg1.Source = edg2.Source) && (edg1.Target = edg2.Target) && (edg1.Label = edg2.Label) && (edg1.BackRef = edg2.BackRef) //smth else?
     
+    let CommonEdges (str1:GraphAction<_>) (str2:GraphAction<_>) = 
+        let edges = new ResizeArray<_>()
+        for edge1 in str1.graph.Edges do
+            for edge2 in str2.graph.Edges do
+                if EqualEdges edge1 edge2
+                then edges.Add(edge1) 
+        edges
+
+    let isEqAc elSearch (elem:GraphAction<_>) = elSearch = elem.startAct
+    let FindElAct el = ResizeArray.find (isEqAc el) tokensInv
+
+    let idF = ref 0
+
+    let idFunction v = 
+        for edge in inputFstLexer.OutEdges(v) do
+            if not <| (edge.Tag.OutSymb = Eps)
+            then 
+                idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
+        !idF    
+
+    for t in tokens do
+        for ea in t.endActs do
+            if ea <> inputFstLexer.FinalState.[0]
+            then 
+                let edgesToken = CommonEdges t (FindElAct ea)            
+                let grToken = new GraphTokenValue<_>()
+                grToken.AddVerticesAndEdgeRange edgesToken |> ignore
+                let tok = actions.[(idFunction ea)] grToken
+                new ParserEdge<_>(t.startAct, ea, tok) |> edgesParserGraph.Add |> ignore
+
     let final = new ResizeArray<_>()
     for edge in inputFstLexer.Edges do
         if  edge.Target = inputFstLexer.FinalState.[0]
         then final.Add edge.Source
+        
+    for v in final do         
+//        let edgeEof = new TokenEdge<_>(v, inputFstLexer.FinalState.[0], (eofToken, Unchecked.defaultof<Position<_>>)) // что делать с eof для parser?
+//        let grEof = new GraphTokenValue<_>()
+//        grEof.AddVerticesAndEdge edgeEof |> ignore
+        new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken) |> edgesParserGraph.Add |> ignore
 
-    for v in final do 
-        edges.Add(new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken))
-             
     let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0])
-    res.AddVerticesAndEdgeRange edges |> ignore  
+    res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<StateInfo<_> -> _>) eofToken (inputGraph : Appr<_>) =    
-    let inputFst = inputGraph.ToFST()
-    //inputFst.PrintToDOT @"..\..\Tests\CalcTestInput.dot"  
+let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) eofToken (inputGraph : Appr<_>) =    
+    let inputFst = inputGraph.ToFST() 
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
-    //inputFstLexer.PrintToDOT @"..\..\Tests\CalcTestLexer.dot"  
     let parserInputGraph = Interpret inputFstLexer actions eofToken 
     let epsRes = EpsClosure.NfaToDfa parserInputGraph
     epsRes 

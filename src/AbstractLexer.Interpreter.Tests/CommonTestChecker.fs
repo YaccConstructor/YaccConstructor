@@ -64,3 +64,28 @@ let loadDotToQG baseInputGraphsPath gFile =
     graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
     graphAppr
 
+let checkArr expectedArr actualArr =
+    if Array.length expectedArr = Array.length actualArr
+    then 
+        Array.iteri2 (
+            fun i x1 x2 -> 
+            if x1 <> x2 then Assert.Fail ("Arrays differ at position: " + string i)) expectedArr actualArr
+        Assert.Pass()
+    else Assert.Fail ("Arrays have different length")
+ 
+let countEdges (parserInputGraph : ParserInputGraph<_>) =
+   parserInputGraph.Edges 
+    |> Seq.map (fun e -> 
+                    match e.Tag with
+                        | NUMBER(gr) 
+                        | MINUS(gr) 
+                        | LBRACE(gr) 
+                        | RBRACE(gr) 
+                        | DIV(gr) 
+                        | PLUS(gr) 
+                        | POW(gr)  
+                        | MULT(gr) 
+                        | LITERAL(gr) -> gr.EdgeCount
+                        | RNGLR_EOF _ -> 0) 
+    |> Array.ofSeq 
+

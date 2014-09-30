@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>114e4775-bf85-464f-bb3d-d68de62615bd</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>AbstractLexer.Interpreter.Tests</RootNamespace>
     <AssemblyName>AbstractLexer.Interpreter.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -84,8 +84,8 @@
     <Compile Include="FstLexer.fs" />
     <Compile Include="CommonTestChecker.fs" />
     <Compile Include="InterpreterTests.fs" />
-    <Compile Include="CalcTests.fs" />
     <Compile Include="LiteralsTests.fs" />
+    <Compile Include="CalcTests.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -7,6 +7,8 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open YC.FST.FstApproximation
 
+let printSmbString (x:char*Position<_>) = 
+        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
 type TokenEdge<'br when 'br:comparison>(s,e,t)=
     inherit TaggedEdge<int, char*Position<'br>>(s,e,t)
@@ -65,17 +67,17 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
                         if (v.Source <> vertex || (isStartV v.Source))
                         then 
                             new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
-                            if (v.Target = vertex) then targetAct.Add(vertex) |> ignore
-                            queueV.Enqueue(v.Target)
+                            if v.Target = vertex then targetAct.Add vertex |> ignore
+                            queueV.Enqueue v.Target
                     else 
                         if v.Source = vertex 
                         then 
                             new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
-                            if (v.Target = graphFst.FinalState.[0]) 
-                            then targetAct.Add(v.Target) |> ignore
-                            else queueV.Enqueue(v.Target)
+                            if v.Target = graphFst.FinalState.[0]
+                            then targetAct.Add v.Target |> ignore
+                            else queueV.Enqueue v.Target
                         else 
-                            targetAct.Add(v.Source) |> ignore   
+                            targetAct.Add v.Source |> ignore   
                                            
         let gr = new GraphTokenValue<_>() 
         gr.AddVerticesAndEdgeRange edgesToks |> ignore
@@ -92,13 +94,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         queueV.Enqueue(vertex)               
 
         let isAct v = Set.exists ((=) v) actionVInv
-
-        let flag = ref false
-        let isEps v = 
-            for edge in inputFstLexer.OutEdges(v) do
-                if edge.Tag.OutSymb = Eps
-                then flag := true
-            !flag
+        let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
 
         while queueV.Count > 0 do
             let topV = queueV.Dequeue()
@@ -106,13 +102,10 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
             then
                 visited.[topV] <- true
                 for v in graphFst.OutEdges(topV) do
-                    if (isAct v.Target)
-                    then 
-                        new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
-                        if (isEps v.Target) then queueV.Enqueue(v.Target)
-                    else 
-                        new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
-                        queueV.Enqueue(v.Target)  
+                    new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                    if isAct v.Target
+                    then if (isEps v.Target) then queueV.Enqueue(v.Target)
+                    else queueV.Enqueue(v.Target)  
                                            
         let gr = new GraphTokenValue<_>() 
         gr.AddVerticesAndEdgeRange edgesToks |> ignore
@@ -140,7 +133,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 
     let idFunction v = 
         for edge in inputFstLexer.OutEdges(v) do
-            if not <| (edge.Tag.OutSymb = Eps)
+            if edge.Tag.OutSymb <> Eps
             then 
                 idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
         !idF    
@@ -161,9 +154,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         then final.Add edge.Source
         
     for v in final do         
-//        let edgeEof = new TokenEdge<_>(v, inputFstLexer.FinalState.[0], (eofToken, Unchecked.defaultof<Position<_>>)) // что делать с eof для parser?
-//        let grEof = new GraphTokenValue<_>()
-//        grEof.AddVerticesAndEdge edgeEof |> ignore
         new ParserEdge<_>(v, inputFstLexer.FinalState.[0], Some eofToken) |> edgesParserGraph.Add |> ignore
 
     let res = new ParserInputGraph<_>(inputFstLexer.InitState.[0], inputFstLexer.FinalState.[0])
@@ -173,6 +163,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST() 
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
+    inputFstLexer.PrintToDOT (@"..\..\Tests\CalcTestLexerk.dot", printSmbString)
     let parserInputGraph = Interpret inputFstLexer actions eofToken 
     let epsRes = EpsClosure.NfaToDfa parserInputGraph
     epsRes 

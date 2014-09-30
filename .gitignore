@@ -146,8 +146,7 @@ Tests/AbstractRNGLR/DOT/errors7.dot.pdf
 Tests/AbstractRNGLR/DOT/errors8.dot.pdf
 Tests/AbstractRNGLR/DOT/errors9.dot.pdf
 src/TSQL/Highlight_*.cs
-src/TSQL/*TermNode.cs
-src/TSQL/*LitNode.cs
+src/TSQL/*Node.cs
 src/TSQL/out
 *log.txt
 **/out
@@ -158,6 +157,5 @@ src/TSQL/TSQLHighlighting/*
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
 *.csproj.user
-src/RNGLR.AstToAstTest/log*.txt
-src/RNGLR.AstToAstTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.yrd.fs
+src/RNGLR.OtherSppfTest/*.txt

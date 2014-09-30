@@ -1,5 +1,6 @@
 ﻿module RNGLRAstToAstTest
 
+open System
 open AbstractAnalysis.Common
 open QuickGraph
 open Yard.Generators.RNGLR
@@ -101,10 +102,11 @@ type ``RNGLR ast to otherSPPF translation test`` () =
     [<Test>]
     member test.``Parents test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;] |> ignore
+        qGraph.AddVertexRange[0; 1; 2] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [createEdge 0 1 (RNGLR.ParseAmbiguous.B 0)
-             createEdge 1 2 (RNGLR.ParseAmbiguous.RNGLR_EOF 1)
+            [
+                createEdge 0 1 (RNGLR.ParseAmbiguous.B 0)
+                createEdge 1 2 (RNGLR.ParseAmbiguous.RNGLR_EOF 1)
              ] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseAmbiguous.buildAstAbstract qGraph
@@ -112,7 +114,6 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-//            RNGLR.ParseAmbiguous.defaultAstToDot mAst "Parents before.dot"
             let other = new OtherTree<_>(mAst)
             RNGLR.ParseAmbiguous.otherAstToDot other "Parents after.dot"
             printfn "Parents test: PASSED"
@@ -132,11 +133,12 @@ type ``RNGLR ast to otherSPPF translation test`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
 //            RNGLR.ParseCycles.defaultAstToDot mAst "Cycles before.dot"
+
             let other = new OtherTree<_>(mAst)
+            
             RNGLR.ParseCycles.otherAstToDot other "Cycles after.dot"
             printfn "Cycles test: PASSED"
             Assert.Pass()
-
 
 [<TestFixture>]
 type ``Classic case: matching brackets``() =
@@ -158,9 +160,7 @@ type ``Classic case: matching brackets``() =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Classic case. Simple test before.dot"
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Classic case. Simple test after.dot"
             
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
@@ -168,13 +168,15 @@ type ``Classic case: matching brackets``() =
             let tokToPos = tokenToPos RNGLR.ParseSummator.tokenData
 
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 0 true tokToNumber tokToPos
-            
             printfn "%d pair(s) was found" pairTokens.Count
             Assert.AreEqual (1, pairTokens.Count)
 
             match pairTokens.[0] with
             | RNGLR.ParseSummator.Token.RBRACE pos -> Assert.AreEqual (4, pos)
-            | _ -> Assert.Fail ("Expected CLOSE token")
+            | _ -> 
+                let t : string = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
+                printfn "%s is founded" t
+                Assert.Fail()
 
         printfn "Classic case. Simple test: PASSED"
 
@@ -196,10 +198,8 @@ type ``Classic case: matching brackets``() =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Classic case. Many brackets 1 before.dot"
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Classic case. Many brackets 1 after.dot"
-            
+
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
@@ -212,7 +212,10 @@ type ``Classic case: matching brackets``() =
             
             match pairTokens.[0] with
             | RNGLR.ParseSummator.Token.RBRACE pos -> Assert.AreEqual (4, pos)
-            | _ -> Assert.Fail ("Expected CLOSE token")
+            | _ -> 
+                let t : string = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
+                printfn "%s is founded" t
+                Assert.Fail()
 
         printfn "Classic case. Many brackets 1: PASSED"
 
@@ -234,10 +237,10 @@ type ``Classic case: matching brackets``() =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Classic case. Many brackets 2 before.dot"
-            let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Classic case. Many brackets 2 after.dot"
             
+            let other = new OtherTree<_>(mAst)
+            
+
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
@@ -251,7 +254,10 @@ type ``Classic case: matching brackets``() =
             
             match pairTokens.[0] with
             | RNGLR.ParseSummator.Token.RBRACE pos -> Assert.AreEqual (3, pos)
-            | _ -> Assert.Fail ("Expected CLOSE token")
+            | _ -> 
+                let t : string = RNGLR.ParseSummator.numToString <| tokToNumber pairTokens.[0]
+                printfn "%s is founded" t
+                Assert.Fail()
 
         printfn "Classic case. Many brackets 2: PASSED"
 
@@ -272,10 +278,9 @@ type ``Classic case: matching brackets``() =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Simple right to left before.dot"
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Simple right to left after.dot"
             
+
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
@@ -293,7 +298,10 @@ type ``Classic case: matching brackets``() =
                 | RNGLR.ParseSummator.LBRACE pos -> 
                     if not <| Array.exists (fun num -> pos = num) expected
                     then Assert.Fail()
-                | _ -> Assert.Fail()
+                | _ -> 
+                    let t : string = RNGLR.ParseSummator.numToString <| tokToNumber right
+                    printfn "%s is founded" t
+                    Assert.Fail()
 
             printfn "Classic case. Right to left: PASSED"
             Assert.Pass()
@@ -319,9 +327,10 @@ type ``Abstract case: matching brackets``() =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Abstract case. Two parentheses before.dot"
+            let timer = new System.Diagnostics.Stopwatch()
+            timer.Start()
+
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Abstract case. Two parentheses after.dot"
             
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
@@ -371,9 +380,9 @@ type ``Abstract case: matching brackets``() =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Abstract case. Two parentheses light 2 before.dot"
+            let timer = new System.Diagnostics.Stopwatch()
+            timer.Start()
             let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Abstract case. Two parentheses light 2 after.dot"
             
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
@@ -403,13 +412,13 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Right to left``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVertexRange[0;1;2;3;5;6] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
              createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
              createEdge 2 3 (RNGLR.ParseSummator.PLUS 2)
              createEdge 3 4 (RNGLR.ParseSummator.NUMBER 3)
-             createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
+             createEdge 2 5 (RNGLR.ParseSummator.RBRACE 4)
              createEdge 3 6 (RNGLR.ParseSummator.NUMBER 5)
              createEdge 6 5 (RNGLR.ParseSummator.RBRACE 6)
              ] |> ignore
@@ -422,16 +431,15 @@ type ``Abstract case: matching brackets``() =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-//            RNGLR.ParseSummator.defaultAstToDot mAst "Abstract case. Right to left (before).dot"
-            let other = new OtherTree<_>(mAst)
-//            RNGLR.ParseSummator.otherAstToDot other "Abstract case. Right to left (after).dot"
             
+            let other = new OtherTree<_>(mAst)
+                        
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
             let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
             let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
 
             let tokToPos = tokenToPos RNGLR.ParseSummator.tokenData
-
+            
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 6 false tokToNumber tokToPos
             
             printfn "%d pair(s) was found" pairTokens.Count
@@ -443,10 +451,13 @@ type ``Abstract case: matching brackets``() =
                 | RNGLR.ParseSummator.LBRACE pos -> 
                     if not <| Array.exists (fun num -> pos = num) expected
                     then Assert.Fail()
-                | _ -> Assert.Fail()
+                | _ ->  
+                    let t : string = RNGLR.ParseSummator.numToString <| tokToNumber right
+                    printfn "%s is founded" t
+                    Assert.Fail()
 
             printfn "Abstract case. Right to left: PASSED"
-            Assert.Pass()
+//            Assert.Pass()
 
 [<EntryPoint>]
 let f x = 
@@ -471,5 +482,7 @@ let f x =
 //    brackets.``AbstractAnalysis case. Right to left``()
 //    brackets.``Abstract case. Right to left``()
     let abstr = new ``Abstract case: matching brackets``()
-    abstr.``Abstract case. Two parentheses light``()
+    abstr.``Abstract case. Right to left``()
+//    abstr.``Abstract case. Two parentheses``()
+//    abstr.``Abstract case. Two parentheses light``()
     1

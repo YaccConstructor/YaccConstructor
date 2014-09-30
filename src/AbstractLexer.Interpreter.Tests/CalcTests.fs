@@ -11,137 +11,78 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 
 let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 
-let calcTokenizationTest path eCount vCount =
+let calcTokenizationTest path eCount vCount countEdgesArray =
     let graphAppr = loadDotToQG baseInputGraphsPath path
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-    checkGraph res eCount vCount
+    checkArr (countEdges res) countEdgesArray
+    checkGraph res eCount vCount   
                              
 [<TestFixture>]
 type ``Lexer Calc Fst Tests`` () =            
-    [<Test>] //checked
+    [<Test>]
     member this.``Load graph test from DOT`` () =
         let g = loadDotToQG baseInputGraphsPath "test_00.dot"
         checkGraph g 4 4
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Simple number.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_0.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc_2.dot" printBref
-        checkArr (countEdges res) [|2; 0|]
-        checkGraph res 2 3     
+        calcTokenizationTest "test_0.dot" 2 3 [|2; 0|] 
 
-    [<Test>] //checked
+    [<Test>]
     member this.``Calc. Simple sum.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc_1.dot" printBref
-        checkArr (countEdges res) [|1; 1; 1; 0|]
-        checkGraph res 4 5 
+        calcTokenizationTest "test_1.dot" 4 5 [|1; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Start from PLUS.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_2.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc1.dot" printBref
-        checkArr (countEdges res) [|1; 2; 0|]
-        checkGraph res 3 4
+        calcTokenizationTest "test_2.dot" 3 4 [|1; 2; 0|]      
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Two-digit numbers sum.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_3.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc2.dot" printBref
-        checkArr (countEdges res) [|2; 1; 2; 0|]
-        checkGraph res 4 5
+        calcTokenizationTest "test_3.dot" 4 5 [|2; 1; 2; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_0.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc3.dot" printBref
-        checkArr (countEdges res) [|2; 0|]
-        checkGraph res 2 3
+        calcTokenizationTest "test_with_pos_0.dot" 2 3 [|2; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Ident on two edgs`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc4.dot" printBref
-        checkArr (countEdges res) [|3; 0|]
-        checkGraph res 2 3    
+        calcTokenizationTest "test_with_pos_1.dot" 2 3 [|3; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Ident on edgs with branch`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_2.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc5.dot" printBref
-        checkArr (countEdges res) [|4; 0|]
-        checkGraph res 2 3
+        calcTokenizationTest "test_with_pos_2.dot" 2 3 [|4; 0|]
 
-    [<Test>] //checked 
+    [<Test>] 
     member this.``Calc. Test with position. Ident and plus on edgs with branch`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_3.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc6.dot" printBref
-        checkArr (countEdges res) [|3; 2; 0; 1; 0|]
-        checkGraph res 5 5
+        calcTokenizationTest "test_with_pos_3.dot" 5 5 [|3; 2; 0; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Ident on edgs with branch in begin.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_4.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc7.dot" printBref
-        checkArr (countEdges res) [|3; 0|]
-        checkGraph res 2 3         
+        calcTokenizationTest "test_with_pos_4.dot" 2 3 [|3; 0|]      
          
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Ident on edgs with branch in begin_1.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_5.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc8.dot" printBref
-        checkArr (countEdges res) [|5; 0|]
-        checkGraph res 2 3
+        calcTokenizationTest "test_with_pos_5.dot" 2 3 [|5; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Positions. Simple binop.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_6.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc9.dot" printBref
-        checkArr (countEdges res) [|1; 1; 1; 0|]
-        checkGraph res 4 5
+        calcTokenizationTest "test_with_pos_6.dot" 4 5 [|1; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Two tokens on the one edge.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_7.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc10.dot" printBref
-        checkArr (countEdges res) [|2; 1; 2; 0|]
-        checkGraph res 4 5
+        calcTokenizationTest "test_with_pos_7.dot" 4 5 [|2; 1; 2; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. With branch and several tokens on the one edge``() =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_8.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc11.dot" printBref
-        checkArr (countEdges res) [|3; 1; 1; 1; 1; 1; 0; 1|]
-        checkGraph res 8 8
+        calcTokenizationTest "test_with_pos_8.dot" 8 8 [|3; 1; 1; 1; 1; 1; 0; 1|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. Several tokens on the one edge``() =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_9.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc12.dot" printBref
-        checkArr (countEdges res) [|2; 1; 1; 1; 1; 0|]
-        checkGraph res 6 7
+        calcTokenizationTest "test_with_pos_9.dot" 6 7 [|2; 1; 1; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with position. With branch and several tokens on the one edge_1``() =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_pos_10.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc13.dot" printBref
-        checkArr (countEdges res) [|3; 1; 1; 1; 1; 1; 0; 1|]
-        checkGraph res 8 8
+        calcTokenizationTest "test_with_pos_10.dot" 8 8 [|3; 1; 1; 1; 1; 1; 0; 1|]
 
     //[<Test>] eps:eps
     member this.``Calc. Check break literals 1.`` () =
@@ -161,150 +102,78 @@ type ``Lexer Calc Fst Tests`` () =
         let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
         checkGraph res 4 5
 
-    [<Test>] //checked
+    [<Test>]
     member this.``Calc. Example with whitespace.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_21.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc14.dot" printBref
-        checkArr (countEdges res) [|1; 1; 1; 0|]
-        checkGraph res 4 5
+        calcTokenizationTest "test_21.dot" 4 5 [|1; 1; 1; 0|]
         
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Example with whitespace 1.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_16.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc15.dot" printBref
-        checkArr (countEdges res) [|1; 1; 1; 0|]
-        checkGraph res 4 5
+        calcTokenizationTest "test_16.dot" 4 5 [|1; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Example with whitespace 2.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_17.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc16.dot" printBref
-        checkArr (countEdges res) [|1; 1; 1; 0; 1|]
-        checkGraph res 5 5
+        calcTokenizationTest "test_17.dot" 5 5 [|1; 1; 1; 0; 1|]
        
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Example with whitespace 3.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_18.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc17.dot" printBref
-        checkArr (countEdges res) [|0; 1; 0|]
-        checkGraph res 3 3
+        calcTokenizationTest "test_18.dot" 3 3 [|0; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Example with whitespace 4.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_19.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc18.dot" printBref
-        checkArr (countEdges res) [|1; 1; 0; 1|]
-        checkGraph res 4 4
+        calcTokenizationTest "test_19.dot" 4 4 [|1; 1; 0; 1|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Example with whitespace 5.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_20.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc19.dot" printBref
-        checkArr (countEdges res) [|0|]
-        checkGraph res 1 2
+        calcTokenizationTest "test_20.dot" 1 2 [|0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Print info on edges.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_15.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc20.dot" printBref  
-        checkArr (countEdges res) [|8; 0|]
-        checkGraph res 2 3      
+        calcTokenizationTest "test_15.dot" 2 3 [|8; 0|]
         
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Branched multy-digit numbers.`` () =     
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_4_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc21.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 0; 0|]
-        checkGraph res 4 4   
+         calcTokenizationTest "test_4_1.dot" 4 4  [|3; 1; 0; 0|]
         
-    [<Test>] //checked
+    [<Test>]
     member this.``Calc. Branched multy-digit numbers with Binop.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_4_2.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc22.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 1; 1; 0|]
-        checkGraph res 5 5  
+         calcTokenizationTest "test_4_2.dot" 5 5  [|3; 1; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Branched multy-digit numbers sum 1.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_4_3.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc23.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 1; 1; 1; 0|]
-        checkGraph res 6 6      
+        calcTokenizationTest "test_4_3.dot" 6 6  [|3; 1; 1; 1; 1; 0|]   
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Branched multy-digit numbers sum 2.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_4_4.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc24.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 1; 1; 2; 1; 0; 0|]
-        checkGraph res 8 7        
+        calcTokenizationTest "test_4_4.dot" 8 7  [|3; 1; 1; 1; 2; 1; 0; 0|]  
         
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Branched binop.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_5.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc25.dot" printBref 
-        checkArr (countEdges res) [|1; 1; 1; 1; 1; 0|]
-        checkGraph res 6 6      
+        calcTokenizationTest "test_5.dot" 6 6  [|1; 1; 1; 1; 1; 0|] 
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Branched binop or negation.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_6.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc26.dot" printBref  
-        checkArr (countEdges res) [|1; 1; 1; 2; 2; 0|]
-        checkGraph res 6 6  
+        calcTokenizationTest "test_6.dot" 6 6 [|1; 1; 1; 2; 2; 0|]
 
     [<Test>] //strange 
     member this.``Calc. Complex branched 1.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_7.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc27.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 1; 1; 1; 1; 5; 1; 5; 1; 0; 0|] 
-        checkGraph res 12 8 
+        calcTokenizationTest "test_7.dot" 12 8  [|3; 1; 1; 1; 1; 1; 5; 1; 5; 1; 0; 0|] 
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Complex branched 2.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_8.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc28.dot" printBref  
-        checkArr (countEdges res) [|1; 1; 0; 1; 1|]
-        checkGraph res 5 5 
+        calcTokenizationTest "test_8.dot" 5 5  [|1; 1; 0; 1; 1|]
 
-    [<Test>] //checked
+    [<Test>]
     member this.``Calc. Complex branched 3.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_9.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc29.dot" printBref  
-        printf "%A" (countEdges res)
-        checkArr (countEdges res) [|1; 1; 1; 1; 2; 2; 0; 1|]
-        checkGraph res 8 8 
+        calcTokenizationTest "test_9.dot" 8 8 [|1; 1; 1; 1; 2; 2; 0; 1|]
         
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Complex 0`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_12.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc30.dot" printBref  
-        checkArr (countEdges res)  [|1; 1; 1; 2; 1; 1; 0|]
-        checkGraph res 7 7 
+        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 1; 2; 1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Whitespace edge.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_10.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc31.dot" printBref  
-        checkArr (countEdges res)  [|4; 1; 0; 1; 0|]
-        checkGraph res 5 5   
+        calcTokenizationTest "test_10.dot" 5 5 [|4; 1; 0; 1; 0|]
+
         
     [<Test>] 
     member this.``Calc. test 100`` () =
@@ -312,21 +181,13 @@ type ``Lexer Calc Fst Tests`` () =
         let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
         ToDot res @"..\..\Tests\testParserCalc32.dot" printBref         
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with space and idents on edge.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_space_0.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc33.dot" printBref  
-        checkArr (countEdges res)  [|1; 1; 0|]
-        checkGraph res 3 4
+        calcTokenizationTest "test_with_space_0.dot" 3 4 [|1; 1; 0|]
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with space with branch.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_with_space_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc34.dot" printBref  
-        checkArr (countEdges res) [|3; 1; 0; 1; 0|]
-        checkGraph res 5 5
+         calcTokenizationTest "test_with_space_1.dot" 5 5 [|3; 1; 0; 1; 0|]
 
     //[<Test>] NOT CORRECT GRAPH!!
     member this.``Calc. Calc with braces.`` () =
@@ -335,26 +196,18 @@ type ``Lexer Calc Fst Tests`` () =
         ToDot res @"..\..\Tests\testParserCalc35.dot" printBref  
         checkGraph res 10 10      
 
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Calc with braces 2.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "calc_0.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc36.dot" printBref  
-        checkArr (countEdges res) [|2; 1; 0|]
-        checkGraph res 3 4   
+        calcTokenizationTest "calc_0.dot" 3 4 [|2; 1; 0|] 
         
-    [<Test>] //checked
+    [<Test>] 
     member this.``Calc. Test with same tokens.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_same_tok.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc37.dot" printBref  
-        checkArr (countEdges res) [|7; 1; 0|]
-        checkGraph res 3 4                                
+        calcTokenizationTest "test_same_tok.dot" 3 4 [|7; 1; 0|]                         
 
-[<EntryPoint>]
-let f x =
-      let t = new ``Lexer Calc Fst Tests`` () 
-      let a = t.``Calc. Simple number.``()
-      //printfn "%A" a      
-      1
+//[<EntryPoint>]
+//let f x =
+//      let t = new ``Lexer Calc Fst Tests`` () 
+//      let a = t.``Calc. Simple number.``()
+//      //printfn "%A" a      
+//      1
 

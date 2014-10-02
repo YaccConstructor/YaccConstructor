@@ -51,9 +51,9 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let conversions = new ResizeArray<string>()
-
-    AddinManager.Registry.Dispose()
+    
     AddinManager.Initialize()
+    AddinManager.Registry.Dispose()
     AddinManager.Registry.Update(null)
 
 

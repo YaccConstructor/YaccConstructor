@@ -162,3 +162,5 @@ src/RNGLR.AstToAstTest/log*.txt
 src/RNGLR.AstToAstTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/log1.txt
+src/RNGLRParser.SimpleTest/res.dot
+src/TSQL/res.dot

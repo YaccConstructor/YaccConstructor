@@ -76,7 +76,7 @@
     </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
-      <Project>{ddd90630-1cda-4cb3-9a0a-6a1253478c2d}</Project>
+      <Project>{c02f5615-1029-4900-aabd-a4b75836986a}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Helper\Helper.fsproj">

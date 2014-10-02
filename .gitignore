@@ -161,3 +161,4 @@ src/JSON_Parser/JSONParser.fs
 src/RNGLR.AstToAstTest/log*.txt
 src/RNGLR.AstToAstTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.yrd.fs
+src/RNGLR.OtherSppfTest/log1.txt

@@ -51,9 +51,11 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let conversions = new ResizeArray<string>()
-
+    
     AddinManager.Initialize()
+    AddinManager.Registry.Dispose()
     AddinManager.Registry.Update(null)
+
 
     let addinFrontends = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray
     let addinConversions = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion> |> Seq.toArray

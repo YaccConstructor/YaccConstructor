@@ -48,9 +48,6 @@
     <Reference Include="FSharpx.Core">
       <HintPath>..\..\Bin\Debug\v40\FSharpx.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FsYacc">
-      <HintPath>..\..\Bin\Debug\v40\FsYacc.exe</HintPath>
-    </Reference>
     <Reference Include="Helper">
       <HintPath>..\..\Bin\Debug\v40\Helper.dll</HintPath>
     </Reference>
@@ -74,6 +71,11 @@
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{39f8bc90-c8e5-4372-bc16-e699a342702b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">

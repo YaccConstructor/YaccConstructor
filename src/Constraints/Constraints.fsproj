@@ -47,6 +47,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
@@ -72,7 +78,7 @@
     </ProjectReference>
     <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
       <Name>FsYacc</Name>
-      <Project>{c02f5615-1029-4900-aabd-a4b75836986a}</Project>
+      <Project>{39f8bc90-c8e5-4372-bc16-e699a342702b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Helper\Helper.fsproj">

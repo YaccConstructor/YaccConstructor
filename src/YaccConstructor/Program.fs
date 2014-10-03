@@ -52,9 +52,12 @@ let () =
     let testFile = ref None
     let conversions = new ResizeArray<string>()
     
-    AddinManager.Initialize()
-    AddinManager.Registry.Dispose()
+    AddinManager.Initialize()    
+    let x = AddinManager.Registry.RegistryPath
+    printfn "%A" x
+    System.IO.Directory.Delete(x, true)
     AddinManager.Registry.Update(null)
+
 
 
     let addinFrontends = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray

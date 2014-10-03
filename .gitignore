@@ -159,3 +159,5 @@ src/JSON_Parser/JSONParser.fs
 *.csproj.user
 src/RNGLR.OtherSppfTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.txt
+src/RNGLRParser.SimpleTest/res.dot
+src/TSQL/res.dot

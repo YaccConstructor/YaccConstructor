@@ -34,7 +34,6 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All frontends`` () =
-        //AddinManager.Initialize()
         let frontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
         let frontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) frontendsManager 
         let allFrontends = 
@@ -52,7 +51,6 @@ type ``Components loader tests`` () =
 
     [<Test>]
     member test.``All conversions`` () =
-        //AddinManager.Initialize()
         let conversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
         let conversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) conversionsManager
         let allConversions = 
@@ -71,7 +69,6 @@ type ``Components loader tests`` () =
     
     [<Test>]
     member test.``Get generators name`` () =
-        //AddinManager.Initialize()
         let generatorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 

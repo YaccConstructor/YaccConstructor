@@ -58,9 +58,6 @@
       <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
-    </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
@@ -82,6 +79,11 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FsYacc\FsYacc.fsproj">
+      <Name>FsYacc</Name>
+      <Project>{ddd90630-1cda-4cb3-9a0a-6a1253478c2d}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Helper\Helper.fsproj">

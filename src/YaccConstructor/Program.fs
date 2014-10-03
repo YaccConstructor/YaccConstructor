@@ -53,9 +53,9 @@ let () =
     let conversions = new ResizeArray<string>()
     
     AddinManager.Initialize()    
-    //let x = AddinManager.Registry.RegistryPath
-    //printfn "%A" x
-    //System.IO.Directory.Delete(x, true)
+    let x = AddinManager.Registry.RegistryPath
+    printfn "%A" x
+    System.IO.Directory.Delete(x, true)
     AddinManager.Registry.Update(null)
 
 

@@ -11,51 +11,43 @@ namespace Highlighting.Core
         /// For each language name returns ycTokenToString dictionary
         /// </summary>
         private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
-        private static readonly LockObject lockObject = new LockObject();
 
-        public static void AddYcItem(string key, string value, string lang)
+        public static void AddYcItem(string key, string value, int ycNumber, string lang)
         {
-            lang = lang.ToLower();
-            key = key.ToLower();
+            lang = lang.ToLowerInvariant();
+            key = key.ToLowerInvariant();
             if (String.IsNullOrEmpty(key) || String.IsNullOrEmpty(value))
                 return;
 
-            lock (lockObject)
+            if (!allYcToString.ContainsKey(lang))
             {
-                if (!allYcToString.ContainsKey(lang))
-                {
-                    allYcToString.Add(lang, new Dictionary<string, StringValue>());
-                }
+                allYcToString.Add(lang, new Dictionary<string, StringValue>());
+            }
 
-                var dict = allYcToString[lang];
+            var dict = allYcToString[lang];
 
-                if (dict.ContainsKey(key))
+            if (dict.ContainsKey(key))
+            {
+                StringValue strValue = dict[key];
+                if (strValue.NumOfValues == Value.OneValue && strValue.TextValue != value)
                 {
-                    var strValue = dict[key];
-                    if (strValue.numOfValues == Value.OneValue)
-                    {
-                        if (strValue.stringValue != value)
-                        {
-                            strValue.numOfValues = Value.ManyValues;
-                            strValue.stringValue = null;
-                        }
-                    }
+                    strValue.NumOfValues = Value.ManyValues;
+                    strValue.TextValue = null;
                 }
-                else
+            }
+            else
+            {
+                dict.Add(key, new StringValue()
                 {
-                    dict.Add(key, new StringValue()
-                    {
-                        numOfValues = Value.OneValue,
-                        stringValue = value,
-                    });
-                }
-
+                    NumOfValues = Value.OneValue,
+                    TextValue = value,
+                    YcNumber = ycNumber,
+                });
             }
         }
 
         public static string GetYcName(string lang, string str)
         {
-            //string str = Yard.Generators.RNGLR.Helper._getLiteralName(s);
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
                 return null;
 
@@ -65,37 +57,52 @@ namespace Highlighting.Core
                 return null;
 
             return
-                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue /*&& item.Key == str*/&& item.Value.stringValue == str)
+                dict.FirstOrDefault(item => item.Value.NumOfValues == Value.OneValue && item.Value.TextValue == str)
                     .Key;
 
+        }
+
+        public static int GetNumber(string lang, string key)
+        {
+            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
+                return -1;
+
+            var dict = allYcToString[lang];
+
+            if (string.IsNullOrEmpty(key) || !dict.ContainsKey(key))
+                return -1;
+
+            return dict[key].YcNumber;
         }
 
         public static string GetStringName(string lang, string str)
         {
             if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
                 return null;
-            
+
             var dict = allYcToString[lang];
 
             if (string.IsNullOrEmpty(str))
                 return null;
 
             return
-                dict.FirstOrDefault(item => item.Value.numOfValues == Value.OneValue && item.Key == str)
-                    .Value.stringValue;
+                dict.FirstOrDefault(item =>
+                    item.Value.NumOfValues == Value.OneValue && item.Key == str)
+                    .Value.TextValue;
         }
     }
 
     public enum Value
     {
-        NoValue,
+        //NoValue,
         OneValue,
         ManyValues
     }
 
     public class StringValue
     {
-        public Value numOfValues { get; set; }
-        public string stringValue { get; set; }
+        public Value NumOfValues { get; set; }
+        public string TextValue { get; set; }
+        public int YcNumber { get; set; }
     }
 }

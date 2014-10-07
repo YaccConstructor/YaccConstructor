@@ -94,6 +94,18 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YC.Common">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Common.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Constraints.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Conversions.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">

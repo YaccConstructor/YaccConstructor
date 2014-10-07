@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
+# Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{ADFB2D79-F895-4FAC-AD8B-232D80BD542C}"
@@ -19,6 +19,10 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Conversions.Test", "Conversions.Test\Conversions.Test.fsproj", "{8EAAC2A1-D03A-4F42-9182-D294A3DB9FDF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "YaccConstructor\YaccConstructor.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.Generators", "Common.Generators\Common.Generators.fsproj", "{A879DFD0-550D-4351-B0C0-2BDF6A83127D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common.Frontends", "Common.Frontends\Common.Frontends.fsproj", "{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +68,18 @@ Global
 		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|x86.ActiveCfg = Release|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A879DFD0-550D-4351-B0C0-2BDF6A83127D}.Release|x86.ActiveCfg = Release|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAAE89C7-C1AE-4FD2-9FAE-1A873324016B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

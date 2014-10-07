@@ -30,6 +30,9 @@ exception FEError of string
 exception GenError of string
 exception CheckerError of string
 
+[<assembly:AddinRoot ("YaccConstructor", "1.0")>]
+do()
+
 let eol = System.Environment.NewLine
 
 let log (e:System.Exception) msg =
@@ -48,9 +51,14 @@ let () =
     let testsPath = ref <| Some ""
     let testFile = ref None
     let conversions = new ResizeArray<string>()
-
-    AddinManager.Initialize()
+    
+    AddinManager.Initialize()    
+    //let x = AddinManager.Registry.RegistryPath
+    //printfn "%A" x
+    //System.IO.Directory.Delete(x, true)
     AddinManager.Registry.Update(null)
+
+
 
     let addinFrontends = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend> |> Seq.toArray
     let addinConversions = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion> |> Seq.toArray

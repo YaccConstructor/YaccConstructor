@@ -33,6 +33,7 @@ type IInjectedLanguageModule<'br,'range,'node> =
      abstract XmlPath: string
      abstract GetNextTree: int -> 'node*bool
      abstract GetForestWithToken: 'range -> ResizeArray<'node>
+     abstract GetPairedRanges: int -> int -> 'range -> bool -> ResizeArray<'range>
      abstract Process
         : AbstractAnalysis.Common.LexerInputGraph<'br>
           -> ResizeArray<string * 'range> * ResizeArray<string * 'range>

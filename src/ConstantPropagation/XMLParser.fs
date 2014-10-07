@@ -17,10 +17,19 @@ let parseXml (path : string) =
         if child.NodeType = XmlNodeType.Comment 
         then child <- child.NextSibling
 
+        let language = 
+            match child.Name.ToLowerInvariant() with
+            | "language" -> child.InnerText.Trim().ToLowerInvariant()
+            | x -> failwithf "Unexpected tag %A. Expected <Language>" x
+
+        child <- child.NextSibling
+        if child.NodeType = XmlNodeType.Comment 
+        then child <- child.NextSibling
+
         let methodName = 
             match child.Name.ToLowerInvariant() with
-            | "fullname" -> child.InnerText.Trim().ToLowerInvariant().Split('.')
-            | x -> failwithf "Unexpected tag %A. Expected <Fullname>" x
+            | "method" -> child.InnerText.Trim().ToLowerInvariant().Split('.')
+            | x -> failwithf "Unexpected tag %A. Expected <Method>" x
 
         child <- child.NextSibling
         if child.NodeType = XmlNodeType.Comment 
@@ -40,7 +49,7 @@ let parseXml (path : string) =
             | "returntype" -> child.InnerText.Trim().ToLowerInvariant()
             | x -> failwithf "Unexpected tag %A. Expected <ReturnType>" x
 
-        new Hotspot(methodName, pos, returnType)
+        language, new Hotspot(methodName, pos, returnType)
     
     let xmlDocument = new XmlDocument()
     xmlDocument.Load (path)
@@ -48,17 +57,11 @@ let parseXml (path : string) =
     let mutable element = xmlDocument.DocumentElement.ChildNodes
     let mutable result = []
     
-    for langNode in element do
-        if langNode.NodeType <> XmlNodeType.Comment 
+    for hotNode in element do
+        if hotNode.NodeType <> XmlNodeType.Comment 
         then
-            match langNode.Name.ToLowerInvariant() with
-            | "language" -> 
-                let lang = langNode.Attributes.GetNamedItem("name").Value.ToLowerInvariant()
-                for item in langNode.ChildNodes do
-                    if item.NodeType <> XmlNodeType.Comment
-                    then
-                        let hotspot = parseHotspot item.FirstChild
-                        result <- (lang, hotspot) :: result
-            | x -> failwithf "Unexpected tag %A. Expected <Language>" x
-
+            match hotNode.Name.ToLowerInvariant() with
+            | "hotspot" -> 
+                result <- parseHotspot hotNode.FirstChild :: result
+            | x -> failwithf "Unexpected tag %A. Expected <Hotspot>" x
     result

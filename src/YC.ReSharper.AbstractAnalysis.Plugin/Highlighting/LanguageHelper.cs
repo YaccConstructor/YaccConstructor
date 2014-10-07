@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Highlighting.Core;
+using JetBrains.TextControl.Graphics;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -10,7 +12,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public static string GetBrother(string lang, string str, Brother brother)
         {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLower());
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
             if (language == null)
                 return null;
             return language.GetBrother(str, brother);
@@ -18,19 +20,38 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public static void Update(string lang, Dictionary<string, TokenInfo> tokenInfo)
         {
-            if (!availableLang.Exists(item => item.LanguageName == lang.ToLower()))
+            if (!availableLang.Exists(item => item.LanguageName == lang.ToLowerInvariant()))
             {
-                var language = new Language(lang.ToLower(), tokenInfo);
+                var language = new Language(lang.ToLowerInvariant(), tokenInfo);
                 availableLang.Add(language);
             }
         }
 
         public static string GetColor(string lang, string token)
         {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLower());
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
             if (language == null)
                 return null;
-            return language.GetColor(token.ToLower());
+            return language.GetColor(token.ToLowerInvariant());
+        }
+
+        public static int GetNumberFromTextValue(string lang, string text)
+        {
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (language == null)
+                return -1;
+
+            string ycName = language.GetYcName(text);
+            return language.GetNumber(ycName);
+        }
+
+        public static int GetNumberFromYcName(string lang, string ycName)
+        {
+            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
+            if (language == null)
+                return -1;
+
+            return language.GetNumber(ycName);
         }
     }
 
@@ -50,30 +71,26 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         {
             string ycName = GetYcName(str);
 
-            if (string.IsNullOrEmpty(ycName))
+            if (String.IsNullOrEmpty(ycName) || 
+                !tokenInfos.ContainsKey(ycName))
                 return null;
 
-            if (tokenInfos.ContainsKey(ycName))
+            switch (brother)
             {
-                if (brother == Brother.Left)
-                {
+                case Brother.Left:
                     return tokenInfos[ycName].LeftPair;
-                }
-                if (brother == Brother.Right)
-                {
+                case Brother.Right:
                     return tokenInfos[ycName].RightPair;
-                }
+                default:
+                    return null;
             }
-            return null;
         }
 
         /// <summary>
         /// Maps token name from YaccConstructor. For example if str is "(" then returned value is "LBRACE"
         /// This method contains definition only for paired tokens.
         /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        private string GetYcName(string str)
+        public string GetYcName(string str)
         {
             return YcHelper.GetYcName(LanguageName, str);
         }
@@ -85,12 +102,15 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
             return ColorHelper.DefaultColor;
         }
+
+        public int GetNumber(string ycName)
+        {
+            return YcHelper.GetNumber(LanguageName, ycName);
+        }
     }
 
     class TokenInfo
     {
-        //possible it is unnecessary
-        //public string YcName { get; set; }
         public string LeftPair { get; set; }
         public string RightPair { get; set; }
         public string Color { get; set; }

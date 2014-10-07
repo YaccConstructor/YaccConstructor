@@ -5,6 +5,8 @@ open QuickGraph
 open QuickGraph.Algorithms
 open YC.AbstractAnalysis.CommonInterfaces
 open AbstractAnalysis.Common
+open Yard.Generators.RNGLR.AST
+open Yard.Generators.RNGLR.OtherSPPF
 
 open System
 open Mono.Addins
@@ -44,23 +46,26 @@ type LanguagesProcessor<'br,'range, 'node>() =
 
     member this.Process (graphs:ResizeArray<string*_>) =
         graphs
-        |> ResizeArray.map(fun (l,g) -> injectedLanguages.[l].Process g)
+        |> ResizeArray.map(fun (lang, graph) -> injectedLanguages.[lang].Process graph)
 
     member this.LexingFinished =  injectedLanguages |> Seq.map (fun l -> l.Value.LexingFinished)
     member this.ParsingFinished = injectedLanguages |> Seq.map (fun l -> l.Value.ParsingFinished)
-    member this.XmlPath l = injectedLanguages.[l].XmlPath
-    member this.GetNextTree l i = injectedLanguages.[l].GetNextTree i
-    member this.GetForestWithToken l rng = injectedLanguages.[l].GetForestWithToken rng
+    member this.XmlPath lang = injectedLanguages.[lang].XmlPath
+    member this.GetNextTree lang i = injectedLanguages.[lang].GetNextTree i
+    member this.GetForestWithToken lang rng = injectedLanguages.[lang].GetForestWithToken rng
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
         tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
-        , getDocumentRange:'br -> 'range) as this =
+        , getDocumentRange:'br -> 'range
+        , printAst: Tree<'TokenType> -> string -> unit
+        , printOtherAst: OtherTree<'TokenType> -> string -> unit) as this =
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<Yard.Generators.RNGLR.AST.Tree<'TokenType> * _> = [] 
+    let mutable forest: list<Tree<'TokenType> * _> = [] 
+    let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
     
@@ -90,8 +95,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 |> addLError
                 None
 
-        let tokenizedGraph = tokenize graph 
         
+        let tokenizedGraph = tokenize graph 
         prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
         tokenizedGraph 
@@ -100,8 +105,9 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             (function 
                 | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
                     forest <- (tree, errors) :: forest
+                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,errors) -> tok |> Array.iter addPError 
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -144,12 +150,25 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             treeNode, true
         | _ -> failwith "Unexpected state in tree generation"
 
-    member this.TokenToPos calculatePos token = 
+    member this.TokenToPos calculatePos (token : 'TokenType)= 
         let data : string * array<AbstractLexer.Core.Position<'br>> = unbox <| tokenData token
         calculatePos <| snd data
 
-    member this.GetForestWithToken range =        
-        getForestWithToken range
+    member this.GetForestWithToken range = getForestWithToken range
+
+    member this.GetPairedRanges leftNumber rightNumber range toRight = 
+        let tokens = new ResizeArray<_>()
+        let tokToPos = this.TokenToPos calculatePos
+
+        for otherTree in otherForest do
+            tokens.AddRange <| otherTree.FindAllPair leftNumber rightNumber range toRight tokenToNumber tokToPos
+        
+        let ranges = new ResizeArray<_>()
+        tokens 
+        |> ResizeArray.iter (fun token -> 
+            Seq.iter (fun r -> ranges.Add r) <| tokToPos token)
+
+        ranges
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
@@ -169,6 +188,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let name = tok |> (tokenToNumber >>  numToString)
             let (language : string), br = tokenData tok :?> _
             e name language br
+        
         
         processLang graph lexerErrors.Add addError
 

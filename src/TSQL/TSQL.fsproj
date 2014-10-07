@@ -30,8 +30,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <!--Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" /-->
-  <!--Import Project="$(FsYardPath)" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
@@ -39,13 +37,9 @@
     <Module>Yard.Examples.MSParser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>$(SolutionDir)..\Bin\Debug\Addins\</OutputPath>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <None Include="Lexer.fsl" />
@@ -72,18 +66,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -110,6 +92,9 @@
     <Reference Include="JetBrains.Platform.ReSharper.Shell">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.Platform.ReSharper.Shell.Extensions">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Shell.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.Util">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.Util.dll</HintPath>
@@ -155,6 +140,18 @@
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="YC.Common">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Common.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Constraints.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Conversions.0.0.8-dev-22-ci.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
@@ -172,6 +169,11 @@
       <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
+      <Name>ReSharperExtension</Name>
+      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Name>RNGLRAbstractParser</Name>
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
@@ -187,14 +189,14 @@
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\YC.EL.ReSharper.Common\YC.SEL.ReSharper.Common.fsproj">
-      <Name>YC.SEL.ReSharper.Common</Name>
-      <Project>{6a086756-9f01-4117-a5cf-ce40ad8b01c4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
       <Name>YC.SEL.SDK.Core</Name>
       <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
+      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
+      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">

@@ -7,17 +7,18 @@ open YC.AbstractAnalysis.CommonInterfaces
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open Mono.Addins
 open YC.EL.ReSharper.Common
+open ReSharperExtension
+open JetBrains.Application
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
 
 do()
 
-
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 
-
 [<Extension>]
+[<ShellComponent>]
 type CalcInjectedLanguageModule () =
     let printTag tag printBrs = 
         match tag with
@@ -55,11 +56,8 @@ type CalcInjectedLanguageModule () =
 
     let processor =
         new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
-                      , getRange)
+                      , getRange, printAstToDot, otherAstToDot)
     
-    static let instance = new CalcInjectedLanguageModule()
-    static member Instance = instance
-
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "calc"
         member this.Process graphs = processor.Process graphs
@@ -67,4 +65,7 @@ type CalcInjectedLanguageModule () =
         member this.ParsingFinished = processor.ParsingFinished
         member this.XmlPath = xmlPath
         member this.GetNextTree i = processor.GetNextTree i
-        member this.GetForestWithToken rng = processor.GetForestWithToken rng
+        member this.GetForestWithToken range = processor.GetForestWithToken range
+        member this.GetPairedRanges left right range toRight = processor.GetPairedRanges left right range toRight
+
+    interface IReSharperLanguage

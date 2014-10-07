@@ -1,16 +1,19 @@
 // (c) Microsoft Corporation 2005-2009.  
 
-module FSharp.PowerPack.FsLex.Driver 
+module internal FSharp.PowerPack.FsLex.Driver 
 
 open FSharp.PowerPack.FsLex
 open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
 open Printf
-open Microsoft.FSharp.Text.Lexing
-open Microsoft.FSharp.Text
+open Internal.Utilities
+open Internal.Utilities.Text.Lexing
 open System
 open System.Collections.Generic
-open System.IO 
+open System.IO
+open YC.FST.GraphBasedFst
+open Microsoft.FSharp.Collections 
+open QuickGraph
 
 //------------------------------------------------------------------
 // This code is duplicated from Microsoft.FSharp.Compiler.UnicodeLexing
@@ -43,7 +46,7 @@ let out = ref None
 let inputCodePage = ref None
 let light = ref None
 
-let mutable lexlib = "AbstractLexer.Core"
+let mutable lexlib = "Microsoft.FSharp.Text.Lexing"
 
 let usage =
   [ ArgInfo ("-o", ArgType.String (fun s -> out := Some s), "Name the output file."); 
@@ -59,8 +62,8 @@ let _ = ArgParser.Parse(usage, (fun x -> match !input with Some _ -> failwith "m
 let outputInt (os: TextWriter) (n:int) = os.Write(string n)
 
 let outputCodedUInt16 (os: #TextWriter)  (n:int) = 
-  os.Write n
-  os.Write "us; "
+  os.Write n;
+  os.Write "us; ";
 
 let sentinel = 255 * 256 + 255 
 
@@ -81,14 +84,14 @@ let main() =
           printf "%s(%d,%d): error: %s" filename lexbuf.StartPos.Line lexbuf.StartPos.Column 
               (match e with 
                | Failure s -> s 
-               | _ -> e.Message)
+               | _ -> e.Message);
           exit 1
     printfn "compiling to dfas (can take a while...)";
     let perRuleData, dfaNodes = AST.Compile spec
     let dfaNodes = dfaNodes |> List.sortBy (fun n -> n.Id) 
 
-    printfn "%d states" dfaNodes.Length
-    printfn "writing output"
+    printfn "%d states" dfaNodes.Length;
+    printfn "writing output"; 
     
     let output = 
         match !out with 
@@ -98,21 +101,22 @@ let main() =
     use os = System.IO.File.CreateText output
 
     if (!light = Some(false)) || (!light = None && (Path.HasExtension(output) && Path.GetExtension(output) = ".ml")) then
-        cfprintfn os "#light \"off\""
+        cfprintfn os "#light \"off\"";
     
     let printLinesIfCodeDefined (code,pos:Position) =
         if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
         then 
-            cfprintfn os "# %d \"%s\"" pos.Line pos.FileName
-            cfprintfn os "%s" code
+            cfprintfn os "# %d \"%s\"" pos.Line pos.FileName;
+            cfprintfn os "%s" code;
 
     printLinesIfCodeDefined spec.TopCode
     let code = fst spec.TopCode
-    lineCount := !lineCount + code.Replace("\r","").Split([| '\n' |]).Length
-    cfprintfn os "# %d \"%s\"" !lineCount output
+    lineCount := !lineCount + code.Replace("\r","").Split([| '\n' |]).Length;
+    cfprintfn os "# %d \"%s\"" !lineCount output;
     
-    cfprintfn os "let trans : uint16[] array = "
-    cfprintfn os "    [| "
+    let tableTransitions = ResizeArray.init dfaNodes.Length (fun _ -> ResizeArray.init 257 (fun _ -> -1))
+    cfprintfn os "let trans : uint16[] array = ";
+    cfprintfn os "    [| ";
     if !unicode then 
         let specificUnicodeChars = GetSpecificUnicodeChars()
         // This emits a (numLowUnicodeChars+NumUnicodeCategories+(2*#specificUnicodeChars)+1) * #states array of encoded UInt16 values
@@ -127,8 +131,8 @@ let main() =
         //
         // For the SpecificUnicodeChars the entries are char/next-state pairs.
         for state in dfaNodes do
-            cfprintfn os "    (* State %d *)" state.Id
-            fprintf os "     [| "
+            cfprintfn os "    (* State %d *)" state.Id;
+            fprintf os "     [| ";
             let trans = 
                 let dict = new Dictionary<_,_>()
                 state.Transitions |> List.iter dict.Add
@@ -140,15 +144,15 @@ let main() =
                   outputCodedUInt16 os sentinel
             for i = 0 to numLowUnicodeChars-1 do 
                 let c = char i
-                emit (EncodeChar c)
+                emit (EncodeChar c);
             for c in specificUnicodeChars do 
-                outputCodedUInt16 os (int c)
-                emit (EncodeChar c)
+                outputCodedUInt16 os (int c); 
+                emit (EncodeChar c);
             for i = 0 to NumUnicodeCategories-1 do 
-                emit (EncodeUnicodeCategoryIndex i)
-            emit Eof
+                emit (EncodeUnicodeCategoryIndex i);
+            emit Eof;
             cfprintfn os "|];"
-        done
+        done;
     
     else
         // Each row for the ASCII table has format 
@@ -167,40 +171,51 @@ let main() =
                 dict
             let emit n = 
                 if trans.ContainsKey(n) then 
-                  outputCodedUInt16 os trans.[n].Id 
+                  outputCodedUInt16 os trans.[n].Id
+                  trans.[n].Id 
                 else
                   outputCodedUInt16 os sentinel
+                  sentinel
             for i = 0 to 255 do 
-                let c = char i
-                emit (EncodeChar c)
-            emit Eof
+                let c = char i                
+                tableTransitions.[state.Id].[i] <- emit (EncodeChar c);
+            tableTransitions.[state.Id].[256] <- emit Eof;
             cfprintfn os "|];"
-        done
+        done;
     
-    cfprintfn os "    |] "
+    cfprintfn os "    |] ";
     
-    fprintf os "let actions : uint16[] = [|"
+    let actionFunc = ResizeArray.init dfaNodes.Length (fun _ -> new ResizeArray<_>())
+    let count = ref 0
+    //let actionFunc = ResizeArray.init dfaNodes.Length (fun _ -> -1)
+    fprintf os "let actions : uint16[] = [|";
     for state in dfaNodes do
         if state.Accepted.Length > 0 then 
           outputCodedUInt16 os (snd state.Accepted.Head)
+          //actionFunc.Add(snd state.Accepted.Head)
+          actionFunc.[!count].Add(snd state.Accepted.Head)
         else
           outputCodedUInt16 os sentinel
-    done
-    cfprintfn os "|]"
-    cfprintfn os "let _fslex_tables = %s.%sTables.Create(trans,actions)" lexlib domain
+          //actionFunc.Add(sentinel)
+          //actionFunc.[!count].Add(sentinel)
+        count := !count + 1
+    done;
+
+    cfprintfn os "|]";
+    cfprintfn os "let _fslex_tables = %s.%sTables.Create(trans,actions)" lexlib domain;
     
-    cfprintfn os "let rec _fslex_dummy () = _fslex_dummy() "
+    cfprintfn os "let rec _fslex_dummy () = _fslex_dummy() ";
 
     // These actions push the additional start state and come first, because they are then typically inlined into later
     // rules. This means more tailcalls are taken as direct branches, increasing efficiency and 
     // improving stack usage on platforms that do not take tailcalls.
-//    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
-//        cfprintfn os "(* Rule %s *)" ident;
-//        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
     for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
         cfprintfn os "(* Rule %s *)" ident;
-        cfprintfn os "let fslex_actions_%s %s _fslex_state lexeme brs =" ident (String.Join(" ",Array.ofList args));
-        cfprintfn os "  match _fslex_state with" ;
+        cfprintfn os "and %s %s (lexbuf : %s.LexBuffer<_>) = _fslex_%s %s %d lexbuf" ident (String.Join(" ",Array.ofList args)) lexlib ident (String.Join(" ",Array.ofList args)) startNode.Id;
+    for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+        cfprintfn os "(* Rule %s *)" ident;
+        cfprintfn os "and _fslex_%s %s _fslex_state lexbuf =" ident (String.Join(" ",Array.ofList args));
+        cfprintfn os "  match _fslex_tables.Interpret(_fslex_state,lexbuf) with" ;
         actions |> Seq.iteri (fun i (code,pos) -> 
             cfprintfn os "  | %d -> ( " i;
             cfprintfn os "# %d \"%s\"" pos.Line pos.FileName;
@@ -216,6 +231,86 @@ let main() =
         
     printLinesIfCodeDefined spec.BottomCode
     cfprintfn os "# 3000000 \"%s\"" output;
+  
+    
+    let ToGraphBasedFst  =
+        let resFST = new FST<_,_>()
+        resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
+        
+        let stEOF = tableTransitions.[0].[256] 
+        new TaggedEdge<_,_>(0, stEOF, new EdgeLbl<_,_>(Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
+        resFST.FinalState.Add(stEOF)
+                         
+        for state in dfaNodes do
+            for i in 0..256 do
+                let st = tableTransitions.[state.Id].[i]
+                if st <> sentinel 
+                then 
+                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                else 
+                    if state.Id <> 0
+                    then 
+                        let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
+                        if tableTransitions.[0].[i] <> sentinel || i = 256 
+                        then  
+                            new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                            
+        let getVal printV s = 
+            match s with
+            | Smbl y -> "Smbl " + printV y
+            | Eps -> "Eps"
+            | _ -> ""
+
+        let filePathFst = 
+            match !out with 
+            | Some x -> Path.Combine (Path.GetDirectoryName x,Path.GetFileNameWithoutExtension(x)) + "_Abstract.fs" 
+            | _ -> Path.Combine (Path.GetDirectoryName filename,Path.GetFileNameWithoutExtension(filename)) + "_Abstract.fs"
+
+        let fstStream = new StreamWriter(filePathFst)
+
+        let printIfCodeDefined (code,pos:Position) =
+            if pos <> Position.Empty  // If bottom code is unspecified, then position is empty.        
+            then 
+                 fstStream.WriteLine(sprintf "%s" code);
+
+        printIfCodeDefined spec.TopCode
+
+        fstStream.WriteLine("let fstLexer () = ")
+        fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
+        fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
+        fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
+        for edge in resFST.Edges do         
+            fstStream.WriteLine(
+                sprintf  
+                    "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
+                    edge.Source
+                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
+                    //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
+                    (getVal (string) edge.Tag.OutSymb) edge.Target)
+                                    
+        fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
+
+        fstStream.WriteLine("\nlet actions () =")
+        fstStream.WriteLine("   [|")
+        
+        let strs = ref ""
+        for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
+                actions |> Seq.iteri (fun i (code,pos) -> 
+                    strs := !strs + "\n      (fun (gr : GraphTokenValue<_>) ->\n"  
+
+                    let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
+                    for line in lines do
+                        strs := !strs +  (sprintf "               %s" line);
+                    strs := !strs + ");")
+    
+        fstStream.WriteLine(!strs)
+        fstStream.WriteLine()
+
+        fstStream.WriteLine("   |]\n")
+        fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation")
+        fstStream.Close()
+
+    ToGraphBasedFst    
     
   with e -> 
     printf "FSLEX: error FSL000: %s" (match e with Failure s -> s | e -> e.ToString());

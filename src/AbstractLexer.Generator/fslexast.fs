@@ -4,7 +4,9 @@ module FSharp.PowerPack.FsLex.AST
 
 open System.Collections.Generic
 open Microsoft.FSharp.Text
-open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Collections
+open Internal.Utilities
+open Internal.Utilities.Text.Lexing
 
 let (|KeyValue|) (kvp:KeyValuePair<_,_>) = kvp.Key,kvp.Value
 
@@ -192,7 +194,7 @@ let LexerStateToNfa (macros: Map<string,_>) (clauses: Clause list) =
         | Seq res -> 
             List.foldBack (CompileRegexp) res dest 
         | Inp (Alphabet c) -> 
-            nfaNodeMap.NewNfaNode([(c, dest)],[])
+             nfaNodeMap.NewNfaNode([(c, dest)],[])
             
         | Star re -> 
             let nfaNode = nfaNodeMap.NewNfaNode([(Epsilon, dest)],[])

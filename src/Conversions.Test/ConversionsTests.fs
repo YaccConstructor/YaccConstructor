@@ -47,7 +47,7 @@ let getBE name =
     match Seq.tryFind (fun (elem : Generator) -> elem.Name = name) GeneratorsManager with
     | Some be -> be
     | None -> failwith (name + " is not found.")
-let treeDump = getBE "TreeDump"
+let treeDump = new Yard.Generators.TreeDump.TreeDump ()
 
 let dummyRule : elem<Source.t,Source.t> = {omit=false; binding=None; checker=None; rule=PToken (Source.t "DUMMY")}
 

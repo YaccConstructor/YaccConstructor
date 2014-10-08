@@ -29,20 +29,33 @@ open Conversions.TransformAux
 open NUnit.Framework
 open ConversionsTests
 open Yard.Core.Helpers
+open Mono.Addins
+
+[<SetUpFixture>]
+type SetUp()=
+    [<SetUp>]
+    member this.SetUp () =
+        AddinManager.Initialize()
+        AddinManager.Registry.Update()
 
 [<TestFixture>]
 type ``Conversions expand metarules tests`` () =
     
     let basePath = System.IO.Path.Combine(conversionTestPath, "Meta")    
-    let conversion = "ExpandMeta" 
 
     let frontend = getFrontend "YardFrontend"    
+
+    let applyConversion loadIL = 
+        {
+            loadIL
+                with grammar = (new Conversions.ExpandMeta.ExpandMeta()).ConvertGrammar (loadIL.grammar, [||])                               
+        }
 
     let runMetaTest srcFile =
         let srcPathFile = System.IO.Path.Combine(basePath, srcFile)                                         
         let ilTree = frontend.ParseGrammar srcPathFile                
         Namer.initNamer ilTree.grammar
-        let ilTreeConverted = apply_Conversion conversion ilTree 
+        let ilTreeConverted = applyConversion ilTree 
         let expected =
             try
                 srcPathFile + ".ans" |> frontend.ParseGrammar

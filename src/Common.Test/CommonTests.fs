@@ -10,15 +10,19 @@ open System.Linq
 open System.IO
 open Mono.Addins
 
-AddinManager.Initialize()
-AddinManager.Registry.Update()
+[<SetUpFixture>]
+type SetUp()=
+    [<SetUp>]
+    member this.SetUp () =
+        AddinManager.Initialize()
+        AddinManager.Registry.Update()
 
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]
     member test.``All generators`` () =        
         let generatorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
-        let generatorNames = Seq.map (fun (elem : Generator) -> elem.Name) generatorsManager
+        let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators = 
             List.ofSeq generatorNames
             |> List.sort
@@ -28,14 +32,14 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allGenerators,expetedResult)
+        Assert.AreEqual(expetedResult |> List.sort, allGenerators |> List.sort)
     
 
 
     [<Test>]
     member test.``All frontends`` () =
         let frontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
-        let frontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) frontendsManager 
+        let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager 
         let allFrontends = 
             List.ofSeq frontendNames
             |> List.sort
@@ -45,7 +49,7 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allFrontends
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allFrontends,expetedResult)
+        Assert.AreEqual(expetedResult, allFrontends)
 
         
 
@@ -64,7 +68,7 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allConversions,expetedResult)
+        Assert.AreEqual(expetedResult |> List.sort, allConversions |> List.sort)
 
     
     [<Test>]

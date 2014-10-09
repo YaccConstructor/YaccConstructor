@@ -654,8 +654,8 @@ let generate (indexator : Indexator) namespaceName =
     let nameOfClasses = ref []
                 
     for i = 0 to indexator.nonTermCount - 1 do
-        let name = indexator.indexToNonTerm i
-        if not <| name.Contains ("highlight_")
+        let name = toClassName <| indexator.indexToNonTerm i
+        if not <| name.Contains ("Highlight_")
         then 
             nameOfClasses := name + nonTermSuffix + extension :: !nameOfClasses
             let info : TokenInfo =  

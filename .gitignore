@@ -163,3 +163,4 @@ src/RNGLRParser.SimpleTest/res.dot
 src/TSQL/res.dot
 src/JSON_Parser/res.dot
 src/RNGLRAbstractParser.Test/res.dot
+BuildScripts/TestResult.xml

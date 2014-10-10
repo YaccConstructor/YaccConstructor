@@ -28,7 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dispatcher.fs" />
-    <Compile Include="SourceFile.fs" />
     <Compile Include="Test.yrd.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />

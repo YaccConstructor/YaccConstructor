@@ -1,7 +1,4 @@
-﻿// Learn more about F# at http://fsharp.net
-// See the 'F# Tutorial' project for more help.
-
-module YC.EL.ReSharper.Common
+﻿module YC.EL.ReSharper.Common
 
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree

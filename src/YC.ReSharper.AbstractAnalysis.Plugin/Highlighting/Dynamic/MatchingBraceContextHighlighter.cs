@@ -11,7 +11,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.AbstractAnalysis;
+using YC.SDK.ReSharper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {

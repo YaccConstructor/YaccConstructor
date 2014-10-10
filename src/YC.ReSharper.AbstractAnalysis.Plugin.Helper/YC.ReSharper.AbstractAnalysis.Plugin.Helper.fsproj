@@ -41,7 +41,6 @@
   </Target>
   <ItemGroup>
     <None Include="packages.config" />
-    <Compile Include="Common.fs" />
     <Compile Include="Helper.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿module YC.AbstractAnalysis.Helper
+﻿module YC.SDK.ReSharper.Helper
 
 open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open JetBrains.ReSharper.Psi.Tree
@@ -8,12 +8,37 @@ open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open ReSharperExtension
 
+type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
+type range = JetBrains.DocumentModel.DocumentRange
+type node = JetBrains.ReSharper.Psi.Tree.ITreeNode 
+
+let getRange =  fun (x:JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression) -> (x:>ITreeNode).GetDocumentRange()
+
+let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
+    let ranges = 
+        brs |> Seq.groupBy (fun x -> x.back_ref)
+        |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+        |> Seq.map(fun brs ->
+            try
+                let pos =  brs |> Array.map(fun i -> i.pos_cnum)
+                let lengthTok = pos.Length
+                let beginPosTok = pos.[0] + 1
+                let endPosTok = pos.[lengthTok-1] + 2 
+                let endPos = 
+                    brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                    - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
+                brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+            with
+            | e -> 
+                brs.[0].back_ref.GetDocumentRange())
+    ranges
+
 [<Class>]
 type ReSharperHelper<'range, 'node> private() =
     let getAllProcessors() =
         Shell.Instance.GetComponents<IReSharperLanguage>()
 
-    let getProcessor (lang  : string) = 
+    let getProcessor (lang: string) = 
         let processors = getAllProcessors() |> Array.ofSeq
         let l = lang.ToLowerInvariant()
         processors

@@ -5,7 +5,7 @@ open AbstractAnalysis.Common
 open AbstractLexer.Core
 open JSON.Parser
 open Yard.Generators.RNGLR.AST
-open YC.EL.ReSharper.Common
+open YC.SDK.ReSharper.Helper
 open Mono.Addins
 open YC.AbstractAnalysis.CommonInterfaces
 open YC.ReSharper.AbstractAnalysis.Plugin.Core

@@ -160,7 +160,8 @@ src/JSON_Parser/JSONParser.fs
 src/RNGLR.OtherSppfTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.txt
 src/RNGLRParser.SimpleTest/res.dot
-src/TSQL/res.dot
 src/JSON_Parser/res.dot
 src/RNGLRAbstractParser.Test/res.dot
 BuildScripts/TestResult.xml
+src/TSQL/*.dot
+src/RNGLRParser.SimpleTest/*.dot

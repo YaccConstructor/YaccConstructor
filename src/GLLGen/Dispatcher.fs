@@ -65,14 +65,16 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
-type SourceFile<'TokenType>(tokens : seq<'TokenType>, parser : ParserSource2<'TokenType>) =
+type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'TokenType>, functions : (int -> int64<vertex> -> ExtensionTree -> ExtensionTree -> unit)[]) = 
     let tokens = Seq.toArray tokens
-    let length = Seq.length tokens
+    let inputLength = Seq.length tokens
+    let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
     let resultAST = ref None
+    let epsilon = new TerminalNode(-1)
     let setR = new Queue<Context>()   
     let setP = new System.Collections.Generic.Dictionary<int64<vertex>,ResizeArray<ExtensionTree>> ()
-    let astDictionary = new System.Collections.Generic.Dictionary<int64<key>,AST> ()
-    let setU = Array.init (length + 1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
+    let astDictionary = new System.Collections.Generic.Dictionary<int64<key>, AST> ()
+    let setU = Array.init (inputLength + 1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
             
     let currentIndex = ref 0
 
@@ -84,8 +86,9 @@ type SourceFile<'TokenType>(tokens : seq<'TokenType>, parser : ParserSource2<'To
     let dummyFam = Family()
     let currentN = ref <| dummyAST
     let currentR = ref <| dummyAST
-    let gss = Array.init length (fun _ -> new ResizeArray<Vertex>())
-    gss.[!currentIndex].Add dummyGSSNode
+    // let edges = Array2D.init inputLength inputLength (fun _ _ -> new ResizeArray<Edge>())
+ 
+    let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
     let currentGSSNode = ref <| packVertex !currentIndex (gss.[!currentIndex].Count - 1)
     let dummyGSSNode = packVertex !currentIndex (gss.[!currentIndex].Count - 1)
     let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummyAST)
@@ -93,97 +96,99 @@ type SourceFile<'TokenType>(tokens : seq<'TokenType>, parser : ParserSource2<'To
 
     let terminalNodes = new BlockResizeArray<ExtensionTree>()
     let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
-    member this.inputLength = length
 
-let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) (gss : array<ResizeArray<Vertex>>) =
-    use out = new System.IO.StreamWriter (path)
-    let was = new Dictionary<_,_>()
-    let levels = new Dictionary<_,_>()
-    out.WriteLine "digraph GSS {"
-    let print s = out.WriteLine ("    " + s)
-    let curNum = ref 0
-    print "rankdir=RL"
-    let getAstString (ast : ExtensionTree) =
-        let ast = ast.tree
-        match ast with
-       // | :? int as i when i >= 0 -> tokens.[i] |> parser.TokenToNumber |> parser.NumToString |> sprintf "%s"    
-       // | :? int as i when i < 0 -> "eps " + parser.NumToString (-i - 1)
-        | :? AST as ast -> 
-            let nonT = 
-                if ast.first.prod < parser.LeftSide.Length then ast.first.prod
-                else -1
-            nonT.ToString()
-        | :? IntermidiateNode as iN ->
-            (getRule iN.Position).ToString()
-        | null -> "null" 
-        | _ -> failwith "Unexpected ast"
+    let condition = ref false 
+    let stop = ref false
 
-    let rec dfs (u : Vertex) =
-        was.Add (u, !curNum)
-        if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
-        else
-            levels.[u.Level] <- !curNum :: levels.[u.Level]
-        if (getRule u.Label = -1) then print <| sprintf "%d [label=\"%s\"]" !curNum "dummy node"
-        else print <| sprintf "%d [label=\"(%d, %d), %d\"]" !curNum (getRule u.Label) (getPosition u.Label) u.Level
-        incr curNum
-        if u.OutEdges.first <> Unchecked.defaultof<_> 
-        then 
-            handleEdge u u.OutEdges.first
-            if u.OutEdges.other <> null then u.OutEdges.other |> Array.iter (handleEdge u)
+    let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) (gss : array<ResizeArray<Vertex>>) =
+        use out = new System.IO.StreamWriter (path)
+        let was = new Dictionary<_,_>()
+        let levels = new Dictionary<_,_>()
+        out.WriteLine "digraph GSS {"
+        let print s = out.WriteLine ("    " + s)
+        let curNum = ref 0
+        print "rankdir=RL"
+        let getAstString (ast : ExtensionTree) =
+            let ast = ast.tree
+            match ast with
+            // | :? int as i when i >= 0 -> tokens.[i] |> parser.TokenToNumber |> parser.NumToString |> sprintf "%s"    
+            // | :? int as i when i < 0 -> "eps " + parser.NumToString (-i - 1)
+            | :? AST as ast -> 
+                let nonT = 
+                    if ast.first.prod < parser.LeftSide.Length then ast.first.prod
+                    else -1
+                nonT.ToString()
+            | :? IntermidiateNode as iN ->
+                (getRule iN.Position).ToString()
+            | null -> "null" 
+            | _ -> failwith "Unexpected ast"
 
-    and handleEdge u (e : Edge) =
-        let v = gss.[getIndex2Vertex e.Dest].[getIndex1Vertex e.Dest]
-        if not <| was.ContainsKey v then dfs v
-        print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
-    for levels in gss do
-        for v in levels do
+        let rec dfs (u : Vertex) =
+            was.Add (u, !curNum)
+            if not <| levels.ContainsKey u.Level then levels.[u.Level] <- [!curNum]
+            else
+                levels.[u.Level] <- !curNum :: levels.[u.Level]
+            if (getRule u.Label = -1) then print <| sprintf "%d [label=\"%s\"]" !curNum "dummy node"
+            else print <| sprintf "%d [label=\"(%d, %d), %d\"]" !curNum (getRule u.Label) (getPosition u.Label) u.Level
+            incr curNum
+            if u.OutEdges.first <> Unchecked.defaultof<_> 
+            then 
+                handleEdge u u.OutEdges.first
+                if u.OutEdges.other <> null then u.OutEdges.other |> Array.iter (handleEdge u)
+
+        and handleEdge u (e : Edge) =
+            let v = gss.[getIndex2Vertex e.Dest].[getIndex1Vertex e.Dest]
             if not <| was.ContainsKey v then dfs v
+            print <| sprintf "%d -> %d [label=\"%s\"]" was.[u] was.[v] (getAstString e.Ast)
+        for levels in gss do
+            for v in levels do
+                if not <| was.ContainsKey v then dfs v
     
-    for level in levels do
-        print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
+        for level in levels do
+            print <| sprintf "{rank=same; %s}" (level.Value |> List.map (fun (u : int) -> string u) |> String.concat " ")
 
-    out.WriteLine "}"
-    out.Close()
+        out.WriteLine "}"
+        out.Close()
 
 
-let findFamily prod (nodes : INode) extension : Family =
-    let mutable result = None
-    let res = ref <| null
-    let exists = createdFamilies.[prod].TryGetValue(extension, res)
-    if exists
-    then 
-        let fams = !res
-        let contains = fams |> ResizeArray.tryFind (fun f -> f.node = nodes )
-        if not contains.IsSome
-        then
+    let findFamily prod (nodes : INode) extension : Family =
+        let mutable result = None
+        let res = ref <| null
+        let exists = createdFamilies.[prod].TryGetValue(extension, res)
+        if exists
+        then 
+            let fams = !res
+            let contains = fams |> ResizeArray.tryFind (fun f -> f.node = nodes )
+            if not contains.IsSome
+            then
+                let temp = new Family(prod, nodes)
+                createdFamilies.[prod].[extension].Add temp
+                temp
+            else contains.Value
+        else
             let temp = new Family(prod, nodes)
-            createdFamilies.[prod].[extension].Add temp
+            let v = new ResizeArray<Family>()
+            v.Add temp
+            createdFamilies.[prod].Add(extension, v)
             temp
-        else contains.Value
-    else
-        let temp = new Family(prod, nodes)
-        let v = new ResizeArray<Family>()
-        v.Add temp
-        createdFamilies.[prod].Add(extension, v)
-        temp
 
-let handleIntermidiate (node : INode) prod extension =
-    let family = findFamily prod node extension
-    family
+    let handleIntermidiate (node : INode) prod extension =
+        let family = findFamily prod node extension
+        family
 
-let containsContext index label  (gssNode : int64<vertex>) (ast : INode) =
-    let set = setU.[index]
-    let key = (label, gssNode)
-    let res = ref null
-    let contains = set.TryGetValue(key, res)
-    if contains
-    then
-        let t = ResizeArray.exists (fun e -> e = null && ast = null || (ast <> null && e <> null && e = ast)) !res
-        contains, t , key
+    let containsContext index label  (gssNode : int64<vertex>) (ast : INode) =
+        let set = setU.[index]
+        let key = (label, gssNode)
+        let res = ref null
+        let contains = set.TryGetValue(key, res)
+        if contains
+        then
+            let t = ResizeArray.exists (fun e -> e = null && ast = null || (ast <> null && e <> null && e = ast)) !res
+            contains, t , key
                 
-    else false, false, key
+        else false, false, key
 
- let addContext label (index : int) (node : int64<vertex>) (ast : ExtensionTree) =
+    let addContext label (index : int) (node : int64<vertex>) (ast : ExtensionTree) =
             let containsKey, containsTree, key = containsContext index label node ast.tree
             if index <= inputLength + 1 && index >= 0 && not containsTree
             then
@@ -197,172 +202,133 @@ let containsContext index label  (gssNode : int64<vertex>) (ast : INode) =
                     setU.[index].Add (key, t)
                 setR.Enqueue(cntxt)  
         
-        let getNodeP label (left : ExtensionTree) (right : ExtensionTree) =      
-            let rExt = right.extension
-            let condTemp = right.tree = null
-            let mutable result = dummyAST
-            if left.tree <> null
+    let getNodeP label (left : ExtensionTree) (right : ExtensionTree) =      
+        let rExt = right.extension
+        let condTemp = right.tree = null
+        let mutable result = dummyAST
+        if left.tree <> null
+        then
+            let lExt = left.extension
+            if condTemp
             then
-                let lExt = left.extension
-                if condTemp
-                then
-                    result <- new ExtensionTree(packExtension (getLeftExtension lExt) (getRightExtension lExt), (new IntermidiateNode(left.tree, right.tree, label)))
-                else 
-                    result <- new ExtensionTree(packExtension (getLeftExtension lExt) (getRightExtension rExt), (new IntermidiateNode(left.tree, right.tree, label)))
+                result <- new ExtensionTree(packExtension (getLeftExtension lExt) (getRightExtension lExt), (new IntermidiateNode(left.tree, right.tree, label)))
             else 
-                result <- new ExtensionTree(packExtension (getLeftExtension rExt) (getRightExtension rExt), (new IntermidiateNode(left.tree, right.tree, label)))
-            result
+                result <- new ExtensionTree(packExtension (getLeftExtension lExt) (getRightExtension rExt), (new IntermidiateNode(left.tree, right.tree, label)))
+        else 
+            result <- new ExtensionTree(packExtension (getLeftExtension rExt) (getRightExtension rExt), (new IntermidiateNode(left.tree, right.tree, label)))
+        result
                 
             
-        let getNodeT index =
-            if terminalNodes.Item index = Unchecked.defaultof<ExtensionTree>
-            then
-                let tree = new TerminalNode(index)
-                let result = new ExtensionTree(packExtension index (index + 1), tree)
-                terminalNodes.Set index result
-                result
-            else terminalNodes.Item index            
-            
-        let containsGSSNode l i =  
-            let curLevel = gss.[i]
-            let index = curLevel.FindIndex (fun v -> v.Label = l)
-            if index = -1
-            then
-                   
-                curLevel.Add <| new Vertex(i, l)   
-                packVertex i (curLevel.Count - 1)
-            else packVertex i index
-
-        let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
-            let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
-            edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
-
-        let findTree prod extension (family : Family) =            
-            let result = 
-                if astDictionary.ContainsKey extension
-                then
-                    let a = astDictionary.[extension]
-                    let eq (fam : Family) =
-                        fam.prod = family.prod
-                        && obj.ReferenceEquals(fam.node, family.node)                    
-                    
-                    if not (eq a.first || (a.other <> null && a.other |> Array.exists eq))
-                    then
-                        if a.other <> null
-                        then a.other <- Array.append a.other [|family|]
-                        else a.other <- [|family|]
-                    a
-                else
-                    let value = new AST(family, null)
-                    astDictionary.Add(extension, value)
-                    value
-            
+    let getNodeT index =
+        if terminalNodes.Item index = Unchecked.defaultof<ExtensionTree>
+        then
+            let tree = new TerminalNode(index)
+            let result = new ExtensionTree(packExtension index (index + 1), tree)
+            terminalNodes.Set index result
             result
-
-        let create label (u : int64<vertex>) (index : int) (ast : ExtensionTree) = 
-            let v = containsGSSNode label index
-            if not (containsEdge v u ast.tree)
-            then
-                let newEdge = new Edge(u, ast)
-               // edges.[gss.[getIndex2Vertex v].[getIndex1Vertex v].Level,gss.[getIndex2Vertex u].[getIndex1Vertex u].Level].Add(newEdge)
-                if setP.ContainsKey v
-                then
-                    let trees = setP.[v]
-                    let handleTree ast2 =
-                        
-                        let y = getNodeP label ast ast2
-                        addContext label (getRightExtension ast2.extension) u y      ////ast2 or ast!!! temp
-                    trees |> ResizeArray.iter handleTree
-                let vertex = gss.[getIndex2Vertex v].[getIndex1Vertex v]     
-                if vertex.OutEdges.first <> Unchecked.defaultof<_>
-                then
-                    if vertex.OutEdges.other <> null
-                    then vertex.OutEdges.other <- Array.append vertex.OutEdges.other [|newEdge|]
-                    else vertex.OutEdges.other <- [|newEdge|]
-                else vertex.OutEdges.first <- newEdge
-            v
-
-        let pop (u : int64<vertex>) (i : int) (z : AST) extension =
-            let temp = 0
-            if not (u = dummyGSSNode)
-            then
-                let vertex = gss.[getIndex2Vertex u].[getIndex1Vertex u]
-                let temp = new ExtensionTree(extension, z)
-                let label = vertex.Label
-                if setP.ContainsKey u           //вот тут можно попробовать какой-нибудь tryGet
-                then
-                    setP.[u].Add(temp)
-                else 
-                    let value = new ResizeArray<ExtensionTree>(5)
-                    value.Add(temp)
-                    setP.Add(u, value)
-                let processEdge (edge : Edge) =
-                    if not <| obj.ReferenceEquals(edge.Ast, dummyAST)
-                    then
-                        let y1 = getNodeP label edge.Ast temp
-                        addContext label i edge.Dest y1
-                    else addContext label i edge.Dest (new ExtensionTree(extension, z))  
-                processEdge vertex.OutEdges.first
-                if vertex.OutEdges.other <> null 
-                then vertex.OutEdges.other |> Array.iter processEdge
-        let getIndex nTerm term = 
-            let mutable index = nTerm
-            index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
-            index <- index + term - parser.NonTermCount
-            index
-        let curToken = parser.TokenToNumber tokens.[!currentIndex]
-        let table = parser.Table
-        let test nonTerm funName =
-            if Array.exists (fun e -> e = funName) table.[getIndex nonTerm curToken]
-            then
-                true
-            else false
-
-let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) (functions : (int -> int64<vertex> -> ExtensionTree -> ExtensionTree -> unit)[]) : ParseResult<_> = 
-    let tokens = Seq.toArray tokens
-    let inputLength = Seq.length tokens
-    let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
-    let resultAST = ref None
-    let getEpsilon =
-
-         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i - 1))
-         fun i -> epsilons.[i]
-    if inputLength = 0 || parser.IndexEOF = parser.TokenToNumber tokens.[0] then
-//        if parser.AcceptEmptyInput then
-//            Success (new Tree<_>(null, getEpsilon startNonTerm, null))
-//        else
-        Error ("This grammar does not accept empty input.")     
-    else
-        let epsilon = new TerminalNode(-1)
-        let setR = new Queue<Context>()   
-        let setP = new System.Collections.Generic.Dictionary<int64<vertex>,ResizeArray<ExtensionTree>> ()
-        let astDictionary = new System.Collections.Generic.Dictionary<int64<key>, AST> ()
-        let setU = Array.init (inputLength + 1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
+        else terminalNodes.Item index            
             
-        let currentIndex = ref 0
+    let containsGSSNode l i =  
+        let curLevel = gss.[i]
+        let index = curLevel.FindIndex (fun v -> v.Label = l)
+        if index = -1
+        then
+                   
+            curLevel.Add <| new Vertex(i, l)   
+            packVertex i (curLevel.Count - 1)
+        else packVertex i index
 
-        let currentrule = parser.StartRule
-        let dummy = null
-        let dummyGSSNode = new Vertex(!currentIndex, (packLabel -1 -1))
-        let currentLabel = ref <| packLabel currentrule 0
-        let dummyAST = new ExtensionTree(packExtension -1 -1, dummy)
-        let dummyFam = Family()
-        let currentN = ref <| dummyAST
-        let currentR = ref <| dummyAST
-       // let edges = Array2D.init inputLength inputLength (fun _ _ -> new ResizeArray<Edge>())
- 
-        let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
+    let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
+        let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
+        edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
+
+    let findTree prod extension (family : Family) =            
+        let result = 
+            if astDictionary.ContainsKey extension
+            then
+                let a = astDictionary.[extension]
+                let eq (fam : Family) =
+                    fam.prod = family.prod
+                    && obj.ReferenceEquals(fam.node, family.node)                    
+                    
+                if not (eq a.first || (a.other <> null && a.other |> Array.exists eq))
+                then
+                    if a.other <> null
+                    then a.other <- Array.append a.other [|family|]
+                    else a.other <- [|family|]
+                a
+            else
+                let value = new AST(family, null)
+                astDictionary.Add(extension, value)
+                value
+            
+        result
+
+    let create label (u : int64<vertex>) (index : int) (ast : ExtensionTree) = 
+        let v = containsGSSNode label index
+        if not (containsEdge v u ast.tree)
+        then
+            let newEdge = new Edge(u, ast)
+            // edges.[gss.[getIndex2Vertex v].[getIndex1Vertex v].Level,gss.[getIndex2Vertex u].[getIndex1Vertex u].Level].Add(newEdge)
+            if setP.ContainsKey v
+            then
+                let trees = setP.[v]
+                let handleTree ast2 =
+                        
+                    let y = getNodeP label ast ast2
+                    addContext label (getRightExtension ast2.extension) u y      
+                trees |> ResizeArray.iter handleTree
+            let vertex = gss.[getIndex2Vertex v].[getIndex1Vertex v]     
+            if vertex.OutEdges.first <> Unchecked.defaultof<_>
+            then
+                if vertex.OutEdges.other <> null
+                then vertex.OutEdges.other <- Array.append vertex.OutEdges.other [|newEdge|]
+                else vertex.OutEdges.other <- [|newEdge|]
+            else vertex.OutEdges.first <- newEdge
+        v
+
+    let pop (u : int64<vertex>) (i : int) (z : AST) extension =
+        let temp = 0
+        if not (u = dummyGSSNode)
+        then
+            let vertex = gss.[getIndex2Vertex u].[getIndex1Vertex u]
+            let temp = new ExtensionTree(extension, z)
+            let label = vertex.Label
+            if setP.ContainsKey u           //вот тут можно попробовать какой-нибудь tryGet
+            then
+                setP.[u].Add(temp)
+            else 
+                let value = new ResizeArray<ExtensionTree>(5)
+                value.Add(temp)
+                setP.Add(u, value)
+            let processEdge (edge : Edge) =
+                if not <| obj.ReferenceEquals(edge.Ast, dummyAST)
+                then
+                    let y1 = getNodeP label edge.Ast temp
+                    addContext label i edge.Dest y1
+                else addContext label i edge.Dest (new ExtensionTree(extension, z))  
+            processEdge vertex.OutEdges.first
+            if vertex.OutEdges.other <> null 
+            then vertex.OutEdges.other |> Array.iter processEdge
+   
+    let getIndex nTerm term = 
+        let mutable index = nTerm
+        index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
+        index <- index + term - parser.NonTermCount
+        index
+    
+    let curToken = parser.TokenToNumber tokens.[!currentIndex]
+    let table = parser.Table
+    
+    let test nonTerm funName =
+        if Array.exists (fun e -> e = funName) table.[getIndex nonTerm curToken]
+        then
+            true
+        else false
+
+    let start =
         gss.[!currentIndex].Add dummyGSSNode
-        let currentGSSNode = ref <| packVertex !currentIndex (gss.[!currentIndex].Count - 1)
-        let dummyGSSNode = packVertex !currentIndex (gss.[!currentIndex].Count - 1)
-        let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummyAST)
-        let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<int64<key>, ResizeArray<Family>>())  
 
-        let terminalNodes = new BlockResizeArray<ExtensionTree>()
-        let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
-
-        let condition = ref false 
-        let stop = ref false
         while setR.Count <> 0 do
                 currentContext := setR.Dequeue()
                 currentIndex := currentContext.Value.Index
@@ -371,10 +337,18 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 currentN := currentContext.Value.Ast 
                 currentR := dummyAST
                 functions.[!currentLabel] !currentIndex !currentGSSNode !currentR !currentN
-                      
-        match !resultAST with
-            | None -> Error ("String was not parsed")
-            | Some res -> 
-                    drawDot parser tokens "gss.dot" gss
-                    let r1 = new Tree<_> (tokens, res, parser.rules)
-                    Success (r1)       
+
+    member this.Pop = pop
+    member this.AddContext = addContext
+    member this.Create = create
+    member this.Test = test
+    member this.GetNodeT = getNodeT
+    member this.GetNodeP = getNodeP   
+   
+//                      
+//        match !resultAST with
+//            | None -> Error ("String was not parsed")
+//            | Some res -> 
+//                    drawDot parser tokens "gss.dot" gss
+//                    let r1 = new Tree<_> (tokens, res, parser.rules)
+//                    Success (r1)       

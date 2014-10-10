@@ -32,7 +32,6 @@ namespace Highlighting.Core
         public static readonly Key<IDocument> Document = new Key<IDocument>("document");
 
         public static readonly Key<string> YcTokenName = new Key<string>("ycTokenName");
-        public static readonly Key<string> YcTextValue = new Key<string>("ycTextValue");
         public static readonly Key<string> YcLanguage = new Key<string>("ycLanguage");
         
     }

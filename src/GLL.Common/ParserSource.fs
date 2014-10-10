@@ -10,7 +10,7 @@ type ParserSource2<'TokenType> (
                                , isTerminal         : 'TokenType -> bool
                                , isNonTerminal      : 'TokenType -> bool
                                , getLiteralNames    : string list
-                               , table              : int[][]
+                               , table              : string[][]
                                , rules              : int array
                                , rulesStart         : int array
                                , leftSide           : int array

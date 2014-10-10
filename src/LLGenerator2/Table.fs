@@ -62,23 +62,36 @@ type Table (grammar : FinalGrammar) =
         let result = num - grammar.indexator.nonTermCount
         result
             
+    let mutable previousNonTerm = -1
+    let mutable currentAlternate = 1
+    let indexator = grammar.indexator
 
     let _table = 
         let length1 = grammar.indexator.nonTermCount
         let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
-        let arr = Array2D.create length1 length2 (List.empty<int>)
-        let result = Array.create (length1 * length2) (Array.empty<int>)
+        let arr = Array2D.create length1 length2 (List.empty<string>)
+        let result = Array.create (length1 * length2) (Array.empty<string>)
         let firsts = firstForChain
         for i = 0 to grammar.rules.rulesCount - 1 do
+
             let curFirst = Set.toArray firsts.[i]
             let curNTerm = grammar.rules.leftSide i
+            let name =
+                if curNTerm <> previousNonTerm
+                then
+                    previousNonTerm <- curNTerm
+                    currentAlternate <- 1
+                    "L_" + indexator.indexToNonTerm curNTerm + "_" + currentAlternate.ToString()
+                else
+                    currentAlternate <- currentAlternate + 1
+                    "L_" + indexator.indexToNonTerm curNTerm + "_" + currentAlternate.ToString() 
             for j = 0 to curFirst.Length - 1 do
-                arr.[curNTerm, getTableIndex curFirst.[j]] <- i :: arr.[curNTerm, getTableIndex curFirst.[j]]
+                arr.[curNTerm, getTableIndex curFirst.[j]] <- "\"" + name + "\"" :: arr.[curNTerm, getTableIndex curFirst.[j]]
             if grammar.canInferEpsilon.[curNTerm]
             then 
                 let curFollow = Set.toArray follow.[curNTerm]
                 for j = 0 to curFollow.Length - 1 do
-                    arr.[curNTerm, getTableIndex curFollow.[j]] <- i :: arr.[curNTerm, getTableIndex curFollow.[j]] 
+                    arr.[curNTerm, getTableIndex curFollow.[j]] <- "\"" + name + "\"" :: arr.[curNTerm, getTableIndex curFollow.[j]] 
                                
         for i = 0 to length1 - 1 do
             for j = 0 to length2 - 1 do

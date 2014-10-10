@@ -199,7 +199,7 @@ let printTableGLL
 
         print "let table = [| "
         for arr in table.result do
-            printArr2 arr (print "%d")
+            printArr2 arr (print "%s")
             print ";"
         print " |]"
         printBr ""
@@ -239,45 +239,109 @@ let printTableGLL
         printBr ""
 
         let rules = grammar.rules
+        let functionsNames = new System.Collections.Generic.Dictionary<string, int> ()
+
         //в дескрипторы пихаем номер функции
         //по ходу дела просто присваиваем номера и имена функциям
-        let functionsNames = new System.Collections.Generic.Dictionary<string, int> ()
-        
-        let genFunctions =
+        let numberOfAlternatives = 
+            let result = Array.zeroCreate indexator.nonTermCount
+            let mutable count = 0
+            let mutable previous = rules.leftSide 0
+            for nTerm in rules.leftSideArr do
+                if previous = nTerm
+                then count <- count + 1
+                else
+                    result.[previous] <- count
+                    count <- 1
+                    previous <- nTerm
+            result.[previous] <- count
+            result
+         
+        let genFunctions () =
+            let parameters = "(currentIndex : int) (currentGSSNode : int64<vertex>) (currentR : ExtensionTree) (currentN : ExtensionTree)"
             let currentFunNumber = ref 0
-            let mutable previousNonTerm = rules.leftSide 0
-            let count = ref 0
-            let generateForAlternative num =
-                let currentFunName = "L_" + (indexator.indexToNonTerm <| rules.leftSide num).ToString() + "_" + count.ToString()
-                printBrInd 0 "let %s = " currentFunName
-                count := !count + 1
-                for sym in rules.rightSide num do
-                    if indexator.isNonTerm sym
+            let mutable previousNonTerm = -1
+
+            let getNumber name =
+                if functionsNames.ContainsKey(name)
+                then functionsNames.[name]
+                else
+                    let res = !currentFunNumber
+                    functionsNames.Add(name, res)
+                    currentFunNumber := !currentFunNumber + 1
+                    res
+
+            let rec generateForAlternative ruleNumber functionName position =
+                printBrInd 0 "let %s %s = " functionName parameters
+                let rule = rules.rightSide ruleNumber
+                let ruleLength = rule.Length
+                let mutable condition = false
+                if position = ruleLength
+                then
+                    printBrInd 1 "currentN := getNodeP !currentLabel !currentN !currentR"
+                    printBrInd 1 "pop !currentGSSNode !currentIndex resTree currentN.Value.extension"
+                    printBr ""
+                else
+                    for pos in position..ruleLength - 1 do
+                        if pos = ruleLength - 1 then condition <- true 
+                        if indexator.isNonTerm rule.[pos]
+                        then
+                            let returnFunName = functionName + "_" + (pos + 1).ToString()
+                            let n = getNumber returnFunName
+                            printBrInd 1 "currentGSSNode := create %d !currentGSSNode !currentIndex !currentN" n
+                            let nonTermName = "L_" + indexator.indexToNonTerm rule.[pos]
+                            let n = getNumber nonTermName
+                            printBrInd 1 "addContext %d !currentIndex !currentGSSNode dummyAST" n
+                            printBr ""
+                            generateForAlternative ruleNumber returnFunName (pos + 1)
+                        else
+                            if pos = 0
+                            then
+                                printBrInd 1 "currentN := getNodeT !currentIndex"
+                            else 
+                                printBrInd 1 "currentR := getNodeT !currentIndex"
+                                printBrInd 1 "currentIndex := !currentIndex + 1"
+                                printBrInd 1 "currentN := getNodeP !currentLabel !currentN !currentR"
+                    if condition
                     then
-                        
-                    //если нетерминалы то нужно сгенерировать функцию возвратную
-                    //нужно сгенерировать новую ячейку в стеке
-                    //нужно вызвать функцию для разбора нетерминала
-                    //добавить новый дескриптор, короче 
-                        printBrInd 1 "if table.[getIndex]"
-                    else
-                        printBrInd 1 "if table.[getIndex]"
+                        printBrInd 1 "pop !currentGSSNode !currentIndex resTree currentN.Value.extension"    
+                    printBr ""
 
             for i in 0..rules.rulesCount - 1 do
-                if previousNonTerm = rules.leftSide i then
-                    generateForAlternative i
-                else               
-                    let currentNonTerm = rules.leftSide i
-                    let currentFunName = "L_" + (indexator.indexToNonTerm <| currentNonTerm).ToString()
-                    printBrInd 0 "let %s = " currentFunName
-                    //в теле функции должна быть проверка на то, что текущий символ подходит и вызов добавления дескрипторов
-                    //в конце функции должен быть вызов функции диспетчера
-                    printBrInd 1 "if table.[getIndex %d]" currentNonTerm
-                    printBrInd 1 "then"
-                    printBrInd 1 "addContext"
-                    generateForAlternative i
-                 
+                let mutable numberOfAlternate = 1 
+                let currentNonTerm = rules.leftSide i
+                let currentNonTermName = indexator.indexToNonTerm currentNonTerm
+                if previousNonTerm <> currentNonTerm then
+                    previousNonTerm <- currentNonTerm
+                    numberOfAlternate <- 1
+                    let currentFunName = "L_" + currentNonTermName
+                    if not <| functionsNames.ContainsKey currentFunName
+                    then
+                        functionsNames.Add(currentFunName, !currentFunNumber)
+                        currentFunNumber := !currentFunNumber + 1
+                        printBrInd 0 "let %s %s = " currentFunName parameters
+                        for a in 1..numberOfAlternatives.[currentNonTerm] do
+                            let name = "L_" + currentNonTermName + "_" + a.ToString() 
+                            let n = getNumber name
+                            printBrInd 2 "if test %d %d currentToken then" currentNonTerm n 
+                            printBrInd 3 "addContext %d !currentIndex !currentGSSNode dummyAST" n
+                        printBr ""
+                else numberOfAlternate <- numberOfAlternate + 1
+                let name = "L_" + currentNonTermName + "_" + (numberOfAlternate.ToString())
+                if not <| functionsNames.ContainsKey(name)
+                then
+                    functionsNames.Add(name, !currentFunNumber)
+                    currentFunNumber := !currentFunNumber + 1
+                generateForAlternative i name 0
+        genFunctions()
+
+        let takeArray =
+            let result = Array.zeroCreate functionsNames.Count
+            for k in functionsNames do
+                result.[k.Value] <- k.Key
+            result
+        print "let functions = "
+        printArr takeArray (print "%s")
                 
-       
         res.ToString()
     printTable ()

@@ -128,7 +128,6 @@ type GLL2() =
                         println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-                    println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.Common.AST2"
 

@@ -483,42 +483,6 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()
 
-//prints "addSemantic" function in parser file.
-//function addSemantic sets relations between nodes (father, child, brother)
-let printAddSemantic() = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
-    printBrInd 1 "let mutable prev = null"
-    printBrInd 1 "let mutable curr = null"
-    printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
-    printBrInd 1 "for child in children do"
-    printBrInd 2 "prev <- curr"
-    printBrInd 2 "curr <- child"
-    printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
-    printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
-    printBrInd 2 "if prev = null"
-    printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
-    printBrInd 2 "else"
-    printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
-    printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
-    printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
-    printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
-    printBrInd 1 "if ranges <> null && ranges.Count > 0"
-    printBrInd 1 "then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)"
-    printBrInd 1 "parent"
-    res.ToString()
-
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 

@@ -534,40 +534,6 @@ let printAddSemantic() =
     printBrInd 1 "parent"
     res.ToString()
 
-//prints "calculatePos" function in parser file. 
-//function calculatePos returns token coordinates.
-let printCalculatePos() = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) ="
-    printBrInd 1 "let ranges = "
-    printBrInd 2 "brs |> Seq.groupBy (fun x -> x.back_ref)"
-    printBrInd 2 "|> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)"
-    printBrInd 2 "|> Seq.map(fun brs ->"
-    printBrInd 3 "try"
-    printBrInd 4 "let pos =  brs |> Array.map(fun i -> i.pos_cnum)"
-    printBrInd 4 "let lengthTok = pos.Length"
-    printBrInd 4 "let beginPosTok = pos.[0] + 1"
-    printBrInd 4 "let endPosTok = pos.[lengthTok-1] + 2"
-    printBrInd 4 "let endPos = "
-    printBrInd 5 "brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok"
-    printBrInd 5 "- brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset"
-    printBrInd 4 "brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)"
-    printBrInd 3 "with"
-    printBrInd 3 "| e -> brs.[0].back_ref.GetDocumentRange())"
-    printBrInd 1 "ranges"
-    res.ToString()
-
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 

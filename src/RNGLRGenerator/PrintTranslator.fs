@@ -303,7 +303,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             wordL <| System.String.Concat [| 
                                              printXmlName; System.Environment.NewLine; 
                                              printAddSemantic(); System.Environment.NewLine; 
-                                             printCalculatePos(); System.Environment.NewLine;
                                              printTokenToTreeNode (grammar.indexator); System.Environment.NewLine;
                                           |] 
         else wordL ""

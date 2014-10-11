@@ -1,9 +1,7 @@
-﻿// Learn more about F# at http://fsharp.net
-
-module RNGLRParserSimpleTest
+﻿module RNGLRParserSimpleTest
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST2
 open NUnit.Framework
 open Yard.Generators
 open LexCommon
@@ -29,17 +27,6 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
-        | Parser.Success (mAst, _, _) ->
-        | Parser.Success (mAst, _, _) ->
-        | Parser.Success (mAst, _, _) -> mAst.PrintAst()
-        | Parser.Success (mAst, _, _) ->
-        | Parser.Success (mAst, _, _) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
     [<Test>]
     member test.``SIMPLE epsilon``() =
         let parser = RNGLR.SimpleEpsilon.buildAst

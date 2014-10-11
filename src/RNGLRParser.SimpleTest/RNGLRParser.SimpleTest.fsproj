@@ -91,11 +91,6 @@
       <Project>{a24b88c9-0236-4575-a304-231e3b040e56}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.fsproj">
-      <Name>GLLGenerator</Name>
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\GLLParser\GLLParser.fsproj">
       <Name>GLLParser</Name>
       <Project>{1548a831-3a8d-489d-8592-dda12fbc3ea4}</Project>

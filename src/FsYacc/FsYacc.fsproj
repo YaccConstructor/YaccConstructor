@@ -8,6 +8,7 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <Name>FsYacc</Name>
+    <ProjectGuid>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

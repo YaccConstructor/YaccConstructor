@@ -39,7 +39,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
     [<Test>]
     member test.``Elementary test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;4] |> ignore
+        qGraph.AddVertexRange[0; 1; 2; 3; 4;] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseElementary.A 0)
              createEdge 1 2 (RNGLR.ParseElementary.B 1)
@@ -61,7 +61,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
     [<Test>]
     member test.``Epsilon test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2] |> ignore
+        qGraph.AddVertexRange[0; 1; 2] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseElementary.A 0)
              createEdge 1 2 (RNGLR.ParseElementary.C 1)
@@ -81,7 +81,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
     [<Test>]
     member test.``Ambiguous test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVertexRange[0; 1; 2; 3] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseAmbiguous.A 0)
              createEdge 1 2 (RNGLR.ParseAmbiguous.A 1)
@@ -122,10 +122,9 @@ type ``RNGLR ast to otherSPPF translation test`` () =
     [<Test>]
     member test.``Cycles test``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1] |> ignore
+        qGraph.AddVertexRange[0; 1] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [createEdge 0 1 (RNGLR.ParseCycles.A 0)
-             ] |> ignore
+            [createEdge 0 1 (RNGLR.ParseCycles.A 0)] |> ignore
 
         let parseResult = (new Parser<_>()).Parse  RNGLR.ParseCycles.buildAstAbstract qGraph
         
@@ -146,6 +145,7 @@ type ``Classic case: matching brackets``() =
     member test.``Classic case. Simple test``() =
         let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
+        // [caret](1 + 2)
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
@@ -183,7 +183,8 @@ type ``Classic case: matching brackets``() =
     [<Test>]
     member test.``Classic case. Many brackets 1``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
+        qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
+        // [caret]((2))
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
@@ -222,7 +223,8 @@ type ``Classic case: matching brackets``() =
     [<Test>]
     member test.``Classic case. Many brackets 2``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;4;5] |> ignore
+        //([caret](2))
+        qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
@@ -262,13 +264,16 @@ type ``Classic case: matching brackets``() =
         printfn "Classic case. Many brackets 2: PASSED"
 
     [<Test>]
-    member test.``Classic case. Right to left``() =
+    member test.``Classic case. Right to left 1``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        qGraph.AddVertexRange[0; 1; 2; 3; 4;] |> ignore
+        // (( 2 )[caret])
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
-             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
-             createEdge 2 3 (RNGLR.ParseSummator.RBRACE 2)
+             createEdge 1 2 (RNGLR.ParseSummator.LBRACE 1)
+             createEdge 2 3 (RNGLR.ParseSummator.NUMBER 2)
+             createEdge 3 4 (RNGLR.ParseSummator.RBRACE 3)
+             createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -287,7 +292,56 @@ type ``Classic case: matching brackets``() =
 
             let tokToPos = tokenToPos RNGLR.ParseSummator.tokenData
 
-            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 2 false tokToNumber tokToPos
+            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 3 false tokToNumber tokToPos
+            
+            printfn "%d pair(s) was found" pairTokens.Count
+            Assert.AreEqual (1, pairTokens.Count)
+
+            let expected = [|1|]
+            for right in pairTokens do
+                match right with
+                | RNGLR.ParseSummator.LBRACE pos -> 
+                    if not <| Array.exists (fun num -> pos = num) expected
+                    then Assert.Fail()
+                | _ -> 
+                    let t : string = RNGLR.ParseSummator.numToString <| tokToNumber right
+                    printfn "%s is founded" t
+                    Assert.Fail()
+
+            printfn "Classic case. Right to left: PASSED"
+            Assert.Pass()
+
+    [<Test>]
+    member test.``Classic case. Right to left 2``() =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
+        // (( 2 ))[caret]
+        qGraph.AddVerticesAndEdgeRange
+            [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
+             createEdge 1 2 (RNGLR.ParseSummator.LBRACE 1)
+             createEdge 2 3 (RNGLR.ParseSummator.NUMBER 2)
+             createEdge 3 4 (RNGLR.ParseSummator.RBRACE 3)
+             createEdge 4 5 (RNGLR.ParseSummator.RBRACE 4)
+             ] |> ignore
+
+        let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
+        match result with
+        | Parser.Error (num, tok, message, debug, _) ->
+            printfn "Error in position %d on Token %A: %s" num tok message
+            debug.drawGSSDot "out.dot"
+            Assert.Fail "!!!!"
+        | Parser.Success(mAst, _, _) ->
+            let other = new OtherTree<_>(mAst)
+
+            RNGLR.ParseSummator.otherAstToDot other "test.dot"
+
+            let tokToNumber = RNGLR.ParseSummator.tokenToNumber
+            let leftBraceNumber  = tokToNumber <| RNGLR.ParseSummator.Token.LBRACE -1
+            let rightBraceNumber = tokToNumber <| RNGLR.ParseSummator.Token.RBRACE -1
+
+            let tokToPos = tokenToPos RNGLR.ParseSummator.tokenData
+
+            let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 4 false tokToNumber tokToPos
             
             printfn "%d pair(s) was found" pairTokens.Count
             Assert.AreEqual (1, pairTokens.Count)
@@ -303,7 +357,7 @@ type ``Classic case: matching brackets``() =
                     printfn "%s is founded" t
                     Assert.Fail()
 
-            printfn "Classic case. Right to left: PASSED"
+            printfn "Classic case. Right to left 2: PASSED"
             Assert.Pass()
 
 [<TestFixture>]
@@ -312,7 +366,9 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Two parentheses``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3] |> ignore
+        // [caret]'(' -> '1' -> ')'
+        //                   -> ')'
+        qGraph.AddVertexRange[0; 1; 2; 3] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
              createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
@@ -327,9 +383,6 @@ type ``Abstract case: matching brackets``() =
             debug.drawGSSDot "out.dot"
             Assert.Fail "!!!!"
         | Parser.Success(mAst, _, _) ->
-            let timer = new System.Diagnostics.Stopwatch()
-            timer.Start()
-
             let other = new OtherTree<_>(mAst)
             
             let tokToNumber = RNGLR.ParseSummator.tokenToNumber
@@ -359,18 +412,16 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Two parentheses light``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0; 1; 4; 5; 6; 7] |> ignore
+        //[caret] '(' -> '1' -> ')'
+        //            -> '2' -> ')'
+        //
+        qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
-//             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
-//             createEdge 2 3 (RNGLR.ParseSummator.PLUS 2)
-//             createEdge 3 4 (RNGLR.ParseSummator.NUMBER 3)
-//             createEdge 3 5 (RNGLR.ParseSummator.NUMBER 4)
-             createEdge 1 4 (RNGLR.ParseSummator.NUMBER 3)
-             createEdge 1 5 (RNGLR.ParseSummator.NUMBER 4)
-             createEdge 4 6 (RNGLR.ParseSummator.RBRACE 5)
-             createEdge 5 6 (RNGLR.ParseSummator.RBRACE 6)
-             createEdge 6 7 (RNGLR.ParseSummator.RNGLR_EOF 7)
+             createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)
+             createEdge 1 3 (RNGLR.ParseSummator.NUMBER 2)
+             createEdge 2 4 (RNGLR.ParseSummator.RBRACE 3)
+             createEdge 3 4 (RNGLR.ParseSummator.RBRACE 4)
              ] |> ignore
 
         let result = (new Parser<_>()).Parse  RNGLR.ParseSummator.buildAstAbstract qGraph
@@ -395,7 +446,7 @@ type ``Abstract case: matching brackets``() =
             printfn "%d pair(s) was found" pairTokens.Count
             Assert.AreEqual (2, pairTokens.Count, "Error: expected two pairs")
             
-            let expectedValues = [|5; 6|]
+            let expectedValues = [|3; 4|]
             
             let actualValues = 
                 pairTokens 
@@ -412,7 +463,7 @@ type ``Abstract case: matching brackets``() =
     [<Test>]
     member test.``Abstract case. Right to left``() =
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0;1;2;3;5;6] |> ignore
+        qGraph.AddVertexRange[0; 1; 2; 3; 5; 6] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [createEdge 0 1 (RNGLR.ParseSummator.LBRACE 0)
              createEdge 1 2 (RNGLR.ParseSummator.NUMBER 1)

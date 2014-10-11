@@ -12,11 +12,11 @@ namespace Highlighting.Core
         /// </summary>
         private static Dictionary<string, Dictionary<string, StringValue>> allYcToString = new Dictionary<string, Dictionary<string, StringValue>>();
 
-        public static void AddYcItem(string key, string value, int ycNumber, string lang)
+        public static void AddYcItem(string key, int ycNumber, string lang)
         {
             lang = lang.ToLowerInvariant();
             key = key.ToLowerInvariant();
-            if (String.IsNullOrEmpty(key) || String.IsNullOrEmpty(value))
+            if (String.IsNullOrEmpty(key))
                 return;
 
             if (!allYcToString.ContainsKey(lang))
@@ -29,10 +29,9 @@ namespace Highlighting.Core
             if (dict.ContainsKey(key))
             {
                 StringValue strValue = dict[key];
-                if (strValue.NumOfValues == Value.OneValue && strValue.TextValue != value)
+                if (strValue.NumOfValues == Value.OneValue)
                 {
                     strValue.NumOfValues = Value.ManyValues;
-                    strValue.TextValue = null;
                 }
             }
             else
@@ -40,26 +39,9 @@ namespace Highlighting.Core
                 dict.Add(key, new StringValue()
                 {
                     NumOfValues = Value.OneValue,
-                    TextValue = value,
                     YcNumber = ycNumber,
                 });
             }
-        }
-
-        public static string GetYcName(string lang, string str)
-        {
-            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
-                return null;
-
-            var dict = allYcToString[lang];
-
-            if (string.IsNullOrEmpty(str))
-                return null;
-
-            return
-                dict.FirstOrDefault(item => item.Value.NumOfValues == Value.OneValue && item.Value.TextValue == str)
-                    .Key;
-
         }
 
         public static int GetNumber(string lang, string key)
@@ -74,27 +56,10 @@ namespace Highlighting.Core
 
             return dict[key].YcNumber;
         }
-
-        public static string GetStringName(string lang, string str)
-        {
-            if (string.IsNullOrEmpty(lang) || !allYcToString.ContainsKey(lang))
-                return null;
-
-            var dict = allYcToString[lang];
-
-            if (string.IsNullOrEmpty(str))
-                return null;
-
-            return
-                dict.FirstOrDefault(item =>
-                    item.Value.NumOfValues == Value.OneValue && item.Key == str)
-                    .Value.TextValue;
-        }
     }
 
     public enum Value
     {
-        //NoValue,
         OneValue,
         ManyValues
     }
@@ -102,7 +67,6 @@ namespace Highlighting.Core
     public class StringValue
     {
         public Value NumOfValues { get; set; }
-        public string TextValue { get; set; }
         public int YcNumber { get; set; }
     }
 }

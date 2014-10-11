@@ -110,36 +110,21 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBr ""
     printBrInd 2 "public NodeUserData UserData { get; private set; }"
     printBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
-//    printBrInd 2 "public NodeUserDataHolder NodeUserDataHolder { get; private set; }"    
     printBr ""
-    printBrInd 2 "public %s (string ycTokName) : this (ycTokName, string.Empty)" nameOfClass
-    printBrInd 2 "{"
-    printBrInd 2 "}"
 
     printBr ""
-    printBrInd 2 "public %s (string ycTokName, string ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName)" nameOfClass
     printBrInd 2 "{"
     printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
     printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
     printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcTextValue, ycValue);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
     printBrInd 2 "}"
     
     printBr ""
-    printBrInd 2 "public %s (string ycTokName, string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, IEnumerable<DocumentRange> positions) : this (ycTokName)" nameOfClass
     printBrInd 2 "{"
-//    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
-//    printBrInd 2 "}"
-//    printBr ""
-    // printing all methods
-
-//    printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
-//    printBrInd 2 "{"
-//    printBrInd 3 "if (positions == null)"
-//    printBrInd 4 "return;"
-//    printBr ""
     printBrInd 3 "var ranges = positions.ToList();"
     printBrInd 3 "if (ranges.Count > 0)"
     printBrInd 3 "{"
@@ -340,13 +325,13 @@ let printTreeNode (tokenInfo : TokenInfo) =
 
     printBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo._name.ToLowerInvariant()
     printBr ""
-    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" className
-    printBrInd 3 ": base(ycTokName, ycValue, positions)"
+    printBrInd 2 "public %s (IEnumerable<DocumentRange> positions)" className
+    printBrInd 3 ": base(ycTokName, positions)"
     printBrInd 2 "{"
 
     match tokenInfo._type with
     | Literal 
-    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
+    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
     | _ -> ()
     printBrInd 2 "}"
 
@@ -498,42 +483,6 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()
 
-//prints "addSemantic" function in parser file.
-//function addSemantic sets relations between nodes (father, child, brother)
-let printAddSemantic() = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
-    printBrInd 1 "let mutable prev = null"
-    printBrInd 1 "let mutable curr = null"
-    printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
-    printBrInd 1 "for child in children do"
-    printBrInd 2 "prev <- curr"
-    printBrInd 2 "curr <- child"
-    printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
-    printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
-    printBrInd 2 "if prev = null"
-    printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
-    printBrInd 2 "else"
-    printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
-    printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
-    printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
-    printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
-    printBrInd 1 "if ranges <> null && ranges.Count > 0"
-    printBrInd 1 "then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)"
-    printBrInd 1 "parent"
-    res.ToString()
-
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 
@@ -557,14 +506,14 @@ let printTokenToTreeNode (indexator : Indexator) =
         printBrInd 1 "| %s data -> " termNode
         printBrInd 2 "let value, temp = data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sTermNode(value.ToString(), ranges) :> ITreeNode" termNode
+        printBrInd 2 "new %sTermNode(ranges) :> ITreeNode" termNode
 
     for i = indexator.literalsStart to indexator.literalsEnd do
         let litNode = toClassName <| indexator.indexToLiteral i
         printBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
         printBrInd 2 "let value, temp = data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sLitNode(value.ToString(), ranges) :> ITreeNode" litNode
+        printBrInd 2 "new %sLitNode(ranges) :> ITreeNode" litNode
 
     res.ToString()
 

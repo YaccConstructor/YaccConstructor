@@ -22,7 +22,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             ExistingTrees[document].Add(tree);
         }
 
-        public static List<ITreeNode> GeTreeNodes(IDocument doc)
+        public static List<ITreeNode> GetTreeNodes(IDocument doc)
         {
             if (ExistingTrees.ContainsKey(doc))
                 return ExistingTrees[doc];

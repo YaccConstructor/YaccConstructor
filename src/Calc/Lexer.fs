@@ -3,7 +3,7 @@
 module Calc.Lexer
 open Calc.AbstractParser
 open AbstractLexer.Core
-open YC.AbstractAnalysis.CommonInterfaces
+open YC.SDK.CommonInterfaces
 
 # 8 "Lexer.fs"
 let trans : uint16[] array = 

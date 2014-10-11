@@ -1,18 +1,38 @@
 ﻿module YC.SDK.ReSharper.Helper
 
-open YC.ReSharper.AbstractAnalysis.Plugin.Core
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.Application
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open ReSharperExtension
+open Highlighting.Core
 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 type range = JetBrains.DocumentModel.DocumentRange
 type node = JetBrains.ReSharper.Psi.Tree.ITreeNode 
 
 let getRange =  fun (x:JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression) -> (x:>ITreeNode).GetDocumentRange()
+
+let addSemantic (parent : ITreeNode) (children : ITreeNode list) = 
+    let mutable prev = null
+    let mutable curr = null
+    let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()
+    for child in children do
+        prev <- curr
+        curr <- child
+        curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)
+        ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))
+        if prev = null
+        then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)
+        else
+            prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)
+            curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)
+    parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)
+    parent.UserData.PutData(KeyConstant.Ranges, ranges)
+    if ranges <> null && ranges.Count > 0
+    then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)
+    parent
 
 let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
     let ranges = 

@@ -40,15 +40,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -62,7 +53,6 @@
     <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
@@ -77,6 +67,9 @@
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
       <Name>Common.AST</Name>
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
@@ -84,22 +77,23 @@
       <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
       <Name>RNGLRCommon</Name>
       <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YC.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="YC.Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="YC.Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="YC.Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

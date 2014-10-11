@@ -41,7 +41,6 @@
   </Target>
   <ItemGroup>
     <None Include="packages.config" />
-    <Compile Include="Common.fs" />
     <Compile Include="Helper.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +52,26 @@
     <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
       <Name>AbstractLexer.Core</Name>
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
+      <Name>Highlighting.Core</Name>
+      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
@@ -153,18 +172,6 @@
       <Project>{42485bca-665d-48fb-befd-4a0232f2cf0b}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YC.Common">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Common.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Constraints.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Conversions.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>

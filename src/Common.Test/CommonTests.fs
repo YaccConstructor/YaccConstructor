@@ -10,15 +10,21 @@ open System.Linq
 open System.IO
 open Mono.Addins
 
+[<SetUpFixture>]
+type SetUp()=
+    [<SetUp>]
+    member this.SetUp () =
+        AddinManager.Initialize()
+        AddinManager.Registry.Update()
+
 [<TestFixture>]
 type ``Components loader tests`` () =
     [<Test>]
-    member test.``All generators`` () =
-        AddinManager.Initialize()
-        let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
-        let GeneratorNames = Seq.map (fun (elem : Generator) -> elem.Name) GeneratorsManager
+    member test.``All generators`` () =        
+        let generatorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
+        let generatorNames = Seq.map (fun (elem: Generator) -> elem.Name) generatorsManager
         let allGenerators = 
-            List.ofSeq GeneratorNames
+            List.ofSeq generatorNames
             |> List.sort
         let expetedResult = 
             ["CYKGenerator"; "FParsecGenerator"; "FsYaccPrinter"; "RNGLRGenerator"; "TreeDump"; "YardPrinter"]
@@ -26,17 +32,16 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allGenerators
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allGenerators,expetedResult)
+        Assert.AreEqual(expetedResult |> List.sort, allGenerators |> List.sort)
     
 
 
     [<Test>]
     member test.``All frontends`` () =
-        AddinManager.Initialize()
-        let FrontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
-        let FrontendNames = Seq.map (fun (elem : Frontend) -> elem.Name) FrontendsManager 
+        let frontendsManager = AddinManager.GetExtensionObjects (typeof<Frontend>) |> Seq.cast<Frontend>
+        let frontendNames = Seq.map (fun (elem: Frontend) -> elem.Name) frontendsManager 
         let allFrontends = 
-            List.ofSeq FrontendNames
+            List.ofSeq frontendNames
             |> List.sort
         let expetedResult =
             ["AntlrFrontend"; "FsYaccFrontend"; "IronyFrontend"; "YardFrontend"]
@@ -44,17 +49,16 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allFrontends
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allFrontends,expetedResult)
+        Assert.AreEqual(expetedResult, allFrontends)
 
         
 
     [<Test>]
     member test.``All conversions`` () =
-        AddinManager.Initialize()
-        let ConversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
-        let ConversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) ConversionsManager
+        let conversionsManager = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
+        let conversionNames = Seq.map (fun (elem : Conversion) -> elem.Name) conversionsManager
         let allConversions = 
-            List.ofSeq ConversionNames
+            List.ofSeq conversionNames
             |> List.sort
         let expetedResult =
              ["AddDefaultAC"; "AddEOF"; "BuildAST"; "BuildAstSimple"; "CNF"; "DeleteChainRule"; "DeleteEpsRule"; "EliminateLeftRecursion";
@@ -64,26 +68,25 @@ type ``Components loader tests`` () =
         Seq.iter (printfn "%A;") allConversions
         printfn "**********************"
         Seq.iter (printfn "%A;") expetedResult        
-        Assert.AreEqual(allConversions,expetedResult)
+        Assert.AreEqual(expetedResult |> List.sort, allConversions |> List.sort)
 
     
     [<Test>]
     member test.``Get generators name`` () =
-        AddinManager.Initialize()
-        let GeneratorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
+        let generatorsManager = AddinManager.GetExtensionObjects (typeof<Generator>) |> Seq.cast<Generator>
         let VerificatedGenerators  = ["RNGLRGenerator",true ; "TreeDump",true]
 
         let genfun (x,y)  = 
-            match (Seq.tryFind (fun (elem : Generator) -> elem.Name = x) GeneratorsManager) with
+            match (Seq.tryFind (fun (elem : Generator) -> elem.Name = x) generatorsManager) with
                 | Some _ -> true
-                | None -> false
+                | None   -> false
         
-        let allGetingGenerators = List.map genfun VerificatedGenerators
+        let allGettingGenerators = List.map genfun VerificatedGenerators
 
         List.iter (fun vg ->  (vg |> snd |> printfn "%A : "); (vg |> fst |> printfn "%A;"))  VerificatedGenerators
         printfn "**********************"
-        List.iter (printfn "%A;") allGetingGenerators 
-        Assert.AreEqual(VerificatedGenerators |> List.map (fun vg ->   vg |> snd),allGetingGenerators)
+        List.iter (printfn "%A;") allGettingGenerators 
+        Assert.AreEqual(VerificatedGenerators |> List.map (fun vg ->   vg |> snd),allGettingGenerators)
 
 [<TestFixture>]
 type ``Checker test`` () =

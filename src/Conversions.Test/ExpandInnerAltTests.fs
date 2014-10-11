@@ -33,16 +33,20 @@ open Yard.Core.Helpers
 type ``Expand inner alts tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandInnerAlt")
     let fe = getFrontend("YardFrontend")
-    let conversion = "ExpandInnerAlt"
+    let applyConversion loadIL = 
+        {
+            loadIL
+                with grammar = (new Conversions.ExpandInnerAlt.ExpandInnerAlt()).ConvertGrammar (loadIL.grammar, [||])                               
+        }
     [<Test>]
     member test.``Alt in seq 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules = 
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("x"),None)}
-                ;{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}]
+                 {dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}]
             ) @ (
                 simpleNotStartRules "yard_exp_brackets_1"
                 <| PAlt
@@ -61,7 +65,7 @@ type ``Expand inner alts tests`` () =
     member test.``Alt in seq 2`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altInSeq2.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "x",None)}
@@ -84,7 +88,7 @@ type ``Expand inner alts tests`` () =
     member test.``Alts in seq`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"altsInSeq.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "x", None)}
@@ -113,7 +117,7 @@ type ``Expand inner alts tests`` () =
     member test.``Nested alts`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"nestedAlts.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1", None)}]

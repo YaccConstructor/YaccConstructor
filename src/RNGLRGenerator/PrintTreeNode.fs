@@ -20,13 +20,25 @@ type TokenInfo =
     }
 
 let toClassName (str : string) = 
-        let symbols = [| 
-                        for i = 0 to str.Length - 1 do
-                            if i = 0 
-                            then yield System.Char.ToUpper str.[0]
-                            else yield str.[i] 
-                        |] 
-        new System.String(symbols)
+    let symbols = [| 
+                    for i = 0 to str.Length - 1 do
+                        if i = 0 
+                        then yield System.Char.ToUpper str.[0]
+                        else yield str.[i] 
+                    |] 
+    new System.String(symbols)
+
+let nonTermSuffix = "NonTermNode"
+let termSuffix = "TermNode"
+let literalSuffix = "LitNode"
+let baseClassSuffix = "BaseTreeNode"
+let extension = ".cs"
+
+let getSuffix tokenKind = 
+    match tokenKind with
+    | Terminal -> termSuffix
+    | Literal -> literalSuffix
+    | NonTerminal -> nonTermSuffix
 
 //Print ITreeNode implementation
 let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : string) = 
@@ -98,36 +110,21 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBr ""
     printBrInd 2 "public NodeUserData UserData { get; private set; }"
     printBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
-//    printBrInd 2 "public NodeUserDataHolder NodeUserDataHolder { get; private set; }"    
     printBr ""
-    printBrInd 2 "public %s (string ycTokName) : this (ycTokName, string.Empty)" nameOfClass
-    printBrInd 2 "{"
-    printBrInd 2 "}"
 
     printBr ""
-    printBrInd 2 "public %s (string ycTokName, string ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName)" nameOfClass
     printBrInd 2 "{"
     printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
     printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
     printBr ""
     printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcTextValue, ycValue);"
     printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
     printBrInd 2 "}"
     
     printBr ""
-    printBrInd 2 "public %s (string ycTokName, string ycValue, IEnumerable<DocumentRange> positions) : this (ycTokName, ycValue)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, IEnumerable<DocumentRange> positions) : this (ycTokName)" nameOfClass
     printBrInd 2 "{"
-//    printBrInd 3 "SetPositions(positions as IEnumerable<DocumentRange>);"
-//    printBrInd 2 "}"
-//    printBr ""
-    // printing all methods
-
-//    printBrInd 2 "private void SetPositions(IEnumerable<DocumentRange> positions)"
-//    printBrInd 2 "{"
-//    printBrInd 3 "if (positions == null)"
-//    printBrInd 4 "return;"
-//    printBr ""
     printBrInd 3 "var ranges = positions.ToList();"
     printBrInd 3 "if (ranges.Count > 0)"
     printBrInd 3 "{"
@@ -262,9 +259,6 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 2 "public ITreeNode FindNodeAt(TreeTextRange treeTextRange)"
     printBrInd 2 "{"
     printBrInd 3 "IDocument doc = UserData.GetData(KeyConstant.Document);"
-//    printBrInd 3 "if (ranges == null || ranges.Count == 0)"
-//    printBrInd 4 "return null;"
-//    printBrInd 3 "var needRange = new DocumentRange(ranges[0].Document, treeTextRange.GetTextRange());"
     printBrInd 3 "var needRange = new DocumentRange(doc, treeTextRange.GetTextRange());"
     printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
     printBr  ""
@@ -306,13 +300,11 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 let printTreeNode (tokenInfo : TokenInfo) = 
     let res  = new System.Text.StringBuilder()
 
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
+    let inline print (x : 'a) = Printf.kprintf (fun s -> res.Append s |> ignore) x
 
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
+    let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
-    let inline printBrInd num (x : 'a) =
+    let inline printBrInd num (x : 'a) = 
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
     
@@ -324,27 +316,22 @@ let printTreeNode (tokenInfo : TokenInfo) =
     printBrInd 0 "namespace %s" tokenInfo._namespace
     printBrInd 0 "{"
 
-
     let className = 
-        let suffix = 
-            match tokenInfo._type with
-            | Terminal -> "TermNode"
-            | Literal -> "LitNode"
-            | NonTerminal -> "NonTermNode"
+        let suffix = getSuffix tokenInfo._type
         toClassName tokenInfo._name + suffix
 
     printBrInd 1 "public class %s : %s" className tokenInfo._baseClass
     printBrInd 1 "{"
 
-    printBrInd 2 "private static string ycTokName = \"%s\";" tokenInfo._name
+    printBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo._name.ToLowerInvariant()
     printBr ""
-    printBrInd 2 "public %s (string ycValue, IEnumerable<DocumentRange> positions)" className
-    printBrInd 3 ": base(ycTokName, ycValue, positions)"
+    printBrInd 2 "public %s (IEnumerable<DocumentRange> positions)" className
+    printBrInd 3 ": base(ycTokName, positions)"
     printBrInd 2 "{"
 
     match tokenInfo._type with
     | Literal 
-    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, ycValue, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
+    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
     | _ -> ()
     printBrInd 2 "}"
 
@@ -359,14 +346,10 @@ let printTreeNode (tokenInfo : TokenInfo) =
 
 let generateTreeNodeFile folder tokenInfo = 
     let className = 
-        let suffix = 
-            match tokenInfo._type with
-            | Terminal -> "TermNode"
-            | Literal -> "LitNode"
-            | NonTerminal -> "NonTermNode"
+        let suffix = getSuffix tokenInfo._type
         toClassName <| tokenInfo._name + suffix
 
-    use out = new System.IO.StreamWriter (folder + className + ".cs")
+    use out = new System.IO.StreamWriter (folder + className + extension)
     let tables = printTreeNode tokenInfo
     out.WriteLine tables
     out.Close()
@@ -500,76 +483,6 @@ let printXML (nameOfNamespace : string) tokens =
     printBrInd 0 "</SyntaxDefinition>"
     res.ToString()
 
-//prints "addSemantic" function in parser file.
-//function addSemantic sets relations between nodes (father, child, brother)
-let printAddSemantic() = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let addSemantic (parent : ITreeNode) (children : ITreeNode list) = " 
-    printBrInd 1 "let mutable prev = null"
-    printBrInd 1 "let mutable curr = null"
-    printBrInd 1 "let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()"
-    printBrInd 1 "for child in children do"
-    printBrInd 2 "prev <- curr"
-    printBrInd 2 "curr <- child"
-    printBrInd 2 "curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)"
-    printBrInd 2 "ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))"
-    printBrInd 2 "if prev = null"
-    printBrInd 2 "then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)"
-    printBrInd 2 "else"
-    printBrInd 3 "prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)"
-    printBrInd 3 "curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)"
-    printBrInd 1 "parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)"
-    printBrInd 1 "parent.UserData.PutData(KeyConstant.Ranges, ranges)"
-    printBrInd 1 "if ranges <> null && ranges.Count > 0"
-    printBrInd 1 "then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)"
-    printBrInd 1 "parent"
-    res.ToString()
-
-//prints "calculatePos" function in parser file. 
-//function calculatePos returns token coordinates.
-let printCalculatePos() = 
-    let res  = new System.Text.StringBuilder()
-
-    let inline print (x : 'a) =
-        Printf.kprintf (fun s -> res.Append s |> ignore) x
-
-    let inline printBr (x : 'a) =
-        Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
-
-    let inline printBrInd num (x : 'a) =
-        print "%s" (String.replicate (num <<< 2) " ")
-        printBr x
-
-    printBrInd 0 "let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) ="
-    printBrInd 1 "let ranges = "
-    printBrInd 2 "brs |> Seq.groupBy (fun x -> x.back_ref)"
-    printBrInd 2 "|> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)"
-    printBrInd 2 "|> Seq.map(fun brs ->"
-    printBrInd 3 "try"
-    printBrInd 4 "let pos =  brs |> Array.map(fun i -> i.pos_cnum)"
-    printBrInd 4 "let lengthTok = pos.Length"
-    printBrInd 4 "let beginPosTok = pos.[0] + 1"
-    printBrInd 4 "let endPosTok = pos.[lengthTok-1] + 2"
-    printBrInd 4 "let endPos = "
-    printBrInd 5 "brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok"
-    printBrInd 5 "- brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset"
-    printBrInd 4 "brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)"
-    printBrInd 3 "with"
-    printBrInd 3 "| e -> brs.[0].back_ref.GetDocumentRange())"
-    printBrInd 1 "ranges"
-    res.ToString()
-
 //prints "tokenToTreeNode" function in parser file. 
 //function "tokenToTreeNode" needs in highlihgting after lexical analysis.
 let printTokenToTreeNode (indexator : Indexator) = 
@@ -591,23 +504,21 @@ let printTokenToTreeNode (indexator : Indexator) =
     for i = indexator.termsStart to indexator.termsEnd do
         let termNode = toClassName <| indexator.indexToTerm i
         printBrInd 1 "| %s data -> " termNode
-        printBrInd 2 "let value = fst <| data"
-        printBrInd 2 "let temp = snd <| data"
+        printBrInd 2 "let value, temp = data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sTermNode(value.ToString(), ranges) :> ITreeNode" termNode
+        printBrInd 2 "new %sTermNode(ranges) :> ITreeNode" termNode
 
     for i = indexator.literalsStart to indexator.literalsEnd do
         let litNode = toClassName <| indexator.indexToLiteral i
         printBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
-        printBrInd 2 "let value = fst <| data"
-        printBrInd 2 "let temp = snd <| data"
+        printBrInd 2 "let value, temp = data"
         printBrInd 2 "let ranges = calculatePos temp"
-        printBrInd 2 "new %sLitNode(value.ToString(), ranges) :> ITreeNode" litNode
+        printBrInd 2 "new %sLitNode(ranges) :> ITreeNode" litNode
 
     res.ToString()
 
 let printItemsGroup nameOfClasses xmlName = 
-    let res  = new System.Text.StringBuilder()
+    let res = new System.Text.StringBuilder()
 
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -636,6 +547,97 @@ let printItemsGroup nameOfClasses xmlName =
     printBrInd 1 "</ItemGroup>"
     printBrInd 1 "</Project>"
     res.ToString()
+
+let generate (indexator : Indexator) namespaceName = 
+    let folder = System.IO.Path.GetFullPath namespaceName + "\\"
+    let langName = namespaceName.Replace ("Highlighting", "")
+    let baseClass = langName + baseClassSuffix
+    
+    let generateFile path text = 
+        use out = new System.IO.StreamWriter(path : string)
+        out.WriteLine(text : string)
+        out.Close()
+
+    let generateXML() = 
+        let fileName = folder + baseClass + extension
+        let text = printBaseTreeNode namespaceName baseClass langName 
+        generateFile fileName text
+    
+    generateXML()
+
+    let mutable tokensAndLits = []
+    let nameOfClasses = ref []
+                
+    for i = 0 to indexator.nonTermCount - 1 do
+        let name = toClassName <| indexator.indexToNonTerm i
+        if not <| name.Contains ("Highlight_")
+        then 
+            nameOfClasses := name + nonTermSuffix + extension :: !nameOfClasses
+            let info : TokenInfo =  
+                {
+                    _baseClass = baseClass
+                    _namespace = namespaceName
+                    _name = name
+                    _type = TokenKind.NonTerminal
+                    _number = i
+                    _lang = langName
+                }
+
+            generateTreeNodeFile folder info
+
+    for i = indexator.termsStart to indexator.termsEnd do
+        let name = indexator.indexToTerm i
+                    
+        nameOfClasses := name + termSuffix + extension :: !nameOfClasses
+        tokensAndLits <- name :: tokensAndLits
+        let info : TokenInfo =  
+            {
+                _baseClass = baseClass
+                _namespace = namespaceName
+                _name = name
+                _type = TokenKind.Terminal
+                _number = i
+                _lang = langName
+            }
+
+        generateTreeNodeFile folder info
+                
+    for i = indexator.literalsStart to indexator.literalsEnd do
+        let name = toClassName <| indexator.getLiteralName i
+                    
+        nameOfClasses := name + literalSuffix + extension :: !nameOfClasses
+        tokensAndLits <- name :: tokensAndLits
+        let info : TokenInfo =  
+            {
+                _baseClass = baseClass
+                _namespace = namespaceName
+                _name = name
+                _type = TokenKind.Literal
+                _number = i
+                _lang = langName
+            }
+
+        generateTreeNodeFile folder info
+                    
+    //generateHotspotXMLFile "Hotspots.xml"
+    tokensAndLits <- tokensAndLits |> List.rev
+    
+    let generateXML name toksAndLits = 
+        let path = folder + name + ".xml"
+        if not <| System.IO.File.Exists (path)
+        then 
+            let text = printXML name toksAndLits
+            generateFile path text
+    generateXML namespaceName tokensAndLits
+    
+    nameOfClasses := !nameOfClasses |> List.rev
+
+    let generateItemGroup() =
+        let fileName = folder + "ItemsGroup.target"
+        let text = printItemsGroup <| List.rev (baseClass + extension :: !nameOfClasses) <| namespaceName
+        generateFile fileName text
+    
+    generateItemGroup()
 
 let printHotspotFile() = 
     let res  = new System.Text.StringBuilder()

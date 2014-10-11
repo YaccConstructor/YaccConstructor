@@ -66,12 +66,14 @@ let initNamer (grammar : Grammar.t<_,_>) =
     let addAC (s : Source.t) =
         let len = ref 0
         s.text |> String.iteri (fun i c ->
-            if acceptable c then incr len
-            elif !len <> 0 then
-                add <| s.text.Substring(i - !len, !len)
+            if acceptable c
+            then incr len
+            elif !len <> 0
+            then add <| s.text.Substring(i - !len, !len)
         )
-        if !len <> 0 then
-            add <| s.text.Substring(s.text.Length - !len, !len)
+        if !len <> 0
+        then add <| s.text.Substring(s.text.Length - !len, !len)
+
     let rec walk = function
         | PRef (n,args) ->
             addSrc n

@@ -24,9 +24,8 @@ open LexerHelper
 open System
 open System.IO
 open Yard.Generators.RNGLR.AST
-open YC.AbstractAnalysis.CommonInterfaces
-open YC.ReSharper.AbstractAnalysis.Plugin.Core
-open YC.EL.ReSharper.Common
+open YC.SDK.CommonInterfaces
+open YC.SDK.ReSharper.Helper
 open Mono.Addins
 open ReSharperExtension
 open JetBrains.Application
@@ -50,6 +49,7 @@ let args =
     }
 
 let printAstToDot ast name = defaultAstToDot ast name
+let printOtherAstToDot sppf name = otherAstToDot sppf name
 
 let xmlPath = xmlPath
 let tokenToTreeNode = tokenToTreeNode
@@ -62,7 +62,7 @@ do()
 [<ShellComponent>]
 [<Extension>]
 type TSQLInjectedLanguageModule () =
-    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange)
+    let processor = new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, "TSQL", calculatePos, getRange, printAstToDot, printOtherAstToDot)
 
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "TSQL"

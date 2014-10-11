@@ -3,10 +3,10 @@
 open Calc.AbstractParser
 open AbstractLexer.Core
 open Yard.Generators.RNGLR.AST
-open YC.AbstractAnalysis.CommonInterfaces
-open YC.ReSharper.AbstractAnalysis.Plugin.Core
+open YC.SDK.CommonInterfaces
+open YC.SDK.CommonInterfaces
 open Mono.Addins
-open YC.EL.ReSharper.Common
+open YC.SDK.ReSharper.Helper
 open ReSharperExtension
 open JetBrains.Application
 
@@ -56,7 +56,7 @@ type CalcInjectedLanguageModule () =
 
     let processor =
         new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
-                      , getRange)
+                      , getRange, printAstToDot, otherAstToDot)
     
     interface IInjectedLanguageModule<br,range,node> with
         member this.Name = "calc"

@@ -555,3 +555,14 @@ type ``Abstract lexer tests`` () =
 //      //let t = Literals.Lexer222.token <| Lexing.LexBuffer<_>.FromString ( "+1+")
 //     // printfn "%A" t
 //      1
+
+
+type T<'a> = 
+    val X: 'a
+    new (x) = {X=x}
+
+let f (t:T<_>) = printfn "%A" t.X 
+
+f (new T<_>("d"))
+f (new T<_>(1))
+     

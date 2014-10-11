@@ -303,8 +303,6 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             let printXmlName = sprintf "let xmlPath = \"%s.xml\" %s" highlightingOpt.Value System.Environment.NewLine
             wordL <| System.String.Concat [| 
                                              printXmlName; System.Environment.NewLine; 
-                                             printAddSemantic(); System.Environment.NewLine; 
-                                             printCalculatePos(); System.Environment.NewLine;
                                              printTokenToTreeNode (grammar.indexator); System.Environment.NewLine;
                                           |] 
         else wordL ""

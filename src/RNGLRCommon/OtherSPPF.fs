@@ -383,6 +383,11 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then family.nodes.doForAllAfterNode node f
             else family.nodes.doForAllBeforeNode node f
 
+        let handleAllNodes (family : OtherFamily) f = 
+            if toRight
+            then family.nodes.doForAll f
+            else family.nodes.doForAllRev f
+
         while contexts.Count > 0 do
             let state = contexts.Pop()
             let mutable parent = box state.parent
@@ -409,7 +414,7 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
         
                     if family.nodes.exist (fun node -> node = !child)
                     then handleSomeNodes !child family handle 
-                    else family.nodes.doForAll (fun node -> handle node)
+                    else handleAllNodes family (fun node -> handle node)
 
             and processAST (ast : OtherAST) = 
                 let value = !count

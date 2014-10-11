@@ -33,9 +33,6 @@
   <ItemGroup>
     <Compile Include="CommonInterfaces.fs" />
     <None Include="packages.config" />
-    <None Include="Languages.addins">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

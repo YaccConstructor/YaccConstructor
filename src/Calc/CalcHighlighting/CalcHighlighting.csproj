@@ -38,20 +38,21 @@
     <Reference Include="JetBrains.ReSharper.Psi, Version=8.1.23.523, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-	  <Compile Include="@(ExternalCompile)" />
+    <Compile Include="@(ExternalCompile)" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Highlighting.Core\Highlighting.Core.csproj">
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
-      <Name>Highlighting.Core</Name>
+    <ProjectReference Include="..\..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
+      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
+      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

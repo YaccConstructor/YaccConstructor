@@ -21,7 +21,7 @@
 
 
 {
-open AbstractLexer.Core
+open YC.FST.AbstractLexing.Interpreter
 open Yard.Utils.SourceText
 }
 
@@ -40,7 +40,7 @@ include "create_table.yrd"
 include "transaction.yrd"
 
 tokens {
-    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of GraphTokenValue<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>
 }
 
 options {

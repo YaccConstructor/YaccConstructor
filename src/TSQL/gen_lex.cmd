@@ -1,1 +1,1 @@
-..\packages\YC.AbstractAnalysis.Lexing.Generator.0.0.6.5\tools\AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
+..\..\Bin\Debug\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs --unicode

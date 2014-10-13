@@ -20,15 +20,17 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lexer
-//open Microsoft.FSharp.Text.Lexing
-//open Microsoft.FSharp.Text
-open Microsoft.FSharp.Reflection
+module YC.TSQLLexer
+
+open Microsoft.FSharp.Collections
+open YC.FST.GraphBasedFst
+open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
 open Yard.Examples.MSParser
-open LexerHelper
 open System
+open LexerHelper
+open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
-open YC.AbstractAnalysis.CommonInterfaces
 
 let mutable id = 0<id>
 
@@ -74,9 +76,7 @@ rule tokens = parse
             Some tok }
  | "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)
- | eof  {RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some }
- | _  { raise (LexerError(lexeme,box brs)) }   //{ failwith (sprintf "fucking shit received %s\n" lexeme ) }
-(* and literal = parse
+ (* and literal = parse
   | "''" { appendBuf("'"); literal brs }
   | '\'' { STRING_CONST(defaultSourceText id  brs (string str_buf)) }
   | eol { appendBuf(lexeme brs); brs.EndPos <- brs.EndPos.NextLine; literal brs }

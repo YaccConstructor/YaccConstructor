@@ -1,5 +1,5 @@
 ﻿{
-open AbstractLexer.Core
+open YC.FST.AbstractLexing.Interpreter
 }
 
 include "../../GrammarTemplates/Common.yrd"

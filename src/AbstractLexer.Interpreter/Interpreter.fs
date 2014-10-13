@@ -10,7 +10,7 @@ open YC.FST.FstApproximation
 let printSmbString (x:char*Position<_>) = 
         (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
-type TokenEdge<'br when 'br:comparison>(s,e,t)=
+type TokenEdge<'br(* when 'br:comparison*)>(s,e,t)=
     inherit TaggedEdge<int, char*Position<'br>>(s,e,t)
         
     member this.BackRef = (snd t).back_ref
@@ -18,7 +18,7 @@ type TokenEdge<'br when 'br:comparison>(s,e,t)=
     member this.EndPos = (snd t).end_offset
     member this.Label = fst t
 
-type GraphTokenValue<'br when 'br:comparison>() =
+type GraphTokenValue<'br(* when 'br:comparison*)>() =
     inherit AdjacencyGraph<int,TokenEdge<'br>>()
 
     member this.AddEdgeForsed (e:TokenEdge<_>) =
@@ -27,7 +27,7 @@ type GraphTokenValue<'br when 'br:comparison>() =
         this.AddEdge e |> ignore
 
 [<Struct>]
-type GraphAction<'br when 'br:comparison> =
+type GraphAction<'br(* when 'br:comparison*)> =
     val startAct: int
     val endActs: HashSet<int>
     val graph: GraphTokenValue<'br>

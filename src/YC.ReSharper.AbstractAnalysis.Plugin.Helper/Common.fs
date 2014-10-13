@@ -5,28 +5,29 @@ module YC.EL.ReSharper.Common
 
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
-
+open YC.FST.AbstractLexing.Interpreter
+ 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 type range = JetBrains.DocumentModel.DocumentRange
 type node = JetBrains.ReSharper.Psi.Tree.ITreeNode 
 
 let getRange =  fun (x:JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression) -> (x:>ITreeNode).GetDocumentRange()
 
-let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
+let calculatePos (grToken: GraphTokenValue<#ITreeNode>) =    
         let ranges = 
-            brs |> Seq.groupBy (fun x -> x.back_ref)
+            grToken.Edges |> Seq.groupBy (fun x -> x.BackRef)
             |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-            |> Seq.map(fun brs ->
+            |> Seq.map(fun grToken ->
                 try
-                    let pos =  brs |> Array.map(fun i -> i.pos_cnum)
+                    let pos =  grToken |> Array.map(fun i -> i.StartPos)
                     let lengthTok = pos.Length
-                    let beginPosTok = pos.[0] + 1
-                    let endPosTok = pos.[lengthTok-1] + 2 
+                    let beginPosTok = pos.[0]
+                    let endPosTok = pos.[lengthTok-1] + 1 
                     let endPos = 
-                        brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                        - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-                    brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+                        grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                        - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 
+                    grToken.[0].BackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
                 with
                 | e -> 
-                    brs.[0].back_ref.GetDocumentRange())
+                    grToken.[0].BackRef.GetDocumentRange())
         ranges

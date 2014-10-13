@@ -7,6 +7,8 @@ open YC.AbstractAnalysis.CommonInterfaces
 open AbstractAnalysis.Common
 open Yard.Generators.RNGLR.AST
 open Yard.Generators.RNGLR.OtherSPPF
+open YC.FST.AbstractLexing.Interpreter
+open YC.FST.FstApproximation
 
 open System
 open Mono.Addins
@@ -56,7 +58,7 @@ type LanguagesProcessor<'br,'range, 'node>() =
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
-        tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
+        tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange:'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
@@ -90,8 +92,8 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
                 tokenize g
                 |> Some 
             with
-            | LexerError(t,brs) ->
-                (t, (brs :?> array<AbstractLexer.Core.Position<'br>>).[0].back_ref |> getDocumentRange)
+            | LexerError(t,grToken) ->
+                (t, (grToken :?> GraphTokenValue<'br>).Edges |> Seq.nth 0 |> fun e -> e.BackRef |> getDocumentRange)
                 |> addLError
                 None
 
@@ -151,7 +153,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos (token : 'TokenType)= 
-        let data : string * array<AbstractLexer.Core.Position<'br>> = unbox <| tokenData token
+        let data : string * GraphTokenValue<'br> = unbox <| tokenData token
         calculatePos <| snd data
 
     member this.GetForestWithToken range = getForestWithToken range
@@ -172,17 +174,13 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
-    member this.Process (graph:LexerInputGraph<'br>) = 
+    member this.Process (graph:Appr<'br>) = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
-        let filterBrs (brs:array<AbstractLexer.Core.Position<'br>>) =
-            let res = new ResizeArray<AbstractLexer.Core.Position<'br>>(3)
-            brs |> Array.iter(fun br -> if res.Exists(fun x -> obj.ReferenceEquals(x.back_ref, br.back_ref)) |> not then res.Add br)
-            res.ToArray()
                     
         let addError tok =
-            let e tokName lang (brs:array<AbstractLexer.Core.Position<'br>>) = 
-                brs |> calculatePos
+            let e tokName lang (grToken: GraphTokenValue<'br>) = 
+                grToken |> calculatePos
                 |> Seq.iter
                     (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" tokName lang), br))
             let name = tok |> (tokenToNumber >>  numToString)

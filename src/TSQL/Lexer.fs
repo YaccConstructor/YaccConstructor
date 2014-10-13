@@ -32,6 +32,7 @@ open System
 open LexerHelper
 open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
+open YC.SDK.CommonInterfaces
 
 let mutable id = 0<id>
 

@@ -7,6 +7,7 @@ open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open Calc.AbstractParser
 
+open YC.SDK.CommonInterfaces
 }
 
 let digit = ['0'-'9']

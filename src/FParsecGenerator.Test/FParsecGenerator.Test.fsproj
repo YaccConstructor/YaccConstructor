@@ -49,15 +49,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <ProjectReference Include="..\YardFrontend\YardFrontend.fsproj">
+      <Name>YardFrontend</Name>
+      <Project>{a090e3b0-0516-44f3-9fba-6ef8cb21926e}</Project>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
+    </ProjectReference>
     <Reference Include="FParsec">
       <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net40-client\FParsec.dll</HintPath>
       <Private>True</Private>
@@ -66,16 +62,16 @@
       <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net40-client\FParsecCS.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core, Version=1.8.41.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -86,23 +82,29 @@
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="RNGLR, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FParsecGenerator\FParsecGenerator.fsproj">
       <Name>FParsecGenerator</Name>
       <Project>{ec8d87c9-3910-4e6a-9c30-1e5c9ba8e73c}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YardFrontend, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

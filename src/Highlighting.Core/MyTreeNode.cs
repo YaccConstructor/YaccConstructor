@@ -53,25 +53,18 @@ namespace Highlighting.Core
         public NodeUserData PersistentUserData { get; private set; }
 
         private int curInd;
-
-        public MyTreeNode(string ycTokName) : this (ycTokName, string.Empty)
-        {
-            
-        }
-
-        public MyTreeNode(string ycTokName, string ycValue)
+        public MyTreeNode(string ycTokName)
         {
             UserData = DataHelper.GetNodeUserData(this);
             PersistentUserData = DataHelper.GetNodeUserData(this);
             UserData.PutData(KeyConstant.YcTokenName, ycTokName);
-            UserData.PutData(KeyConstant.YcTextValue, ycValue);
             UserData.PutData(KeyConstant.YcLanguage, "Calc");
             
-            YcHelper.AddYcItem(ycTokName, ycValue, -2, "Calc");
+            YcHelper.AddYcItem(ycTokName, -2, "Calc");
         }
 
-        public MyTreeNode(string ycName, string ycValue, IEnumerable<DocumentRange> positions)
-            : this(ycName, ycValue)
+        public MyTreeNode(string ycName, IEnumerable<DocumentRange> positions)
+            : this(ycName)
         {
             var ranges = positions.ToList();
             if (ranges.Count > 0)

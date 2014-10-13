@@ -10,4 +10,12 @@ namespace Highlighting.Core
             return new TextRange(treeTextRange.StartOffset.Offset, treeTextRange.EndOffset.Offset);
         }
     }
+
+    public static class TextRangeExtension
+    {
+        public static TreeTextRange GetTreeTextRange(this TextRange textRange)
+        {
+            return new TreeTextRange(new TreeOffset(textRange.StartOffset), new TreeOffset(textRange.EndOffset));
+        }
+    }
 }

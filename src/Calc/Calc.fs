@@ -2,10 +2,10 @@
 
 open Calc.AbstractParser
 open Yard.Generators.RNGLR.AST
-open YC.AbstractAnalysis.CommonInterfaces
-open YC.ReSharper.AbstractAnalysis.Plugin.Core
+open YC.SDK.CommonInterfaces
+open YC.SDK.CommonInterfaces
 open Mono.Addins
-open YC.EL.ReSharper.Common
+open YC.SDK.ReSharper.Helper
 open ReSharperExtension
 open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter

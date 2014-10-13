@@ -7,6 +7,7 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open Calc.AbstractParser
+open YC.SDK.CommonInterfaces
 
 
 # 12 "Lexer.fs"

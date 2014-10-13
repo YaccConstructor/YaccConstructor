@@ -184,9 +184,8 @@ type RNGLR() =
 
                     if !needHighlighting && !needTranslate
                     then 
-                        println "open YC.EL.ReSharper.Common"
+                        println "open YC.SDK.ReSharper.Helper"
                         println "open JetBrains.ReSharper.Psi.Tree"
-                        println "open Highlighting.Core"
                         println "open %s" !namespaceName
                         
                     match definition.head with

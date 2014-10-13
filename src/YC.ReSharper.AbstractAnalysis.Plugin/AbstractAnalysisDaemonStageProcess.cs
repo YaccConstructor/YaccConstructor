@@ -23,9 +23,8 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Files;
 using System.Linq;
-//using YC.ReSharper.AbstractAnalysis.Plugin.Core;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.AbstractAnalysis;
+using YC.SDK.ReSharper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin
 {

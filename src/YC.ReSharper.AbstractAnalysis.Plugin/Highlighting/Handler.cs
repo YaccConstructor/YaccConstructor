@@ -5,7 +5,8 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Stages;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.AbstractAnalysis;
+using YC.SDK;
+using YC.SDK.ReSharper;
 using YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 

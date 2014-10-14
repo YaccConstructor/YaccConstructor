@@ -180,7 +180,7 @@ type RNGLR() =
 
 
                     println "open Yard.Generators.RNGLR.Parser"
-                    println "open Yard.Generators.Common"
+                    println "open Yard.Generators.RNGLR"
                     println "open Yard.Generators.Common.AST"
                     
                     if !needHighlighting && !needTranslate

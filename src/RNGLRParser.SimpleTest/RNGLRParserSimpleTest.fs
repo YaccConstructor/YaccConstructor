@@ -28,24 +28,6 @@ let inline translate (f : TranslateArguments<_,_> -> 'b -> 'c) (ast : 'b) =
 [<TestFixture>]
 type ``RNGLR parser tests with simple lexer`` () =
     [<Test>]
-    member test.``SIMPLE epsilon``() =
-        let parser = RNGLR.SimpleEpsilon.buildAst
-        let path = dir + "AA.txt"
-
-        match run path parser with
-        | Parser.Error (num, tok, err,_, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-        | Parser.Success (mAst, _, errors) ->
-            RNGLR.SimpleEpsilon.defaultAstToDot mAst "SimpleEpsilon.dot"
-           // mAst.ChooseLongestMatch()
-//            let res = translate RNGLR.ParseLongest.translate mAst errors
-//            printfn "Result: %A" res
-//            Assert.AreEqual([5,0], res)
-
-    [<Test>]
     member test.``Omit``() =
         let parser = RNGLR.ParseOmit.buildAst
         let path = dir + "Omit.txt"
@@ -267,5 +249,3 @@ type ``RNGLR parser tests with simple lexer`` () =
 //            printfn "Result: %A" res
 //            Assert.AreEqual([5,0], res)
 //
-[<EntryPoint>]
-(new ``RNGLR parser tests with simple lexer``()).``SIMPLE epsilon``()

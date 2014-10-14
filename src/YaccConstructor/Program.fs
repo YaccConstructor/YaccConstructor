@@ -46,7 +46,7 @@ let log (e:System.Exception) msg =
 
 let () =
     let feName = ref None
-    let generatorName = ref <| Some ""
+    let generatorName = ref None
     let generatorParams = ref None
     let testsPath = ref <| Some ""
     let testFile = ref None
@@ -79,14 +79,14 @@ let () =
             Some tmpName
         else None
             
-//    generatorName :=
-//        if Array.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") addinGenerators
-//        then Some "RNGLRGenerator"
-//        elif not <| Array.isEmpty addinGenerators
-//        then 
-//            let tmpName = addinGenerators.[0].Name
-//            Some tmpName
-//        else None
+    generatorName :=
+        if Array.exists (fun (elem : Generator) -> elem.Name = "RNGLRGenerator") addinGenerators
+        then Some "RNGLRGenerator"
+        elif not <| Array.isEmpty addinGenerators
+        then 
+            let tmpName = addinGenerators.[0].Name
+            Some tmpName
+        else None
 
     let generateSomething = ref true
 
@@ -210,8 +210,17 @@ let () =
                 checkSources conv !ilTree
   //          printfn "========================================================"
     //        printfn "%A" <| ilTree
-            let gen = Yard.Generators.GLL2.GLL2()
-                
+            let gen =
+                let _raise () = InvalidGenName generatorName |> raise
+                if Array.exists (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators
+                then              
+                    try
+                        match Array.tryFind (fun (elem : Generator) -> elem.Name = generatorName) addinGenerators with
+                        | Some gen -> gen
+                        | None -> failwith "TreeDump is not found."
+                    with
+                    | _ -> _raise ()
+                else _raise ()
                                
             // Generate something
             
@@ -228,7 +237,6 @@ let () =
 
                     match !generatorParams with
                     | None -> gen.Generate !ilTree
-                       
                     | Some genParams -> gen.Generate(!ilTree, genParams)
                 //with
 //                | Yard.Generators.GNESCCGenerator.StartRuleNotFound 

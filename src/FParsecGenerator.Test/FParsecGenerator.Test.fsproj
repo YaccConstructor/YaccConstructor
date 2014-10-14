@@ -12,6 +12,7 @@
     <Name>FParsecGenerator.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>

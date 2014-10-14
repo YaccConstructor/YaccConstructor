@@ -19,8 +19,24 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="SimpleEpsilon.yrd.fs" />
     <Compile Include="LexCommon.fs" />
+    <Compile Include="Attrs.yrd.fs" />
+    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="ComplexRightNull.yrd.fs" />
+    <Compile Include="Cond.yrd.fs" />
+    <Compile Include="Counter.yrd.fs" />
+    <Compile Include="Cycle.yrd.fs" />
+    <Compile Include="Epsilon.yrd.fs" />
+    <Compile Include="Expr.yrd.fs" />
+    <Compile Include="First.yrd.fs" />
+    <Compile Include="InfEpsilon.yrd.fs" />
+    <Compile Include="List.yrd.fs" />
+    <Compile Include="LolCalc.yrd.fs" />
+    <Compile Include="LongCycle.yrd.fs" />
+    <Compile Include="Longest.yrd.fs" />
+    <Compile Include="Order.yrd.fs" />
+    <Compile Include="Resolvers.yrd.fs" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
@@ -71,6 +87,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -86,14 +107,14 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GLL.Common\GLL.Common.fsproj">
-      <Name>GLL.Common</Name>
-      <Project>{a24b88c9-0236-4575-a304-231e3b040e56}</Project>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\GLLParser\GLLParser.fsproj">
-      <Name>GLLParser</Name>
-      <Project>{1548a831-3a8d-489d-8592-dda12fbc3ea4}</Project>
+    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
+      <Name>RNGLRAbstractParser</Name>
+      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">

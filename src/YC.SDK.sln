@@ -139,6 +139,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParser", "GLLParser\GLLP
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GLLParser.SimpleTest", "GLLParser.SimpleTest\GLLParser.SimpleTest.fsproj", "{DAFA5B16-8713-46EC-9D20-21C8EF8201E9}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YaccConstructor", "YaccConstructor\YaccConstructor.fsproj", "{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -453,6 +455,12 @@ Global
 		{DAFA5B16-8713-46EC-9D20-21C8EF8201E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAFA5B16-8713-46EC-9D20-21C8EF8201E9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DAFA5B16-8713-46EC-9D20-21C8EF8201E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9A0E63B-EAD7-43DE-8823-13FAA6B2B972}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

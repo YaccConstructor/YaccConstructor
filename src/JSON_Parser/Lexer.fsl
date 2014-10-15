@@ -6,7 +6,6 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open JSON.Parser
-open LexerHelper
 open System
 
 }

@@ -2,20 +2,19 @@
 
 open System.IO
 open AbstractAnalysis.Common
-open AbstractLexer.Core
 open JSON.Parser
 open Yard.Generators.RNGLR.AST
 open YC.SDK.ReSharper.Helper
 open YC.SDK.CommonInterfaces
 open JetBrains.Application
 open ReSharperExtension
+open YC.FST.AbstractLexing.Interpreter
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
 let tokenize lexerInputGraph =
-    let eof = RNGLR_EOF("",[||])
-    Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_token, lexerInputGraph, eof)
-
+    let eof = RNGLR_EOF(new GraphTokenValue<_>())    
+    YC.JSONLexer.tokenize eof lexerInputGraph
 
 let parse (*parser:Yard.Generators.RNGLR.AbstractParser.Parser<_>*) =
     

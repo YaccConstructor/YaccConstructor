@@ -163,7 +163,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST() 
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
-    inputFstLexer.PrintToDOT (@"..\..\Tests\CalcTestLexerk.dot", printSmbString)
+    //inputFstLexer.PrintToDOT (@"..\..\Tests\CalcTestLexerk.dot", printSmbString)
     let parserInputGraph = Interpret inputFstLexer actions eofToken 
     let epsRes = EpsClosure.NfaToDfa parserInputGraph
     epsRes 

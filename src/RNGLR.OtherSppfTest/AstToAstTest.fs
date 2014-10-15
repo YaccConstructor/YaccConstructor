@@ -313,7 +313,7 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Right to left 2``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 5)
         qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
         // (( 2 ))[caret]
         qGraph.AddVerticesAndEdgeRange

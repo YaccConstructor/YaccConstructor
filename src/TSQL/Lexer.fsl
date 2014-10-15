@@ -42,8 +42,8 @@ let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
 let whitespaces = [' '  '\t']+
-let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'а'-'я' 'А'-'Я' ] 
-let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'а'-'я' 'А'-'Я' ] 
+let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%'  ] 
+let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$'  ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 //let with_dot = '.' | idenbody_char
 let ident = idenstarchar idenbody_char*

@@ -19,5 +19,5 @@ for %%i in (ComplexRightNull,Expr,First,List,SimpleRightNull) do (
 		echo . >> log.txt
 		echo %%i >> log.txt
     ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i %%i.yrd ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -o %%i.yrd.fs" >> log.txt
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Parse%%i -translate false -o %%i.yrd.fs" >> log.txt
 )

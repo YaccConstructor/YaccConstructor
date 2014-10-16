@@ -4,7 +4,7 @@ module AbstractLexer.Test.Calc.Parser
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.RNGLR.Parser
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 
 # 1 "calc.yrd"
 
@@ -22,9 +22,9 @@ type Token =
     | RBRACE of (string*array<Position<string>>)
     | RNGLR_EOF of (string*array<Position<string>>)
 
-let genLiteral (str : string) posStart posEnd =
+let genLiteral (str : string) (data : string*array<Position<string>>) =
     match str.ToLower() with
-    | x -> failwithf "Literal %s undefined" x
+    | x -> None
 let tokenData = function
     | DIV x -> box x
     | LBRACE x -> box x
@@ -88,14 +88,17 @@ let isLiteral = function
 let getLiteralNames = []
 let mutable private cur = 0
 let leftSide = [|1; 14; 8; 11; 11; 7; 7; 6; 9; 12; 12; 3; 3; 2; 10; 13; 13; 5; 4; 4|]
-let private rules = [|8; 1; 6; 11; 7; 6; 11; 17; 20; 9; 2; 12; 3; 2; 12; 15; 18; 10; 4; 13; 5; 4; 13; 21; 16; 1; 22; 19|]
-let private rulesStart = [|0; 1; 2; 4; 7; 7; 8; 9; 10; 12; 15; 15; 16; 17; 18; 20; 23; 23; 24; 27; 28|]
+let private rules = [|8; 1; 6; 11; 7; 6; 11; 20; 17; 9; 2; 12; 3; 2; 12; 18; 15; 10; 4; 13; 5; 4; 13; 21; 19; 16; 1; 22|]
+let private rulesStart = [|0; 1; 2; 4; 4; 7; 8; 9; 10; 12; 12; 15; 16; 17; 18; 20; 20; 23; 24; 25; 28|]
 let startRule = 1
 
 let acceptEmptyInput = false
 
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+
+let otherAstToDot =
+    (fun (tree : Yard.Generators.RNGLR.OtherSPPF.OtherTree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
 let private lists_gotos = [|1; 2; 8; 20; 28; 26; 18; 13; 16; 3; 19; 6; 7; 4; 5; 9; 17; 12; 10; 11; 14; 15; 21; 27; 24; 25; 22; 23|]
 let private small_gotos =
@@ -113,7 +116,7 @@ while cur < small_gotos.Length do
         let x = small_gotos.[cur + k] &&& 65535
         gotos.[i].[j] <- lists_gotos.[x]
     cur <- cur + length
-let private lists_reduces = [|[|8,1|]; [|9,2|]; [|9,3|]; [|11,1|]; [|12,1|]; [|14,1|]; [|15,2|]; [|15,3|]; [|17,1|]; [|18,3|]; [|19,1|]; [|14,2|]; [|13,1|]; [|8,2|]; [|2,1|]; [|3,2|]; [|3,3|]; [|5,1|]; [|6,1|]; [|7,1|]; [|2,2|]; [|0,1|]|]
+let private lists_reduces = [|[|8,1|]; [|10,2|]; [|10,3|]; [|12,1|]; [|11,1|]; [|14,1|]; [|16,2|]; [|16,3|]; [|17,1|]; [|19,3|]; [|18,1|]; [|14,2|]; [|13,1|]; [|8,2|]; [|2,1|]; [|4,2|]; [|4,3|]; [|6,1|]; [|5,1|]; [|7,1|]; [|2,2|]; [|0,1|]|]
 let private small_reduces =
         [|131076; 1114112; 1310720; 1441792; 1507328; 262148; 1114113; 1310721; 1441793; 1507329; 327684; 1114114; 1310722; 1441794; 1507330; 393218; 1048579; 1245187; 458754; 1048580; 1245188; 524294; 983045; 1114117; 1179653; 1310725; 1441797; 1507333; 655366; 983046; 1114118; 1179654; 1310726; 1441798; 1507334; 720902; 983047; 1114119; 1179655; 1310727; 1441799; 1507335; 786434; 1048584; 1245192; 983047; 983049; 1114121; 1179657; 1310729; 1376265; 1441801; 1507337; 1048583; 983050; 1114122; 1179658; 1310730; 1376266; 1441802; 1507338; 1114118; 983051; 1114123; 1179659; 1310731; 1441803; 1507339; 1179654; 983052; 1114124; 1179660; 1310732; 1441804; 1507340; 1245188; 1114125; 1310733; 1441805; 1507341; 1310722; 1441806; 1507342; 1441794; 1441807; 1507343; 1507330; 1441808; 1507344; 1572866; 1048593; 1245201; 1638402; 1048594; 1245202; 1703940; 1114131; 1310739; 1441811; 1507347; 1769474; 1441812; 1507348; 1835010; 1441813; 1507349|]
 let reduces = Array.zeroCreate 29
@@ -129,7 +132,7 @@ while cur < small_reduces.Length do
         let x = small_reduces.[cur + k] &&& 65535
         reduces.[i].[j] <- lists_reduces.[x]
     cur <- cur + length
-let private lists_zeroReduces = [|[|10|]; [|16|]; [|4|]|]
+let private lists_zeroReduces = [|[|9|]; [|15|]; [|3|]|]
 let private small_zeroReduces =
         [|131076; 1114112; 1310720; 1441792; 1507328; 262148; 1114112; 1310720; 1441792; 1507328; 524294; 983041; 1114113; 1179649; 1310721; 1441793; 1507329; 655366; 983041; 1114113; 1179649; 1310721; 1441793; 1507329; 1310722; 1441794; 1507330; 1441794; 1441794; 1507330|]
 let zeroReduces = Array.zeroCreate 29

@@ -129,10 +129,6 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Name>Conversions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
-      <Name>Highlighting.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
       <Name>ReSharperExtension</Name>

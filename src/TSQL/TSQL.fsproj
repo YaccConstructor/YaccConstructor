@@ -152,21 +152,6 @@
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Name>Common</Name>
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Name>Constraints</Name>
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Name>Conversions</Name>
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Name>ReSharperExtension</Name>
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>

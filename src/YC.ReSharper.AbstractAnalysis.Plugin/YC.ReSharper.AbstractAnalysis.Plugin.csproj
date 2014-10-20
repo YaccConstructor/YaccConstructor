@@ -31,10 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
-    </Reference>
     <Reference Include="GraphX.Common">
       <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Common.dll</HintPath>
     </Reference>
@@ -43,10 +39,6 @@
     </Reference>
     <Reference Include="GraphX.Logic">
       <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
-    </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -71,9 +63,6 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Utils.SourceText, Version=0.1.5119.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="YAXLib">
       <HintPath>..\packages\YAXLib.2.13\lib\YAXLib.dll</HintPath>
@@ -117,28 +106,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.fsproj">
-      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Constraints\Constraints.fsproj">
-      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
-      <Name>Constraints</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Conversions\Conversions.fsproj">
-      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Name>Conversions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
       <Name>ReSharperExtension</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
-      <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
-      <Name>RNGLRAbstractParser</Name>
-    </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
+      <Project>{5FBF733C-9F3D-4831-89F2-68A500A2916C}</Project>
       <Name>YC.SEL.SDK.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">

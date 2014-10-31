@@ -11,6 +11,7 @@ open Microsoft.FSharp.Collections
 open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.CSharp.Impl.Resolve
+open Microsoft.FSharp.Collections
 
 type Approximator(file:ICSharpFile) = 
     static let langToHotspot : (string * Hotspot) list = parseXml "Hotspots.xml"
@@ -115,4 +116,14 @@ type Approximator(file:ICSharpFile) =
         processor.Process file
         let graphs = ResizeArray.map (fun (lang, hotspot) -> lang, propagate hotspot) hotspots
         graphs
+        |> ResizeArray.map 
+            (fun (l,g) -> 
+                let res = new YC.FST.FstApproximation.Appr<_>()
+                res.AddVerticesAndEdgeRange (g.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, YC.FST.FstApproximation.Smb (e.Label.Value,e.BackRef.Value))))
+                |> ignore
+                res.InitState <- new ResizeArray<_>([0])
+                res.FinalState <- new ResizeArray<_>([g.Vertices |> Seq.max])
+                l,res
+            )
+        
         

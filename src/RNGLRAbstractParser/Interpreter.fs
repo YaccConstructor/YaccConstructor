@@ -21,9 +21,9 @@
 module Yard.Generators.RNGLR.Parser
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open System.Collections.Generic
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.DataStructures
 open Yard.Generators.RNGLR.Parser 
 open Microsoft.FSharp.Collections
 

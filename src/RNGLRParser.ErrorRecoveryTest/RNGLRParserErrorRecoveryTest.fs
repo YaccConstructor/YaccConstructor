@@ -3,7 +3,7 @@
 module RNGLRParserErrorRecoveryTest
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open NUnit.Framework
 open Yard.Generators
 open LexCommon

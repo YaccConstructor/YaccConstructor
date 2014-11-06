@@ -6,12 +6,13 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d65bde42-d396-458c-be08-104477314657}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
     <AssemblyName>YC.RNGLRParser.SimpleTest</AssemblyName>
     <Name>RNGLRParser.SimpleTest</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <RestorePackages>true</RestorePackages>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
@@ -19,26 +20,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
-    <Compile Include="First.yrd.fs" />
-    <Compile Include="List.yrd.fs" />
-    <Compile Include="SimpleRightNull.yrd.fs" />
-    <Compile Include="Expr.yrd.fs" />
-    <Compile Include="ComplexRightNull.yrd.fs" />
-    <Compile Include="Counter.yrd.fs" />
-    <Compile Include="Calc.yrd.fs" />
-    <YC Include="Attrs.yrd">
-      <InputFile>Attrs.yrd</InputFile>
-      <Generator>RNGLRGenerator -pos int -token int -module RNGLR.ParseAttrs -translate true -table LR -o Attrs\Attrs.yrd.fs</Generator>
-    </YC>
     <Compile Include="Attrs.yrd.fs" />
+    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="ComplexRightNull.yrd.fs" />
+    <Compile Include="Cond.yrd.fs" />
+    <Compile Include="Counter.yrd.fs" />
     <Compile Include="Cycle.yrd.fs" />
     <Compile Include="Epsilon.yrd.fs" />
-    <Compile Include="Cond.yrd.fs" />
-    <Compile Include="Resolvers.yrd.fs" />
+    <Compile Include="Expr.yrd.fs" />
+    <Compile Include="First.yrd.fs" />
+    <Compile Include="InfEpsilon.yrd.fs" />
+    <Compile Include="List.yrd.fs" />
+    <Compile Include="LolCalc.yrd.fs" />
+    <Compile Include="LongCycle.yrd.fs" />
     <Compile Include="Longest.yrd.fs" />
     <Compile Include="Order.yrd.fs" />
-    <Compile Include="LongCycle.yrd.fs" />
-    <Compile Include="LolCalc.yrd.fs" />
+    <Compile Include="Resolvers.yrd.fs" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
     <Compile Include="Omit.yrd.fs" />
     <Compile Include="RNGLRParserSimpleTest.fs" />
     <None Include="Calc.yrd" />
@@ -89,6 +87,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
       <Name>Common</Name>
       <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
@@ -102,6 +105,11 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">

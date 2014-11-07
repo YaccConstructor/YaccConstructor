@@ -42,7 +42,13 @@ let eof = Calc.Parser.RNGLR_EOF(new GraphTokenValue<_>())
 let errorTest inputFilePath shouldContainsSuccess errorsCount =
     printfn "==============================================================="
     let lexerInputGraph = loadLexerInputGraph inputFilePath
-    let qGraph = YC.RNGLR.CalcLexer.tokenize eof lexerInputGraph
+    let qGraph = 
+        match YC.RNGLR.CalcLexer.tokenize eof lexerInputGraph with
+        | YC.FST.GraphBasedFst.Success g -> g
+        | YC.FST.GraphBasedFst.Error e -> 
+            Assert.Fail ("Tokenization failed! Errors:" + (e |> Array.map (function | YC.FST.GraphBasedFst.Smbl s -> fst s |> string | e -> string e) |> String.concat "; " ))
+            failwith "Tokenization failed!"
+
     let r = (new Parser<_>()).Parse  Calc.Parser.buildAstAbstract qGraph
     printfn "%A" r
     match r with

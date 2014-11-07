@@ -430,7 +430,7 @@ type ``Abstract case: matching brackets``() =
         printfn "        '2' -> ')'[caret]"
         printfn " '(' -> "
         
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -516,7 +516,7 @@ type ``Abstract case: matching brackets``() =
         printfn " '(' ->        '3' -> ')' -> ')'[caret]"
         printfn "        '(' -> "
         
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 5)
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [

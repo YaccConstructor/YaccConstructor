@@ -15,9 +15,9 @@
 module Yard.Generators.RNGLR.Parser              
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open System.Collections.Generic
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 // Custom graph structure. For optimization and needed (by algorithm) relation with AST
 
@@ -96,6 +96,7 @@ let private addEdge (v : Vertex) (family : Family) (out : ResizeArray<Vertex * F
         let mutable j = i-1
         while j >= 0 && eq (fst3 out.[j])  (fst3 out.[i]) do
             j <- j-1
+
         out.RemoveRange(j+1, i-j-1)
     isCreated, ast
 
@@ -639,14 +640,14 @@ let buildAst<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : seq
             |> Array.exists (fun state -> parserSource.AccStates.[state])
 
         // if finish isn't accepting state then error
-        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
-        then
-            if errorRuleExist 
-            then 
-                 recovery()
-                 makeReductions (!curInd + 1) recovery
-                 attachEdges()
-            else wasError := true
+//        if !isEnd && usedStates.Count > 0 && not <| isAcceptState() 
+//        then
+//            if errorRuleExist 
+//            then 
+//                 recovery()
+//                 makeReductions (!curInd + 1) recovery
+//                 attachEdges()
+//            else wasError := true
 
         let lastTokens count =
             [| for i = max 0 (tokens.Count-count) to tokens.Count-1 do

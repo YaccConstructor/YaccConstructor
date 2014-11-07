@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Highlighting.Core;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi.Tree;
 
@@ -12,9 +11,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
         public static void AddTree(ITreeNode tree)
         {
-            IDocument document = tree.UserData.GetData(KeyConstant.Document);
+            IDocument document = tree.UserData.GetData(Constants.Document);
             if (document == null)
-                document = tree.UserData.GetData(KeyConstant.Ranges).FirstOrDefault().Document;
+                document = tree.UserData.GetData(Constants.Ranges).FirstOrDefault().Document;
 
             if (!ExistingTrees.ContainsKey(document))
                 ExistingTrees.Add(document, new List<ITreeNode>());

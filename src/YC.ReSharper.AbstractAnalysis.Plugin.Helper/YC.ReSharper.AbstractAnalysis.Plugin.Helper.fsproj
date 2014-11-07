@@ -41,6 +41,7 @@
   </Target>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="Constants.fs" />
     <Compile Include="Helper.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -72,11 +73,6 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Name>Highlighting.Core</Name>
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">

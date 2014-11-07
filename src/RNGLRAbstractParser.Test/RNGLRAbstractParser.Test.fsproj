@@ -133,6 +133,16 @@
       <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Name>RNGLRAbstractParser</Name>
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>

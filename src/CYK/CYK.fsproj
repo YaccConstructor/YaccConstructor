@@ -13,15 +13,9 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
-    <Reference Include="Brahma.OpenCL">
-      <HintPath>..\..\3rdParty\Brahma.FSharp\Brahma.OpenCL.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
-    </Reference>
-    <Reference Include="OpenCL.Net">
-      <HintPath>..\..\3rdParty\Brahma.FSharp\OpenCL.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

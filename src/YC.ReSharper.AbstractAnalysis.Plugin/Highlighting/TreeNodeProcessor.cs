@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Highlighting.Core;
 using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
@@ -47,7 +46,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public void VisitLeaf(ITreeNode treeNode, IHighlightingConsumer consumer)
         {
-            ICollection<DocumentRange> colorConstantRange = treeNode.UserData.GetData(KeyConstant.Ranges);
+            ICollection<DocumentRange> colorConstantRange = treeNode.UserData.GetData(Constants.Ranges);
 
             if (colorConstantRange == null)
                 return;

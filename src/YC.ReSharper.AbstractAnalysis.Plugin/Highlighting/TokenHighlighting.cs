@@ -1,5 +1,4 @@
-﻿using Highlighting.Core;
-using JetBrains.DocumentModel;
+﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon;
 using JetBrains.ReSharper.Daemon.Impl;
 using JetBrains.ReSharper.Psi.Tree;
@@ -22,8 +21,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
         public TokenHighlighting(ITreeNode element)
         {
             myElement = element;
-            string lang = element.UserData.GetData(KeyConstant.YcLanguage);
-            string tokenName = element.UserData.GetData(KeyConstant.YcTokenName);
+            string lang = element.UserData.GetData(Constants.YcLanguage);
+            string tokenName = element.UserData.GetData(Constants.YcTokenName);
             attributeId = LanguageHelper.GetColor(lang, tokenName);
         }
 

@@ -5,7 +5,7 @@ open Yard.Generators.RNGLR.OtherSPPF
 open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst

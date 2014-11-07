@@ -4,6 +4,8 @@ obj/
 *.suo
 *.user
 *.orig
+*.vspx
+*.dot
 
 GNESCCGeneratedTests/
 src/Development/Utils/tests.fsproj.inc
@@ -126,6 +128,13 @@ src/TSQL/FsYARD/*
 src/FsYaccFrontend/out
 **/FsYard.log
 src/TSQL/MsParser.fs
+src/RNGLRParser.SimpleTest/gen.cmd
+
+
+src/GLLParser.SimpleTest/log.txt
+src/TSQL/TSQLHighlighting/*
+src/GLLParser.SimpleTest/log.txt
+src/TSQL/FsYard.log
 Tests/Alvor/GenerateTestforAlvor/packages/*
 src/packages/*
 Tests/AbstractRNGLR/DOT/errors1.dot.pdf
@@ -158,6 +167,8 @@ BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
 src/AbstractLexer.Interpreter.Tests/Tests/*
 *.csproj.user
+Tests/Alvor/GenerateTestforAlvor/packages/*
+src/TSQL/TSQLHighlighting/KW_*
 src/RNGLR.OtherSppfTest/*.yrd.fs
 src/RNGLR.OtherSppfTest/*.txt
 src/RNGLRParser.SimpleTest/res.dot
@@ -166,3 +177,5 @@ src/RNGLRAbstractParser.Test/res.dot
 BuildScripts/TestResult.xml
 src/TSQL/*.dot
 src/RNGLRParser.SimpleTest/*.dot
+src/GLLParser.SimpleTest/*.yrd.fs
+src/GLLParser.SimpleTest/log.txt

@@ -2,7 +2,7 @@
 
 module PrintTreeNode
 
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 
 type TokenKind = 
     | Terminal 
@@ -60,11 +60,11 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 0 "using JetBrains.DocumentModel;"
     printBrInd 0 "using JetBrains.ReSharper.Psi;"
     printBrInd 0 "using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;"
+    printBrInd 0 "using JetBrains.ReSharper.Psi.Impl;"
     printBrInd 0 "using JetBrains.ReSharper.Psi.Modules;"
     printBrInd 0 "using JetBrains.ReSharper.Psi.Tree;"
-    //printBrInd 0 "using JetBrains.ReSharper.Psi.Impl;"
     printBrInd 0 "using JetBrains.Text;"
-    printBrInd 0 "using Highlighting.Core;"
+    printBrInd 0 "using JetBrains.Util;"
 
     printBr "" 
 
@@ -73,63 +73,66 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 
     printBrInd 1 "public class %s : ITreeNode" nameOfClass
     printBrInd 1 "{"
+
+    printBrInd 2 "private NodeUserDataHolder dataHolder = new NodeUserDataHolder();"
+
     printBrInd 2 "public ITreeNode Parent"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.Parent); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.Parent); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public ITreeNode FirstChild"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.FirstChild); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.FirstChild); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public ITreeNode LastChild"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.LastChild); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.LastChild); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public ITreeNode NextSibling"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.NextSibling); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.NextSibling); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public ITreeNode PrevSibling"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.PrevSibling); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.PrevSibling); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public NodeType NodeType"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.NodeType); }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.NodeType); }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public PsiLanguageType Language"
     printBrInd 2 "{"
-    printBrInd 3 "get { return PersistentUserData.GetData(PropertyConstant.Language) ?? UnknownLanguage.Instance; }"
+    printBrInd 3 "get { return PersistentUserData.GetData(Constants.Language) ?? UnknownLanguage.Instance; }"
     printBrInd 2 "}"
     printBr ""
     printBrInd 2 "public NodeUserData UserData { get; private set; }"
     printBrInd 2 "public NodeUserData PersistentUserData { get; private set; }"
-    printBr ""
 
     printBr ""
-    printBrInd 2 "public %s (string ycTokName)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, int ycTokNumber)" nameOfClass
     printBrInd 2 "{"
-    printBrInd 3 "UserData = DataHelper.GetNodeUserData(this);"
-    printBrInd 3 "PersistentUserData = DataHelper.GetNodePersistentUserData(this);"
+    printBrInd 3 "UserData = dataHolder.GetNodeUserData(this);"
+    printBrInd 3 "PersistentUserData = dataHolder.GetNodePersistentUserData(this);"
     printBr ""
-    printBrInd 3 "UserData.PutData(KeyConstant.YcTokenName, ycTokName);"
-    printBrInd 3 "UserData.PutData(KeyConstant.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
+    printBrInd 3 "UserData.PutData(Constants.YcTokenName, ycTokName);"
+    printBrInd 3 "UserData.PutData(Constants.YcTokNumber, ycTokNumber.ToString());"
+    printBrInd 3 "UserData.PutData(Constants.YcLanguage, \"%s\");" <| lang.ToLowerInvariant()
     printBrInd 2 "}"
     
     printBr ""
-    printBrInd 2 "public %s (string ycTokName, IEnumerable<DocumentRange> positions) : this (ycTokName)" nameOfClass
+    printBrInd 2 "public %s (string ycTokName, int ycTokNumber, IEnumerable<DocumentRange> positions) : this (ycTokName, ycTokNumber)" nameOfClass
     printBrInd 2 "{"
     printBrInd 3 "var ranges = positions.ToList();"
     printBrInd 3 "if (ranges.Count > 0)"
     printBrInd 3 "{"
-    printBrInd 4 "UserData.PutData(KeyConstant.Document, ranges[0].Document);"
-    printBrInd 4 "UserData.PutData(KeyConstant.Ranges, ranges);"
+    printBrInd 4 "UserData.PutData(Constants.Document, ranges[0].Document);"
+    printBrInd 4 "UserData.PutData(Constants.Ranges, ranges);"
     printBrInd 3 "}"
     printBrInd 2 "}"
     printBr ""
@@ -207,7 +210,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 2 "//Calls by external code"
     printBrInd 2 "public DocumentRange GetNavigationRange()"
     printBrInd 2 "{"
-    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(Constants.Ranges);"
     printBrInd 3 "if (ranges == null || ranges.Count == 0)"
     printBrInd 4 "return default(DocumentRange);"
     printBr ""
@@ -219,7 +222,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 
     printBrInd 2 "public TreeOffset GetTreeStartOffset()"
     printBrInd 2 "{"
-    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(Constants.Ranges);"
     printBrInd 3 "if (ranges == null || ranges.Count == 0)"
     printBrInd 4 "return TreeOffset.InvalidOffset;"
     printBr ""
@@ -235,7 +238,7 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 
     printBrInd 2 "public StringBuilder GetText(StringBuilder to)"
     printBrInd 2 "{"
-    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(Constants.Ranges);"
     printBrInd 3 "foreach (DocumentRange range in ranges)"
     printBrInd 3 "{"
     printBrInd 4 "to.Append(range.GetText());"
@@ -258,9 +261,9 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
 
     printBrInd 2 "public ITreeNode FindNodeAt(TreeTextRange treeTextRange)"
     printBrInd 2 "{"
-    printBrInd 3 "IDocument doc = UserData.GetData(KeyConstant.Document);"
-    printBrInd 3 "var needRange = new DocumentRange(doc, treeTextRange.GetTextRange());"
-    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(KeyConstant.Ranges);"
+    printBrInd 3 "IDocument doc = UserData.GetData(Constants.Document);"
+    printBrInd 3 "var needRange = new DocumentRange(doc, GetTextRange(treeTextRange));"
+    printBrInd 3 "List<DocumentRange> ranges = UserData.GetData(Constants.Ranges);"
     printBr  ""
     printBrInd 3 "bool exists = ranges.Exists(range => range.Contains(needRange));"
     printBr ""
@@ -293,6 +296,11 @@ let printBaseTreeNode (nameOfNamespace : string) (nameOfClass : string) (lang : 
     printBrInd 2 "}"
     printBr ""
 
+    printBrInd 2 "private static TextRange GetTextRange(TreeTextRange treeTextRange)"
+    printBrInd 2 "{"
+    printBrInd 3 "return new TextRange(treeTextRange.StartOffset.Offset, treeTextRange.EndOffset.Offset);"
+    printBrInd 2 "}"
+
     printBrInd 1 "}"
     printBrInd 0 "}"
     res.ToString()
@@ -308,9 +316,9 @@ let printTreeNode (tokenInfo : TokenInfo) =
         print "%s" (String.replicate (num <<< 2) " ")
         printBr x
     
-    printBrInd 0 "using Highlighting.Core;"
     printBrInd 0 "using System.Collections.Generic;"
     printBrInd 0 "using JetBrains.DocumentModel;"
+    printBrInd 0 "using YC.SDK.ReSharper;"
     printBrInd 0 ""
 
     printBrInd 0 "namespace %s" tokenInfo._namespace
@@ -324,19 +332,20 @@ let printTreeNode (tokenInfo : TokenInfo) =
     printBrInd 1 "{"
 
     printBrInd 2 "private static string ycTokName = \"%s\";" <| tokenInfo._name.ToLowerInvariant()
+    printBrInd 2 "private static int ycTokNumber = %d;" <| tokenInfo._number
     printBr ""
     printBrInd 2 "public %s (IEnumerable<DocumentRange> positions)" className
-    printBrInd 3 ": base(ycTokName, positions)"
+    printBrInd 3 ": base(ycTokName, ycTokNumber, positions)"
     printBrInd 2 "{"
 
     match tokenInfo._type with
     | Literal 
-    | Terminal -> printBrInd 3 "YcHelper.AddYcItem(ycTokName, %d, \"%s\");" tokenInfo._number <| tokenInfo._lang.ToLowerInvariant()
+    | Terminal -> printBrInd 3 "Helper.YcHelper.AddYcItem(ycTokName, ycTokNumber, \"%s\");" <| tokenInfo._lang.ToLowerInvariant()
     | _ -> ()
     printBrInd 2 "}"
 
     printBrInd 0 ""
-    printBrInd 2 "public %s() : base(ycTokName)" className
+    printBrInd 2 "public %s() : base(ycTokName, ycTokNumber)" className
     printBrInd 2 "{"
     printBrInd 2 "}"
 

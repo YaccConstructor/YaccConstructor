@@ -7,8 +7,9 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens
+open System.Collections.Generic
 
-# 11 "CalcLexer.fs"
+# 12 "CalcLexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -55,49 +56,49 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 15 "CalcLexer.fsl"
+# 16 "CalcLexer.fsl"
                               None 
-# 60 "CalcLexer.fs"
+# 61 "CalcLexer.fs"
           )
   | 1 -> ( 
-# 16 "CalcLexer.fsl"
+# 17 "CalcLexer.fsl"
                                                            NUMBER(gr) |> Some 
-# 65 "CalcLexer.fs"
+# 66 "CalcLexer.fs"
           )
   | 2 -> ( 
-# 17 "CalcLexer.fsl"
+# 18 "CalcLexer.fsl"
                        MINUS(gr) |> Some 
-# 70 "CalcLexer.fs"
+# 71 "CalcLexer.fs"
           )
   | 3 -> ( 
-# 18 "CalcLexer.fsl"
+# 19 "CalcLexer.fsl"
                        LBRACE(gr) |> Some 
-# 75 "CalcLexer.fs"
+# 76 "CalcLexer.fs"
           )
   | 4 -> ( 
-# 19 "CalcLexer.fsl"
+# 20 "CalcLexer.fsl"
                        RBRACE(gr) |> Some 
-# 80 "CalcLexer.fs"
+# 81 "CalcLexer.fs"
           )
   | 5 -> ( 
-# 20 "CalcLexer.fsl"
+# 21 "CalcLexer.fsl"
                        DIV(gr)|> Some 
-# 85 "CalcLexer.fs"
+# 86 "CalcLexer.fs"
           )
   | 6 -> ( 
-# 21 "CalcLexer.fsl"
+# 22 "CalcLexer.fsl"
                        PLUS(gr)|> Some 
-# 90 "CalcLexer.fs"
+# 91 "CalcLexer.fs"
           )
   | 7 -> ( 
-# 22 "CalcLexer.fsl"
+# 23 "CalcLexer.fsl"
                         POW(gr)|> Some 
-# 95 "CalcLexer.fs"
+# 96 "CalcLexer.fs"
           )
   | 8 -> ( 
-# 23 "CalcLexer.fsl"
+# 24 "CalcLexer.fsl"
                        MULT(gr)|> Some 
-# 100 "CalcLexer.fs"
+# 101 "CalcLexer.fs"
           )
   | _ -> failwith "token"
 

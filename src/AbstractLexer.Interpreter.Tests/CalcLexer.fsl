@@ -6,6 +6,7 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens
+open System.Collections.Generic
 }
 
 let digit = ['0'-'9']

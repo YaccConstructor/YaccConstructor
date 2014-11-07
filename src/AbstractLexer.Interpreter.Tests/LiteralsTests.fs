@@ -10,40 +10,32 @@ open YC.FST.AbstractLexing.Tests.CommonTestChecker
 
 let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
   
-let literalsTokenizationTest path eCount vCount =
+let literalsTokenizationTest path eCount vCount pathPrint =
     let graphAppr = loadDotToQG baseInputGraphsPath path
     let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphAppr
-    checkGraph res eCount vCount
+    match res with
+    | Success res -> 
+        checkGraph res eCount vCount  
+        ToDot res pathPrint printBref 
+    | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
 
 [<TestFixture>]
 type ``Lexer Literals Fst Tests`` () =   
     [<Test>]
     member this.``Literals. Simple.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "literals_simple.dot"
-        let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserLiterals0.dot" printBref
-        checkGraph res 2 3
+        literalsTokenizationTest "literals_simple.dot" 2 3 @"..\..\Tests\testParserLiterals0.dot"
 
     [<Test>] 
     member this.``Literals. Inner branch.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "literals_inner_branch.dot"
-        let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserLiterals1.dot" printBref
-        checkGraph res 2 3
+        literalsTokenizationTest "literals_inner_branch.dot" 2 3 @"..\..\Tests\testParserLiterals1.dot"
 
     [<Test>]
     member this.``Literals. Outer branch.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "literals_outer_branch.dot"
-        let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserLiterals2.dot" printBref
-        checkGraph res 2 3
+        literalsTokenizationTest "literals_outer_branch.dot" 2 3 @"..\..\Tests\testParserLiterals2.dot"
 
     [<Test>]
     member this.``Literals. Splitted.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "literals_splitted.dot"
-        let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserLiterals3.dot" printBref
-        checkGraph res 2 3
+        literalsTokenizationTest "literals_splitted.dot" 2 3 @"..\..\Tests\testParserLiterals3.dot"
 
 //[<EntryPoint>]
 //let f x =

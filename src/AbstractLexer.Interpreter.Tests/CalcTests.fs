@@ -14,8 +14,11 @@ let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
 let calcTokenizationTest path eCount vCount countEdgesArray =
     let graphAppr = loadDotToQG baseInputGraphsPath path
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-    checkArr (countEdges res) countEdgesArray
-    checkGraph res eCount vCount   
+    match res with
+    | Success res ->
+        checkArr (countEdges res) countEdgesArray
+        checkGraph res eCount vCount   
+    | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
                              
 [<TestFixture>]
 type ``Lexer Calc Fst Tests`` () =            
@@ -83,24 +86,6 @@ type ``Lexer Calc Fst Tests`` () =
     [<Test>] 
     member this.``Calc. Test with position. With branch and several tokens on the one edge_1``() =
         calcTokenizationTest "test_with_pos_10.dot" 8 8 [|3; 1; 1; 1; 1; 1; 0; 1|]
-
-    //[<Test>] eps:eps
-    member this.``Calc. Check break literals 1.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_break_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        checkGraph res 2 3
-
-    //[<Test>] eps:eps
-    member this.``Calc. Check break literals 2.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_break_2.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        checkGraph res 2 3
-
-    //[<Test>] eps:eps
-    member this.``Calc. Check break literals 3.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_break_3.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        checkGraph res 4 5
 
     [<Test>]
     member this.``Calc. Example with whitespace.`` () =
@@ -172,14 +157,7 @@ type ``Lexer Calc Fst Tests`` () =
 
     [<Test>] 
     member this.``Calc. Whitespace edge.`` () =
-        calcTokenizationTest "test_10.dot" 5 5 [|4; 1; 0; 1; 0|]
-
-        
-    [<Test>] 
-    member this.``Calc. test 100`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "test_100.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc32.dot" printBref         
+        calcTokenizationTest "test_10.dot" 5 5 [|4; 1; 0; 1; 0|]       
 
     [<Test>] 
     member this.``Calc. Test with space and idents on edge.`` () =
@@ -187,14 +165,7 @@ type ``Lexer Calc Fst Tests`` () =
 
     [<Test>] 
     member this.``Calc. Test with space with branch.`` () =
-         calcTokenizationTest "test_with_space_1.dot" 5 5 [|3; 1; 0; 1; 0|]
-
-    //[<Test>] NOT CORRECT GRAPH!!
-    member this.``Calc. Calc with braces.`` () =
-        let graphAppr = loadDotToQG baseInputGraphsPath "calc_1.dot"
-        let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
-        ToDot res @"..\..\Tests\testParserCalc35.dot" printBref  
-        checkGraph res 10 10      
+         calcTokenizationTest "test_with_space_1.dot" 5 5 [|3; 1; 0; 1; 0|]    
 
     [<Test>] 
     member this.``Calc. Calc with braces 2.`` () =

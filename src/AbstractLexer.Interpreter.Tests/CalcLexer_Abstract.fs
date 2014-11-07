@@ -6,6 +6,7 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens
+open System.Collections.Generic
 
 let fstLexer () = 
    let startState = ResizeArray.singleton 0
@@ -404,4 +405,8 @@ let actions () =
 
    |]
 
-let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation
+
+let alphabet () = 
+ new HashSet<_>([| Smbl (char 65535); Smbl '\t'; Smbl '\n'; Smbl '\r'; Smbl ' '; Smbl '('; Smbl ')'; Smbl '*'; Smbl '+'; Smbl '-'; Smbl '/'; Smbl '0'; Smbl '1'; Smbl '2'; Smbl '3'; Smbl '4'; Smbl '5'; Smbl '6'; Smbl '7'; Smbl '8'; Smbl '9'; Smbl '.'; Smbl 'E'; Smbl 'e';|])
+
+let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation

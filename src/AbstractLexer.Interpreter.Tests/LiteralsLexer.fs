@@ -7,7 +7,7 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open AbstractParser.Tokens
-
+open System.Collections.Generic
 
 # 12 "LiteralsLexer.fs"
 let trans : uint16[] array = 

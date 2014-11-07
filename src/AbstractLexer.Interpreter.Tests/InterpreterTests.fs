@@ -9,7 +9,12 @@ open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
-      
+     
+let TokenizationTest graphAppr eCount vCount  =
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
+    match res with
+    | Success res -> checkGraph res eCount vCount   
+    | Error e -> Assert.Fail(sprintf "Tokenization problem %A:" e)
  
 [<TestFixture>]
 type ``Lexer FST Tests`` () =            
@@ -19,16 +24,11 @@ type ``Lexer FST Tests`` () =
         let finishState = ResizeArray.singleton 3
         let transitions = new ResizeArray<_>()
         transitions.Add(0, Smb("+", "+"), 1)
-        transitions.Add(1, Smb("*", "*"), 2)
+        transitions.Add(1, Smb("a", "a"), 2)
         transitions.Add(2, Smb("*", "*"), 1)
         transitions.Add(1, Smb("*", "*"), 3)
         let appr = new Appr<_>(startState, finishState, transitions)
-        let fstInputLexer = appr.ToFST()
-        let resFST = FST<_,_>.Compos(fstInputLexer, YC.FST.AbstractLexing.CalcLexer.fstLexer())
-        resFST.PrintToDOT(@"..\..\Tests\test1.dot", printSmbString)
-        let parserInputGraph = YC.FST.AbstractLexing.CalcLexer.tokenize eof appr
-        ToDot parserInputGraph @"..\..\Tests\testParser1.dot" printBref
-        checkGraph resFST 7 6
+        TokenizationTest appr 7 6 
 
     [<Test>]
     member this.``Lexer FST Tests. Check work of interpreter.`` () = 
@@ -44,12 +44,7 @@ type ``Lexer FST Tests`` () =
         transitions.Add(2, Smb("+", "+"), 3)
         transitions.Add(3, Smb("6", "6"), 4)
         let appr = new Appr<_>(startState, finishState, transitions)
-        let fstInputLexer = appr.ToFST()
-        let resFST = FST<_,_>.Compos(fstInputLexer, YC.FST.AbstractLexing.CalcLexer.fstLexer())
-        resFST.PrintToDOT(@"..\..\Tests\test2.dot", printSmbString)
-        let parserInputGraph = YC.FST.AbstractLexing.CalcLexer.tokenize eof appr
-        ToDot parserInputGraph @"..\..\Tests\testParser2.dot" printBref
-        checkGraph parserInputGraph 7 7
+        TokenizationTest appr 7 7
 
 //[<EntryPoint>]
 //let f x =

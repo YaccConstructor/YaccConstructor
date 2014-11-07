@@ -43,8 +43,8 @@ let calculatePos (grToken: GraphTokenValue<#ITreeNode>) =
                 try
                     let pos =  grToken |> Array.map(fun i -> i.StartPos)
                     let lengthTok = pos.Length
-                    let beginPosTok = pos.[0]
-                    let endPosTok = pos.[lengthTok-1] + 1 
+                    let beginPosTok = pos.[0] + 1
+                    let endPosTok = pos.[lengthTok-1] + 2 
                     let endPos = 
                         grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
                         - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 

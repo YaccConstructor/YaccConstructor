@@ -1,9 +1,10 @@
 ﻿ {
 module Calc.Lexer
-open Calc.Parser
+open GLL.Calc2
 open Microsoft.FSharp.Text.Lexing
 
-let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+let lexnum = ref -1
+let lexeme lexbuf =  lexnum := !lexnum + 1; !lexnum
 }
 
 
@@ -22,4 +23,4 @@ rule token = parse
 | "**" { POW <| lexeme lexbuf }
 | '*' { MULT <| lexeme lexbuf }
 | eof { RNGLR_EOF <| lexeme lexbuf }
-| _ { failwithf "unexpected input: %s" <| lexeme lexbuf }
+| _ { failwithf "unexpected input: %d" <| lexeme lexbuf }

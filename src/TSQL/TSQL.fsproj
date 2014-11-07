@@ -152,6 +152,11 @@
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Name>ReSharperExtension</Name>
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>

@@ -76,7 +76,7 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <FsYard Include="calc.yrd" />
+    <Compile Include="Calc2.yrd.fs" />
     <FsLex Include="Lexer.fsl">
       <OtherFlags>--unicode</OtherFlags>
     </FsLex>
@@ -138,9 +138,11 @@
       <HintPath>..\packages\YC.FsYARD.0.1.5033.0\lib\RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RNGLRParser">
+    <Reference Include="GLLCommon">
       <HintPath>..\packages\YC.FsYARD.0.1.5033.0\lib\RNGLRParser.dll</HintPath>
       <Private>True</Private>
+    <Reference Include="GLLParser">
+      <HintPath>..\yc\GLLParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

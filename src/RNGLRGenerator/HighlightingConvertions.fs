@@ -2,7 +2,7 @@
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 
 let toClassName (str : string) = 
     let symbols = [| 

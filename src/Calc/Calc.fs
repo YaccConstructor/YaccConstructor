@@ -4,7 +4,6 @@ open Calc.AbstractParser
 open AbstractLexer.Core
 open Yard.Generators.RNGLR.AST
 open YC.SDK.CommonInterfaces
-open YC.SDK.CommonInterfaces
 open Mono.Addins
 open YC.SDK.ReSharper.Helper
 open ReSharperExtension
@@ -49,17 +48,20 @@ type CalcInjectedLanguageModule () =
             filterEpsilons = true
         }
 
+    
     let printAstToDot ast name = defaultAstToDot ast name
-    let tokenToTreeNode = tokenToTreeNode
+    
+    let langName = "calc"
     let xmlPath = xmlPath
+    let tokenToTreeNode = tokenToTreeNode
     let translate ast errors = translate args ast errors
 
     let processor =
-        new Processor<Token,br,range,node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode,"calc",calculatePos
+        new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos
                       , getRange, printAstToDot, otherAstToDot)
     
     interface IInjectedLanguageModule<br,range,node> with
-        member this.Name = "calc"
+        member this.Name = langName
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished
         member this.ParsingFinished = processor.ParsingFinished

@@ -10,7 +10,7 @@ open YC.FST.FstApproximation
 let printSmbString (x:char*Position<_>) = 
         (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
-type TokenEdge<'br(* when 'br:comparison*)>(s,e,t)=
+type TokenEdge<'br>(s,e,t)=
     inherit TaggedEdge<int, char*Position<'br>>(s,e,t)
         
     member this.BackRef = (snd t).back_ref
@@ -18,7 +18,7 @@ type TokenEdge<'br(* when 'br:comparison*)>(s,e,t)=
     member this.EndPos = (snd t).end_offset
     member this.Label = fst t
 
-type GraphTokenValue<'br(* when 'br:comparison*)>() =
+type GraphTokenValue<'br>() =
     inherit AdjacencyGraph<int,TokenEdge<'br>>()
 
     member this.AddEdgeForsed (e:TokenEdge<_>) =
@@ -27,7 +27,7 @@ type GraphTokenValue<'br(* when 'br:comparison*)>() =
         this.AddEdge e |> ignore
 
 [<Struct>]
-type GraphAction<'br(* when 'br:comparison*)> =
+type GraphAction<'br> =
     val startAct: int
     val endActs: HashSet<int>
     val graph: GraphTokenValue<'br>
@@ -160,12 +160,17 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) eofToken (inputGraph : Appr<_>) =    
+let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST() 
-    let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer) 
+    let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer, alphabet) 
     //inputFstLexer.PrintToDOT (@"..\..\Tests\CalcTestLexerk.dot", printSmbString)
-    let parserInputGraph = Interpret inputFstLexer actions eofToken 
-    let epsRes = EpsClosure.NfaToDfa parserInputGraph
+    let epsRes = 
+        match inputFstLexer with
+        | Success fst -> 
+            let parserInputGraph = Interpret fst actions eofToken
+            Success (EpsClosure.NfaToDfa parserInputGraph)
+        | Error errors -> Error errors
+    
     epsRes 
 
 let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =

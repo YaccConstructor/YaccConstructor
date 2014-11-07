@@ -279,15 +279,18 @@ let main() =
         fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
         fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
         fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
+        //let alphabet = new ResizeArray<_>()
+        let alphabet = new HashSet<_>()
         for edge in resFST.Edges do         
+            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)) |> ignore
             fstStream.WriteLine(
                 sprintf  
                     "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
                     edge.Source
                     (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
                     //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
-                    (getVal (string) edge.Tag.OutSymb) edge.Target)
-                                    
+                    (getVal (string) edge.Tag.OutSymb) edge.Target)            
+                                                 
         fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
         fstStream.WriteLine("\nlet actions () =")
@@ -307,7 +310,15 @@ let main() =
         fstStream.WriteLine()
 
         fstStream.WriteLine("   |]\n")
-        fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation")
+        
+
+        fstStream.WriteLine("\nlet alphabet () = ")
+        //alphabet |> Set.toArray |> Array.iter (fun i -> sprintf " %s;" i) |> Array.concat |> fstStream.WriteLine 
+        let alp = ref ""
+        for i in alphabet do
+            alp := !alp + (sprintf " %s;" i)
+        fstStream.WriteLine(" new HashSet<_>([|" + !alp + "|])\n")
+        fstStream.WriteLine("let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation")
         fstStream.Close()
 
     ToGraphBasedFst    

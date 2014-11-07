@@ -122,7 +122,7 @@ type Approximator(file:ICSharpFile) =
                 res.AddVerticesAndEdgeRange (g.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, YC.FST.FstApproximation.Smb (e.Label.Value,e.BackRef.Value))))
                 |> ignore
                 res.InitState <- new ResizeArray<_>([0])
-                res.FinalState <- new ResizeArray<_>([g.Vertices |> Seq.max])
+                res.FinalState <- new ResizeArray<_>([g.Vertices |> Seq.find (fun v -> g.OutDegree(v) = 0)])
                 l,res
             )
         

@@ -31,9 +31,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="DataStructures.fs" />
     <Compile Include="AstNode.fs" />
-    <Compile Include="AST.fs" />
     <Compile Include="OtherSPPF.fs" />
     <Compile Include="ParserSource.fs" />
     <Compile Include="Helper.fs" />
@@ -55,6 +53,18 @@
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

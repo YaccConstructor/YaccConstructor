@@ -35,29 +35,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Constraints.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.11\lib\net40\Conversions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -68,6 +50,32 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YC.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Constraints, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Conversions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

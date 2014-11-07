@@ -1,1 +1,1 @@
-..\..\bin\Release\v%1\YC.AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs
+..\..\bin\Release\v40\YC.AbstractLexer.Generator.exe Lexer.fsl --unicode -o Lexer.fs

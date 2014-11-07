@@ -1,8 +1,8 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
+open Yard.Generators.Common.AST
 open System.Collections.Generic
-open Yard.Generators.RNGLR.AST
-open Yard.Generators.RNGLR.DataStructures
+open Yard.Generators.Common.DataStructures
 
 [<AllowNullLiteral>]
 type OtherAST =
@@ -143,7 +143,6 @@ and OtherNodes =
             /// <summary>
             /// Applies function to all nodes (right node is first)
             /// </summary>
-            /// <param name="f"></param>
             member nodes.doForAllRev f =
                 if nodes.fst <> null then
                     if nodes.snd <> null then
@@ -238,9 +237,9 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 
                 let newNodes = 
                     if nodesDict.ContainsKey oldNodes 
-                    then nodesDict.[oldNodes]
+                    then 
+                        nodesDict.[oldNodes]
                     else
-                        // possible that it occurs never
                         let children = ref []
                         let handle (node : obj) = 
                             let newElem = 
@@ -338,8 +337,8 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             tokenToPos tokens.[number]
             |> Seq.exists (fun range -> range = now)
 
-        let rec handleFamily (fam : OtherFamily) = 
-            fam.nodes.doForAll (fun node -> 
+        let rec handleFamily (family : OtherFamily) = 
+            family.nodes.doForAll (fun node -> 
                 match node with
                 | :? OtherAST as ast -> 
                     if List.exists (fun t -> containsRange t) familyToTokens.[ast.first]
@@ -347,18 +346,17 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                     
                     if ast.other <> null 
                     then
-                        for f in ast.other do
-                            let test = familyToTokens.[f]
-                            if List.exists (fun t -> containsRange t) test
-                            then handleFamily f
+                        ast.other
+                        |> Array.iter (fun fam ->
+                            if List.exists (fun t -> containsRange t) familyToTokens.[fam]
+                            then handleFamily fam
+                        )
                 
                 | :? int as t when t >= 0 -> 
-                    if tokenToPos tokens.[t] |> Seq.exists (fun range -> range = now)
+                    if containsRange t && not <| List.exists (fun fam -> fam = family) !parents
                     then
-                        if not <| List.exists (fun f -> f = fam) parents.Value
-                        then 
-                            parents := fam :: !parents
-                            child := node
+                        parents := family :: !parents
+                        child := node
                 | _ -> ()
                 )
         handleFamily root.first
@@ -372,12 +370,12 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
     /// <param name="right">Number of right paired token</param>
     /// <param name="toRight">True, if we search close token.</param>
     member this.FindAllPair (left : int) (right : int) (now : 'range) toRight tokenToNumber (tokenToPos : 'TokenType -> seq<'range>)= 
-        let firstNd, cur = findNodeWithParents now tokenToPos
+        let leaf, parents = findNodeWithParents now tokenToPos
         let res = new ResizeArray<_>()
         let contexts = new Stack<_>()
 
-        for family in cur do
-            contexts.Push <| new Context (family, firstNd, 1)
+        parents
+        |> List.iter (fun family -> contexts.Push <| new Context (family, leaf, 1))
 
         let nowNumber, pairNumber = if toRight then left, right else right, left
         let handleSomeNodes node (family : OtherFamily) f = 
@@ -385,19 +383,24 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
             then family.nodes.doForAllAfterNode node f
             else family.nodes.doForAllBeforeNode node f
 
+        let handleAllNodes (family : OtherFamily) f = 
+            if toRight
+            then family.nodes.doForAll f
+            else family.nodes.doForAllRev f
+
         while contexts.Count > 0 do
             let state = contexts.Pop()
-            let mutable current = box state.parent
-            let nd = ref state.child
+            let mutable parent = box state.parent
+            let child = ref state.child
             let count = ref state.count
 
             let rec processFamily (family : OtherFamily) = 
-                if familyToTokens.ContainsKey family && 
-                    not <| List.exists (fun t -> 
+                //familyToTokens.ContainsKey family is always true
+                if familyToTokens.[family] 
+                    |> List.exists (fun t -> 
                         let tokNumber = tokenToNumber tokens.[t]
-                        tokNumber = pairNumber || tokNumber = nowNumber) familyToTokens.[family]
-                then ()
-                else
+                        tokNumber = pairNumber || tokNumber = nowNumber) 
+                then 
                     let handle (node : obj) =
                         match node with 
                         | :? int as t when t >= 0 -> 
@@ -408,37 +411,39 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                             if !count = 0 then res.Add tokens.[t]
                         | :? OtherAST as ast -> processAST ast
                         | _ -> ()
-            
-                    if family.nodes.exist (fun node -> node = !nd)
-                    then handleSomeNodes !nd family handle 
-                    else family.nodes.doForAll (fun node -> handle node)
+        
+                    if family.nodes.exist (fun node -> node = !child)
+                    then handleSomeNodes !child family handle 
+                    else handleAllNodes family (fun node -> handle node)
 
             and processAST (ast : OtherAST) = 
                 let value = !count
-                let oldNd = !nd
+                let oldChild = !child
                 processFamily ast.first
                 
                 if ast.other <> null
                 then 
-                    Array.iter (fun fam -> 
+                    ast.other
+                    |> Array.iter (fun fam -> 
                         count := value
-                        nd := oldNd
-                        processFamily fam) ast.other
+                        child := oldChild
+                        processFamily fam)
 
-            match current with
+            match parent with
             | :? OtherFamily as fam -> processFamily fam
             | :? OtherAST as ast -> processAST ast
             | _ -> failwith ""
 
-            while !count <> 0 do
+            let isEnd = ref false
+            while not !isEnd && !count <> 0 do
                 let father = 
-                    match current with
+                    match parent with
                     | :? OtherAST as ast -> 
-                        nd := box current
-                        if ast.parent.other.Length > 0 
+                        child := box parent
+                        if ast.parent.other <> null && ast.parent.other.Length > 0 
                         then
                             ast.parent.other
-                            |> Array.iter (fun parent -> contexts.Push <| new Context (parent :?> OtherFamily, !nd, !count))
+                            |> Array.iter (fun parent -> contexts.Push <| new Context (parent :?> OtherFamily, !child, !count))
                         
                         ast.parent.first
                     | :? OtherFamily as fam -> fam.parent
@@ -447,9 +452,9 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                 match father with
                 | :? OtherAST as ast -> processAST ast
                 | :? OtherFamily as fam -> processFamily fam
-                | _ -> failwithf "Unexpected error. Father node doesn't be null"
+                | _ -> isEnd := true
                 
-                current <- father
+                parent <- father
         res
 
     /// <summary>
@@ -550,7 +555,6 @@ type OtherTree<'TokenType> (tree : Tree<'TokenType>) =
                         createEdge u v false ""
                 children.first |> handle
                 if children.other <> null then 
-                    
                     children.other |> Array.iter handle
 //        else createEpsilon (getSingleNode root) |> ignore
         

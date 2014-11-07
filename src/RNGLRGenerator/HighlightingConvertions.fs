@@ -2,28 +2,16 @@
 
 open Yard.Core.IL
 open Yard.Core.IL.Production
-open Yard.Generators.RNGLR
+open Yard.Generators.Common
 
 let toClassName (str : string) = 
-//    let onlyFirstLetterToUpper (word : string) = 
-//        let symbols = [| 
-//                        for i = 0 to word.Length - 1 do
-//                            if i = 0 
-//                            then yield System.Char.ToUpper word.[0]
-//                            else yield System.Char.ToLower word.[i] 
-//                      |] 
-//        new System.String(symbols)
-//    
-//    str.Split('_')
-//    |> Array.map onlyFirstLetterToUpper
-//    |> System.String.Concat 
-        let symbols = [| 
-                        for i = 0 to str.Length - 1 do
-                            if i = 0 
-                            then yield System.Char.ToUpper str.[0]
-                            else yield str.[i] 
-                      |] 
-        new System.String(symbols)
+    let symbols = [| 
+                    for i = 0 to str.Length - 1 do
+                        if i = 0 
+                        then yield System.Char.ToUpper str.[0]
+                        else yield str.[i] 
+                    |] 
+    new System.String(symbols)
 
 let litToClassName (lit : string) = 
     toClassName <| lit.ToLowerInvariant()
@@ -35,9 +23,8 @@ let getLeafSemanticForToken token =
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
-    printBr "let value = fst <| _rnglr_var_0"
 
-    printBr "new %sTermNode(value.ToString(), ranges) :> ITreeNode" <| toClassName token
+    printBr "new %sTermNode(ranges) :> ITreeNode" <| toClassName token
     res.ToString()
 
 let getLeafSemanticForLiteral litName litText = 
@@ -47,9 +34,8 @@ let getLeafSemanticForLiteral litName litText =
 
     printBr "let pos = snd <| _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
-    printBr "let stringValue = \"%s\"" litText
 
-    printBr "new %sLitNode(stringValue, ranges) :> ITreeNode"  <| litToClassName litName
+    printBr "new %sLitNode(ranges) :> ITreeNode"  <| litToClassName litName
 
     res.ToString()
                                

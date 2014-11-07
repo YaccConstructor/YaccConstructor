@@ -8,32 +8,12 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <Name>FsYacc</Name>
+    <ProjectGuid>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="../YC.targets" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <!-- Always use x86 emulation for this binary... -->
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{DDD90630-1CDA-4CB3-9A0A-6A1253478C2D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <AssemblyName>YC.FsYacc</AssemblyName>
-    <TreatWarningsAsErrors>
-    </TreatWarningsAsErrors>
-    <!-- 5310 tracks reenabling -->
-    <DefineConstants>$(DefineConstants)</DefineConstants>
-    <AllowCrossTargeting>true</AllowCrossTargeting>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
-  <!-- These dummy entries are needed for F# Beta2 -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
   <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">

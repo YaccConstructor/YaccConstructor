@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Highlighting.Core;
 using JetBrains.DataFlow;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
@@ -11,7 +10,8 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.Parsing;
 using JetBrains.ReSharper.Psi.Tree;
-using YC.AbstractAnalysis;
+using YC.SDK.ReSharper;
+using JetBrains.Util;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 {
@@ -46,18 +46,19 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
                 return;
 
             DocumentRange lBraceRange = myProvider.DocumentCaret.ExtendRight(1);
+            ITreeNode node = GetNodeFromRange(lBraceRange);
+            string lang = GetLanguageFromNode(node);
 
-            string lBrotherText = lBraceRange.GetText();
-
-            string lang = GetLanguageFromRange(lBraceRange);
-            if (string.IsNullOrEmpty(lang))
+            if (String.IsNullOrEmpty(lang))
                 return;
 
-            string rBrother = LanguageHelper.GetBrother(lang, lBrotherText, Brother.Right);
+            string lBrother = node.UserData.GetData(Constants.YcTokenName);
+
+            string rBrother = LanguageHelper.GetBrother(lang, lBrother, Brother.Right);
             if (String.IsNullOrEmpty(rBrother))
                 return;
 
-            int leftNumber = LanguageHelper.GetNumberFromTextValue(lang, lBrotherText);
+            int leftNumber = Int32.Parse(node.UserData.GetData(Constants.YcTokNumber));
             int rightNumber = LanguageHelper.GetNumberFromYcName(lang, rBrother);
 
             var helper = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
@@ -87,9 +88,9 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
                 //    continue;
                 var rBraceNode = lbraceNode.NextSibling;
                 while (rBraceNode != null
-                    && rBraceNode.UserData.GetData(KeyConstant.YcTokenName) != rBrother)
+                    && rBraceNode.UserData.GetData(Constants.YcTokenName) != rBrother)
                 {
-                    var text = rBraceNode.UserData.GetData(KeyConstant.YcTokenName);
+                    var text = rBraceNode.UserData.GetData(Constants.YcTokenName);
                     if (string.IsNullOrEmpty(text))
                         Console.WriteLine();
                     rBraceNode = rBraceNode.NextSibling;
@@ -129,18 +130,21 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
             DocumentRange rBraceRange = myProvider.DocumentCaret.ExtendLeft(1);
 
-            string rBrotherText = rBraceRange.GetText();
+            ITreeNode node = GetNodeFromRange(rBraceRange);
+            string lang = GetLanguageFromNode(node);
 
-            string lang = GetLanguageFromRange(rBraceRange);
             if (String.IsNullOrEmpty(lang))
                 return;
-            string lbrother = LanguageHelper.GetBrother(lang, rBrotherText, Brother.Left);
+
+            string rBrother = node.UserData.GetData(Constants.YcTokenName);
+
+            string lbrother = LanguageHelper.GetBrother(lang, rBrother, Brother.Left);
 
             if (String.IsNullOrEmpty(lbrother))
                 return;
 
             int leftNumber = LanguageHelper.GetNumberFromYcName(lang, lbrother);
-            int rightNumber = LanguageHelper.GetNumberFromTextValue(lang, rBrotherText);
+            int rightNumber = Int32.Parse(node.UserData.GetData(Constants.YcTokNumber));
 
             var helper = Helper.ReSharperHelper<DocumentRange, ITreeNode>.Instance;
 
@@ -167,7 +171,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
 
                 var lbraceNode = rBraceNode.PrevSibling;
                 while (lbraceNode != null
-                    && lbraceNode.UserData.GetData(KeyConstant.YcTokenName) != lbrother)
+                    && lbraceNode.UserData.GetData(Constants.YcTokenName) != lbrother)
                 {
                     lbraceNode = lbraceNode.PrevSibling;
                 }
@@ -182,25 +186,31 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
             */
         }
 
-        private string GetLanguageFromRange(DocumentRange needRange)
+        private ITreeNode GetNodeFromRange(DocumentRange needRange)
         {
             IDocument doc = needRange.Document;
 
-            var treeList = new List<ITreeNode>(ExistingTreeNodes.GeTreeNodes(doc));
+            var treeList = new List<ITreeNode>(ExistingTreeNodes.GetTreeNodes(doc));
             foreach (ITreeNode tree in treeList)
             {
-                List<DocumentRange> treeRanges = tree.UserData.GetData(KeyConstant.Ranges);
+                List<DocumentRange> treeRanges = tree.UserData.GetData(Constants.Ranges);
 
-                if (treeRanges == null) 
+                if (treeRanges == null)
                     continue;
-                
+
                 foreach (var range in treeRanges)
                 {
                     if (needRange.ContainedIn(range))
-                        return tree.UserData.GetData(KeyConstant.YcLanguage);
+                        return tree.FindNodeAt(GetTreeTextRange(needRange.TextRange));
                 }
             }
+
             return null;
+        }
+
+        private string GetLanguageFromNode(ITreeNode node)
+        {
+            return node == null ? null : node.UserData.GetData(Constants.YcLanguage);
         }
 
         //Method doesn't call now
@@ -219,6 +229,11 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting.Dynamic
         protected override bool Match(TokenNodeType token1, TokenNodeType token2)
         {
             return false;
+        }
+
+        private static TreeTextRange GetTreeTextRange(TextRange textRange)
+        {
+            return new TreeTextRange(new TreeOffset(textRange.StartOffset), new TreeOffset(textRange.EndOffset));
         }
     }
 }

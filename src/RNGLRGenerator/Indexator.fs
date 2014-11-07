@@ -1,4 +1,4 @@
-ï»¿//   Copyright 2013, 2014 YaccConstructor Software Foundation
+//   Copyright 2013, 2014 YaccConstructor Software Foundation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -58,7 +58,58 @@ type Indexator (ruleList : Rule.t<Source.t,Source.t> list, caseSensitive) =
     let _eofIndex = (let (x,_,_) = termsConnect in x "RNGLR_EOF") + termsShift
     
     let _errorIndex = let (x,_,_) = nonTermsConnect in x "error"
+    let _getLiteralName i =
+        let (lit:string) = Indexator.sub literalsShift (Indexator.snd literalsConnect) i
+        let replacementDict =
+            [
+                '.', "dot"
+                ',', "comma"
+                ':', "semi"
+                ';', "colon"
+                '+', "plus"
+                '-', "minus"
+                '*', "star"
+                '<', "less"
+                '>', "more"
+                '=', "equal"
+                '/', "slash"
+                '&', "and"
+                '|', "or"
+                '?', "question"
+                '$', "dollar"
+                '[', "left_square_bracket"
+                ']', "right_square_bracket"
+                '(', "left_bracket"
+                ')', "right_bracket"
+                '!', "not"
+                '~', "tilda"
+                '#', "sharp"
+                '%', "percent"
+                '^', "hat"
+                '{', "left_figure_bracket"
+                '}', "right_figure_bracket"
+                '\\', "reverse_slash"
+                '`', "reverse_quate"
+                ''', "quate"
+                '?', "number"
+            ]
+            |> dict
 
+        lit
+        |> Seq.mapi  
+            (fun i ch ->
+                let exist,v = replacementDict.TryGetValue(ch)
+                if exist
+                then
+                    if i = 0 
+                    then v + "_"
+                    elif i = lit.Length - 1
+                    then "_" + v
+                    else "_" + v + "_"
+                else string ch
+            )
+        |> String.concat ""
+                '¹', "number"
     static member inline private fst (x,_,_) = x
     static member inline private snd (_,x,_) = x
     static member inline private trd (_,_,x) = x

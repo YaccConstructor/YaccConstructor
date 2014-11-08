@@ -32,6 +32,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="AST.fs" />
     <Compile Include="Interpreter.fs" />
     <Compile Include="RNGLRAbstractParser.fs" />
     <None Include="packages.config" />

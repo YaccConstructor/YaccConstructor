@@ -26,7 +26,7 @@ type TargetLanguage =
 let printTables 
     (grammar : FinalGrammar) head (tables : Tables) (moduleName : string) 
     (tokenType : Map<_,_>) (res : System.Text.StringBuilder) targetLanguage 
-    _class positionType caseSensitive =
+    _class positionType caseSensitive isAbstractParsingMode =
     
     let inline print (x : 'a) =
         Printf.kprintf (fun s -> res.Append s |> ignore) x
@@ -291,13 +291,16 @@ let printTables
         
         printBrInd 0 "let private parserSource = new ParserSource<Token> (gotos, reduces, zeroReduces, accStates, rules, rulesStart, leftSide, startRule, eofIndex, tokenToNumber, acceptEmptyInput, numToString, errorIndex, errorRulesExists)"
 
-        printBr "let buildAstAbstract : (seq<int*array<'TokenType*int>> -> ParseResult<Token>) ="
-        printBrInd 1 "buildAstAbstract<Token> parserSource"
-        printBr ""
-        
-        printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
-        printBr ""
+        if isAbstractParsingMode
+        then
+            printBr "let buildAstAbstract : (ParserInputGraph<'TokenType> -> Yard.Generators.ARNGLR.Parser.ParseResult<Token>) = "
+            printBrInd 1 "buildAstAbstract<Token> parserSource"
+            printBr ""
+        else
+            printBr "let buildAst : (seq<'TokenType> -> ParseResult<Token>) ="
+            printBrInd 1 "buildAst<Token> parserSource"
+            printBr ""
+
         res.ToString()
 
     let printTablesToScala () =    

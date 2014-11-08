@@ -29,7 +29,7 @@ open Yard.Generators.RNGLR.Parser
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
-let path = path baseInputGraphsPath
+let path name = path baseInputGraphsPath name
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)

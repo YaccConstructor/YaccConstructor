@@ -184,7 +184,8 @@ type RNGLR() =
                     then 
                         println "open Yard.Generators.ARNGLR.Parser"
                         println "open Yard.Generators.RNGLR"
-                        println "open Yard.Generators.ARNGLR.AST1"
+                        println "open Yard.Generators.Common.ARNGLR.AST"
+                        println "open AbstractAnalysis.Common"
                     else 
                         println "open Yard.Generators.RNGLR.Parser"
                         println "open Yard.Generators.RNGLR"
@@ -225,7 +226,7 @@ type RNGLR() =
                         else None
                                 
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive xmlOpt
+                                    positionType fullPath output dummyPos caseSensitive xmlOpt !isAbstractParsingMode
 
             let res = 
                 match definition.foot with

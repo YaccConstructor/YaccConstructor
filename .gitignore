@@ -178,3 +178,4 @@ src/TSQL/*.dot
 src/RNGLRParser.SimpleTest/*.dot
 src/GLLParser.SimpleTest/*.yrd.fs
 src/GLLParser.SimpleTest/log.txt
+src/AbstractLexer.Test/Parser.fs

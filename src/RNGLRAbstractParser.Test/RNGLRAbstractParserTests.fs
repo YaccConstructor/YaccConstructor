@@ -25,7 +25,7 @@ open RNGLR.ParseSimpleCalc
 open RNGLR.PrettySimpleCalc
 open Yard.Generators.RNGLR.AbstractParser
 open YC.Tests.Helper
-open Yard.Generators.RNGLR.Parser
+open Yard.Generators.ARNGLR.Parser
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 

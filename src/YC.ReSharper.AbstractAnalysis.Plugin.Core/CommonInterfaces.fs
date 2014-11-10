@@ -5,11 +5,11 @@ open Yard.Generators.RNGLR.OtherSPPF
 open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * int list
+    | InProgress of 'node * LeafNode list
     | End of 'node
 
 type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
@@ -92,11 +92,11 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         |> Option.map parse
         |> Option.iter
             (function 
-                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
+                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
                     forest <- (tree, errors) :: forest
                     otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
                     parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
             )
 
     let getNextTree index : TreeGenerationState<'node> = 
@@ -107,7 +107,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let mutable curSppf, errors = List.nth forest index
             let unprocessed = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
+                | Start ->   Array.init curSppf.TokensCount (fun i -> new LeafNode(i)) |> List.ofArray
                 | InProgress (_, unproc) ->  unproc
                 | _ -> failwith "Unexpected state in treeGeneration"
                 

@@ -4,7 +4,7 @@ open System.IO
 open AbstractAnalysis.Common
 open AbstractLexer.Core
 open JSON.Parser
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 open YC.SDK.ReSharper.Helper
 open YC.SDK.CommonInterfaces
 open JetBrains.Application

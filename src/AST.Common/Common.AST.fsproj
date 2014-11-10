@@ -44,6 +44,7 @@
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="AST2.fs" />
+    <Compile Include="ArnglrAst.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

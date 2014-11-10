@@ -253,8 +253,9 @@ let printTables
         printBr "let acceptEmptyInput = %A" grammar.canInferEpsilon.[leftSide.[grammar.startRule]]
         printBr ""
 
+        let astNamespace = if isAbstractParsingMode then "Yard.Generators.Common.ARNGLR.AST" else "Yard.Generators.Common.AST"
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        printBrInd 1 "(fun (tree : %s.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)" astNamespace
 
         printBr ""
 

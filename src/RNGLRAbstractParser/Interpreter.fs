@@ -21,7 +21,7 @@
 module Yard.Generators.ARNGLR.Parser
 
 open Yard.Generators.RNGLR
-open Yard.Generators.RNGLR.AST1
+open Yard.Generators.Common.ARNGLR.AST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 //open Yard.Generators.RNGLR.Parser 
@@ -53,7 +53,7 @@ type ParserDebugFuns<'TokenType> = {
 }
 
 type ParseResult<'TokenType> =
-    | Success of Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
+    | Success of Yard.Generators.Common.ARNGLR.AST.Tree<'TokenType> * array<'TokenType> * Dictionary<Family, ErrorNode>
     | Error of int * array<'TokenType> * string * ParserDebugFuns<'TokenType> * Dictionary<Family, ErrorNode>
 
 [<Struct>]

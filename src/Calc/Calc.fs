@@ -2,7 +2,7 @@
 
 open Calc.AbstractParser
 open AbstractLexer.Core
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 open YC.SDK.CommonInterfaces
 open YC.SDK.CommonInterfaces
 open Mono.Addins

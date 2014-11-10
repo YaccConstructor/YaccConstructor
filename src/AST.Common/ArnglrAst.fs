@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Generators.RNGLR.AST1
+module Yard.Generators.Common.ARNGLR.AST
 open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
@@ -706,7 +706,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
             let mutable res = [] 
             for i = 0 to processed.Length - 1 do
                 if not processed.[i] 
-                then res <- i :: res
+                then res <- new LeafNode(i) :: res
             List.rev res
 
         // now parameter 'tokens' is all sppf tokens rather than tokens from new tree

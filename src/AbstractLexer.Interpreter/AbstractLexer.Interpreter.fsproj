@@ -8,7 +8,7 @@
     <ProjectGuid>0a44967a-f233-4d77-8abb-d165af90075a</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AbstractLexer.Interpreter</RootNamespace>
-    <AssemblyName>AbstractLexer.Interpreter</AssemblyName>
+    <AssemblyName>YC.AbstractLexer.Interpreter</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>AbstractLexer.Interpreter</Name>
     <TargetFrameworkProfile />
@@ -21,11 +21,12 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\yc\recursive-ascent\src\..\Bin\Debug\v40\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\AbstractLexer.Interpreter.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

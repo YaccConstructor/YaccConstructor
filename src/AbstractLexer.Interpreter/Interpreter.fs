@@ -7,8 +7,8 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open YC.FST.FstApproximation
 
-let printSmbString (x:char*Position<_>) = 
-        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
+//let printSmbString (x:char*Position<_>) = 
+//        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
 type TokenEdge<'br>(s,e,t)=
     inherit TaggedEdge<int, char*Position<'br>>(s,e,t)
@@ -163,10 +163,10 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputGraph : Appr<_>) =    
     let inputFst = inputGraph.ToFST() 
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer, alphabet) 
-    //inputFstLexer.PrintToDOT (@"..\..\Tests\CalcTestLexerk.dot", printSmbString)
     let epsRes = 
         match inputFstLexer with
         | Success fst -> 
+            //fst.PrintToDOT (@"../../../src/AbstractLexer.Interpreter.Tests/Tests/CalcTestLexerk.dot", printSmbString)
             let parserInputGraph = Interpret fst actions eofToken
             Success (EpsClosure.NfaToDfa parserInputGraph)
         | Error errors -> Error errors

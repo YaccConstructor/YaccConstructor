@@ -8,7 +8,7 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 
-let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
   
 let literalsTokenizationTest path eCount vCount pathPrint =
     let graphAppr = loadDotToQG baseInputGraphsPath path
@@ -21,21 +21,21 @@ let literalsTokenizationTest path eCount vCount pathPrint =
 
 [<TestFixture>]
 type ``Lexer Literals Fst Tests`` () =   
-    [<Test>]
+    [<Test>]  
     member this.``Literals. Simple.`` () =
-        literalsTokenizationTest "literals_simple.dot" 2 3 @"..\..\Tests\testParserLiterals0.dot"
+        literalsTokenizationTest "literals_simple.dot" 2 3 @"../../../src/AbstractLexer.Interpreter.Tests/Tests/testParserLiterals0.dot"
 
     [<Test>] 
     member this.``Literals. Inner branch.`` () =
-        literalsTokenizationTest "literals_inner_branch.dot" 2 3 @"..\..\Tests\testParserLiterals1.dot"
+        literalsTokenizationTest "literals_inner_branch.dot" 2 3 @"../../../src/AbstractLexer.Interpreter.Tests/Tests/testParserLiterals0.dot"
 
     [<Test>]
     member this.``Literals. Outer branch.`` () =
-        literalsTokenizationTest "literals_outer_branch.dot" 2 3 @"..\..\Tests\testParserLiterals2.dot"
+        literalsTokenizationTest "literals_outer_branch.dot" 2 3 @"../../../src/AbstractLexer.Interpreter.Tests/Tests/testParserLiterals0.dot"
 
     [<Test>]
     member this.``Literals. Splitted.`` () =
-        literalsTokenizationTest "literals_splitted.dot" 2 3 @"..\..\Tests\testParserLiterals3.dot"
+        literalsTokenizationTest "literals_splitted.dot" 2 3 @"../../../src/AbstractLexer.Interpreter.Tests/Tests/testParserLiterals0.dot"
 
 //[<EntryPoint>]
 //let f x =

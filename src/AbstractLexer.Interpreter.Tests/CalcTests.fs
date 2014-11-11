@@ -9,7 +9,7 @@ open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 
-let baseInputGraphsPath = "../../../../Tests/AbstractLexing/DOT"
+let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
 let calcTokenizationTest path eCount vCount countEdgesArray =
     let graphAppr = loadDotToQG baseInputGraphsPath path

@@ -11,7 +11,7 @@ open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
      
 let TokenizationTest graphAppr eCount vCount  =
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr        
     match res with
     | Success res -> checkGraph res eCount vCount   
     | Error e -> Assert.Fail(sprintf "Tokenization problem %A:" e)
@@ -24,11 +24,11 @@ type ``Lexer FST Tests`` () =
         let finishState = ResizeArray.singleton 3
         let transitions = new ResizeArray<_>()
         transitions.Add(0, Smb("+", "+"), 1)
-        transitions.Add(1, Smb("a", "a"), 2)
+        transitions.Add(1, Smb("*", "*"), 2)
         transitions.Add(2, Smb("*", "*"), 1)
         transitions.Add(1, Smb("*", "*"), 3)
         let appr = new Appr<_>(startState, finishState, transitions)
-        TokenizationTest appr 7 6 
+        TokenizationTest appr 6 5 
 
     [<Test>]
     member this.``Lexer FST Tests. Check work of interpreter.`` () = 

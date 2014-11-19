@@ -29,10 +29,13 @@ type TranslateArguments<'Token, 'Position> = {
 type INode = interface end
 
 /// Positive, if it is production number, and negative, if it is epsilon node.
-type LeafNode =
+type Terminal (tokenNumber : int) =
     interface INode
-    val index : int
-    new (i) = {index = i}
+    member this.TokenNumber = tokenNumber
+
+type Epsilon (epsilonNonTerm : int) =
+    interface INode
+    member this.EpsilonNonTerm = epsilonNonTerm
 
 [<Struct>]
 type UsualOne<'T> =
@@ -147,11 +150,15 @@ let inline getFamily (node : INode) =
 
 let inline getSingleNode (node : INode) =
     match node with
-    | :? LeafNode as i  -> i.index
+    | :? Epsilon as e  -> e.EpsilonNonTerm
+    | :? Terminal as t  -> t.TokenNumber
     | _ -> failwith "Attempt to get singleNode of NonTerm"
 
 let inline private getPos (x : INode) = match x with :? AST as n -> n.pos | _ -> failwith "Attempt to get num of single node"
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
+
+let inline isEpsilon (x : INode) =
+    match x with | :? Epsilon -> true | _ -> false
 
 let private emptyArr = [||]
 type private DotNodeType = Prod | AstNode
@@ -175,18 +182,18 @@ type ErrorNode =
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]) =
-    let rootFamily, isEpsilon =
+    let rootFamily, isEpsilonTree =
         match root with
         | :? AST as ast -> ast, false
-        | :? LeafNode as x when x.index < 0 -> Unchecked.defaultof<_>, true
-        | _ -> failwith "Strange tree - singleNode with non-negative value"
+        | :? Epsilon as e -> Unchecked.defaultof<_>, true
+        | _ -> failwith "Strange tree - consists of terminal"
     let order =
         let stack = new System.Collections.Generic.Stack<_>()
         match root with
         | :? AST as ast -> stack.Push ast
         | _ -> ()
         let res = new BlockResizeArray<_>()
-        if not isEpsilon then
+        if not isEpsilonTree then
             while stack.Count > 0 do
                 let u = stack.Pop()
                 let children = u
@@ -217,12 +224,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
     member this.TokensCount = tokens.Length
 
     static member inline private smaller pos : (INode -> _) = function
-        | :? LeafNode -> true
+        | :? Epsilon | :? Terminal -> true
         | :? AST as n -> n.pos < pos && n.pos <> -1
         | _ -> failwith ""
 
     member private this.FilterChildren childrenHandler = 
-        if not isEpsilon then
+        if not isEpsilonTree then
             for children in order do
                 if children.pos <> -1 then
                     childrenHandler children
@@ -287,12 +294,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
     /// If ranges are equal, then select one, having the smallest rule number.
     /// Eliminate cycles.
     member this.ChooseLongestMatch () =
-        if not isEpsilon then
+        if not isEpsilonTree then
             let rangeEnds = Array.zeroCreate order.Length
-            let inline isEpsilon x = match x : INode with | :? LeafNode as x when x.index < 0 -> true | _ -> false
             let inline getEnd (x : INode) =
                 match x with
-                | :? LeafNode as t -> t.index
+                | :? Terminal as t -> t.TokenNumber
                 | :? AST as ch -> rangeEnds.[ch.pos]
                 | _ -> failwith ""
             let getRangeEnd (family : Nodes) =
@@ -317,8 +323,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                 let inline getEnd (x : obj) =
                     match x with
                     | null -> -1
-                    | :? LeafNode as t when t.index < 0 -> -1
-                    | :? LeafNode as t -> t.index
+                    | :? Epsilon -> -1
+                    | :? Terminal as t -> t.TokenNumber
                     | :? AST as ch -> rangeEnds.[ch.pos]
                     | _ -> failwith ""
                 let inline compareNodes (n1 : Nodes) (n2 : Nodes) =
@@ -386,7 +392,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
 
         let inline getRanges x =
             match x : INode with
-            | :? LeafNode as t -> tokenToRange tokens.[t.index]
+            | :? Terminal as t -> tokenToRange tokens.[t.TokenNumber]
             | :? AST as ch -> ranges.[ch.pos]
             | _ -> failwith ""
         for i = 0 to order.Length - 1 do
@@ -407,7 +413,6 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                     processed.[x.pos] <- true
                     let nodes = family.nodes
                     let mutable j, k = 0, nodes.Length-1
-                    let inline isEpsilon x = match x : obj with | :? LeafNode as x when x.index < 0 -> true | _ -> false
                     (*let left = 
                         if isEpsilon family.fst then
                             if isEpsilon family.snd then
@@ -444,7 +449,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
 
     member this.collectWarnings tokenToRange =
         let res = new ResizeArray<_>()
-        if not isEpsilon then
+        if not isEpsilonTree then
             this.TraverseWithRanges tokenToRange ignore ignore <| fun i ranges ->
                 let children = order.[i]
                 if children.other <> null then
@@ -460,7 +465,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
             let mutable res : INode list = []
             for j = 0 to fam.nodes.Length-1 do
                 match fam.nodes.[j] with
-                | :? LeafNode as t when t.index >= 0 -> 
+                | :? Terminal as t -> 
                     res <- res @ [t]
                 | :? AST as ast -> 
                     if ast.other <> null 
@@ -476,7 +481,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
 
     member this.collectErrors tokenToRange = 
         let res = new ResizeArray<'Position * 'Position * array<INode>>()
-        if not isEpsilon 
+        if not isEpsilonTree 
         then
             this.TraverseWithRanges tokenToRange ignore ignore <| fun i ranges ->
                 //let inline isEpsilon x = match x : INode with | :? LeafNode as x when x.index < 0 -> true | _ -> false
@@ -524,7 +529,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                             (concat : array<_>) (epsilons : array<Tree<_>>) (tokenToRange) (zeroPosition :'Position) 
                             clearAST (errDict : Dictionary<Family, ErrorNode>) =
 
-        if isEpsilon 
+        if isEpsilonTree
         then epsilons.[-(getSingleNode root)-1].TranslateEpsilon funs leftSides concat (zeroPosition, zeroPosition)
         else
             let result = new BlockResizeArray<_>()
@@ -546,11 +551,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
 
             this.TraverseWithRanges tokenToRange dispose reportCycleError <| fun i ranges ->
                 let inline getRes prevRange : (obj -> _) = function
-                    | :? LeafNode as i when i.index < 0 -> 
-                        epsilons.[-i.index-1].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
-                    | :? LeafNode as t ->
-                        prevRange := snd <| tokenToRange tokens.[t.index]
-                        box tokens.[t.index]
+                    | :? Epsilon as e -> 
+                        epsilons.[e.EpsilonNonTerm].TranslateEpsilon funs leftSides concat (!prevRange, !prevRange)
+                    | :? Terminal as t ->
+                        prevRange := snd <| tokenToRange tokens.[t.TokenNumber]
+                        box tokens.[t.TokenNumber]
                     | :? AST as ch ->
                         prevRange := snd ranges.[ch.pos]    
                         result.[ch.pos]
@@ -617,8 +622,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                 printf "%s" (String.replicate (num * 4) " ")
                 printfn x
             match (ast : obj) with
-            | :? LeafNode as i when i.index < 0 -> printInd ind "e"
-            | :? LeafNode as t -> printInd ind "t: %A" tokens.[t.index]
+            | :? Epsilon -> printInd ind "e"
+            | :? Terminal as t -> printInd ind "t: %A" tokens.[t.TokenNumber]
             | :? AST as fam ->
                 let children = fam
                 let needGroup = children.other <> null
@@ -642,16 +647,16 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
     /// <para> unprocessed - list of number of tokens that need process. </para>
     /// <para> filter is a function that is involved in choosing trees.</para>
     /// </summary>
-    member this.GetNextTree (unprocessed : LeafNode list) filter = 
+    member this.GetNextTree (unprocessed : Terminal list) filter = 
         let processed = [| 
                             for i = 0 to tokens.Length - 1 do
-                                yield not (unprocessed |> List.exists (fun j -> j.index = i))
+                                yield not (unprocessed |> List.exists (fun j -> j.TokenNumber = i))
                         |]
         
         let rootFamily = 
             match root with
             | :? AST as ast -> ast
-            | :? LeafNode as x when x.index < 0 -> Unchecked.defaultof<_>
+            | :? Epsilon -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
         /// choose family from AST which contains the more unprocessed tokens
@@ -663,7 +668,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                     let familyLeaves = 
                         this.getTokensFromFamily family |> Seq.distinct |> Seq.toList
                     let newToksList = 
-                        unprocessed |> List.filter (fun leaf -> familyLeaves |> List.exists ((fun x -> (x :?> LeafNode).index = leaf.index)))
+                        unprocessed |> List.filter (fun leaf -> familyLeaves |> List.exists ((fun x -> (x :?> Terminal).TokenNumber = leaf.TokenNumber)))
                     newToksList.Length
 
                 let mutable nextFam = ast.first
@@ -689,9 +694,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                 | :? AST as ast -> 
                     let child = processFamily <| handleAST ast
                     children.Add child
-                | :? LeafNode as tok -> 
-                    if tok.index >= 0
-                    then processed.[tok.index] <- true
+                | :? Terminal as tok -> 
+                    processed.[tok.TokenNumber] <- true
                     children.Add node
                 | _ -> failwithf "Error in generation one of highlighting tree"
 
@@ -706,7 +710,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
             let mutable res = [] 
             for i = 0 to processed.Length - 1 do
                 if not processed.[i] 
-                then res <- new LeafNode(i) :: res
+                then res <- new Terminal(i) :: res
             List.rev res
 
         // now parameter 'tokens' is all sppf tokens rather than tokens from new tree
@@ -732,7 +736,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
         if tokNumberOption.IsNone
         then []
         else
-            let token = new LeafNode(tokNumberOption.Value)
+            let token = new Terminal(tokNumberOption.Value)
             let forestFam = ref []
             let mutable forestTree = []
             let filter (family : Family) = 
@@ -805,7 +809,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
             let res = next()
             createNode res false AstNode ("t " + indToString (tokenToNumber tokens.[t]))
             res
-        if not isEpsilon then
+        if not isEpsilonTree then
             //for i in order do
             for i = order.Length-1 downto 0 do
                 let x = order.[i]
@@ -827,8 +831,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
                             let v = 
                                 match child with
                                 | :? AST as v -> v.pos
-                                | :? LeafNode as e when e.index < 0 -> createEpsilon e.index
-                                | :? LeafNode as t -> createTerm t.index
+                                | :? Epsilon as e -> createEpsilon e.EpsilonNonTerm
+                                | :? Terminal as t -> createTerm t.TokenNumber
                                 | _ -> failwith ""
                             createEdge u v false ""
                     children.first |> handle

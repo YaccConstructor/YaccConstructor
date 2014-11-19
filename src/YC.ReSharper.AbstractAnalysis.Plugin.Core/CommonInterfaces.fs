@@ -9,7 +9,7 @@ open Yard.Generators.Common.ARNGLR.AST
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * LeafNode list
+    | InProgress of 'node * INode list
     | End of 'node
 
 type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
@@ -105,9 +105,9 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             generationState <- End(null)
         else
             let mutable curSppf, errors = List.nth forest index
-            let unprocessed = 
+            let unprocessed : Terminal list = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> new LeafNode(i)) |> List.ofArray
+                | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
                 | InProgress (_, unproc) ->  unproc
                 | _ -> failwith "Unexpected state in treeGeneration"
                 

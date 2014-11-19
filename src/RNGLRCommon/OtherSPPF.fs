@@ -171,7 +171,7 @@ type OtherTree<'TokenType> (tree : Yard.Generators.Common.ARNGLR.AST.Tree<'Token
         let root = 
             match tree.Root with
             | :? AST as ast -> ast
-            | :? LeafNode as x when x.index < 0 -> Unchecked.defaultof<_>
+            | :? Epsilon -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
         let dict = new System.Collections.Generic.Dictionary<AST, OtherAST>()

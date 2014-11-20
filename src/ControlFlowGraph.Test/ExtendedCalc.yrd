@@ -1,0 +1,31 @@
+﻿binExpr<operand binOp>:
+  operand (binOp operand)*
+  
+[<Start>]
+start: assign+
+
+assign: id EQ expr SEMICOLON
+
+calcExpr: expr
+
+expr: binExpr<term termOp> 
+      | ERROR
+
+termOp: PLUS | MINUS
+
+term: binExpr<factor factorOp>
+      | ERROR
+factorOp: MULT | DIV
+
+factor: binExpr<powExpr powOp>
+        | ERROR
+
+powOp: POW
+
+powExpr:   number 
+		 | id
+         | LBRACE expr RBRACE
+         | ERROR
+
+id: X | Y | Z
+number: ONE | TWO | THREE | FOUR | FIVE | SIX | SEVEN | EIGHT | NINE

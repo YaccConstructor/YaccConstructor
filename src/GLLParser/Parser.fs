@@ -134,7 +134,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let setR = new Queue<Context>()   
         let setP = new System.Collections.Generic.Dictionary<int64<vertex>,ResizeArray<ExtensionTree>> ()
         let astDictionary = new System.Collections.Generic.Dictionary<int64<key>,AST> ()
-        let setU = Array.init (inputLength+1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
+        let setU = Array.init (inputLength + 1) (fun _ -> new Dictionary<_*_, ResizeArray<INode>>())
             
         let currentIndex = ref 0
 
@@ -248,7 +248,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 packVertex i (curLevel.Count - 1)
             else packVertex i index
 
-        let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
+        let containsEdge (b : int64<vertex>) (e : int64<vertex>) =
             let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
             edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
 
@@ -276,7 +276,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let create label (u : int64<vertex>) (index : int) (ast : ExtensionTree) = 
             let v = containsGSSNode label index
-            if not (containsEdge v u ast.tree)
+            if not (containsEdge v u)
             then
                 let newEdge = new Edge(u, ast)
                // edges.[gss.[getIndex2Vertex v].[getIndex1Vertex v].Level,gss.[getIndex2Vertex u].[getIndex1Vertex u].Level].Add(newEdge)
@@ -405,5 +405,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             | Some res -> 
                     drawDot parser tokens "gss.dot" gss
                     let r1 = new Tree<_> (tokens, res, parser.rules)
+                    r1.AstToDot parser.NumToString parser.TokenToNumber  parser.LeftSide "ast1111111.dot"
                     Success (r1)   
                         

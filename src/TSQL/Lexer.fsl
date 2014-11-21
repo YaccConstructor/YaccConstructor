@@ -32,6 +32,7 @@ open LexerHelper
 open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
 open YC.SDK.CommonInterfaces
+open System.Collections.Generic
 
 let mutable id = 0<id>
 
@@ -56,26 +57,30 @@ let label = ident ':'
 rule tokens = parse
 (* | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } *)
- | decnumber    { DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some }
+ | decnumber    { DEC_NUMBER(gr)|> Some }
  | whitespaces  { None }
- | "."        //  { getLiteral id brs "." }
- | ","        //  { getLiteral id brs "," }
- | "="        //  { getLiteral id brs "=" }
- | ">"        //  { getLiteral id brs ">"}
- | "<"        //  { getLiteral id brs "<"}
- | ";"        //  { getLiteral id brs ";"}
- | "("     // { getLiteral id brs "(" }
- | ")"     // { getLiteral id brs ")" }
- | "["     // { getLiteral id brs "[" }
- | "]"     // { getLiteral id brs "]" }
- | "+"     // { getLiteral id brs "+" }
- | "-"     // { getLiteral id brs "-" }
- | "~"     // { getLiteral id brs "~" }
- | "*"     // { getLiteral id brs "*" }*)
+// | '.'       //  { getLiteral id brs "." }
+ | ','      { L_comma_(gr) |> Some }  //  { getLiteral id brs "," }
+ | '='      { L_equal_(gr) |> Some }  //  { getLiteral id brs "=" }
+ | '>'      { L_more_(gr) |> Some }  //  { getLiteral id brs ">"}
+ | '<'      { L_less_(gr) |> Some }  //  { getLiteral id brs "<"}
+ | ';'      { L_colon_(gr) |> Some}  //  { getLiteral id brs ";"}
+ | '('      { L_left_bracket_(gr) |> Some} // { getLiteral id brs "(" }
+ | ')'      { L_right_bracket_(gr) |> Some} // { getLiteral id brs ")" }
+// | '['     // { getLiteral id brs "[" }
+// | ']'     // { getLiteral id brs "]" }
+ | '+'     { L_plus_(gr) |> Some }// { getLiteral id brs "+" }
+ | '-'     { L_minus_(gr) |> Some }// { getLiteral id brs "-" }
+// | '~'     // { getLiteral id brs "~" }
+ | '*'     { L_star_(gr) |> Some }// { getLiteral id brs "*" }*)
  //| "$"      { getLiteral brs "$" } 
- | ident {  let tok = makeIdent false lexeme (brs, brs)
-            Some tok }
- | "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
+ | "select" { L_select(gr) |> Some }
+ | "from" { L_from(gr)|> Some }
+ | "where" { L_where(gr)|> Some }
+ | "and" { L_and_(gr) |> Some }
+ | "or" { L_or_(gr) |> Some }
+ | ident { IDENT(gr) |> Some }
+//| "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)
  (* and literal = parse
   | "''" { appendBuf("'"); literal brs }

@@ -114,7 +114,15 @@ let main() =
     lineCount := !lineCount + code.Replace("\r","").Split([| '\n' |]).Length;
     cfprintfn os "# %d \"%s\"" !lineCount output;
     
-    let tableTransitions = ResizeArray.init dfaNodes.Length (fun _ -> ResizeArray.init 257 (fun _ -> -1))
+    let sizeTable = 
+        if !unicode 
+        then 
+            let countSpecificUnicodeChars = GetSpecificUnicodeChars() |> Array.ofSeq |> Array.length
+            numLowUnicodeChars + NumUnicodeCategories + 2 * countSpecificUnicodeChars + 1           
+        else 256 + 1
+
+    let tableTransitions = ResizeArray.init dfaNodes.Length (fun _ -> ResizeArray.init sizeTable (fun _ -> -1))
+
     cfprintfn os "let trans : uint16[] array = ";
     cfprintfn os "    [| ";
     if !unicode then 
@@ -130,6 +138,7 @@ let main() =
         // Each entry is an encoded UInt16 value indicating the next state to transition to for this input.
         //
         // For the SpecificUnicodeChars the entries are char/next-state pairs.
+        let k = ref 0
         for state in dfaNodes do
             cfprintfn os "    (* State %d *)" state.Id;
             fprintf os "     [| ";
@@ -140,17 +149,20 @@ let main() =
             let emit n = 
                 if trans.ContainsKey(n) then 
                   outputCodedUInt16 os trans.[n].Id 
+                  trans.[n].Id 
                 else
                   outputCodedUInt16 os sentinel
+                  sentinel
             for i = 0 to numLowUnicodeChars-1 do 
                 let c = char i
-                emit (EncodeChar c);
+                tableTransitions.[state.Id].[i] <- emit (EncodeChar c);
+            k := numLowUnicodeChars - 1
             for c in specificUnicodeChars do 
                 outputCodedUInt16 os (int c); 
-                emit (EncodeChar c);
+                tableTransitions.[state.Id].[(incr k; !k)] <- emit (EncodeChar c);
             for i = 0 to NumUnicodeCategories-1 do 
-                emit (EncodeUnicodeCategoryIndex i);
-            emit Eof;
+                tableTransitions.[state.Id].[(incr k; !k)] <- emit (EncodeUnicodeCategoryIndex i);
+            tableTransitions.[state.Id].[(sizeTable - 1)] <- emit Eof;
             cfprintfn os "|];"
         done;
     
@@ -237,23 +249,23 @@ let main() =
         let resFST = new FST<_,_>()
         resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
         
-        let stEOF = tableTransitions.[0].[256] 
+        let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
         new TaggedEdge<_,_>(0, stEOF, new EdgeLbl<_,_>(Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
         resFST.FinalState.Add(stEOF)
                          
         for state in dfaNodes do
-            for i in 0..256 do
+            for i in 0..(sizeTable - 1) do
                 let st = tableTransitions.[state.Id].[i]
                 if st <> sentinel 
                 then 
-                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                 else 
                     if state.Id <> 0
                     then 
                         let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
-                        if tableTransitions.[0].[i] <> sentinel || i = 256 
+                        if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
                         then  
-                            new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = 256 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                            new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
         let getVal printV s = 
             match s with
@@ -282,12 +294,12 @@ let main() =
         //let alphabet = new ResizeArray<_>()
         let alphabet = new HashSet<_>()
         for edge in resFST.Edges do         
-            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)) |> ignore
+            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)) |> ignore
             fstStream.WriteLine(
                 sprintf  
                     "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
                     edge.Source
-                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
+                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
                     //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
                     (getVal (string) edge.Tag.OutSymb) edge.Target)            
                                                  

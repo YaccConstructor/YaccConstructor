@@ -22,30 +22,31 @@ let tokenToPos (tokenData : _ -> obj) token =
 
 [<TestFixture>]
 type ``Control Flow Graph Building`` () =
+    let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
+    let tokenToNumber = RNGLR.ParseExtendedCalc.tokenToNumber
+    let leftSides = RNGLR.ParseExtendedCalc.leftSide
+    let indToString = RNGLR.ParseExtendedCalc.numToString
+    let tokenData = RNGLR.ParseExtendedCalc.tokenData
+
+    let semicolon = RNGLR.ParseExtendedCalc.SEMICOLON 0
+    let semicolonNumber = tokenToNumber semicolon
+    let nodeToType = dict["assign", Assignment;]
+        
+    let typeToDelimiters = dict [
+                                    Assignment, [semicolonNumber]; 
+                                ]
+        
+    let stmntNumber = 0
+        
+    let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, typeToDelimiters)
+
 
     [<Test>]
     member test.``Elementary test``() =
-        let buildAbstractAst = RNGLR.ParseExtendedCalc.buildAstAbstract
-        let tokenToNumber = RNGLR.ParseExtendedCalc.tokenToNumber
-        let leftSides = RNGLR.ParseExtendedCalc.leftSide
-        let indToString = RNGLR.ParseExtendedCalc.numToString
-        let tokenData = RNGLR.ParseExtendedCalc.tokenData
-
-        let semicolon = RNGLR.ParseExtendedCalc.SEMICOLON 0
-        let semicolonNumber = tokenToNumber semicolon
-        let nodeToType = dict["assign", Assignment;]
-        
-        let typeToDelimiters = dict [
-                                        Assignment, [semicolonNumber]; 
-                                    ]
-        
-        let stmntNumber = 0
-        
-        let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
-        let langSource = new LanguageSource(nodeToType, typeToDelimiters)
-
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0; 1; 2; 3; 4; (*5; 6; 7; 8; 9; 10; 11; 12;*)] |> ignore
+        let vertexRange = List.init 13 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
@@ -67,39 +68,86 @@ type ``Control Flow Graph Building`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseExtendedCalc.defaultAstToDot mAst "elementary.dot"
+            RNGLR.ParseExtendedCalc.defaultAstToDot mAst "tree elementary.dot"
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
-            cfg.PrintToDot "elementary cfg.dot"
+            
+            cfg.PrintToDot "cfg elementary.dot"
+            printfn "%s" <| cfg.ToString()
+
+    [<Test>]
+    member test.``Ambiguous test``() =
+        let qGraph = new ParserInputGraph<_>()
+        let vertexRange = List.init 16 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
+        //          -> Y = 2;
+        // X = 1;                -> X = 4;
+        //          -> Z = 3;
+        
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 1)
+                createEdge 2 3 (RNGLR.ParseExtendedCalc.ONE 2)
+                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 3)
+                createEdge 4 5 (RNGLR.ParseExtendedCalc.Y 4)
+                createEdge 5 6 (RNGLR.ParseExtendedCalc.EQ 5)
+                createEdge 6 7 (RNGLR.ParseExtendedCalc.TWO 6)
+                createEdge 7 8 (RNGLR.ParseExtendedCalc.SEMICOLON 7)
+                createEdge 4 9 (RNGLR.ParseExtendedCalc.Z 8)
+                createEdge 9 10 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 10 11 (RNGLR.ParseExtendedCalc.THREE 10)
+                createEdge 11 8 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
+                createEdge 8 12 (RNGLR.ParseExtendedCalc.X 8)
+                createEdge 12 13 (RNGLR.ParseExtendedCalc.EQ 9)
+                createEdge 13 14 (RNGLR.ParseExtendedCalc.FOUR 10)
+                createEdge 14 15 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
+            ] |> ignore
+
+        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
+
+        match parseResult with 
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
+            RNGLR.ParseExtendedCalc.defaultAstToDot mAst "tree Ambiguous.dot"
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+
+            printfn "%s" <| cfg.ToString()
+            cfg.PrintToDot "cfg Ambiguous.dot"
+
+
+[<TestFixture>]
+type ``Control Flow Graph: If`` () =
+    let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
+    let tokenToNumber = RNGLR.ParseIf.tokenToNumber
+    let leftSides = RNGLR.ParseIf.leftSide
+    let indToString = RNGLR.ParseIf.numToString
+    let tokenData = RNGLR.ParseIf.tokenData
+
+    let semicolon = RNGLR.ParseIf.SEMICOLON 0
+    let semicolonNumber = tokenToNumber semicolon
+    let nodeToType = dict[
+                                "simple_statement", Assignment;
+                                "if_statement", IfStatement;
+                          ]
+    let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
+    let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
+    let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
+    let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
+
+    let typeToDelimiters = dict [
+                                    Assignment, [semicolonNumber]; 
+                                    IfStatement, [ifNumber; thenNumber; elseNumber; endIfNumber];
+                                ]
+
+    let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
+    let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
 
     [<Test>]
     member test.``Simple If test``() =
-        let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
-        let tokenToNumber = RNGLR.ParseIf.tokenToNumber
-        let leftSides = RNGLR.ParseIf.leftSide
-        let indToString = RNGLR.ParseIf.numToString
-        let tokenData = RNGLR.ParseIf.tokenData
-
-        let semicolon = RNGLR.ParseIf.SEMICOLON 0
-        let semicolonNumber = tokenToNumber semicolon
-        let nodeToType = dict[
-                                "simple_statement", Assignment;
-                                "if_statement", IfStatement;
-                            ]
-        let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
-        let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
-        let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
-        let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
-
-        let typeToDelimiters = dict [
-                                        Assignment, [semicolonNumber]; 
-                                        IfStatement, [ifNumber; thenNumber; elseNumber; endIfNumber];
-                                    ]
-
-        let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
-        let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
-
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0; 1; 2; 3; 4; 5; 6; 7; 8; 9; (*10; 11; 12;*)] |> ignore
+        let vertexRange = List.init 12 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseIf.IF 0)
@@ -120,41 +168,17 @@ type ``Control Flow Graph Building`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "simple if-tree.dot"
+            RNGLR.ParseIf.defaultAstToDot mAst "tree simple if.dot"
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
             
-            cfg.PrintToDot "simple if-cfg.dot"
+            cfg.PrintToDot "cfg simple if.dot"
             printfn "%s" <| cfg.ToString()
 
     [<Test>]
     member test.``Big If test``() =
-        let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
-        let tokenToNumber = RNGLR.ParseIf.tokenToNumber
-        let leftSides = RNGLR.ParseIf.leftSide
-        let indToString = RNGLR.ParseIf.numToString
-        let tokenData = RNGLR.ParseIf.tokenData
-
-        let semicolon = RNGLR.ParseIf.SEMICOLON 0
-        let semicolonNumber = tokenToNumber semicolon
-        let nodeToType = dict[
-                                "simple_statement", Assignment;
-                                "if_statement", IfStatement;
-                            ]
-        let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
-        let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
-        let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
-        let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
-
-        let typeToDelimiters = dict [
-                                        Assignment, [semicolonNumber]; 
-                                        IfStatement, [ifNumber; thenNumber; elseNumber; endIfNumber];
-                                    ]
-
-        let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
-        let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
-
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0; 1; 2; 3; 4; 5; 6; 7; 8; 9; (*10; 11; 12;*)] |> ignore
+        let vertexRange = List.init 16 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseIf.IF 0)
@@ -179,41 +203,19 @@ type ``Control Flow Graph Building`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "big if-tree.dot"
+            RNGLR.ParseIf.defaultAstToDot mAst "tree big if.dot"
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
             
-            cfg.PrintToDot "big if-cfg.dot"
+            cfg.PrintToDot "cfg big if.dot"
             printfn "%s" <| cfg.ToString()
 
     [<Test>]
     member test.``If without else test``() =
-        let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
-        let tokenToNumber = RNGLR.ParseIf.tokenToNumber
-        let leftSides = RNGLR.ParseIf.leftSide
-        let indToString = RNGLR.ParseIf.numToString
-        let tokenData = RNGLR.ParseIf.tokenData
-
-        let semicolon = RNGLR.ParseIf.SEMICOLON 0
-        let semicolonNumber =  tokenToNumber semicolon
-        let nodeToType = dict[
-                                "simple_statement", Assignment;
-                                "if_statement", IfStatement;
-                            ]
-        let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
-        let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
-        let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
-        let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
-
-        let typeToDelimiters = dict [
-                                        Assignment, [semicolonNumber]; 
-                                        IfStatement, [ifNumber; thenNumber; elseNumber; endIfNumber];
-                                    ]
-
-        let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
-        let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
-
         let qGraph = new ParserInputGraph<_>()
-        qGraph.AddVertexRange[0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10;] |> ignore
+
+        let vertexRange = List.init 11 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
+
         qGraph.AddVerticesAndEdgeRange
             [
                 createEdge 0 1 (RNGLR.ParseIf.IF 0)
@@ -233,39 +235,14 @@ type ``Control Flow Graph Building`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "if-without-else-tree.dot"
+            RNGLR.ParseIf.defaultAstToDot mAst "tree if-without-else.dot"
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
             
-            cfg.PrintToDot "if_statement.dot"
+            cfg.PrintToDot "cfg if-without-else.dot"
             printfn "%s" <| cfg.ToString()
             
     [<Test>]
     member test.``Inner if``() =
-        let buildAbstractAst = RNGLR.ParseIf.buildAstAbstract
-        let tokenToNumber = RNGLR.ParseIf.tokenToNumber
-        let leftSides = RNGLR.ParseIf.leftSide
-        let indToString = RNGLR.ParseIf.numToString
-        let tokenData = RNGLR.ParseIf.tokenData
-
-        let semicolon = RNGLR.ParseIf.SEMICOLON 0
-        let semicolonNumber = tokenToNumber semicolon
-        let nodeToType = dict[
-                                "if_statement", IfStatement;
-                                "simple_statement", Assignment;
-                            ]
-        let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
-        let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
-        let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
-        let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
-        
-        let typeToDelimiters = dict [
-                                        Assignment, [semicolonNumber]; 
-                                        IfStatement, [ifNumber; thenNumber; elseNumber; endIfNumber];
-                                    ]
-
-        let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
-        let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
-
         let qGraph = new ParserInputGraph<_>()
         let vertices = Array.init 23 (fun i -> i)
         qGraph.AddVertexRange vertices |> ignore
@@ -301,18 +278,16 @@ type ``Control Flow Graph Building`` () =
         match parseResult with 
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "Inner if.dot"
+            RNGLR.ParseIf.defaultAstToDot mAst "Tree inner if.dot"
             let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
             
-            cfg.PrintToDot "Inner if cfg.dot"
+            cfg.PrintToDot "cfg inner if.dot"
             printfn "%s" <| cfg.ToString()
 
 [<EntryPoint>]
 let f x = 
     let cfgBuilding = new ``Control Flow Graph Building``()
-//    cfgBuilding.``Elementary test``()
-//    cfgBuilding.``Simple If test``()
-    cfgBuilding.``Big If test``()
-//    cfgBuilding.``If without else test``()
-//    cfgBuilding.``Inner if``()
+//    cfgBuilding.``Ambiguous test``()
+    let ifBuilding = new ``Control Flow Graph: If``()
+    ifBuilding.``If without else test``()
     1

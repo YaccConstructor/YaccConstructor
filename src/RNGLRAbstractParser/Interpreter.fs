@@ -84,14 +84,14 @@ let inline fst3 (x,_,_) = x
 
 /// Add edges, what must be unique (after shift or epsilon-edges).
 /// All edges are sorted by destination ascending.
-let private addSimpleEdge (v : Vertex) (ast : obj) (out : ResizeArray<Vertex * obj>) =
+let private addSimpleEdge (v : Vertex) (ast : INode) (out : ResizeArray<Vertex * INode>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
     out.Insert (i+1, (v, ast))
 
 /// Check if edge with specified destination and AST already exists
-let private containsSimpleEdge (v : Vertex) (f : obj) (out : ResizeArray<Vertex * obj>) =
+let private containsSimpleEdge (v : Vertex) (f : INode) (out : ResizeArray<Vertex * INode>) =
     let mutable i = out.Count - 1
     while i >= 0 && less (fst out.[i]) v do
         i <- i - 1
@@ -327,9 +327,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                             path.[remainLength - 1] <- vertex.OutEdges.first.Ast
                             walk (remainLength - 1) vertex.OutEdges.first.Dest path
                         else
-                            edges.[vertex.State] 
-                            |> ResizeArray.iter (fun (v,_,a) ->
-                                                path.[remainLength - 1] <- a :> INode
+                            simpleEdges.[vertex.State] 
+                            |> ResizeArray.iter (fun (v,a) ->
+                                                path.[remainLength - 1] <- a
                                                 walk (remainLength - 1) v path)
                             
                             let mutable i = 0
@@ -349,9 +349,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     let state = parserSource.Gotos.[vertex.State].[nonTerm]
                     addVertex [|state, !curLvl, None|] |> ignore
                     let ast = getEpsilon parserSource.LeftSide.[prod]
-//                    if not <| containsSimpleEdge vertex ast simpleEdges.[state]
-//                    then
-//                        addSimpleEdge vertex ast simpleEdges.[state]
+                    if not <| containsSimpleEdge vertex ast simpleEdges.[state]
+                    then
+                        addSimpleEdge vertex ast simpleEdges.[state]
                     if not <| containsEdge vertex (new Family(prod, new Nodes([|ast|]))) edges.[state]
                     then
                         addEdge vertex (new Family(prod, new Nodes([|ast|]))) edges.[state] |> ignore
@@ -508,7 +508,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
               for oldPushes,newAstNode in pushesMap.[!curLvl] do
                   for (vertex, state) in oldPushes do
                       let newVertex = addVertex [|state, !curLvl,  Some (vertex, newAstNode :> INode)|]
-                      addEdge vertex (new Family(0, new Nodes([|newAstNode|]))) edges.[state] |> ignore
+                      addSimpleEdge vertex newAstNode simpleEdges.[state] |> ignore
               pushesMap.Remove(!curLvl) |> ignore
 
         let erTok () = 

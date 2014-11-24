@@ -108,7 +108,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             let unprocessed : Terminal list = 
                 match generationState with
                 | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
-                | InProgress (_, unproc) ->  unproc
+                | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
@@ -117,7 +117,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             
             if unproc.IsEmpty
             then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc) 
+            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> INode)) 
 
         generationState
 

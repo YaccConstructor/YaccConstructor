@@ -162,7 +162,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let findFamily prod (nodes : INode) extension : Family =
             let mutable result = None
-            let res = ref <| null
+            let res = ref null
             let exists = createdFamilies.[prod].TryGetValue(extension, res)
             if exists
             then 
@@ -252,7 +252,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
             edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
 
-        let findTree prod extension (family : Family) =            
+        let findTree extension (family : Family) =            
             let result = 
                 if astDictionary.ContainsKey extension
                 then
@@ -271,7 +271,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     let value = new AST(family, null)
                     astDictionary.Add(extension, value)
                     value
-            
             result
 
         let create label (u : int64<vertex>) (index : int) (ast : ExtensionTree) = 
@@ -388,10 +387,10 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     let curRight =  !currentN
                     let t1 = getLeftExtension curRight.extension
                     let t2 = getRightExtension curRight.extension
-                   // let extension = curRight.extension
+                    let extension = curRight.extension
                     let key = pack3ToInt64 rule (getLeftExtension curRight.extension) (getRightExtension curRight.extension)
-                    let resTree = handleIntermidiate curRight.tree (rule) key
-                    let resTree = findTree rule key resTree
+                    let fam = handleIntermidiate curRight.tree (rule) extension
+                    let resTree = findTree key fam 
                     if  key = finalExtension
                     then resultAST := Some resTree
                     pop !currentGSSNode !currentIndex resTree currentN.Value.extension

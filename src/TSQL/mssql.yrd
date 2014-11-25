@@ -40,14 +40,14 @@ include "create_table.yrd"
 include "transaction.yrd"
 
 tokens {
-    _ of GraphTokenValue<CalcHighlighting.CalcBaseTreeNode>
+    _ of GraphTokenValue<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>
 }
 
 options {
     translate = false
     module = "Yard.Examples.MSParser"
     infEpsPath = epsilons
-    pos = "array<int>"
+    pos = "GraphTokenValue<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>"
 }
 
 module Main

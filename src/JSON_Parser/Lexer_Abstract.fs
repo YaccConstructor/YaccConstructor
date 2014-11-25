@@ -84,7 +84,7 @@ let fstLexer () =
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'X', Eps), 7)
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'Y', Eps), 7)
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'Z', Eps), 7)
-   transitions.Add(5, new EdgeLbl<_,_>(Smbl '\', Eps), 7)
+   transitions.Add(5, new EdgeLbl<_,_>(Smbl '\\', Eps), 7)
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'a', Eps), 7)
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'b', Eps), 7)
    transitions.Add(5, new EdgeLbl<_,_>(Smbl 'c', Eps), 7)
@@ -340,7 +340,7 @@ let fstLexer () =
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'X', Eps), 9)
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'Y', Eps), 9)
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'Z', Eps), 9)
-   transitions.Add(7, new EdgeLbl<_,_>(Smbl '\', Eps), 9)
+   transitions.Add(7, new EdgeLbl<_,_>(Smbl '\\', Eps), 9)
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'a', Eps), 9)
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'b', Eps), 9)
    transitions.Add(7, new EdgeLbl<_,_>(Smbl 'c', Eps), 9)
@@ -409,7 +409,7 @@ let fstLexer () =
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'X', Eps), 9)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'Y', Eps), 9)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'Z', Eps), 9)
-   transitions.Add(6, new EdgeLbl<_,_>(Smbl '\', Eps), 9)
+   transitions.Add(6, new EdgeLbl<_,_>(Smbl '\\', Eps), 9)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'a', Eps), 9)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'b', Eps), 9)
    transitions.Add(6, new EdgeLbl<_,_>(Smbl 'c', Eps), 9)
@@ -478,7 +478,7 @@ let fstLexer () =
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'X', Eps), 9)
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'Y', Eps), 9)
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'Z', Eps), 9)
-   transitions.Add(9, new EdgeLbl<_,_>(Smbl '\', Eps), 9)
+   transitions.Add(9, new EdgeLbl<_,_>(Smbl '\\', Eps), 9)
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'a', Eps), 9)
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'b', Eps), 9)
    transitions.Add(9, new EdgeLbl<_,_>(Smbl 'c', Eps), 9)
@@ -547,7 +547,7 @@ let fstLexer () =
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'X', Eps), 9)
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'Y', Eps), 9)
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'Z', Eps), 9)
-   transitions.Add(8, new EdgeLbl<_,_>(Smbl '\', Eps), 9)
+   transitions.Add(8, new EdgeLbl<_,_>(Smbl '\\', Eps), 9)
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'a', Eps), 9)
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'b', Eps), 9)
    transitions.Add(8, new EdgeLbl<_,_>(Smbl 'c', Eps), 9)
@@ -862,4 +862,8 @@ let actions () =
 
    |]
 
-let tokenize eof approximation = Tokenize (fstLexer()) (actions()) eof approximation
+
+let alphabet () = 
+ new HashSet<_>([| Smbl (char 65535); Smbl '\t'; Smbl ' '; Smbl '\"'; Smbl '-'; Smbl '0'; Smbl '1'; Smbl '2'; Smbl '3'; Smbl '4'; Smbl '5'; Smbl '6'; Smbl '7'; Smbl '8'; Smbl '9'; Smbl '/'; Smbl 'A'; Smbl 'B'; Smbl 'C'; Smbl 'D'; Smbl 'E'; Smbl 'F'; Smbl 'G'; Smbl 'H'; Smbl 'I'; Smbl 'J'; Smbl 'K'; Smbl 'L'; Smbl 'M'; Smbl 'N'; Smbl 'O'; Smbl 'P'; Smbl 'Q'; Smbl 'R'; Smbl 'S'; Smbl 'T'; Smbl 'U'; Smbl 'V'; Smbl 'W'; Smbl 'X'; Smbl 'Y'; Smbl 'Z'; Smbl '\\'; Smbl 'a'; Smbl 'b'; Smbl 'c'; Smbl 'd'; Smbl 'e'; Smbl 'f'; Smbl 'g'; Smbl 'h'; Smbl 'i'; Smbl 'j'; Smbl 'k'; Smbl 'l'; Smbl 'm'; Smbl 'n'; Smbl 'o'; Smbl 'p'; Smbl 'q'; Smbl 'r'; Smbl 's'; Smbl 't'; Smbl 'u'; Smbl 'v'; Smbl 'w'; Smbl 'x'; Smbl 'y'; Smbl 'z'; Smbl '.'; Smbl '+';|])
+
+let tokenize eof approximation = Tokenize (fstLexer()) (actions()) (alphabet()) eof approximation

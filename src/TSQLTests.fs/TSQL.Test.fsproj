@@ -115,9 +115,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\TSQL\MSParser.fs">
-      <Link>MSParser.fs</Link>
-    </Compile>
+    <Compile Include="MSParser.fs" />
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="TSQLTests.fs" />
     <None Include="packages.config" />

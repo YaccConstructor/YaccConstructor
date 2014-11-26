@@ -621,7 +621,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : INode, rules : int[][]
             let printInd num (x : 'a) =
                 printf "%s" (String.replicate (num * 4) " ")
                 printfn x
-            match (ast : obj) with
+            match (ast : INode) with
             | :? Epsilon -> printInd ind "e"
             | :? Terminal as t -> printInd ind "t: %A" tokens.[t.TokenNumber]
             | :? AST as fam ->

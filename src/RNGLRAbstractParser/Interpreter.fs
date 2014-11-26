@@ -573,7 +573,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 //                          //curLvl := pushesMap.Keys |> Seq.min
 //                          //restorePushes ()
 //                        //else wasError <- true
-                    shift ()
+                    push ()
 
         let isAcceptState() = 
             let flag = ref false

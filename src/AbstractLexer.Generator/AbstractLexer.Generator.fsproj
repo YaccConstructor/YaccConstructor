@@ -24,6 +24,7 @@
     <StartArguments>C:\yc\recursive-ascent\src\AbstractFsLex\Lexer.fsl -o C:\yc\recursive-ascent\src\AbstractFsLex\output</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\Bin\Release\v40\</OutputPath>
   </PropertyGroup>
   <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />
   <Choose>

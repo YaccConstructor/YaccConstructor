@@ -9,9 +9,13 @@
     <SccLocalPath>SAK</SccLocalPath>
     <Name>FsYacc</Name>
     <ProjectGuid>{58497973-2ae7-4e48-a6fc-9ed7a5c6cce6}</ProjectGuid>
+    <AssemblyName>YC.FsYacc</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\Bin\Release\v40\</OutputPath>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(FSharpPowerPackSourcesRoot)\FSharpPowerPackSource.targets" />

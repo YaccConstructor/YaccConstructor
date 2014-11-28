@@ -90,14 +90,15 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
         tokenizedGraph 
         |> Option.map parse
-        |> Option.iter
-            (function 
-                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
-                    forest <- (tree, errors) :: forest
-                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
-                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
-            )
+        |> ignore
+//        |> Option.iter
+//            (function 
+//                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
+//                    forest <- (tree, errors) :: forest
+//                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
+//                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+//                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+//            )
 
     let getNextTree index : TreeGenerationState<'node> = 
         if forest.Length <= index

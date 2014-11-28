@@ -46,7 +46,12 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         new TaggedEdge<_,_>(edge.Target, edge.Source, edge.Tag) |>  FstInverse.AddVerticesAndEdge |> ignore
 
      
-    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
+    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray |> Array.ofSeq
+    let actionVInvBool = ResizeArray.init (!maxV + 1) (fun _ -> false) 
+    
+    for v in actionVInv do
+        actionVInvBool.[v] <- true       
+            
     let tokensInv = new ResizeArray<_>() 
 
     let bfs vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
@@ -82,10 +87,10 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         let gr = new GraphTokenValue<_>() 
         gr.AddVerticesAndEdgeRange edgesToks |> ignore
         new GraphAction<_>(vertex, targetAct, gr)      
-            
+    let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)        
     for act in actionV do 
-        let visited = ResizeArray.init (!maxV + 1) (fun _ -> false) 
         bfs act inputFstLexer visited |> tokens.Add |> ignore
+        visited |> ResizeArray.iteri(fun i x -> visited.[i] <- false)
 
     let bfsInv vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
         let targetAct = new HashSet<_>()
@@ -93,7 +98,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex)               
 
-        let isAct v = Set.exists ((=) v) actionVInv
+        //let isAct v = Set.exists ((=) v) actionVInv
         let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
 
         while queueV.Count > 0 do
@@ -103,7 +108,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
                 visited.[topV] <- true
                 for v in graphFst.OutEdges(topV) do
                     new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
-                    if isAct v.Target
+                    if actionVInvBool.[v.Target]
                     then if (isEps v.Target) then queueV.Enqueue(v.Target)
                     else queueV.Enqueue(v.Target)  
                                            
@@ -112,8 +117,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         new GraphAction<_>(vertex, targetAct, gr) 
 
     for act in actionVInv do
-        let visitedInv = ResizeArray.init (!maxV + 1) (fun _ -> false)
-        bfsInv act FstInverse visitedInv |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
+        //let visitedInv = ResizeArray.init (!maxV + 1) (fun _ -> false)
+        bfsInv act FstInverse visited |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
+        visited |> ResizeArray.iteri(fun i x -> visited.[i] <- false)
 
     let EqualEdges (edg1:TokenEdge<_>) (edg2:TokenEdge<_>) = 
         (edg1.Source = edg2.Source) && (edg1.Target = edg2.Target) && (edg1.Label = edg2.Label) && (edg1.BackRef = edg2.BackRef) //smth else?

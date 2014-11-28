@@ -53,8 +53,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         actionVInvBool.[v] <- true       
             
     let tokensInv = new ResizeArray<_>() 
+    let visited = new HashSet<_>()
 
-    let bfs vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
+    let bfs vertex (graphFst: FST<_,_>) =
         let targetAct = new HashSet<_>()
         let edgesToks = new ResizeArray<_>()            
         let queueV = new Queue<_>()
@@ -63,9 +64,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         let isStartV v = ResizeArray.exists ((=) v) inputFstLexer.InitState
         while queueV.Count > 0 do
             let topV = queueV.Dequeue()
-            if not <| visited.[topV]
+            if not <| visited.Contains(topV) 
             then
-                visited.[topV] <- true
+                visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
                     if v.Tag.OutSymb = Eps
                     then 
@@ -83,43 +84,39 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
                             else queueV.Enqueue v.Target
                         else 
                             targetAct.Add v.Source |> ignore   
-                                           
+        visited.Clear()                                   
         let gr = new GraphTokenValue<_>() 
         gr.AddVerticesAndEdgeRange edgesToks |> ignore
         new GraphAction<_>(vertex, targetAct, gr)      
-    let visited = ResizeArray.init (!maxV + 1) (fun _ -> false)        
+                
     for act in actionV do 
-        bfs act inputFstLexer visited |> tokens.Add |> ignore
-        visited |> ResizeArray.iteri(fun i x -> visited.[i] <- false)
+        bfs act inputFstLexer |> tokens.Add |> ignore
 
-    let bfsInv vertex (graphFst: FST<_,_>) (visited: ResizeArray<_>) =
+    let bfsInv vertex (graphFst: FST<_,_>) =        
         let targetAct = new HashSet<_>()
         let edgesToks = new ResizeArray<_>()            
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex)               
 
-        //let isAct v = Set.exists ((=) v) actionVInv
         let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
 
         while queueV.Count > 0 do
             let topV = queueV.Dequeue()
-            if not <| visited.[topV]
+            if not <| visited.Contains(topV)
             then
-                visited.[topV] <- true
+                visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
                     new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
                     if actionVInvBool.[v.Target]
                     then if (isEps v.Target) then queueV.Enqueue(v.Target)
                     else queueV.Enqueue(v.Target)  
-                                           
+        visited.Clear()                                   
         let gr = new GraphTokenValue<_>() 
         gr.AddVerticesAndEdgeRange edgesToks |> ignore
         new GraphAction<_>(vertex, targetAct, gr) 
 
     for act in actionVInv do
-        //let visitedInv = ResizeArray.init (!maxV + 1) (fun _ -> false)
-        bfsInv act FstInverse visited |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
-        visited |> ResizeArray.iteri(fun i x -> visited.[i] <- false)
+        bfsInv act FstInverse |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
 
     let EqualEdges (edg1:TokenEdge<_>) (edg2:TokenEdge<_>) = 
         (edg1.Source = edg2.Source) && (edg1.Target = edg2.Target) && (edg1.Label = edg2.Label) && (edg1.BackRef = edg2.BackRef) //smth else?

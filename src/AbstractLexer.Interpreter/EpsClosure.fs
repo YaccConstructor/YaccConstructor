@@ -11,15 +11,14 @@ type DfaNode<'a> =
       IsFinal: bool
       IsStart: bool }
 
-type MultiMap<'a,'b> = Dictionary<'a,'b list>
-let LookupMultiMap (trDict:MultiMap<_,_>) a  =
-    if trDict.ContainsKey(a) then trDict.[a] else []
+type MultiMap<'a,'b> = Dictionary<'a,ResizeArray<'b>>
+//let LookupMultiMap (trDict:MultiMap<_,_>) a  =
+//    if trDict.ContainsKey(a) then trDict.[a] else new ResizeArray<_>(20)
 
 let AddToMultiMap (trDict:MultiMap<_,_>) a b =
-    let prev = LookupMultiMap trDict a
-    trDict.[a] <- b::prev
-
-
+    if not <| trDict.ContainsKey(a)
+    then trDict.Add(a, new ResizeArray<_>(10)) 
+    trDict.[a].Add b
 
 // TODO: consider a better representation here.
 type internal NfaNodeIdSetBuilder = HashSet<int>
@@ -87,7 +86,7 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
                 //printfn "n.Id = %A, #Epsilon = %d" n.Id tr.Length
                 tr |> List.iter (EClosure1 acc) 
 
-    let EClosure (moves:list<_>) = 
+    let EClosure (moves:ResizeArray<_>) = 
         let acc = new NfaNodeIdSetBuilder(HashIdentity.Structural)
         for i in moves do
             EClosure1 acc i

@@ -46,6 +46,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="AST3.fs" />
     <Compile Include="DataStructures.fs" />
     <Compile Include="AST.fs" />
     <Compile Include="AST2.fs" />

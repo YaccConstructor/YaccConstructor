@@ -61,16 +61,32 @@ type Context =
     val Ast           : ExtensionTree
     new (index, label, vertex, ast) = {Index = index; Label = label; Vertex = vertex; Ast = ast}
 
+[<Struct>]
+type Functions =
+    val Create     : int -> int64<vertex> -> int -> ExtensionTree -> int64<vertex>
+    val AddContext : int -> int  -> int64<vertex> -> ExtensionTree -> unit
+    val Pop        : int64<vertex> -> int -> AST -> int64<extension> -> unit
+    val GetNodeT   : int -> ExtensionTree
+    val GetNodeP   : int -> ExtensionTree -> ExtensionTree -> ExtensionTree
+    val Test       : int -> string -> bool
+    val DummyAst   : ExtensionTree
+    val FinalExt   : int64<key>
+    val Pack       : int -> int -> int -> int64<key> 
+    val PackLabel  : int -> int -> int
+    val FindTree   : INode -> int -> int64<key> -> AST
+    val FindFamily : int -> INode -> int64<key> -> Family
+    val GetRule    : int -> int
+    val Length     : int
+    new (create, addContext, pop, getNodeT, getNodeP, test, dummyAst, ext, pack, packLabel, findTree, findFamily, getRule, len) = {Create = create; AddContext = addContext; Pop = pop; GetNodeT = getNodeT; GetNodeP = getNodeP; Test = test; DummyAst = dummyAst; FinalExt = ext; Pack = pack; PackLabel = packLabel; FindTree = findTree; FindFamily = findFamily; GetRule = getRule; Length = len}
+
 type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
-type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'TokenType>, functions : (int -> int64<vertex> -> ExtensionTree -> ExtensionTree -> unit)[]) = 
+type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'TokenType>, functions : (int ref -> int ref -> int64<vertex> ref -> ExtensionTree ref -> ExtensionTree ref -> Functions -> 'TokenType[] -> unit)[], startRule : int, ast : AST option ref) = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
-    let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
-    let resultAST = ref None
-    let epsilon = new TerminalNode(-1)
+    
     let setR = new Queue<Context>()   
     let setP = new System.Collections.Generic.Dictionary<int64<vertex>,ResizeArray<ExtensionTree>> ()
     let astDictionary = new System.Collections.Generic.Dictionary<int64<key>, AST> ()
@@ -80,25 +96,21 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
 
     let currentrule = parser.StartRule
     let dummy = null
-    let dummyGSSNode = new Vertex(!currentIndex, (packLabel -1 -1))
+    let dummyGSSNode1 = new Vertex(!currentIndex, (packLabel -1 -1))
     let currentLabel = ref <| packLabel currentrule 0
     let dummyAST = new ExtensionTree(packExtension -1 -1, dummy)
-    let dummyFam = Family()
     let currentN = ref <| dummyAST
     let currentR = ref <| dummyAST
     // let edges = Array2D.init inputLength inputLength (fun _ _ -> new ResizeArray<Edge>())
  
     let gss = Array.init inputLength (fun _ -> new ResizeArray<Vertex>())
-    let currentGSSNode = ref <| packVertex !currentIndex (gss.[!currentIndex].Count - 1)
-    let dummyGSSNode = packVertex !currentIndex (gss.[!currentIndex].Count - 1)
+    let currentGSSNode = ref <| packVertex !currentIndex (gss.[!currentIndex].Count)
+    let dummyGSSNode = packVertex !currentIndex (gss.[!currentIndex].Count)
     let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummyAST)
     let createdFamilies = Array.init parser.rulesCount (fun _ -> new Dictionary<int64<key>, ResizeArray<Family>>())  
 
     let terminalNodes = new BlockResizeArray<ExtensionTree>()
     let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
-
-    let condition = ref false 
-    let stop = ref false
 
     let drawDot (parser : ParserSource2<'TokenType>) (tokens : 'TokenType[])(path : string) (gss : array<ResizeArray<Vertex>>) =
         use out = new System.IO.StreamWriter (path)
@@ -120,6 +132,8 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
                 nonT.ToString()
             | :? IntermidiateNode as iN ->
                 (getRule iN.Position).ToString()
+            | :? TerminalNode as t ->
+                t.value.ToString()
             | null -> "null" 
             | _ -> failwith "Unexpected ast"
 
@@ -172,10 +186,6 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
             createdFamilies.[prod].Add(extension, v)
             temp
 
-    let handleIntermidiate (node : INode) prod extension =
-        let family = findFamily prod node extension
-        family
-
     let containsContext index label  (gssNode : int64<vertex>) (ast : INode) =
         let set = setU.[index]
         let key = (label, gssNode)
@@ -188,20 +198,20 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
                 
         else false, false, key
 
-    let addContext label (index : int) (node : int64<vertex>) (ast : ExtensionTree) =
-            let containsKey, containsTree, key = containsContext index label node ast.tree
-            if index <= inputLength + 1 && index >= 0 && not containsTree
-            then
-                let cntxt = new Context(index, label, node, ast)
-                if containsKey
-                then 
-                    setU.[index].[key].Add ast.tree
-                else 
-                    let t = new ResizeArray<INode>()
-                    t.Add ast.tree
-                    setU.[index].Add (key, t)
-                setR.Enqueue(cntxt)  
-        
+    let addContext label (index : int) (node : int64<vertex>) (ast : ExtensionTree) =  
+        let containsKey, containsTree, key = containsContext index label node ast.tree
+        if index <= inputLength + 1 && index >= 0 && not containsTree
+        then
+            let cntxt = new Context(index, label, node, ast)
+            if containsKey
+            then 
+                setU.[index].[key].Add ast.tree
+            else 
+                let t = new ResizeArray<INode>()
+                t.Add ast.tree
+                setU.[index].Add (key, t)
+            setR.Enqueue(cntxt)  
+                
     let getNodeP label (left : ExtensionTree) (right : ExtensionTree) =      
         let rExt = right.extension
         let condTemp = right.tree = null
@@ -238,11 +248,12 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
             packVertex i (curLevel.Count - 1)
         else packVertex i index
 
-    let containsEdge (b : int64<vertex>) (e : int64<vertex>) (ast : INode) =
+    let containsEdge (b : int64<vertex>) (e : int64<vertex>) =
         let edges = gss.[getIndex2Vertex b].[getIndex1Vertex b].OutEdges
         edges.first <> Unchecked.defaultof<_> && (edges.first.Dest = e || (edges.other <> null && edges.other |> Array.exists (fun edge ->  edge.Dest = e)))
 
-    let findTree prod extension (family : Family) =            
+    let findTree (node : INode) prod extension = 
+        let family = findFamily prod node extension
         let result = 
             if astDictionary.ContainsKey extension
             then
@@ -260,13 +271,12 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
             else
                 let value = new AST(family, null)
                 astDictionary.Add(extension, value)
-                value
-            
+                value   
         result
 
     let create label (u : int64<vertex>) (index : int) (ast : ExtensionTree) = 
         let v = containsGSSNode label index
-        if not (containsEdge v u ast.tree)
+        if not (containsEdge v u)
         then
             let newEdge = new Edge(u, ast)
             // edges.[gss.[getIndex2Vertex v].[getIndex1Vertex v].Level,gss.[getIndex2Vertex u].[getIndex1Vertex u].Level].Add(newEdge)
@@ -288,7 +298,6 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
         v
 
     let pop (u : int64<vertex>) (i : int) (z : AST) extension =
-        let temp = 0
         if not (u = dummyGSSNode)
         then
             let vertex = gss.[getIndex2Vertex u].[getIndex1Vertex u]
@@ -321,34 +330,37 @@ type buildAst<'TokenType>(parser : ParserSource2<'TokenType>, tokens : seq<'Toke
     let table = parser.Table
     
     let test nonTerm funName =
-        if Array.exists (fun e -> e = funName) table.[getIndex nonTerm curToken]
-        then
-            true
-        else false
+        let curToken = parser.TokenToNumber tokens.[!currentIndex]
+        let arr = table.[getIndex nonTerm curToken]
+        let res = Array.exists (fun e -> e = funName) arr
+        res
 
     let start =
-        gss.[!currentIndex].Add dummyGSSNode
-
+        gss.[!currentIndex].Add dummyGSSNode1
+        let funs = new Functions(create, addContext, pop, getNodeT, getNodeP, test, dummyAST, finalExtension, pack3ToInt64, packLabel, findTree, findFamily, getRule, inputLength)
+        functions.[startRule] currentLabel currentIndex currentGSSNode currentR currentN funs tokens
+        
         while setR.Count <> 0 do
-                currentContext := setR.Dequeue()
-                currentIndex := currentContext.Value.Index
-                currentGSSNode := currentContext.Value.Vertex
-                currentLabel := currentContext.Value.Label
-                currentN := currentContext.Value.Ast 
-                currentR := dummyAST
-                functions.[!currentLabel] !currentIndex !currentGSSNode !currentR !currentN
+            currentContext := setR.Dequeue()
+            currentIndex := currentContext.Value.Index
+            currentGSSNode := currentContext.Value.Vertex
+            currentLabel := currentContext.Value.Label
+            currentN := currentContext.Value.Ast 
+            currentR := dummyAST
+            functions.[!currentLabel] currentLabel currentIndex currentGSSNode currentR currentN funs tokens
+        match !ast with
+        | None -> Error ("String was not parsed")
+        | Some res -> 
+                drawDot parser tokens "gss.dot" gss
+                let r1 = new Tree<_> (tokens, res, parser.rules)
+               // r1.AstToDot parser.NumToString parser.TokenToNumber  parser.LeftSide "ast.dot"
+                Success (r1) 
+            
 
     member this.Pop = pop
     member this.AddContext = addContext
     member this.Create = create
     member this.Test = test
     member this.GetNodeT = getNodeT
-    member this.GetNodeP = getNodeP   
-   
-//                      
-//        match !resultAST with
-//            | None -> Error ("String was not parsed")
-//            | Some res -> 
-//                    drawDot parser tokens "gss.dot" gss
-//                    let r1 = new Tree<_> (tokens, res, parser.rules)
-//                    Success (r1)       
+    member this.GetNodeP = getNodeP  
+    member this.Start = start     

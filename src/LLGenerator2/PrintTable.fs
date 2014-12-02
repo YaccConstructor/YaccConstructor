@@ -229,20 +229,15 @@ let printTableGLL
         printBr "let literalStart = %d" grammar.indexator.literalsStart
         printBr "let literalEnd = %d" grammar.indexator.literalsEnd
         printBr "let literalsCount = %d" grammar.indexator.literalsCount
+        printBr "let resultAST = ref None"
+        
+        printBr ""
+        printBr ""
+        printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput, numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
        
-        printBr ""
-        printBr ""
-        printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)"
-                       
-        printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
-        printBr ""
-
         let rules = grammar.rules
         let functionsNames = new System.Collections.Generic.Dictionary<string, int> ()
-
-        //в дескрипторы пихаем номер функции
-        //по ходу дела просто присваиваем номера и имена функциям
+        let startFunctionName = ref 0
         let numberOfAlternatives = 
             let result = Array.zeroCreate indexator.nonTermCount
             let mutable count = 0
@@ -258,9 +253,11 @@ let printTableGLL
             result
          
         let genFunctions () =
-            let parameters = "(currentIndex : int) (currentGSSNode : int64<vertex>) (currentR : ExtensionTree) (currentN : ExtensionTree)"
+            let parameters = "(currentLabel : int ref)(currentIndex : int ref) (currentGSSNode : int64<vertex> ref) (currentR : ExtensionTree ref) (currentN : ExtensionTree ref) (funs : Functions) (tokens : 'TokenType[])"
+            let shift = ref 0
             let currentFunNumber = ref 0
             let mutable previousNonTerm = -1
+            let startName = "L_yard_start_rule"
 
             let getNumber name =
                 if functionsNames.ContainsKey(name)
@@ -270,62 +267,83 @@ let printTableGLL
                     functionsNames.Add(name, res)
                     currentFunNumber := !currentFunNumber + 1
                     res
-
+ 
             let rec generateForAlternative ruleNumber functionName position =
-                printBrInd 0 "let %s %s = " functionName parameters
+                shift := 0
+                printBrInd !shift "let %s %s = " functionName parameters
+                shift := !shift + 1
+                printBrInd !shift "let rule = %d" ruleNumber
+                printBrInd !shift "let mutable position = 0"
                 let rule = rules.rightSide ruleNumber
                 let ruleLength = rule.Length
-                let mutable condition = false
-                if position = ruleLength
+                let mutable condition = false 
+                if ruleNumber = grammar.startRule && position = 1
                 then
-                    printBrInd 1 "currentN := getNodeP !currentLabel !currentN !currentR"
-                    printBrInd 1 "pop !currentGSSNode !currentIndex resTree currentN.Value.extension"
+                    printBrInd !shift "let label = funs.PackLabel rule 1"
+                    printBrInd !shift "currentN := funs.GetNodeP label !currentN !currentR"
+                    printBrInd !shift "let curRight = !currentN"
+                    printBrInd !shift "let key = funs.Pack rule (getLeftExtension curRight.extension) (getRightExtension curRight.extension)"
+                    printBrInd !shift "let resTree = funs.FindTree curRight.tree (rule) key"
+                    printBrInd !shift "if  key = funs.FinalExt"
+                    printBrInd !shift "then resultAST := Some resTree"
                     printBr ""
-                else
+                else 
+//                    if position = ruleLength
+//                    then
+//                        printBrInd !shift "currentN := funs.GetNodeP !currentLabel !currentN !currentR"
+//                        printBrInd !shift "funs.Pop !currentGSSNode !currentIndex resTree currentN.Value.extension"
+//                        printBr ""
+//                    else
                     for pos in position..ruleLength - 1 do
                         if pos = ruleLength - 1 then condition <- true 
                         if indexator.isNonTerm rule.[pos]
                         then
                             let returnFunName = functionName + "_" + (pos + 1).ToString()
                             let n = getNumber returnFunName
-                            printBrInd 1 "currentGSSNode := create %d !currentGSSNode !currentIndex !currentN" n
+                            printBrInd !shift "currentGSSNode := funs.Create %d !currentGSSNode !currentIndex !currentN" n
                             let nonTermName = "L_" + indexator.indexToNonTerm rule.[pos]
                             let n = getNumber nonTermName
-                            printBrInd 1 "addContext %d !currentIndex !currentGSSNode dummyAST" n
+                            printBrInd 1 "funs.AddContext %d !currentIndex !currentGSSNode funs.DummyAst" n
                             printBr ""
                             generateForAlternative ruleNumber returnFunName (pos + 1)
                         else
                             if pos = 0
                             then
-                                printBrInd 1 "currentN := getNodeT !currentIndex"
-                            else 
-                                printBrInd 1 "currentR := getNodeT !currentIndex"
-                                printBrInd 1 "currentIndex := !currentIndex + 1"
-                                printBrInd 1 "currentN := getNodeP !currentLabel !currentN !currentR"
-                    if condition
+                                printBrInd !shift "currentN := funs.GetNodeT !currentIndex"
+                            else
+                                printBrInd !shift "currentIndex := !currentIndex + 1"
+                                printBrInd !shift "position <- position + 1"
+                                printBrInd !shift "if !currentIndex < funs.Length && parserSource.rules.[rule].[position] = parserSource.TokenToNumber tokens.[!currentIndex]"
+                                printBrInd !shift "then"
+                                shift := !shift + 1
+                                printBrInd !shift "currentR := funs.GetNodeT !currentIndex"
+                                printBrInd !shift "let label = funs.PackLabel rule position"
+                                printBrInd !shift "currentN := funs.GetNodeP label !currentN !currentR"
+                    if condition && ruleNumber <> grammar.startRule && position <> 1
                     then
-                        printBrInd 1 "pop !currentGSSNode !currentIndex resTree currentN.Value.extension"    
+                        printBrInd !shift "funs.Pop !currentGSSNode !currentIndex !currentN currentN.Value.extension"    
                     printBr ""
-
+            
+            let mutable numberOfAlternate = 1
             for i in 0..rules.rulesCount - 1 do
-                let mutable numberOfAlternate = 1 
+                shift := 0
                 let currentNonTerm = rules.leftSide i
                 let currentNonTermName = indexator.indexToNonTerm currentNonTerm
                 if previousNonTerm <> currentNonTerm then
                     previousNonTerm <- currentNonTerm
                     numberOfAlternate <- 1
                     let currentFunName = "L_" + currentNonTermName
-                    if not <| functionsNames.ContainsKey currentFunName
-                    then
-                        functionsNames.Add(currentFunName, !currentFunNumber)
-                        currentFunNumber := !currentFunNumber + 1
-                        printBrInd 0 "let %s %s = " currentFunName parameters
-                        for a in 1..numberOfAlternatives.[currentNonTerm] do
-                            let name = "L_" + currentNonTermName + "_" + a.ToString() 
-                            let n = getNumber name
-                            printBrInd 2 "if test %d %d currentToken then" currentNonTerm n 
-                            printBrInd 3 "addContext %d !currentIndex !currentGSSNode dummyAST" n
-                        printBr ""
+                    if currentFunName = startName then startFunctionName := getNumber currentFunName
+                    printBrInd !shift "let %s %s = " currentFunName parameters
+                    shift := !shift + 1
+                    for a in 1..numberOfAlternatives.[currentNonTerm] do
+                        let name = "L_" + currentNonTermName + "_" + a.ToString() 
+                        let n = getNumber name
+                        printBrInd !shift "if funs.Test %d \"%s\" then" currentNonTerm name  
+                        shift := !shift + 1
+                        printBrInd !shift "funs.AddContext %d !currentIndex !currentGSSNode funs.DummyAst" n
+                        shift := !shift - 1
+                    printBr ""
                 else numberOfAlternate <- numberOfAlternate + 1
                 let name = "L_" + currentNonTermName + "_" + (numberOfAlternate.ToString())
                 if not <| functionsNames.ContainsKey(name)
@@ -340,8 +358,13 @@ let printTableGLL
             for k in functionsNames do
                 result.[k.Value] <- k.Key
             result
+        printBrInd 0 "let startFunctionName = %d" !startFunctionName
         print "let functions = "
         printArr takeArray (print "%s")
-                
+               
+        printBr "let buildAst tokens ="
+        printBrInd 1 "new buildAst<Token>(parserSource, tokens, functions, startFunctionName, resultAST)"
+        printBr ""
+         
         res.ToString()
     printTable ()

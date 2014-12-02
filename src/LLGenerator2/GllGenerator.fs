@@ -130,6 +130,7 @@ type GLL2() =
 
                     println "open Yard.Generators.GLL"
                     println "open Yard.Generators.Common.AST2"
+                    println "open Dispatcher"
 
                     match definition.head with
                     | None -> ()

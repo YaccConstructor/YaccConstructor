@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="Dispatcher.fs" />
     <Compile Include="Test.yrd.fs" />
+    <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

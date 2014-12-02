@@ -17,6 +17,9 @@ open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 
+[<Measure>] type key
+[<Measure>] type extension
+
 /// Arguments for tanslation calling, seen by user
 type TranslateArguments<'Token, 'Position> = {
     tokenToRange : 'Token -> 'Position * 'Position
@@ -33,6 +36,12 @@ type UsualOne<'T> =
     val mutable first : 'T
     val mutable other : 'T[]
     new (f,o) = {first = f; other = o}
+
+[<Struct>]
+type NumNode =
+    val Num : int
+    val Node : obj
+    new (num, node) = {Num = num; Node = node} 
 
 /// Non-terminal expansion: production, family of children
 /// All nodes are stored in array, so there is a correspondence between integer and node.
@@ -99,10 +108,21 @@ let inline getSingleNode (node : obj) =
 //let inline private setPos p (x : AST) = match x with NonTerm n -> n.pos <- p | SingleNode _ -> failwith "Attempt to get num of single node"
 
 let private emptyArr = [||]
-type private DotNodeType = Prod | AstNode | IntermidiateNode
+type private DotNodeType = FamilyNode | AstNode | Intermidiate | Terminal
+
+let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
+let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
+let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
+
+
+let inline packLabel rule position = (int rule <<< 16) ||| int position
 let inline getRule packedValue = int packedValue >>> 16
 let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
 
+let inline pack3ToInt64 p l r : int64<key>        = LanguagePrimitives.Int64WithMeasure (((int64 p) <<< 52) ||| ((int64 l) <<< 26) ||| (int64 r))
+let inline getProduction (long : int64<key>)      = int (int64 long >>> 52)
+let inline getLeftExtension3 (long : int64<key>)  = int((int64 long <<< 12) >>> 38)
+let inline getRightExtension3 (long : int64<key>) = int((int64 long <<< 38) >>> 38)
 
 [<AllowNullLiteral>]
 type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) =
@@ -112,18 +132,10 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
         | :? int as x when x < 0 -> Unchecked.defaultof<_>, true
         | _ -> failwith "Strange tree - singleNode with non-negative value"
 
-    member this.Root = root
-    member this.RulesCount = rules.GetLength(0)
-
-  
-
     member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
-        
-        let nodeToNumber = new System.Collections.Hashtable({new Collections.IEqualityComparer with
-                                                                    override this.Equals (x1, x2) = Object.ReferenceEquals (x1, x2)
-                                                                    override this.GetHashCode x = x.GetHashCode()})
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
+
         let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
@@ -132,48 +144,70 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             let shape =
                 match nodeType with
                 | AstNode -> ",shape=box"
-                | Prod -> ""
+                | FamilyNode -> ",shape=box"
+                | Terminal -> ",shape=box"
+                | Intermidiate -> ",shape=oval"
             let color =
                 if not isAmbiguous then ""
                 else ",style=\"filled\",fillcolor=red"
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
+
         let createEdge (b : int) (e : int) isBold (str : string) =
             let label = str.Replace("\n", "\\n").Replace ("\r", "")
             let bold = 
                 if not isBold then ""
                 else "style=bold,width=10,"
             out.WriteLine ("    " + b.ToString() + " -> " + e.ToString() + " [" + bold + "label=\"" + label + "\"" + "]")
-       
-        let num = ref 0
-        let rec dfs (node : obj) parentNum =
-            num := !num + 1
-            let cur = !num 
-            match node with 
-            | :? AST as a -> 
-                createNode cur false AstNode (indToString leftSide.[a.first.prod])
-                createEdge parentNum cur false ""
-                dfs a.first cur
+        
+        let nodeQueue = new Queue<NumNode>()
+        let used = new Dictionary<_,_>()
+        let num = ref -1
+        nodeQueue.Enqueue(new NumNode(!num, root))
+        while nodeQueue.Count <> 0 do
+            let currentPair = nodeQueue.Dequeue()
+            let key = ref 0
+            if !num <> -1
+            then
+
+                if currentPair.Node <> null && used.TryGetValue(currentPair.Node, key)
+                then
+                    createEdge currentPair.Num !key false ""
+                else    
+                    num := !num + 1
+                    used.Add(currentPair.Node, !num)
+                    match currentPair.Node with 
+                    | :? AST as a -> 
+                   
+                        createNode !num false AstNode (indToString leftSide.[a.first.prod])
+                        createEdge currentPair.Num !num false ""
+                        nodeQueue.Enqueue(new NumNode(!num, a.first))
+                        if a.other <> Unchecked.defaultof<_> 
+                        then 
+                            for t in a.other do
+                                nodeQueue.Enqueue(new NumNode(!num, t))
+                    | :? Family as f ->
+                        createNode !num false FamilyNode ("fam " + indToString leftSide.[f.prod])
+                        createEdge currentPair.Num !num false ""
+                        nodeQueue.Enqueue(new NumNode(!num, f.node))
+                    | :? IntermidiateNode as i ->
+                        createNode !num false Intermidiate ((getRule i.Position).ToString() + " " + (getPosition i.Position).ToString())
+                        createEdge currentPair.Num !num false ""
+                        if i.LeftChild <> null then nodeQueue.Enqueue(new NumNode(!num, i.LeftChild))
+                        if i.RightChild <> null then nodeQueue.Enqueue(new NumNode(!num, i.RightChild))
+                    | :? TerminalNode as t ->
+                        createNode !num false Terminal ("t " + indToString (tokenToNumber tokens.[t.value]))
+                        createEdge currentPair.Num !num false ""
+                    | null -> ()
+            else
+                let a = currentPair.Node :?> AST
+                num := !num + 1
+                createNode !num false AstNode (indToString leftSide.[a.first.prod])
+                nodeQueue.Enqueue(new NumNode(!num, a.first))
                 if a.other <> Unchecked.defaultof<_> 
                 then 
                     for t in a.other do
-                        dfs t cur
-            | :? Family as f ->
-                createNode cur false AstNode (indToString leftSide.[f.prod])
-                createEdge parentNum cur false ""
-                dfs f.node cur
-            | :? IntermidiateNode as i ->
-                createNode cur false AstNode ((getRule i.Position).ToString() + " " + (getPosition i.Position).ToString())
-                createEdge parentNum cur false ""
-                dfs i.LeftChild cur
-                dfs i.RightChild cur
-            | :? TerminalNode as t ->
-                createNode cur false AstNode ("t " + indToString (tokenToNumber tokens.[t.value]))
-                createEdge parentNum cur false ""
-            | null -> ()
-            
-        let root = root :?> AST
-        createNode !num false AstNode (indToString leftSide.[root.first.prod])
-        dfs root.first !num
+                        nodeQueue.Enqueue(new NumNode(!num, t))
+        
 
         out.WriteLine("}")
         out.Close()

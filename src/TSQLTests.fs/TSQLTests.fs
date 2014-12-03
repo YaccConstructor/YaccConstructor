@@ -10,21 +10,34 @@ open AbstractLexer.Core
 open QuickGraph.Algorithms
 open QuickGraph.Graphviz
 open Microsoft.FSharp.Text
-open YC.ReSharper.AbstractAnalysis.Languages.TSQL
-open YC.Tests.Helper
-open Lexer
 open Yard.Examples.MSParser
 open Yard.Utils.SourceText
+open YC.FST.AbstractLexing.Interpreter
+open YC.FST.FstApproximation
+open Microsoft.FSharp.Collections
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
-let eofToken = Yard.Examples.MSParser.RNGLR_EOF ("",[||])
+let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new GraphTokenValue<_>())
 
-let loadLexerInputGraph gFile =
-    let qGraph = loadDotToQG baseInputGraphsPath gFile
-    let lexerInputG = new LexerInputGraph<_>()
-    lexerInputG.StartVertex <- 0
-    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some(e.Tag, null)))
-    lexerInputG
+let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
+
+let loadGraphFromDOT filePath =
+    let parser = AntlrParserAdapter<string>.GetParser()
+    parser.Parse(new StreamReader(File.OpenRead filePath))
+
+let loadDotToQG baseInputGraphsPath gFile =
+    let qGraph = loadGraphFromDOT(path baseInputGraphsPath gFile)
+    let graphAppr = new Appr<_>()
+    graphAppr.InitState <- ResizeArray.singleton 0
+
+    for e in qGraph.Edges do
+        let edg = e :?> DotEdge<string>
+        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (Smb(edg.Label, new CalcHighlighting.CalcBaseTreeNode("", 0)))) |> graphAppr.AddVerticesAndEdge |> ignore
+
+    graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
+    graphAppr
+
+let loadLexerInputGraph gFile = loadDotToQG baseInputGraphsPath gFile
 
 let resultDirectoryPath = ref @"../../result"
 
@@ -39,7 +52,7 @@ let LexerTSQL (srcFilePath:string) =
     let lexerInputGraph = loadLexerInputGraph srcFilePath
     let tokenize srcFilePath = 
         let start = System.DateTime.Now
-        for i in 1..10 do Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eofToken) |> ignore
+        for i in 1..10 do YC.TSQLLexer.tokenize eofToken lexerInputGraph  |> ignore
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
         printfn " "

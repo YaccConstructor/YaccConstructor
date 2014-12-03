@@ -18,9 +18,10 @@ open Mono.Addins
 open Yard.Core
 open IL
 open Constraints
+open Yard.Generators.Common
 open Yard.Generators.RNGLR
 open InitialConvert
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open States
 open Printer
 open TranslatorPrinter
@@ -180,8 +181,8 @@ type RNGLR() =
 
                     println "open Yard.Generators.RNGLR.Parser"
                     println "open Yard.Generators.RNGLR"
-                    println "open Yard.Generators.RNGLR.AST"
-
+                    println "open Yard.Generators.Common.AST"
+                    
                     if !needHighlighting && !needTranslate
                     then 
                         println "open YC.SDK.ReSharper.Helper"

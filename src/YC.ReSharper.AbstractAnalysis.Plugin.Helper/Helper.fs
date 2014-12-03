@@ -1,12 +1,14 @@
 ﻿module YC.SDK.ReSharper.Helper
 
+open System.Collections.Generic
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.Application
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open ReSharperExtension
-open Highlighting.Core
+open Constants
+open YC.FST.AbstractLexing.Interpreter
 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 type range = JetBrains.DocumentModel.DocumentRange
@@ -18,40 +20,43 @@ let addSemantic (parent : ITreeNode) (children : ITreeNode list) =
     let mutable prev = null
     let mutable curr = null
     let ranges = new ResizeArray<JetBrains.DocumentModel.DocumentRange>()
+    
     for child in children do
         prev <- curr
         curr <- child
-        curr.PersistentUserData.PutData(PropertyConstant.Parent, parent)
-        ranges.AddRange (curr.UserData.GetData(KeyConstant.Ranges))
+        curr.PersistentUserData.PutData(Parent, parent)
+        ranges.AddRange (curr.UserData.GetData(Ranges))
         if prev = null
-        then parent.PersistentUserData.PutData(PropertyConstant.FirstChild, curr)
+        then parent.PersistentUserData.PutData(FirstChild, curr)
         else
-            prev.PersistentUserData.PutData(PropertyConstant.NextSibling, curr)
-            curr.PersistentUserData.PutData(PropertyConstant.PrevSibling, prev)
-    parent.PersistentUserData.PutData(PropertyConstant.LastChild, curr)
-    parent.UserData.PutData(KeyConstant.Ranges, ranges)
+            prev.PersistentUserData.PutData(NextSibling, curr)
+            curr.PersistentUserData.PutData(PrevSibling, prev)
+    parent.PersistentUserData.PutData(LastChild, curr)
+    parent.UserData.PutData(Ranges, ranges)
+    
     if ranges <> null && ranges.Count > 0
-    then parent.UserData.PutData(KeyConstant.Document, ranges.[0].Document)
+    then parent.UserData.PutData(Document, ranges.[0].Document)
+    
     parent
 
-let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
-    let ranges = 
-        brs |> Seq.groupBy (fun x -> x.back_ref)
-        |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-        |> Seq.map(fun brs ->
-            try
-                let pos =  brs |> Array.map(fun i -> i.pos_cnum)
-                let lengthTok = pos.Length
-                let beginPosTok = pos.[0] + 1
-                let endPosTok = pos.[lengthTok-1] + 2 
-                let endPos = 
-                    brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                    - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-                brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-            with
-            | e -> 
-                brs.[0].back_ref.GetDocumentRange())
-    ranges
+let calculatePos (grToken: GraphTokenValue<#ITreeNode>) =    
+        let ranges = 
+            grToken.Edges |> Seq.groupBy (fun x -> x.BackRef)
+            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+            |> Seq.map(fun grToken ->
+                try
+                    let pos =  grToken |> Array.map(fun i -> i.StartPos)
+                    let lengthTok = pos.Length
+                    let beginPosTok = pos.[0] + 1
+                    let endPosTok = pos.[lengthTok-1] + 2 
+                    let endPos = 
+                        grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                        - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 
+                    grToken.[0].BackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+                with
+                | e -> 
+                    grToken.[0].BackRef.GetDocumentRange())
+        ranges
 
 [<Class>]
 type ReSharperHelper<'range, 'node> private() =
@@ -84,3 +89,39 @@ type ReSharperHelper<'range, 'node> private() =
         |> ResizeArray.iter(fun (x, y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
         
         lexerErrors, parserErrors
+
+[<Class>]
+type YcHelper private() = 
+    static let allYcToInt = new Dictionary<string, Dictionary<string, int>>()
+
+    static member AddYcItem (key : string) number (lang : string)= 
+        let lang = lang.ToLowerInvariant()
+        let key = key.ToLowerInvariant()
+        
+        let dict = 
+            if allYcToInt.ContainsKey lang
+            then 
+                allYcToInt.[lang]
+            else
+                let newDict = new Dictionary<string, int>()
+                allYcToInt.Add(lang, newDict)
+                newDict
+
+        if not <| dict.ContainsKey key
+        then dict.Add(key, number)
+
+
+    static member GetNumber (lang : string) (key : string) = 
+        let lang = lang.ToLowerInvariant()
+        let key = key.ToLowerInvariant()
+
+        if allYcToInt.ContainsKey lang
+        then 
+            let dict = allYcToInt.[lang]
+            if dict.ContainsKey key 
+            then 
+                dict.[key]
+            else 
+                -1
+        else 
+            -1

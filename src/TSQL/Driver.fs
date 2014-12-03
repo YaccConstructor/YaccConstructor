@@ -23,16 +23,17 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open System.IO
-open Yard.Generators.RNGLR.AST
+open Yard.Generators.Common.AST
 open YC.SDK.CommonInterfaces
 open YC.SDK.ReSharper.Helper
 open Mono.Addins
 open ReSharperExtension
 open JetBrains.Application
+open YC.FST.AbstractLexing.Interpreter
 
 let tokenize lexerInputGraph =
-    let eof = Yard.Examples.MSParser.RNGLR_EOF("",[||])
-    Lexer._fslex_tables.Tokenize(Lexer.fslex_actions_tokens, lexerInputGraph, eof)
+    let eof = RNGLR_EOF(new GraphTokenValue<_>())    
+    YC.TSQLLexer.tokenize eof lexerInputGraph
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 
@@ -42,8 +43,8 @@ let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGra
 
 let args = 
     {
-        tokenToRange = fun _ -> [||],[||]
-        zeroPosition = [||]
+        tokenToRange = fun x -> new GraphTokenValue<_>(),new GraphTokenValue<_>()
+        zeroPosition = new GraphTokenValue<_>()
         clearAST = false
         filterEpsilons = true
     }

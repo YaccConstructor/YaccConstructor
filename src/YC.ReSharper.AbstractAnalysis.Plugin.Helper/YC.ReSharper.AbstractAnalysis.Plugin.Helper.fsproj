@@ -41,17 +41,23 @@
   </Target>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="Constants.fs" />
     <Compile Include="Helper.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
+      <Name>FST</Name>
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
-      <Name>AbstractLexer.Core</Name>
-      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
+      <Name>AbstractLexer.Interpreter</Name>
+      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.fsproj">
@@ -67,11 +73,6 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Name>Highlighting.Core</Name>
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">

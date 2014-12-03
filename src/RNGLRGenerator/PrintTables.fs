@@ -14,7 +14,7 @@
 
 module Yard.Generators.RNGLR.Printer
 
-open Yard.Generators.RNGLR.FinalGrammar
+open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.RNGLR
 open Yard.Core.IL
@@ -254,7 +254,7 @@ let printTables
         printBr ""
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.RNGLR.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 

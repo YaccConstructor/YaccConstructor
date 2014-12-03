@@ -10,6 +10,7 @@
     <RootNamespace>GLLGenerator</RootNamespace>
     <AssemblyName>GLLGenerator</AssemblyName>
     <Name>GLLGenerator</Name>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -17,56 +18,96 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Users\User\recursive-ascent\Bin\Release\v40\YaccConstructor.exe</StartProgram>
+    <StartArguments>-i BadLeftRecursion.yrd   -g "GLLGenerator -pos int -token int -module GLL.BadLeftRecursion -o BadLeftRecursion.yrd.fs"</StartArguments>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="CodeEmitter.fs" />
-    <Compile Include="GLLGenerator.fs" />
-    <Compile Include="AST.fs" />
-    <Compile Include="Parser.fs" />
+    <Compile Include="PrintTranslator.fs" />
+    <Compile Include="Table.fs" />
+    <Compile Include="PrintTable.fs" />
+    <Compile Include="GllGenerator.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Common.dll</HintPath>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Constraints">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Constraints.dll</HintPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Generators.Common\Common.Generators.fsproj">
+      <Name>Common.Generators</Name>
+      <Project>{f46a55cf-a97f-4dfc-9483-340c631c80fe}</Project>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\Conversions.dll</HintPath>
+    </ProjectReference>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="fsyacc">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\FsYacc.exe</HintPath>
+    <Reference Include="FSharpx.Text.StructuredFormat">
+      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Addins">
+      <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\RNGLRCommon\RNGLRCommon.fsproj">
-      <Name>RNGLRCommon</Name>
-      <Project>{1c719cd3-0559-4a12-8b57-f58053947dc1}</Project>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RNGLRGenerator\RNGLRGenerator.fsproj">
-      <Name>RNGLRGenerator</Name>
-      <Project>{5baf0fba-31b7-406d-bea4-1bcc1418a63f}</Project>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="YaccConstructor">
-      <HintPath>..\packages\YC.Core.0.0.0.1\lib\net45\YaccConstructor.exe</HintPath>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
       <Private>True</Private>
-    </Reference>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

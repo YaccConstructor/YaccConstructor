@@ -53,6 +53,10 @@
     <Compile Include="ExecuteTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Name>FST</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ApproximatorTester\ApproximatorTester.csproj">
       <Name>ApproximatorTester</Name>
     </ProjectReference>

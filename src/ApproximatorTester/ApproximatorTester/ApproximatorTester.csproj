@@ -74,6 +74,10 @@
     <EmbeddedResource Include="Actions.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Name>FST</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Name>AbstractAnalysis.Common</Name>

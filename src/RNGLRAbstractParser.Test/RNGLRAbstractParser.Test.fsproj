@@ -36,7 +36,6 @@
     <!--Compile Include="MsParser.fs" /-->
     <!--Compile Include="LexerHelper.fs" /-->
     <!--Compile Include="MsLexer.fs" /-->
-    <Compile Include="Lexer.fs" />
     <!--Compile Include="calcDemo.yrd.fs" /-->
     <Compile Include="SimpleCalc.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms_2.yrd.fs" />
@@ -45,6 +44,7 @@
     <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="PrettySimpleCalc.yrd.fs" />
+    <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
@@ -113,14 +113,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
+      <Name>FST</Name>
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
-      <Name>AbstractLexer.Core</Name>
-      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+    <ProjectReference Include="..\AbstractLexer.Interpreter.Tests\AbstractLexer.Interpreter.Tests.fsproj">
+      <Name>AbstractLexer.Interpreter.Tests</Name>
+      <Project>{114e4775-bf85-464f-bb3d-d68de62615bd}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
+      <Name>AbstractLexer.Interpreter</Name>
+      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

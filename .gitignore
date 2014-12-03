@@ -193,6 +193,7 @@ src/JSON_Parser/JSONHighlighting/*
 src/TSQL/TSQLHighlighting/*
 BuildScripts/packages/*
 src/JSON_Parser/JSONParser.fs
+src/AbstractLexer.Interpreter.Tests/Tests/*
 *.csproj.user
 Tests/Alvor/GenerateTestforAlvor/packages/*
 src/TSQL/TSQLHighlighting/KW_*

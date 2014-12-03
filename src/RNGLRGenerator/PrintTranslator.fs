@@ -19,7 +19,6 @@ open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
 open Yard.Generators.Common.AST
-open Yard.Generators.RNGLR.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
@@ -122,11 +121,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let rec printAst : (AstNode -> _) =
+        let rec printAst : (obj -> _) =
             function
             | :? AST as arr ->
-                "new AST(" + printChild arr.first
-                        + ", " + printArr arr.other printChild + ")"
+                "box (new AST(" + printChild arr.first
+                        + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
         and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
                                             + printArr (family.nodes.map id) printAst + "))"

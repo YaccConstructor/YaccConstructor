@@ -3,58 +3,54 @@ open System
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 
-[<Measure>] type key
 [<Measure>] type extension
 
 
 [<AllowNullLiteral>]
-type INode = interface end
+type INode = 
+    interface
+    end
 
 [<AllowNullLiteral>]
 type NonTerminalNode =
     interface INode
     val Name      : int
-    val Extension : int
-    val Child : PackedNode
+    val Extension : int<extension>
+    val Child     : PackedNode
     new (name, extension, child) = {Name = name; Extension = extension; Child = child}
     
 and TerminalNode =
     interface INode
     val Name : int
-    val Extension : int
+    val Extension : int<extension>
     new (name, extension) = {Name = name; Extension = extension}
 
 and PackedNode =
-    struct
-        val Production : int
-        val Fst : INode
-        val Snd : INode
-        new (p, f, s) = {Production = p; Fst = f; Snd = s}
-    end
+    interface INode    
+    val Production : int
+    val Fst : INode
+    val Snd : INode
+    new (p, f, s) = {Production = p; Fst = f; Snd = s}
 
 and IntermidiateNode = 
-    struct
-        val Slot : int
-        val Extension    : int
-        val Fst : INode
-        val Others : ResizeArray<INode>
-        new (s, e, f, o) = {Slot = s; Extension = e; Fst = f; Others = o}
-    end
+    interface INode
+    val Slot      : int
+    val Extension : int<extension>
+    val Fst       : INode
+    val Others : ResizeArray<INode>
+    new (s, e, f, o) = {Slot = s; Extension = e; Fst = f; Others = o}
+    
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
+
 let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int64WithMeasure ((int64 left <<< 32) ||| int64 right)
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
 let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
-
 
 let inline packLabel rule position = (int rule <<< 16) ||| int position
 let inline getRule packedValue = int packedValue >>> 16
 let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
 
-let inline pack3ToInt64 p l r : int64<key>        = LanguagePrimitives.Int64WithMeasure (((int64 p) <<< 52) ||| ((int64 l) <<< 26) ||| (int64 r))
-let inline getProduction (long : int64<key>)      = int (int64 long >>> 52)
-let inline getLeftExtension3 (long : int64<key>)  = int((int64 long <<< 12) >>> 38)
-let inline getRightExtension3 (long : int64<key>) = int((int64 long <<< 38) >>> 38)
 [<Struct>]
 type NumNode =
     val Num : int

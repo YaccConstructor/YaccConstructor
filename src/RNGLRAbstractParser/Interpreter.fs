@@ -67,7 +67,9 @@ type VInfo<'TokenType> (vNum, statesCount) =
     member val vNum = vNum with get
     //member val curLevelCount = ref 0 with get, set
     member val reductions = new Queue<_>(10) with get
-    member val gssVertices = new ResizeArray<Vertex>() with get
+    //member val gssVertices = new ResizeArray<Vertex>() with get
+    member val processedGssVertices = new ResizeArray<Vertex>() with get
+    member val unprocessedGssVertices = new ResizeArray<Vertex>() with get
     //member val curEdge = ref Unchecked.defaultof<QuickGraph.TaggedEdge<VInfo<'TokenType>,'TokenType>>
     //member val curTokNum = ref 0
     //member val curToken = ref Unchecked.defaultof<'TokenType>
@@ -82,7 +84,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             tokens.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
             |> g.AddVerticesAndEdgeRange
         //if added <> tokens.EdgeCount then failwithf "Error while convertion input parser graph to iier representation. Expected edges: %A, actual: %A" tokens.EdgeCount added
-        verticesMap.[0], verticesMap.[Seq.max tokens.Vertices], g
+        verticesMap.[Seq.min tokens.Vertices], verticesMap.[Seq.max tokens.Vertices], g
     
     let nodes = new BlockResizeArray<_>()
     // Must be number of non-terminals, but doesn't matter
@@ -94,51 +96,67 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     verticesToProcess.Enqueue startV
     let mutable errorIndex = -1
 
-    let push currentGraphV v state =
+
+    let push currentGraphV gssVertex state =
+        let reductions = new ResizeArray<_>(10)
         for e in innerGraph.OutEdges currentGraphV do
         //printfn "v(%d,%d)" state num                                
             let push = parserSource.Gotos.[state].[parserSource.TokenToNumber e.Tag]
             if push <> 0 then
                 let curAst = Term e.Tag
-                let edge = new Edge(v, nodes.Count)
+                let edge = new Edge(gssVertex, nodes.Count)
                 for e2 in innerGraph.OutEdges e.Target do
                     let arr = parserSource.Reduces.[push].[parserSource.TokenToNumber e2.Tag]
                     if arr <> null then
                         for (prod, pos) in arr do
                             //printf "%A %A %d %d\n" v.label v.outEdges prod pos
-                            e.Target.reductions.Enqueue (v, prod, pos, Some edge)
+                            reductions.Add(gssVertex, prod, pos, Some edge, e.Target)
                 nodes.Add curAst
-                let srcV = e.Target.gssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
+                let srcV = e.Target.unprocessedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
                 match srcV with
                 | Some v -> v.addEdge edge
                 | None -> 
-                    let srcV = new Vertex(push, e.Target.vNum)
-                    srcV.addEdge edge
-                    e.Target.gssVertices.Add srcV
+                    let srcV = e.Target.unprocessedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
+                    match srcV with
+                    | Some v -> v.addEdge edge
+                    | None -> 
+                        let srcV = new Vertex(push, e.Target.vNum)
+                        srcV.addEdge edge
+                        e.Target.unprocessedGssVertices.Add srcV
 
             let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
             if arr <> null then
                 for prod in arr do
-                    e.Target.reductions.Enqueue (v, prod, 0, None) |> ignore            
+                    reductions.Add(gssVertex, prod, 0, None, e.Target)
+        
+        let reductionSet = new ResizeArray<_>(10)
+        for gssVertex, prod, pos, edge, target in reductions do
+            let reductionExists = 
+                reductionSet
+                |> ResizeArray.exists(function v, p, _pos, e, target -> v = gssVertex && p = prod && _pos = pos && edge = e)
+            if not reductionExists then reductionSet.Add(gssVertex, prod, pos, edge, target)
+        for gssVertex, prod, pos, edge, target in reductionSet do
+            let r = gssVertex, prod, pos, edge
+            let reds = target.reductions
+            target.reductions.Enqueue(r)
+        
+        currentGraphV.processedGssVertices.Add(gssVertex)
 
     let (*inline*) addVertex (currentGraphV:VInfo<_>) state (edgeOpt : option<Edge>) =
-        printfn "v: %d" state        
+        //printfn "v: %d" state        
         let mutable v = null
-        let vOpt = currentGraphV.gssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+        let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
         match vOpt with
         | None ->
-            v <- new Vertex(state, currentGraphV.vNum)
-                
-        |Some x -> v <- x
-
-//        if edgeOpt.IsSome then
-//            for e in innerGraph.OutEdges currentGraphV do
-//                let arr = parserSource.Reduces.[state].[parserSource.TokenToNumber e.Tag]
-//                if arr <> null then
-//                    for (prod, pos) in arr do
-//                        //printf "%A %A %d %d\n" v.label v.outEdges prod pos
-//                        e.Target.reductions.Enqueue (v, prod, pos, edgeOpt)
-        currentGraphV.gssVertices.Add v
+            let vOpt = currentGraphV.unprocessedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+            match vOpt with
+            | None ->
+                v <- new Vertex(state, currentGraphV.vNum)
+                currentGraphV.unprocessedGssVertices.Add v
+            |Some x -> v <- x
+        |Some x -> 
+            v <- x
+            currentGraphV.unprocessedGssVertices.Add v 
         v
 
     let makeReductions (currentGraphV:VInfo<_>) =
@@ -205,7 +223,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
     let processVertex v = 
         makeReductions v
-        for _v in v.gssVertices do push v _v _v.State
+        for gssVertex in v.unprocessedGssVertices do push v gssVertex gssVertex.State // !!!!!
+        v.unprocessedGssVertices.RemoveAll(fun _ -> true) |> ignore
 
     let globalCurV = ref startV
 
@@ -216,7 +235,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
         let v = addVertex startV startState None
-        while errorIndex = -1 && verticesToProcess.Count > 0 do            
+        while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             for e in innerGraph.OutEdges(curV) do
                 verticesToProcess.Enqueue e.Target
@@ -234,7 +253,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let children = new ResizeArray<_>(1)
                 children.Add (parserSource.StartRule, [|res|])
                 NonTerm children
-            for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.gssVertices) do
+            for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
                 //printf "%d " usedStates.[i]
                 if parserSource.AccStates.[v.State] then
                     root := Some nodes.Count
@@ -243,8 +262,4 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     |> nodes.Add
             match !root with
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
-            | Some res -> Success <| new Tree<_>(nodes.ToArray(), res)                
-
-        
-
-         
+            | Some res -> Success <| new Tree<_>(nodes.ToArray(), res)

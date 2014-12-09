@@ -40,6 +40,18 @@ let loadLexerInputGraph gFile =
     lexerInputG.StartVertex <- 0
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
+
+let test buildAstAbstract qGraph= 
+    let r = (new Parser<_>()).Parse  buildAstAbstract qGraph
+    printfn "%A" r
+    match r with
+    | Error (num, tok, message) ->
+        printfn "Error in position %d on Token %A: %s" num tok message
+        Assert.Fail "!!!!!!"
+    | Success(tree) ->
+        tree.PrintAst()
+        Assert.Pass()
+
 //let errorTest inputFilePath shouldContainsSuccess errorsCount =
 //    printfn "==============================================================="
 //    let lexerInputGraph = loadLexerInputGraph inputFilePath
@@ -84,28 +96,65 @@ type ``RNGLR abstract parser tests`` () =
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 25)
 
     [<Test>]
-    member this.``Simple calc. Sequence input.`` () =
+    member this.``Pretty Simple Calc. Sequence input.`` () =
         let qGraph = new ParserInputGraph<_>()        
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
              edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 0)
              edg 2 3 (RNGLR.PrettySimpleCalc.NUM 2)
-             //edg 3 4 (RNGLR.PrettySimpleCalc.PLUS 3)
-             //edg 4 5 (RNGLR.PrettySimpleCalc.NUM 4)
              edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 5)
              ] |> ignore
 
-        let r = (new Parser<_>()).Parse  RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
-        printfn "%A" r
-        match r with
-        | Error (num, tok, message) ->
-            printfn "Error in position %d on Token %A: %s" num tok message
-            //debug.drawGSSDot "out.dot"
-            Assert.Fail "!!!!!!"
-        | Success(tree) ->
-            tree.PrintAst()
-            //RNGLR.ParseSimpleCalc.defaultAstToDot tree "ast.dot"
-            Assert.Pass()
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Pretty Simple Calc. Simple branched input.`` () =
+        let qGraph = new ParserInputGraph<_>()        
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 0)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 2)
+             edg 0 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 5)
+             ] |> ignore
+
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Pretty Simple Calc. Branched input.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 2)
+             edg 3 4 (RNGLR.PrettySimpleCalc.PLUS 3)
+             edg 4 5 (RNGLR.PrettySimpleCalc.NUM 4)
+             edg 3 6 (RNGLR.PrettySimpleCalc.PLUS 5)
+             edg 6 5 (RNGLR.PrettySimpleCalc.NUM 6)
+             edg 5 7 (RNGLR.PrettySimpleCalc.PLUS 3)
+             edg 7 8 (RNGLR.PrettySimpleCalc.NUM 7)
+             edg 8 9 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Pretty Simple Calc. Lots Of Variants.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 0)
+             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 2)
+             edg 3 4 (RNGLR.PrettySimpleCalc.PLUS 3)
+             edg 4 5 (RNGLR.PrettySimpleCalc.NUM 4)
+             edg 3 6 (RNGLR.PrettySimpleCalc.PLUS 5)
+             edg 6 5 (RNGLR.PrettySimpleCalc.NUM 6)
+             edg 5 7 (RNGLR.PrettySimpleCalc.PLUS 3)
+             edg 7 8 (RNGLR.PrettySimpleCalc.NUM 7)
+             edg 8 9 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
+
 
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
@@ -678,35 +727,10 @@ let f x =
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
-//    //t.tsqlPerpT()
-//    t.``Errors 1``()
-//    t.``Errors 2``()
-//    //t.``Errors 3``()
-//    t.``Errors 4``() 
-//    t.``Errors 5``()
-//    t.``Errors 6``()
-//    t.``Errors 8``()
-//   // t.``Errors 9``()
-//    //t.``Errors 10``()
-//   // t.``Errors 11``() // 3 EOF? O_o
-//   // t.``Errors 12``() // skip!
-//    t.``Errors 13``()
-//   // t.``Errors 14``()
-//    //t.``Errors 15``()
-//    t.``Errors 16``()
-    
-//    t.``Simple calc. Branch binop input.``  ()
-    t.``Simple calc. Sequence input.``()
-    //t.``Calc. Branched input error.``()
-    //t.``Simple calc with nterm. Branch binop and first arg.``()
-    //t.``Simple calc. Branch binop and first arg.``()
-    //t.``Simple calc. Branch binop and second arg.``()
-    //t.``Simple calc with nterm. Seq input.``()
-    //t.``Simple calc with nterm 2. Seq input.``()
-    //t.``Simple calc with nterm 3. Seq input.``()
-    //t.``Simple calc with nterm 4. Seq input.``()
-    //t.``Simple calc. Sequence input.``()
-    //t.``Simple calc with nterm 2. Brabch first operand.``()
-    //t.``Simple calc with nterm 2. Fully brabched.``()
+
+    t.``Pretty Simple Calc. Sequence input.`` ()
+    t.``Pretty Simple Calc. Simple branched input.`` ()
+    t.``Pretty Simple Calc. Branched input.`` ()
+    t.``Pretty Simple Calc. Lots Of Variants.``() 
     0
     

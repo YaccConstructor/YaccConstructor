@@ -45,6 +45,7 @@
     <Compile Include="simpleCalc_with_Nterms_4.yrd.fs" />
     <Compile Include="simpleCalc_with_Nterms.yrd.fs" />
     <Compile Include="PrettySimpleCalc.yrd.fs" />
+    <Compile Include="NotAmbigousSimpleCalc.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />

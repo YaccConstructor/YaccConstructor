@@ -155,6 +155,39 @@ type ``RNGLR abstract parser tests`` () =
         
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph
 
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Lots Of Variants.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 0)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 2)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 3)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalc.NUM 4)
+             edg 3 6 (RNGLR.NotAmbigousSimpleCalc.PLUS 5)
+             edg 6 5 (RNGLR.NotAmbigousSimpleCalc.NUM 6)
+             edg 5 7 (RNGLR.NotAmbigousSimpleCalc.PLUS 3)
+             edg 7 8 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 8 9 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+             edg 5 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 7 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
 
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
@@ -728,9 +761,11 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
 
-    t.``Pretty Simple Calc. Sequence input.`` ()
-    t.``Pretty Simple Calc. Simple branched input.`` ()
-    t.``Pretty Simple Calc. Branched input.`` ()
-    t.``Pretty Simple Calc. Lots Of Variants.``() 
+//    t.``Pretty Simple Calc. Sequence input.`` ()
+//    t.``Pretty Simple Calc. Simple branched input.`` ()
+//    t.``Pretty Simple Calc. Branched input.`` ()
+//    t.``Pretty Simple Calc. Lots Of Variants.``() 
+//    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
+    t.``Not Ambigous Simple Calc. Loop.`` ()
     0
     

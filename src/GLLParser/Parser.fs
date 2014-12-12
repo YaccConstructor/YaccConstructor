@@ -115,33 +115,35 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let currentIndex = ref 0
         let currentrule = parser.StartRule
-        let dummyGSSNode = new Vertex(dummySlot, currentIndex)
+        let dummyGSSNode = new Vertex(dummySlot, !currentIndex)
         let currentLabel = ref <| packLabel currentrule 0
-        let dummyAST = new INode()
-        let currentN = ref <| dummyAST
-        let currentR = ref <| dummyAST
+        let dummyAST = new TerminalNode(-1, -1)
+        let dummy = 0
+        let currentN = ref <| 0
+        let currentR = ref <| 0
 
         let resultAST = ref None
-        let packedNode = Array3D.zeroCreate<Array2D<INode>> inputLength inputLength inputLength
-        let symbolNodes = Array3D.init parser.NonTermCount inputLength inputLength 
+        let packedNodes = Array3D.zeroCreate<int[,]> inputLength inputLength inputLength
+        let symbolNodes = Array3D.zeroCreate<int> parser.NonTermCount inputLength inputLength 
         let edges = Array2D.zeroCreate<Dictionary<int, Dictionary<int, ResizeArray<int>>>> slotNumber inputLength
         
-        let currentGSSNode = ref <| dummyGSSNode
-        let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummyAST)
-        let terminalNodes = new BlockResizeArray<TerminalNode>()
         let sppfNodes = new BlockResizeArray<INode>()
         sppfNodes.Add(dummyAST)
+
+        let currentGSSNode = ref <| dummyGSSNode
+        let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, 0)
+        
         let finalExtension = pack3ToInt64 parser.StartRule 0 inputLength
 
         let containsContext index label vertex ast =
             if index < inputLength
             then
                 if setU.[index] <> Unchecked.defaultof<Dictionary<int, Dictionary<Vertex, ResizeArray<int>>>>
-                then  
-                    if setU.[index].TryGetValue(label) then
-                        let current = setU.[index].[label]
-                        if current.ContainsKey(gssNode) then
-                            let trees = current.[gssNode]
+                then 
+                    let cond, current = setU.[index].TryGetValue(label) 
+                    if  cond then
+                       if current.ContainsKey(vertex) then
+                            let trees = current.[vertex]
                             if not <| trees.Contains(ast)
                             then 
                                 trees.Add(ast)
@@ -151,14 +153,14 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                         else 
                             let arr = new ResizeArray<int> ()
                             arr.Add(ast)
-                            current.Add(gssNode, arr)                    
+                            current.Add(vertex, arr)                    
                             false
                     else 
                         let dict = new Dictionary<Vertex, ResizeArray<int>>()
                         setU.[index].Add(label, dict)
                         let arr = new ResizeArray<int>()
                         arr.Add(ast)
-                        dict2.Add(arr) 
+                        dict.Add(vertex, arr) 
                         false
                 else 
                     let dict1 =  new Dictionary<int, Dictionary<Vertex, ResizeArray<int>>>()
@@ -176,24 +178,57 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             if not <| containsContext index label vertex ast
             then
                 setR.Enqueue(new Context(index, label, vertex, ast)) 
-            
-        let getNodeP label (left : INode) (right : INode) =
-            let left = left :?> IntermidiateNode
-            if left <> dummyAST
+
+        let slotIsEnd label =
+            (getPosition label) = (parser.)
+
+        let findSppfNode isEnd label lExt rExt leftChild rightChild =
+            let nTerm = parser.LeftSide.[getRule label]
+            if symbolNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int>
             then
-                let y = findSppfSymbolNode label left.
-                findSppfPackedNode 
+                if isEnd then
+                    let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
+                    sppfNodes.Add(newNode)
+                else
+                    let newNode = new IntermidiateNode(label, packExtension lExt rExt, leftChild, rightChild)
+                    sppfNodes.Add(newNode)
+                let num = sppfNodes.Count - 1
+                symbolNodes.[nTerm, lExt, rExt] <- num
+                num
+            else 
+                symbolNodes.[nTerm, lExt, rExt]
+
+        
+                
+            
+        let getNodeP label (left : int) (right : int) =
+            if slotIsEnd label then right
             else
-                let y = findSppfSymbolNode
-                findSppfPackedNode
+                if left <> dummy
+                then
+                    let currentLeft = sppfNodes.Item left
+                    match currentLeft with                    
+                    | :? NonTerminalNode as nonTerm ->
+                        let extension = nonTerm.Child
+                        ()
+                    | :? IntermidiateNode as interm ->
+                        let extension = interm
+                        ()
+                        
+                    let currentLeft = sppfNodes.Item right
+                    let y = findSppfSymbolNode label currentLeft 
+                    findSppfPackedNode 
+                else
+                    let y = findSppfSymbolNode
+                    findSppfPackedNode
             
                 
             
         //let getNodeT index =
                      
             
-        let containsEdge b e ast =
-            let dict1 = edges[b.Label, b.Level]
+        let containsEdge (b : Vertex) (e : Vertex) ast =
+            let dict1 = edges.[b.Label, b.Level]
             if dict1 <> Unchecked.defaultof<Dictionary<int, Dictionary<int, ResizeArray<int>>>>
             then
                 if dict1.ContainsKey(ast)
@@ -203,7 +238,9 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     then
                         let t = dict2.[e.Label]
                         if t.Contains(e.Level) then true
-                        else t.Add(e.Level) false
+                        else 
+                            t.Add(e.Level) 
+                            false
                     else
                         let arr = new ResizeArray<int>()
                         arr.Add(e.Level) 

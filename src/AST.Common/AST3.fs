@@ -15,9 +15,20 @@ type INode =
 type NonTerminalNode =
     interface INode
     val Name      : int
-    val Extension : int<extension>
-    val Child     : PackedNode
-    new (name, extension, child) = {Name = name; Extension = extension; Child = child}
+    val Extension : int64<extension>
+    val mutable First     : int 
+    val mutable Others    : ResizeArray<int> 
+    member this.AddChild child : unit = 
+        if this.First <> Unchecked.defaultof<_>
+        then 
+            if this.Others <> Unchecked.defaultof<_>
+            then
+                this.Others.Add child
+            else
+                this.Others <- new ResizeArray<int>()
+                this.Others.Add child
+        else this.First <- child
+    new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 and TerminalNode =
     interface INode
@@ -36,9 +47,9 @@ and IntermidiateNode =
     interface INode
     val Slot      : int
     val Extension : int<extension>
-    val Fst       : INode
-    val Others : ResizeArray<INode>
-    new (s, e, f, o) = {Slot = s; Extension = e; Fst = f; Others = o}
+    val Left      : INode
+    val Right     : INode
+    new (slot, extension, left, right) = {Slot = slot; Extension = extension; Left = left; Right = right}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
@@ -107,7 +118,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? NonTerminalNode as a -> 
                         createNode !num false NonTerminal (indToString leftSide.[a.Name])
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode(!num, a.Child))
+                        nodeQueue.Enqueue(new NumNode(!num, a.First))
+                        if a.Others <> Unchecked.defaultof<_>
+                        then
+                            for n in a.Others do
+                                nodeQueue.Enqueue(new NumNode(!num, n))
                     | :? PackedNode as p ->
                         createNode !num false Packed ""
                         createEdge currentPair.Num !num false ""
@@ -117,11 +132,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? IntermidiateNode as i ->
                         createNode !num false Intermidiate ((getRule i.Slot).ToString() + " " + (getPosition i.Slot).ToString())
                         createEdge currentPair.Num !num false ""
-                        if i.Fst <> null then nodeQueue.Enqueue(new NumNode(!num, i.Fst))
-                        if i.Others <> null 
-                        then 
-                            for c in i.Others do
-                                nodeQueue.Enqueue(new NumNode(!num, c))
+                        nodeQueue.Enqueue(new NumNode(!num, i.Left))
+                        nodeQueue.Enqueue(new NumNode(!num, i.Right))
                     | :? TerminalNode as t ->
                         createNode !num false Terminal ("t " + indToString (tokenToNumber tokens.[t.Name]))
                         createEdge currentPair.Num !num false ""
@@ -130,7 +142,12 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
                 createNode !num false NonTerminal (indToString leftSide.[a.Name])
-                nodeQueue.Enqueue(new NumNode(!num, a.Child))
+                nodeQueue.Enqueue(new NumNode(!num, a.First))
+                if a.Others <> Unchecked.defaultof<_>
+                then
+                    for n in a.Others do
+                        nodeQueue.Enqueue(new NumNode(!num, n))
+
 
         out.WriteLine("}")
         out.Close()

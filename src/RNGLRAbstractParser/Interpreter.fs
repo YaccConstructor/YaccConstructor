@@ -66,7 +66,7 @@ and Edge (destination : Vertex, ast : int) =
 type VInfo<'TokenType> (vNum, statesCount) =
     member val vNum = vNum with get
     //member val curLevelCount = ref 0 with get, set
-    member val reductions = new ResizeArray<_>(10) with get
+    member val reductions = new ResizeArray<_>(10) with get, set
     //member val gssVertices = new ResizeArray<Vertex>() with get
     member val processedGssVertices = new ResizeArray<Vertex>() with get
     member val unprocessedGssVertices = new ResizeArray<Vertex>() with get
@@ -161,8 +161,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             currentGraphV.unprocessedGssVertices.Add v 
         v
 
-    let makeReductions (currentGraphV:VInfo<_>) =
-        while currentGraphV.reductions.Count > 0 do
+    let rec makeReductions (currentGraphV:VInfo<_>) =
+            let newReductions = new ResizeArray<_>(10)
+        //while currentGraphV.reductions.Count > 0 do
             for vertex, prod, pos, edgeOpt in currentGraphV.reductions do
                 //printfn "r: %A %A: %A %A" vertex.Level vertex.State prod pos
                 let nonTerm = parserSource.LeftSide.[prod]
@@ -193,7 +194,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                     let arr = parserSource.Reduces.[state].[parserSource.TokenToNumber e.Tag]
                                     if arr <> null then
                                         for (prod, pos) in arr do
-                                            currentGraphV.reductions.Add (newVertex, prod, pos, Some edge)
+                                            (*currentGraphV.reductions*)newReductions.Add (newVertex, prod, pos, Some edge)
                             edge.Ast
                         | x -> (newVertex.Edge x).Ast
                     addChildren nodes.[ast] (Microsoft.FSharp.Collections.Array.copy path) prod
@@ -219,6 +220,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         path.[i] <- getEpsilon parserSource.Rules.[parserSource.RulesStart.[prod] + i].[0]
                     path.[pos - 1] <- edgeOpt.Value.Ast
                     walk (pos - 1) (edgeOpt.Value : Edge).Dest path
+            if newReductions.Count > 0 
+            then 
+                currentGraphV.reductions <- newReductions 
+                makeReductions currentGraphV
     
     //let processEdge (e:QuickGraph.TaggedEdge<_,_>) =
     ///    shift        
@@ -231,6 +236,27 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             v.unprocessedGssVertices.RemoveAll(fun _ -> true) |> ignore
 
     let globalCurV = ref startV
+
+    let addReductionsWhenLoop (gssVertices : ResizeArray<Vertex>) (inputEdge : QuickGraph.TaggedEdge<_,_>) = 
+        for gssV in gssVertices do
+            let reductions = new ResizeArray<_>(10)
+            let edge = new Edge(gssV, nodes.Count)
+            let arr = parserSource.Reduces.[gssV.State].[parserSource.TokenToNumber inputEdge.Tag]
+            if arr <> null then
+                for (prod, pos) in arr do
+                    reductions.Add(gssV, prod, pos, Some edge, inputEdge.Target)
+                verticesToProcess.Enqueue(inputEdge.Target, true)
+            
+            let reductionSet = new ResizeArray<_>(10)
+            for gssVertex, prod, pos, edge, target in reductions do
+                let reductionExists = 
+                    reductionSet
+                    |> ResizeArray.exists(function v, p, _pos, e, target -> v = gssVertex && p = prod && _pos = pos && edge = e)
+                if not reductionExists then reductionSet.Add(gssVertex, prod, pos, edge, target)
+            for gssVertex, prod, pos, e, (target : VInfo<_>) in reductionSet do
+                let r = gssVertex, prod, pos, e
+                let reds = target.reductions
+                target.reductions.Add(r)
 
     if tokens.EdgeCount = 0
     then
@@ -252,7 +278,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     else
                         if e.Target.reductions.Count > 0
                         then
-                            verticesToProcess.Enqueue (e.Target, true)
+                            addReductionsWhenLoop curV.processedGssVertices e
+                            //verticesToProcess.Enqueue (e.Target, true)
 
             //globalCurV := curV
             processVertex curV onlyReduces

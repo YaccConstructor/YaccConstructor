@@ -1,0 +1,6 @@
+[<Start>]
+s : a | x | z {}
+x : B C A D {}
+a : B y G {}
+z : B C y G A {}
+y : A E {} | C

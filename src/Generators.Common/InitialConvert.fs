@@ -71,7 +71,10 @@ let initialConvert (def : Definition.t<_,_>) =
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
             | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PMany m -> reachable m
             | PAlt (x,y) -> reachable x && reachable y
+            | POpt o -> reachable o
+            | PSome s -> reachable s
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false
@@ -89,5 +92,5 @@ let initialConvert (def : Definition.t<_,_>) =
         inner ruleList
     if def.grammar.Length > 1 then
         failwith "More than one module. Use 'Linearize' conversion"
-    let rules = def.grammar.Head.rules |> addStartRule |> splitAlters |> filterNonReachable
+    let rules = def.grammar.Head.rules |> addStartRule (*|> splitAlters*) |> filterNonReachable
     {def with grammar = [{def.grammar.Head with rules=rules}]}

@@ -17,6 +17,7 @@ module Yard.Generators.RNGLR.States
 open System.Collections.Generic
 open Yard.Generators.Common.FinalGrammar
 open Yard.Generators.Common
+open System.IO
 type OutTable = LR | LALR
 
 type Kernel = int
@@ -111,9 +112,15 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
         |> (fun ks -> ks , ks |> Array.map (fun x -> kernelToLookAhead.[x]))
 
     let incount = ref 0
+    let dfsDepth = ref 0
+    let maxDfsDepth = ref 0
+    
     let rec dfsLALR initKernelsAndLookAheads =
         incr incount
 //        if !incount % 5000 = 0 then eprintf "%d " !incount
+        incr dfsDepth
+        if !dfsDepth > !maxDfsDepth then
+            incr maxDfsDepth
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let key = String.concat "|" (kernels |> Array.map string)
         let vertex, newLookAheads, needDfs =
@@ -152,15 +159,23 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
                             if curSymbol kernels.[j] = i then
                                 destStates.[curi] <- KernelInterpreter.incPos kernels.[j], newLookAheads.[j]
                                 curi <- curi + 1
-                        let newVertex : Vertex<_,_> = dfsLALR destStates
+                        let newVertex : Vertex<_,_> = dfsLALR destStates 
                         if not <| wasEdge.[vertex.label].Contains newVertex.label then
                             wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
                             vertex.addEdge <| new Edge<_,_>(newVertex, i)
+        decr dfsDepth
         vertex
 
     let rec dfsLR initKernelsAndLookAheads =
         incr incount
 //        if !incount % 5000 = 0 then eprintf "%d " !incount
+        incr dfsDepth
+        if !dfsDepth > !maxDfsDepth then
+            incr maxDfsDepth
+            if !maxDfsDepth % 100000 = 0 then
+                eprintf "depth = %d\n " !maxDfsDepth
+        if !incount % 1000000 = 0 then 
+            eprintf " DFS%d vertices = %d\n " !incount vertices.Count
         let kernels,lookaheads = initKernelsAndLookAheads |> closure
         let setToStr = Set.map (sprintf "%d") >> String.concat ","
         let key = String.concat "|" (Array.map2 (fun x y -> sprintf "%d(%s)" x (setToStr y)) kernels lookaheads)
@@ -190,6 +205,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
                         let newVertex : Vertex<_,_> = dfsLR destStates
                         //wasEdge.[vertex.label] <- wasEdge.[vertex.label].Add newVertex.label
                         vertex.addEdge <| new Edge<_,_>(newVertex, i)
+            decr dfsDepth
             vertex
     let initKernel = KernelInterpreter.toKernel(grammar.startRule, 0)
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
@@ -198,6 +214,7 @@ let buildStates outTable (grammar : FinalGrammar) = //(kernelIndexator : KernelI
         | LALR -> dfsLALR
         | LR -> dfsLR
     |> ignore
+    eprintfn "maxDfsDepth %d" !maxDfsDepth
     eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()
     //printfn "rules count = %d; states count = %d" grammar.rules.rulesCount <| vertexCount()

@@ -1,0 +1,5 @@
+[<Start>]
+s : b d A B | A d A D {}
+d : A a b {}
+a : A b b | {}
+b : {}

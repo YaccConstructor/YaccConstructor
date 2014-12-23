@@ -277,6 +277,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     then
                         verticesToProcess.Enqueue (e.Target, false)
                     else
+                        if curV.reductions.Count > 0 then makeReductions curV
                         flg <- true
             if flg
             then

@@ -182,3 +182,8 @@ src/AbstractLexer.Test/Parser.fs
 src/AbstractLexer.Test/Parser.fs
 tmp.dot.pdf
 Tests/AbstractRNGLR/DOT/sppf.dot.pdf
+Tests/AbstractRNGLR/DOT/_sppf.dot.pdf
+Tests/AbstractRNGLR/DOT/sppf5.dot.pdf
+Tests/AbstractRNGLR/DOT/sppf6.dot.pdf
+Tests/AbstractRNGLR/DOT/sppf7.dot.pdf
+Tests/AbstractRNGLR/DOT/sppf8.dot.pdf

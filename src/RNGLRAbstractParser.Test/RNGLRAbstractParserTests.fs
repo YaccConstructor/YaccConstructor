@@ -189,6 +189,132 @@ type ``RNGLR abstract parser tests`` () =
         
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
 
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop2.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 3 5 (RNGLR.NotAmbigousSimpleCalc.PLUS 5)
+             edg 5 1 (RNGLR.NotAmbigousSimpleCalc.NUM 6)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 7 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop3.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 3 5 (RNGLR.NotAmbigousSimpleCalc.PLUS 5)
+             edg 5 7 (RNGLR.NotAmbigousSimpleCalc.NUM 6)
+             edg 7 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 8)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 8 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+        
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop4.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 3 5 (RNGLR.NotAmbigousSimpleCalc.PLUS 5)
+             edg 5 3 (RNGLR.NotAmbigousSimpleCalc.NUM 6)             
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 8 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop5.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 3 5 (RNGLR.NotAmbigousSimpleCalc.PLUS 5)
+             edg 5 3 (RNGLR.NotAmbigousSimpleCalc.NUM 6)
+             edg 3 8 (RNGLR.NotAmbigousSimpleCalc.PLUS 8)
+             edg 8 3 (RNGLR.NotAmbigousSimpleCalc.NUM 9)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 9 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop6.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+             edg 5 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 5 7 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 7 1 (RNGLR.NotAmbigousSimpleCalc.NUM 8)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 8 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop7.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+             edg 7 5 (RNGLR.NotAmbigousSimpleCalc.NUM 9)
+             edg 5 7 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 7 1 (RNGLR.NotAmbigousSimpleCalc.NUM 8)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 8 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc. Loop8.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalc.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalc.PLUS 4)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalc.NUM 5)
+             edg 5 2 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 7 5 (RNGLR.NotAmbigousSimpleCalc.NUM 9)
+             edg 5 7 (RNGLR.NotAmbigousSimpleCalc.PLUS 6)
+             edg 7 1 (RNGLR.NotAmbigousSimpleCalc.NUM 8)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalc.NUM 7)
+             edg 6 8 (RNGLR.NotAmbigousSimpleCalc.RNGLR_EOF 0)
+             ] |> ignore
+
+
+        test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
+
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
 //        let qGraph = new ParserInputGraph<_>()
@@ -766,6 +892,6 @@ let f x =
 //    t.``Pretty Simple Calc. Branched input.`` ()
 //    t.``Pretty Simple Calc. Lots Of Variants.``() 
 //    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
-    t.``Not Ambigous Simple Calc. Loop.`` ()
+    t.``Not Ambigous Simple Calc. Loop8.`` ()
     0
     

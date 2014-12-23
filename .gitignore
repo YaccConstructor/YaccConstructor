@@ -180,3 +180,5 @@ src/GLLParser.SimpleTest/*.yrd.fs
 src/GLLParser.SimpleTest/log.txt
 src/AbstractLexer.Test/Parser.fs
 src/AbstractLexer.Test/Parser.fs
+tmp.dot.pdf
+Tests/AbstractRNGLR/DOT/sppf.dot.pdf

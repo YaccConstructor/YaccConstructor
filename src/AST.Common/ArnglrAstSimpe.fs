@@ -233,7 +233,7 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                         if needGroup then printInd ind "vvvv"
         printAst 0 root
 
-    member this.AstToDot (indToString : int -> string) tokenToNumber (leftSide : array<int>) (path : string) =
+    member this.AstToDot (indToString : int -> string) tokenToNumber tokenData (leftSide : array<int>) (path : string) =
         let next =
             let cur = ref nodes.Length
             fun () ->
@@ -273,7 +273,7 @@ type Tree<'TokenType> (nodes : array<AST<'TokenType>>, root : int) =
                     let ast = nodes.[i]
                     match ast with
                     | Term t ->
-                        createNode i false  ("t " + indToString (tokenToNumber t))
+                        createNode i false  (sprintf "t %s: %s" (indToString (tokenToNumber t))(tokenData t |> string))
                     | NonTerm children ->
                         createNode i (children.Count > 1) ("n " + indToString leftSide.[fst children.[0]])
                         children |> ResizeArray.iter

@@ -263,11 +263,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         v.unprocessedGssVertices.RemoveAll(fun _ -> true) |> ignore
         if verticesSeenBefore.[v]
         then
-            let processed = ResizeArray.copy v.processedGssVertices 
-            for gssVertex in processed do push v gssVertex gssVertex.State
-
             for e in innerGraph.OutEdges(v) do
-                verticesToProcess.Enqueue (e.Target)
+                if e.Target.reductions.Count > 0 || e.Target.unprocessedGssVertices.Count > 0
+                then
+                    verticesToProcess.Enqueue (e.Target)
 
             let toRecalc = handlePassingReductions v
             for vToRecalc in toRecalc do verticesToProcess.Enqueue (vToRecalc)

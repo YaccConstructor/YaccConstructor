@@ -315,6 +315,40 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph
 
+    [<Test>]
+    member this.``Not Ambigous Simple Calc With 2 Ops. Loop.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 2)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 3)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 4)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 5)
+             edg 5 2 (RNGLR.NotAmbigousSimpleCalcWith2Ops.MULT 6)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 7)
+             edg 6 7 (RNGLR.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.NotAmbigousSimpleCalcWith2Ops.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Not Ambigous Simple Calc With 2 Ops. Loops.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM  1)
+             edg 1 2 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 6)
+             edg 2 3 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 7)
+             edg 2 4 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 2)
+             edg 3 4 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 5)
+             edg 4 5 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 8)
+             edg 5 2 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 4)
+             edg 4 6 (RNGLR.NotAmbigousSimpleCalcWith2Ops.PLUS 9)
+             edg 6 7 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM 3)
+             edg 7 8 (RNGLR.NotAmbigousSimpleCalcWith2Ops.RNGLR_EOF 113)
+             ] |> ignore
+        
+        test RNGLR.NotAmbigousSimpleCalcWith2Ops.buildAstAbstract qGraph
+
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
 //        let qGraph = new ParserInputGraph<_>()
@@ -892,6 +926,15 @@ let f x =
 //    t.``Pretty Simple Calc. Branched input.`` ()
 //    t.``Pretty Simple Calc. Lots Of Variants.``() 
 //    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
-    t.``Not Ambigous Simple Calc. Loop8.`` ()
+//    t.``Not Ambigous Simple Calc. Loop.`` ()
+//    t.``Not Ambigous Simple Calc. Loop2.`` ()
+//    t.``Not Ambigous Simple Calc. Loop3.`` ()
+//    t.``Not Ambigous Simple Calc. Loop4.`` ()
+//    t.``Not Ambigous Simple Calc. Loop5.`` ()
+//    t.``Not Ambigous Simple Calc. Loop6.`` ()
+//    t.``Not Ambigous Simple Calc. Loop7.`` ()
+//    t.``Not Ambigous Simple Calc. Loop8.`` ()
+//    t.``Not Ambigous Simple Calc With 2 Ops. Loop.`` ()
+    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
     0
     

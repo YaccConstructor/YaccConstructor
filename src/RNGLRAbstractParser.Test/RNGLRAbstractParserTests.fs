@@ -349,6 +349,38 @@ type ``RNGLR abstract parser tests`` () =
         
         test RNGLR.NotAmbigousSimpleCalcWith2Ops.buildAstAbstract qGraph
 
+    [<Test>]
+    member this.``Stars. Loop.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 0 (RNGLR.Stars.STAR 1)
+             edg 0 1 (RNGLR.Stars.SEMI 2)
+             edg 1 2 (RNGLR.Stars.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.Stars.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Stars2. Loop.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 0 (RNGLR.Stars2.STAR 1)
+             edg 0 1 (RNGLR.Stars2.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.Stars2.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.``Stars2. Loop2.`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 0 (RNGLR.Stars2.STAR 1)
+             edg 0 1 (RNGLR.Stars2.STAR 2)
+             edg 1 2 (RNGLR.Stars2.RNGLR_EOF 0)
+             ] |> ignore
+        
+        test RNGLR.Stars2.buildAstAbstract qGraph
+
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
 //        let qGraph = new ParserInputGraph<_>()
@@ -935,6 +967,8 @@ let f x =
 //    t.``Not Ambigous Simple Calc. Loop7.`` ()
 //    t.``Not Ambigous Simple Calc. Loop8.`` ()
 //    t.``Not Ambigous Simple Calc With 2 Ops. Loop.`` ()
-    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
+//    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
+//    t.``Stars. Loop.`` () 
+    t.``Stars2. Loop.`` () 
     0
     

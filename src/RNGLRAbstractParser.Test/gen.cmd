@@ -24,3 +24,9 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i NotAmbigousSimpleCalcWith2Ops.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.NotAmbigousSimpleCalcWith2Ops -translate false -table LR -o NotAmbigousSimpleCalcWith2Ops.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Stars.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Stars -translate false -table LR -o Stars.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Stars2.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Stars2 -translate false -table LR -o Stars2.yrd.fs -abstract true" >> log.txt

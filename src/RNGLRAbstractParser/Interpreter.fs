@@ -111,33 +111,49 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let verticesSeenBefore = new Dictionary<_,_>()
     for v in innerGraph.Vertices do
         verticesSeenBefore.Add(v, false)
-
+    
+    let edgesToTerms = new Dictionary<_,_>()
     let push currentGraphV gssVertex state =
         let reductions = new ResizeArray<_>(10)
+        let newUnprocessedGssVs = new ResizeArray<_>(2)
         for e in innerGraph.OutEdges currentGraphV do
         //printfn "v(%d,%d)" state num
             let push = parserSource.Gotos.[state].[parserSource.TokenToNumber e.Tag]
-            if push <> 0 then
-                let curAst = Term e.Tag
-                let edge = new Edge(gssVertex, nodes.Count)
+            if push <> 0 
+            then
+                let findGssVertex (target : VInfo<_>) = 
+                    let srcV = target.processedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
+                    match srcV with
+                    | Some v -> v
+                    | None -> 
+                        let srcV = target.unprocessedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
+                        match srcV with
+                        | Some v -> v
+                        | None -> 
+                            let v = new Vertex(push, target.vNum)
+                            if currentGraphV = target
+                            then newUnprocessedGssVs.Add v
+                            else target.unprocessedGssVertices.Add v
+                            v
+                let targetGssV = findGssVertex e.Target
+
+                let mutable edge = Unchecked.defaultof<_>
+                if edgesToTerms.ContainsKey e
+                then
+                    edge <- new Edge(gssVertex, edgesToTerms.[e])
+                    targetGssV.addEdge edge
+                else 
+                    nodes.Add <| Term e.Tag
+                    edgesToTerms.Add(e, nodes.Count - 1)
+                    edge <- new Edge(gssVertex, nodes.Count - 1)
+                    targetGssV.addEdge edge
+
                 for e2 in innerGraph.OutEdges e.Target do
                     let arr = parserSource.Reduces.[push].[parserSource.TokenToNumber e2.Tag]
                     if arr <> null then
                         for (prod, pos) in arr do
                             //printf "%A %A %d %d\n" v.label v.outEdges prod pos
                             reductions.Add(gssVertex, prod, pos, Some edge, e.Target)
-                nodes.Add curAst
-                let srcV = e.Target.processedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
-                match srcV with
-                | Some v -> v.addEdge edge
-                | None -> 
-                    let srcV = e.Target.unprocessedGssVertices |> ResizeArray.tryFind(fun v -> v.State = push)
-                    match srcV with
-                    | Some v -> v.addEdge edge
-                    | None -> 
-                        let srcV = new Vertex(push, e.Target.vNum)
-                        srcV.addEdge edge
-                        e.Target.unprocessedGssVertices.Add srcV
 
             let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
             if arr <> null then
@@ -156,6 +172,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             target.reductions.Enqueue(r)
         
         currentGraphV.processedGssVertices.Add(gssVertex)
+        newUnprocessedGssVs
 
     let (*inline*) addVertex (currentGraphV:VInfo<_>) state (edgeOpt : option<Edge>) =
         let mutable v = null
@@ -259,8 +276,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
     let processVertex v = 
         makeReductions v
-        for gssVertex in v.unprocessedGssVertices do push v gssVertex gssVertex.State
+        
+        let newGssVs = new ResizeArray<_>(2)
+        for gssVertex in v.unprocessedGssVertices do 
+            newGssVs.AddRange(push v gssVertex gssVertex.State)
         v.unprocessedGssVertices.RemoveAll(fun _ -> true) |> ignore
+        if newGssVs.Count > 0 
+        then
+            v.unprocessedGssVertices.AddRange(newGssVs)
+
         if verticesSeenBefore.[v]
         then
             for e in innerGraph.OutEdges(v) do

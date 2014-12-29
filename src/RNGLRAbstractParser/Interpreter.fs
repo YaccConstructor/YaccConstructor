@@ -284,6 +284,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if newGssVs.Count > 0 
         then
             v.unprocessedGssVertices.AddRange(newGssVs)
+            verticesToProcess.Enqueue(v)
 
         if verticesSeenBefore.[v]
         then

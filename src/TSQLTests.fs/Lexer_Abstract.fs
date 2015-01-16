@@ -30,7 +30,7 @@ open Yard.Examples.MSParser
 open System
 open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
-open YC.SDK.CommonInterfaces
+//open YC.SDK.CommonInterfaces
 open System.Collections.Generic
 
 let mutable id = 0<id>

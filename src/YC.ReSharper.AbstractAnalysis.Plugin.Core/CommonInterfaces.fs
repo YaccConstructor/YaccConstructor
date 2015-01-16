@@ -56,7 +56,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<Tree<'TokenType> * _> = [] 
+    let mutable forest: list<_ * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
@@ -101,15 +101,18 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
         tokenizedGraph 
         |> Option.map
-        |> ignore
-//        |> Option.iter
-//            (function 
-//                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
-//                    forest <- (tree, errors) :: forest
-//                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
-//                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-//                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
-//            )
+            (fun x -> 
+                let y = parse x
+                printfn "Tree: %A" y
+                y)
+        |> Option.iter
+            (function 
+                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
+                    forest <- (tree, errors) :: forest
+                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
+                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+            )
 
     let getNextTree index : TreeGenerationState<'node> = 
         if forest.Length <= index

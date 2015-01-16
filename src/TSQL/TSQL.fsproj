@@ -177,11 +177,6 @@
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
-      <Name>ReSharperExtension</Name>
-      <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RNGLRAbstractParser\RNGLRAbstractParser.fsproj">
       <Name>RNGLRAbstractParser</Name>
       <Project>{1873ea19-fab7-4d5f-b452-67c0b93c8b9b}</Project>
@@ -195,21 +190,6 @@
     <ProjectReference Include="..\RNGLRParser\RNGLRParser.fsproj">
       <Name>RNGLRParser</Name>
       <Project>{1b09eacc-608a-4965-8b46-2746fac220fc}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Core\YC.SEL.SDK.Core.fsproj">
-      <Name>YC.SEL.SDK.Core</Name>
-      <Project>{5fbf733c-9f3d-4831-89f2-68a500a2916c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\YC.ReSharper.AbstractAnalysis.Plugin.Helper\YC.ReSharper.AbstractAnalysis.Plugin.Helper.fsproj">
-      <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
-      <Project>{f86a2827-4c61-4bc5-82c5-19c2b60ab831}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="TSQLHighlighting\TSQLHighlighting.csproj">
-      <Name>TSQLHighlighting</Name>
-      <Project>{6ee8bdd8-79e9-41f5-8a8e-e959835d60fb}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

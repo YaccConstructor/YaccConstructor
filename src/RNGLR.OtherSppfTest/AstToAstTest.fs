@@ -2,7 +2,8 @@
 
 open AbstractAnalysis.Common
 open QuickGraph
-open Yard.Generators.RNGLR
+//open Yard.Generators.RNGLR
+open Yard.Generators.ARNGLR
 open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.AbstractParser
 open Yard.Generators.RNGLR.OtherSPPF

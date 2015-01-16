@@ -5,14 +5,14 @@ open Yard.Generators.RNGLR.OtherSPPF
 open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * int list
+    | InProgress of 'node * INode list
     | End of 'node
 
 type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
@@ -101,18 +101,15 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
         tokenizedGraph 
         |> Option.map
-            (fun x -> 
-                let y = parse x
-                printfn "Tree: %A" y
-                y)
-        |> Option.iter
-            (function 
-                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
-                    forest <- (tree, errors) :: forest
-                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
-                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
-            )
+        |> ignore
+//        |> Option.iter
+//            (function 
+//                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
+//                    forest <- (tree, errors) :: forest
+//                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
+//                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+//                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+//            )
 
     let getNextTree index : TreeGenerationState<'node> = 
         if forest.Length <= index
@@ -120,10 +117,10 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             generationState <- End(null)
         else
             let mutable curSppf, errors = List.nth forest index
-            let unprocessed = 
+            let unprocessed : Terminal list = 
                 match generationState with
-                | Start ->   Array.init curSppf.TokensCount (fun i -> i) |> List.ofArray
-                | InProgress (_, unproc) ->  unproc
+                | Start ->   Array.init curSppf.TokensCount (fun i -> new Terminal(i)) |> List.ofArray
+                | InProgress (_, unproc) -> unproc |> List.map (fun n -> n :?> Terminal) 
                 | _ -> failwith "Unexpected state in treeGeneration"
                 
             let nextTree, unproc = curSppf.GetNextTree unprocessed (fun _ -> true)
@@ -132,7 +129,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             
             if unproc.IsEmpty
             then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc) 
+            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> INode)) 
 
         generationState
 

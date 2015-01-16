@@ -77,6 +77,7 @@ type RNGLR() =
                     | "fsharp" -> FSharp
                     | "scala" -> Scala
                     | x -> failwithf "Unsupported output language: %s." x
+            let isAbstractParsingMode = ref <| getBoolOption "abstract" false
             let getBoolValue name = function
                     | "true" -> true
                     | "false" -> false
@@ -108,6 +109,7 @@ type RNGLR() =
                         | "fsharp" -> FSharp
                         | "scala" -> Scala
                         | s -> failwithf "Language %s is not supported" s
+                | "-abstract" -> isAbstractParsingMode := getBoolValue "abstract" value
                 // In other cases causes error
                 | _ -> failwithf "Unknown option %A" opt
             let mutable newDefinition = initialConvert definition
@@ -178,10 +180,16 @@ type RNGLR() =
                     then println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-
-                    println "open Yard.Generators.RNGLR.Parser"
-                    println "open Yard.Generators.RNGLR"
-                    println "open Yard.Generators.Common.AST"
+                    if !isAbstractParsingMode
+                    then 
+                        println "open Yard.Generators.ARNGLR.Parser"
+                        println "open Yard.Generators.RNGLR"
+                        println "open Yard.Generators.Common.ARNGLR.AST"
+                        println "open AbstractAnalysis.Common"
+                    else 
+                        println "open Yard.Generators.RNGLR.Parser"
+                        println "open Yard.Generators.RNGLR"
+                        println "open Yard.Generators.Common.AST"
                     
                     if !needHighlighting && !needTranslate
                     then 
@@ -207,7 +215,7 @@ type RNGLR() =
                 | Scala -> scalaHeaders()
 
             printHeaders moduleName fullPath light output targetLanguage
-            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive
+            let tables = printTables grammar definition.head tables moduleName tokenType res targetLanguage _class positionType caseSensitive !isAbstractParsingMode
             let res = 
                 if not !needTranslate || targetLanguage = Scala 
                 then tables
@@ -218,7 +226,7 @@ type RNGLR() =
                         else None
                                 
                     tables + printTranslator grammar newDefinition.grammar.[0].rules 
-                                    positionType fullPath output dummyPos caseSensitive xmlOpt
+                                    positionType fullPath output dummyPos caseSensitive xmlOpt !isAbstractParsingMode
 
             let res = 
                 match definition.foot with

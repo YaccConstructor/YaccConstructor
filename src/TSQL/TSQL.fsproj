@@ -215,6 +215,10 @@
   </ItemGroup>
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
 del JetBrains.*</PostBuildEvent>
   </PropertyGroup>

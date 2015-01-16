@@ -41,7 +41,7 @@ let getPosFromSource fullPath dummyPos (src : Source.t) =
 let defaultSource output = new Source.t("", new Source.Position(0,-1,0), new Source.Position(), output)
 
 let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Source.t> list)
-        positionType fullPath output dummyPos caseSensitive (highlightingOpt : string option)=
+        positionType fullPath output dummyPos caseSensitive (highlightingOpt : string option) isAbstractParsingMode =
     let tab = 4
 
     let rules = grammar.rules
@@ -124,7 +124,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
         let rec printAst : (obj -> _) =
             function
             | :? AST as arr ->
-                "box (new AST(" + printChild arr.first
+                (if isAbstractParsingMode then "" else "box ") + "(new AST(" + printChild arr.first
                         + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
         and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("

@@ -1,6 +1,6 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
-open Yard.Generators.Common.AST
+open Yard.Generators.Common.ARNGLR.AST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 
@@ -165,13 +165,13 @@ type private Context =
     end
 
 [<AllowNullLiteral>]
-type OtherTree<'TokenType> (tree : Tree<'TokenType>) = 
+type OtherTree<'TokenType> (tree : Yard.Generators.Common.ARNGLR.AST.Tree<'TokenType>) = 
     let tokens = tree.Tokens
     let root = 
         let root = 
             match tree.Root with
             | :? AST as ast -> ast
-            | :? int as x when x < 0 -> Unchecked.defaultof<_>
+            | :? Epsilon -> Unchecked.defaultof<_>
             | _ -> failwith "Strange tree - singleNode with non-negative value"
 
         let dict = new System.Collections.Generic.Dictionary<AST, OtherAST>()

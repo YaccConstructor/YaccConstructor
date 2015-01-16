@@ -52,7 +52,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     for v in actionVInv do
         actionVInvBool.[v] <- true       
             
-    let tokensInv = new ResizeArray<_>() 
+    let tokensInv = new Dictionary<_,_>()
     let visited = new HashSet<_>()
 
     let bfs vertex (graphFst: FST<_,_>) =
@@ -86,15 +86,16 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
                             targetAct.Add v.Source |> ignore   
         visited.Clear()                                   
         let gr = new GraphTokenValue<_>() 
-        gr.AddVerticesAndEdgeRange edgesToks |> ignore
-        new GraphAction<_>(vertex, targetAct, gr)      
+        //gr.AddVerticesAndEdgeRange edgesToks |> ignore
+        //new GraphAction<_>(vertex, targetAct, gr)      
+        (vertex, targetAct, edgesToks)
                 
     for act in actionV do 
         bfs act inputFstLexer |> tokens.Add |> ignore
 
     let bfsInv vertex (graphFst: FST<_,_>) =        
         let targetAct = new HashSet<_>()
-        let edgesToks = new ResizeArray<_>()            
+        let edgesToks = new Dictionary<_,ResizeArray<_>>()            
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex)               
 
@@ -106,50 +107,47 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
             then
                 visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
-                    new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                    let addE e =
+                        if edgesToks.ContainsKey v.Target
+                        then edgesToks.[v.Target].Add e
+                        else edgesToks.Add(v.Target,ResizeArray.singleton e)
+                    new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> addE |> ignore
                     if actionVInvBool.[v.Target]
                     then if (isEps v.Target) then queueV.Enqueue(v.Target)
                     else queueV.Enqueue(v.Target)  
         visited.Clear()                                   
         let gr = new GraphTokenValue<_>() 
-        gr.AddVerticesAndEdgeRange edgesToks |> ignore
-        new GraphAction<_>(vertex, targetAct, gr) 
+        //gr.AddVerticesAndEdgeRange edgesToks |> ignore
+        //new GraphAction<_>(vertex, targetAct, gr) 
+        vertex, targetAct, edgesToks
 
     for act in actionVInv do
-        bfsInv act FstInverse |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
+        bfsInv act FstInverse |> fun (vertex, targetAct, edgesToks) -> tokensInv.Add(vertex, (vertex, targetAct, edgesToks)) |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
 
-    let EqualEdges (edg1:TokenEdge<_>) (edg2:TokenEdge<_>) = 
-        (edg1.Source = edg2.Source) && (edg1.Target = edg2.Target) && (edg1.Label = edg2.Label) && (edg1.BackRef = edg2.BackRef) //smth else?
+    let inline EqualEdges (edg1:TokenEdge<_>) (edg2:TokenEdge<_>) = 
+        (*(edg1.Source = edg2.Source) &&*) (edg1.Target = edg2.Target) && (edg1.Label = edg2.Label) && (edg1.BackRef = edg2.BackRef) //smth else?
     
-    let CommonEdges (str1:GraphAction<_>) (str2:GraphAction<_>) = 
-        let edges = new ResizeArray<_>()
-        for edge1 in str1.graph.Edges do
-            for edge2 in str2.graph.Edges do
-                if EqualEdges edge1 edge2
-                then edges.Add(edge1) 
-        edges
-
-    let isEqAc elSearch (elem:GraphAction<_>) = elSearch = elem.startAct
-    let FindElAct el = ResizeArray.find (isEqAc el) tokensInv
-
-    let idF = ref 0
+    let inline CommonEdges str1 (str2:Dictionary<_,_>) = 
+        //let s1,s2 = if Array.length str1 > Array.length str2 then str2,str1 else str1,str2
+        str1 |> Array.filter (fun (edg:TokenEdge<_>) -> str2.ContainsKey edg.Source && str2.[edg.Source] |> ResizeArray.exists (EqualEdges edg))    
 
     let idFunction v = 
+        let idF = ref 0
         for edge in inputFstLexer.OutEdges(v) do
             if edge.Tag.OutSymb <> Eps
-            then 
-                idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
+            then idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
         !idF    
 
-    for t in tokens do
-        for ea in t.endActs do
+    for (vertex, targetAct, edgesToks) in tokens do
+        let tsArr = edgesToks.ToArray()
+        for ea in targetAct do
             if ea <> inputFstLexer.FinalState.[0]
             then 
-                let edgesToken = CommonEdges t (FindElAct ea)            
+                let edgesToken = CommonEdges tsArr (let _,_,e = tokensInv.[ea] in e)
                 let grToken = new GraphTokenValue<_>()
                 grToken.AddVerticesAndEdgeRange edgesToken |> ignore
-                let tok = actions.[(idFunction ea)] grToken
-                new ParserEdge<_>(t.startAct, ea, tok) |> edgesParserGraph.Add |> ignore
+                let tok = actions.[idFunction ea] grToken
+                new ParserEdge<_>(vertex, ea, tok) |> edgesParserGraph.Add |> ignore
 
     let final = new ResizeArray<_>()
     for edge in inputFstLexer.Edges do

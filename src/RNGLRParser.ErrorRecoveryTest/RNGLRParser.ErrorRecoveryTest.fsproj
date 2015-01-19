@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{e33864e1-96da-4838-b088-a61901a1eca0}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParserErrorRecoveryTest</RootNamespace>
     <AssemblyName>YC.RNGLRParserErrorRecoveryTest</AssemblyName>
     <Name>RNGLRParser.ErrorRecoveryTest</Name>

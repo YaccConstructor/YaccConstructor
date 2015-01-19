@@ -8,8 +8,14 @@ type Hotspot =
     val QueryPosition : int 
     val ReturnType : string
 
-    new (_class, _method, position, returnType) = {Class = _class; Method = _method; QueryPosition = position; ReturnType = returnType}
-    new (full : string array, position, returnType) = new Hotspot(full.[0], full.[1], position, returnType)
+    new (_class, _method, position, returnType) = {
+        Class = _class
+        Method = _method
+        QueryPosition = position
+        ReturnType = returnType
+    }
+    new (full : string array, position, returnType) = 
+        new Hotspot(full.[0], full.[1], position, returnType)
 
 let parseXml (path : string) = 
     let parseHotspot (hotspot : XmlNode) = 

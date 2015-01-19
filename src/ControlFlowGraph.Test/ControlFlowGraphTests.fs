@@ -44,7 +44,7 @@ type ``Control Flow Graph Building`` () =
 
     [<Test>]
     member test.``Elementary test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 12)
         let vertexRange = List.init 13 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -76,7 +76,7 @@ type ``Control Flow Graph Building`` () =
 
     [<Test>]
     member test.``Ambiguous test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 15)
         let vertexRange = List.init 16 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
 
@@ -145,7 +145,7 @@ type ``Control Flow Graph: If`` () =
 
     [<Test>]
     member test.``Simple If test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 11)
         let vertexRange = List.init 12 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -176,7 +176,7 @@ type ``Control Flow Graph: If`` () =
 
     [<Test>]
     member test.``Big If test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 15)
         let vertexRange = List.init 16 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
         qGraph.AddVerticesAndEdgeRange
@@ -211,7 +211,7 @@ type ``Control Flow Graph: If`` () =
 
     [<Test>]
     member test.``If without else test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 10)
 
         let vertexRange = List.init 11 (fun i -> i)
         qGraph.AddVertexRange vertexRange |> ignore
@@ -243,7 +243,7 @@ type ``Control Flow Graph: If`` () =
             
     [<Test>]
     member test.``Inner if``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 23)
         let vertices = Array.init 23 (fun i -> i)
         qGraph.AddVertexRange vertices |> ignore
         qGraph.AddVerticesAndEdgeRange

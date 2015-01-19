@@ -8,7 +8,7 @@ open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Microsoft.FSharp.Collections
 open ReSharperExtension
 open Constants
-
+open YC.FST.AbstractLexing.Interpreter
 
 type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 type range = JetBrains.DocumentModel.DocumentRange
@@ -39,24 +39,24 @@ let addSemantic (parent : ITreeNode) (children : ITreeNode list) =
     
     parent
 
-let calculatePos (brs:array<AbstractLexer.Core.Position<#ITreeNode>>) =    
-    let ranges = 
-        brs |> Seq.groupBy (fun x -> x.back_ref)
-        |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-        |> Seq.map(fun brs ->
-            try
-                let pos =  brs |> Array.map(fun i -> i.pos_cnum)
-                let lengthTok = pos.Length
-                let beginPosTok = pos.[0] + 1
-                let endPosTok = pos.[lengthTok-1] + 2 
-                let endPos = 
-                    brs.[0].back_ref.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                    - brs.[0].back_ref.GetDocumentRange().TextRange.StartOffset 
-                brs.[0].back_ref.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-            with
-            | e -> 
-                brs.[0].back_ref.GetDocumentRange())
-    ranges
+let calculatePos (grToken: GraphTokenValue<#ITreeNode>) =    
+        let ranges = 
+            grToken.Edges |> Seq.groupBy (fun x -> x.BackRef)
+            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+            |> Seq.map(fun grToken ->
+                try
+                    let pos =  grToken |> Array.map(fun i -> i.StartPos)
+                    let lengthTok = pos.Length
+                    let beginPosTok = pos.[0] + 1
+                    let endPosTok = pos.[lengthTok-1] + 2 
+                    let endPos = 
+                        grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                        - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 
+                    grToken.[0].BackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+                with
+                | e -> 
+                    grToken.[0].BackRef.GetDocumentRange())
+        ranges
 
 [<Class>]
 type ReSharperHelper<'range, 'node> private() =

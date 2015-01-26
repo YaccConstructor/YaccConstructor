@@ -82,14 +82,9 @@ type ParserEdge<'token>(s,e,t)=
     inherit TaggedEdge<int, 'token>(s,e,t)
 
 type ParserInputGraph<'token>(initial : int, final : int) =
-    inherit AdjacencyGraph<int,ParserEdge<'token>>()
+    inherit EdgeListGraph<int,ParserEdge<'token>>()
     member val InitState = initial
-    member val FinalState = final     
-
-    member this.AddEdgeForsed (e:ParserEdge<_>) =
-        this.AddVertex e.Source |> ignore
-        this.AddVertex e.Target |> ignore
-        this.AddEdge e |> ignore
+    member val FinalState = final
 
     member this.PrintToDot name (tokenToString : 'token -> string) = 
         use out = new System.IO.StreamWriter (name : string)

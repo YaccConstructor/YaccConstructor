@@ -16,7 +16,7 @@ let eof = RNGLR_EOF(new GraphTokenValue<_>())
 let printTok =
      fun x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])
 
-let checkGraph (graph:AdjacencyGraph<_,_>) countE countV  =
+let checkGraph (graph:EdgeListGraph<_,_>) countE countV  =
     Assert.AreEqual(graph.EdgeCount, countE, "Count of edges not equal expected number. ")
     Assert.AreEqual(graph.VertexCount, countV, "Count of vertices not equal expected number. ")
 

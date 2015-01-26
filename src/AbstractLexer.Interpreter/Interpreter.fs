@@ -38,15 +38,15 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let edgesParserGraph = new ResizeArray<_>()
          
-    let actionV = [|for v in inputFstLexer.InitState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
+    let actionV = [|for v in inputFstLexer.InitState do yield v ; for edge in inputFstLexer.GetEdges() do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
     let tokens = new ResizeArray<_>()
 
     let FstInverse = new FST<_,_>()   
-    for edge in inputFstLexer.Edges do
+    for edge in inputFstLexer.GetEdges() do
         new TaggedEdge<_,_>(edge.Target, edge.Source, edge.Tag) |>  FstInverse.AddVerticesAndEdge |> ignore
 
      
-    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray |> Array.ofSeq
+    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.GetEdges() do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray |> Array.ofSeq
     let actionVInvBool = ResizeArray.init (!maxV + 1) (fun _ -> false) 
     
     for v in actionVInv do
@@ -67,7 +67,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
             if not <| visited.Contains(topV) 
             then
                 visited.Add(topV) |> ignore
-                for v in graphFst.OutEdges(topV) do
+                for v in graphFst.GetOutEdges topV do
                     if v.Tag.OutSymb = Eps
                     then 
                         if (v.Source <> vertex || (isStartV v.Source))
@@ -93,20 +93,33 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     for act in actionV do 
         bfs act inputFstLexer |> tokens.Add |> ignore
 
+    let isEps = 
+        let mem = Dictionary<_,_>(1000)
+
+        fun v -> 
+            if mem.ContainsKey v
+            then mem.[v]
+            else 
+                let res = inputFstLexer.GetOutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
+                mem.Add(v,res)
+                res
+
     let bfsInv vertex (graphFst: FST<_,_>) =        
         let targetAct = new HashSet<_>()
-        let edgesToks = new Dictionary<_,ResizeArray<_>>()            
-        let queueV = new Queue<_>()
-        queueV.Enqueue(vertex)               
+        let edgesToks = 
+            let d = new Dictionary<_,ResizeArray<_>>()
+            //for v in graphFst.Vertices do d.Add(v,new ResizeArray<_>())
+            d
 
-        let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
+        let queueV = new Queue<_>()
+        queueV.Enqueue(vertex)                       
 
         while queueV.Count > 0 do
             let topV = queueV.Dequeue()
             if not <| visited.Contains(topV)
             then
                 visited.Add(topV) |> ignore
-                for v in graphFst.OutEdges(topV) do
+                for v in graphFst.GetOutEdges(topV) do
                     let addE e =
                         if edgesToks.ContainsKey v.Target
                         then edgesToks.[v.Target].Add e
@@ -133,7 +146,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 
     let idFunction v = 
         let idF = ref 0
-        for edge in inputFstLexer.OutEdges(v) do
+        for edge in inputFstLexer.GetOutEdges(v) do
             if edge.Tag.OutSymb <> Eps
             then idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
         !idF    
@@ -150,7 +163,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
                 new ParserEdge<_>(vertex, ea, tok) |> edgesParserGraph.Add |> ignore
 
     let final = new ResizeArray<_>()
-    for edge in inputFstLexer.Edges do
+    for edge in inputFstLexer.GetEdges() do
         if  edge.Target = inputFstLexer.FinalState.[0]
         then final.Add edge.Source
         
@@ -189,7 +202,7 @@ let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
         + rank "max" parserInputGraph.FinalState
     
     let strs =
-            parserInputGraph.Edges
+            parserInputGraph.GetEdges()
             |> Seq.map (fun edge ->
                 sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target  (toStr edge.Tag)) 
                                       

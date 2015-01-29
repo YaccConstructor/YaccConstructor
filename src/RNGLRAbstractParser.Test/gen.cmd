@@ -19,7 +19,7 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i PrettySimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.PrettySimpleCalc -translate false -table LR -o PrettySimpleCalc.yrd.fs -abstract true" >> log.txt
-
+                                                                                                                                                               
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i NotAmbigousSimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.NotAmbigousSimpleCalc -translate false -table LR -o NotAmbigousSimpleCalc.yrd.fs -abstract true" >> log.txt
 
@@ -37,3 +37,6 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i List.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.List -translate false -table LR -o List.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Epsilon2.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Epsilon2 -translate false -table LR -o Epsilon2.yrd.fs -abstract true" >> log.txt

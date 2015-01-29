@@ -159,6 +159,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         for (prod, pos) in arr do
                             //printf "%A %A %d %d\n" v.label v.outEdges prod pos
                             reductions.Add(gssVertex, prod, pos, Some edge, e.Target)
+
+            let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
+            if arr <> null then
+                for prod in arr do
+                    reductions.Add(gssVertex, prod, 0, None, e.Target)
         
         let reductionSet = new ResizeArray<_>(10)
         for gssVertex, prod, pos, edge, target in reductions do

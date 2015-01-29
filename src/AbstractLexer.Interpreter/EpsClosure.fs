@@ -78,8 +78,8 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
     let numNfaNodes = inGraph.VertexCount
     let rec EClosure1 (acc:NfaNodeIdSetBuilder) n = 
         if not (acc.Contains n) then 
-            acc.Add n |> ignore
-            let epsTransitions = (inGraph.GetOutEdges n) |> List.ofSeq |> List.filter (fun x -> Option.isNone x.Tag) |> List.map (fun e -> e.Target)
+            acc.Add n |> ignore (*GET*)
+            let epsTransitions = (inGraph.OutEdges n) |> List.ofSeq |> List.filter (fun x -> Option.isNone x.Tag) |> List.map (fun e -> e.Target)
             match epsTransitions with 
             | [] -> () // this Clause is an optimization - the list is normally empty
             | tr -> 
@@ -97,7 +97,7 @@ let NfaToDfa (inGraph: ParserInputGraph<_>)=
     let ComputeMoves (nset:NfaNodeIdSet) = 
         let moves = new MultiMap<_,_>()
         nset.Iterate(fun nodeId -> 
-            for e in inGraph.GetOutEdges nodeId do
+            for e in inGraph.OutEdges nodeId do
                 if e.Tag <> None then AddToMultiMap moves e.Tag e.Target)
                     //match dests with 
                     //| [] -> ()  // this Clause is an optimization - the list is normally empty

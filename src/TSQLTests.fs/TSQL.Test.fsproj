@@ -16,6 +16,9 @@
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <Reference Include="DotParserProject">
+      <HintPath>..\..\3rdParty\DotParser\DotParserProject.exe</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Platform.ReSharper.ComponentModel">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.$(rshVer)\bin\JetBrains.Platform.ReSharper.ComponentModel.dll</HintPath>
       <Private>False</Private>
@@ -121,6 +124,7 @@
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="TSQLTests.fs" />
     <None Include="packages.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
@@ -192,10 +196,10 @@
 del JetBrains*</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\10.dot</StartArguments>
+    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\1\_1.dot  -p</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\5.dot</StartArguments>
+    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\sbt\ready\idv_XAnyPayGBK_151str.dot     -p</StartArguments>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

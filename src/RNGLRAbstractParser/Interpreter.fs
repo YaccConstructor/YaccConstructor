@@ -149,16 +149,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     targetGssV.addEdge edge
 
                 for e2 in innerGraph.OutEdges e.Target do
+                    let arr = parserSource.ZeroReduces.[push].[parserSource.TokenToNumber e2.Tag]
+                    if arr <> null then
+                        for prod in arr do
+                            reductions.Add(targetGssV, prod, 0, None, e.Target)
+
                     let arr = parserSource.Reduces.[push].[parserSource.TokenToNumber e2.Tag]
                     if arr <> null then
                         for (prod, pos) in arr do
                             //printf "%A %A %d %d\n" v.label v.outEdges prod pos
                             reductions.Add(gssVertex, prod, pos, Some edge, e.Target)
-
-            let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
-            if arr <> null then
-                for prod in arr do
-                    reductions.Add(gssVertex, prod, 0, None, e.Target)
         
         let reductionSet = new ResizeArray<_>(10)
         for gssVertex, prod, pos, edge, target in reductions do
@@ -249,14 +249,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         if pos = 0 then
             let state = parserSource.Gotos.[vertex.State].[nonTerm]
-            let newVertex, isNew = addVertex startV state None
+            let newVertex, isNew = addVertex currentGraphV state None
             if newVertex.FindIndex vertex.State vertex.Level = -1 then
                 let edge = new Edge(vertex, getEpsilon parserSource.LeftSide.[prod])
                 newVertex.addEdge edge
         else 
-            let path = Array.zeroCreate parserSource.Length.[prod]
-            for i = path.Length - 1 downto pos do
-                path.[i] <- getEpsilon parserSource.Rules.[parserSource.RulesStart.[prod] + i].[0]
+            let path = Array.zeroCreate pos
             path.[pos - 1] <- edgeOpt.Value.Ast
             walk (pos - 1) (edgeOpt.Value : Edge).Dest path currentGraphV currentGraphV nonTerm pos prod false
 

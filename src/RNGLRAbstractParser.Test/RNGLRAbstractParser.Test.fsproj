@@ -48,6 +48,7 @@
     <Compile Include="NotAmbigousSimpleCalc.yrd.fs" />
     <Compile Include="NotAmbigousSimpleCalcWith2Ops.yrd.fs" />
     <Compile Include="Stars.yrd.fs" />
+    <Compile Include="Epsilons2.yrd.fs" />
     <Compile Include="Stars2.yrd.fs" />
     <Compile Include="RNGLRAbstractParserTests.fs" />
     <None Include="packages.config" />

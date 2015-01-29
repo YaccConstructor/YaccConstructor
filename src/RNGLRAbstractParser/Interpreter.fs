@@ -254,10 +254,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let edge = new Edge(vertex, getEpsilon parserSource.LeftSide.[prod])
                 newVertex.addEdge edge
         else 
-            let path = Array.zeroCreate parserSource.Length.[prod]
-            for i = path.Length - 1 downto pos do
-                let blah = parserSource.Rules.[parserSource.RulesStart.[prod] + i]
-                path.[i] <- getEpsilon (if blah.Length = 0 then -1 else blah.[0]) ///????
+            let path = Array.zeroCreate pos //parserSource.Length.[prod]
+            //for i = path.Length - 1 downto pos do
+            //    let blah = parserSource.Rules.[parserSource.RulesStart.[prod] + i]
+            //    path.[i] <- getEpsilon (if blah.Length = 0 then -1 else blah.[0]) ///????
             path.[pos - 1] <- edgeOpt.Value.Ast
             walk (pos - 1) (edgeOpt.Value : Edge).Dest path currentGraphV currentGraphV nonTerm pos prod false
 

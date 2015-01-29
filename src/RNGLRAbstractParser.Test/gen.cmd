@@ -34,3 +34,6 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Epsilons.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.Epsilons -translate false -table LR -o Epsilons.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Epsilons2.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Epsilons2 -translate false -table LR -o Epsilons2.yrd.fs -abstract true" >> log.txt

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>YaccConstructor</title>
+    <title>YaccConstructor. YARD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="YaccConstructor"/>
     <meta name="author" content="Semyon Grigorev and others"/>
@@ -32,28 +32,129 @@
       <div class="row">
         <div class="span9" id="main">
           
-<h1>YaccConstructor</h1>
-YaccConstructor is a modular tool for parser construction and grammars processing. Also it is a framework for research and development of parser generators, compilers compilers and other grammarware for .NET. YaccConstructor is mostly implemented in F#. Short name is YC.
-<br>
-<br>
-YaccConstructor has been successfully used for a number of industrial projects, thus we can state that YC functionality is mature enough. Give it a try! We accept bug reports and are ready to make improvements on demand.
-<br>
-<h3>Main modules of YC</h3>
-<ul>
-<li> YARD grammar specification language.
-</il>
-<li> RNGLR parser generator.
-</il>
-<li> GLL parser generator (in active development).
-</il>
-<li> Platform for analysis of string-embedded languages.
-<br>
-<br>
-   <div>
-   <iframe class="youtube-player" type="text/html" width="800" height="420" src="http://www.youtube.com/embed/P3FFg02-edc?autoplay=0" frameborder="0"></iframe>
-   </div>
-</il>
-</ul>
+<h1>YARD</h1>
+YARD is powerful translation specification language. It allow you to use EBNF, metarules and conditional generation. Also YARD support L and S attributed grammars.
+
+<h2>Syntax in exapmles</h2>
+<h3>Grammar</h3>
+<pre>
+grammar: ('{'header'}')? rules ('{'footer'}')?
+</pre>
+
+Example of YARD grammar file:
+<pre>
+{
+let helperFunction x y = x+y
+}
+s: NUMBER;
+{
+let helperFunction2 x y = x*y
+}
+</pre>
+
+<h3>Sequence</h3>
+<pre>
+s: e PLUS e;
+</pre>
+
+<h3>Alternative</h3>
+<pre>
+s: DECNUMBER|HEXNUMBER;
+s: NUMBER (PLUS|MULT) NUMBER;
+s: { None }|n=NUMBER{Some n};
+</pre>
+Mean that empty branch is epsilon. So s can produce epsilon or NUMBER. It is important that empty branch must have action code. It is necessary for type checking.
+
+<h3>Zero or More</h3>
+<pre>
+grammar: rule*;
+</pre>
+
+<h3>One ore More</h3>
+<pre>
+grammar: rule+;
+</pre>
+
+<h3>Option</h3>
+<pre>
+s: PLUS?;
+</pre>
+Or
+<pre>
+s: [PLUS];
+</pre>
+Thie syntax useful for big optional subsexpresionns. Instead of 
+
+<pre>
+s: (n PLUS expr)?;
+</pre>
+you can write
+<pre>
+s: [n PLUS expr];
+</pre>
+Grouping and optionality in one.
+
+<h3>Literal</h3>
+<pre>
+stmt_block: 'BEGIN' stmt+ 'END';
+</pre>
+
+<h3>Metarules</h3>
+<pre>
+not_empty_list<<item sep>>: item (sep item)*;
+statements: not_empty_list<<stetement SEMICOLON>>;
+args: not_empty_list<<arg COMMA>>;
+</pre>
+
+<h3>Action code</h3>
+<pre>
+s: n {printfn "n is detected!!!"}
+</pre>
+
+<h3>Bindings</h3>
+<pre>
+s: n=NUMBER {printfn "Number value is %A" n}
+s: <hd::tl>=not_empty_list<<NUMBER COLON>> {List.fold myFunction hd tl}
+</pre>
+
+<h3>L-attributes</h3>
+<pre>
+proc: declarations=var_declarations IN expressions[declarations];
+expressions[declarations]: 
+     expr_lst=expression+ {check_undeclared_vareables_in_expressions expr_lst declarations};
+</pre>
+
+<h3>Conditional generation</h3>
+<pre>
+exec_literal:
+#if ms
+("EXEC" | "EXECUTE")
+#elif pl
+"EXECUTE" "IMMEDIATE"
+#endif
+LBRACE LITERAL RBRACE
+;
+</pre>
+Means, that if you run generator with key -D "ms" then you get parser for grammar
+<pre>
+exec_literal:
+("EXEC" | "EXECUTE")
+LBRACE LITERAL RBRACE
+;
+</pre>
+Else, if you run generator with key -D "pl" then you get parser for grammar
+<pre>
+exec_literal:
+"EXECUTE" "IMMEDIATE"
+LBRACE LITERAL RBRACE
+;
+</pre>
+
+<h3>Labels</h3>
+<pre>
+s: x (@l1(y z)| @l2(a b)) g;
+</pre>
+Where @l1 and @l2 are labels. Labels are used for working with dialects.
 
 </div>
         <div class="span3">

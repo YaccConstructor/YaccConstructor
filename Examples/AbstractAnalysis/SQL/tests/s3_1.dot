@@ -1,9 +1,0 @@
-digraph G
-{
-0;5;6;7;9;
-0->5 [label="select "];
-5->6 [label=" z1 "];
-5->6 [label=" z2 "];
-6->9 [label=", z3 "];
-9->7 [label=" from c"];
-}

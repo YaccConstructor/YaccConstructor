@@ -1,9 +1,9 @@
 ﻿{
-open AbstractLexer.Core
+open YC.FST.AbstractLexing.Interpreter
 }
 
 tokens {
-    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of GraphTokenValue<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>
 }
 
 options {

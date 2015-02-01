@@ -1,7 +1,12 @@
 ﻿{
-module Calc.Lexer
+module YC.CalcLexer
+
+open Microsoft.FSharp.Collections
+open YC.FST.GraphBasedFst
+open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
 open Calc.AbstractParser
-open AbstractLexer.Core
+open System.Collections.Generic
 open YC.SDK.CommonInterfaces
 }
 
@@ -10,13 +15,11 @@ let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
 | whitespace { None }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lexeme,brs) |> Some }
-| '-' { MINUS(lexeme,brs) |> Some }
-| '(' { LBRACE(lexeme,brs) |> Some }
-| ')' { RBRACE(lexeme,brs)|> Some  }
-| '/' { DIV(lexeme,brs) |> Some }
-| '+' { PLUS(lexeme,brs) |> Some }
-| "**" { POW(lexeme,brs) |> Some }
-| '*' { MULT(lexeme,brs) |> Some }
-| eof { RNGLR_EOF ("",[||]) |> Some }
-| _ { raise (LexerError(lexeme,box brs)) (* failwithf "unexpected input: %s" <| string lexeme*) }
+| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(gr) |> Some }
+| '-' { MINUS(gr) |> Some }
+| '(' { LBRACE(gr) |> Some }
+| ')' { RBRACE(gr) |> Some }
+| '/' { DIV(gr) |> Some }
+| '+' { PLUS(gr) |> Some }
+| "**" { POW(gr) |> Some }
+| '*' { MULT(gr) |> Some }

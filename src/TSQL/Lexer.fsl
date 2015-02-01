@@ -79,8 +79,8 @@ rule tokens = parse
  | "update" { L_update(gr) |> Some }
  | "from" { L_from(gr)|> Some }
  | "where" { L_where(gr)|> Some }
- | "and" { L_and_(gr) |> Some }
- | "or" { L_or_(gr) |> Some }
+ | "and" { L_and(gr) |> Some }
+ | "or" { L_or(gr) |> Some }
  | "set" { L_set(gr) |> Some }
  | "on" { L_on(gr) |> Some }
  | "go" { L_go(gr) |> Some }

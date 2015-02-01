@@ -246,12 +246,12 @@ and _fslex_tokens  _fslex_state lexbuf =
           )
   | 18 -> ( 
 # 82 "Lexer.fsl"
-                          L_and_(gr) |> Some 
+                          L_and(gr) |> Some 
 # 250 "Lexer.fs"
           )
   | 19 -> ( 
 # 83 "Lexer.fsl"
-                         L_or_(gr) |> Some 
+                         L_or(gr) |> Some 
 # 255 "Lexer.fs"
           )
   | 20 -> ( 

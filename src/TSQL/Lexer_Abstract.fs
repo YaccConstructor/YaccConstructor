@@ -31,7 +31,7 @@ open System
 open LexerHelper
 open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
-
+open YC.SDK.CommonInterfaces
 open System.Collections.Generic
 
 let mutable id = 0<id>
@@ -4331,9 +4331,9 @@ let actions () =
       (fun (gr : GraphTokenValue<_>) ->
                             L_where(gr)|> Some );
       (fun (gr : GraphTokenValue<_>) ->
-                          L_and_(gr) |> Some );
+                          L_and(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->
-                         L_or_(gr) |> Some );
+                         L_or(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->
                           L_set(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->

@@ -94,10 +94,10 @@ let parseSQL srcFilePath =
     printfn "Lexer time = %A" (System.DateTime.Now - s)
     //QuickGraph.EdgeListGraph
     let start = System.DateTime.Now
-    for i in 1..10 do 
+    for i in 1..1 do 
         let r = parse input
         match r with
-        | Yard.Generators.ARNGLR.Parser.ParseResult.Success (_) -> ()
+        | Yard.Generators.ARNGLR.Parser.ParseResult.Success (t) -> t.PrintAst()
         | _ -> failwith "!!!!!"
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0

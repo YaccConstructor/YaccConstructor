@@ -4330,9 +4330,9 @@ let actions () =
       (fun (gr : GraphTokenValue<_>) ->
                             L_where(gr)|> Some );
       (fun (gr : GraphTokenValue<_>) ->
-                          L_and_(gr) |> Some );
+                          L_and(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->
-                         L_or_(gr) |> Some );
+                         L_or(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->
                           L_set(gr) |> Some );
       (fun (gr : GraphTokenValue<_>) ->

@@ -162,8 +162,9 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
             let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
             if arr <> null then
+                verticesToProcess.Enqueue currentGraphV
                 for prod in arr do
-                    reductions.Add(gssVertex, prod, 0, None, e.Target)
+                    reductions.Add(gssVertex, prod, 0, None, currentGraphV)
         
         let reductionSet = new ResizeArray<_>(10)
         for gssVertex, prod, pos, edge, target in reductions do
@@ -205,12 +206,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     
     let verticesToRecalc = new ResizeArray<_> (10)
 
-    let inline addChildren node path prod =
+    let (*inline*) addChildren node (path : _[]) prod =
         let family = getFamily node
         let astExists = 
             family
             |> ResizeArray.exists
-                (function (number,children) -> number = prod && Array.forall2 (=) children path)
+                (function (number,children) -> number = prod && children.Length = path.Length && Array.forall2 (=) children path)
         if not astExists then
             family.Add (prod, path)
 

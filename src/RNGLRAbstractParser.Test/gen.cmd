@@ -36,7 +36,7 @@
         -g "RNGLRGenerator -pos int -token int -module RNGLR.Eps -translate false -table LR -o Eps.yrd.fs -abstract true" >> log.txt
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i List.yrd -c ExpandEbnf -c ExpandMeta ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.List -translate false -table LR -o List.yrd.fs -abstract true" >> log.txt
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.List -translate false -table LR -o List.yrd.fs -abstract true" >> _log.txt
 
-..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Epsilon2.yrd -c ExpandEbnf -c ExpandMeta ^
-        -g "RNGLRGenerator -pos int -token int -module RNGLR.Epsilon2 -translate false -table LR -o Epsilon2.yrd.fs -abstract true" >> log.txt
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i FirstEps.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.FirstEps -translate false -table LR -o FirstEps.yrd.fs -abstract true" >> log.txt

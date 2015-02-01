@@ -405,6 +405,19 @@ type ``RNGLR abstract parser tests`` () =
         
         test RNGLR.Stars2.buildAstAbstract qGraph
 
+    member this.``FirstEps`` () =
+        let qGraph = new ParserInputGraph<_>()
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.FirstEps.Z 1)
+            //edg 1 2 (RNGLR.Eps.YYY 1)
+            edg 1 3 (RNGLR.FirstEps.N 2)
+            //edg 2 3 (RNGLR.Eps.PLUS 0)
+            edg 3 4 (RNGLR.FirstEps.RNGLR_EOF 5)
+            ] |> ignore
+
+        test RNGLR.FirstEps.buildAstAbstract qGraph
+
+    [<Test>]
 //    [<Test>]
 //    member this.``Calc. Sequence input.`` () =
 //        let qGraph = new ParserInputGraph<_>()
@@ -995,5 +1008,6 @@ let f x =
 //    t.``Stars. Loop.`` () 
     //t.``Stars2. Loop.`` () 
     t.``Epsilons2. Sequence input.``()
+//    t.``FirstEps`` ()
     0
     

@@ -96,6 +96,23 @@ type ``RNGLR abstract parser tests`` () =
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 25)
 
     [<Test>]
+            [edg 0 1 (RNGLR.Epsilons2.DDD 1)
+    member this.``Epsilons2. Branch input.`` () =
+        let qGraph = new ParserInputGraph<_>(0, 4)        
+        qGraph.AddVerticesAndEdgeRange
+            [//edg 0 1 (RNGLR.Epsilons2.DDD 1)
+             //edg 1 2 (RNGLR.Epsilons2.YYY 1)
+             edg 0 2 (RNGLR.Epsilons2.NUM 2)
+             edg 0 5 (RNGLR.Epsilons2.NUM 3)
+             edg 5 6 (RNGLR.Epsilons2.P 4)
+             edg 6 2 (RNGLR.Epsilons2.NUM 6)
+             //edg 2 3 (RNGLR.Epsilons2.PLUS 0)
+             edg 2 4 (RNGLR.Epsilons2.RNGLR_EOF 5)
+             ] |> ignore
+
+        test RNGLR.Epsilons2.buildAstAbstract qGraph
+
+    [<Test>]
     member this.``Pretty Simple Calc. Sequence input.`` () =
         let qGraph = new ParserInputGraph<_>()        
         qGraph.AddVerticesAndEdgeRange
@@ -111,10 +128,10 @@ type ``RNGLR abstract parser tests`` () =
     member this.``Pretty Simple Calc. Simple branched input.`` () =
         let qGraph = new ParserInputGraph<_>()        
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+            [edg 0 3 (RNGLR.PrettySimpleCalc.NUM 3)
+             edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
              edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 0)
              edg 2 3 (RNGLR.PrettySimpleCalc.NUM 2)
-             edg 0 3 (RNGLR.PrettySimpleCalc.NUM 3)
              edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 5)
              ] |> ignore
 
@@ -380,7 +397,7 @@ type ``RNGLR abstract parser tests`` () =
              ] |> ignore
         
         test RNGLR.Stars2.buildAstAbstract qGraph
-
+    
     [<Test>]
     member this.``Eps`` () =
         let qGraph = new ParserInputGraph<_>()
@@ -396,7 +413,7 @@ type ``RNGLR abstract parser tests`` () =
 
     [<Test>]
     member this.``FirstEps`` () =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.FirstEps.Z 1)
             //edg 1 2 (RNGLR.Eps.YYY 1)
@@ -407,7 +424,7 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.FirstEps.buildAstAbstract qGraph
 
-    [<Test>]
+    
     member this.``List`` () =
         let qGraph = new ParserInputGraph<_>() 
         qGraph.AddVerticesAndEdgeRange
@@ -990,7 +1007,7 @@ let f x =
     let t = new ``RNGLR abstract parser tests`` () 
 
 //    t.``Pretty Simple Calc. Sequence input.`` ()
-//    t.``Pretty Simple Calc. Simple branched input.`` ()
+    //t.``Pretty Simple Calc. Simple branched input.`` ()
 //    t.``Pretty Simple Calc. Branched input.`` ()
 //    t.``Pretty Simple Calc. Lots Of Variants.``() 
 //    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
@@ -1006,7 +1023,7 @@ let f x =
 //    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
 //    t.``Stars. Loop.`` () 
 //    t.``Stars2. Loop.`` () 
-//    t.``Eps`` ()
+    t.``Epsilons2. Sequence input.``()
     t.``List`` ()
 //    t.``FirstEps`` ()
     0

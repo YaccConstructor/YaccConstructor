@@ -118,6 +118,7 @@
     <PostBuildEvent>cd $(TargetDir)
 del JetBrains*</PostBuildEvent>
   </PropertyGroup>
+    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\3.dot  -p</StartArguments>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

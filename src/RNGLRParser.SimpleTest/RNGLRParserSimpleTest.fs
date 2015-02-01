@@ -184,3 +184,26 @@ type ``RNGLR parser tests with simple lexer`` () =
  //           RNGLR.ParseLolCalc.defaultAstToDot mAst "lolCalc.dot"
  //           printfn "Result: %A" res
  //           Assert.AreEqual(List.replicate 2 45, res)
+
+    [<Test>]
+    member test.``Eps``() =
+        runTest RNGLR.Eps.buildAst "Eps.txt" printAst
+
+    [<Test>]
+    member test.``Eps2``() =
+        runTest RNGLR.Eps2.buildAst "Eps2.txt" printAst
+
+    [<Test>]
+    member test.``ListEps``() =
+        runTest RNGLR.ListEps.buildAst "ListEps.txt" printAst
+
+[<EntryPoint>]
+let f x =
+    if System.IO.Directory.Exists "dot" 
+    then 
+        System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
+    else System.IO.Directory.CreateDirectory "dot" |> ignore
+    let t = new ``RNGLR parser tests with simple lexer`` ()
+    t.``ListEps`` ()
+
+    0

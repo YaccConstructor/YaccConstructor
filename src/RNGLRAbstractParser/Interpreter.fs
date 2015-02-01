@@ -97,7 +97,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             tokens.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
             |> g.AddVerticesAndEdgeRange
         //if added <> tokens.EdgeCount then failwithf "Error while convertion input parser graph to iier representation. Expected edges: %A, actual: %A" tokens.EdgeCount added
-        verticesMap.[Seq.min tokens.Vertices], verticesMap.[Seq.max tokens.Vertices], g
+        verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
     
     let nodes = new BlockResizeArray<_>()
     // Must be number of non-terminals, but doesn't matter

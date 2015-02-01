@@ -42,11 +42,11 @@ type ``FParsec generator tests`` () =
         System.IO.File.Exists resultFullPath |> Assert.IsTrue
         filesAreEqual resultFullPath expectedFullPath      
 
-    [<Test>]
+    //[<Test>]
     member test.``Right generation of file`` () =  
         tetsFun "calc.yrd"
 
-    [<Test>]
+    //[<Test>]
     member test.``Test for literals`` () =
         tetsFun "literals.yrd"                
 

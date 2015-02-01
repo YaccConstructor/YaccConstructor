@@ -513,15 +513,13 @@ let printTokenToTreeNode (indexator : Indexator) =
     for i = indexator.termsStart to indexator.termsEnd do
         let termNode = toClassName <| indexator.indexToTerm i
         printBrInd 1 "| %s data -> " termNode
-        printBrInd 2 "let value, temp = data"
-        printBrInd 2 "let ranges = calculatePos temp"
+        printBrInd 2 "let ranges = calculatePos data"
         printBrInd 2 "new %sTermNode(ranges) :> ITreeNode" termNode
 
     for i = indexator.literalsStart to indexator.literalsEnd do
         let litNode = toClassName <| indexator.indexToLiteral i
         printBrInd 1 "| L_%s data -> " <| indexator.indexToLiteral i
-        printBrInd 2 "let value, temp = data"
-        printBrInd 2 "let ranges = calculatePos temp"
+        printBrInd 2 "let ranges = calculatePos data"
         printBrInd 2 "new %sLitNode(ranges) :> ITreeNode" litNode
 
     res.ToString()

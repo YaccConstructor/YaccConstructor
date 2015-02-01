@@ -1,3 +1,4 @@
+..\..\bin\Release\v40\AbstractLexer.Generator.exe Lexer.fsl -o Lexer.fs
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i SimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.ParseSimpleCalc -translate true -table LR -o SimpleCalc.yrd.fs -abstract true" >> log.txt
 
@@ -18,7 +19,7 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i PrettySimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.PrettySimpleCalc -translate false -table LR -o PrettySimpleCalc.yrd.fs -abstract true" >> log.txt
-
+                                                                                                                                                               
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i NotAmbigousSimpleCalc.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.NotAmbigousSimpleCalc -translate false -table LR -o NotAmbigousSimpleCalc.yrd.fs -abstract true" >> log.txt
 

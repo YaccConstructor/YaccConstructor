@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d65bde42-d396-458c-be08-104477314657}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>RNGLRParser.SimpleTest</RootNamespace>
     <AssemblyName>YC.RNGLRParser.SimpleTest</AssemblyName>
     <Name>RNGLRParser.SimpleTest</Name>

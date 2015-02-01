@@ -6,6 +6,9 @@ open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.ARNGLR.AST
+open YC.FST.AbstractLexing.Interpreter
+open YC.FST.FstApproximation
+open YC.FST.GraphBasedFst
 
 type TreeGenerationState<'node> = 
     | Start
@@ -39,13 +42,13 @@ type IInjectedLanguageModule<'br,'range,'node> =
      abstract GetForestWithToken: 'range -> ResizeArray<'node>
      abstract GetPairedRanges: int -> int -> 'range -> bool -> ResizeArray<'range>
      abstract Process
-        : AbstractAnalysis.Common.LexerInputGraph<'br>
-          -> ResizeArray<string * 'range> * ResizeArray<string * 'range>
+        : Appr<'br> -> ResizeArray<string * 'range> * ResizeArray<string * 'range>
 
 
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
-        tokenize: LexerInputGraph<'br> -> ParserInputGraph<'TokenType>
+        //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Smbl<char * Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange:'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit
@@ -53,7 +56,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     let lexingFinished = new Event<LexingFinishedArgs<'node>>()
     let parsingFinished = new Event<ParsingFinishedArgs>()
-    let mutable forest: list<Tree<'TokenType> * _> = [] 
+    let mutable forest: list<_ * _> = [] 
     let mutable otherForest : list<OtherTree<'TokenType>> = []
 
     let mutable generationState : TreeGenerationState<'node> = Start
@@ -74,31 +77,42 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             lexingFinished.Trigger(new LexingFinishedArgs<'node>(tokensList, lang))
 
     let processLang graph addLError addPError =
-        let tokenize g =
-            try 
-                tokenize g
-                |> Some 
-            with
-            | LexerError(t,brs) ->
-                (t, (brs :?> array<AbstractLexer.Core.Position<'br>>).[0].back_ref |> getDocumentRange)
-                |> addLError
+//        let tokenize g =
+//            try 
+//                tokenize g
+//                |> Some 
+//            with
+//            | LexerError(t,grToken) ->
+//                (t, (grToken :?> GraphTokenValue<'br>).Edges |> Seq.nth 0 |> fun e -> e.BackRef |> getDocumentRange)
+//                |> addLError
+//                None
+//        
+//        let tokenizedGraph = tokenize graph         
+    
+        let tokenizedGraph = 
+            match tokenize graph with
+            | Success res -> res |> Some
+            | Error errors -> 
+                errors |> Array.map (function Smbl e -> fst e |> string, (e |> snd).back_ref |> getDocumentRange | e -> failwithf "Unexpected tocenization result: %A" e)
+                |> Array.iter addLError 
                 None
 
-        
-        let tokenizedGraph = tokenize graph 
         prepareToHighlighting tokenizedGraph tokenToTreeNode 
 
         tokenizedGraph 
-        |> Option.map parse
-        |> ignore
-//        |> Option.iter
-//            (function 
-//                | Yard.Generators.ARNGLR.Parser.Success(tree, _, errors) ->
-//                    forest <- (tree, errors) :: forest
-//                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
-//                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
-//                | Yard.Generators.ARNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
-//            )
+        |> Option.map
+            (fun x -> 
+                let y = parse x
+                printfn "Tree: %A" y
+                y)
+        |> Option.iter
+            (function 
+                | Yard.Generators.RNGLR.Parser.Success(tree, _, errors) ->
+                    forest <- (tree, errors) :: forest
+                    otherForest <- new OtherTree<'TokenType>(tree) :: otherForest
+                    parsingFinished.Trigger (new ParsingFinishedArgs (lang))
+                | Yard.Generators.RNGLR.Parser.Error(_,tok,_,_,_) -> tok |> Array.iter addPError 
+            )
 
     let getNextTree index : TreeGenerationState<'node> = 
         if forest.Length <= index
@@ -141,7 +155,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
         | _ -> failwith "Unexpected state in tree generation"
 
     member this.TokenToPos calculatePos (token : 'TokenType)= 
-        let data : string * array<AbstractLexer.Core.Position<'br>> = unbox <| tokenData token
+        let data : string * GraphTokenValue<'br> = unbox <| tokenData token
         calculatePos <| snd data
 
     member this.GetForestWithToken range = getForestWithToken range
@@ -162,22 +176,19 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
 
     member this.TranslateToTreeNode nextTree errors = (Seq.head <| translate nextTree errors)
     
-    member this.Process (graph:LexerInputGraph<'br>) = 
+    member this.Process (graph:Appr<'br>) = 
         let parserErrors = new ResizeArray<_>()
         let lexerErrors = new ResizeArray<_>()
-        let filterBrs (brs:array<AbstractLexer.Core.Position<'br>>) =
-            let res = new ResizeArray<AbstractLexer.Core.Position<'br>>(3)
-            brs |> Array.iter(fun br -> if res.Exists(fun x -> obj.ReferenceEquals(x.back_ref, br.back_ref)) |> not then res.Add br)
-            res.ToArray()
-                    
+
         let addError tok =
-            let e tokName lang (brs:array<AbstractLexer.Core.Position<'br>>) = 
-                brs |> calculatePos
+            let e tokName (tokenData: GraphTokenValue<'br>) = 
+                tokenData |> calculatePos
                 |> Seq.iter
-                    (fun br -> parserErrors.Add <| ((sprintf "%A(%A)" tokName lang), br))
+                    ///TODO!!! Produce user friendly error message!
+                    (fun br -> parserErrors.Add <| ((sprintf "%A" tokName), br))
             let name = tok |> (tokenToNumber >>  numToString)
-            let (language : string), br = tokenData tok :?> _
-            e name language br
+            let tokenData = tokenData tok :?> GraphTokenValue<'br>
+            e name tokenData
         
         
         processLang graph lexerErrors.Add addError

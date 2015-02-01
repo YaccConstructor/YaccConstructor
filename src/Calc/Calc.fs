@@ -1,7 +1,6 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.Languages.Calc
 
 open Calc.AbstractParser
-open AbstractLexer.Core
 open Yard.Generators.Common.ARNGLR.AST
 open YC.SDK.CommonInterfaces
 open YC.SDK.CommonInterfaces
@@ -9,6 +8,7 @@ open Mono.Addins
 open YC.SDK.ReSharper.Helper
 open ReSharperExtension
 open JetBrains.Application
+open YC.FST.AbstractLexing.Interpreter
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -20,20 +20,9 @@ type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 [<Extension>]
 [<ShellComponent>]
 type CalcInjectedLanguageModule () =
-    let printTag tag printBrs = 
-        match tag with
-            | NUMBER(v,br) -> "NUM: " + v + "; br= " + printBrs br
-            | PLUS(v,br)   
-            | MULT(v,br)   
-            | RBRACE(v,br)
-            | POW(v,br)
-            | DIV(v,br)
-            | LBRACE(v,br) ->  v + "; br= " + printBrs br
-            | e -> string e
-
     let tokenize lexerInputGraph =
-        let eof = Calc.AbstractParser.RNGLR_EOF("",[||])
-        Calc.Lexer._fslex_tables.Tokenize(Calc.Lexer.fslex_actions_token, lexerInputGraph, eof)
+        let eof = RNGLR_EOF(new GraphTokenValue<_>())    
+        YC.CalcLexer.tokenize eof lexerInputGraph
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

@@ -1,12 +1,13 @@
 # 1 "fslexlex.fsl"
- 
+
 (* (c) Microsoft Corporation 2005-2008.  *)
   
-module FSharp.PowerPack.FsLex.Lexer
+module internal FSharp.PowerPack.FsLex.Lexer
   
 open FSharp.PowerPack.FsLex.AST
 open FSharp.PowerPack.FsLex.Parser
-open Microsoft.FSharp.Text.Lexing
+open Internal.Utilities
+open Internal.Utilities.Text.Lexing
 open System.Text
 
 let escape c = 
@@ -56,7 +57,7 @@ let unicodegraph_long (s:string) =
       char(0xDF30 + ((high * 0x10000 + low - 0x10000) % 0x400))
 
 
-# 59 "fslexlex.fs"
+# 60 "fslexlex.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -339,396 +340,393 @@ let trans : uint16[] array =
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 92us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 65535us; 65535us; 65535us; 65535us; 92us; 65535us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 92us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
 let actions : uint16[] = [|65535us; 7us; 1us; 7us; 3us; 7us; 7us; 5us; 6us; 7us; 6us; 4us; 3us; 2us; 65535us; 65535us; 0us; 65535us; 5us; 1us; 2us; 5us; 3us; 4us; 5us; 3us; 2us; 0us; 65535us; 0us; 1us; 8us; 3us; 4us; 8us; 5us; 8us; 7us; 8us; 6us; 6us; 5us; 4us; 2us; 65535us; 7us; 3us; 4us; 7us; 5us; 6us; 7us; 5us; 4us; 0us; 65535us; 1us; 65535us; 65535us; 2us; 65535us; 15us; 15us; 15us; 15us; 15us; 31us; 11us; 12us; 13us; 14us; 31us; 15us; 16us; 17us; 18us; 19us; 20us; 21us; 22us; 23us; 24us; 25us; 26us; 27us; 28us; 31us; 31us; 32us; 30us; 30us; 29us; 15us; 14us; 13us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 10us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 9us; 65535us; 65535us; 65535us; 65535us; 8us; 65535us; 65535us; 7us; 65535us; 65535us; 6us; 5us; 15us; 4us; 15us; 3us; 15us; 2us; 15us; 15us; 15us; 1us; 15us; 15us; 0us; |]
-let _fslex_tables = Microsoft.FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
+let _fslex_tables = Internal.Utilities.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 (* Rule token *)
-and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  60 lexbuf
-(* Rule string *)
-and string p buff (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_string p buff 44 lexbuf
-(* Rule code *)
-and code p buff (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_code p buff 28 lexbuf
-(* Rule codestring *)
-and codestring buff (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_codestring buff 17 lexbuf
-(* Rule comment *)
-and comment p (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_comment p 0 lexbuf
-(* Rule token *)
+and token  (lexbuf : Internal.Utilities.Text.Lexing.LexBuffer<_>) = _fslex_token  60 lexbuf
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 75 "fslexlex.fsl"
-                          RULE 
-# 360 "fslexlex.fs"
+# 76 "fslexlex.fsl"
+               RULE 
+# 352 "fslexlex.fs"
           )
   | 1 -> ( 
-# 76 "fslexlex.fsl"
-                           PARSE 
-# 365 "fslexlex.fs"
+# 77 "fslexlex.fsl"
+               PARSE 
+# 357 "fslexlex.fs"
           )
   | 2 -> ( 
-# 77 "fslexlex.fsl"
-                         EOF 
-# 370 "fslexlex.fs"
+# 78 "fslexlex.fsl"
+               EOF 
+# 362 "fslexlex.fs"
           )
   | 3 -> ( 
-# 78 "fslexlex.fsl"
-                         LET 
-# 375 "fslexlex.fs"
+# 79 "fslexlex.fsl"
+               LET 
+# 367 "fslexlex.fs"
           )
   | 4 -> ( 
-# 79 "fslexlex.fsl"
-                         AND 
-# 380 "fslexlex.fs"
+# 80 "fslexlex.fsl"
+               AND 
+# 372 "fslexlex.fs"
           )
   | 5 -> ( 
-# 81 "fslexlex.fsl"
-                    let s = lexeme lexbuf in 
+# 82 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     CHAR (if s.[1] = '\\' then escape s.[2] else s.[1])  
-# 386 "fslexlex.fs"
+# 378 "fslexlex.fs"
           )
   | 6 -> ( 
-# 85 "fslexlex.fsl"
-                    let s = lexeme lexbuf in 
+# 86 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     CHAR (trigraph s.[2] s.[3] s.[4]) 
-# 392 "fslexlex.fs"
+# 384 "fslexlex.fs"
           )
   | 7 -> ( 
-# 89 "fslexlex.fsl"
-                    let s = lexeme lexbuf in 
+# 90 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     CHAR (hexgraph s.[3] s.[4]) 
-# 398 "fslexlex.fs"
+# 390 "fslexlex.fs"
           )
   | 8 -> ( 
-# 93 "fslexlex.fsl"
-                    let s = lexeme lexbuf in 
+# 94 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     CHAR (unicodegraph_short s.[3..6]) 
-# 404 "fslexlex.fs"
+# 396 "fslexlex.fs"
           )
   | 9 -> ( 
-# 97 "fslexlex.fsl"
-                    let s = lexeme lexbuf in
+# 98 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     match (unicodegraph_long s.[3..10]) with 
                     | None, c -> CHAR(c)
                     | Some _ , _ -> failwith "Unicode characters needing surrogate pairs are not yet supported by this tool" 
-# 412 "fslexlex.fs"
+# 404 "fslexlex.fs"
           )
   | 10 -> ( 
-# 103 "fslexlex.fsl"
-                    let s = (lexeme lexbuf).[2..3] in 
+# 104 "fslexlex.fsl"
+                let s = (lexeme lexbuf).[2..3] in 
                     UNICODE_CATEGORY (s) 
-# 418 "fslexlex.fs"
+# 410 "fslexlex.fs"
           )
   | 11 -> ( 
-# 106 "fslexlex.fsl"
-                        let p = lexbuf.StartPos in 
+# 107 "fslexlex.fsl"
+                let p = lexbuf.StartPos in 
                         let buff = (new StringBuilder 100) in
                         // adjust the first line to get even indentation for all lines w.r.t. the left hand margin
                         buff.Append (String.replicate (lexbuf.StartPos.Column+1) " ") |> ignore;
                         code p buff lexbuf 
-# 427 "fslexlex.fs"
+# 419 "fslexlex.fs"
           )
   | 12 -> ( 
-# 112 "fslexlex.fsl"
-                        string  lexbuf.StartPos (new StringBuilder 100) lexbuf 
-# 432 "fslexlex.fs"
+# 113 "fslexlex.fsl"
+                string  lexbuf.StartPos (new StringBuilder 100) lexbuf 
+# 424 "fslexlex.fs"
           )
   | 13 -> ( 
-# 114 "fslexlex.fsl"
-                                 token lexbuf 
-# 437 "fslexlex.fs"
+# 115 "fslexlex.fsl"
+                token lexbuf 
+# 429 "fslexlex.fs"
           )
   | 14 -> ( 
-# 115 "fslexlex.fsl"
-                            newline lexbuf; token lexbuf 
-# 442 "fslexlex.fs"
+# 116 "fslexlex.fsl"
+                newline lexbuf; token lexbuf 
+# 434 "fslexlex.fs"
           )
   | 15 -> ( 
-# 116 "fslexlex.fsl"
-                                                 IDENT (lexeme lexbuf) 
-# 447 "fslexlex.fs"
+# 117 "fslexlex.fsl"
+                IDENT (lexeme lexbuf) 
+# 439 "fslexlex.fs"
           )
   | 16 -> ( 
-# 117 "fslexlex.fsl"
-                        BAR 
-# 452 "fslexlex.fs"
+# 118 "fslexlex.fsl"
+                BAR 
+# 444 "fslexlex.fs"
           )
   | 17 -> ( 
-# 118 "fslexlex.fsl"
-                        DOT 
-# 457 "fslexlex.fs"
+# 119 "fslexlex.fsl"
+                DOT 
+# 449 "fslexlex.fs"
           )
   | 18 -> ( 
-# 119 "fslexlex.fsl"
-                        PLUS 
-# 462 "fslexlex.fs"
+# 120 "fslexlex.fsl"
+                PLUS 
+# 454 "fslexlex.fs"
           )
   | 19 -> ( 
-# 120 "fslexlex.fsl"
-                        STAR 
-# 467 "fslexlex.fs"
+# 121 "fslexlex.fsl"
+                STAR 
+# 459 "fslexlex.fs"
           )
   | 20 -> ( 
-# 121 "fslexlex.fsl"
-                        QMARK 
-# 472 "fslexlex.fs"
+# 122 "fslexlex.fsl"
+                QMARK 
+# 464 "fslexlex.fs"
           )
   | 21 -> ( 
-# 122 "fslexlex.fsl"
-                        EQUALS 
-# 477 "fslexlex.fs"
+# 123 "fslexlex.fsl"
+                EQUALS 
+# 469 "fslexlex.fs"
           )
   | 22 -> ( 
-# 123 "fslexlex.fsl"
-                        LBRACK 
-# 482 "fslexlex.fs"
+# 124 "fslexlex.fsl"
+                LBRACK 
+# 474 "fslexlex.fs"
           )
   | 23 -> ( 
-# 124 "fslexlex.fsl"
-                        RBRACK 
-# 487 "fslexlex.fs"
+# 125 "fslexlex.fsl"
+                RBRACK 
+# 479 "fslexlex.fs"
           )
   | 24 -> ( 
-# 125 "fslexlex.fsl"
-                        LPAREN 
-# 492 "fslexlex.fs"
+# 126 "fslexlex.fsl"
+                LPAREN 
+# 484 "fslexlex.fs"
           )
   | 25 -> ( 
-# 126 "fslexlex.fsl"
-                        RPAREN 
-# 497 "fslexlex.fs"
+# 127 "fslexlex.fsl"
+                RPAREN 
+# 489 "fslexlex.fs"
           )
   | 26 -> ( 
-# 127 "fslexlex.fsl"
-                        UNDERSCORE 
-# 502 "fslexlex.fs"
+# 128 "fslexlex.fsl"
+                UNDERSCORE 
+# 494 "fslexlex.fs"
           )
   | 27 -> ( 
-# 128 "fslexlex.fsl"
-                        HAT 
-# 507 "fslexlex.fs"
+# 129 "fslexlex.fsl"
+                HAT 
+# 499 "fslexlex.fs"
           )
   | 28 -> ( 
-# 129 "fslexlex.fsl"
-                        DASH 
-# 512 "fslexlex.fs"
+# 130 "fslexlex.fsl"
+                DASH 
+# 504 "fslexlex.fs"
           )
   | 29 -> ( 
-# 130 "fslexlex.fsl"
-                         ignore(comment lexbuf.StartPos lexbuf); token lexbuf 
-# 517 "fslexlex.fs"
+# 131 "fslexlex.fsl"
+                ignore(comment lexbuf.StartPos lexbuf); token lexbuf 
+# 509 "fslexlex.fs"
           )
   | 30 -> ( 
-# 131 "fslexlex.fsl"
-                                      token lexbuf 
-# 522 "fslexlex.fs"
+# 132 "fslexlex.fsl"
+                token lexbuf 
+# 514 "fslexlex.fs"
           )
   | 31 -> ( 
-# 132 "fslexlex.fsl"
-                      unexpected_char lexbuf 
-# 527 "fslexlex.fs"
+# 133 "fslexlex.fsl"
+                unexpected_char lexbuf 
+# 519 "fslexlex.fs"
           )
   | 32 -> ( 
-# 133 "fslexlex.fsl"
-                        EOF  
-# 532 "fslexlex.fs"
+# 134 "fslexlex.fsl"
+                EOF  
+# 524 "fslexlex.fs"
           )
   | _ -> failwith "token"
 (* Rule string *)
+and string p buff (lexbuf : Internal.Utilities.Text.Lexing.LexBuffer<_>) = _fslex_string p buff 44 lexbuf
 and _fslex_string p buff _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 135 "fslexlex.fsl"
-                                  newline lexbuf; string p buff lexbuf 
-# 541 "fslexlex.fs"
+# 136 "fslexlex.fsl"
+                newline lexbuf; string p buff lexbuf 
+# 534 "fslexlex.fs"
           )
   | 1 -> ( 
-# 137 "fslexlex.fsl"
-                    let _ = buff.Append (escape (lexeme lexbuf).[1]) in
+# 138 "fslexlex.fsl"
+                let _ = buff.Append (escape (lexeme lexbuf).[1]) in
                     string p buff lexbuf 
-# 547 "fslexlex.fs"
+# 540 "fslexlex.fs"
           )
   | 2 -> ( 
-# 140 "fslexlex.fsl"
-                    let s = lexeme lexbuf in 
+# 141 "fslexlex.fsl"
+                let s = lexeme lexbuf in 
                     let _ = buff.Append (trigraph s.[1] s.[2] s.[3]) in
                     string p buff lexbuf  
-# 554 "fslexlex.fs"
+# 547 "fslexlex.fs"
           )
   | 3 -> ( 
-# 143 "fslexlex.fsl"
-                        STRING (buff.ToString()) 
-# 559 "fslexlex.fs"
+# 144 "fslexlex.fsl"
+                STRING (buff.ToString()) 
+# 552 "fslexlex.fs"
           )
   | 4 -> ( 
-# 144 "fslexlex.fsl"
-                            newline lexbuf; 
+# 145 "fslexlex.fsl"
+                newline lexbuf; 
                             let _ = buff.Append System.Environment.NewLine in
                             string p buff lexbuf 
-# 566 "fslexlex.fs"
+# 559 "fslexlex.fs"
           )
   | 5 -> ( 
-# 148 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in 
+# 149 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                     string p buff lexbuf 
-# 572 "fslexlex.fs"
+# 565 "fslexlex.fs"
           )
   | 6 -> ( 
-# 150 "fslexlex.fsl"
-                        failwith (Printf.sprintf "end of file in string started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))  
-# 577 "fslexlex.fs"
+# 151 "fslexlex.fsl"
+                failwith (Printf.sprintf "end of file in string started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))  
+# 570 "fslexlex.fs"
           )
   | 7 -> ( 
-# 151 "fslexlex.fsl"
-                      let _ = buff.Append (lexeme lexbuf).[0] in
+# 152 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf).[0] in
                       string p buff lexbuf 
-# 583 "fslexlex.fs"
+# 576 "fslexlex.fs"
           )
   | _ -> failwith "string"
 (* Rule code *)
+and code p buff (lexbuf : Internal.Utilities.Text.Lexing.LexBuffer<_>) = _fslex_code p buff 28 lexbuf
 and _fslex_code p buff _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 154 "fslexlex.fsl"
-                        CODE (buff.ToString(), p) 
-# 592 "fslexlex.fs"
+# 155 "fslexlex.fsl"
+                CODE (buff.ToString(), p) 
+# 586 "fslexlex.fs"
           )
   | 1 -> ( 
-# 155 "fslexlex.fsl"
-                        let _ = buff.Append (lexeme lexbuf) in 
+# 156 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                         ignore(code p buff lexbuf); 
                         let _ = buff.Append "}" in
                         code p buff lexbuf 
-# 600 "fslexlex.fs"
+# 594 "fslexlex.fs"
           )
   | 2 -> ( 
-# 160 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in 
+# 161 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                     code p buff lexbuf 
-# 606 "fslexlex.fs"
+# 600 "fslexlex.fs"
           )
   | 3 -> ( 
-# 162 "fslexlex.fsl"
-                         let _ = buff.Append (lexeme lexbuf) in 
+# 163 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                          ignore(codestring buff lexbuf); 
                          code p buff lexbuf 
-# 613 "fslexlex.fs"
+# 607 "fslexlex.fs"
           )
   | 4 -> ( 
-# 165 "fslexlex.fsl"
-                            newline lexbuf; 
+# 166 "fslexlex.fsl"
+                newline lexbuf; 
                             let _ = buff.Append System.Environment.NewLine in
                             code p buff lexbuf 
-# 620 "fslexlex.fs"
+# 614 "fslexlex.fs"
           )
   | 5 -> ( 
-# 169 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in 
+# 170 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
+                    code p buff lexbuf 
+# 620 "fslexlex.fs"
+          )
+  | 6 -> ( 
+# 173 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in
                     code p buff lexbuf 
 # 626 "fslexlex.fs"
           )
-  | 6 -> ( 
-# 172 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in
-                    code p buff lexbuf 
-# 632 "fslexlex.fs"
-          )
   | 7 -> ( 
-# 174 "fslexlex.fsl"
-                        EOF 
-# 637 "fslexlex.fs"
+# 175 "fslexlex.fsl"
+                EOF 
+# 631 "fslexlex.fs"
           )
   | 8 -> ( 
-# 175 "fslexlex.fsl"
-                      let _ = buff.Append (lexeme lexbuf).[0] in
+# 176 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf).[0] in
                       code p buff lexbuf 
-# 643 "fslexlex.fs"
+# 637 "fslexlex.fs"
           )
   | _ -> failwith "code"
 (* Rule codestring *)
+and codestring buff (lexbuf : Internal.Utilities.Text.Lexing.LexBuffer<_>) = _fslex_codestring buff 17 lexbuf
 and _fslex_codestring buff _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 180 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in 
+# 181 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                     codestring buff lexbuf 
-# 653 "fslexlex.fs"
+# 648 "fslexlex.fs"
           )
   | 1 -> ( 
-# 182 "fslexlex.fsl"
-                        let _ = buff.Append (lexeme lexbuf) in 
+# 183 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                         buff.ToString() 
-# 659 "fslexlex.fs"
+# 654 "fslexlex.fs"
           )
   | 2 -> ( 
-# 184 "fslexlex.fsl"
-                            newline lexbuf; 
+# 185 "fslexlex.fsl"
+                newline lexbuf; 
                             let _ = buff.Append System.Environment.NewLine in
                             codestring buff lexbuf 
-# 666 "fslexlex.fs"
+# 661 "fslexlex.fs"
           )
   | 3 -> ( 
-# 188 "fslexlex.fsl"
-                    let _ = buff.Append (lexeme lexbuf) in 
+# 189 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf) in 
                     codestring buff lexbuf 
-# 672 "fslexlex.fs"
+# 667 "fslexlex.fs"
           )
   | 4 -> ( 
-# 190 "fslexlex.fsl"
-                        failwith "unterminated string in code" 
-# 677 "fslexlex.fs"
+# 191 "fslexlex.fsl"
+                failwith "unterminated string in code" 
+# 672 "fslexlex.fs"
           )
   | 5 -> ( 
-# 191 "fslexlex.fsl"
-                      let _ = buff.Append (lexeme lexbuf).[0] in
+# 192 "fslexlex.fsl"
+                let _ = buff.Append (lexeme lexbuf).[0] in
                       codestring buff lexbuf 
-# 683 "fslexlex.fs"
+# 678 "fslexlex.fs"
           )
   | _ -> failwith "codestring"
 (* Rule comment *)
+and comment p (lexbuf : Internal.Utilities.Text.Lexing.LexBuffer<_>) = _fslex_comment p 0 lexbuf
 and _fslex_comment p _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 195 "fslexlex.fsl"
-                          comment p lexbuf 
-# 692 "fslexlex.fs"
+# 196 "fslexlex.fsl"
+                comment p lexbuf 
+# 688 "fslexlex.fs"
           )
   | 1 -> ( 
-# 196 "fslexlex.fsl"
-                        ignore(try string lexbuf.StartPos (new StringBuilder 100) lexbuf 
+# 197 "fslexlex.fsl"
+                ignore(try string lexbuf.StartPos (new StringBuilder 100) lexbuf 
                                with Failure s -> failwith (s + "\n" + Printf.sprintf "error while processing string nested in comment started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))); 
                         comment p lexbuf 
-# 699 "fslexlex.fs"
+# 695 "fslexlex.fs"
           )
   | 2 -> ( 
-# 199 "fslexlex.fsl"
-                         ignore(try comment p lexbuf with Failure s -> failwith (s + "\n" + Printf.sprintf "error while processing nested comment started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))); 
+# 200 "fslexlex.fsl"
+                ignore(try comment p lexbuf with Failure s -> failwith (s + "\n" + Printf.sprintf "error while processing nested comment started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))); 
                          comment p lexbuf 
-# 705 "fslexlex.fs"
+# 701 "fslexlex.fs"
           )
   | 3 -> ( 
-# 201 "fslexlex.fsl"
-                            newline lexbuf; comment p lexbuf 
-# 710 "fslexlex.fs"
+# 202 "fslexlex.fsl"
+                newline lexbuf; comment p lexbuf 
+# 706 "fslexlex.fs"
           )
   | 4 -> ( 
-# 202 "fslexlex.fsl"
-                         () 
-# 715 "fslexlex.fs"
+# 203 "fslexlex.fsl"
+                () 
+# 711 "fslexlex.fs"
           )
   | 5 -> ( 
-# 203 "fslexlex.fsl"
-                        failwith (Printf.sprintf "end of file in comment started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))  
-# 720 "fslexlex.fs"
+# 204 "fslexlex.fsl"
+                failwith (Printf.sprintf "end of file in comment started at (%d,%d)" p.pos_lnum (p.pos_cnum - p.pos_bol))  
+# 716 "fslexlex.fs"
           )
   | 6 -> ( 
-# 204 "fslexlex.fsl"
-                                                          comment p lexbuf 
-# 725 "fslexlex.fs"
+# 205 "fslexlex.fsl"
+                comment p lexbuf 
+# 721 "fslexlex.fs"
           )
   | 7 -> ( 
-# 205 "fslexlex.fsl"
-                       comment p lexbuf 
-# 730 "fslexlex.fs"
+# 206 "fslexlex.fsl"
+                comment p lexbuf 
+# 726 "fslexlex.fs"
           )
   | _ -> failwith "comment"
+
+# 209 "fslexlex.fsl"
 
 # 3000000 "fslexlex.fs"

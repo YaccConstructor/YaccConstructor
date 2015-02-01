@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.FsYARD</id>
-    <version>0.2.8.7</version>
+    <version>0.2.8.16</version>
     <title>YC.FsYARD</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -11,22 +11,53 @@
     <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
-    <releaseNotes>Execution from command line is fixed.</releaseNotes>
+    <releaseNotes>Parts of SDK are added.</releaseNotes>
     <copyright>Copyright 2013, 2014</copyright>
     <tags>YaccConstructor F#  FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
+    <references>
+       <reference file="YC.Common.dll" />
+       <reference file="YC.Constraints.dll" />
+       <reference file="YC.Conversions.dll" />
+       <reference file="YC.RNGLRCommon.dll" />
+       <reference file="YC.RNGLRParser.dll" />
+       <reference file="YC.RNGLRAbstractParser.dll" />
+       <reference file="YC.AbstractLexer.Interpreter.dll" />
+       <reference file="YC.SEL.SDK.Core.dll" />
+       <reference file="YC.ReSharper.AbstractAnalysis.Plugin.Helper.dll" />
+       <reference file="YC.AbstractLexer.Interpreter.dll" />
+       <reference file="AbstractLexer.Common.dll" />
+       <reference file="AbstractLexer.Core.dll" />
+       <reference file="QuickGraph.dll" />
+       <reference file="AST.Common.dll" />
+       <reference file="FST.dll" />
+       <reference file="Generators.Common.dll" />
+       <reference file="ReSharperExtension.dll" />
+       <reference file="YC.AbstractAnalysis.Common.dll" />
+    </references>
   </metadata>
+
     <files>
-        <file src="..\..\Bin\Release\v45\Common.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Constraints.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\Conversions.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\Abstract*.*.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>		
-        <file src="..\..\Bin\Release\v45\RNGLR*" target="\tools\FsYARD" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
-        <file src="..\..\Bin\Release\v45\YardFrontend.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>
-        <file src="..\..\Bin\Release\v45\FsYARD.*" target="\tools\FsYARD" exclude="**\*.Test.*"/>        
-        <file src="..\..\Bin\Release\v45\FsYacc.exe" target="\tools\FsYARD"/>
-        <file src="..\..\Bin\Release\v45\FSharp.Core.dll" target="\tools\FsYARD"/>
-        <file src="..\..\Bin\Release\v45\FSharpx.Text.StructuredFormat.*" target="\tools\FsYARD"/>
-        <file src="..\..\Bin\Release\v45\FSharpx.Core.*" target="\tools\FsYARD"/>
+        <file src="..\..\Bin\Release\v40\ReSharperExtension.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.Common.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.Constraints.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.Conversions.*" target="lib\net40\" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v40\AST.Common.*" target="lib\net40\" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v40\Generators.Common.*" target="lib\net40\" exclude="**\*.Test.*"/>		
+        <file src="..\..\Bin\Release\v40\YC.RNGLR*" target="lib\net40\" exclude="**\*.Test.*;**\*Application.*;**\*Test*.*"/>
+        <file src="..\..\Bin\Release\v40\YC.YardFrontend.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.SEL.SDK.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.ReSharper.AbstractAnalysis.Plugin.Helper.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\YC.YaccConstructor.*" target="lib\net40\" exclude="**\*.Test.*"/>        
+        <file src="..\..\Bin\Release\v40\FsYacc.exe" target="lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\AbstractLexer.*" target="lib\net40\" exclude="**\*.Tests.*"/>
+        <file src="..\..\Bin\Release\v40\YC.AbstractAnalysis.*" target="lib\net40\" exclude="**\*.Tests.*"/>
+        <file src="..\..\Bin\Release\v40\YC.AbstractLexer.*" target="lib\net40\" exclude="**\*.Test.*"/>
+        <file src="..\..\Bin\Release\v40\FST.*" target="lib\net40\" exclude="**\*.Tests.*"/>
+        <file src="..\..\Bin\Release\v40\Mono.Addins.dll" target="lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\QuickGraph.*" target="lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\FSharp.Core.dll" target="lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\FSharpx.Text.StructuredFormat.*" target="lib\net40\"/>
+        <file src="..\..\Bin\Release\v40\FSharpx.Core.*" target="lib\net40\"/>
         
         <file src="README" target="README"/>
         <file src="..\..\LICENSE" target="LICENSE"/>

@@ -21,7 +21,7 @@ let getLeafSemanticForToken token =
 
     let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
-    printBr "let pos = snd <| _rnglr_var_0"
+    printBr "let pos = _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
 
     printBr "new %sTermNode(ranges) :> ITreeNode" <| toClassName token
@@ -32,7 +32,7 @@ let getLeafSemanticForLiteral litName litText =
 
     let inline printBr (x : 'a) = Printf.kprintf (fun s -> res.Append(s).Append(System.Environment.NewLine) |> ignore) x
 
-    printBr "let pos = snd <| _rnglr_var_0"
+    printBr "let pos =  _rnglr_var_0"
     printBr "let ranges = calculatePos pos"
 
     printBr "new %sLitNode(ranges) :> ITreeNode"  <| litToClassName litName

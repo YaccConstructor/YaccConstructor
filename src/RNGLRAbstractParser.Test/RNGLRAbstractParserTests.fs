@@ -107,19 +107,6 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Epsilons.buildAstAbstract qGraph
 
     [<Test>]
-    member this.``Epsilons2. Sequence input.`` () =
-        let qGraph = new ParserInputGraph<_>(0, 4)        
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.Epsilons2.DDD 1)
-             //edg 1 2 (RNGLR.Epsilons2.YYY 1)
-             edg 1 3 (RNGLR.Epsilons2.NUM 2)
-             //edg 2 3 (RNGLR.Epsilons2.PLUS 0)
-             edg 3 4 (RNGLR.Epsilons2.RNGLR_EOF 5)
-             ] |> ignore
-
-        test RNGLR.Epsilons2.buildAstAbstract qGraph
-
-    [<Test>]
     member this.``Pretty Simple Calc. Sequence input.`` () =
         let qGraph = new ParserInputGraph<_>(0, 4)        
         qGraph.AddVerticesAndEdgeRange
@@ -992,7 +979,7 @@ let f x =
 
 //    t.``Pretty Simple Calc. Sequence input.`` ()
     //t.``Pretty Simple Calc. Simple branched input.`` ()
-//    t.``Pretty Simple Calc. Branched input.`` ()
+    t.``Pretty Simple Calc. Branched input.`` ()
 //    t.``Pretty Simple Calc. Lots Of Variants.``() 
 //    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
 //    t.``Not Ambigous Simple Calc. Loop.`` ()
@@ -1007,7 +994,7 @@ let f x =
 //    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
 //    t.``Stars. Loop.`` () 
     //t.``Stars2. Loop.`` () 
-    t.``Epsilons2. Sequence input.``()
+ 
 //    t.``FirstEps`` ()
     0
     

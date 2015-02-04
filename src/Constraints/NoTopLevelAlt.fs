@@ -12,16 +12,16 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Yard.Core.Constraints
+module Yard.Core.ConstraintsImpl.NoTopLevelAlt
 
-open Yard.Core.ConstraintsImpl
+open Yard.Core
+open IL
+open Production
+open Yard.Core.ConstraintsImpl.Common
 
-let singleModule = SingleModule.singleModule
-let noEbnf = NoEbnf.noEbnf
-let noMeta = NoMeta.noMeta
-let inCNF = InCNF.inCNF
-let needAC = NeedAC.needAC
-let noInnerAlt = NoInnerAlt.noInnerAlt
-let noBrackets = NoBrackets.noBrackets
-let noLiterals = NoLiterals.noLiterals
-let noTopLevelAlt = NoTopLevelAlt.noTopLevelAlt
+let private checker grammar =
+    let isAlt = function PAlt _ -> true | _ -> false
+    existsRules (fun r -> isAlt r.body) grammar
+    |> not
+    
+let noTopLevelAlt = new Constraint("NoTopLevelAlt", checker, Conversions.ExpandTopLevelAlt.ExpandTopLevelAlt())

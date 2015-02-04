@@ -40,6 +40,7 @@
     <Compile Include="NoMeta.fs" />
     <Compile Include="InCNF.fs" />
     <Compile Include="NeedAC.fs" />
+    <Compile Include="NoTopLevelAlt.fs" />
     <Compile Include="NoInnerAlt.fs" />
     <Compile Include="NoBrackets.fs" />
     <Compile Include="NoLiterals.fs" />

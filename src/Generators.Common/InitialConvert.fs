@@ -25,35 +25,34 @@ open Yard.Core.Conversions.TransformAux
 let initialConvert (def : Definition.t<_,_>) =
     let addStartRule (ruleList : Rule.t<_,_> list) =
         let wasStart = ref false
+        let startNonTerm = ref ""
         ruleList
         |> List.fold
             (fun res rule->
                 if not rule.isStart then rule::res
                 else
-                    if !wasStart then failwith "More than one start rule"
-                    wasStart := true
-                    let startRule : Rule.t<_,_> =
-                        {
-                            isStart = true
-                            name = new Source.t("yard_start_rule", rule.name)
-                            args = rule.args
-                            metaArgs = []
-                            isPublic=false
-                            body = PRef(rule.name, rule.args |> createParams |> list2opt)
-                        }
-                    startRule::{rule with isStart = false}::res
+                    if not !wasStart then 
+                        wasStart := true
+                        startNonTerm := rule.name.text
+                        let startRule : Rule.t<_,_> =
+                            {
+                                isStart = true
+                                name = new Source.t("yard_start_rule", rule.name)
+                                args = rule.args
+                                metaArgs = []
+                                isPublic=false
+                                body = PRef(rule.name, rule.args |> createParams |> list2opt)
+                            }
+                        startRule::{rule with isStart = false}::res
+                    else
+                        if rule.name.text = !startNonTerm then
+                            {rule with isStart = false}::res                        
+                        else 
+                            failwith "More than one start rule with different left sides"
             )
             []
         |> (fun x -> if not !wasStart then failwith "No startRule was found"
                      x)
-
-    let splitAlters ruleList =
-        let rec splitRule (curRule : Rule.t<_,_>) res = function
-            | PAlt (l, r) ->
-                let rightRes = splitRule curRule res r
-                splitRule curRule rightRes l
-            |  x -> {curRule with body = x}::res
-        List.fold (fun res rule -> splitRule rule res rule.body) [] ruleList
 
     let filterNonReachable ruleList =
         let count = new Dictionary<_,_>()
@@ -92,5 +91,5 @@ let initialConvert (def : Definition.t<_,_>) =
         inner ruleList
     if def.grammar.Length > 1 then
         failwith "More than one module. Use 'Linearize' conversion"
-    let rules = def.grammar.Head.rules |> addStartRule (*|> splitAlters*) |> filterNonReachable
+    let rules = def.grammar.Head.rules |> addStartRule |> filterNonReachable
     {def with grammar = [{def.grammar.Head with rules=rules}]}

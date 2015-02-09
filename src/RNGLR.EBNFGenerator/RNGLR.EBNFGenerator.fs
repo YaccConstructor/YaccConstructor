@@ -23,7 +23,7 @@ do()
 type RNGLREBNF() = 
     inherit Generator()
         override this.Name = "RNGLR.EBNFGenerator"
-        override this.Constraints = [|noMeta; (*noLiterals;*) noBrackets; needAC; singleModule|]
+        override this.Constraints = [|noMeta; noBrackets; needAC; singleModule|]
         override this.Generate (definition, args) =
             let start = System.DateTime.Now
             let args = args.Split([|' ';'\t';'\n';'\r'|]) |> Array.filter ((<>) "")
@@ -164,9 +164,9 @@ type RNGLREBNF() =
                     then println "#light \"off\""
                     println "#nowarn \"64\";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type"
 
-
-                    println "open Yard.Generators.RNGLR.Parser"
-                    println "open Yard.Generators.RNGLR"
+                    
+                    println "open Yard.Generators.RNGLR.EBNF"
+                    println "open Yard.Generators.RNGLR.EBNF.Parser"
                     println "open Yard.Generators.Common.AST"
                     
                     if !needHighlighting && !needTranslate

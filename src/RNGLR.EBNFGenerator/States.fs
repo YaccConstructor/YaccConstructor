@@ -310,7 +310,7 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
     let initKernels = grammar.startPositions.[grammar.startRule] |> Set.map (fun x -> KernelInterpreter.toKernel(grammar.startRule, x))
     let initLookAhead = Set.ofSeq [grammar.indexator.eofIndex]
     let initKernelsAndLookAheads = Set.map (fun x -> (x, initLookAhead)) initKernels |> Set.toArray
-    let threadFun = fun () ->
+    (*let threadFun = fun () ->
         initKernelsAndLookAheads
         |> match outTable with
             | LALR -> dfsLALR
@@ -319,7 +319,12 @@ let buildStatesEBNF outTable (grammar : FinalGrammarNFA) = //(kernelIndexator : 
     let callStackSize = 10 * (1 <<< 20)
     let threadDfs = new Thread(threadFun, callStackSize)
     threadDfs.Start()
-    threadDfs.Join()
+    threadDfs.Join()*)
+    initKernelsAndLookAheads
+        |> match outTable with
+            | LALR -> dfsLALR
+            | LR -> dfsLR
+        |> ignore
     eprintfn "maxDfsDepth %d" !maxDfsDepth
     eprintfn "Dfs calls count: %d" !incount
     eprintfn "States count: %d" <| vertexCount()

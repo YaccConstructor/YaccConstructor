@@ -5,15 +5,16 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>b98ef513-0a5e-4f8e-bdf0-6a7859a2bd81</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>RNGLR.EBNFParser.SimpleTest</RootNamespace>
-    <AssemblyName>YC.RNGLR.EBNFParser.SimpleTest</AssemblyName>
+    <ProjectGuid>b15c6ebc-93ff-4015-8770-0841a773de41</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RNGLR.EBNFParser</RootNamespace>
+    <AssemblyName>YC.RNGLR.EBNFParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>RNGLR.EBNFParser.SimpleTest</Name>
+    <Name>RNGLR.EBNFParser</Name>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <ItemGroup>
+    <Reference Include="FSharpx.Core, Version=1.8.41.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -23,10 +24,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LexCommon.fs" />
-    <Compile Include="SimpleOpt.yrd.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="Parser.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
@@ -37,11 +35,6 @@
     <ProjectReference Include="..\RNGLR.EBNFCommon\RNGLR.EBNFCommon.fsproj">
       <Name>RNGLR.EBNFCommon</Name>
       <Project>{1baa8af2-e318-40ef-bb80-05213dbab52c}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RNGLR.EBNFParser\RNGLR.EBNFParser.fsproj">
-      <Name>RNGLR.EBNFParser</Name>
-      <Project>{b15c6ebc-93ff-4015-8770-0841a773de41}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿//  Parser.fs contains methods, needed to build an AST
+//  Parser.fs contains methods, needed to build an AST
 //
 //  Copyright 2011-2012 Avdyukhin Dmitry
 //
@@ -23,7 +23,6 @@ open Yard.Generators.RNGLR
 open Yard.Generators.Common.ARNGLR.SimpleAST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
-//open Yard.Generators.RNGLR.Parser 
 open Microsoft.FSharp.Collections
 open AbstractAnalysis.Common
 
@@ -261,7 +260,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 newVertex.addEdge edge
         else 
             let path = Array.zeroCreate pos
-            //    path.[i] <- getEpsilon (if blah.Length = 0 then -1 else blah.[0]) ///????
             path.[pos - 1] <- edgeOpt.Value.Ast
             walk (pos - 1) (edgeOpt.Value : Edge).Dest path currentGraphV currentGraphV nonTerm pos prod false
 

@@ -16,3 +16,5 @@ del log.txt
 ..\packages\YaccConstructor.0.0.8.11\tools\YaccConstructor\YaccConstructor.exe -i Mixed.yrd ^
            -g "GLLGenerator -pos int -token int -module GLL.Mixed -o Mixed.yrd.fs" >> log.txt
 
+
+pause

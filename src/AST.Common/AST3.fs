@@ -11,21 +11,22 @@ type INode =
     interface
     end
 
+
 [<AllowNullLiteral>]
 type NonTerminalNode =
     interface INode
     val Name      : int
     val Extension : int64<extension>
-    val mutable First     : int 
-    val mutable Others    : ResizeArray<int> 
-    member this.AddChild child : unit = 
+    val mutable First     : PackedNode 
+    val mutable Others    : ResizeArray<PackedNode> 
+    member this.AddChild (child : PackedNode) : unit = 
         if this.First <> Unchecked.defaultof<_>
         then 
             if this.Others <> Unchecked.defaultof<_>
             then
                 this.Others.Add child
             else
-                this.Others <- new ResizeArray<int>()
+                this.Others <- new ResizeArray<PackedNode>()
                 this.Others.Add child
         else this.First <- child
     new (name, extension) = {Name = name; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
@@ -33,23 +34,33 @@ type NonTerminalNode =
 and TerminalNode =
     interface INode
     val Name : int
-    val Extension : int<extension>
+    val Extension : int64<extension>
     new (name, extension) = {Name = name; Extension = extension}
 
 and PackedNode =
     interface INode    
     val Production : int
-    val Fst : INode
-    val Snd : INode
-    new (p, f, s) = {Production = p; Fst = f; Snd = s}
+    val Left : INode
+    val Right : INode
+    new (p, l, r) = {Production = p; Left = l; Right = r}
 
 and IntermidiateNode = 
     interface INode
     val Slot      : int
-    val Extension : int<extension>
-    val Left      : INode
-    val Right     : INode
-    new (slot, extension, left, right) = {Slot = slot; Extension = extension; Left = left; Right = right}
+    val Extension : int64<extension>
+    val mutable First     : PackedNode
+    val mutable Others    : ResizeArray<PackedNode>
+    member this.AddChild (child : PackedNode) : unit = 
+        if this.First <> Unchecked.defaultof<_>
+        then 
+            if this.Others <> Unchecked.defaultof<_>
+            then
+                this.Others.Add child
+            else
+                this.Others <- new ResizeArray<PackedNode>()
+                this.Others.Add child
+        else this.First <- child
+    new (slot, extension) = {Slot = slot; Extension = extension; First = Unchecked.defaultof<_>; Others = Unchecked.defaultof<_>}
     
 
 type private DotNodeType = Packed | NonTerminal | Intermidiate | Terminal
@@ -58,7 +69,6 @@ let inline packExtension left right : int64<extension> =  LanguagePrimitives.Int
 let inline getRightExtension (long : int64<extension>) = int <| ((int64 long) &&& 0xffffffffL)
 let inline getLeftExtension (long : int64<extension>)  = int <| ((int64 long) >>> 32)
 
-let inline packLabel rule position = (int rule <<< 16) ||| int position
 let inline getRule packedValue = int packedValue >>> 16
 let inline getPosition (packedValue : int) = int (packedValue &&& 0xffff)
 
@@ -83,7 +93,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
             let shape =
                 match nodeType with
                 | Intermidiate -> ",shape=box"
-                | Packed -> ",shape=circle"
+                | Packed -> ",shape=point"
                 | Terminal -> ",shape=box"
                 | NonTerminal -> ",shape=oval"
             let color =
@@ -116,7 +126,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     used.Add(currentPair.Node, !num)
                     match currentPair.Node with 
                     | :? NonTerminalNode as a -> 
-                        createNode !num false NonTerminal (indToString leftSide.[a.Name])
+                        createNode !num false NonTerminal (indToString a.Name)
                         createEdge currentPair.Num !num false ""
                         nodeQueue.Enqueue(new NumNode(!num, a.First))
                         if a.Others <> Unchecked.defaultof<_>
@@ -126,22 +136,25 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? PackedNode as p ->
                         createNode !num false Packed ""
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode(!num, p.Fst))
-                        if p.Snd <> null
-                        then nodeQueue.Enqueue(new NumNode(!num, p.Snd))
+                        nodeQueue.Enqueue(new NumNode(!num, p.Left))
+                        if p.Right <> null
+                        then nodeQueue.Enqueue(new NumNode(!num, p.Right))
                     | :? IntermidiateNode as i ->
                         createNode !num false Intermidiate ((getRule i.Slot).ToString() + " " + (getPosition i.Slot).ToString())
                         createEdge currentPair.Num !num false ""
-                        nodeQueue.Enqueue(new NumNode(!num, i.Left))
-                        nodeQueue.Enqueue(new NumNode(!num, i.Right))
+                        nodeQueue.Enqueue(new NumNode(!num, i.First))
+                        if i.Others <> Unchecked.defaultof<ResizeArray<PackedNode>>
+                        then
+                            for nodes in i.Others do
+                                nodeQueue.Enqueue(new NumNode(!num, nodes))
                     | :? TerminalNode as t ->
-                        createNode !num false Terminal ("t " + indToString (tokenToNumber tokens.[t.Name]))
+                        createNode !num false Terminal ("t " + indToString t.Name)
                         createEdge currentPair.Num !num false ""
                     | null -> ()
             else
                 let a = currentPair.Node :?> NonTerminalNode
                 num := !num + 1
-                createNode !num false NonTerminal (indToString leftSide.[a.Name])
+                createNode !num false NonTerminal (indToString a.Name)
                 nodeQueue.Enqueue(new NumNode(!num, a.First))
                 if a.Others <> Unchecked.defaultof<_>
                 then

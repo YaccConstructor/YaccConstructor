@@ -83,8 +83,10 @@ let literalStart = 5
 let literalEnd = 4
 let literalsCount = 0
 
+let slots = [(2,3);(2,3)] |> dict
 
-let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon)
+let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)
+//(parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) (slotNumber : int) (dummySlot : int) (slots : Dictionary<int, int>) : ParseResult<_>
 let buildAst : (seq<Token> -> ParseResult<_>) =
     buildAst<Token> parserSource
 

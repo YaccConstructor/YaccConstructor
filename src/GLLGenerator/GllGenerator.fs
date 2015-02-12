@@ -161,6 +161,7 @@ type GLL() =
                         |> ignore
                     res.ToString()
             out.WriteLine res
+            out.Flush()
             out.Close()
             eprintfn "Generation time: %A" <| System.DateTime.Now - start
             box ()

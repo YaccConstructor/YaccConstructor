@@ -1,7 +1,8 @@
 ﻿module Yard.Generators.RNGLR.OtherSPPF
 
-open Yard.Generators.Common.ARNGLR.AST
 open System.Collections.Generic
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open Yard.Generators.Common.DataStructures
 
 [<AllowNullLiteral>]
@@ -165,7 +166,7 @@ type private Context =
     end
 
 [<AllowNullLiteral>]
-type OtherTree<'TokenType> (tree : Yard.Generators.Common.ARNGLR.AST.Tree<'TokenType>) = 
+type OtherTree<'TokenType> (tree : Yard.Generators.Common.AST.Tree<'TokenType>) = 
     let tokens = tree.Tokens
     let root = 
         let root = 

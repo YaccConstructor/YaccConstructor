@@ -150,9 +150,9 @@ type RNGLR() =
                     System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
-                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
-                            grammar.indexator.indexToNonTerm (fun _ -> 0) grammar.rules.leftSideArr
-                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
+                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot(
+                            grammar.indexator.indexToNonTerm, (fun _ -> 0), grammar.rules.leftSideArr,
+                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot")))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             
             let statesInterpreter = buildStates table grammar
@@ -183,14 +183,14 @@ type RNGLR() =
                     if !isAbstractParsingMode
                     then 
                         println "open Yard.Generators.ARNGLR.Parser"
-                        println "open Yard.Generators.RNGLR"
-                        println "open Yard.Generators.Common.ARNGLR.AST"
                         println "open AbstractAnalysis.Common"
                     else 
                         println "open Yard.Generators.RNGLR.Parser"
-                        println "open Yard.Generators.RNGLR"
-                        println "open Yard.Generators.Common.AST"
                     
+                    println "open Yard.Generators.RNGLR"
+                    println "open Yard.Generators.Common.AST"
+                    println "open Yard.Generators.Common.AstNode"
+
                     if !needHighlighting && !needTranslate
                     then 
                         println "open YC.SDK.ReSharper.Helper"

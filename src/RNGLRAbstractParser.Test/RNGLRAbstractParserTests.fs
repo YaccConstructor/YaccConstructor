@@ -96,17 +96,6 @@ type ``RNGLR abstract parser tests`` () =
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 25)
 
     [<Test>]
-    member this.``Epsilons. Sequence input.`` () =
-        let qGraph = new ParserInputGraph<_>(0, 3)        
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 2 (RNGLR.Epsilons.NUM 1)
-             //edg 1 2 (RNGLR.Epsilons.PLUS 0)
-             edg 2 3 (RNGLR.Epsilons.RNGLR_EOF 5)
-             ] |> ignore
-
-        test RNGLR.Epsilons.buildAstAbstract qGraph
-
-    [<Test>]
     member this.``Pretty Simple Calc. Sequence input.`` () =
         let qGraph = new ParserInputGraph<_>(0, 4)        
         qGraph.AddVerticesAndEdgeRange

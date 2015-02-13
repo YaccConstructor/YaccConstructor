@@ -197,7 +197,7 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test.``ListEps``() =
         runTest RNGLR.ListEps.buildAst "ListEps.txt" printAst
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 

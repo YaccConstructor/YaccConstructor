@@ -24,10 +24,10 @@ open LexerHelper
 open System
 open System.IO
 open Yard.Generators.Common.ARNGLR.AST
-//open YC.SDK.CommonInterfaces
-//open YC.SDK.ReSharper.Helper
+open YC.SDK.CommonInterfaces
+open YC.SDK.ReSharper.Helper
 open Mono.Addins
-//open ReSharperExtension
+open ReSharperExtension
 open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter
 

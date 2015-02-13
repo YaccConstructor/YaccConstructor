@@ -20,7 +20,9 @@
 module Yard.Generators.ARNGLR.Parser
 
 open Yard.Generators.RNGLR
-open Yard.Generators.Common.ARNGLR.SimpleAST
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
+//open Yard.Generators.Common.ARNGLR.SimpleAST
 open System.Collections.Generic
 open Yard.Generators.Common.DataStructures
 //open Yard.Generators.RNGLR.Parser 
@@ -99,11 +101,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         //if added <> tokens.EdgeCount then failwithf "Error while convertion input parser graph to iier representation. Expected edges: %A, actual: %A" tokens.EdgeCount added
         verticesMap.[tokens.InitState], verticesMap.[tokens.FinalState], g
     
-    let nodes = new BlockResizeArray<_>()
+    let nodes = new BlockResizeArray<AstNode>()
+    let terminals = new BlockResizeArray<'TokenType>()
     // Must be number of non-terminals, but doesn't matter
     let nonTermsCountLimit = 1 + (Array.max parserSource.LeftSide)
     let startState = 0
-    let inline getEpsilon i = -1-i
+    let inline getEpsilon i = new Epsilon(-1-i)
     let startNonTerm = parserSource.LeftSide.[parserSource.StartRule]
     let verticesToProcess = new Queue<_>()
     verticesToProcess.Enqueue (startV)
@@ -143,7 +146,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     edge <- new Edge(gssVertex, edgesToTerms.[e])
                     targetGssV.addEdge edge
                 else 
-                    nodes.Add <| Term e.Tag
+                    terminals.Add e.Tag
+                    nodes.Add <| Terminal (parserSource.TokenToNumber e.Tag)
                     edgesToTerms.Add(e, nodes.Count - 1)
                     edge <- new Edge(gssVertex, nodes.Count - 1)
                     targetGssV.addEdge edge
@@ -207,13 +211,23 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let verticesToRecalc = new ResizeArray<_> (10)
 
     let (*inline*) addChildren node (path : _[]) prod =
-        let family = getFamily node
-        let astExists = 
-            family
-            |> ResizeArray.exists
-                (function (number,children) -> number = prod && children.Length = path.Length && Array.forall2 (=) children path)
-        if not astExists then
-            family.Add (prod, path)
+        let ast = getFamily node
+        let familyOpt = 
+            ast.findFamily (function family -> family.prod = prod 
+                                            && family.nodes.Length = path.Length 
+                                            && 
+                                               let c = ref -1
+                                               family.nodes.isForAll(fun x -> incr c; x = path.[!c]) )
+        match familyOpt with 
+        | None -> 
+            let newFamily = new Family (prod, new Nodes(path))
+            if ast.first = Unchecked.defaultof<_> 
+            then ast.first <- newFamily 
+            else
+                if ast.other = null 
+                then ast.other <- [|newFamily|]
+                else ast.other <- Array.append ast.other [|newFamily|]
+        | Some _ -> ()
 
     let handlePath (path : _[]) (final : Vertex) currentGraphV startV nonTerm pos prod shouldEnqueueVertex =
         let state = parserSource.Gotos.[final.State].[nonTerm]
@@ -223,7 +237,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             match newVertex.FindIndex final.State final.Level with
             | -1 -> 
                 let edge = new Edge(final, nodes.Count)
-                nodes.Add <| NonTerm (new ResizeArray<_>(1))
+                nodes.Add <| new AST (Unchecked.defaultof<_>, null)
                 newVertex.addEdge edge
                 if (pos > 0)
                 then
@@ -247,7 +261,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             then vertex.PassingReductions.Add (prod, remainLength, Array.copy path, nonTerm, pos, startV)
             vertex.OutEdges |> ResizeArray.iter
                 (fun e ->
-                    path.[remainLength - 1] <- e.Ast
+                    path.[remainLength - 1] <- nodes.[e.Ast]
                     walk (remainLength - 1) e.Dest path currentGraphV startV nonTerm pos prod shouldEnqueueVertex)
 
     let makeSingleReduction currentGraphV (vertex : Vertex) prod pos (edgeOpt : Edge option) =
@@ -257,12 +271,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let state = parserSource.Gotos.[vertex.State].[nonTerm]
             let newVertex, isNew = addVertex currentGraphV state None
             if newVertex.FindIndex vertex.State vertex.Level = -1 then
-                let edge = new Edge(vertex, getEpsilon parserSource.LeftSide.[prod])
+                let edge = new Edge(vertex, -parserSource.LeftSide.[prod]-1)
                 newVertex.addEdge edge
         else 
             let path = Array.zeroCreate pos
             //    path.[i] <- getEpsilon (if blah.Length = 0 then -1 else blah.[0]) ///????
-            path.[pos - 1] <- edgeOpt.Value.Ast
+            path.[pos - 1] <- nodes.[edgeOpt.Value.Ast]
             walk (pos - 1) (edgeOpt.Value : Edge).Dest path currentGraphV currentGraphV nonTerm pos prod false
 
     let makeReductions (currentGraphV : VInfo<_>) =
@@ -308,7 +322,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     if tokens.EdgeCount = 0
     then
         if parserSource.AcceptEmptyInput
-        then new Tree<_>([||], getEpsilon startNonTerm) |> Success
+        then new Tree<_>([||], getEpsilon startNonTerm, parserSource.Rules) |> Success
         else Error (0, Unchecked.defaultof<'TokenType>, "This grammar cannot accept empty string")
     else
         let v = addVertex startV startState None
@@ -324,18 +338,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             //printfn "accs: %A" [for i = 0 to parserSource.AccStates.Length-1 do
             //                        if parserSource.AccStates.[i] then yield i]
             let addTreeTop res =
-                let children = new ResizeArray<_>(1)
-                children.Add (parserSource.StartRule, [|res|])
-                NonTerm children
+                let children = new Family(parserSource.StartRule, new Nodes([|res|]))
+                new AST(children, null)
             for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
                 if parserSource.AccStates.[v.State] then
                     root := Some nodes.Count
-                    (v.Edge 0).Ast
+                    nodes.[(v.Edge 0).Ast]
                     |> addTreeTop
                     |> nodes.Add
             match !root with
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
-                let tree = new Tree<_>(nodes.ToArray(), res)
-                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData.Value  parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
+                tree.AstToDot (parserSource.NumToString, parserSource.TokenToNumber, parserSource.LeftSide, "../../../Tests/AbstractRNGLR/DOT/sppf.dot", parserSource.TokenData.Value)
                 Success <| tree

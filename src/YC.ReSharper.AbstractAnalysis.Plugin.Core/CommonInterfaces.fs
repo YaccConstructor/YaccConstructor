@@ -5,14 +5,15 @@ open Yard.Generators.RNGLR.OtherSPPF
 open QuickGraph
 open QuickGraph.Algorithms
 open AbstractAnalysis.Common
-open Yard.Generators.Common.ARNGLR.AST
+open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst
 
 type TreeGenerationState<'node> = 
     | Start
-    | InProgress of 'node * INode list
+    | InProgress of 'node * AstNode list
     | End of 'node
 
 type LexingFinishedArgs<'node> (tokens : ResizeArray<'node>, lang:string) =
@@ -132,7 +133,7 @@ type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equ
             
             if unproc.IsEmpty
             then generationState <- End (treeNode)
-            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> INode)) 
+            else generationState <- InProgress (treeNode, unproc |> List.map (fun n -> n :> AstNode)) 
 
         generationState
 

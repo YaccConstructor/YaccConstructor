@@ -13,8 +13,9 @@ open Microsoft.FSharp.Text
 open Yard.Examples.MSParser
 open Yard.Utils.SourceText
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.FstApproximation
+open YC.FSA.FsaApproximation
 open Microsoft.FSharp.Collections
+open YC.FSA.GraphBasedFsa
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
 let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new GraphTokenValue<_>())
@@ -50,9 +51,10 @@ let getResultFileName path pref =
 //let flg = ref false
 let LexerTSQL (srcFilePath:string) =
     let lexerInputGraph = loadLexerInputGraph srcFilePath
+    let graphFsa = FSA.ApprToFSA(lexerInputGraph)
     let tokenize srcFilePath = 
         let start = System.DateTime.Now
-        for i in 1..10 do YC.TSQLLexer.tokenize eofToken lexerInputGraph  |> ignore
+        for i in 1..10 do YC.TSQLLexer.tokenize eofToken graphFsa  |> ignore
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
         printfn " "

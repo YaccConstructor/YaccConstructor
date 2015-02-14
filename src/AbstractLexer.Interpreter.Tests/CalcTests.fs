@@ -5,15 +5,16 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open AbstractAnalysis.Common
 open YC.FST.GraphBasedFst
-open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
+open YC.FSA.GraphBasedFsa
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
 let calcTokenizationTest path eCount vCount countEdgesArray =
     let graphAppr = loadDotToQG baseInputGraphsPath path
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr
+    let graphFsa = FSA.ApprToFSA(graphAppr)
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFsa
     match res with
     | Success res ->
         checkArr (countEdges res) countEdgesArray

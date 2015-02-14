@@ -5,7 +5,8 @@ open AbstractAnalysis.Common
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open QuickGraph
-open YC.FST.FstApproximation
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
 
 //let printSmbString (x:char*Position<_>) = 
 //        (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
@@ -163,8 +164,8 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputGraph : Appr<_>) =    
-    let inputFst = inputGraph.ToFST() 
+let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputGraph : FSA<_>) =    
+    let inputFst = FST<_,_>.FSAtoFST(inputGraph)
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with

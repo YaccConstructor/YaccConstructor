@@ -33,9 +33,9 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            var approximator = new Approximator(inputFile);
-            var res = approximator.Approximate();
-            Console.WriteLine(res);
+            
+            CFA.buildControlFlowGraph(inputFile);
+
             return null;
         }
 

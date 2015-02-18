@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Tools</id>
-<version>0.0.6.112</version>
+<version>0.0.6.113</version>
 <title>3rd party tools for YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>
@@ -15,8 +15,8 @@
 <copyright>Copyright 2013, 2014</copyright>
 <tags>Parsing Reengineering YaccConstructor YC Tool Grammarware .NET F# FSharp</tags>
 <references>
-<reference file="YC.FsYacc.0.0.6.112.exe" />
-<reference file="YC.Helper.0.0.6.112.dll" />
+<reference file="YC.FsYacc.0.0.6.113.exe" />
+<reference file="YC.Helper.0.0.6.113.dll" />
 </references>
 </metadata>
 <files>

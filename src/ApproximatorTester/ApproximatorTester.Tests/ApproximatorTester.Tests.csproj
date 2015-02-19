@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="test\data\AllTests\test1.cs.gold" />
+    <None Include="test\data\AllTests\test1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">

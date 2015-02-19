@@ -19,7 +19,7 @@ namespace ApproximatorTester.Tests
         [Test]
         public void Test0()
         {
-            DoTestFiles("test0.cs");
+            DoTestFiles("test1.cs");
         }
     }
 }

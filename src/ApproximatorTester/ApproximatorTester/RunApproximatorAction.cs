@@ -33,8 +33,8 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            
-            CFA.buildControlFlowGraph(inputFile);
+
+            CFA.analyze(inputFile);
 
             return null;
         }

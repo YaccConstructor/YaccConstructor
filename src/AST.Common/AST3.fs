@@ -148,8 +148,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                             for nodes in i.Others do
                                 nodeQueue.Enqueue(new NumNode(!num, nodes))
                     | :? TerminalNode as t ->
-                        createNode !num false Terminal ("t " + indToString t.Name)
-                        createEdge currentPair.Num !num false ""
+                        if t.Extension <> packExtension -1 -1 
+                        then
+                            createNode !num false Terminal ("t " + indToString t.Name)
+                            createEdge currentPair.Num !num false ""
+                        else
+                            createNode !num false Terminal ("dummy")
+                            createEdge currentPair.Num !num false ""
                     | null -> ()
             else
                 let a = currentPair.Node :?> NonTerminalNode

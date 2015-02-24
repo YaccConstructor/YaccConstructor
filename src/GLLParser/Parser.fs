@@ -45,6 +45,7 @@ type ParseResult<'TokenType> =
     | Success of Tree<'TokenType>
     | Error of string
 
+
 let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'TokenType>) : ParseResult<_> = 
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
@@ -134,7 +135,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let slotIsEnd (label : int<labelMeasure>) =
             (getPosition label) = Array.length (parser.rules.[getRule label])
 
-        let findSppfNode label lExt rExt leftChild rightChild : int<nodeMeasure> =
+        let findSppfNode label lExt rExt : int<nodeMeasure> =
             let isEnd = slotIsEnd label
             let nTerm = parser.LeftSide.[getRule label]
             if symbolNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
@@ -253,11 +254,11 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 //y := findSPPFSymbolNode(t, k, i)
                 //findSPPFPackNode(y, s, k, (), w)
                     
-                let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt) currentLeft currentRight
+                let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label leftExt rightExt currentLeft currentRight
                 y
             else
-                let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt) dummyAST currentRight
+                let y = findSppfNode label (getLeftExtension rightExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label rightExt rightExt dummyAST currentRight 
                 y
             
@@ -312,8 +313,26 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 false                    
         
         let getTreeExtension (node : int<nodeMeasure>) =
-            node
+            match sppfNodes.Item (int node) with
+                | :? TerminalNode as t ->
+                    t.Extension
+                | :? IntermidiateNode as i ->
+                    i.Extension
+                | :? NonTerminalNode as n ->
+                    n.Extension
+                | _ -> failwith "Bad type for tree node"
 
+        
+
+//        create(L, u, i,w) {
+//        if there is not already a GSS node labelled (L, i) create one
+//        let v be the GSS node labelled (L, i)
+//        if there is not an edge from v to u labelled w {
+//            create an edge from v to u labelled w
+//            for all ((v, z) ∈ P) {
+//            let y be the node returned by getNodeP(L,w, z)
+//            add(L, u, h, y) where h is the right extent of z } }
+//         return v }
 
         let create index label (vertex : Vertex) ast = 
             let v = new Vertex(index, label)
@@ -416,12 +435,16 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                                     
                 else
                     let curRight =  sppfNodes.Item <| int !currentN 
-                    let r =  curRight :?> NonTerminalNode
-                    if (r.Name = parser.LeftSide.[parser.StartRule]) && r.Extension = finalExtension
-                    then 
-                        resultAST := Some r
-                    
-                    pop !currentGSSNode !currentIndex !currentN r.Extension
+                    match curRight with
+                        | :? TerminalNode as t ->
+                            currentN := getNodeP !currentLabel !currentR !currentN
+                            let r = (sppfNodes.Item <| int !currentN) :?> NonTerminalNode 
+                            pop !currentGSSNode !currentIndex !currentN r.Extension
+                        | :? NonTerminalNode as r ->
+                            if (r.Name = parser.LeftSide.[parser.StartRule]) && r.Extension = finalExtension
+                            then 
+                                resultAST := Some r 
+                            pop !currentGSSNode !currentIndex !currentN r.Extension
 
         let control () =
              while not !stop do

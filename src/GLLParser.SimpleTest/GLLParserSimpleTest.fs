@@ -1,10 +1,7 @@
-﻿// Learn more about F# at http://fsharp.net
-
-module GLLParserSimpleTest
+﻿module GLLParserSimpleTest
 
 open Yard.Generators.GLL
 open Yard.Generators.GLL.Parser 
-open Yard.Generators.RNGLR.AST
 open NUnit.Framework
 open Yard.Generators
 open LexCommon

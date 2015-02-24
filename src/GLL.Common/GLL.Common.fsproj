@@ -44,13 +44,6 @@
   <ItemGroup>
     <Compile Include="ParserSource.fs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GLLGenerator\GLLGenerator.tmp.fsproj">
-      <Name>GLLGenerator.tmp</Name>
-      <Project>{8756690f-8138-495a-a368-39afb9029823}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

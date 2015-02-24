@@ -30,8 +30,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <!--Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" /-->
-  <!--Import Project="$(FsYardPath)" /-->
   <PropertyGroup>
     <RLiterals>KW_%s</RLiterals>
     <OutFile>MsParser.fs</OutFile>
@@ -39,13 +37,9 @@
     <Module>Yard.Examples.MSParser</Module>
     <EpsilonPath>epsilons</EpsilonPath>
   </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>$(SolutionDir)..\Bin\Debug\Addins\</OutputPath>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <None Include="Lexer.fsl" />
@@ -146,18 +140,6 @@
       <HintPath>..\packages\YC.Utils.SourceText.0.1.6500.5\lib\net40\Utils.SourceText.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="YC.Common">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Common.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Constraints">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Constraints.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="YC.Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8-dev-22-ci\lib\net40\YC.Conversions.0.0.8-dev-22-ci.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
@@ -170,9 +152,24 @@
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Highlighting.Core\Highlighting.Core.csproj">
-      <Name>Highlighting.Core</Name>
-      <Project>{d4978d25-d792-4045-8941-25800d82afa3}</Project>
+    <ProjectReference Include="..\AST.Common\Common.AST.fsproj">
+      <Name>Common.AST</Name>
+      <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
@@ -214,7 +211,6 @@
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\Plugin.NoReferences.Targets')" />
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
-copy * $(TargetDir)..\Addins
 del JetBrains.*</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

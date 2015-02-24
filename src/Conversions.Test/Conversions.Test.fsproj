@@ -38,17 +38,10 @@
     <Compile Include="ReplaceInlineTests.fs" />
     <Compile Include="EliminateLeftRecursionTests.fs" />
     <Compile Include="ToCNFTests.fs" />
-    <Compile Include="EntryPoint.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Common.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Conversions">
-      <HintPath>..\packages\YC.Core.0.0.8.10\lib\net40\Conversions.dll</HintPath>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
@@ -56,7 +49,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -71,10 +68,33 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="YardPrinter">
-      <HintPath>..\packages\YC.Generators.YardPrinter.0.0.6.6\lib\net40\YardPrinter.dll</HintPath>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{10ea63ab-6f4e-4925-b0a3-4f9bf8e17a08}</Project>
       <Private>True</Private>
-    </Reference>
+    </ProjectReference>
+    <ProjectReference Include="..\Constraints\Constraints.fsproj">
+      <Name>Constraints</Name>
+      <Project>{0f4580e0-a1e0-45a6-8062-5b5f08ad8e38}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Conversions\Conversions.fsproj">
+      <Name>Conversions</Name>
+      <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TreeDump\TreeDump.fsproj">
+      <Name>TreeDump</Name>
+      <Project>{99dfb4e9-46c5-4767-9646-ba49b2b6a664}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\YardPrinter\YardPrinter.fsproj">
+      <Name>YardPrinter</Name>
+      <Project>{3148144c-1649-440e-a9b4-1d5c41677262}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

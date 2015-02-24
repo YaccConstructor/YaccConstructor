@@ -33,12 +33,13 @@ let initialConvert (def : Definition.t<_,_>) =
                     if !wasStart then failwith "More than one start rule"
                     wasStart := true
                     let startRule : Rule.t<_,_> =
-                        {isStart = true;
-                         name = new Source.t("yard_start_rule", rule.name);
-                         args = rule.args;
-                         metaArgs = [];
-                         isPublic=false;
-                         body = PRef(rule.name, rule.args |> createParams |> list2opt)
+                        {
+                            isStart = true
+                            name = new Source.t("yard_start_rule", rule.name)
+                            args = rule.args
+                            metaArgs = []
+                            isPublic=false
+                            body = PRef(rule.name, rule.args |> createParams |> list2opt)
                         }
                     startRule::{rule with isStart = false}::res
             )
@@ -70,6 +71,7 @@ let initialConvert (def : Definition.t<_,_>) =
             | PToken _ | PLiteral _ -> true
             | PRef (n, _) -> getCount <| Source.toString n > 0
             | PSeq (s,_,_) -> s |> List.forall (fun elem -> reachable elem.rule)
+            | PAlt (x,y) -> reachable x && reachable y
             | x -> failwithf "Unexpected construction %A" x
         let rec inner (ruleList : Rule.t<_,_> list) =
             let iter = ref false

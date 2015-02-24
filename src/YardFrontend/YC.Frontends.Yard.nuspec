@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>YC.Frontends.Yard</id>
-    <version>0.0.6.10</version>
+    <version>0.0.6.11</version>
     <title>YC frontend for Yard</title>
     <authors>YaccConstructor Software Foundation</authors>
     <owners>YaccConstructor Software Foundation</owners>
@@ -23,7 +23,7 @@
     <file src="README" target="README" /> 
     <file src="..\..\LICENSE" target="LICENSE" /> 
     <file src="..\..\NOTICE" target="NOTICE" />
-    <file src="..\..\Bin\Release\v40\YardFrontend.*" target="lib\net40\" exclude="**\*.Test.*"/> 
-    <file src="..\..\Bin\Release\v40\RNGLR.*" target="lib\net40\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\YC.YardFrontend.*" target="lib\net40\" exclude="**\*.Test.*"/> 
+    <file src="..\..\Bin\Release\v40\YC.RNGLR.*" target="lib\net40\" exclude="**\*.Test.*"/> 
 </files>
 </package>

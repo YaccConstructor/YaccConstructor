@@ -2,7 +2,7 @@
 <package>
 <metadata>
 <id>YC.Core</id>
-<version>0.0.8-dev-22-ci</version>
+<version>0.0.8.22-dev-local</version>
 <title>Core of YaccConstructor</title>
 <authors>YaccConstructor Software Foundation</authors>
 <owners>YaccConstructor Software Foundation</owners>

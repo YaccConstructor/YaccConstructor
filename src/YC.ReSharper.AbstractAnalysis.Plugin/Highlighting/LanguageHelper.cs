@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Highlighting.Core;
 using JetBrains.TextControl.Graphics;
+using YC.SDK.ReSharper;
 
 namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 {
@@ -35,16 +35,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             return language.GetColor(token.ToLowerInvariant());
         }
 
-        public static int GetNumberFromTextValue(string lang, string text)
-        {
-            Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
-            if (language == null)
-                return -1;
-
-            string ycName = language.GetYcName(text);
-            return language.GetNumber(ycName);
-        }
-
         public static int GetNumberFromYcName(string lang, string ycName)
         {
             Language language = availableLang.FirstOrDefault(item => item.LanguageName == lang.ToLowerInvariant());
@@ -67,10 +57,8 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             this.tokenInfos = tokenInfos;
         }
 
-        public string GetBrother(string str, Brother brother)
+        public string GetBrother(string ycName, Brother brother)
         {
-            string ycName = GetYcName(str);
-
             if (String.IsNullOrEmpty(ycName) || 
                 !tokenInfos.ContainsKey(ycName))
                 return null;
@@ -86,15 +74,6 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             }
         }
 
-        /// <summary>
-        /// Maps token name from YaccConstructor. For example if str is "(" then returned value is "LBRACE"
-        /// This method contains definition only for paired tokens.
-        /// </summary>
-        public string GetYcName(string str)
-        {
-            return YcHelper.GetYcName(LanguageName, str);
-        }
-
         public string GetColor(string token)
         {
             if (tokenInfos.ContainsKey(token))
@@ -105,7 +84,7 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
 
         public int GetNumber(string ycName)
         {
-            return YcHelper.GetNumber(LanguageName, ycName);
+            return Helper.YcHelper.GetNumber(LanguageName, ycName);
         }
     }
 

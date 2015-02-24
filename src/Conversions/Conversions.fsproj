@@ -11,18 +11,12 @@
     <AssemblyName>YC.Conversions</AssemblyName>
     <Name>Conversions</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <!--Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" /-->
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
       <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
@@ -35,7 +29,7 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
-  <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Namer.fs" />
     <Compile Include="TransformAux.fs" />
@@ -59,10 +53,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FsYacc, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Helper, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.7\lib\net40\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -85,7 +77,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
              Other similar extension points exist, see Microsoft.Common.targets.
         <Target Name="BeforeBuild">

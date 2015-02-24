@@ -23,14 +23,15 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-i "C:\yc\recursive-ascent\src\Calc\calc.yrd" -c ExpandEbnf -c ExpandMeta -g "RNGLRGenerator -pos uint64 -token string*array&lt;Position&lt;JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression&gt;&gt; -module Calc.AbstractParser -translate true -highlighting true -namespace CalcHighlighting -table LALR -o Calc.yrd.fs"</StartArguments>
+    <StartArguments>-i "C:\gsv\projects\recursive-ascent\src\RNGLRParser.SimpleTest\Attrs.yrd " -c ExpandEbnf -c ExpandMeta  -g "RNGLRGenerator -pos int -token int -module LL.Parse2 -o 222.yrd.fs"</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartArguments>-i C:\Users\User\recursive-ascent\src\GLLParser.SimpleTest\BadLeftRecursion.yrd</StartArguments>
+    <StartArguments>-i "C:\gsv\projects\recursive-ascent\src\RNGLRParser.SimpleTest\Attrs.yrd " -c ExpandEbnf -c ExpandMeta  -g "RNGLRGenerator -pos int -token int -module LL.Parse2 -o 222.yrd.fs"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <RemoteDebugMachine />
+    <OutputPath>..\..\Bin\Release\v40\</OutputPath>
   </PropertyGroup>
   <Import Project="../YC.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.5\Microsoft.FSharp.Targets')" />
@@ -61,7 +62,11 @@
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.8\lib\net40\FsYacc.exe</HintPath>
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\FsYacc.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net40\Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Addins">
@@ -82,11 +87,6 @@
     <ProjectReference Include="..\Conversions\Conversions.fsproj">
       <Name>Conversions</Name>
       <Project>{96ab0183-84e1-4a2e-8896-9ead2c8cf6a4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\LLGenerator2\GLLGenerator2.fsproj">
-      <Name>GLLGenerator2</Name>
-      <Project>{6fd45034-ad73-4274-867a-cf80443344be}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -28,7 +28,7 @@ open Yard.Examples.MSParser
 open LexerHelper
 open System
 open Yard.Utils.StructClass
-open YC.AbstractAnalysis.CommonInterfaces
+open YC.SDK.CommonInterfaces
 
 let mutable id = 0<id>
 

@@ -33,13 +33,19 @@ open Yard.Core.Helpers
 [<TestFixture>]
 type ``Expand subseq tests`` () =
     let basePath = System.IO.Path.Combine(conversionTestPath, "ExpandSubseq")
-    let fe = getFrontend("YardFrontend")
-    let conversion = "ExpandBrackets"
+    let fe = getFrontend("YardFrontend")    
+
+    let applyConversion loadIL = 
+        {
+            loadIL
+                with grammar = (new Conversions.ExpandBrackets.ExpandBrackets()).ConvertGrammar (loadIL.grammar, [||])                               
+        }
+
     [<Test>]
     member test.``Subseq 1`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq1.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]
@@ -59,7 +65,7 @@ type ``Expand subseq tests`` () =
     member test.``Subseq 2`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"subseq2.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t("yard_exp_brackets_1"),None)}
@@ -84,7 +90,7 @@ type ``Expand subseq tests`` () =
     member test.``Inner subseq`` () =
         let loadIL = fe.ParseGrammar (System.IO.Path.Combine(basePath,"innerSubseq.yrd"))
         Namer.initNamer loadIL.grammar
-        let result = apply_Conversion conversion loadIL
+        let result = applyConversion loadIL
         let rules =
             (verySimpleRules "s"
                 [{dummyRule with rule = PRef (Source.t "yard_exp_brackets_1",None)}]

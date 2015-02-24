@@ -142,8 +142,6 @@ let metaRulesTbl grammar =
     |> dict
 
 let apply_Conversion (convNameWithParams:string) (ilTree:Definition.t<Source.t,Source.t>) =
-        AddinManager.Initialize()
-        AddinManager.Registry.Update(null)
         let AddinConversion = AddinManager.GetExtensionObjects (typeof<Conversion>) |> Seq.cast<Conversion>
         let parameters = convNameWithParams.Split(' ')
             //printfn "Conversion: %s" convNameWithParams

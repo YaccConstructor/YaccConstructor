@@ -1,3 +1,0 @@
-[<Start>]
-start: a
-a: A | B | C | OPEN start CLOSE

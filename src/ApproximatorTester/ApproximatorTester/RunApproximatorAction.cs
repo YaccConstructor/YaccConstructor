@@ -10,7 +10,7 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.TextControl;
 using JetBrains.Util;
-using YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation;
+using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
 
 namespace ApproximatorTester
@@ -34,7 +34,7 @@ namespace ApproximatorTester
         {
             var inputFile = _provider.PsiFile;
 
-            CFA.analyze(inputFile);
+            ApproximationBuilder.Build(inputFile);
 
             return null;
         }

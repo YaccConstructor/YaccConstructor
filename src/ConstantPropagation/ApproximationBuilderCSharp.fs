@@ -1,4 +1,4 @@
-﻿module ApproximationBuilderCSharp
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximationBuilderCSharp
 
 open XMLParser
 open JetBrains.ReSharper.Psi.CSharp.Tree

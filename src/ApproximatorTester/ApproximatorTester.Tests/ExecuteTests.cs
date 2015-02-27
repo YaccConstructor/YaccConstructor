@@ -21,5 +21,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("test0.cs");
         }
+
+        [Test]
+        public void Test1()
+        {
+            DoTestFiles("test1.cs");
+        }
     }
 }

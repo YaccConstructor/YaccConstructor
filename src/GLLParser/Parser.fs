@@ -76,7 +76,8 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
 
         let resultAST = ref None
         let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) (inputLength + 1)
-        let symbolNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.rulesCount (inputLength + 1) (inputLength + 1) 
+        let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
+        let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) 
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count inputLength
         let terminalNodes = new BlockResizeArray<int<nodeMeasure>>() // чем по умолчанию заполнен такой массив 
         
@@ -140,20 +141,38 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let isEnd = slotIsEnd label
             let nTerm = parser.LeftSide.[getRule label]
             let rule = getRule label
-            if symbolNodes.[rule, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
+            if isEnd
             then
-                if isEnd then
+                if nonTerminalNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
+                then
                     let newNode = new NonTerminalNode(nTerm, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
+                    let num = sppfNodes.Count - 1
+                    nonTerminalNodes.[nTerm, lExt, rExt] <- num*1<nodeMeasure>
+                    num*1<nodeMeasure>
                 else
+                    nonTerminalNodes.[nTerm, lExt, rExt]
+            else
+                if intermidiateNodes.[lExt, rExt] = Unchecked.defaultof<Dictionary<int<labelMeasure>, int<nodeMeasure>>>
+                then
+                    let d = new Dictionary<int<labelMeasure>, int<nodeMeasure>>()
                     let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
                     sppfNodes.Add(newNode)
-                let num = sppfNodes.Count - 1
-                symbolNodes.[rule, lExt, rExt] <- num*1<nodeMeasure>
-                num*1<nodeMeasure>
-            else 
-                symbolNodes.[rule, lExt, rExt]
-
+                    let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                    d.Add(label, num)
+                    intermidiateNodes.[lExt, rExt] <- d 
+                    num
+                else
+                    let dict = intermidiateNodes.[lExt, rExt] 
+                    if dict.ContainsKey label
+                    then
+                        dict.[label]
+                    else
+                        let newNode = new IntermidiateNode(int label, (packExtension lExt rExt))
+                        sppfNodes.Add(newNode)
+                        let num = (sppfNodes.Count - 1)*1<nodeMeasure>
+                        dict.Add(label, num)
+                        num
 
         let findSppfPackedNode symbolNode label leftExtension rightExtension (left : INode) (right : INode) : int<nodeMeasure> = 
             let i = getLeftExtension leftExtension

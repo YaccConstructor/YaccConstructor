@@ -35,30 +35,6 @@ let private tryDefineLang (node: IInvocationExpression) =
                 && hotspot.ReturnType = retType
         )
     |> Option.map fst  
-
-
-//// expects "node <> null"
-//let isSourceElemEquals (node: ITreeNode) (elem: IControlFlowElement) =
-//    elem <> null && LanguagePrimitives.PhysicalEquality node elem.SourceElement
-
-//// Searches control flow graph for IControlFlowElement element 
-//// correponding to passed IInvocationExpression node
-//let private findNodeInCFG (cfg: ICSharpControlFlowGraf) (pred: IControlFlowElement -> bool) =
-//    if cfg = null then None
-//    else
-//        let rec dfs (elem: IControlFlowElement) =
-//            match elem with
-//            | null -> None
-//            | e when pred(e) -> Some (e)
-//            | e when e.Exits <> null ->
-//                e.Exits
-//                |> List.ofSeq
-//                |> List.map (fun rib -> rib.Target) 
-//                |> List.tryPick dfs
-//            | _ -> None
-//        dfs cfg.EntryElement
-//    
-//let getAncestorsSubCFG (node: IControlFlowElement) pred =
     
 // expects "node <> null"
 let isPsiElemEquals (node: ITreeNode) (cfgNode: ICFGNode) =

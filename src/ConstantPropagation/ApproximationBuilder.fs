@@ -1,8 +1,9 @@
 ﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximationBuilder
 
 open JetBrains.ReSharper.Psi.ControlFlow
-open Utils
 open System.Collections.Generic
+open JetBrains.ReSharper.Psi.ControlFlow.CSharp
+open JetBrains.ReSharper.Psi.Tree
 
 // Data dependency graph node
 type DataDependencyNode = 
@@ -10,33 +11,39 @@ type DataDependencyNode =
     | InnerNode of List<DataDependencyNode> * List<DataDependencyNode> * string
     | Leaf of List<DataDependencyNode> * string
 
-// Data dependency graph, constructor takes the root node
+// Data dependency graph. Constructor takes the root node
 // as a parameter
 type DataDependencyGraph = 
     | DDGraph of DataDependencyNode
 
-// Type representing control flow graph node 
-type IControlFlowGraphNode = 
+// Represents control flow graph node 
+type ICFGNode = 
     // Builds subgraph of node's ancestors omitting nodes not 
     // satisfying predicate (subgraph remains connected)
-    abstract getAncestorsSubgraph: (IControlFlowGraphNode -> bool) -> option<DataDependencyGraph>
+    abstract getAncestorsSubgraph: (ICFGNode -> bool) -> DataDependencyGraph
+    // Corresponding elem in PSI
+    abstract psiElem: ITreeNode with get
 
-// Type representing control flow graph of source code
-and IControlFlowGraph = 
+// Represents control flow graph of source code
+and ICFG = 
     // Find first node satisfying predicate
-    abstract findFirst: (IControlFlowGraphNode -> bool) -> option<IControlFlowGraphNode>
+    abstract findFirst: (ICFGNode -> bool) -> option<ICFGNode>
 
-//// Enum representing control flow graph node type
-//type ControlFlowGraphNodeType = NotImplemented=0
+(* impelementations for CSharp *)
 
-type ReSharperControlFlowGraphNode(node: IControlFlowElement) =
+// Wraps ReSharper's IControlFlowElement and ad some new functionality
+type ReSharperCFGNode(node: IControlFlowElement) =
     // exception messages
+    let nullContructorArgMsg = "node argument can't be null"
+
     let nullAncestorMsg = "null ancestor encountered"
     let wrongAncestorNodeTypeToConnect = "leaf node is passed as an ancestor in connect function"
     let wrongNodeTypeToConnect = "root node is passed as a child in connect function"
     let wrongRootTypeMsg = "maybeRoot must contain object constructed by Root"
 
-    interface IControlFlowGraphNode with
+    do if node = null then failwith nullContructorArgMsg
+
+    interface ICFGNode with
         member this.getAncestorsSubgraph pred =
             let connect (node: DataDependencyNode) (ancestor: DataDependencyNode) =
                 match ancestor with
@@ -89,10 +96,33 @@ type ReSharperControlFlowGraphNode(node: IControlFlowElement) =
                         )
                     |> List.head
 
-            if node = null
-            then None
-            else 
-                let ddLeafNode = Leaf (new List<DataDependencyNode>(), node.Id.ToString())
-                let createdNodes = new Dictionary<int, DataDependencyNode>()
-                let ddRootNode = traverse node ddLeafNode createdNodes None
-                Some (DDGraph ddRootNode)
+            let ddLeafNode = Leaf (new List<DataDependencyNode>(), node.Id.ToString())
+            let createdNodes = new Dictionary<int, DataDependencyNode>()
+            let ddRootNode = traverse node ddLeafNode createdNodes None
+            DDGraph ddRootNode
+
+        member this.psiElem = node.SourceElement
+
+// Wraps ICSharpControlFlowGraf and add some new functionality
+type CSharpCFG(cfg: ICSharpControlFlowGraf) = 
+    // exception messages
+    let nullContructorArgMsg = "cfg argument can't be null"
+
+    do if cfg = null then failwith nullContructorArgMsg
+
+    interface ICFG with 
+        member this.findFirst pred =
+            if cfg = null then None
+            else
+                let rec dfs (elem: IControlFlowElement) =
+                    match elem with
+                    | null -> None
+                    | e when pred(ReSharperCFGNode(e)) -> Some (e)
+                    | e when e.Exits <> null ->
+                        e.Exits
+                        |> List.ofSeq
+                        |> List.map (fun rib -> rib.Target) 
+                        |> List.tryPick dfs
+                    | _ -> None
+                dfs cfg.EntryElement 
+                |> Option.map (fun elem -> ReSharperCFGNode(elem) :> ICFGNode)

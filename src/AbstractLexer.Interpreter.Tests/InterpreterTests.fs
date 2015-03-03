@@ -5,13 +5,15 @@ open Microsoft.FSharp.Collections
 open QuickGraph
 open AbstractAnalysis.Common
 open YC.FST.GraphBasedFst
-open YC.FST.FstApproximation
 open YC.FST.AbstractLexing.Interpreter
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
      
 let TokenizationTest graphAppr eCount vCount  =
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphAppr        
+    let graphFsa = FSA.ApprToFSA(graphAppr)
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFsa       
     match res with
     | Success res -> checkGraph res eCount vCount   
     | Error e -> Assert.Fail(sprintf "Tokenization problem %A:" e)

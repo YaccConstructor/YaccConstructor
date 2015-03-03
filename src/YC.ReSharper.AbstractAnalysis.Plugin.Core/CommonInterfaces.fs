@@ -7,8 +7,8 @@ open QuickGraph.Algorithms
 open AbstractAnalysis.Common
 open Yard.Generators.Common.AST
 open YC.FST.AbstractLexing.Interpreter
-open YC.FST.FstApproximation
 open YC.FST.GraphBasedFst
+open YC.FSA.FsaApproximation
 
 type TreeGenerationState<'node> = 
     | Start

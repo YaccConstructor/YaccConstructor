@@ -30,10 +30,12 @@ open Mono.Addins
 open ReSharperExtension
 open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.GraphBasedFsa
 
 let tokenize lexerInputGraph =
+    let graphFsa = FSA.ApprToFSA(lexerInputGraph)
     let eof = RNGLR_EOF(new GraphTokenValue<_>())    
-    YC.TSQLLexer.tokenize eof lexerInputGraph
+    YC.TSQLLexer.tokenize eof graphFsa
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

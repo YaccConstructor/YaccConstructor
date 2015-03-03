@@ -28,6 +28,7 @@ open YC.Tests.Helper
 open Yard.Generators.RNGLR.Parser
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.GraphBasedFsa
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
@@ -41,9 +42,10 @@ let loadLexerInputGraph gFile =
 let eof = Calc.Parser.RNGLR_EOF(new GraphTokenValue<_>()) 
 let errorTest inputFilePath shouldContainsSuccess errorsCount =
     printfn "==============================================================="
-    let lexerInputGraph = loadLexerInputGraph inputFilePath
+    let lexerInputGraph = loadLexerInputGraph inputFilePath    
+    let graphFsa = FSA.ApprToFSA(lexerInputGraph) 
     let qGraph = 
-        match YC.RNGLR.CalcLexer.tokenize eof lexerInputGraph with
+        match YC.RNGLR.CalcLexer.tokenize eof graphFsa with
         | YC.FST.GraphBasedFst.Success g -> g
         | YC.FST.GraphBasedFst.Error e -> 
             Assert.Fail ("Tokenization failed! Errors:" + (e |> Array.map (function | YC.FST.GraphBasedFst.Smbl s -> fst s |> string | e -> string e) |> String.concat "; " ))

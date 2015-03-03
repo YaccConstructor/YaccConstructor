@@ -8,7 +8,7 @@ open QuickGraph
 open AbstractAnalysis.Common
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
-open YC.FST.FstApproximation
+open YC.FSA.FsaApproximation
 open System.IO
 
 let eof = RNGLR_EOF(new GraphTokenValue<_>())   

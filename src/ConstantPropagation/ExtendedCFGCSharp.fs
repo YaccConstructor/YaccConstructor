@@ -1,10 +1,11 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph.CSharpCFG
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.CSharp
 
 open System.Collections.Generic
 
 open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DataDependencyGraph
 
 // Wraps ReSharper's IControlFlowElement and ad some new functionality

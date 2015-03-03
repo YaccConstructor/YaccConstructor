@@ -40,7 +40,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="CFA.fs" />
-    <Compile Include="ApproximationBuilder.fs" />
+    <Compile Include="DataDependencyGraph.fs" />
+    <Compile Include="ExtendedCFGGeneral.fs" />
+    <Compile Include="ExtendedCFGCSharp.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
     <Compile Include="Approximator.fs" />
   </ItemGroup>

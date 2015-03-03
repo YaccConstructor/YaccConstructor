@@ -10,8 +10,8 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph.CSharpCFG
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.CSharp
 
 let private hotspotInfoList = parseXml "Hotspots.xml"
 

@@ -1,4 +1,4 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
 
 open JetBrains.ReSharper.Psi.Tree
 

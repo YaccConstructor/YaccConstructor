@@ -1,14 +1,17 @@
 ﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximationBuilderCSharp
 
-open XMLParser
+open System.Collections.Generic
+
 open JetBrains.ReSharper.Psi.CSharp.Tree
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
-open System.Collections.Generic
 open JetBrains.ReSharper.Psi.ControlFlow
-open ApproximationBuilder
+
+open XMLParser
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph.CSharpCFG
 
 let private hotspotInfoList = parseXml "Hotspots.xml"
 
@@ -35,27 +38,18 @@ let private tryDefineLang (node: IInvocationExpression) =
                 && hotspot.ReturnType = retType
         )
     |> Option.map fst  
-    
-// expects "node <> null"
-let isPsiElemEquals (node: ITreeNode) (cfgNode: ICFGNode) =
-    LanguagePrimitives.PhysicalEquality node cfgNode.psiElem
 
 let private getEnclosingMethodNullParentMsg = "can't get enclosing method, null parent encountered"
-//let private hotspotElementNotFoundMsg = "hotspot's corresponding IControlFlowElementnot found"
 
-let private getDataFlowGraph (hotspot: IInvocationExpression) =
+let private createControlFlowGraph (hotspot: IInvocationExpression) =
     let rec getEnclosingMethod (node: ITreeNode) =
         match node with
         | null -> failwith getEnclosingMethodNullParentMsg
         | :? ICSharpFunctionDeclaration as funDecl -> funDecl
         | _ -> getEnclosingMethod node.Parent
+
     let methodDeclaration = getEnclosingMethod hotspot
-    let controlFlowGraph = CSharpControlFlowBuilder.Build methodDeclaration
-    let wrappedCFG = CSharpCFG(controlFlowGraph) :> ICFG
-    let ddGraphOpt = 
-        wrappedCFG.findFirst (isPsiElemEquals hotspot)
-        |> Option.map (fun node -> node.getAncestorsSubgraph (fun _ -> true))
-    ()
+    CSharpControlFlowBuilder.Build methodDeclaration
 
 let build (file: ICSharpFile) = 
     let hotspots = new ResizeArray<_>() 
@@ -65,6 +59,21 @@ let build (file: ICSharpFile) =
             tryDefineLang invocExpr
             |> Option.iter (fun lang -> hotspots.Add (lang, invocExpr))
         | _ -> ()
+
     let processor = RecursiveElementProcessor(fun x -> addHotspot x)
     processor.Process file
-    hotspots |> List.ofSeq |> List.iter (getDataFlowGraph << snd)
+    let ddGraphOpts = 
+        hotspots 
+        |> List.ofSeq 
+        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
+        |> List.map
+            (
+                fun (cfg, hotspot) ->
+                    // expects "node <> null"
+                    let isPsiElemEquals (node: ITreeNode) (cfgNode: IExtendedCFGNode) =
+                        LanguagePrimitives.PhysicalEquality node cfgNode.psiElem
+                    let extCFG = CSharpExtendedCFG(cfg) :> IExtendedCFG
+                    extCFG.findFirst (isPsiElemEquals hotspot)
+                    |> Option.map (fun node -> node.getAncestorsSubgraph (fun _ -> true))
+            )
+    ()

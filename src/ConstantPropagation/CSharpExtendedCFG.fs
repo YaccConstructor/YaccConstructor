@@ -1,35 +1,11 @@
-﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ApproximationBuilder
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.ControlFlowGraph.CSharpCFG
+
+open System.Collections.Generic
 
 open JetBrains.ReSharper.Psi.ControlFlow
-open System.Collections.Generic
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
-open JetBrains.ReSharper.Psi.Tree
 
-// Data dependency graph node
-type DataDependencyNode = 
-    | Root of List<DataDependencyNode>
-    | InnerNode of List<DataDependencyNode> * List<DataDependencyNode> * string
-    | Leaf of List<DataDependencyNode> * string
-
-// Data dependency graph. Constructor takes the root node
-// as a parameter
-type DataDependencyGraph = 
-    | DDGraph of DataDependencyNode
-
-// Represents control flow graph node 
-type ICFGNode = 
-    // Builds subgraph of node's ancestors omitting nodes not 
-    // satisfying predicate (subgraph remains connected)
-    abstract getAncestorsSubgraph: (ICFGNode -> bool) -> DataDependencyGraph
-    // Corresponding elem in PSI
-    abstract psiElem: ITreeNode with get
-
-// Represents control flow graph of source code
-and ICFG = 
-    // Find first node satisfying predicate
-    abstract findFirst: (ICFGNode -> bool) -> option<ICFGNode>
-
-(* impelementations for CSharp *)
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DataDependencyGraph
 
 // Wraps ReSharper's IControlFlowElement and ad some new functionality
 type ReSharperCFGNode(node: IControlFlowElement) =
@@ -43,7 +19,7 @@ type ReSharperCFGNode(node: IControlFlowElement) =
 
     do if node = null then failwith nullContructorArgMsg
 
-    interface ICFGNode with
+    interface IExtendedCFGNode with
         member this.getAncestorsSubgraph pred =
             let connect (node: DataDependencyNode) (ancestor: DataDependencyNode) =
                 match ancestor with
@@ -104,13 +80,13 @@ type ReSharperCFGNode(node: IControlFlowElement) =
         member this.psiElem = node.SourceElement
 
 // Wraps ICSharpControlFlowGraf and add some new functionality
-type CSharpCFG(cfg: ICSharpControlFlowGraf) = 
+type CSharpExtendedCFG(cfg: ICSharpControlFlowGraf) = 
     // exception messages
     let nullContructorArgMsg = "cfg argument can't be null"
 
     do if cfg = null then failwith nullContructorArgMsg
 
-    interface ICFG with 
+    interface IExtendedCFG with 
         member this.findFirst pred =
             if cfg = null then None
             else
@@ -125,4 +101,4 @@ type CSharpCFG(cfg: ICSharpControlFlowGraf) =
                         |> List.tryPick dfs
                     | _ -> None
                 dfs cfg.EntryElement 
-                |> Option.map (fun elem -> ReSharperCFGNode(elem) :> ICFGNode)
+                |> Option.map (fun elem -> ReSharperCFGNode(elem) :> IExtendedCFGNode)

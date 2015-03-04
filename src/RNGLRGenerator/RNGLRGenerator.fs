@@ -150,9 +150,9 @@ type RNGLR() =
                     System.IO.Directory.CreateDirectory printInfiniteEpsilonPath |> ignore
                     for cycle in grammar.EpsilonCyclicNonTerms do
                         let nonTerm = List.head cycle
-                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot(
-                            grammar.indexator.indexToNonTerm, (fun _ -> 0), grammar.rules.leftSideArr,
-                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot")))
+                        grammar.epsilonTrees.[grammar.indexator.nonTermToIndex nonTerm].AstToDot
+                            grammar.indexator.indexToNonTerm (fun _ -> 0) None grammar.rules.leftSideArr
+                            (System.IO.Path.Combine (printInfiniteEpsilonPath, nonTerm + ".dot"))
                 grammar.epsilonTrees |> Array.iter (fun t -> if t <> null then t.EliminateCycles())
             
             let statesInterpreter = buildStates table grammar

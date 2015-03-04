@@ -445,7 +445,7 @@ type ``Abstract case: matching brackets``() =
         
         match result with
         | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst, _, _) ->
+        | Parser.Success(mAst) ->
             
             let other = new OtherTree<_>(mAst)
             
@@ -488,7 +488,7 @@ type ``Abstract case: matching brackets``() =
         
         match result with
         | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst, _, _) ->
+        | Parser.Success(mAst) ->
             
             let other = new OtherTree<_>(mAst)
             
@@ -533,7 +533,7 @@ type ``Abstract case: matching brackets``() =
         
         match result with
         | Parser.Error (num, tok, message) -> printErr (num, tok, message)
-        | Parser.Success(mAst, _, _) ->
+        | Parser.Success(mAst) ->
             
             let other = new OtherTree<_>(mAst)
             let pairTokens = other.FindAllPair leftBraceNumber rightBraceNumber 5 false tokToNumber tokToPos

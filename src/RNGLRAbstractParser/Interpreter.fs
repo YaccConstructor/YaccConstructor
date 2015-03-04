@@ -350,5 +350,5 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
                 let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                tree.AstToDot (parserSource.NumToString, parserSource.TokenToNumber, parserSource.LeftSide, "../../../Tests/AbstractRNGLR/DOT/sppf.dot", parserSource.TokenData.Value)
+                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
                 Success <| tree

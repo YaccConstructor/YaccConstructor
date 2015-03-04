@@ -638,7 +638,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
         
             forestTree
 
-    member this.AstToDot ((indToString : int -> string), tokenToNumber, (leftSide : array<int>), (path : string), ?tokenData)=
+    member this.AstToDot (indToString : int -> string) tokenToNumber tokenData (leftSide : array<int>) (path : string)=
         let next =
             let cur = ref order.Length
             fun () ->

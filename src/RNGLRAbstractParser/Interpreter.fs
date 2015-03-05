@@ -147,7 +147,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     targetGssV.addEdge edge
                 else 
                     terminals.Add e.Tag
-                    nodes.Add <| Terminal (parserSource.TokenToNumber e.Tag)
+                    nodes.Add <| Terminal (terminals.Count - 1)
                     edgesToTerms.Add(e, nodes.Count - 1)
                     edge <- new Edge(gssVertex, nodes.Count - 1)
                     targetGssV.addEdge edge
@@ -261,7 +261,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             then vertex.PassingReductions.Add (prod, remainLength, Array.copy path, nonTerm, pos, startV)
             vertex.OutEdges |> ResizeArray.iter
                 (fun e ->
-                    path.[remainLength - 1] <- nodes.[e.Ast]
+                    path.[remainLength - 1] <- if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast]
                     walk (remainLength - 1) e.Dest path currentGraphV startV nonTerm pos prod shouldEnqueueVertex)
 
     let makeSingleReduction currentGraphV (vertex : Vertex) prod pos (edgeOpt : Edge option) =
@@ -275,7 +275,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 newVertex.addEdge edge
         else 
             let path = Array.zeroCreate pos
-            //    path.[i] <- getEpsilon (if blah.Length = 0 then -1 else blah.[0]) ///????
             path.[pos - 1] <- nodes.[edgeOpt.Value.Ast]
             walk (pos - 1) (edgeOpt.Value : Edge).Dest path currentGraphV currentGraphV nonTerm pos prod false
 

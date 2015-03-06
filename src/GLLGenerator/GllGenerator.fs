@@ -130,7 +130,7 @@ type GLL() =
 
                     println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"
-                    println "open Yard.Generators.Common.AST2"
+                    println "open Yard.Generators.Common.AST3"
 
                     match definition.head with
                     | None -> ()

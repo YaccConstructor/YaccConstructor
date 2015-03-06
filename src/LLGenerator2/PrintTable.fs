@@ -211,7 +211,7 @@ let printTableGLL
         printArr grammar.canInferEpsilon (print "%A")
 
         printBr "let defaultAstToDot ="
-        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST2.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
+        printBrInd 1 "(fun (tree : Yard.Generators.Common.AST3.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)"
 
         printBr ""
 
@@ -367,4 +367,4 @@ let printTableGLL
         printBr ""
          
         res.ToString()
-    printTable ()
+    printTable ()   

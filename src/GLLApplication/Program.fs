@@ -11,7 +11,7 @@ open Yard.Generators.GLL
 
 open Yard.Generators.GLL.Parser    
 open Microsoft.FSharp.Text.Lexing
-open Yard.Generators.Common.AST2
+open Yard.Generators.RNGLR
 open GLL.SimpleLeftRecursion
 open GLL.BadLeftRecursion
 open GLL.Parse.SimpleAmb
@@ -25,35 +25,41 @@ open Lexer2
 let run () =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let gen = new Yard.Generators.GLL.GLL()
-    let il = fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLParser.SimpleTest\SimpleAmb.yrd")
+    let il = fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
     gen.Generate(il,"-pos int -token int -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
 
 run () |> printfn "%A"
 
-let run2 path astBuilder =
+let run1 path astBuilder =
     let tokens = Lexer2.tokens2(path)
     astBuilder tokens, tokens
 
-let parser2 = GLL.Parse.SimpleAmb.buildAst
-let str = "A D B" //String.init 5 (fun i -> "B ") + "A" 
-let r = run2 str parser2
-printfn "simple amb"
-//for i in [1..100] do
-//    let str = String.init (100) (fun i -> "B ") + "A "
-//    let str2 = String.init (i) (fun i -> str)
+
+let parser1 = GLL.Parse.SimpleAmb.buildAst
+
+//for i in [1..10] do
+//    let str = String.init (i * 5) (fun i -> "B ")
 //    let start = System.DateTime.Now
-//let str = "A D B"
-//let r = run2 (str.Trim()) parser2
+//    let r = run1 (str.Trim()) parser1
 //    let t = System.DateTime.Now - start
-//   printfn "%A" t.TotalSeconds
+//    printfn "%A" t.TotalSeconds
 
-
+//////////////////////////////////////
+//let run2 path astBuilder =
+//    let tokens = Lexer2.tokens2(path)
+//    astBuilder tokens, tokens
+//
+//let parser2 = GLL.Parse.SimpleAmb.buildAst
+//let str = String.init 100 (fun i -> "B ") + "B"
+let str = "A B"
+let r = run1 str parser1
+//printfn "simple amb"
 
 match r with
     | Parser.Error str, _ ->
-        printfn "%s" str
+        printfn "%s" "dddd" //str 
     | Parser.Success tree, tokens ->
         printfn "%s" "sss"
         //GLL.SimpleLeftRecursion.defaultAstToDot tree "ast.dot"
-//
-printfn "ff"
+////
+//printfn "ff"

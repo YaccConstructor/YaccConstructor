@@ -4,7 +4,7 @@ module GLL.Parse.SimpleAmb
 #nowarn "64";; // From fsyacc: turn off warnings that type variables used in production annotations are instantiated to concrete type
 open Yard.Generators.GLL.Parser
 open Yard.Generators.GLL
-open Yard.Generators.Common.AST2
+open Yard.Generators.Common.AST3
 type Token =
     | A of (int)
     | B of (int)
@@ -80,15 +80,15 @@ let mutable private cur = 0
 
 let acceptEmptyInput = false
 
-let leftSide = [|2; 2; 3; 0|]
-let table = [| [||];[||];[|3|];[||];[||];[||];[||];[||];[|1; 0|];[||];[||];[||];[|2|];[||];[||];[||]; |]
-let private rules = [|4; 6; 5; 4; 0; 5; 2; 6|]
-let private canInferEpsilon = [|false; true; false; false; false; false; false; false|]
+let leftSide = [|2; 3; 0; 0|]
+let table = [| [||];[|3; 2|];[|2|];[||];[||];[||];[||];[||];[|0|];[||];[||];[||];[|1|];[||];[||];[||]; |]
+let private rules = [|4; 0; 5; 2; 6|]
+let private canInferEpsilon = [|true; true; false; false; false; false; false; false|]
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.AST2.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST3.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
 
-let private rulesStart = [|0; 3; 6; 7; 8|]
-let startRule = 2
+let private rulesStart = [|0; 3; 4; 5; 5|]
+let startRule = 1
 let indexatorFullCount = 8
 let rulesCount = 4
 let indexEOF = 7
@@ -100,7 +100,7 @@ let literalStart = 8
 let literalEnd = 7
 let literalsCount = 0
 
-let slots = dict <| [|(-1, 0); (65538, 1); (131073, 2)|]
+let slots = dict <| [|(-1, 0); (2, 1); (65537, 2)|]
 
 let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)
 let buildAst : (seq<Token> -> ParseResult<_>) =

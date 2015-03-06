@@ -84,5 +84,6 @@ type Table (grammar : FinalGrammar) =
             for j = 0 to length2 - 1 do
                 result.[length2 * i + j] <- List.toArray arr.[i,j]
         result
-  
+    
+
     member this.result = _table

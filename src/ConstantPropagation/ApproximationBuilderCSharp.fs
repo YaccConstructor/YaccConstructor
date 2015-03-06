@@ -39,6 +39,19 @@ let private tryDefineLang (node: IInvocationExpression) =
         )
     |> Option.map fst  
 
+let getHotspots (file: ICSharpFile) =
+    let hotspots = new ResizeArray<_>() 
+    let addHotspot (node: ITreeNode) =
+        match node with 
+        | :? IInvocationExpression as invocExpr  -> 
+            tryDefineLang invocExpr
+            |> Option.iter (fun lang -> hotspots.Add (lang, invocExpr))
+        | _ -> ()
+
+    let processor = RecursiveElementProcessor(fun x -> addHotspot x)
+    processor.Process file
+    hotspots
+
 let private getEnclosingMethodNullParentMsg = "can't get enclosing method, null parent encountered"
 
 let private createControlFlowGraph (hotspot: IInvocationExpression) =
@@ -52,16 +65,7 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     CSharpControlFlowBuilder.Build methodDeclaration
 
 let build (file: ICSharpFile) = 
-    let hotspots = new ResizeArray<_>() 
-    let addHotspot (node: ITreeNode) =
-        match node with 
-        | :? IInvocationExpression as invocExpr  -> 
-            tryDefineLang invocExpr
-            |> Option.iter (fun lang -> hotspots.Add (lang, invocExpr))
-        | _ -> ()
-
-    let processor = RecursiveElementProcessor(fun x -> addHotspot x)
-    processor.Process file
+    let hotspots = getHotspots file
     let ddGraphOpts = 
         hotspots 
         |> List.ofSeq 
@@ -77,3 +81,7 @@ let build (file: ICSharpFile) =
                     |> Option.map (fun node -> node.getAncestorsSubgraph (fun _ -> true))
             )
     ()
+
+//let buildDDG (node: IControlFlowElement) =
+//    match node with 
+//    | :? IAdditiveExpression

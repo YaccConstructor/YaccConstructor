@@ -6,5 +6,6 @@ open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ConstantPropagation
 open Utils
 
 let BuildApproximation (file: ICSharpFile) = 
-    CFGUtils.methodsCFGToDot file
+    // the next line is for debug purposes
+    CFGUtils.allMethodsCFGToDot file
     ApproximationBuilderCSharp.build file

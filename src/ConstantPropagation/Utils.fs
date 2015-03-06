@@ -55,22 +55,28 @@ module CFGUtils =
             | [] -> ()
         bfs [cfg.EntryElement]
 
+    // Converts passed cfg "cfg" to DOT's digraph with name "name" 
+    // and stores it in the file specified by "outPath"
     let cfgToDot (cfg: ICSharpControlFlowGraf) outPath name =
         use outStream = FileInfo(outPath).CreateText()
         outStream.WriteLine("digraph " + name + " {")
         toDot cfg outStream
         outStream.WriteLine("}")
 
-    let methodToDot (methodDecl: IMethodDeclaration) =
+    // Extracts C# CFG from method declaration and converts it
+    // to DOT's digraph. The output file's name and the digraph's name
+    // are the same as passed method's name
+    let methodCFGToDot (methodDecl: IMethodDeclaration) =
         let methodName = methodDecl.NameIdentifier.GetText()
         let outPath = methodName + ".dot"
         let cfg = CSharpControlFlowBuilder.Build methodDecl
         cfgToDot cfg outPath methodName
 
-    let methodsCFGToDot (file: ICSharpFile) =
+    // Applies "CFGUtils.methodCFGToDot" to all the methods in the file
+    let allMethodsCFGToDot (file: ICSharpFile) =
         let processorAction (node: ITreeNode) = 
             match node with
-            | :? IMethodDeclaration as methodDecl -> methodToDot methodDecl
+            | :? IMethodDeclaration as methodDecl -> methodCFGToDot methodDecl
             | _ -> ()
         let processor = RecursiveElementProcessor (fun node -> processorAction node)
         processor.Process file

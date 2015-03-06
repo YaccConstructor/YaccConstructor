@@ -32,7 +32,6 @@ type Vertex =
     val Label            : int<labelMeasure>
     new (level, label) = {Level = level; Label = label}
 
-
 [<Struct>]
 type Context =
     val Index         : int
@@ -50,15 +49,13 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
     let tokens = Seq.toArray tokens
     let inputLength = Seq.length tokens
     let nonTermsCountLimit = 1 + (Array.max parser.LeftSide)
-    let getEpsilon =
 
-         let epsilons = Array.init nonTermsCountLimit (fun i -> box (-i - 1))
-         fun i -> epsilons.[i]
     if inputLength = 0 || parser.IndexEOF = parser.TokenToNumber tokens.[0] then
-//        if parser.AcceptEmptyInput then
-//            Success (new Tree<_>(null, getEpsilon startNonTerm, null))
-//        else
-        Error ("This grammar does not accept empty input.")     
+      //  if parser.AcceptEmptyInput then
+      //      let eps = new Nonnte
+            //Success (new Tree<_>(null, getEpsilon startNonTerm, null))
+     //   else
+            Error ("This grammar does not accept empty input.")     
     else
         let slots = parser.Slots
         let setR = new Queue<Context>()   
@@ -79,10 +76,13 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) 
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count inputLength
-        let terminalNodes = new BlockResizeArray<int<nodeMeasure>>() // чем по умолчанию заполнен такой массив 
-        
+        let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
+        let epsilonNode = new TerminalNode(-1, packExtension 0 0)
+        let epsilon = 1<nodeMeasure>
         let sppfNodes = new BlockResizeArray<INode>()
         sppfNodes.Add(dummyAST)
+        sppfNodes.Add(epsilonNode)
+
 
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummy)
@@ -225,8 +225,6 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     | :? TerminalNode as term ->
                         term.Extension 
                     | _ -> failwith "Smth strange, Nastya" 
-                //y := findSPPFSymbolNode(t, k, i)
-                //findSPPFPackNode(y, s, k, (), w)
                     
                 let y = findSppfNode label (getLeftExtension leftExt) (getRightExtension rightExt)
                 ignore <| findSppfPackedNode y label leftExt rightExt currentLeft currentRight
@@ -248,6 +246,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                 let res = sppfNodes.Count - 1
                 terminalNodes.Set index ((sppfNodes.Count - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
+            
                      
         let containsEdge (b : Vertex) (e : Vertex) ast =
             let labelN = slots.[int b.Label]
@@ -313,7 +312,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                         addContext index label vertex y 
             v
 
-        let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) extension =
+        let pop (u : Vertex) (i : int) (z : int<nodeMeasure>) =
             if u <> dummyGSSNode
             then
                 let vertexKey = (u.Level, u.Label)
@@ -358,10 +357,9 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let position = getPosition !currentLabel
             if Array.length parser.rules.[rule] = 0 
             then
-               // currentR := getNodeT !currentIndex
-                //currentN := getNodeP !currentLabel !currentN !currentR  
-                //pop !currentGSSNode !currentIndex !currentN
-                printf "temp"
+                currentR := epsilon
+                currentN := getNodeP !currentLabel !currentN !currentR  
+                pop !currentGSSNode !currentIndex !currentN
             else
                 if Array.length parser.rules.[rule] <> position
                 then
@@ -369,7 +367,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                     then
                         let curToken = parser.TokenToNumber tokens.[!currentIndex]
                         let curSymbol = parser.rules.[rule].[position]
-                        if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol) //может, здесь нужен отдельный иф для проверки на совпадение текущего символа и токена
+                        if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                         then
                             if curSymbol = curToken 
                             then
@@ -406,12 +404,12 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                         | :? TerminalNode as t ->
                             currentN := getNodeP !currentLabel !currentR !currentN
                             let r = (sppfNodes.Item <| int !currentN) :?> NonTerminalNode 
-                            pop !currentGSSNode !currentIndex !currentN r.Extension
+                            pop !currentGSSNode !currentIndex !currentN
                         | :? NonTerminalNode as r ->
                             if (r.Name = parser.LeftSide.[parser.StartRule]) && r.Extension = finalExtension
                             then 
                                 resultAST := Some r 
-                            pop !currentGSSNode !currentIndex !currentN r.Extension
+                            pop !currentGSSNode !currentIndex !currentN
 
         let control () =
              while not !stop do

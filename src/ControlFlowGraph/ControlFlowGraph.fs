@@ -1,6 +1,7 @@
 ﻿module ControlFlowGraph
 
 open Yard.Generators.Common.AST
+open System.Collections.Generic
 
 type BlockType = 
     | Assignment 
@@ -12,7 +13,7 @@ type BlockType =
     | ForStatement 
     | WhileStatement
     | Start
-    | None 
+    | NoneBlock 
 
 type ParserSource<'TokenType> = 
     val tokenToNumber : 'TokenType -> int
@@ -29,10 +30,12 @@ type ParserSource<'TokenType> =
         }
 
 type LanguageSource = 
-    val nodeToType : System.Collections.Generic.IDictionary<string, BlockType>
-    val typeToDelimiters: System.Collections.Generic.IDictionary<BlockType, int list>
+    val nodeToType : IDictionary<string, BlockType>
+    val typeToDelimiters: IDictionary<BlockType, int list>
     val elseNumber : int
     val endIfNumber : int
+    val eqNumber : int
+    val isVariable : int -> bool
 
     new (nodeToType, typeToDelimiters) = 
         {
@@ -40,6 +43,8 @@ type LanguageSource =
             typeToDelimiters = typeToDelimiters;
             elseNumber = -1;
             endIfNumber = -1;
+            eqNumber = -1;
+            isVariable = fun _ -> false;
         }
 
     new (nodeToType, typeToDelimiters, elseNumber, endIfNumber) = 
@@ -48,6 +53,18 @@ type LanguageSource =
             typeToDelimiters = typeToDelimiters;
             elseNumber = elseNumber;
             endIfNumber = endIfNumber;
+            eqNumber = -1;
+            isVariable = fun _ -> false;
+        }
+
+    new (nodeToType, typeToDelimiters, elseNumber, endIfNumber, eqNumber, isVariable) = 
+        {
+            nodeToType = nodeToType; 
+            typeToDelimiters = typeToDelimiters;
+            elseNumber = elseNumber;
+            endIfNumber = endIfNumber;
+            eqNumber = eqNumber;
+            isVariable = isVariable;
         }
 
 type Block<'TokenType> = 
@@ -73,7 +90,7 @@ type Block<'TokenType> =
             | ForStatement -> "ForStatement"
             | WhileStatement -> "WhileStatement"
             | Start -> "Start"
-            | None -> "None"
+            | NoneBlock -> "None"
 
         let strValues = 
             this.values
@@ -346,8 +363,92 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSour
         
         result
 
+    let findUndefVariable() = 
+        
+        let blockToVars = new Dictionary<_, _>()
+        let errorList = ref []
+        
+        let rec processBlock (block : Block<_>) = 
+            
+            let prevVars = blockToVars.[block]
+            let defVars = ref prevVars
+            let mutable newVar = None
+
+            let tokens = 
+                match block.blockType with 
+                | Assignment -> 
+                    let leftPart = 
+                         block.values 
+                         |> Seq.takeWhile (fun tok -> parserSource.tokenToNumber tok <> langSource.eqNumber)
+                         |> List.ofSeq
+
+                    if leftPart.Length = 1 
+                    then
+                        let varName = 
+                            leftPart.Head
+                            |> parserSource.tokenToNumber
+                            |> parserSource.numToString
+                        newVar <- Some <| varName
+                    
+                    block.values 
+                    |> Seq.skipWhile (fun tok -> parserSource.tokenToNumber tok <> langSource.eqNumber)
+                    |> List.ofSeq
+                    |> List.tail
+
+                | _ -> block.values |> List.ofArray
+
+            for tok in tokens do 
+                let tokNumber = parserSource.tokenToNumber tok
+
+                if langSource.isVariable tokNumber
+                then
+                    let varName = tokNumber |> parserSource.numToString
+
+                    if not <| List.exists (fun t -> t = varName) !defVars //it's error
+                    then
+                        let tokData = parserSource.tokenData tok
+                        //if it's new error
+                        if not <| List.exists (fun t -> parserSource.tokenData t = tokData) !errorList     
+                        then errorList := tok :: !errorList 
+
+            if newVar.IsSome 
+            then
+                defVars := newVar.Value :: !defVars
+                
+            block.children 
+            |> List.iter (fun child -> processInterNode child !defVars)
+
+        and processInterNode node defVars = 
+            
+            let intersect one two = 
+                one 
+                |> List.filter (fun elem1 -> List.exists (fun elem2 -> elem1 = elem2) two)
+
+            node.children 
+            |> List.iter (fun child -> 
+                            if blockToVars.ContainsKey child 
+                            then
+                                let oldVars = blockToVars.[child]
+                                let commonVars = intersect oldVars defVars
+
+                                //Does list change?
+                                if oldVars.Length <> commonVars.Length
+                                then
+                                    blockToVars.[child] <- commonVars
+                                    processBlock child
+
+                            else
+                                blockToVars.Add(child, defVars)
+                                processBlock child)
+
+        processInterNode start []
+
+        !errorList
+
     member this.Start = start
     member this.Finish = finish
+
+    member this.FindUndefVariable() = findUndefVariable()
 
     member this.PrintToDot name = 
         let count = ref -1

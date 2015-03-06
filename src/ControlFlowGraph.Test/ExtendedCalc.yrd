@@ -27,5 +27,5 @@ powExpr:   number
          | LBRACE expr RBRACE
          | ERROR
 
-id: X | Y | Z
+id: V | W | X | Y | Z
 number: ONE | TWO | THREE | FOUR | FIVE | SIX | SEVEN | EIGHT | NINE

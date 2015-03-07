@@ -61,6 +61,7 @@
     <Compile Include="Mixed.yrd.fs" />
     <Compile Include="BadLeftRecursion.yrd.fs" />
     <None Include="App.config" />
+    <Compile Include="lexerCalc.fs" />
     <Compile Include="Lexer2.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />

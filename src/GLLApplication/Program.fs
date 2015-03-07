@@ -25,13 +25,20 @@ open Lexer2
 let run () =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let gen = new Yard.Generators.GLL.GLL()
-    let il = fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
-    gen.Generate(il,"-pos int -token int -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
 
 run () |> printfn "%A"
 
-let run1 path astBuilder =
-    let tokens = Lexer2.tokens2(path)
+let run1 astBuilder =
+    let lb = LexBuffer<_>.FromString "1"
+    let tokens = seq{while not lb.IsPastEndOfStream do yield Calc.Lexer.token lb}
     astBuilder tokens, tokens
 
 
@@ -51,8 +58,8 @@ let parser1 = GLL.Parse.SimpleAmb.buildAst
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
 //let str = String.init 100 (fun i -> "B ") + "B"
-let str = "A B"
-let r = run1 str parser1
+//let str = "A B"
+let r = run1 parser1
 //printfn "simple amb"
 
 match r with

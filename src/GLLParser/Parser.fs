@@ -363,6 +363,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             else
                 if Array.length parser.rules.[rule] <> position
                 then
+                    
                     if !currentIndex < inputLength 
                     then
                         let curToken = parser.TokenToNumber tokens.[!currentIndex]

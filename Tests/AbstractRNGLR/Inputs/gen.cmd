@@ -1,0 +1,3 @@
+for %%i in (01_PrettySimpleCalc.SequenceInput, 02_PrettySimpleCalc.SimpleBranchedInput, 03_PrettySimpleCalc.BranchedInput, 04_PrettySimpleCalc.LotsOfVariants, 05_NotAmbigousSimpleCalc.LotsOfVariants, 06_NotAmbigousSimpleCalc.Loop, 07_NotAmbigousSimpleCalc.Loop2, 08_NotAmbigousSimpleCalc.Loop3, 09_NotAmbigousSimpleCalc.Loop4, 10_NotAmbigousSimpleCalc.Loop5, 11_NotAmbigousSimpleCalc.Loop6, 12_NotAmbigousSimpleCalc.Loop7, 13_NotAmbigousSimpleCalc.Loop8, 14_NotAmbigousSimpleCalcWith2Ops.Loop, 15_NotAmbigousSimpleCalcWith2Ops.Loops, 16_Stars.Loop, 17_Stars2.Loop, 18_Stars2.Loop2, 19_FirstEps) do (
+	dot -Tpdf %%i.dot -o %%i.dot.pdf    
+)

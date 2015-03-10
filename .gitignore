@@ -396,3 +396,5 @@ Tests/AbstractRNGLR/DOT/sppf7.dot.pdf
 Tests/AbstractRNGLR/DOT/sppf8.dot.pdf
 Tests/AbstractRNGLR/DOT/sppf7Better.dot.pdf
 Tests/AbstractRNGLR/DOT/sppf8Better.dot.pdf
+Tests/AbstractRNGLR/Inputs/*.pdf
+Tests/AbstractRNGLR/DOT/sppf.dot

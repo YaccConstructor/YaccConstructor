@@ -285,7 +285,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
 
     let handlePassingReductions (graphV : VInfo<_>) =
-        verticesToRecalc.RemoveAll(fun _ -> true) |> ignore
+        verticesToRecalc.Clear()
         for gssV in graphV.processedGssVertices do
             let passingReductions = gssV.PassingReductions
             for prod, remainLength, path, nonTerm, pos, startV in passingReductions do
@@ -298,7 +298,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         let newGssVs = new ResizeArray<_>(2)
         for gssVertex in v.unprocessedGssVertices do 
             newGssVs.AddRange(push v gssVertex gssVertex.State)
-        v.unprocessedGssVertices.RemoveAll(fun _ -> true) |> ignore
+        v.unprocessedGssVertices.Clear()
         if newGssVs.Count > 0 
         then
             v.unprocessedGssVertices.AddRange(newGssVs)

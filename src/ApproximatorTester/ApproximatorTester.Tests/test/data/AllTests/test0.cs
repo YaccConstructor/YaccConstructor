@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            string query1 = "Select * From ";
+            string query1 = "Select field From ";
             if (args.Length != 0)
             {
                 query1 += "Table1";

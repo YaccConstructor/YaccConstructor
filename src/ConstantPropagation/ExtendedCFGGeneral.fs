@@ -2,7 +2,7 @@
 
 open JetBrains.ReSharper.Psi.Tree
 
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DataDependencyGraph
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DDG
 
 // Represents control flow graph node 
 type IExtendedCFGNode = 

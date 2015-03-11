@@ -40,7 +40,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="Utils.fs" />
-    <Compile Include="CFA.fs" />
     <Compile Include="DataDependencyGraph.fs" />
     <Compile Include="ExtendedCFGGeneral.fs" />
     <Compile Include="ExtendedCFGCSharp.fs" />

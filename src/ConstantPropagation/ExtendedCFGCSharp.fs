@@ -6,7 +6,7 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DataDependencyGraph
+open YC.ReSharper.AbstractAnalysis.LanguageApproximation.DDG
 
 // Wraps ReSharper's IControlFlowElement and ad some new functionality
 type ReSharperCFGNode(node: IControlFlowElement) =

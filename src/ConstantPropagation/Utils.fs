@@ -1,6 +1,6 @@
 ﻿module Utils
 
-module CFGUtils =
+module DotUtils =
     open System.IO
     open JetBrains.ReSharper.Psi.ControlFlow.CSharp
     open JetBrains.ReSharper.Psi.ControlFlow
@@ -66,17 +66,21 @@ module CFGUtils =
     // Extracts C# CFG from method declaration and converts it
     // to DOT's digraph. The output file's name and the digraph's name
     // are the same as passed method's name
-    let methodCFGToDot (methodDecl: IMethodDeclaration) =
+    let methodCFGToDot (methodDecl: IMethodDeclaration) (outDirPath: string) =
         let methodName = methodDecl.NameIdentifier.GetText()
-        let outPath = methodName + ".dot"
+        let outPath = Path.Combine(outDirPath, methodName + ".dot")
         let cfg = CSharpControlFlowBuilder.Build methodDecl
         cfgToDot cfg outPath methodName
 
     // Applies "CFGUtils.methodCFGToDot" to all the methods in the file
-    let allMethodsCFGToDot (file: ICSharpFile) =
+    let allMethodsCFGToDot (file: ICSharpFile) (outDirPath: string)=
         let processorAction (node: ITreeNode) = 
             match node with
-            | :? IMethodDeclaration as methodDecl -> methodCFGToDot methodDecl
+            | :? IMethodDeclaration as methodDecl -> methodCFGToDot methodDecl outDirPath
             | _ -> ()
         let processor = RecursiveElementProcessor (fun node -> processorAction node)
         processor.Process file
+
+module MapUtils =
+    let union (map1: Map<_,_>) (map2: Map<_,_>) =
+        Map.fold (fun acc key value -> Map.add key value acc) map2 map1

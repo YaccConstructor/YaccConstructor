@@ -9,15 +9,18 @@ open JetBrains.ReSharper.Psi.CSharp.Tree
 open System.Collections.Generic
 open System.IO
 
-type NodeInfo = {
-    Info: string
-    AstElem: ITreeNode
-}
+type NodeInfo = 
+    { Label: string
+      AstElem: ITreeNode }
 
-type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) =
+type DDNode =
+| RootNode
+| InnerNode of NodeInfo
+
+type DDGraph(finalNodeId: int, finalNodeInfo: DDNode) =
     let graph = new AdjacencyGraph<int, Edge<int>>()
-    let nodeIdInfoDict = new Dictionary<int, NodeInfo>()
-    let mutable currentConnectionNodeId = finalNodeId
+    let nodeIdInfoDict = new Dictionary<int, DDNode>()
+    let mutable currentConnectionNode = finalNodeId
 
     // exception messages
     let dstNodeIsNotSetMsg = "cannot create edge - dst node is not set"
@@ -49,11 +52,11 @@ type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) =
         then graph.AddEdge (new Edge<int>(src, dst)) |> ignore
 
     member private this.AddEdgeFrom srcNodeId =  
-        this.AddEdge srcNodeId currentConnectionNodeId
+        this.AddEdge srcNodeId currentConnectionNode
 
     member this.CurrentConnectionNode 
-        with get() = currentConnectionNodeId
-        and set(id) = currentConnectionNodeId <- id
+        with get() = currentConnectionNode
+        and set(id) = currentConnectionNode <- id
 
     member this.AddEdgeFrom (srcNodeId, srcNodeInfo) =
         addNode srcNodeId srcNodeInfo
@@ -73,7 +76,12 @@ type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) =
         |> List.ofSeq
         |> List.map 
             (
-                fun kvp -> kvp.Key.ToString() + " [label=\"" + kvp.Value.Info + "\"]"
+                fun kvp ->
+                    let text = 
+                        match kvp.Value with
+                        | RootNode -> "root"
+                        | InnerNode(nodeInfo) -> nodeInfo.Label
+                    kvp.Key.ToString() + " [label=\"" + text + "\"]"
             )
         |> List.iter file.WriteLine
         this.Graph.Edges
@@ -85,65 +93,99 @@ type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) =
         |> List.iter file.WriteLine
         file.WriteLine("}")
 
+module NodeIdProvider = 
+    type NodeIdProvider = 
+        { NextId: int
+          GeneratedIds: Dictionary<ITreeNode, int> }
+
+    let create = {NextId = 0; GeneratedIds = new Dictionary<ITreeNode, int>()}
+
+    let getId (provider: NodeIdProvider) (node: ITreeNode) =
+        let idsDict = provider.GeneratedIds
+        if idsDict.ContainsKey node
+        then idsDict.[node], provider
+        else
+            do idsDict.Add (node, provider.NextId)
+            provider.NextId, {provider with NextId = provider.NextId + 1 }
+
 module DDGraphFuncs =
+    open NodeIdProvider
+
     let buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode, IControlFlowElement>) =
-        let rec build (cfgNode: IControlFlowElement) (varName: string) (graph: DDGraph) =
-            let updateGraph treeNode textInfo =
-                let nodeId = treeNode.GetHashCode()
+        let rec build (cfgNode: IControlFlowElement) (varName: string) 
+                      (graph: DDGraph) (provider: NodeIdProvider) =
+            let updateGraph treeNode textInfo (provider: NodeIdProvider) =
+                let nodeId, provider = NodeIdProvider.getId provider treeNode
                 let nodeInfo = {
-                    Info = textInfo
+                    Label = textInfo
                     AstElem = treeNode
                 }
-                graph.AddEdgeFrom (nodeId, nodeInfo)
-                nodeId
+                graph.AddEdgeFrom (nodeId, InnerNode(nodeInfo))
+                nodeId, provider
 
-            let processExpr (expr: ICSharpExpression) =
+            let processExpr (expr: ICSharpExpression) (provider: NodeIdProvider) =
                 match expr with
                 | :? ICSharpLiteralExpression as literalExpr ->
-                    updateGraph literalExpr ("literal(" + literalExpr.Literal.GetText().Trim[|'\"'|] + ")") 
-                    |> ignore
+                    let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
+                    let _, provider =
+                        updateGraph literalExpr ("literal(" + literalVal + ")") provider
+                    provider
                 // not implemented (but must precede IReferenceExpression case)
-                | :? IInvocationExpression -> ()
+                | :? IInvocationExpression -> provider
                 | :? IReferenceExpression as refExpr ->
                     let curVarName = refExpr.NameIdentifier.Name
-                    let addedNodeId = updateGraph refExpr ("refExpr(" + curVarName + ")")
+                    let addedNodeId, provider = 
+                        updateGraph refExpr ("refExpr(" + curVarName + ")") provider
                     if curVarName = varName
                     then 
                         let curConnectionNode = graph.CurrentConnectionNode
                         graph.CurrentConnectionNode <- addedNodeId
-                        let curCggNode = astCfgMap.[refExpr]
-                        build curCggNode varName graph
+                        let curCfgNode = astCfgMap.[refExpr]
+                        let provider = build curCfgNode varName graph provider
                         graph.CurrentConnectionNode <- curConnectionNode
+                        provider
                     else 
                         failwith ("not implemented new ref case in processExpr")
                 | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
-                    
-            let processAssignOps (ops: list<ICSharpExpression>) = 
-                ops |> List.iter processExpr
 
-            let processAssignment (assignExpr: IAssignmentExpression) = 
+            let processAssignment (assignExpr: IAssignmentExpression) (provider: NodeIdProvider) = 
                 let assingText, operands = 
                     if assignExpr.AssignmentType = AssignmentType.EQ
                     then 
                         "assignment", assignExpr.OperatorOperands |> List.ofSeq |> List.tail
                     else 
                         "plusAssignment", assignExpr.OperatorOperands |> List.ofSeq
-                let addedNodeId = updateGraph assignExpr (assingText + "(" + varName + ")")
+                let addedNodeId, provider = 
+                    updateGraph assignExpr (assingText + "(" + varName + ")") provider
                 graph.CurrentConnectionNode <- addedNodeId
-                processAssignOps operands
+                operands |> List.fold (fun provider op -> processExpr op provider) provider
 
-            let processInitializer (initializer: ITreeNode) = 
+            let processInitializer (initializer: ITreeNode) (provider: NodeIdProvider) = 
                 match initializer with
                 | :? ICSharpExpression as expr ->
-                    processExpr expr
+                    processExpr expr provider
                 | :? IExpressionInitializer as exprInitializer ->
-                    processExpr exprInitializer.Value
+                    processExpr exprInitializer.Value provider
                 | _ -> failwith ("not implemented case in processInitializer: " + initializer.NodeType.ToString())
 
-            let processLocVarDecl (locVarDecl: ILocalVariableDeclaration) =
-                let addedNodeId = updateGraph locVarDecl ("varDecl(" + varName + ")")
+            let processLocVarDecl (locVarDecl: ILocalVariableDeclaration) (provider: NodeIdProvider) =
+                let addedNodeId, provider = 
+                    updateGraph locVarDecl ("varDecl(" + varName + ")") provider
                 graph.CurrentConnectionNode <- addedNodeId
-                processInitializer locVarDecl.Initializer
+                processInitializer locVarDecl.Initializer provider
+
+            let processEntries (cfgNode: IControlFlowElement) (provider: NodeIdProvider): NodeIdProvider =
+                let curConnectionNode = graph.CurrentConnectionNode
+                cfgNode.Entries
+                |> List.ofSeq
+                |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
+                |> List.fold 
+                    (
+                        fun provider src ->
+                            graph.CurrentConnectionNode <- curConnectionNode
+                            build src varName graph provider
+                    ) 
+                    provider
 
             let astNode = cfgNode.SourceElement
             match astNode with
@@ -154,30 +196,22 @@ module DDGraphFuncs =
                         when dst.NameIdentifier.Name = varName -> true
                     | _ -> false
                 -> 
-                    processAssignment assignExpr
+                    processAssignment assignExpr provider
             | :? ILocalVariableDeclaration as locVarDecl
                 when locVarDecl.NameIdentifier.Name = varName 
                 -> 
-                    processLocVarDecl locVarDecl
+                    processLocVarDecl locVarDecl provider
             | _ ->
-                let curConnectionNode = graph.CurrentConnectionNode
-                cfgNode.Entries
-                |> List.ofSeq
-                |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
-                |> List.iter 
-                    (
-                        fun src ->
-                            graph.CurrentConnectionNode <- curConnectionNode
-                            build src varName graph
-                    )
-
-        let finalNodeId = varRef.GetHashCode()
+                processEntries cfgNode provider
+        
+        let provider = NodeIdProvider.create
+        let finalNodeId, provider = NodeIdProvider.getId provider varRef
         let varName = varRef.NameIdentifier.Name
         let finalNodeInfo = {
-            Info = "varRef(" + varName + ")"
+            Label = "varRef(" + varName + ")"
             AstElem = varRef
         }
-        let graph = DDGraph(finalNodeId, finalNodeInfo)
+        let graph = DDGraph(finalNodeId, InnerNode(finalNodeInfo))
         let cfgNode = astCfgMap.[varRef]
-        build cfgNode varName graph
+        build cfgNode varName graph provider |> ignore
         graph

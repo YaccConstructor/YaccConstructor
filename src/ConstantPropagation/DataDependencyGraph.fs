@@ -14,75 +14,69 @@ type NodeInfo = {
     AstElem: ITreeNode
 }
 
-type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) = 
+type DDGraph(finalNodeId: int, finalNodeInfo: NodeInfo) =
     let graph = new AdjacencyGraph<int, Edge<int>>()
-    let nodeInfoDict = new Dictionary<int, NodeInfo>()
-    let mutable curConnectionNodeId = finalNodeId
+    let nodeIdInfoDict = new Dictionary<int, NodeInfo>()
+    let mutable currentConnectionNodeId = finalNodeId
 
     // exception messages
     let dstNodeIsNotSetMsg = "cannot create edge - dst node is not set"
     let noSuchNodeMsg = "cannot create edge - src or dst node is not added to graph"
 
     let addNode id info = 
-        if nodeInfoDict.ContainsKey id
+        if nodeIdInfoDict.ContainsKey id
         then 
-            nodeInfoDict.[id] <- info
+            nodeIdInfoDict.[id] <- info
         else
-            nodeInfoDict.Add (id, info)
+            nodeIdInfoDict.Add (id, info)
             graph.AddVertex id |> ignore
 
     do
         addNode finalNodeId finalNodeInfo
 
     let failIfNotExists id =
-        if (not << nodeInfoDict.ContainsKey) id
+        if (not << nodeIdInfoDict.ContainsKey) id
         then failwith noSuchNodeMsg
 
-    member this.AddNode = addNode
+    member private this.Graph with get() = graph
+    member private this.NodeIdInfoDict with get() = nodeIdInfoDict
+    member private this.FinalNodeId with get() = finalNodeId
 
-    member this.AddEdge src dst =
+    member private this.AddEdge src dst =
         failIfNotExists src
         failIfNotExists dst
         if (not << (graph.ContainsEdge : int * int -> bool)) (src, dst)
         then graph.AddEdge (new Edge<int>(src, dst)) |> ignore
 
-    member this.SetConnectionNode id = curConnectionNodeId <- id
+    member private this.AddEdgeFrom srcNodeId =  
+        this.AddEdge srcNodeId currentConnectionNodeId
 
-    member this.CurrentConnectionNode = curConnectionNodeId
-
-    member this.AddEdgeFrom srcNodeId = 
-        failIfNotExists srcNodeId 
-        this.AddEdge srcNodeId curConnectionNodeId |> ignore
+    member this.CurrentConnectionNode 
+        with get() = currentConnectionNodeId
+        and set(id) = currentConnectionNodeId <- id
 
     member this.AddEdgeFrom (srcNodeId, srcNodeInfo) =
-        this.AddNode srcNodeId srcNodeInfo
+        addNode srcNodeId srcNodeInfo
         this.AddEdgeFrom srcNodeId
 
-    member this.Edges = graph.Edges
-
-    member this.GetNodes() = 
-        nodeInfoDict 
-        |> List.ofSeq 
-        |> List.map (fun kvp -> kvp.Key, kvp.Value)
-
-    member this.FinalNodeId = finalNodeId
-
     member this.Merge (other: DDGraph) =
-        other.GetNodes() |> List.iter nodeInfoDict.Add
-        graph.AddEdgeRange other.Edges |> ignore
+        other.NodeIdInfoDict 
+        |> List.ofSeq
+        |> List.iter (fun entry -> nodeIdInfoDict.Add (entry.Key, entry.Value))
+        graph.AddEdgeRange other.Graph.Edges |> ignore
         this.AddEdgeFrom other.FinalNodeId
 
     member this.ToDot name path =
         use file = FileInfo(path).CreateText()
         file.WriteLine("digraph " + name + " {")
-        do this.GetNodes()
+        this.NodeIdInfoDict
         |> List.ofSeq
         |> List.map 
             (
-                fun (id, node) -> id.ToString() + " [label=\"" + node.Info + "\"]"
+                fun kvp -> kvp.Key.ToString() + " [label=\"" + kvp.Value.Info + "\"]"
             )
         |> List.iter file.WriteLine
-        do this.Edges
+        this.Graph.Edges
         |> List.ofSeq
         |> List.map
             (
@@ -116,10 +110,10 @@ module DDGraphFuncs =
                     if curVarName = varName
                     then 
                         let curConnectionNode = graph.CurrentConnectionNode
-                        graph.SetConnectionNode addedNodeId
+                        graph.CurrentConnectionNode <- addedNodeId
                         let curCggNode = astCfgMap.[refExpr]
                         build curCggNode varName graph
-                        graph.SetConnectionNode curConnectionNode
+                        graph.CurrentConnectionNode <- curConnectionNode
                     else 
                         failwith ("not implemented new ref case in processExpr")
                 | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
@@ -135,7 +129,7 @@ module DDGraphFuncs =
                     else 
                         "plusAssignment", assignExpr.OperatorOperands |> List.ofSeq
                 let addedNodeId = updateGraph assignExpr (assingText + "(" + varName + ")")
-                graph.SetConnectionNode addedNodeId
+                graph.CurrentConnectionNode <- addedNodeId
                 processAssignOps operands
 
             let processInitializer (initializer: ITreeNode) = 
@@ -148,7 +142,7 @@ module DDGraphFuncs =
 
             let processLocVarDecl (locVarDecl: ILocalVariableDeclaration) =
                 let addedNodeId = updateGraph locVarDecl ("varDecl(" + varName + ")")
-                graph.SetConnectionNode addedNodeId
+                graph.CurrentConnectionNode <- addedNodeId
                 processInitializer locVarDecl.Initializer
 
             let astNode = cfgNode.SourceElement
@@ -173,7 +167,7 @@ module DDGraphFuncs =
                 |> List.iter 
                     (
                         fun src ->
-                            graph.SetConnectionNode curConnectionNode
+                            graph.CurrentConnectionNode <- curConnectionNode
                             build src varName graph
                     )
 

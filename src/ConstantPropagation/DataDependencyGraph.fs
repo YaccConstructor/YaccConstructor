@@ -93,23 +93,19 @@ type DDGraph(finalNodeId: int, finalNodeInfo: DDNode) =
         |> List.iter file.WriteLine
         file.WriteLine("}")
 
-module NodeIdProvider = 
-    type NodeIdProvider = 
-        { NextId: int
-          GeneratedIds: Dictionary<ITreeNode, int> }
-
-    let create = {NextId = 0; GeneratedIds = new Dictionary<ITreeNode, int>()}
-
-    let getId (provider: NodeIdProvider) (node: ITreeNode) =
-        let idsDict = provider.GeneratedIds
-        if idsDict.ContainsKey node
-        then idsDict.[node], provider
-        else
-            do idsDict.Add (node, provider.NextId)
-            provider.NextId, {provider with NextId = provider.NextId + 1 }
-
 module DDGraphFuncs =
-    open NodeIdProvider
+    type NodeIdProvider = { 
+        NextId: int
+        GeneratedIds: Dictionary<ITreeNode, int> } 
+    with
+        static member create = {NextId = 0; GeneratedIds = new Dictionary<ITreeNode, int>()}
+        static member getId (provider: NodeIdProvider) (node: ITreeNode) =
+            let idsDict = provider.GeneratedIds
+            if idsDict.ContainsKey node
+            then idsDict.[node], provider
+            else
+                do idsDict.Add (node, provider.NextId)
+                provider.NextId, {provider with NextId = provider.NextId + 1 }
 
     let buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode, IControlFlowElement>) =
         let rec build (cfgNode: IControlFlowElement) (varName: string) 

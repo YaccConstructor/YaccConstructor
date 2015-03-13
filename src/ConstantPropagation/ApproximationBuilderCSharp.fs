@@ -95,7 +95,7 @@ let build (file: ICSharpFile) =
                 fun (cfg, hotspot) ->
                     let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
                     let astCfgMap = createAstCfgMap cfg
-                    let ddGraph = buildForVar queryVarRef astCfgMap
+                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef astCfgMap
 
                     let cfgName = "ddg_" + cfg.GetHashCode().ToString()
                     let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")

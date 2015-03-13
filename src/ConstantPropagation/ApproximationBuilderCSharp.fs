@@ -12,7 +12,8 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open XMLParser
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
 open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.CSharp
-open DataDependencyGraph
+//open DataDependencyGraph
+open ImmutableDDG
 
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
@@ -104,6 +105,25 @@ let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IContro
     let dict = new Dictionary<ITreeNode, IControlFlowElement>()
     dfs cfg.EntryElement dict
 
+//let build (file: ICSharpFile) =
+//    let hotspots = getHotspots file
+//    let ddGraphs = 
+//        hotspots 
+//        |> List.ofSeq 
+//        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
+//        |> List.map
+//            (
+//                fun (cfg, hotspot) ->
+//                    let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
+//                    let astCfgMap = createAstCfgMap cfg
+//                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef astCfgMap
+//
+//                    let cfgName = "ddg_" + cfg.GetHashCode().ToString()
+//                    let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
+//                    ddGraph.ToDot cfgName path
+//            )
+//    ()
+
 let build (file: ICSharpFile) =
     let hotspots = getHotspots file
     let ddGraphs = 
@@ -115,10 +135,10 @@ let build (file: ICSharpFile) =
                 fun (cfg, hotspot) ->
                     let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
                     let astCfgMap = createAstCfgMap cfg
-                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef astCfgMap
+                    let ddGraph = buildForVar queryVarRef astCfgMap
 
                     let cfgName = "ddg_" + cfg.GetHashCode().ToString()
                     let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
-                    ddGraph.ToDot cfgName path
+                    ImmutableDDGFuncs.toDot ddGraph cfgName path
             )
     ()

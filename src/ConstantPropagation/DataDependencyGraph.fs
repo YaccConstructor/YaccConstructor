@@ -26,7 +26,7 @@ type DDGraph = {
     RootId: int }
 
 module DDGraphFuncs =
-    type DDGraphBuildInfo = {   
+    type private DDGraphBuildInfo = {   
         Graph: AdjacencyGraph<int, Edge<int>>
         NodeIdInfoDict: Dictionary<int, DDNode>
         ConnectionNode: int
@@ -34,7 +34,7 @@ module DDGraphFuncs =
         PrerootNodes: list<int>
         RootId: option<int> }
 
-    module DDGBuildFuncs =
+    module private DDGBuildFuncs =
         // exception messages
         let private dstNodeIsNotSetMsg = 
             "cannot create edge - dst node is not set"
@@ -95,11 +95,11 @@ module DDGraphFuncs =
             dstGraph.Graph.AddEdgeRange srcGraph.Graph.Edges |> ignore
             addEdge dstGraph srcGraph.FinalNodeId dstGraph.ConnectionNode
 
-    type NodeIdProvider = {   
+    type private NodeIdProvider = {   
         NextId: int
         GeneratedIds: Dictionary<ITreeNode, int> } 
 
-    module NodeIdProviderFuncs =
+    module private NodeIdProviderFuncs =
         let create = { NextId = 0; GeneratedIds = new Dictionary<ITreeNode, int>() }
 
         let getId (provider: NodeIdProvider) (node: ITreeNode) =
@@ -110,7 +110,7 @@ module DDGraphFuncs =
                 do idsDict.Add (node, provider.NextId)
                 provider.NextId, {provider with NextId = provider.NextId + 1 }
 
-    type BuildState = {   
+    type private BuildState = {   
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider }
 

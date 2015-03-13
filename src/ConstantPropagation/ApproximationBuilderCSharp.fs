@@ -10,8 +10,6 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.General
-open YC.ReSharper.AbstractAnalysis.LanguageApproximation.ExtendedCFG.CSharp
 //open DataDependencyGraph
 open ImmutableDDG
 
@@ -71,24 +69,6 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     let methodDeclaration = getEnclosingMethod hotspot
     CSharpControlFlowBuilder.Build methodDeclaration
 
-//let build (file: ICSharpFile) = 
-//    let hotspots = getHotspots file
-//    let ddGraphOpts = 
-//        hotspots 
-//        |> List.ofSeq 
-//        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
-//        |> List.map
-//            (
-//                fun (cfg, hotspot) ->
-//                    // expects "node <> null"
-//                    let isPsiElemEquals (node: ITreeNode) (cfgNode: IExtendedCFGNode) =
-//                        LanguagePrimitives.PhysicalEquality node cfgNode.psiElem
-//                    let extCFG = CSharpExtendedCFG(cfg) :> IExtendedCFG
-//                    extCFG.findFirst (isPsiElemEquals hotspot)
-//                    |> Option.map (fun node -> node.getAncestorsSubgraph (fun _ -> true))
-//            )
-//    ()
-
 let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IControlFlowElement> =
     let rec dfs (elem: IControlFlowElement) (dict: Dictionary<ITreeNode, IControlFlowElement>) =
         if elem = null
@@ -104,25 +84,6 @@ let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IContro
         
     let dict = new Dictionary<ITreeNode, IControlFlowElement>()
     dfs cfg.EntryElement dict
-
-//let build (file: ICSharpFile) =
-//    let hotspots = getHotspots file
-//    let ddGraphs = 
-//        hotspots 
-//        |> List.ofSeq 
-//        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
-//        |> List.map
-//            (
-//                fun (cfg, hotspot) ->
-//                    let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
-//                    let astCfgMap = createAstCfgMap cfg
-//                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef astCfgMap
-//
-//                    let cfgName = "ddg_" + cfg.GetHashCode().ToString()
-//                    let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
-//                    ddGraph.ToDot cfgName path
-//            )
-//    ()
 
 let build (file: ICSharpFile) =
     let hotspots = getHotspots file

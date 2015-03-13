@@ -39,11 +39,7 @@
     <Content Include="Hotspots.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="DDG.fs" />
-    <Compile Include="ExtendedCFGGeneral.fs" />
-    <Compile Include="ExtendedCFGCSharp.fs" />
     <Compile Include="Utils.fs" />
-    <Compile Include="DataDependencyGraph.fs" />
     <Compile Include="ImmutableDDG.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
     <Compile Include="Approximator.fs" />

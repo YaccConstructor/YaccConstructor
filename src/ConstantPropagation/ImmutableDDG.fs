@@ -24,7 +24,8 @@ type ImmutableDDG =
     {   Graph: AdjacencyGraph<int, Edge<int>>
         NodeIdInfoDict: Dictionary<int, DDNode>
         ConnectionNode: int
-        FinalNode: int }
+        FinalNodeId: int
+        PrerootNodes: list<int> }
 
 module ImmutableDDGFuncs =
     // exception messages
@@ -61,19 +62,23 @@ module ImmutableDDGFuncs =
             Graph = new AdjacencyGraph<int, Edge<int>>()
             NodeIdInfoDict = new Dictionary<int, DDNode>()
             ConnectionNode = finalNodeId
-            FinalNode = finalNodeId }
+            FinalNodeId = finalNodeId
+            PrerootNodes = [] }
         addNode ddGraph finalNodeId finalNodeInfo
 
-    let addEdgeFrom (ddGraph: ImmutableDDG) (srcNodeId, srcNodeInfo) =
+    let addNodeAndEdge (ddGraph: ImmutableDDG) srcNodeId srcNodeInfo =
         let ddg = addNode ddGraph srcNodeId srcNodeInfo
         addEdge ddg srcNodeId ddg.ConnectionNode
 
-    let merge (dstGraph: ImmutableDDG) (srcGraph: ImmutableDDG) =
-        srcGraph.NodeIdInfoDict 
-        |> List.ofSeq
-        |> List.iter (fun entry -> dstGraph.NodeIdInfoDict.Add (entry.Key, entry.Value))
-        dstGraph.Graph.AddEdgeRange srcGraph.Graph.Edges |> ignore
-        addEdge dstGraph srcGraph.FinalNode dstGraph.ConnectionNode
+    let addPrerootAndEdge (ddg: ImmutableDDG) srcNodeId srcNodeInfo =
+        let ddg' = addNodeAndEdge ddg srcNodeId srcNodeInfo
+        { ddg' with PrerootNodes = srcNodeId :: ddg'.PrerootNodes }
+
+    let foldPreroots (ddg: ImmutableDDG) rootId rootInfo =
+        let ddg' = addNode ddg rootId rootInfo
+        ddg'.PrerootNodes
+        |> List.fold (fun accDdg id -> addEdge accDdg rootId id) ddg'
+        |> fun ddg -> { ddg with PrerootNodes = [] }
 
     let toDot (ddGraph: ImmutableDDG) name path =
         use file = FileInfo(path).CreateText()
@@ -120,11 +125,19 @@ type BuildState =
         AstCfgMap: Dictionary<ITreeNode, IControlFlowElement> }
 
 let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildState) =
-    let addNode treeNode label (state: BuildState) =
+    let addNodeUsingFun treeNode label addFunc (state: BuildState) =
         let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
         let nodeInfo = { Label = label; AstElem = treeNode }
-        let graph' = ImmutableDDGFuncs.addEdgeFrom state.Graph (nodeId, InnerNode(nodeInfo))
+        let graph' = addFunc state.Graph nodeId (InnerNode(nodeInfo))
         nodeId, {state with Graph = graph'; Provider = provider'}
+
+    let addNode treeNode label (state: BuildState) =
+        let addFun = ImmutableDDGFuncs.addNodeAndEdge
+        addNodeUsingFun treeNode label addFun state
+
+    let addPreroot treeNode label (state: BuildState) =
+        let addFun = ImmutableDDGFuncs.addPrerootAndEdge
+        addNodeUsingFun treeNode label addFun state
 
     let setGraphConnectionNode nodeId (state: BuildState) =
         let graph' = { state.Graph with ConnectionNode = nodeId }
@@ -139,7 +152,7 @@ let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildStat
         | :? ICSharpLiteralExpression as literalExpr ->
             let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
             let label = "literal(" + literalVal + ")"
-            snd <| addNode literalExpr label state
+            snd <| addPreroot literalExpr label state
         // not implemented (but must precede IReferenceExpression case)
         | :? IInvocationExpression -> state
         | :? IReferenceExpression as refExpr ->
@@ -221,5 +234,7 @@ let buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode,
     let graph = ImmutableDDGFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
     let cfgNode = astCfgMap.[varRef]
     let initState = { Graph = graph; Provider = provider; AstCfgMap = astCfgMap }
-    let res = build cfgNode varName initState
-    res.Graph
+    let resState = build cfgNode varName initState
+    let root = RootNode
+    let rootId = resState.Provider.NextId
+    ImmutableDDGFuncs.foldPreroots resState.Graph rootId root

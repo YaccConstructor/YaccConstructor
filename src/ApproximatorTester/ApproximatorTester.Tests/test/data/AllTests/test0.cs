@@ -13,6 +13,8 @@
             {
                 query1 += "Table2";
             }
+            string filter = "where field is numeric";
+            query1 += filter;
             Program.ExecuteImmediate(query1);
         }
 

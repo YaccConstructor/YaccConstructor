@@ -1,4 +1,4 @@
-﻿module DataDependencyGraph
+﻿module YC.ReSharper.AbstractAnalysis.LanguageApproximation.DataDependencyGraph
 
 open QuickGraph
 
@@ -150,17 +150,11 @@ module DDGraphFuncs =
                     let curVarName = refExpr.NameIdentifier.Name
                     let label = "refExpr(" + curVarName + ")"
                     let addedNode, state' = addNode refExpr label state
-                    if curVarName = varName
-                    then 
-                        let curCfgNode = astCfgMap.[refExpr]
-                        let curConnectionNode = state'.GraphInfo.ConnectionNode
-                        let state' = setGraphConnectionNode addedNode state'
-                        let state' = build curCfgNode varName state'
-                        setGraphConnectionNode curConnectionNode state'
-                    else 
-                        // let otherVarDdg = buildForVar refExpr astCfgMap
-                        failwith ""
-                    
+                    let curCfgNode = astCfgMap.[refExpr]
+                    let curConnectionNode = state'.GraphInfo.ConnectionNode
+                    let state' = setGraphConnectionNode addedNode state'
+                    let state' = build curCfgNode curVarName state'
+                    setGraphConnectionNode curConnectionNode state'
                 | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
 
             let processAssignment (assignExpr: IAssignmentExpression) (state: BuildState) = 

@@ -1,16 +1,16 @@
-﻿module ImmutableDDG
+﻿module DataDependencyGraph
 
 open QuickGraph
 
 open JetBrains.ReSharper.Psi.Tree
 open JetBrains.ReSharper.Psi.ControlFlow
+open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open Utils
 open Utils.StateMonad
 
 open System.Collections.Generic
 open System.IO
-open JetBrains.ReSharper.Psi.CSharp.Tree
 
 type NodeInfo = 
     {   Label: string
@@ -20,21 +20,21 @@ type DDNode =
 | RootNode
 | InnerNode of NodeInfo
 
-type ImmutableDDG = 
+type DDGraph = 
     {   Graph: AdjacencyGraph<int, Edge<int>>
         NodeIdInfoDict: Dictionary<int, DDNode>
         ConnectionNode: int
         FinalNodeId: int
         PrerootNodes: list<int> }
 
-module ImmutableDDGFuncs =
+module DDGraphFuncs =
     // exception messages
     let private dstNodeIsNotSetMsg = 
         "cannot create edge - dst node is not set"
     let private noSuchNodeMsg = 
         "cannot create edge - src or dst node is not added to graph"
 
-    let private addNode (ddGraph: ImmutableDDG) id info = 
+    let private addNode (ddGraph: DDGraph) id info = 
         let nodes = ddGraph.NodeIdInfoDict
         if nodes.ContainsKey id
         then 
@@ -48,7 +48,7 @@ module ImmutableDDGFuncs =
         if (not << dict.ContainsKey) id
         then failwith noSuchNodeMsg
 
-    let private addEdge (ddGraph: ImmutableDDG) src dst =
+    let private addEdge (ddGraph: DDGraph) src dst =
         let nodes = ddGraph.NodeIdInfoDict
         let graph = ddGraph.Graph
         failIfNoSuchKey nodes src
@@ -66,21 +66,21 @@ module ImmutableDDGFuncs =
             PrerootNodes = [] }
         addNode ddGraph finalNodeId finalNodeInfo
 
-    let addNodeAndEdge (ddGraph: ImmutableDDG) srcNodeId srcNodeInfo =
+    let addNodeAndEdge (ddGraph: DDGraph) srcNodeId srcNodeInfo =
         let ddg = addNode ddGraph srcNodeId srcNodeInfo
         addEdge ddg srcNodeId ddg.ConnectionNode
 
-    let addPrerootAndEdge (ddg: ImmutableDDG) srcNodeId srcNodeInfo =
+    let addPrerootAndEdge (ddg: DDGraph) srcNodeId srcNodeInfo =
         let ddg' = addNodeAndEdge ddg srcNodeId srcNodeInfo
         { ddg' with PrerootNodes = srcNodeId :: ddg'.PrerootNodes }
 
-    let foldPreroots (ddg: ImmutableDDG) rootId rootInfo =
+    let foldPreroots (ddg: DDGraph) rootId rootInfo =
         let ddg' = addNode ddg rootId rootInfo
         ddg'.PrerootNodes
         |> List.fold (fun accDdg id -> addEdge accDdg rootId id) ddg'
         |> fun ddg -> { ddg with PrerootNodes = [] }
 
-    let toDot (ddGraph: ImmutableDDG) name path =
+    let toDot (ddGraph: DDGraph) name path =
         use file = FileInfo(path).CreateText()
         file.WriteLine("digraph " + name + " {")
         ddGraph.NodeIdInfoDict
@@ -120,7 +120,7 @@ module NodeIdProviderFuncs =
             provider.NextId, {provider with NextId = provider.NextId + 1 }
 
 type BuildState = 
-    {   Graph: ImmutableDDG
+    {   Graph: DDGraph
         Provider: NodeIdProvider
         AstCfgMap: Dictionary<ITreeNode, IControlFlowElement> }
 
@@ -132,11 +132,11 @@ let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildStat
         nodeId, {state with Graph = graph'; Provider = provider'}
 
     let addNode treeNode label (state: BuildState) =
-        let addFun = ImmutableDDGFuncs.addNodeAndEdge
+        let addFun = DDGraphFuncs.addNodeAndEdge
         addNodeUsingFun treeNode label addFun state
 
     let addPreroot treeNode label (state: BuildState) =
-        let addFun = ImmutableDDGFuncs.addPrerootAndEdge
+        let addFun = DDGraphFuncs.addPrerootAndEdge
         addNodeUsingFun treeNode label addFun state
 
     let setGraphConnectionNode nodeId (state: BuildState) =
@@ -231,10 +231,10 @@ let buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode,
     let finalNodeId, provider = NodeIdProviderFuncs.getId provider varRef
     let varName = varRef.NameIdentifier.Name
     let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
-    let graph = ImmutableDDGFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
+    let graph = DDGraphFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
     let cfgNode = astCfgMap.[varRef]
     let initState = { Graph = graph; Provider = provider; AstCfgMap = astCfgMap }
     let resState = build cfgNode varName initState
     let root = RootNode
     let rootId = resState.Provider.NextId
-    ImmutableDDGFuncs.foldPreroots resState.Graph rootId root
+    DDGraphFuncs.foldPreroots resState.Graph rootId root

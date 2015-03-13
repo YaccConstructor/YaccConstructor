@@ -40,7 +40,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="Utils.fs" />
-    <Compile Include="ImmutableDDG.fs" />
+    <Compile Include="DataDependencyGraph.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
     <Compile Include="Approximator.fs" />
   </ItemGroup>

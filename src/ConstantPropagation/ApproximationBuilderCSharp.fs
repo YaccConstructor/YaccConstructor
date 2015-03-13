@@ -10,8 +10,7 @@ open JetBrains.ReSharper.Psi.ControlFlow.CSharp
 open JetBrains.ReSharper.Psi.ControlFlow
 
 open XMLParser
-//open DataDependencyGraph
-open ImmutableDDG
+open DataDependencyGraph
 
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
@@ -100,6 +99,6 @@ let build (file: ICSharpFile) =
 
                     let cfgName = "ddg_" + cfg.GetHashCode().ToString()
                     let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
-                    ImmutableDDGFuncs.toDot ddGraph cfgName path
+                    DDGraphFuncs.toDot ddGraph cfgName path
             )
     ()

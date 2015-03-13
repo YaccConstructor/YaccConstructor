@@ -120,34 +120,39 @@ type BuildState =
         AstCfgMap: Dictionary<ITreeNode, IControlFlowElement> }
 
 let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildState) =
-    let updateGraph treeNode label (state: BuildState) =
+    let addNode treeNode label (state: BuildState) =
         let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
         let nodeInfo = { Label = label; AstElem = treeNode }
         let graph' = ImmutableDDGFuncs.addEdgeFrom state.Graph (nodeId, InnerNode(nodeInfo))
         nodeId, {state with Graph = graph'; Provider = provider'}
+
+    let setGraphConnectionNode nodeId (state: BuildState) =
+        let graph' = { state.Graph with ConnectionNode = nodeId }
+        { state with Graph = graph' }
+
+    let addNodeAsConnectionNode treeNode label (state: BuildState) =
+        let addedNode, state' = addNode treeNode label state
+        setGraphConnectionNode addedNode state'
 
     let processExpr (expr: ICSharpExpression) (state: BuildState) =
         match expr with
         | :? ICSharpLiteralExpression as literalExpr ->
             let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
             let label = "literal(" + literalVal + ")"
-            let _, state' = updateGraph literalExpr label state
-            state'
+            snd <| addNode literalExpr label state
         // not implemented (but must precede IReferenceExpression case)
         | :? IInvocationExpression -> state
         | :? IReferenceExpression as refExpr ->
             let curVarName = refExpr.NameIdentifier.Name
             let label = "refExpr(" + curVarName + ")"
-            let addedNodeId, state' = updateGraph refExpr label state
+            let addedNode, state' = addNode refExpr label state
             if curVarName = varName
             then 
-                let curConnectionNode = state'.Graph.ConnectionNode
-                let graph' = { state'.Graph with ConnectionNode = addedNodeId }
-                let state' = { state' with Graph = graph' }
                 let curCfgNode = state'.AstCfgMap.[refExpr]
+                let curConnectionNode = state'.Graph.ConnectionNode
+                let state' = setGraphConnectionNode addedNode state'
                 let state' = build curCfgNode varName state'
-                let graph' = { state'.Graph with ConnectionNode = curConnectionNode }
-                { state' with Graph = graph' }
+                setGraphConnectionNode curConnectionNode state'
             else 
                 failwith ("not implemented new ref case in processExpr")
         | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
@@ -162,9 +167,7 @@ let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildStat
                 let ops = assignExpr.OperatorOperands |> List.ofSeq
                 "plusAssignment", ops
         let label = assingnType + "(" + varName + ")"
-        let addedNode, state' = updateGraph assignExpr label state
-        let graph' = { state'.Graph with ConnectionNode = addedNode }
-        let state' = { state' with Graph = graph' }
+        let state' = addNodeAsConnectionNode assignExpr label state
         operands |> List.fold (fun st op -> processExpr op st) state'
 
     let processInitializer (initializer: ITreeNode) (state: BuildState) = 
@@ -176,10 +179,9 @@ let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildStat
         | _ -> failwith ("not implemented case in processInitializer: " + initializer.NodeType.ToString())
 
     let processLocVarDecl (locVarDecl: ILocalVariableDeclaration) (state: BuildState) =
-        let addedNode, state' = 
-            updateGraph locVarDecl ("varDecl(" + varName + ")") state
-        let graph' = { state'.Graph with ConnectionNode = addedNode }
-        processInitializer locVarDecl.Initializer { state' with Graph = graph' }
+        let label = "varDecl(" + varName + ")"
+        let state' = addNodeAsConnectionNode locVarDecl label state
+        processInitializer locVarDecl.Initializer state'
 
     let processEntries (cfgNode: IControlFlowElement) (state: BuildState) =
         let curConnectionNode = state.Graph.ConnectionNode
@@ -188,9 +190,9 @@ let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildStat
         |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
         |> List.fold 
             (
-                fun accState src ->
-                    let graph' = { accState.Graph with ConnectionNode = curConnectionNode }
-                    build src varName { accState with Graph = graph' }
+                fun accState src -> 
+                    build src varName accState 
+                    |> setGraphConnectionNode curConnectionNode
             ) 
             state
 

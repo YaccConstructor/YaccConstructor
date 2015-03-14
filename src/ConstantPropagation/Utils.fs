@@ -84,3 +84,21 @@ module DotUtils =
 module MapUtils =
     let union (map1: Map<_,_>) (map2: Map<_,_>) =
         Map.fold (fun acc key value -> Map.add key value acc) map2 map1
+
+module StateMonad = 
+    type State<'s,'a> = State of ('s -> 'a * 's)
+
+    type StateBuilder<'s>() =
+      member x.Return v : State<'s,_> = State(fun s -> v,s)
+      member x.Bind(State v, f) : State<'s,_> =
+        State(fun s ->
+          let (a, s) = v s
+          let (State v') = f a
+          v' s)
+
+    let withState<'s> = StateBuilder<'s>()
+
+    let getState = State(fun s -> s, s)
+    let putState v = State(fun _ -> (), v)
+
+    let runState (State f) init = f init

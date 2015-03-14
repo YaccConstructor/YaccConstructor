@@ -51,8 +51,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
-    <None Include="test\data\AllTests\test1.cs.gold" />
-    <None Include="test\data\AllTests\test1.cs" />
+    <None Include="test\data\AllTests\FailTest.cs.gold" />
+    <None Include="test\data\AllTests\FailTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\FST\FST\FST\FST.fsproj">
@@ -68,8 +68,8 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="test\data\AllTests\test0.cs" />
-    <None Include="test\data\AllTests\test0.cs.gold" />
+    <None Include="test\data\AllTests\SimpleQuery.cs" />
+    <None Include="test\data\AllTests\SimpleQuery.cs.gold" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

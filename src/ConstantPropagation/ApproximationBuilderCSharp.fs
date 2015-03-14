@@ -100,5 +100,6 @@ let build (file: ICSharpFile) =
                     let cfgName = "ddg_" + cfg.GetHashCode().ToString()
                     let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
                     DDGraphFuncs.toDot ddGraph cfgName path
+                    ddGraph
             )
-    ()
+    ddGraphs

@@ -1,15 +1,14 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Application;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
 using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Intentions.Extensibility;
-using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.TextControl;
 using JetBrains.Util;
 using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
@@ -35,8 +34,8 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            Approximator.BuildApproximation(inputFile);
-            OutputResults();
+            var ddGraphs = Approximator.BuildApproximation(inputFile);
+            OutputResult(ResultToString(ddGraphs.First()));
             return null;
         }
 
@@ -45,7 +44,7 @@ namespace ApproximatorTester
             get { return "Run Approximator"; }
         }
 
-        private void OutputResults()
+        private void OutputResult(string result)
         {
             var firstToken = _provider.TokenAfterCaret;
             var namespaceDecl = firstToken == null ? null : firstToken.Parent;
@@ -57,18 +56,20 @@ namespace ApproximatorTester
                 throw new Exception(msg);
             }
 
-            var resultString = ResultToString();
             var factory = CSharpElementFactory.GetInstance(_provider.PsiModule);
-            var commentWithResult = factory.CreateComment("/*\n" + resultString + "\n*/");
+            var commentWithResult = factory.CreateComment("/*\n" + result + "\n*/");
             WriteLockCookie.Execute(() =>
             {
                 ModificationUtil.ReplaceChild(namespaceDecl, commentWithResult);
             });
         }
 
-        private string ResultToString()
+        private string ResultToString(DataDependencyGraph.DDGraph ddGraph)
         {
-            return "result";
+            var edgesList = ddGraph.Graph.Edges
+                .Select(edge => edge.Source.ToString() + " -> " + edge.Target.ToString())
+                .ToList();
+            return String.Join("\n", edgesList);
         }
     }
 }

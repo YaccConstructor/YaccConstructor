@@ -3,8 +3,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files %28x86%29\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe</StartProgram>
-    <StartArguments>/ReSharper.LogFile "C:\yc\resharper.log" /ReSharper.Plugin YC.ReSharper.AbstractAnalysis.Plugin.dll</StartArguments>
-    <StartWorkingDirectory>C:\yc\Bin\Debug\v40\</StartWorkingDirectory>
+    <StartArguments>/ReSharper.LogFile "C:\gsv\projects\YC\YaccConstructor\resharper.log" /ReSharper.Plugin YC.ReSharper.AbstractAnalysis.Plugin.dll</StartArguments>
+    <StartWorkingDirectory>C:\gsv\projects\YC\YaccConstructor\Bin\Debug\v40\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartAction>Program</StartAction>

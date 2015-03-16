@@ -1,0 +1,28 @@
+﻿{
+open YC.FST.AbstractLexing.Interpreter
+}
+
+tokens {
+    _ of GraphTokenValue<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>
+}
+
+options {
+    translate = true
+    module = "Calc.AbstractParser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+module Main
+
+[<Start>]
+start: assign+
+
+assign: VARIABLE EQ expr SEMI
+
+expr:   expr (PLUS | MINUS | DIV | MUL) expr  
+	| NUMBER
+	| VARIABLE 
+        | LBRACE expr RBRACE
+        | ERROR
+

@@ -7,5 +7,5 @@ open Utils
 
 let BuildApproximation (file: ICSharpFile) = 
     // the next line is for debug purposes
-    DotUtils.allMethodsCFGToDot file "E:\\Diploma\\Debug"
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
     ApproximationBuilderCSharp.build file |> Seq.ofList

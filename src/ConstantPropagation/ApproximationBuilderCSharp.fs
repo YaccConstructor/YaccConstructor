@@ -15,6 +15,7 @@ open DataDependencyGraph
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open System.IO
+open Utils
 
 
 let private hotspotInfoList = parseXml "Hotspots.xml"
@@ -98,7 +99,7 @@ let build (file: ICSharpFile) =
                     let ddGraph = DDGraphFuncs.buildForVar queryVarRef astCfgMap
 
                     let cfgName = "ddg_" + cfg.GetHashCode().ToString()
-                    let path = Path.Combine ("E:\\Diploma\\Debug", cfgName + ".dot")
+                    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
                     DDGraphFuncs.toDot ddGraph cfgName path
                     ddGraph
             )

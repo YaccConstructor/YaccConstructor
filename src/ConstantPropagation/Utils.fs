@@ -102,3 +102,5 @@ module StateMonad =
     let putState v = State(fun _ -> (), v)
 
     let runState (State f) init = f init
+
+let myDebugFolderPath = "E:\\Diploma\\Debug";

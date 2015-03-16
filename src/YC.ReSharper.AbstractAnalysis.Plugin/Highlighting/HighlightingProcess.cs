@@ -81,21 +81,29 @@ namespace YC.ReSharper.AbstractAnalysis.Plugin.Highlighting
             Handler.Process = this;
         }
 
-        private void OnErrors(Tuple<List<Tuple<string, DocumentRange>>, List<Tuple<string, DocumentRange>>> errors)
+        private void OnErrors(YC.SDK.ReSharper.Helper.ProcessErrors errors)
         {
-            var parserErrors = errors.Item2;
             var highlightings = new List<HighlightingInfo>();
+
+            var parserErrors = errors.ParserErrors.Info;
             if (parserErrors.Count > 0)
             {
                 highlightings.AddRange(from error in parserErrors
                                        select new HighlightingInfo(error.Item2, new ErrorWarning("Syntax error. Unexpected token " /*+ error.Item1*/)));
             }
 
-            var lexerErrors = errors.Item1;
+            var lexerErrors = errors.LexerErrors.Info;
             if (lexerErrors.Count > 0)
             {
                 highlightings.AddRange(from error in lexerErrors
                                        select new HighlightingInfo(error.Item2, new ErrorWarning("Unexpected symbol: " + error.Item1 + ".")));
+            }
+
+            var semanticErrors = errors.SemanticErrors.Info;
+            if (semanticErrors.Count > 0)
+            {
+                highlightings.AddRange(from error in semanticErrors
+                                       select new HighlightingInfo(error.Item2, new ErrorWarning("Semantic error. Symbol: " + error.Item1 + ".")));
             }
             //var highlightings = (from e in errors.Item2 select new HighlightingInfo(e.Item2, new ErrorWarning())).Concat(
             //                    from e in errors.Item1 select new HighlightingInfo(e.Item2, new ErrorWarning("Unexpected symbol: " + e.Item1 + ".")));

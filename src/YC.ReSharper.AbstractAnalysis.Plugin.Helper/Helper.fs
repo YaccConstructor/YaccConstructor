@@ -40,23 +40,32 @@ let addSemantic (parent : ITreeNode) (children : ITreeNode list) =
     parent
 
 let calculatePos (grToken: GraphTokenValue<#ITreeNode>) =    
-        let ranges = 
-            grToken.Edges |> Seq.groupBy (fun x -> x.BackRef)
-            |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
-            |> Seq.map(fun grToken ->
-                try
-                    let pos =  grToken |> Array.map(fun i -> i.StartPos)
-                    let lengthTok = pos.Length
-                    let beginPosTok = pos.[0] + 1
-                    let endPosTok = pos.[lengthTok-1] + 2 
-                    let endPos = 
-                        grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
-                        - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 
-                    grToken.[0].BackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
-                with
-                | e -> 
-                    grToken.[0].BackRef.GetDocumentRange())
-        ranges
+    let ranges = 
+        grToken.Edges |> Seq.groupBy (fun x -> x.BackRef)
+        |> Seq.map (fun (_, brs) -> brs |> Array.ofSeq)
+        |> Seq.map(fun grToken ->
+            try
+                let pos =  grToken |> Array.map(fun i -> i.StartPos)
+                let lengthTok = pos.Length
+                let beginPosTok = pos.[0] + 1
+                let endPosTok = pos.[lengthTok-1] + 2 
+                let endPos = 
+                    grToken.[0].BackRef.GetDocumentRange().TextRange.EndOffset - endPosTok 
+                    - grToken.[0].BackRef.GetDocumentRange().TextRange.StartOffset 
+                grToken.[0].BackRef.GetDocumentRange().ExtendLeft(-beginPosTok).ExtendRight(-endPos)
+            with
+            | e -> 
+                grToken.[0].BackRef.GetDocumentRange())
+    ranges
+
+type Error(errors : ResizeArray<string * 'range>) =
+    member this.Info = errors
+
+[<Class>]
+type ProcessErrors(lexerErrors : Error, parserErrors : Error, semanticErrors : Error) = 
+    member this.LexerErrors = lexerErrors
+    member this.ParserErrors = parserErrors
+    member this.SemanticErrors = semanticErrors
 
 [<Class>]
 type ReSharperHelper<'range, 'node> private() =
@@ -84,11 +93,17 @@ type ReSharperHelper<'range, 'node> private() =
         let graphs = (new Approximator(file)).Approximate()
         let lexerErrors = new ResizeArray<_>()
         let parserErrors = new ResizeArray<_>()
+        let semanticErrors = new ResizeArray<_>()
+
         graphs
         |> ResizeArray.map (fun (lang, graph) -> (getProcessor lang).Process graph)
-        |> ResizeArray.iter(fun (x, y) -> lexerErrors.AddRange x; parserErrors.AddRange y)
-        
-        lexerErrors, parserErrors
+        |> ResizeArray.iter(fun (x, y, z) -> 
+                                lexerErrors.AddRange x
+                                parserErrors.AddRange y
+                                semanticErrors.AddRange z
+                            )
+                
+        new ProcessErrors(new Error(lexerErrors), new Error(parserErrors), new Error(semanticErrors))
 
 [<Class>]
 type YcHelper private() = 
@@ -110,7 +125,6 @@ type YcHelper private() =
         if not <| dict.ContainsKey key
         then dict.Add(key, number)
 
-
     static member GetNumber (lang : string) (key : string) = 
         let lang = lang.ToLowerInvariant()
         let key = key.ToLowerInvariant()
@@ -119,9 +133,7 @@ type YcHelper private() =
         then 
             let dict = allYcToInt.[lang]
             if dict.ContainsKey key 
-            then 
-                dict.[key]
-            else 
-                -1
+            then dict.[key]
+            else -1
         else 
             -1

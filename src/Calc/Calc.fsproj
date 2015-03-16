@@ -141,6 +141,11 @@
       <Project>{f61cae49-b511-431a-bc1b-49a04c38bee9}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ControlFlowGraph\ControlFlowGraph.fsproj">
+      <Name>ControlFlowGraph (SEL.SDK\ControlFlowGraph\ControlFlowGraph)</Name>
+      <Project>{e94970c1-26a4-4fa6-bb3b-261b70938ff4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\ReSharperExtension\ReSharperExtension.csproj">
       <Name>ReSharperExtension</Name>
       <Project>{70133fea-83f5-416a-8869-0e745ef37778}</Project>
@@ -182,6 +187,9 @@
     <PostBuildEvent>cd $(TargetDir)
 del JetBrains.*
 </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>C:\YaccConstructor\src\..\Bin\Debug\v40\</OutputPath>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

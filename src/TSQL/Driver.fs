@@ -66,7 +66,7 @@ do()
 [<ShellComponent>]
 [<Extension>]
 type TSQLInjectedLanguageModule () =
-    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot)
+    let processor = new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos, getRange, printAstToDot, printOtherAstToDot, None)
 
     interface IInjectedLanguageModule<br, range, node> with
         member this.Name = langName

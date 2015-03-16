@@ -47,9 +47,9 @@ type CalcInjectedLanguageModule () =
 
     let processor =
         new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos
-                      , getRange, printAstToDot, otherAstToDot)
+                      , getRange, printAstToDot, otherAstToDot, None)
     
-    interface IInjectedLanguageModule<br,range,node> with
+    interface IInjectedLanguageModule<br, range, node> with
         member this.Name = langName
         member this.Process graphs = processor.Process graphs
         member this.LexingFinished = processor.LexingFinished

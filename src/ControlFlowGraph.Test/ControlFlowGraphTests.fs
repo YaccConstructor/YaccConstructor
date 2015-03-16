@@ -292,17 +292,12 @@ type ``Find undefined variables`` () =
     let indToString = RNGLR.ParseExtendedCalc.numToString
     let tokenData = RNGLR.ParseExtendedCalc.tokenData
 
-    let semicolon = RNGLR.ParseExtendedCalc.SEMICOLON 0
-    let semicolonNumber = tokenToNumber semicolon
-
-    let eq = RNGLR.ParseExtendedCalc.EQ 0
-    let eqNumber = tokenToNumber eq
+    let semicolonNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.SEMICOLON 0
+    let eqNumber = tokenToNumber <| RNGLR.ParseExtendedCalc.EQ 0
 
     let nodeToType = dict["assign", Assignment;]
         
-    let typeToDelimiters = dict [
-                                    Assignment, [semicolonNumber]; 
-                                ]
+    let typeToDelimiters = dict [Assignment, [semicolonNumber]; ]
         
     let varsNumbers = 
         [RNGLR.ParseExtendedCalc.X 0; RNGLR.ParseExtendedCalc.Y 0; RNGLR.ParseExtendedCalc.Z 0]

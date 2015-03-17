@@ -1,12 +1,14 @@
 ﻿module Utils
 
 module DotUtils =
-    open System.IO
     open JetBrains.ReSharper.Psi.ControlFlow.CSharp
     open JetBrains.ReSharper.Psi.ControlFlow
     open JetBrains.ReSharper.Psi.CSharp.Tree
     open JetBrains.ReSharper.Psi.Tree
     open JetBrains.ReSharper.Psi
+
+    open System.IO
+    open System.Collections.Generic
 
     let private toDot (cfg: ICSharpControlFlowGraf) (outStream: StreamWriter) =
         let getNodeInfo (node: IControlFlowElement) =
@@ -38,11 +40,13 @@ module DotUtils =
                 )
             |> List.iter (fun edge -> outStream.WriteLine(edge))
 
-        let rec bfs (elems: list<IControlFlowElement>) =
+        let rec bfs (elems: list<IControlFlowElement>) (visited: HashSet<IControlFlowElement>)=
             match elems with
             | null :: tl ->
                 outStream.WriteLine ("null_node")
-                bfs tl
+                bfs tl visited
+            | hd :: tl when visited.Contains hd ->
+                bfs tl visited
             | hd :: tl -> 
                 printGraphNode hd
                 let updatedElems =
@@ -51,9 +55,10 @@ module DotUtils =
                         |> List.ofSeq 
                         |> List.map (fun rib -> if rib <> null then rib.Target else null)
                     )
-                bfs updatedElems
+                do visited.Add hd |> ignore
+                bfs updatedElems visited
             | [] -> ()
-        bfs [cfg.EntryElement]
+        bfs [cfg.EntryElement] (new HashSet<IControlFlowElement>())
 
     // Converts passed cfg "cfg" to DOT's digraph with name "name" 
     // and stores it in the file specified by "outPath"

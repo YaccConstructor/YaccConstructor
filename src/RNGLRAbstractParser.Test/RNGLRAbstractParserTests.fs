@@ -390,6 +390,18 @@ type ``RNGLR abstract parser tests`` () =
             ] |> ignore
 
         test RNGLR.FirstEps.buildAstAbstract qGraph
+    
+    [<Test>]
+    member this.``Brackets`` () =
+        let qGraph = new ParserInputGraph<_>(0, 2)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 0 (RNGLR.Brackets.LBR 1)
+            edg 0 1 (RNGLR.Brackets.NUM 2)
+            edg 1 1 (RNGLR.Brackets.RBR 3)
+            edg 1 2 (RNGLR.Brackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.Brackets.buildAstAbstract qGraph
 
     
 //    [<Test>]
@@ -971,7 +983,7 @@ let f x =
 //    t.``Not Ambigous Simple Calc. Lots Of Variants.``()
 //    t.``Not Ambigous Simple Calc. Loop.`` ()
 //    t.``Not Ambigous Simple Calc. Loop2.`` ()
-//    t.``Not Ambigous Simple Calc. Loop3.`` ()
+    t.``Not Ambigous Simple Calc. Loop3.`` ()
 //    t.``Not Ambigous Simple Calc. Loop4.`` ()
 //    t.``Not Ambigous Simple Calc. Loop5.`` ()
 //    t.``Not Ambigous Simple Calc. Loop6.`` ()
@@ -981,6 +993,7 @@ let f x =
 //    t.``Not Ambigous Simple Calc With 2 Ops. Loops.`` ()
 //    t.``Stars. Loop.`` () 
 //    t.``Stars2. Loop.`` () 
-    t.``FirstEps`` ()
+//    t.``FirstEps`` ()
+    //t.``Brackets`` ()
     0
     

@@ -37,6 +37,7 @@
     <!--Compile Include="MsParser.fs" /-->
     <!--Compile Include="LexerHelper.fs" /-->
     <!--Compile Include="MsLexer.fs" /-->
+    <Compile Include="CroppedBrackets.yrd.fs" />
     <Compile Include="Eps.yrd.fs" />
     <Compile Include="FirstEps.yrd.fs" />
     <Compile Include="List.yrd.fs" />

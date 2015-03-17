@@ -650,6 +650,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                                                                     override this.GetHashCode x = x.GetHashCode()})
         use out = new System.IO.StreamWriter (path : string)
         out.WriteLine("digraph AST {")
+
         let createNode num isAmbiguous nodeType (str : string) =
             let label =
                 let cur = str.Replace("\n", "\\n").Replace ("\r", "")
@@ -660,7 +661,8 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                 | AstNodeType -> ",shape=box"
                 | Prod -> ""
             let color =
-                if not isAmbiguous then ""
+                if not isAmbiguous 
+                then ""
                 else ",style=\"filled\",fillcolor=red"
             out.WriteLine ("    " + num.ToString() + " [label=\"" + label + "\"" + color + shape + "]")
         let createEdge (b : int) (e : int) isBold (str : string) =
@@ -711,6 +713,52 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : AstNode, rules : int[]
                     if children.other <> null then 
                         children.other |> Array.iter handle
         else createEpsilon (root :?> Epsilon).EpsilonNonTerm |> ignore
-        
+
         out.WriteLine("}")
         out.Close()
+
+
+    member this.CountCounters ()=
+        let nodesCount = ref 0
+        let edgesCount = ref 0
+        let epsilonsCount = ref 0
+        let termsCount = ref 0
+        let ambiguityCount = ref 0
+
+        let incrNodesCounter() = incr nodesCount
+        let incrEdgesCounter() = incr edgesCount
+        let incrAmbiguityCounter () = incr ambiguityCount
+        
+        let incrEpsilonsCounter() = 
+            incr epsilonsCount
+            incrNodesCounter()
+            incrNodesCounter()
+            incrEdgesCounter()
+        
+        let incrTermsCounter() =
+            incr termsCount
+            incrNodesCounter()
+
+        if not isEpsilonTree then
+            for i = order.Length-1 downto 0 do
+                let x = order.[i]
+                if x.pos <> -1 then
+                    let children = x
+                    incrNodesCounter()
+                    if children.other <> null
+                    then incrAmbiguityCounter()
+                    let inline handle (family : Family) =
+                        incrNodesCounter()
+                        incrEdgesCounter()
+                        family.nodes.doForAll <| fun child ->
+                            match child with
+                            | :? AST -> ()
+                            | :? Epsilon -> incrEpsilonsCounter()
+                            | :? Terminal -> incrTermsCounter()
+                            | _ -> failwith ""
+                            incrEdgesCounter()
+                    children.first |> handle
+                    if children.other <> null then 
+                        children.other |> Array.iter handle
+        else incrEpsilonsCounter()
+        !nodesCount, !edgesCount, !epsilonsCount, !termsCount, !ambiguityCount

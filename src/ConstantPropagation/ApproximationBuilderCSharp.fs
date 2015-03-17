@@ -70,20 +70,32 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     CSharpControlFlowBuilder.Build methodDeclaration
 
 let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IControlFlowElement> =
-    let rec dfs (elem: IControlFlowElement) (dict: Dictionary<ITreeNode, IControlFlowElement>) =
-        if elem = null
-        then dict
-        else
-            if elem.SourceElement <> null
-            then dict.[elem.SourceElement] <- elem
-            elem.Exits
-            |> List.ofSeq
-            |> List.map (fun rib -> rib.Target) 
-            |> List.map (fun t -> dfs t dict)
-            |> List.head
-        
+//    let rec dfs (elem: IControlFlowElement) (dict: Dictionary<ITreeNode, IControlFlowElement>) =
+//        if elem = null
+//        then dict
+//        else
+//            if elem.SourceElement <> null
+//            then dict.[elem.SourceElement] <- elem
+//            elem.Exits
+//            |> List.ofSeq
+//            |> List.map (fun rib -> rib.Target) 
+//            |> List.map (fun t -> dfs t dict)
+//            |> List.head
+//        
+//    let dict = new Dictionary<ITreeNode, IControlFlowElement>()
+//    dfs cfg.EntryElement dict
+
+
     let dict = new Dictionary<ITreeNode, IControlFlowElement>()
-    dfs cfg.EntryElement dict
+    cfg.AllElements
+    |> List.ofSeq
+    |> List.iter
+        (
+            fun e ->
+                if e <> null && e.SourceElement <> null
+                then dict.[e.SourceElement] <- e
+        )
+    dict
 
 let build (file: ICSharpFile) =
     let hotspots = getHotspots file

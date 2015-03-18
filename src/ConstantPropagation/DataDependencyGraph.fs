@@ -26,6 +26,10 @@ type DDGraph = {
     RootId: int }
 
 module DDGraphFuncs =
+    // exception messages 
+    let private multipleCfgNodesForAstNodeMsg = 
+        "ast node maps to multiple cfg nodes where single mapping expected"
+
     type private DDGraphBuildInfo = {   
         Graph: AdjacencyGraph<int, Edge<int>>
         NodeIdInfoDict: Dictionary<int, DDNode>
@@ -36,8 +40,6 @@ module DDGraphFuncs =
 
     module private DDGBuildFuncs =
         // exception messages
-        let private dstNodeIsNotSetMsg = 
-            "cannot create edge - dst node is not set"
         let private noSuchNodeMsg = 
             "cannot create edge - src or dst node is not added to graph"
 
@@ -114,7 +116,7 @@ module DDGraphFuncs =
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider }
 
-    let rec buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode, IControlFlowElement>) = 
+    let rec buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode, HashSet<IControlFlowElement>>) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
             let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
             let nodeInfo = { Label = label; AstElem = treeNode }
@@ -137,6 +139,12 @@ module DDGraphFuncs =
             let addedNode, state' = addNode treeNode label state
             setGraphConnectionNode addedNode state'
 
+        let getCorespondingCfgNode (treeNode: ITreeNode) =
+            let cfgNodes = astCfgMap.[treeNode]
+            if cfgNodes.Count > 1
+            then failwith multipleCfgNodesForAstNodeMsg
+            else cfgNodes |> List.ofSeq |> List.head
+
         let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildState) =
             let processExpr (expr: ICSharpExpression) (state: BuildState) =
                 match expr with
@@ -150,7 +158,7 @@ module DDGraphFuncs =
                     let curVarName = refExpr.NameIdentifier.Name
                     let label = "refExpr(" + curVarName + ")"
                     let addedNode, state' = addNode refExpr label state
-                    let curCfgNode = astCfgMap.[refExpr]
+                    let curCfgNode = getCorespondingCfgNode refExpr
                     let curConnectionNode = state'.GraphInfo.ConnectionNode
                     let state' = setGraphConnectionNode addedNode state'
                     let state' = build curCfgNode curVarName state'
@@ -218,7 +226,7 @@ module DDGraphFuncs =
         let varName = varRef.NameIdentifier.Name
         let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
         let graphInfo = DDGBuildFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
-        let cfgNode = astCfgMap.[varRef]
+        let cfgNode = getCorespondingCfgNode varRef
         let initState = { GraphInfo = graphInfo; Provider = provider }
         let resState = build cfgNode varName initState
         let root = RootNode

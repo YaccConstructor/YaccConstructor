@@ -69,17 +69,30 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     let methodDeclaration = getEnclosingMethod hotspot
     CSharpControlFlowBuilder.Build methodDeclaration
 
-let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, IControlFlowElement> =
-    let dict = new Dictionary<ITreeNode, IControlFlowElement>()
-    cfg.AllElements
-    |> List.ofSeq
-    |> List.iter
-        (
-            fun e ->
-                if e <> null && e.SourceElement <> null
-                then dict.[e.SourceElement] <- e
-        )
+let createAstCfgMap (cfg: ICSharpControlFlowGraf): Dictionary<ITreeNode, HashSet<IControlFlowElement>> =
+    let rec dfs (cfgElem: IControlFlowElement) (visited: HashSet<int>) 
+                (dict: Dictionary<ITreeNode, HashSet<IControlFlowElement>>) =
+        if cfgElem <> null && (not << visited.Contains) cfgElem.Id
+        then
+            visited.Add cfgElem.Id |> ignore
+            let node = cfgElem.SourceElement
+            if node <> null
+            then
+                if dict.ContainsKey node
+                then dict.[node].Add cfgElem |> ignore
+                else 
+                    let newSet = new HashSet<IControlFlowElement>([cfgElem])
+                    dict.[node] <- newSet
+            cfgElem.Exits
+            |> List.ofSeq
+            |> List.map (fun rib -> rib.Target)
+            |> List.iter (fun e -> dfs e visited dict)
+
+    let dict = new Dictionary<ITreeNode, HashSet<IControlFlowElement>>()
+    let visited = new HashSet<int>()
+    dfs cfg.EntryElement visited dict
     dict
+            
 
 let build (file: ICSharpFile) =
     let hotspots = getHotspots file

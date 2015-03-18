@@ -118,8 +118,9 @@ type Processor<'TokenType, 'br, 'range, 'node>  when 'br:equality and  'range:eq
                     if semantic.IsSome 
                     then
                         printAst tree "result ast.dot"
-                        let pSource, lSource = semantic.Value
-                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens)
+                        let pSource, lSource, tokToSourceString = semantic.Value
+                        let cfg = new ControlFlow<'TokenType>(tree, pSource, lSource, tree.Tokens, tokToSourceString)
+                        cfg.PrintToDot "result cfg.dot"
                         let semErrors = cfg.FindUndefVariable()
                         semErrors |> List.iter addSError
 

@@ -38,8 +38,21 @@ type ``Control Flow Graph Building`` () =
         
     let stmntNumber = 0
         
+    let tokToRealString tok = tok |> tokenToNumber |> indToString
     let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters)
+
+    let runTest graph astName cfgName = 
+        let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
+        
+        match parseResult with 
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
+            RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
+            
+            cfg.PrintToDot cfgName
+            printfn "%s" <| cfg.ToString()
 
     [<Test>]
     member test.``Elementary test``() =
@@ -62,16 +75,7 @@ type ``Control Flow Graph Building`` () =
                 createEdge 11 12 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseExtendedCalc.defaultAstToDot mAst "tree elementary.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
-            
-            cfg.PrintToDot "cfg elementary.dot"
-            printfn "%s" <| cfg.ToString()
+        runTest qGraph "ast elementary (cfg construction).dot" "cfg elementary (cfg construction).dot"
 
     [<Test>]
     member test.``Ambiguous test``() =
@@ -102,16 +106,24 @@ type ``Control Flow Graph Building`` () =
                 createEdge 14 15 (RNGLR.ParseExtendedCalc.SEMICOLON 11)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
+        runTest qGraph "ast ambiguous (cfg construction).dot" "cfg ambiguous (cfg construction).dot"
 
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseExtendedCalc.defaultAstToDot mAst "tree Ambiguous.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+    [<Test>]
+    member this.``Ambiguous2 test``() = 
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        let vertexRange = List.init 5 (fun i -> i)
+        qGraph.AddVertexRange vertexRange |> ignore
 
-            printfn "%s" <| cfg.ToString()
-            cfg.PrintToDot "cfg Ambiguous.dot"
+        qGraph.AddVerticesAndEdgeRange
+            [
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.X 0)
+                createEdge 0 1 (RNGLR.ParseExtendedCalc.Y 1)
+                createEdge 1 2 (RNGLR.ParseExtendedCalc.EQ 2)
+                createEdge 2 3 (RNGLR.ParseExtendedCalc.FIVE 3)
+                createEdge 3 4 (RNGLR.ParseExtendedCalc.SEMICOLON 4)
+            ] |> ignore
+
+        runTest qGraph "ast ambiguous2 (cfg construction).dot" "cfg ambiguous2 (cfg construction).dot"
 
 
 [<TestFixture>]
@@ -122,16 +134,19 @@ type ``Control Flow Graph: If`` () =
     let indToString = RNGLR.ParseIf.numToString
     let tokenData = RNGLR.ParseIf.tokenData
 
-    let semicolon = RNGLR.ParseIf.SEMICOLON 0
-    let semicolonNumber = tokenToNumber semicolon
-    let nodeToType = dict[
-                                "simple_statement", Assignment;
-                                "if_statement", IfStatement;
-                          ]
+    let semicolonNumber = tokenToNumber <| RNGLR.ParseIf.SEMICOLON 0
     let ifNumber = tokenToNumber <| RNGLR.ParseIf.IF 0
     let thenNumber = tokenToNumber <| RNGLR.ParseIf.THEN 0
     let elseNumber = tokenToNumber <| RNGLR.ParseIf.ELSE 0
     let endIfNumber = tokenToNumber <| RNGLR.ParseIf.ENDIF 0
+    
+    let nodeToType = dict[
+                                "simple_statement", Assignment;
+                                "if_statement", IfStatement;
+                          ]
+    
+
+    let tokToRealString tok = tok |> tokenToNumber |> indToString
 
     let typeToDelimiters = dict [
                                     Assignment, [semicolonNumber]; 
@@ -167,7 +182,7 @@ type ``Control Flow Graph: If`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             RNGLR.ParseIf.defaultAstToDot mAst "tree simple if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
             cfg.PrintToDot "cfg simple if.dot"
             printfn "%s" <| cfg.ToString()
@@ -202,7 +217,7 @@ type ``Control Flow Graph: If`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             RNGLR.ParseIf.defaultAstToDot mAst "tree big if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
             cfg.PrintToDot "cfg big if.dot"
             printfn "%s" <| cfg.ToString()
@@ -234,7 +249,7 @@ type ``Control Flow Graph: If`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             RNGLR.ParseIf.defaultAstToDot mAst "tree if-without-else.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
             cfg.PrintToDot "cfg if-without-else.dot"
             printfn "%s" <| cfg.ToString()
@@ -277,7 +292,7 @@ type ``Control Flow Graph: If`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             RNGLR.ParseIf.defaultAstToDot mAst "Tree inner if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
             
             cfg.PrintToDot "cfg inner if.dot"
             printfn "%s" <| cfg.ToString()
@@ -304,7 +319,8 @@ type ``Find undefined variables`` () =
         |> List.map (fun t -> tokenToNumber t)
 
     let isVariable tok = varsNumbers |> List.exists (fun t -> t = tok) 
-        
+
+    let tokToRealName tok = tok |> tokenToNumber |> indToString   
         
     let parserSource = new ParserSource<RNGLR.ParseExtendedCalc.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
@@ -316,7 +332,7 @@ type ``Find undefined variables`` () =
         | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
         | Parser.Success (mAst, _, _) ->
             RNGLR.ParseExtendedCalc.defaultAstToDot mAst astName
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens)
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealName)
             
             cfg.PrintToDot cfgName
             
@@ -429,10 +445,10 @@ type ``Find undefined variables`` () =
 
 [<EntryPoint>]
 let f x = 
-//    let cfgBuilding = new ``Control Flow Graph Building``()
-//    cfgBuilding.``Ambiguous test``()
+    let cfgBuilding = new ``Control Flow Graph Building``()
+    cfgBuilding.``Ambiguous2 test``()
 //    let ifBuilding = new ``Control Flow Graph: If``()
 //    ifBuilding.``If without else test``()
-    let undefVariables = new ``Find undefined variables``()
-    undefVariables.``Undef: ambiguous 2``()
+//    let undefVariables = new ``Find undefined variables``()
+//    undefVariables.``Undef: ambiguous 2``()
     1

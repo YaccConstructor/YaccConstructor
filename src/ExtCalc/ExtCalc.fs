@@ -57,8 +57,22 @@ type ExtCalcInjectedLanguageModule () =
     let typeToDelimiters = dict [Assignment, [semicolonNumber]; ]
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, -1, -1, eqNumber, isVariable)
 
+    let tokToSourceString token = 
+        let tok = (unbox <| tokenData token) :> GraphTokenValue<br>
+        
+        tok.Edges
+        |> Seq.map (fun edge -> 
+            let range = edge.BackRef.GetNavigationRange()
+            let startOffset = range.StartOffsetRange().TextRange.StartOffset
+            let newStart = startOffset + 1 + edge.StartPos
+            let newEnd = startOffset + 1 + edge.EndPos
+            range.SetStartTo(newStart).SetEndTo(newEnd).GetText()
+            )
+        |> List.ofSeq
+        |> List.fold (fun acc elem -> acc + elem) ""
+
     let parserSource = new ParserSource<Token>(tokenToNumber, numToString, leftSide, tokenData)
-    let semantic = Some <| (parserSource, langSource)
+    let semantic = Some <| (parserSource, langSource, tokToSourceString)
 
     let processor =
         new Processor<Token, br, range, node>(tokenize, parse, translate, tokenToNumber, numToString, tokenData, tokenToTreeNode, langName, calculatePos

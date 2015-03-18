@@ -78,27 +78,6 @@ type Block<'TokenType> =
     new (blockType, vals, children) = {blockType = blockType; values = vals; children = children; parent = new InterNode<_>()}
     new (blockType, vals) = {blockType = blockType; values = vals; children = []; parent = new InterNode<_>()}
 
-    override this.ToString() = 
-        let typeStr = 
-            match this.blockType with
-            | Assignment -> "Assignment"
-            | Declaration -> "Declaration"
-            | Definition -> "Definition"
-            | IfStatement -> "IfStatement"
-            | ThenStatement -> "ThenStatement"
-            | ElseStatement -> "ElseStatement"
-            | ForStatement -> "ForStatement"
-            | WhileStatement -> "WhileStatement"
-            | Start -> "Start"
-            | NoneBlock -> "None"
-
-        let strValues = 
-            this.values
-            |> Array.map (fun t -> t.ToString())
-            |> String.concat ""
-
-        sprintf "%s\n tokens: %A\n" typeStr this.values //strValues
-
     static member CreateSimpleBlock blockType vals = 
         let newBlock = new Block<_>(blockType, vals)
         
@@ -122,6 +101,27 @@ type Block<'TokenType> =
     member this.ReplaceChild oldChild newChildren = 
         this.children <- this.children |> List.filter (fun child -> child <> oldChild)
         this.children <- this.children @ newChildren
+
+    member this.BlockToString (tokToString : 'TokenType -> string) = 
+        let typeStr = 
+            match this.blockType with
+            | Assignment -> "Assignment"
+            | Declaration -> "Declaration"
+            | Definition -> "Definition"
+            | IfStatement -> "IfStatement"
+            | ThenStatement -> "ThenStatement"
+            | ElseStatement -> "ElseStatement"
+            | ForStatement -> "ForStatement"
+            | WhileStatement -> "WhileStatement"
+            | Start -> "Start"
+            | NoneBlock -> "None"
+
+        let strValues = 
+            this.values
+            |> Array.map (fun t -> tokToString t)
+            |> String.concat ""
+
+        sprintf "%s\n tokens: %s\n" typeStr strValues
 
 and InterNode<'TokenType> =
     val mutable parents  : Block<'TokenType> list
@@ -167,7 +167,33 @@ and InterNode<'TokenType> =
             then "Finish Node"
             else "Node"
 
-type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSource<'TokenType>, langSource : LanguageSource, input : array<'TokenType>) = 
+type ControlFlow<'TokenType> (tree : Tree<'TokenType>
+                            , parserSource : ParserSource<'TokenType>
+                            , langSource : LanguageSource
+                            , input : array<'TokenType>
+                            , tokToSourceString : _ -> string) = 
+    
+    let blockToString (block : Block<'TokenType>) = 
+        let typeStr = 
+            match block.blockType with
+            | Assignment -> "Assignment"
+            | Declaration -> "Declaration"
+            | Definition -> "Definition"
+            | IfStatement -> "IfStatement"
+            | ThenStatement -> "ThenStatement"
+            | ElseStatement -> "ElseStatement"
+            | ForStatement -> "ForStatement"
+            | WhileStatement -> "WhileStatement"
+            | Start -> "Start"
+            | NoneBlock -> "None"
+
+        let strValues = 
+            block.values
+            |> Array.map (fun t -> tokToSourceString t)
+            |> String.concat System.String.Empty
+
+        sprintf "%s\n tokens: %s\n" typeStr strValues
+    
     let start, finish = 
         let treeRoot = 
             match tree.Root with
@@ -303,7 +329,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSour
 
                         blocks := List.rev !blocks
                         // only for debug
-                        let temp = Array.ofList !blocks
+//                        let temp = Array.ofList !blocks
 
                         let ifStart, ifEnd = createIfBlock !blocks
                         restoreContext()
@@ -384,10 +410,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSour
 
                     if leftPart.Length = 1 
                     then
-                        let varName = 
-                            leftPart.Head
-                            |> parserSource.tokenToNumber
-                            |> parserSource.numToString
+                        let varName = leftPart.Head |> tokToSourceString
                         newVar <- Some <| varName
                     
                     block.values 
@@ -402,7 +425,7 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSour
 
                 if langSource.isVariable tokNumber
                 then
-                    let varName = tokNumber |> parserSource.numToString
+                    let varName = tok |> tokToSourceString
 
                     if not <| List.exists (fun t -> t = varName) !defVars //it's error
                     then
@@ -459,14 +482,16 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>, parserSource : ParserSour
         out.WriteLine("digraph AST {")
 
         let rec printBlock (block : Block<'TokenType>) parentNumber = 
-            let getBlockNumber block= 
+            let getBlockNumber block = 
                 if blockToNumber.ContainsKey block 
                 then 
                     blockToNumber.[block], false
                 else
                     incr count
 
-                    out.WriteLine (sprintf "%d [label=\"%s\",shape=box]" <| !count <| block.ToString())
+                    let blockString = blockToString block
+
+                    out.WriteLine (sprintf "%d [label=\"%s\",shape=box]"  !count blockString)
                     blockToNumber.Add (block, !count)
                     !count, true
 

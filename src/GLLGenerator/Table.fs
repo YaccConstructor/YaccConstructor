@@ -62,7 +62,11 @@ type Table (grammar : FinalGrammar) =
         let result = num - grammar.indexator.nonTermCount
         result
             
-
+//для каждого правила вывода заданной грамматики A → α (где под α понимается цепочка в правой части правила) выполняются следующие действия:
+//Для каждого терминала a ∈ FIRST(α) добавить правило A → α к M[A, a]
+//Если ε ∈ FIRST(α), то для каждого b ∈ FOLLOW(A) добавить A → α к M[A, b]
+//ε ∈ FIRST(α) и $ ∈ FOLLOW(A), добавить A → α к M[A, $]
+//Все пустые ячейки — ошибка во входном слове
     let _table = 
         let length1 = grammar.indexator.nonTermCount
         let length2 = grammar.indexator.fullCount - grammar.indexator.nonTermCount
@@ -74,12 +78,12 @@ type Table (grammar : FinalGrammar) =
             let curNTerm = grammar.rules.leftSide i
             for j = 0 to curFirst.Length - 1 do
                 arr.[curNTerm, getTableIndex curFirst.[j]] <- i :: arr.[curNTerm, getTableIndex curFirst.[j]]
-            if grammar.canInferEpsilon.[curNTerm]
+            if grammar.epsilonRules.[i]
             then 
                 let curFollow = Set.toArray follow.[curNTerm]
                 for j = 0 to curFollow.Length - 1 do
                     arr.[curNTerm, getTableIndex curFollow.[j]] <- i :: arr.[curNTerm, getTableIndex curFollow.[j]] 
-                               
+        let temp = arr                 
         for i = 0 to length1 - 1 do
             for j = 0 to length2 - 1 do
                 result.[length2 * i + j] <- List.toArray arr.[i,j]

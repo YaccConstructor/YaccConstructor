@@ -5,7 +5,7 @@ open System.IO
 open System
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
-
+//packages/yc.tools/lib/net40/fslex.exe file.fsl --unicode
 
 open Yard.Generators.GLL
 
@@ -37,7 +37,7 @@ let run () =
 run () |> printfn "%A"
 
 let run1 astBuilder =
-    let lb = LexBuffer<_>.FromString "1"
+    let lb = LexBuffer<_>.FromString "1 - 2"
     let tokens = seq{while not lb.IsPastEndOfStream do yield Calc.Lexer.token lb}
     astBuilder tokens, tokens
 

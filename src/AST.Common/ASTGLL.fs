@@ -150,8 +150,13 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     | :? TerminalNode as t ->
                         if t.Extension <> packExtension -1 -1 
                         then
-                            createNode !num false Terminal ("t " + indToString t.Name)
-                            createEdge currentPair.Num !num false ""
+                            if t.Name <> -1
+                            then
+                                createNode !num false Terminal ("t " + indToString t.Name)
+                                createEdge currentPair.Num !num false ""
+                            else
+                                createNode !num false Terminal ("epsilon")
+                                createEdge currentPair.Num !num false ""
                         else
                             createNode !num false Terminal ("dummy")
                             createEdge currentPair.Num !num false ""

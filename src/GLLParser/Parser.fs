@@ -87,7 +87,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummy)
         
-        let finalExtension = packExtension 0 inputLength
+        let finalExtension = packExtension 0 (inputLength - 1)
 
         let containsContext index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             if index <= inputLength
@@ -357,7 +357,10 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             let position = getPosition !currentLabel
             if Array.length parser.rules.[rule] = 0 
             then
-                currentR := epsilon
+                let t = new TerminalNode(-1, packExtension !currentIndex !currentIndex)
+                sppfNodes.Add t
+                let res = sppfNodes.Count - 1
+                currentR := res * 1<nodeMeasure>
                 currentN := getNodeP !currentLabel !currentN !currentR  
                 pop !currentGSSNode !currentIndex !currentN
             else

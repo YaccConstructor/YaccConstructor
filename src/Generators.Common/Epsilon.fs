@@ -71,7 +71,7 @@ let getEpsilonCyclicNonTerms (rules : NumberedRules) (indexator : Indexator) (ca
             dfs [i] i
     !result
 
-let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
+let epsilonRules (rules : NumberedRules) (canInferEpsilon : bool[]) =
     let result : bool[] = Array.zeroCreate rules.rulesCount
     for i in 0..rules.rulesCount-1 do
         result.[i] <-
@@ -80,7 +80,7 @@ let epsilonRules (rules : NumberedRules) (indexator : Indexator) (canInferEpsilo
     result
 
 let epsilonTrees (rules : NumberedRules) (indexator : Indexator) (canInferEpsilon : bool[]) =
-    let allEpsilon = epsilonRules rules indexator canInferEpsilon
+    let allEpsilon = epsilonRules rules canInferEpsilon
     let result : Tree<_> [] = Array.zeroCreate indexator.nonTermCount
     let pos = Array.zeroCreate indexator.nonTermCount
     for u = 0 to indexator.nonTermCount - 1 do

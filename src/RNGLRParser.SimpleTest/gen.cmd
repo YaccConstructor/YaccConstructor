@@ -30,3 +30,9 @@ for %%i in (ComplexRightNull,Expr,First,List,SimpleRightNull) do (
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i ListEps.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.ListEps -translate false -table LR -o ListEps.yrd.fs " >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Brackets.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Brackets -translate false -table LR -o Brackets.yrd.fs " >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i _Brackets.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR._Brackets -translate false -table LR -o _Brackets.yrd.fs " >> log.txt

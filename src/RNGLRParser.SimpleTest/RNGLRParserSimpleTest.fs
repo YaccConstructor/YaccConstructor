@@ -197,13 +197,22 @@ type ``RNGLR parser tests with simple lexer`` () =
     member test.``ListEps``() =
         runTest RNGLR.ListEps.buildAst "ListEps.txt" printAst
 
-//[<EntryPoint>]
+    [<Test>]
+    member test.Brackets() =
+        runTest RNGLR.Brackets.buildAst "Brackets.txt" printAst
+
+
+    [<Test>]
+    member test._Brackets() =
+        runTest RNGLR._Brackets.buildAst "_Brackets.txt" printAst
+
+[<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
     then 
         System.IO.Directory.GetFiles "dot" |> Seq.iter System.IO.File.Delete
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR parser tests with simple lexer`` ()
-    t.``ListEps`` ()
+    t._Brackets ()
 
     0

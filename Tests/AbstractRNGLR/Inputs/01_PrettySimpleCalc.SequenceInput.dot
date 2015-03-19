@@ -6,4 +6,8 @@ node [shape=circle]
 1 -> 2 [label="PLUS 2"]
 2 -> 3 [label="NUM 3"]
 3 -> 4 [label="RNGLR_EOF 0"]
+//Nodes:    13
+//Edges:    12
+//Epsilons: 0
+//Terms:    3
 }

@@ -65,14 +65,14 @@ and VInfo<'TokenType> (vNum, statesCount) =
     let processedReductions = new ResizeArray<Reduction> ()
     let areEqualReductions (x : Reduction) (y : Reduction) = 
            x.prod = y.prod 
-        && x.pos = y.pos 
-        && x.gssVertex.State = y.gssVertex.State 
-        && x.gssVertex.Level = y.gssVertex.Level
-        && x.edge.IsSome
-        && y.edge.IsSome
-        && x.edge.Value.Ast = y.edge.Value.Ast
-        && x.edge.Value.Dest.Level = y.edge.Value.Dest.Level
-        && x.edge.Value.Dest.State = y.edge.Value.Dest.State
+           && x.pos = y.pos 
+           && x.gssVertex.State = y.gssVertex.State 
+           && x.gssVertex.Level = y.gssVertex.Level
+           && (x.edge.IsNone && y.edge.IsNone 
+               || x.edge.IsSome && y.edge.IsSome
+                  && x.edge.Value.Ast = y.edge.Value.Ast
+                  && x.edge.Value.Dest.Level = y.edge.Value.Dest.Level
+                  && x.edge.Value.Dest.State = y.edge.Value.Dest.State)
 
     member val vNum = vNum with get
     member val processedGssVertices = new ResizeArray<Vertex>() with get
@@ -97,20 +97,32 @@ and [<Struct>]
     val edge : Edge option
     new (_gssVertex, _prod, _pos, _edge) = {gssVertex = _gssVertex; prod = _prod; pos = _pos; edge = _edge}
 
-[<AllowNullLiteral>]
-type Path (first : int, tail : int, paths : ResizeArray<Path>) =
-    let allPaths = paths
-    let rec toList (path : Path) result = 
-        match path with 
-        | null -> result
-        | _ -> toList allPaths.[path.Tail] (path.First :: result)
-        
-    member this.First = first
+and [<AllowNullLiteral>]
+    Path (head : AstNode, tail : Path, length : int) = 
+    member this.Head = head
     member this.Tail = tail
-    member this.AddEdge edge = 
-        allPaths.Add this
-        new Path (edge, allPaths.Count, allPaths)
-    member this.ToList = toList this [] 
+    member this.Length = length
+    
+    member this.AddEdge edge =
+        new Path(edge, this, this.Length + 1)
+    
+    member this.IsEqual (other : Path) =
+        this = null && other = null || this.Head = other.Head && this.Tail = other.Tail
+
+    member this.IsEqual (nodes : Nodes) = 
+        nodes.Length = this.Length 
+        && let h = ref this in nodes.isForAll(fun x -> let res = x = h.Value.Head
+                                                       h := h.Value.Tail
+                                                       res )
+
+    member this.ToArray() =
+        let p = ref this
+        Array.init this.Length (fun _ -> let cur = p.Value.Head
+                                         p := p.Value.Tail
+                                         cur)
+       
+    new (head, tail) = new Path(head, tail, if tail = null then 1 else tail.Length + 1)
+    new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
     let statesCount = parserSource.Gotos.Length
@@ -137,6 +149,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     for v in innerGraph.Vertices do
         verticesSeenBefore.Add(v, false)
     
+    let customEnqueue (elem : VInfo<_>) = 
+        if verticesToProcess.Count = 0 || not <| (verticesToProcess.Last(fun _ -> true).vNum = elem.vNum) //.Any(fun x -> x.vNum = elem.vNum)
+            then verticesToProcess.Enqueue(elem)
+
     let edgesToTerms = new Dictionary<_,_>()
     let push currentGraphV gssVertex state =
         let reductions = new ResizeArray<_>(10)
@@ -166,12 +182,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 if edgesToTerms.ContainsKey e
                 then
                     edge <- new Edge(gssVertex, edgesToTerms.[e])
-                    targetGssV.addEdge edge
                 else 
                     terminals.Add e.Tag
                     nodes.Add <| Terminal (terminals.Count - 1)
                     edgesToTerms.Add(e, nodes.Count - 1)
                     edge <- new Edge(gssVertex, nodes.Count - 1)
+
+                if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
+                then
                     targetGssV.addEdge edge
 
                 for e2 in innerGraph.OutEdges e.Target do
@@ -188,7 +206,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
             let arr = parserSource.ZeroReduces.[state].[parserSource.TokenToNumber e.Tag]
             if arr <> null then
-                verticesToProcess.Enqueue currentGraphV
+                //verticesToProcess.Enqueue currentGraphV
+                customEnqueue currentGraphV
                 for prod in arr do
                     reductions.Add(new Reduction(gssVertex, prod, 0, None), currentGraphV)
         
@@ -221,28 +240,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             |Some x -> v <- x
         |Some x -> 
             v <- x
-            
-            let isInUnprocessedList (v:Vertex) =
-                currentGraphV.unprocessedGssVertices 
-                |> ResizeArray.exists (fun _v -> _v.Level = v.Level && _v.State = v.State ) 
-            if not <| isInUnprocessedList v 
-            then
-                currentGraphV.unprocessedGssVertices.Add v 
         v, isNew
     
     let verticesToRecalc = new ResizeArray<_> (10)
 
-    let (*inline*) addChildren node (path : _[]) prod =
+    let (*inline*) addChildren node (path : Path) prod =
         let ast = getFamily node
         let familyOpt = 
-            ast.findFamily (function family -> family.prod = prod 
-                                            && family.nodes.Length = path.Length 
-                                            && 
-                                               let c = ref -1
-                                               family.nodes.isForAll(fun x -> incr c; x = path.[!c]) )
+            ast.findFamily (function family -> family.prod = prod && path.IsEqual(family.nodes))
         match familyOpt with 
         | None -> 
-            let newFamily = new Family (prod, new Nodes(path))
+            let newFamily = new Family (prod, new Nodes(path.ToArray()))
             if ast.first = Unchecked.defaultof<_> 
             then ast.first <- newFamily 
             else
@@ -251,7 +259,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 else ast.other <- Array.append ast.other [|newFamily|]
         | Some _ -> ()
 
-    let handlePath (path : _[]) (final : Vertex) currentGraphV startV nonTerm pos prod shouldEnqueueVertex =
+    let handlePath (path : Path) (final : Vertex) currentGraphV startV nonTerm pos prod shouldEnqueueVertex =
         let state = parserSource.Gotos.[final.State].[nonTerm]
         let newVertex, isNew = addVertex startV state None
         if shouldEnqueueVertex && isNew then verticesToRecalc.Add startV
@@ -270,21 +278,27 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                                 currentGraphV.AddReduction(new Reduction(newVertex, prod, pos, Some edge))
                 edge.Ast
             | x -> (newVertex.Edge x).Ast
-        addChildren nodes.[ast] (Microsoft.FSharp.Collections.Array.copy path) prod
+        if ast >= 0 
+        then addChildren nodes.[ast] path prod
 
     let rec walk remainLength (vertex : Vertex) path currentGraphV startV nonTerm pos prod shouldEnqueueVertex = 
         if remainLength = 0 
         then handlePath path vertex currentGraphV startV nonTerm pos prod shouldEnqueueVertex
         else
             if not (ResizeArray.exists 
-                       (fun (_prod, _remainLength, _path, _nonTerm, _pos, _startV) -> 
-                                    prod = _prod && remainLength = _remainLength && path = _path && nonTerm = _nonTerm && pos = _pos && startV = _startV)
+                       (fun (_prod, _remainLength, _path : Path, _nonTerm, _pos, _startV) -> 
+                                    prod = _prod 
+                                 && remainLength = _remainLength 
+                                 && path.IsEqual(_path)
+                                 && nonTerm = _nonTerm 
+                                 && pos = _pos 
+                                 && startV = _startV)
                        vertex.PassingReductions)
-            then vertex.PassingReductions.Add (prod, remainLength, Array.copy path, nonTerm, pos, startV)
+            then vertex.PassingReductions.Add (prod, remainLength, path, nonTerm, pos, startV)
             vertex.OutEdges |> ResizeArray.iter
                 (fun e ->
-                    path.[remainLength - 1] <- if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast]
-                    walk (remainLength - 1) e.Dest path currentGraphV startV nonTerm pos prod shouldEnqueueVertex)
+                    let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                    walk (remainLength - 1) e.Dest newPath currentGraphV startV nonTerm pos prod shouldEnqueueVertex)
 
     let makeSingleReduction currentGraphV (reduction : Reduction) =
         let nonTerm = parserSource.LeftSide.[reduction.prod]
@@ -296,8 +310,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
                 newVertex.addEdge edge
         else 
-            let path = Array.zeroCreate reduction.pos
-            path.[reduction.pos - 1] <- nodes.[reduction.edge.Value.Ast]
+            let path = new Path(nodes.[reduction.edge.Value.Ast])
             walk (reduction.pos - 1) (reduction.edge.Value : Edge).Dest path currentGraphV currentGraphV nonTerm reduction.pos reduction.prod false
 
     let makeReductions (currentGraphV : VInfo<_>) =
@@ -324,20 +337,21 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if newGssVs.Count > 0 
         then
             v.unprocessedGssVertices.AddRange(newGssVs)
-            verticesToProcess.Enqueue(v)
-
+            //verticesToProcess.Enqueue(v)
+            customEnqueue v
         if verticesSeenBefore.[v]
         then
             for e in innerGraph.OutEdges(v) do
                 if e.Target.reductions.Count > 0 || e.Target.unprocessedGssVertices.Count > 0
                 then
-                    verticesToProcess.Enqueue (e.Target)
-
+                    //verticesToProcess.Enqueue (e.Target)
+                    customEnqueue e.Target
             let toRecalc = handlePassingReductions v
-            for vToRecalc in toRecalc do verticesToProcess.Enqueue (vToRecalc)
+            for vToRecalc in toRecalc do customEnqueue vToRecalc //verticesToProcess.Enqueue (vToRecalc)
         else
             for e in innerGraph.OutEdges(v) do
-                verticesToProcess.Enqueue (e.Target)
+                customEnqueue e.Target
+                //verticesToProcess.Enqueue (e.Target)
 
 
     if tokens.EdgeCount = 0
@@ -362,9 +376,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 let children = new Family(parserSource.StartRule, new Nodes([|res|]))
                 new AST(children, null)
             for v in innerGraph.Edges |> Seq.filter (fun e -> e.Target = finalV) |> Seq.collect (fun e -> e.Source.processedGssVertices) do
-                if parserSource.AccStates.[v.State] then
+                if parserSource.AccStates.[v.State]
+                then
                     root := Some nodes.Count
-                    nodes.[(v.Edge 0).Ast]
+                    let ast = v.OutEdges.FirstOrDefault(fun x -> x.Ast >= 0).Ast
+                    nodes.[ast]
                     |> addTreeTop
                     |> nodes.Add
             match !root with

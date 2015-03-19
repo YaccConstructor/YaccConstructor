@@ -104,12 +104,17 @@ module DDGraphFuncs =
     module private NodeIdProviderFuncs =
         let create = { NextId = 0; GeneratedIds = new Dictionary<ITreeNode, int>() }
 
-        let getId (provider: NodeIdProvider) (node: ITreeNode) =
+        let tryGetId (provider: NodeIdProvider) (node: ITreeNode) =
             let idsDict = provider.GeneratedIds
             if idsDict.ContainsKey node
-            then idsDict.[node], provider
-            else
-                do idsDict.Add (node, provider.NextId)
+            then Some(idsDict.[node])
+            else None
+
+        let getId (provider: NodeIdProvider) (node: ITreeNode) =
+            match tryGetId provider node with
+            | Some(id) -> id, provider
+            | None ->
+                do provider.GeneratedIds.Add (node, provider.NextId)
                 provider.NextId, {provider with NextId = provider.NextId + 1 }
 
     type private BuildState = {   
@@ -151,17 +156,17 @@ module DDGraphFuncs =
                 | :? ICSharpLiteralExpression as literalExpr ->
                     let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
                     let label = "literal(" + literalVal + ")"
-                    snd <| addPreroot literalExpr label state
+                    addPreroot literalExpr label state |> snd
                 // not implemented (but must precede IReferenceExpression case)
                 | :? IInvocationExpression -> state
                 | :? IReferenceExpression as refExpr ->
                     let curVarName = refExpr.NameIdentifier.Name
                     let label = "refExpr(" + curVarName + ")"
                     let addedNode, state' = addNode refExpr label state
-                    let curCfgNode = getCorespondingCfgNode refExpr
+                    let exprCfgNode = getCorespondingCfgNode refExpr
                     let curConnectionNode = state'.GraphInfo.ConnectionNode
                     let state' = setGraphConnectionNode addedNode state'
-                    let state' = build curCfgNode curVarName state'
+                    let state' = build exprCfgNode curVarName state'
                     setGraphConnectionNode curConnectionNode state'
                 | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
 

@@ -119,7 +119,7 @@ type Approximator(file:ICSharpFile) =
         |> ResizeArray.map 
             (fun (l,g) -> 
                 let res = new YC.FSA.FsaApproximation.Appr<_>()
-                res.AddVerticesAndEdgeRange (g.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, YC.FSA.FsaApproximation.Smb (e.Label.Value,e.BackRef.Value))))
+                res.AddVerticesAndEdgeRange (g.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(e.Source, e.Target, (e.Label.Value,e.BackRef.Value))))
                 |> ignore
                 res.InitState <- new ResizeArray<_>([0])
                 res.FinalState <- new ResizeArray<_>([g.Vertices |> Seq.find (fun v -> g.OutDegree(v) = 0)])

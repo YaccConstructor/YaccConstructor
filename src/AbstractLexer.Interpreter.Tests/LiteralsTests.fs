@@ -8,13 +8,18 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
+
+let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
   
 let literalsTokenizationTest path eCount vCount pathPrint =
     let graphAppr = loadDotToQG baseInputGraphsPath path
-    let graphFsa = FSA.ApprToFSA(graphAppr)
-    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFsa   
+    let graphFsa = graphAppr.ApprToFSA()
+    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+    let res = YC.FST.AbstractLexing.LiteralsLexer.tokenize eof graphFst
     match res with
     | Success res -> 
         checkGraph res eCount vCount  

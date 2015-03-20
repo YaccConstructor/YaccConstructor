@@ -39,15 +39,15 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     let maxV = inputFstLexer.Vertices |> Seq.max |> ref
     let edgesParserGraph = new ResizeArray<_>()
          
-    let actionV = [|for v in inputFstLexer.InitState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray
+    let actionV = [|for v in inputFstLexer.InitState do yield v ; for edge in inputFstLexer.Edges do if (snd edge.Tag) <> Eps then yield edge.Source |] |> Set.ofArray
     let tokens = new ResizeArray<_>()
 
     let FstInverse = new FST<_,_>()   
     for edge in inputFstLexer.Edges do
-        new TaggedEdge<_,_>(edge.Target, edge.Source, edge.Tag) |>  FstInverse.AddVerticesAndEdge |> ignore
+        new EdgeFST<_,_>(edge.Target, edge.Source, edge.Tag) |>  FstInverse.AddVerticesAndEdge |> ignore
 
      
-    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if edge.Tag.OutSymb <> Eps then yield edge.Source |] |> Set.ofArray |> Array.ofSeq
+    let actionVInv = [|for v in inputFstLexer.FinalState do yield v ; for edge in inputFstLexer.Edges do if (snd edge.Tag) <> Eps then yield edge.Source |] |> Set.ofArray |> Array.ofSeq
     let actionVInvBool = ResizeArray.init (!maxV + 1) (fun _ -> false) 
     
     for v in actionVInv do
@@ -69,17 +69,17 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
             then
                 visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
-                    if v.Tag.OutSymb = Eps
+                    if (snd v.Tag) = Eps
                     then 
                         if (v.Source <> vertex || (isStartV v.Source))
                         then 
-                            new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                            new TokenEdge<_>(v.Source, v.Target, match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
                             if v.Target = vertex then targetAct.Add vertex |> ignore
                             queueV.Enqueue v.Target
                     else 
                         if v.Source = vertex 
                         then 
-                            new TokenEdge<_>(v.Source, v.Target, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                            new TokenEdge<_>(v.Source, v.Target, match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
                             if v.Target = graphFst.FinalState.[0]
                             then targetAct.Add v.Target |> ignore
                             else queueV.Enqueue v.Target
@@ -99,7 +99,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
         let queueV = new Queue<_>()
         queueV.Enqueue(vertex)               
 
-        let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> x.Tag.OutSymb = Eps) 
+        let isEps v = inputFstLexer.OutEdges(v) |> Seq.exists(fun x -> (snd x.Tag) = Eps) 
 
         while queueV.Count > 0 do
             let topV = queueV.Dequeue()
@@ -107,7 +107,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
             then
                 visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
-                    new TokenEdge<_>(v.Target, v.Source, match v.Tag.InSymb with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
+                    new TokenEdge<_>(v.Target, v.Source, match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!" ) |> edgesToks.Add |> ignore
                     if actionVInvBool.[v.Target]
                     then if (isEps v.Target) then queueV.Enqueue(v.Target)
                     else queueV.Enqueue(v.Target)  
@@ -137,9 +137,9 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
 
     let idFunction v = 
         for edge in inputFstLexer.OutEdges(v) do
-            if edge.Tag.OutSymb <> Eps
+            if (snd edge.Tag) <> Eps
             then 
-                idF := match edge.Tag.OutSymb with |Smbl y -> y | _ -> failwith "Unexpected :(" 
+                idF := match (snd edge.Tag) with |Smbl y -> y | _ -> failwith "Unexpected :(" 
         !idF    
 
     for t in tokens do
@@ -164,8 +164,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<GraphTokenValue<_> -> _>
     res.AddVerticesAndEdgeRange edgesParserGraph |> ignore  
     res
 
-let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputGraph : FSA<_>) =    
-    let inputFst = FST<_,_>.FSAtoFST(inputGraph)
+let Tokenize (fstLexer : FST<_,_>) (actions : array<GraphTokenValue<_> -> _>) (alphabet: HashSet<_>) eofToken (inputFst : FST<_,_>) =    
     let inputFstLexer = FST<_,_>.Compos(inputFst, fstLexer, alphabet) 
     let epsRes = 
         match inputFstLexer with

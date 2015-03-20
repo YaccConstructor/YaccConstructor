@@ -16,6 +16,7 @@ open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.FsaApproximation
 open Microsoft.FSharp.Collections
 open YC.FSA.GraphBasedFsa
+open YC.FST.GraphBasedFst
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
 let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new GraphTokenValue<_>())
@@ -33,7 +34,7 @@ let loadDotToQG baseInputGraphsPath gFile =
 
     for e in qGraph.Edges do
         let edg = e :?> DotEdge<string>
-        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (Smb(edg.Label, new CalcHighlighting.CalcBaseTreeNode("", 0)))) |> graphAppr.AddVerticesAndEdge |> ignore
+        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (edg.Label, new CalcHighlighting.CalcBaseTreeNode("", 0))) |> graphAppr.AddVerticesAndEdge |> ignore
 
     graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
     graphAppr
@@ -51,10 +52,13 @@ let getResultFileName path pref =
 //let flg = ref false
 let LexerTSQL (srcFilePath:string) =
     let lexerInputGraph = loadLexerInputGraph srcFilePath
-    let graphFsa = FSA.ApprToFSA(lexerInputGraph)
+    let graphFsa = lexerInputGraph.ApprToFSA()
+    let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+    let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let tokenize srcFilePath = 
         let start = System.DateTime.Now
-        for i in 1..10 do YC.TSQLLexer.tokenize eofToken graphFsa  |> ignore
+        for i in 1..10 do YC.TSQLLexer.tokenize eofToken graphFst  |> ignore
         printf  "%s " (System.IO.Path.GetFileNameWithoutExtension(srcFilePath))
         printf " %A " <| (System.DateTime.Now - start).TotalMilliseconds / 10.0
         printfn " "

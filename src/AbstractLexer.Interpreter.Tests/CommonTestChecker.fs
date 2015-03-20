@@ -59,7 +59,7 @@ let loadDotToQG baseInputGraphsPath gFile =
 
     for e in qGraph.Edges do
         let edg = e :?> DotEdge<string>
-        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (Smb(edg.Label, edg.Label))) |> graphAppr.AddVerticesAndEdge |> ignore
+        new TaggedEdge<_,_>(int edg.Source.Id, int edg.Destination.Id, (edg.Label, edg.Label)) |> graphAppr.AddVerticesAndEdge |> ignore
 
     graphAppr.FinalState <- ResizeArray.singleton (Seq.max graphAppr.Vertices)
     graphAppr

@@ -8,17 +8,29 @@ open YC.FST.GraphBasedFst
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.AbstractLexing.Tests.CommonTestChecker
 open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 
 let baseInputGraphsPath = "../../../Tests/AbstractLexing/DOT"
 
+let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+
+let printSmb (x:char*Position<_>) = 
+        match x with
+        | (y, _) when y = char 65535 -> "eof"  
+        | _ -> (fst x).ToString() + "_br: " + (snd x).back_ref.ToString() + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
+
 let calcTokenizationTest path eCount vCount countEdgesArray =
     let graphAppr = loadDotToQG baseInputGraphsPath path
-    let graphFsa = FSA.ApprToFSA(graphAppr)
-    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFsa
+    let graphFsa = graphAppr.ApprToFSA()
+    //graphFsa.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FSA.dot", printSmb)
+    let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+    //graphFst.PrintToDOT("../../../FST/FST/FSA.Tests/DOTfsa/test12FST.dot", printSmb)
+    let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst    
     match res with
     | Success res ->
         checkArr (countEdges res) countEdgesArray
-        checkGraph res eCount vCount   
+        checkGraph res eCount vCount            
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
                              
 [<TestFixture>]
@@ -146,15 +158,15 @@ type ``Lexer Calc Fst Tests`` () =
 
     [<Test>] 
     member this.``Calc. Complex branched 2.`` () =
-        calcTokenizationTest "test_8.dot" 5 5  [|1; 1; 0; 1; 1|]
+        calcTokenizationTest "test_8.dot" 5 5  [|1; 1; 1; 0; 1|]
 
     [<Test>]
     member this.``Calc. Complex branched 3.`` () =
-        calcTokenizationTest "test_9.dot" 8 8 [|1; 1; 1; 1; 2; 2; 0; 1|]
+        calcTokenizationTest "test_9.dot" 8 8 [|1; 1; 1; 1; 2; 2; 1; 0|]
         
     [<Test>] 
     member this.``Calc. Complex 0`` () =
-        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 1; 2; 1; 1; 0|]
+        calcTokenizationTest "test_12.dot" 7 7 [|1; 1; 2; 1; 1; 1; 0|]
 
     [<Test>] 
     member this.``Calc. Whitespace edge.`` () =
@@ -179,7 +191,7 @@ type ``Lexer Calc Fst Tests`` () =
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Lexer Calc Fst Tests`` () 
-//      let a = t.``Calc. Simple number.``()
+//      let a = t.``Calc. Complex branched 3.``()
 //      //printfn "%A" a      
 //      1
 

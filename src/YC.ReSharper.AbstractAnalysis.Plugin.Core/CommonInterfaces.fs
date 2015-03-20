@@ -9,6 +9,7 @@ open Yard.Generators.Common.AST
 open YC.FST.AbstractLexing.Interpreter
 open YC.FST.GraphBasedFst
 open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
 
 type TreeGenerationState<'node> = 
     | Start
@@ -33,7 +34,7 @@ type InjectedLanguageAttribute(language : string) =
     member this.language = language
 
 [<Interface>]
-type IInjectedLanguageModule<'br,'range,'node> =    
+type IInjectedLanguageModule<'br,'range,'node when 'br : equality> =    
      abstract Name: string
      abstract LexingFinished: IEvent<LexingFinishedArgs<'node>>
      abstract ParsingFinished: IEvent<ParsingFinishedArgs>
@@ -48,7 +49,7 @@ type IInjectedLanguageModule<'br,'range,'node> =
 type Processor<'TokenType,'br, 'range, 'node>  when 'br:equality and  'range:equality and 'node:null
     (
         //tokenize: Appr<'br> -> ParserInputGraph<'TokenType>
-        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Smbl<char * Position<'br>>>>
+        tokenize: Appr<'br> -> Test<ParserInputGraph<'TokenType>, array<Symb<char * Position<'br>>>>
         , parse, translate, tokenToNumber: 'TokenType -> int, numToString: int -> string, tokenData: 'TokenType -> obj, tokenToTreeNode, lang, calculatePos:_->seq<'range>
         , getDocumentRange:'br -> 'range
         , printAst: Tree<'TokenType> -> string -> unit

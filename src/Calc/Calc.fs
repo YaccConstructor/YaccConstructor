@@ -10,6 +10,8 @@ open ReSharperExtension
 open JetBrains.Application
 open YC.FST.AbstractLexing.Interpreter
 open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
+open YC.FST.GraphBasedFst
 
 [<assembly:Addin>]
 [<assembly:AddinDependency ("YC.ReSharper.AbstractAnalysis.Plugin.Core", "1.0")>]
@@ -21,10 +23,13 @@ type br = JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression
 [<Extension>]
 [<ShellComponent>]
 type CalcInjectedLanguageModule () =
-    let tokenize lexerInputGraph =
-        let graphFsa = FSA.ApprToFSA(lexerInputGraph)
-        let eof = RNGLR_EOF(new GraphTokenValue<_>())    
-        YC.CalcLexer.tokenize eof graphFsa
+    let tokenize (lexerInputGraph:Appr<_>) =
+        let graphFsa = lexerInputGraph.ApprToFSA()
+        let eof = RNGLR_EOF(new GraphTokenValue<_>())
+        let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
+        let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
+        let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
+        YC.CalcLexer.tokenize eof graphFst
 
     let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
 

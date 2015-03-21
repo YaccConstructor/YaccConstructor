@@ -15,7 +15,6 @@ open DataDependencyGraph
 open Utils
 
 open System.Collections.Generic
-open Microsoft.FSharp.Collections
 open System.IO
 
 let private hotspotInfoList = parseXml "Hotspots.xml"

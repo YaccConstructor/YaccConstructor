@@ -227,6 +227,17 @@ module DDGraphFuncs =
                 let stack = state.LoopNodesStack
                 not stack.IsEmpty && stack.Head = cfe.Id
 
+            let (|SameNameAssignExpr|_|) (node: ITreeNode) =
+                match node with
+                | :? IAssignmentExpression as assignExpr 
+                    when 
+                        match assignExpr.Dest with 
+                        | :? IReferenceExpression as dst 
+                            when dst.NameIdentifier.Name = varName -> true
+                        | _ -> false
+                    -> Some(assignExpr)
+                | _ -> None
+
             match cfe with
             | LoopNode(info) when loopNodeAlreadyMet cfe state ->
                 addNodeAsConnectionNode cfe.SourceElement "loopNode" state 
@@ -242,18 +253,12 @@ module DDGraphFuncs =
                 let astNode = cfe.SourceElement
                 match astNode with
                 // todo: extract as active pattern
-                | :? IAssignmentExpression as assignExpr 
-                    when 
-                        match assignExpr.Dest with 
-                        | :? IReferenceExpression as dst 
-                            when dst.NameIdentifier.Name = varName -> true
-                        | _ -> false
-                    -> 
-                        processAssignment assignExpr state
+                | SameNameAssignExpr(assignExpr) -> 
+                    processAssignment assignExpr state
                 | :? ILocalVariableDeclaration as locVarDecl
                     when locVarDecl.NameIdentifier.Name = varName 
                     -> 
-                        processLocVarDecl locVarDecl state 
+                    processLocVarDecl locVarDecl state 
                 | _ ->
                     processEntries (List.ofSeq cfe.Entries) state
 

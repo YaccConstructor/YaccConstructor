@@ -44,7 +44,7 @@ module DDGraphFuncs =
         NodeIdInfoDict: Dictionary<int, DDNode>
         ConnectionNode: int
         FinalNodeId: int
-        PrerootNodes: list<int>
+        MarkedNodes: list<int>
         RootId: option<int> }
 
     module private DDGBuildFuncs =
@@ -81,7 +81,7 @@ module DDGraphFuncs =
                 NodeIdInfoDict = new Dictionary<int, DDNode>()
                 ConnectionNode = finalNodeId
                 FinalNodeId = finalNodeId
-                PrerootNodes = []
+                MarkedNodes = []
                 RootId = None }
             addNode ddGraph finalNodeId finalNodeInfo
 
@@ -89,15 +89,22 @@ module DDGraphFuncs =
             let ddg = addNode ddGraph srcNodeId srcNodeInfo
             addEdge ddg srcNodeId ddg.ConnectionNode
 
-        let addPrerootAndEdge (ddg: DDGraphBuildInfo) srcNodeId srcNodeInfo =
+        let addMarkedNodeAndEdge (ddg: DDGraphBuildInfo) srcNodeId srcNodeInfo =
             let ddg' = addNodeAndEdge ddg srcNodeId srcNodeInfo
-            { ddg' with PrerootNodes = srcNodeId :: ddg'.PrerootNodes }
+            { ddg' with MarkedNodes = srcNodeId :: ddg'.MarkedNodes }
 
-        let foldPreroots (ddg: DDGraphBuildInfo) rootId rootInfo =
-            let ddg' = addNode ddg rootId rootInfo
-            ddg'.PrerootNodes
-            |> List.fold (fun accDdg id -> addEdge accDdg rootId id) ddg'
-            |> fun ddg -> { ddg with PrerootNodes = [] }
+        let markConnectionNode (ddg: DDGraphBuildInfo) =
+            { ddg with MarkedNodes = ddg.ConnectionNode :: ddg.MarkedNodes }
+
+        let foldMarkedOnExisting (ddg: DDGraphBuildInfo) existingId =
+            failIfNoSuchKey ddg.NodeIdInfoDict existingId
+            ddg.MarkedNodes
+            |> List.fold (fun accDdg id -> addEdge accDdg existingId id) ddg
+            |> fun ddg -> { ddg with MarkedNodes = [] }
+
+        let foldMarkedOnNew (ddg: DDGraphBuildInfo) newNodeId newNodeInfo =
+            let ddg' = addNode ddg newNodeId newNodeInfo
+            foldMarkedOnExisting ddg' newNodeId
 
         let merge (dstGraph: DDGraphBuildInfo) (srcGraph: DDGraphBuildInfo) =
             srcGraph.NodeIdInfoDict 
@@ -142,8 +149,8 @@ module DDGraphFuncs =
             let addFun = DDGBuildFuncs.addNodeAndEdge
             addNodeUsingFun treeNode label addFun state
 
-        let addPreroot treeNode label (state: BuildState) =
-            let addFun = DDGBuildFuncs.addPrerootAndEdge
+        let addMarkedNode treeNode label (state: BuildState) =
+            let addFun = DDGBuildFuncs.addMarkedNodeAndEdge
             addNodeUsingFun treeNode label addFun state
 
         let setGraphConnectionNode nodeId (state: BuildState) =
@@ -166,7 +173,7 @@ module DDGraphFuncs =
                 | :? ICSharpLiteralExpression as literalExpr ->
                     let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
                     let label = "literal(" + literalVal + ")"
-                    addPreroot literalExpr label state |> snd
+                    addMarkedNode literalExpr label state |> snd
                 // not implemented (but must precede IReferenceExpression case)
                 | :? IInvocationExpression -> state
                 | :? IReferenceExpression as refExpr ->
@@ -240,19 +247,24 @@ module DDGraphFuncs =
 
             match cfe with
             | LoopNode(info) when loopNodeAlreadyMet cfe state ->
-                addNodeAsConnectionNode cfe.SourceElement "loopNode" state 
+                DDGBuildFuncs.markConnectionNode state.GraphInfo
+                |> fun g' -> { state with GraphInfo = g' }
             | LoopNode(info) ->
                 let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
                 let enterNode = cfe.Entries.[info.EnterEdgeIndex]
                 addNodeAsConnectionNode cfe.SourceElement "loopNode" state
                 |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
                 |> processEntries [bodyExitNode]
-                |> fun st -> { st with LoopNodesStack = st.LoopNodesStack.Tail } 
+                |> fun st -> 
+                    let id = st.GraphInfo.ConnectionNode
+                    let g = DDGBuildFuncs.foldMarkedOnExisting st.GraphInfo id
+                    { st with 
+                        GraphInfo = g;
+                        LoopNodesStack = st.LoopNodesStack.Tail }
                 |> processEntries [enterNode] 
             | _ ->
                 let astNode = cfe.SourceElement
                 match astNode with
-                // todo: extract as active pattern
                 | SameNameAssignExpr(assignExpr) -> 
                     processAssignment assignExpr state
                 | :? ILocalVariableDeclaration as locVarDecl
@@ -272,7 +284,7 @@ module DDGraphFuncs =
         let resState = build cfgNode varName initState
         let root = RootNode
         let rootId = resState.Provider.NextId
-        let graphInfo' = DDGBuildFuncs.foldPreroots resState.GraphInfo rootId root
+        let graphInfo' = DDGBuildFuncs.foldMarkedOnNew resState.GraphInfo rootId root
         let ddGraph: DDGraph = { 
             Graph = graphInfo'.Graph
             NodeIdInfoDict = graphInfo'.NodeIdInfoDict

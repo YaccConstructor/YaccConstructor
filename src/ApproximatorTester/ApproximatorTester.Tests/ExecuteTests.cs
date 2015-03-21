@@ -33,5 +33,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("SimpleFor.cs");
         }
+
+        [Test]
+        public void TestForWithLocalVar()
+        {
+            DoTestFiles("ForWithLocalVar.cs");
+        }
     }
 }

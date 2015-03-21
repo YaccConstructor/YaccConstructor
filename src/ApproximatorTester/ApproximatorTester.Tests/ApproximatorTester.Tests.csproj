@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="test\data\AllTests\ForWithLocalVar.cs" />
+    <None Include="test\data\AllTests\ForWithLocalVar.cs.gold" />
     <None Include="test\data\AllTests\SimpleFor.cs" />
     <None Include="test\data\AllTests\FourVars.cs" />
     <None Include="test\data\AllTests\FourVars.cs.gold" />

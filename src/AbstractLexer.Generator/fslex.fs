@@ -309,7 +309,7 @@ let main() =
         let strs = ref ""
         for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
                 actions |> Seq.iteri (fun i (code,pos) -> 
-                    strs := !strs + "\n      (fun (gr : GraphTokenValue<_>) ->\n"  
+                    strs := !strs + "\n      (fun (gr : FSA<_>) ->\n"  
 
                     let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
                     for line in lines do

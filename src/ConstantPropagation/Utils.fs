@@ -60,24 +60,24 @@ module DotUtils =
             | [] -> ()
         bfs [cfg.EntryElement] (new HashSet<IControlFlowElement>())
 
-    // Converts passed cfg "cfg" to DOT's digraph with name "name" 
-    // and stores it in the file specified by "outPath"
+    /// Converts passed cfg "cfg" to DOT's digraph with name "name" 
+    /// and stores it in the file specified by "outPath"
     let cfgToDot (cfg: ICSharpControlFlowGraf) outPath name =
         use outStream = FileInfo(outPath).CreateText()
         outStream.WriteLine("digraph " + name + " {")
         toDot cfg outStream
         outStream.WriteLine("}")
 
-    // Extracts C# CFG from method declaration and converts it
-    // to DOT's digraph. The output file's name and the digraph's name
-    // are the same as passed method's name
+    /// Extracts C# CFG from method declaration and converts it
+    /// to DOT's digraph. The output file's name and the digraph's name
+    /// are the same as passed method's name
     let methodCFGToDot (methodDecl: IMethodDeclaration) (outDirPath: string) =
         let methodName = methodDecl.NameIdentifier.GetText()
         let outPath = Path.Combine(outDirPath, methodName + ".dot")
         let cfg = CSharpControlFlowBuilder.Build methodDecl
         cfgToDot cfg outPath methodName
 
-    // Applies "CFGUtils.methodCFGToDot" to all the methods in the file
+    /// Applies "CFGUtils.methodCFGToDot" to all the methods in the file
     let allMethodsCFGToDot (file: ICSharpFile) (outDirPath: string)=
         let processorAction (node: ITreeNode) = 
             match node with

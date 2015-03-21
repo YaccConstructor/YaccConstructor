@@ -39,5 +39,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("ForWithLocalVar.cs");
         }
+
+        [Test]
+        public void TestComplexConditionFor()
+        {
+            DoTestFiles("ComplexConditionFor.cs");
+        }
     }
 }

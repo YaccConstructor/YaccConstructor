@@ -248,21 +248,15 @@ module DDGraphFuncs =
             let processLoopNode (cfe: IControlFlowElement) (info: LoopNodeInfo) (state: BuildState) =
                 if loopNodeAlreadyMet cfe state
                 then
-                    DDGBuildFuncs.markConnectionNode state.GraphInfo
-                    |> fun g' -> { state with GraphInfo = g' }
+                    addNodeAsConnectionNode cfe.SourceElement "loopNode" state
                 else
                     let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
                     let enterNode = cfe.Entries.[info.EnterEdgeIndex]
                     addNodeAsConnectionNode cfe.SourceElement "loopNode" state
                     |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
                     |> processEntries [bodyExitNode] 
-                    |> fun st -> 
-                        let id = st.GraphInfo.ConnectionNode
-                        let g = DDGBuildFuncs.foldMarkedOnExisting st.GraphInfo id
-                        { st with 
-                            GraphInfo = g;
-                            LoopNodesStack = st.LoopNodesStack.Tail }
-                    |> processEntries [enterNode] 
+                    |> fun st -> { st with LoopNodesStack = st.LoopNodesStack.Tail }
+                    |> processEntries [enterNode]
 
             match cfe with
             | LoopNode(info) -> processLoopNode cfe info state

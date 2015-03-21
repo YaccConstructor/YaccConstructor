@@ -245,23 +245,27 @@ module DDGraphFuncs =
                     -> Some(assignExpr)
                 | _ -> None
 
+            let processLoopNode (cfe: IControlFlowElement) (info: LoopNodeInfo) (state: BuildState) =
+                if loopNodeAlreadyMet cfe state
+                then
+                    DDGBuildFuncs.markConnectionNode state.GraphInfo
+                    |> fun g' -> { state with GraphInfo = g' }
+                else
+                    let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
+                    let enterNode = cfe.Entries.[info.EnterEdgeIndex]
+                    addNodeAsConnectionNode cfe.SourceElement "loopNode" state
+                    |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
+                    |> processEntries [bodyExitNode] 
+                    |> fun st -> 
+                        let id = st.GraphInfo.ConnectionNode
+                        let g = DDGBuildFuncs.foldMarkedOnExisting st.GraphInfo id
+                        { st with 
+                            GraphInfo = g;
+                            LoopNodesStack = st.LoopNodesStack.Tail }
+                    |> processEntries [enterNode] 
+
             match cfe with
-            | LoopNode(info) when loopNodeAlreadyMet cfe state ->
-                DDGBuildFuncs.markConnectionNode state.GraphInfo
-                |> fun g' -> { state with GraphInfo = g' }
-            | LoopNode(info) ->
-                let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
-                let enterNode = cfe.Entries.[info.EnterEdgeIndex]
-                addNodeAsConnectionNode cfe.SourceElement "loopNode" state
-                |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
-                |> processEntries [bodyExitNode]
-                |> fun st -> 
-                    let id = st.GraphInfo.ConnectionNode
-                    let g = DDGBuildFuncs.foldMarkedOnExisting st.GraphInfo id
-                    { st with 
-                        GraphInfo = g;
-                        LoopNodesStack = st.LoopNodesStack.Tail }
-                |> processEntries [enterNode] 
+            | LoopNode(info) -> processLoopNode cfe info state
             | _ ->
                 let astNode = cfe.SourceElement
                 match astNode with

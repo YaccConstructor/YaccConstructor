@@ -108,4 +108,9 @@ module StateMonad =
 
     let runState (State f) init = f init
 
-let myDebugFolderPath = "E:\\Diploma\\Debug";
+let myDebugFolderPath = "E:\\Diploma\\Debug"
+
+let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFaildFunc =
+    match arg2 with
+    | :? 'a as arg2Typed-> f (mapper arg1) (mapper arg2Typed)
+    | _ -> typingFaildFunc ()

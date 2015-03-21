@@ -7,7 +7,7 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open JetBrains.ReSharper.Psi.CSharp.Tree
 
 open Utils
-open Utils.StateMonad
+open CSharpCFGInfo
 
 open System.Collections.Generic
 open System.IO
@@ -29,6 +29,15 @@ module DDGraphFuncs =
     // exception messages 
     let private multipleCfgNodesForAstNodeMsg = 
         "ast node maps to multiple cfg nodes where single mapping expected"
+
+    let private forNodeIncorrectMappingMsg =
+        "_for_ node mapping is incorrect, it must be mapped to exactly 3 cfg nodes"
+
+    let private bodyForNodeManyInputsMsg =
+        "body for node has more than one input"
+
+    let private emptyListPopMsg = "pop on empty list"
+    let private emptyListVisitMsg = "visit on empty list"
 
     type private DDGraphBuildInfo = {   
         Graph: AdjacencyGraph<int, Edge<int>>
@@ -119,9 +128,10 @@ module DDGraphFuncs =
 
     type private BuildState = {   
         GraphInfo: DDGraphBuildInfo
-        Provider: NodeIdProvider }
+        Provider: NodeIdProvider
+        LoopNodesStack: list<int> }
 
-    let rec buildForVar (varRef: IReferenceExpression) (astCfgMap: Dictionary<ITreeNode, HashSet<IControlFlowElement>>) = 
+    let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
             let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
             let nodeInfo = { Label = label; AstElem = treeNode }
@@ -145,12 +155,12 @@ module DDGraphFuncs =
             setGraphConnectionNode addedNode state'
 
         let getCorespondingCfgNode (treeNode: ITreeNode) =
-            let cfgNodes = astCfgMap.[treeNode]
+            let cfgNodes = cfgInfo.AstCfgMap.[treeNode.GetHashCode()]
             if cfgNodes.Count > 1
             then failwith multipleCfgNodesForAstNodeMsg
             else cfgNodes |> List.ofSeq |> List.head
 
-        let rec build (cfgNode: IControlFlowElement) (varName: string) (state: BuildState) =
+        let rec build (cfe: IControlFlowElement) (varName: string) (state: BuildState) =
             let processExpr (expr: ICSharpExpression) (state: BuildState) =
                 match expr with
                 | :? ICSharpLiteralExpression as literalExpr ->
@@ -163,7 +173,7 @@ module DDGraphFuncs =
                     let curVarName = refExpr.NameIdentifier.Name
                     let label = "refExpr(" + curVarName + ")"
                     let addedNode, state' = addNode refExpr label state
-                    let exprCfgNode = getCorespondingCfgNode refExpr
+                    let exprCfgNode = getCorespondingCfgNode refExpr |> fun w -> w.Value
                     let curConnectionNode = state'.GraphInfo.ConnectionNode
                     let state' = setGraphConnectionNode addedNode state'
                     let state' = build exprCfgNode curVarName state'
@@ -196,10 +206,9 @@ module DDGraphFuncs =
                 let state' = addNodeAsConnectionNode locVarDecl label state
                 processInitializer locVarDecl.Initializer state'
 
-            let processEntries (cfgNode: IControlFlowElement) (state: BuildState) =
+            let processEntries (entries: list<IControlFlowRib>) (state: BuildState) =
                 let curConnectionNode = state.GraphInfo.ConnectionNode
-                cfgNode.Entries
-                |> List.ofSeq
+                entries
                 |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
                 |> List.fold 
                     (
@@ -209,30 +218,52 @@ module DDGraphFuncs =
                     ) 
                     state
 
-            let astNode = cfgNode.SourceElement
-            match astNode with
-            | :? IAssignmentExpression as assignExpr 
-                when 
-                    match assignExpr.Dest with 
-                    | :? IReferenceExpression as dst 
-                        when dst.NameIdentifier.Name = varName -> true
-                    | _ -> false
-                -> 
-                    processAssignment assignExpr state
-            | :? ILocalVariableDeclaration as locVarDecl
-                when locVarDecl.NameIdentifier.Name = varName 
-                -> 
-                    processLocVarDecl locVarDecl state
+            let (|LoopNode|_|) (cfe: IControlFlowElement) =
+                match Map.tryFind cfe.Id cfgInfo.LoopNodes with
+                | Some(lnInfo) as i -> i
+                | _ -> None
+
+            let loopNodeAlreadyMet (cfe: IControlFlowElement) (state: BuildState) =
+                let stack = state.LoopNodesStack
+                not stack.IsEmpty && stack.Head = cfe.Id
+
+            match cfe with
+            | LoopNode(info) when loopNodeAlreadyMet cfe state ->
+                addNodeAsConnectionNode cfe.SourceElement "loopNode" state 
+            | LoopNode(info) ->
+                let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
+                let enterNode = cfe.Entries.[info.EnterEdgeIndex]
+                addNodeAsConnectionNode cfe.SourceElement "loopNode" state
+                |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
+                |> processEntries [bodyExitNode]
+                |> fun st -> { st with LoopNodesStack = st.LoopNodesStack.Tail } 
+                |> processEntries [enterNode] 
             | _ ->
-                processEntries cfgNode state    
+                let astNode = cfe.SourceElement
+                match astNode with
+                // todo: extract as active pattern
+                | :? IAssignmentExpression as assignExpr 
+                    when 
+                        match assignExpr.Dest with 
+                        | :? IReferenceExpression as dst 
+                            when dst.NameIdentifier.Name = varName -> true
+                        | _ -> false
+                    -> 
+                        processAssignment assignExpr state
+                | :? ILocalVariableDeclaration as locVarDecl
+                    when locVarDecl.NameIdentifier.Name = varName 
+                    -> 
+                        processLocVarDecl locVarDecl state 
+                | _ ->
+                    processEntries (List.ofSeq cfe.Entries) state
 
         let provider = NodeIdProviderFuncs.create
         let finalNodeId, provider = NodeIdProviderFuncs.getId provider varRef
         let varName = varRef.NameIdentifier.Name
         let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
         let graphInfo = DDGBuildFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
-        let cfgNode = getCorespondingCfgNode varRef
-        let initState = { GraphInfo = graphInfo; Provider = provider }
+        let cfgNode = getCorespondingCfgNode varRef |> fun w -> w.Value
+        let initState = { GraphInfo = graphInfo; Provider = provider; LoopNodesStack = [] }
         let resState = build cfgNode varName initState
         let root = RootNode
         let rootId = resState.Provider.NextId

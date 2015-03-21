@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="test\data\AllTests\SimpleFor.cs" />
     <None Include="test\data\AllTests\FourVars.cs" />
     <None Include="test\data\AllTests\FourVars.cs.gold" />
     <None Include="test\data\AllTests\FailTest.cs.gold" />
@@ -70,6 +71,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="test\data\AllTests\SimpleFor.cs.gold" />
     <None Include="test\data\AllTests\SimpleQuery.cs" />
     <None Include="test\data\AllTests\SimpleQuery.cs.gold" />
   </ItemGroup>

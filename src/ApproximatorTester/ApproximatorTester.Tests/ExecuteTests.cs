@@ -27,5 +27,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("FourVars.cs");
         }
+
+        [Test]
+        public void TestSimpleFor()
+        {
+            DoTestFiles("SimpleFor.cs");
+        }
     }
 }

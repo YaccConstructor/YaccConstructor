@@ -56,13 +56,13 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =
                     then 
                         if (v.Source <> vertex || (isStartV v.Source))
                         then 
-                            new EdgeFSA<_>(v.Source, v.Target, fst v.Tag (*match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!" *)) |> edgesToks.Add |> ignore
+                            new EdgeFSA<_>(v.Source, v.Target, fst v.Tag) |> edgesToks.Add |> ignore
                             if v.Target = vertex then targetAct.Add vertex |> ignore
                             queueV.Enqueue v.Target
                     else 
                         if v.Source = vertex 
                         then 
-                            new EdgeFSA<_>(v.Source, v.Target, fst v.Tag (*match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!" *)) |> edgesToks.Add |> ignore
+                            new EdgeFSA<_>(v.Source, v.Target, fst v.Tag) |> edgesToks.Add |> ignore
                             if v.Target = graphFst.FinalState.[0]
                             then targetAct.Add v.Target |> ignore
                             else queueV.Enqueue v.Target
@@ -90,7 +90,7 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =
             then
                 visited.Add(topV) |> ignore
                 for v in graphFst.OutEdges(topV) do
-                    new EdgeFSA<_>(v.Target, v.Source, fst v.Tag (*match (fst v.Tag) with |Smbl y -> y | _ -> failwith "Unexpected!!!"*)) |> edgesToks.Add |> ignore
+                    new EdgeFSA<_>(v.Target, v.Source, fst v.Tag) |> edgesToks.Add |> ignore
                     if actionVInvBool.[v.Target]
                     then if (isEps v.Target) then queueV.Enqueue(v.Target)
                     else queueV.Enqueue(v.Target)  
@@ -101,11 +101,6 @@ let Interpret (inputFstLexer: FST<_,_>) (actions: array<FSA<_> -> _>) eofToken =
 
     for act in actionVInv do
         bfsInv act FstInverse |> tokensInv.Add |> ignore     //if from vertex exist and act-edge and eps-edge, then continue add edges.
-
-//    let isEqualTag (x:Symb<_>) (y:Symb<_>) =
-//        match (x, y) with
-//        | (Smbl m, Smbl n) -> m = n
-//        | _ -> false
 
     let EqualEdges (edg1:EdgeFSA<_>) (edg2:EdgeFSA<_>) = 
        (edg1.Source = edg2.Source) && (edg1.Target = edg2.Target) && (edg1.Tag = edg2.Tag)

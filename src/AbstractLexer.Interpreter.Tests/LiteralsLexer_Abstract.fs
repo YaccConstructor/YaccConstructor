@@ -58,7 +58,7 @@ let fstLexer () =
 let actions () =
    [|
 
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                                    LITERAL(gr) |> Some );
 
    |]

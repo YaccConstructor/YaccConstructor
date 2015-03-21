@@ -27,11 +27,11 @@ let fstLexer () =
 
 let actions () =
     [|
-        (fun (gr : GraphTokenValue<_>) ->
+        (fun (gr : FSA<_>) ->
                         PLUS(gr) |> Some );
-        (fun (gr : GraphTokenValue<_>) ->
+        (fun (gr : FSA<_>) ->
                         POW(gr) |> Some );
-        (fun (gr : GraphTokenValue<_>) ->
+        (fun (gr : FSA<_>) ->
                         MULT(gr) |> Some );
 
     |] 

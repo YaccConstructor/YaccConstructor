@@ -41,7 +41,7 @@ let edg f t l = new ParserEdge<_>(f,t,lbl l)
 let loadLexerInputGraph gFile =
     loadDotToQG baseInputGraphsPath gFile
 
-let eof = Calc.Parser.RNGLR_EOF(new GraphTokenValue<_>()) 
+let eof = Calc.Parser.RNGLR_EOF(new FSA<_>()) 
 let errorTest inputFilePath shouldContainsSuccess errorsCount =
     printfn "==============================================================="
     let lexerInputGraph = loadLexerInputGraph inputFilePath    
@@ -62,6 +62,7 @@ let errorTest inputFilePath shouldContainsSuccess errorsCount =
     | ParseResult.Error (_, tok, message, debug, _) ->
         printfn "Errors in file %s on Tokens %A: %s" inputFilePath tok message
         debug.drawGSSDot "out.dot"
+
         if shouldContainsSuccess
         then Assert.Fail(sprintf "Test %s should produce sucess parsing result but its fully failed." inputFilePath)
         else Assert.AreEqual(errorsCount, tok.Length, (sprintf "Errors count mismatch in test %s." inputFilePath))
@@ -121,9 +122,9 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (Calc.Parser.NUMBER  (new GraphTokenValue<_>()))
-             edg 1 2 (Calc.Parser.PLUS  (new GraphTokenValue<_>()))
-             edg 2 3 (Calc.Parser.NUMBER  (new GraphTokenValue<_>()))
+            [edg 0 1 (Calc.Parser.NUMBER  (new FSA<_>()))
+             edg 1 2 (Calc.Parser.PLUS  (new FSA<_>()))
+             edg 2 3 (Calc.Parser.NUMBER  (new FSA<_>()))
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  Calc.Parser.buildAstAbstract qGraph
@@ -143,13 +144,13 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new ParserInputGraph<_>(0, 6)
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (Calc.Parser.NUMBER  (new GraphTokenValue<_>()))
-             edg 1 2 (Calc.Parser.PLUS (new GraphTokenValue<_>()))
-             edg 2 3 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 4 (Calc.Parser.MULT (new GraphTokenValue<_>()))
-             edg 4 5 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 6 (Calc.Parser.DIV (new GraphTokenValue<_>()))
-             edg 6 5 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
+            [edg 0 1 (Calc.Parser.NUMBER  (new FSA<_>()))
+             edg 1 2 (Calc.Parser.PLUS (new FSA<_>()))
+             edg 2 3 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 4 (Calc.Parser.MULT (new FSA<_>()))
+             edg 4 5 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 6 (Calc.Parser.DIV (new FSA<_>()))
+             edg 6 5 (Calc.Parser.NUMBER (new FSA<_>()))
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  Calc.Parser.buildAstAbstract qGraph
@@ -169,11 +170,11 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new ParserInputGraph<_>(0, 6)
         qGraph.AddVerticesAndEdgeRange
             [
-             edg 0 3 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 4 (Calc.Parser.MULT (new GraphTokenValue<_>()))
-             edg 4 5 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 6 (Calc.Parser.DIV (new GraphTokenValue<_>()))
-             edg 6 5 (Calc.Parser.PLUS (new GraphTokenValue<_>()))
+             edg 0 3 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 4 (Calc.Parser.MULT (new FSA<_>()))
+             edg 4 5 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 6 (Calc.Parser.DIV (new FSA<_>()))
+             edg 6 5 (Calc.Parser.PLUS (new FSA<_>()))
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  Calc.Parser.buildAstAbstract qGraph
@@ -265,15 +266,15 @@ type ``RNGLR abstract parser tests`` () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVertexRange[0;1;2;3] |> ignore
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (Calc.Parser.NUMBER  (new GraphTokenValue<_>()))
-             edg 1 2 (Calc.Parser.PLUS (new GraphTokenValue<_>()))
-             edg 2 3 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 4 (Calc.Parser.MULT (new GraphTokenValue<_>()))
-             edg 4 5 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 3 6 (Calc.Parser.MINUS (new GraphTokenValue<_>()))
-             edg 6 5 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
-             edg 5 7 (Calc.Parser.MULT (new GraphTokenValue<_>()))
-             edg 7 8 (Calc.Parser.NUMBER (new GraphTokenValue<_>()))
+            [edg 0 1 (Calc.Parser.NUMBER  (new FSA<_>()))
+             edg 1 2 (Calc.Parser.PLUS (new FSA<_>()))
+             edg 2 3 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 4 (Calc.Parser.MULT (new FSA<_>()))
+             edg 4 5 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 3 6 (Calc.Parser.MINUS (new FSA<_>()))
+             edg 6 5 (Calc.Parser.NUMBER (new FSA<_>()))
+             edg 5 7 (Calc.Parser.MULT (new FSA<_>()))
+             edg 7 8 (Calc.Parser.NUMBER (new FSA<_>()))
              ] |> ignore
 
         let r = (new Parser<_>()).Parse  Calc.Parser.buildAstAbstract qGraph

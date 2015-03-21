@@ -2992,41 +2992,41 @@ let fstLexer () =
 let actions () =
    [|
 
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                                  DEC_NUMBER(gr)|> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                                  None );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_comma_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_equal_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_more_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_less_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_colon_(gr) |> Some);
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_left_bracket_(gr) |> Some);
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_right_bracket_(gr) |> Some);
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                             L_plus_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                             L_minus_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                             L_star_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                              L_select(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                            L_from(gr)|> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                             L_where(gr)|> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                           L_and_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                          L_or_(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                           IDENT(gr) |> Some );
 
    |]

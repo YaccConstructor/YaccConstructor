@@ -19,7 +19,7 @@ open YC.FSA.GraphBasedFsa
 open YC.FST.GraphBasedFst
 
 let baseInputGraphsPath = "../../../Tests/AbstractPerformance/TSQL"
-let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new GraphTokenValue<_>())
+let eofToken = Yard.Examples.MSParser.RNGLR_EOF (new FSA<_>())
 
 let path baseInputGraphsPath name = System.IO.Path.Combine(baseInputGraphsPath,name)
 

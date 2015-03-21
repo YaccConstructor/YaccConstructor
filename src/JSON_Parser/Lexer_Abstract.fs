@@ -854,11 +854,11 @@ let fstLexer () =
 let actions () =
    [|
 
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                                None );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                           NUMBER(gr) |> Some );
-      (fun (gr : GraphTokenValue<_>) ->
+      (fun (gr : FSA<_>) ->
                            STRING1(gr) |> Some );
 
    |]

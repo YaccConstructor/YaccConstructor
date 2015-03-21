@@ -39,7 +39,7 @@ let tokenize (lexerInputGraph:Appr<_>) =
     let transform x = (x, match x with |Smbl(y, _) -> Smbl y |_ -> Eps)
     let smblEOF = Smbl(char 65535,  Unchecked.defaultof<Position<_>>)
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
-    let eof = RNGLR_EOF(new GraphTokenValue<_>())    
+    let eof = RNGLR_EOF(new FSA<_>())    
     YC.TSQLLexer.tokenize eof graphFst
 
 let parser = new Yard.Generators.RNGLR.AbstractParser.Parser<_>()
@@ -50,8 +50,8 @@ let parse = fun parserInputGraph -> parser.Parse buildAstAbstract parserInputGra
 
 let args = 
     {
-        tokenToRange = fun x -> new GraphTokenValue<_>(),new GraphTokenValue<_>()
-        zeroPosition = new GraphTokenValue<_>()
+        tokenToRange = fun x -> new FSA<_>(),new FSA<_>()
+        zeroPosition = new FSA<_>()
         clearAST = false
         filterEpsilons = true
     }

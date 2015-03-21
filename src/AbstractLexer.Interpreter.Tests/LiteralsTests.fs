@@ -23,7 +23,7 @@ let literalsTokenizationTest path eCount vCount pathPrint =
     match res with
     | Success res -> 
         checkGraph res eCount vCount  
-        ToDot res pathPrint printBref 
+        //ToDot res pathPrint printBref 
     | Error e -> Assert.Fail(sprintf "Tokenization problem in test %s: %A" path e)
 
 [<TestFixture>]

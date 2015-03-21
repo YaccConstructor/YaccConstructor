@@ -2,16 +2,17 @@
 
 open AbstractParser.Tokens
 open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.FsaApproximation
+open YC.FSA.GraphBasedFsa
 open NUnit.Framework
 open Microsoft.FSharp.Collections 
 open QuickGraph 
 open AbstractAnalysis.Common
 open Graphviz4Net.Dot.AntlrParser
 open Graphviz4Net.Dot
-open YC.FSA.FsaApproximation
 open System.IO
 
-let eof = RNGLR_EOF(new GraphTokenValue<_>())   
+let eof = RNGLR_EOF(new FSA<_>())   
 
 let printTok =
      fun x -> string x  |> (fun s -> s.Split '+' |> Array.rev |> fun a -> a.[0])
@@ -23,13 +24,12 @@ let checkGraph (graph:AdjacencyGraph<_,_>) countE countV  =
 let printSmbString (x:char*Position<_>) = 
         (fst x).ToString() + "_br: " + (snd x).back_ref + "(" + (snd x).start_offset.ToString() + "," + (snd x).end_offset.ToString() + ")"
 
-let printBref =       
-    let printGr (gr:GraphTokenValue<_>) = 
+let printBref printSmbString =       
+    let printGr (gr:FSA<_>) = 
         let strs = ref ""
         for edge in gr.Edges do
             strs := !strs + "[" + edge.Source.ToString() + ", " + 
-                                  "{" + edge.Label.ToString() + "_br: " + edge.BackRef + "(" + edge.StartPos.ToString() + ", " + edge.EndPos.ToString() + ")"+ "}" +
-                                  edge.Target.ToString() + "] ;"
+                                  "{" + (match edge.Tag with |Smbl x -> printSmbString x |_ -> "") + "}" + edge.Target.ToString() + "] ;"
         !strs        
              
     fun x ->
@@ -88,4 +88,26 @@ let countEdges (parserInputGraph : ParserInputGraph<_>) =
                         | LITERAL(gr) -> gr.EdgeCount
                         | RNGLR_EOF _ -> 0) 
     |> Array.ofSeq 
+
+let ToDot (parserInputGraph : ParserInputGraph<_>) filePrintPath toStr =
+    let rank s l =
+        "{ rank=" + s + "; " + (l |> string) + " }\n"
+    let s = 
+        "digraph G {\n" 
+        + "rankdir = LR\n"
+        + "node [shape = circle]\n"
+        + sprintf "%i[style=filled, fillcolor=green]\n" parserInputGraph.InitState 
+        + sprintf "%i[shape = doublecircle, style=filled, fillcolor=red]\n" parserInputGraph.FinalState
+        + rank "same" parserInputGraph.InitState
+        + rank "min" parserInputGraph.InitState  
+        + rank "same" parserInputGraph.FinalState 
+        + rank "max" parserInputGraph.FinalState
+    
+    let strs =
+            parserInputGraph.Edges
+            |> Seq.map (fun edge ->
+                sprintf "%i -> %i [label=\"%s\"]; \n" edge.Source edge.Target  (toStr edge.Tag)) 
+                                      
+    System.IO.File.WriteAllText(filePrintPath, s + (String.concat "" strs) + "\n}")
+    ()
 

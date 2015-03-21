@@ -19,7 +19,9 @@ let TokenizationTest (graphAppr:Appr<_>) eCount vCount  =
     let graphFst = FST<_,_>.FSAtoFST(graphFsa, transform, smblEOF)
     let res = YC.FST.AbstractLexing.CalcLexer.tokenize eof graphFst       
     match res with
-    | Success res -> checkGraph res eCount vCount   
+    | Success res -> 
+                //ToDot res @"../../../src/AbstractLexer.Interpreter.Tests/Tests/TestInterpretParser.dot" (printBref printSmbString)
+                checkGraph res eCount vCount   
     | Error e -> Assert.Fail(sprintf "Tokenization problem %A:" e)
  
 [<TestFixture>]
@@ -55,6 +57,6 @@ type ``Lexer FST Tests`` () =
 //[<EntryPoint>]
 //let f x =
 //      let t = new ``Lexer FST Tests`` () 
-//      let a = t.``Lexer FST Tests. Check work of interpreter.``()
+//      let a = t.``Lexer FST Tests. Check composition with lexer.``()
 //      printfn "%A" a      
 //      1

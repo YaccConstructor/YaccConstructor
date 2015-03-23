@@ -22,8 +22,7 @@ type DDNode =
 
 type DDGraph = {
     Graph: AdjacencyGraph<int, Edge<int>>
-    NodeIdInfoDict: Dictionary<int, DDNode>
-    RootId: int }
+    NodeIdInfoDict: Dictionary<int, DDNode> }
 
 module DDGraphFuncs =
     // exception messages 
@@ -35,6 +34,9 @@ module DDGraphFuncs =
 
     let private bodyForNodeManyInputsMsg =
         "body for node has more than one input"
+
+    let private unexpectedInitializerTypeMsg =
+        "unexpected initializer type in local variable declaration"
 
     let private emptyListPopMsg = "pop on empty list"
     let private emptyListVisitMsg = "visit on empty list"
@@ -85,13 +87,20 @@ module DDGraphFuncs =
                 RootId = None }
             addNode ddGraph finalNodeId finalNodeInfo
 
-        let addNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNodeId srcNodeInfo =
+        let private addNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNodeId srcNodeInfo =
             let ddg = addNode ddGraph srcNodeId srcNodeInfo
             addEdge ddg srcNodeId ddg.ConnectionNode
+
+        let addConnectionNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNodeId srcNodeInfo =
+            let ddg' = addNodeAndEdge ddGraph srcNodeId srcNodeInfo
+            { ddg' with ConnectionNode = srcNodeId }
 
         let addMarkedNodeAndEdge (ddg: DDGraphBuildInfo) srcNodeId srcNodeInfo =
             let ddg' = addNodeAndEdge ddg srcNodeId srcNodeInfo
             { ddg' with MarkedNodes = srcNodeId :: ddg'.MarkedNodes }
+
+        let addEdgeFromExistingNode (ddg: DDGraphBuildInfo) existingNodeId =
+            addEdge ddg existingNodeId ddg.ConnectionNode
 
         let markConnectionNode (ddg: DDGraphBuildInfo) =
             { ddg with MarkedNodes = ddg.ConnectionNode :: ddg.MarkedNodes }
@@ -136,31 +145,23 @@ module DDGraphFuncs =
     type private BuildState = {   
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider
-        LoopNodesStack: list<int>
-        Visited: Set<ControlFlowElemWrapper> }
+        VisitedForks: Map<int, Set<string>>
+        RefExprsToVisit: Set<int> } 
 
     let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
             let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
             let nodeInfo = { Label = label; AstElem = treeNode }
             let graph' = addFunc state.GraphInfo nodeId (InnerNode(nodeInfo))
-            nodeId, {state with GraphInfo = graph'; Provider = provider'}
+            { state with GraphInfo = graph'; Provider = provider' }
 
-        let addNode treeNode label (state: BuildState) =
-            let addFun = DDGBuildFuncs.addNodeAndEdge
-            addNodeUsingFun treeNode label addFun state
-
-        let addMarkedNode treeNode label (state: BuildState) =
-            let addFun = DDGBuildFuncs.addMarkedNodeAndEdge
+        let addNodeAsConnectionNode treeNode label (state: BuildState) =
+            let addFun = DDGBuildFuncs.addConnectionNodeAndEdge
             addNodeUsingFun treeNode label addFun state
 
         let setGraphConnectionNode nodeId (state: BuildState) =
             let graph' = { state.GraphInfo with ConnectionNode = nodeId }
             { state with GraphInfo = graph' }
-
-        let addNodeAsConnectionNode treeNode label (state: BuildState) =
-            let addedNode, state' = addNode treeNode label state
-            setGraphConnectionNode addedNode state'
 
         let getCorespondingCfgNode (treeNode: ITreeNode) =
             let cfgNodes = cfgInfo.AstCfgMap.[treeNode.GetHashCode()]
@@ -168,129 +169,140 @@ module DDGraphFuncs =
             then failwith multipleCfgNodesForAstNodeMsg
             else cfgNodes |> List.ofSeq |> List.head
 
-        let rec build (cfe: IControlFlowElement) (varName: string) (state: BuildState) =
-            let processExpr (expr: ICSharpExpression) (state: BuildState) =
-                match expr with
-                | :? ICSharpLiteralExpression as literalExpr ->
-                    let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
-                    let label = "literal(" + literalVal + ")"
-                    addMarkedNode literalExpr label state |> snd
-                // not implemented (but must precede IReferenceExpression case)
-                | :? IInvocationExpression -> state
-                | :? IReferenceExpression as refExpr ->
-                    let curConnectionNode = state.GraphInfo.ConnectionNode
-                    let curVarName = refExpr.NameIdentifier.Name
-                    let label = "refExpr(" + curVarName + ")"
-                    let exprCfgNode = getCorespondingCfgNode refExpr |> fun w -> w.Value
-                    addNodeAsConnectionNode refExpr label state
-                    |> build exprCfgNode curVarName
-                    |> setGraphConnectionNode curConnectionNode
-                | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
-
-            let processAssignment (assignExpr: IAssignmentExpression) (state: BuildState) = 
-                let assingnType, operands = 
-                    if assignExpr.AssignmentType = AssignmentType.EQ
-                    then 
-                        let ops = assignExpr.OperatorOperands |> List.ofSeq |> List.tail
-                        "assignment", ops
-                    else 
-                        let ops = assignExpr.OperatorOperands |> List.ofSeq
-                        "plusAssignment", ops
-                let label = assingnType + "(" + varName + ")"
-                let state' = addNodeAsConnectionNode assignExpr label state
-                operands |> List.fold (fun st op -> processExpr op st) state'
-
-            let processInitializer (initializer: ITreeNode) (state: BuildState) = 
-                match initializer with
-                | :? ICSharpExpression as expr ->
-                    processExpr expr state
-                | :? IExpressionInitializer as exprInitializer ->
-                    processExpr exprInitializer.Value state
-                | _ -> failwith ("not implemented case in processInitializer: " + initializer.NodeType.ToString())
-
-            let processLocVarDecl (locVarDecl: ILocalVariableDeclaration) (state: BuildState) =
-                let label = "varDecl(" + varName + ")"
-                let state' = addNodeAsConnectionNode locVarDecl label state
-                processInitializer locVarDecl.Initializer state'
-
-            let processEntries (entries: list<IControlFlowRib>) (state: BuildState) =
-                let curConnectionNode = state.GraphInfo.ConnectionNode
-                entries
-                |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
-                |> List.fold 
-                    (
-                        fun accState src -> 
-                            build src varName accState 
-                            |> setGraphConnectionNode curConnectionNode
-                    ) 
-                    state
+        let rec build (cfe: IControlFlowElement) (varsSet: Set<string>) (state: BuildState) =
+            let (|AppropNameAssignExpr|_|) (node: ITreeNode) =
+                match node with
+                | :? IAssignmentExpression as assignExpr 
+                    when 
+                        match assignExpr.Dest with 
+                        | :? IReferenceExpression as dst 
+                            when Set.contains dst.NameIdentifier.Name varsSet 
+                            -> true
+                        | _ -> false
+                    -> Some(assignExpr)
+                | _ -> None
 
             let (|LoopNode|_|) (cfe: IControlFlowElement) =
                 match Map.tryFind cfe.Id cfgInfo.LoopNodes with
                 | Some(lnInfo) as i -> i
                 | _ -> None
 
-            let loopNodeAlreadyMet (cfe: IControlFlowElement) (state: BuildState) =
-                let stack = state.LoopNodesStack
-                not stack.IsEmpty && stack.Head = cfe.Id
+            let processEntries (entries: list<IControlFlowRib>) (varsSet: Set<string>) (state: BuildState) =
+                let curConnectionNode = state.GraphInfo.ConnectionNode
+                entries
+                |> List.choose (fun rib -> if rib.Source <> null then Some(rib.Source) else None) 
+                |> List.fold 
+                    (
+                        fun accState src -> 
+                            build src varsSet accState 
+                            |> setGraphConnectionNode curConnectionNode
+                    ) 
+                    state 
 
-            let (|SameNameAssignExpr|_|) (node: ITreeNode) =
-                match node with
-                | :? IAssignmentExpression as assignExpr 
-                    when 
-                        match assignExpr.Dest with 
-                        | :? IReferenceExpression as dst 
-                            when dst.NameIdentifier.Name = varName -> true
-                        | _ -> false
-                    -> Some(assignExpr)
-                | _ -> None
-
-            let processLoopNode (cfe: IControlFlowElement) (info: LoopNodeInfo) (state: BuildState) =
-                if loopNodeAlreadyMet cfe state
-                then
-                    addNodeAsConnectionNode cfe.SourceElement "loopNode" state
-                else
-                    let bodyExitNode = cfe.Entries.[info.BodyExitEdgeIndex]
-                    let enterNode = cfe.Entries.[info.EnterEdgeIndex]
-                    addNodeAsConnectionNode cfe.SourceElement "loopNode" state
-                    |> fun st -> { st with LoopNodesStack = cfe.Id :: st.LoopNodesStack }
-                    |> processEntries [bodyExitNode] 
-                    |> fun st -> { st with LoopNodesStack = st.LoopNodesStack.Tail }
-                    |> processEntries [enterNode]
-
-            match cfe with
-            | LoopNode(info) -> processLoopNode cfe info state
-            | _ ->
-                let astNode = cfe.SourceElement
-                match astNode with
-                | SameNameAssignExpr(assignExpr) -> 
-                    processAssignment assignExpr state
-                | :? ILocalVariableDeclaration as locVarDecl
-                    when locVarDecl.NameIdentifier.Name = varName 
-                    -> 
-                    processLocVarDecl locVarDecl state 
+            let entries, updState, updVarsSet =
+                match cfe with
+                | LoopNode(info) ->
+                    let state' = addNodeAsConnectionNode cfe.SourceElement "loopNode" state
+                    let forkVarsSet = 
+                        match Map.tryFind cfe.Id state.VisitedForks with
+                        | None -> Set.empty
+                        | Some(vs) -> vs
+                    let newVarsSet = Set.difference varsSet forkVarsSet
+                    if Set.isEmpty newVarsSet
+                    then
+                        let enterEdge = cfe.Entries.[info.EnterEdgeIndex]
+                        [enterEdge], state', varsSet
+                    else 
+                        let visitedForks' = Map.add cfe.Id varsSet state.VisitedForks
+                        let bodyExitEdge = cfe.Entries.[info.BodyExitEdgeIndex]
+                        [bodyExitEdge], { state' with VisitedForks = visitedForks' }, varsSet
                 | _ ->
-                    processEntries (List.ofSeq cfe.Entries) state
+                    let astNode = cfe.SourceElement
+                    match astNode with
+                    | AppropNameAssignExpr(assignExpr) -> 
+                        let assingnType, operands = 
+                            if assignExpr.AssignmentType = AssignmentType.EQ
+                            then 
+                                let ops = assignExpr.OperatorOperands |> List.ofSeq |> List.tail
+                                "assignment", ops
+                            else 
+                                let ops = assignExpr.OperatorOperands |> List.ofSeq
+                                "plusAssignment", ops
+                        let state' = 
+                            let varName = (assignExpr.Dest :?> IReferenceExpression).NameIdentifier.Name
+                            let label = assingnType + "(" + varName + ")"
+                            addNodeAsConnectionNode assignExpr label state
+                        let varsSet' =
+                            operands
+                            |> List.choose 
+                                (
+                                    function 
+                                    | :? IReferenceExpression as re -> 
+                                        Some(re.NameIdentifier.Name) 
+                                    | _ -> None
+                                )
+                            |> List.fold (fun accSet var -> Set.add var accSet) varsSet
+                        let refExprsToVisit = 
+                            operands 
+                            |> List.map (fun op -> (getCorespondingCfgNode op).Value.Id)
+                            |> List.fold (fun accSet id -> Set.add id accSet ) state'.RefExprsToVisit
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, { state' with RefExprsToVisit = refExprsToVisit }, varsSet'
+                    | :? ILocalVariableDeclaration as locVarDecl
+                        when Set.contains locVarDecl.NameIdentifier.Name varsSet
+                        -> 
+                        let state' = 
+                            let label = "varDecl(" + locVarDecl.NameIdentifier.Name + ")"
+                            addNodeAsConnectionNode locVarDecl label state
+                        let refExprsToVisit' = 
+                            match locVarDecl.Initializer with
+                            | :? IExpressionInitializer as re ->
+                                let initializerId = (getCorespondingCfgNode re.Value).Value.Id
+                                Set.add initializerId state'.RefExprsToVisit
+                            | _ -> failwith unexpectedInitializerTypeMsg
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, { state' with RefExprsToVisit = refExprsToVisit' }, varsSet
+                    | :? ICSharpLiteralExpression as literalExpr 
+                        when Set.contains cfe.Id state.RefExprsToVisit 
+                        ->
+                        let label = 
+                            let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
+                            "literal(" + literalVal + ")"
+                        let state' = addNodeAsConnectionNode literalExpr label state
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, state', varsSet
+                    // not implemented (but must precede IReferenceExpression case)
+                    | :? IInvocationExpression -> 
+                        cfe.Entries |> List.ofSeq, state, varsSet
+                    | :? IReferenceExpression as refExpr 
+                        when Set.contains cfe.Id state.RefExprsToVisit 
+                        ->
+                        let label = 
+                            let curVarName = refExpr.NameIdentifier.Name
+                            "refExpr(" + curVarName + ")"
+                        let state' = addNodeAsConnectionNode refExpr label state
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, state', varsSet
+                    | _ -> cfe.Entries |> List.ofSeq, state, varsSet
+
+            processEntries entries updVarsSet updState
 
         let provider = NodeIdProviderFuncs.create
         let finalNodeId, provider = NodeIdProviderFuncs.getId provider varRef
         let varName = varRef.NameIdentifier.Name
         let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
         let graphInfo = DDGBuildFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
+        let varsSet = Set.ofList [varName]
         let cfgNode = getCorespondingCfgNode varRef |> fun w -> w.Value
         let initState = { 
             GraphInfo = graphInfo; 
-            Provider = provider; 
-            LoopNodesStack = []; 
-            Visited = Set.empty }
-        let resState = build cfgNode varName initState
-        let root = RootNode
-        let rootId = resState.Provider.NextId
-        let graphInfo' = DDGBuildFuncs.foldMarkedOnNew resState.GraphInfo rootId root
+            Provider = provider;
+            VisitedForks = Map.empty;
+            RefExprsToVisit = Set.empty }
+        let resState = build cfgNode varsSet initState
         let ddGraph: DDGraph = { 
-            Graph = graphInfo'.Graph
-            NodeIdInfoDict = graphInfo'.NodeIdInfoDict
-            RootId = rootId }
+            Graph = resState.GraphInfo.Graph
+            NodeIdInfoDict = resState.GraphInfo.NodeIdInfoDict }
         ddGraph
 
     let toDot (ddGraph: DDGraph) name path =

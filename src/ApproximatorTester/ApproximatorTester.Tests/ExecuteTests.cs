@@ -45,5 +45,17 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("ComplexConditionFor.cs");
         }
+
+        [Test]
+        public void TestNestedFor()
+        {
+            DoTestFiles("NestedFor.cs");
+        }
+
+        [Test]
+        public void TestForWithIf()
+        {
+            DoTestFiles("ForWithIf.cs");
+        }
     }
 }

@@ -51,8 +51,12 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="test\data\AllTests\ForWithIf.cs" />
+    <None Include="test\data\AllTests\ForWithIf.cs.gold" />
+    <None Include="test\data\AllTests\NestedFor.cs" />
     <None Include="test\data\AllTests\ComplexConditionFor.cs" />
     <None Include="test\data\AllTests\ComplexConditionFor.cs.gold" />
+    <None Include="test\data\AllTests\NestedFor.cs.gold" />
     <None Include="test\data\AllTests\ForWithLocalVar.cs" />
     <None Include="test\data\AllTests\ForWithLocalVar.cs.gold" />
     <None Include="test\data\AllTests\SimpleFor.cs" />

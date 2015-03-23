@@ -436,7 +436,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
     [<Test>]
-    member this.``22_StrangeBrackets`` () =
+    member this.``23_StrangeBrackets`` () =
         let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
@@ -446,26 +446,42 @@ type ``RNGLR abstract parser tests`` () =
             edg 2 3 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 0 9 3
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 29 29 3 12 3
 
     [<Test>]
-    member this.``22_StrangeBrackets.BackEdge`` () =
-        let qGraph = new ParserInputGraph<_>(0, 7)
+    member this.``24_StrangeBrackets.Circle`` () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
-            //edg 1 1 (RNGLR.StrangeBrackets.LBR 2)
-           [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
-            edg 1 2 (RNGLR.StrangeBrackets.LBR 3)
-            edg 2 3 (RNGLR.StrangeBrackets.RBR 1)
-            edg 3 4 (RNGLR.StrangeBrackets.RBR 3)
-            edg 4 5 (RNGLR.StrangeBrackets.LBR 1)
-            edg 5 6 (RNGLR.StrangeBrackets.RBR 3)
-            //edg 2 2 (RNGLR.StrangeBrackets.RBR 4)
-            //edg 2 4 (RNGLR.StrangeBrackets.LBR 5)
-            //edg 4 0 (RNGLR.StrangeBrackets.RBR 6)
-            edg 6 7 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 20 20 0 9 3
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
+    member this.``25_StrangeBrackets.BiggerCircle`` () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 0)
+            edg 3 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+
+    [<Test>]
+    member this.``26_StrangeBrackets.Inf`` () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 0 (RNGLR.StrangeBrackets.LBR 0)
+            edg 0 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
 [<EntryPoint>]
 let f x =
@@ -495,7 +511,11 @@ let f x =
 //    t.``18_Stars2.Loop2.`` () 
 //    t.``19_FirstEps`` ()
 //    t.``20_CroppedBrackets`` ()
-    //t.``21_Brackets`` ()
-    t.``22_StrangeBrackets.BackEdge`` ()
+//    t.``21_Brackets`` ()
+//    t.``22_Brackets.BackEdge`` ()
+//    t.``23_StrangeBrackets`` ()
+//    t.``24_StrangeBrackets.Circle``()
+//    t.``25_StrangeBrackets.BiggerCircle`` ()
+    t.``26_StrangeBrackets.Inf``()
     0
     

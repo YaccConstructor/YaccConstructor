@@ -136,7 +136,8 @@ module DDGraphFuncs =
     type private BuildState = {   
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider
-        LoopNodesStack: list<int> }
+        LoopNodesStack: list<int>
+        Visited: Set<ControlFlowElemWrapper> }
 
     let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
@@ -177,14 +178,13 @@ module DDGraphFuncs =
                 // not implemented (but must precede IReferenceExpression case)
                 | :? IInvocationExpression -> state
                 | :? IReferenceExpression as refExpr ->
+                    let curConnectionNode = state.GraphInfo.ConnectionNode
                     let curVarName = refExpr.NameIdentifier.Name
                     let label = "refExpr(" + curVarName + ")"
-                    let addedNode, state' = addNode refExpr label state
                     let exprCfgNode = getCorespondingCfgNode refExpr |> fun w -> w.Value
-                    let curConnectionNode = state'.GraphInfo.ConnectionNode
-                    let state' = setGraphConnectionNode addedNode state'
-                    let state' = build exprCfgNode curVarName state'
-                    setGraphConnectionNode curConnectionNode state'
+                    addNodeAsConnectionNode refExpr label state
+                    |> build exprCfgNode curVarName
+                    |> setGraphConnectionNode curConnectionNode
                 | _ -> failwith ("not implemented case in processExpr: " + expr.NodeType.ToString())
 
             let processAssignment (assignExpr: IAssignmentExpression) (state: BuildState) = 
@@ -278,7 +278,11 @@ module DDGraphFuncs =
         let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
         let graphInfo = DDGBuildFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
         let cfgNode = getCorespondingCfgNode varRef |> fun w -> w.Value
-        let initState = { GraphInfo = graphInfo; Provider = provider; LoopNodesStack = [] }
+        let initState = { 
+            GraphInfo = graphInfo; 
+            Provider = provider; 
+            LoopNodesStack = []; 
+            Visited = Set.empty }
         let resState = build cfgNode varName initState
         let root = RootNode
         let rootId = resState.Provider.NextId

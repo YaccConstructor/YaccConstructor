@@ -288,6 +288,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     if arr <> null then
                         for (prod, pos) in arr do
                             startV.AddReduction(new Reduction(newVertex, prod, pos, Some edge))
+                if startV.reductions.Count > 0 then customEnqueue startV
             addChildren nodes.[nodes.Count - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path currentGraphV startV nonTerm pos prod shouldEnqueueVertex = 
@@ -350,9 +351,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if verticesSeenBefore.[v]
         then
             for e in innerGraph.OutEdges(v) do
-                let toRecalc = handlePassingReductions e.Target
-                for vToRecalc in toRecalc do customEnqueue vToRecalc
-                
                 if e.Target.reductions.Count > 0 || e.Target.unprocessedGssVertices.Count > 0
                 then
                     customEnqueue e.Target

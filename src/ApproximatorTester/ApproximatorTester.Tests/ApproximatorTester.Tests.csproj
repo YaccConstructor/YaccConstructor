@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExecuteTests.cs" />
+    <None Include="test\data\AllTests\SimpleConcat.cs" />
+    <None Include="test\data\AllTests\SimpleConcat.cs.gold" />
     <None Include="test\data\AllTests\IfWithoutElse.cs" />
     <None Include="test\data\AllTests\IfWithoutElse.cs.gold" />
     <None Include="test\data\AllTests\MethodWithMethodCallArg.cs" />

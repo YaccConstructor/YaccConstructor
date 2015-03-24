@@ -81,5 +81,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("IfWithoutElse.cs");
         }
+
+        [Test]
+        public void TestSimpleConcat()
+        {
+            DoTestFiles("SimpleConcat.cs");
+        }
     }
 }

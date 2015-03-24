@@ -307,9 +307,12 @@ module DDGraphFuncs =
                             let callTarget = callTargetRefExpr.NameIdentifier.Name
                             let label = "methodCall(target=" + callTarget + " name=" + methodName + ")"
                             addNodeAsConnectionNode invocExpr label state
-                        let args = invocExpr.Arguments |> List.ofSeq
+                        let args = 
+                            invocExpr.Arguments 
+                            |> List.ofSeq
+                            |> List.map (fun a -> a.Value)
                         let varsSet' = 
-                            let vs = addNewVarsFromArgs args varsSet
+                            let vs = addNewVarsFromExprs args varsSet
                             if isUpdateMethod methodName (callTargetRefExpr.Type())
                             then
                                 addNewVarsFromExprs [callTargetRefExpr] vs
@@ -319,12 +322,11 @@ module DDGraphFuncs =
                         let entries = cfe.Entries |> List.ofSeq
                         entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
                     // todo: consider remove this, it is never met in tests
-                    | :? ICSharpArgument as arg ->
-                        let state' = addNodeAsConnectionNode arg "argument"
-                        let varsSet' = addNewVarsFromExprs [arg.Value] varsSet
-                        let nodesToVisit = addNodesToVisit [arg.Value] state.NodesToVisit
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, { state with NodesToVisit = nodesToVisit }, varsSet'
+//                    | :? ICSharpArgument as arg ->
+//                        let varsSet' = addNewVarsFromExprs [arg.Value] varsSet
+//                        let nodesToVisit = addNodesToVisit [arg.Value] state.NodesToVisit
+//                        let entries = cfe.Entries |> List.ofSeq
+//                        entries, { state with NodesToVisit = nodesToVisit }, varsSet'
                     | :? IReferenceExpression as refExpr 
                         when Set.contains cfe.Id state.NodesToVisit 
                         ->
@@ -334,9 +336,19 @@ module DDGraphFuncs =
                         let state' = addNodeAsConnectionNode refExpr label state
                         let entries = cfe.Entries |> List.ofSeq
                         entries, state', varsSet
+                    | :? IAdditiveExpression as addExpr 
+                        when Set.contains cfe.Id state.NodesToVisit  
+                        ->
+                        let state' = addNodeAsConnectionNode addExpr "concat" state
+                        let operands = addExpr.OperatorOperands |> List.ofSeq
+                        let varsSet' = addNewVarsFromExprs operands varsSet
+                        let nodesToVisit = addNodesToVisit operands state'.NodesToVisit
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
+                    // todo: replace with failwith when all cases will be covered
                     | _ -> cfe.Entries |> List.ofSeq, state, varsSet
 
-            processEntries entries updVarsSet updState
+            processEntries entries updVarsSet updState 
 
         let provider = NodeIdProviderFuncs.create
         let finalNodeId, provider = NodeIdProviderFuncs.getId provider varRef

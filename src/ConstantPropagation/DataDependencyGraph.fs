@@ -170,7 +170,7 @@ module DDGraphFuncs =
             else cfgNodes |> List.ofSeq |> List.head
 
         let rec build (cfe: IControlFlowElement) (varsSet: Set<string>) (state: BuildState) =
-            let (|AppropNameAssignExpr|_|) (node: ITreeNode) =
+            let (|TrackedVarAssignExpr|_|) (node: ITreeNode) =
                 match node with
                 | :? IAssignmentExpression as assignExpr 
                     when 
@@ -219,7 +219,7 @@ module DDGraphFuncs =
                 | _ ->
                     let astNode = cfe.SourceElement
                     match astNode with
-                    | AppropNameAssignExpr(assignExpr) -> 
+                    | TrackedVarAssignExpr(assignExpr) -> 
                         let assingnType, operands = 
                             if assignExpr.AssignmentType = AssignmentType.EQ
                             then 
@@ -272,7 +272,7 @@ module DDGraphFuncs =
                         let entries = cfe.Entries |> List.ofSeq
                         entries, state', varsSet
                     // not implemented (but must precede IReferenceExpression case)
-                    | :? IInvocationExpression -> 
+                    | :? IInvocationExpression as invocExpr -> 
                         cfe.Entries |> List.ofSeq, state, varsSet
                     | :? IReferenceExpression as refExpr 
                         when Set.contains cfe.Id state.RefExprsToVisit 

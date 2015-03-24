@@ -57,5 +57,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("ForWithIf.cs");
         }
+
+        [Test]
+        public void TestSimpleReplace()
+        {
+            DoTestFiles("SimpleReplace.cs");
+        }
     }
 }

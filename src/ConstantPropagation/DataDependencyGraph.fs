@@ -38,6 +38,10 @@ module DDGraphFuncs =
     let private unexpectedInitializerTypeMsg =
         "unexpected initializer type in local variable declaration"
 
+    let private badIRefExprCastMsg = 
+        "unable to perform cast to IReferenceExpression"
+
+
     let private emptyListPopMsg = "pop on empty list"
     let private emptyListVisitMsg = "visit on empty list"
 
@@ -146,7 +150,7 @@ module DDGraphFuncs =
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider
         VisitedForks: Map<int, Set<string>>
-        RefExprsToVisit: Set<int> } 
+        NodesToVisit: Set<int> } 
 
     let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
@@ -186,6 +190,27 @@ module DDGraphFuncs =
                 match Map.tryFind cfe.Id cfgInfo.LoopNodes with
                 | Some(lnInfo) as i -> i
                 | _ -> None
+
+            let tryCastToIRefExpr (n: ITreeNode) =
+                if n :? IReferenceExpression
+                then Some(n :?> IReferenceExpression)
+                else None
+
+            let castToIRefExpr (n: ITreeNode) =
+                if n :? IReferenceExpression
+                then n :?> IReferenceExpression
+                else failwith badIRefExprCastMsg
+
+            let addNewVars (nodes: list<#ITreeNode>) varsSet =
+                nodes
+                |> List.choose tryCastToIRefExpr
+                |> List.map (fun re -> re.NameIdentifier.Name)
+                |> List.fold (fun accSet var -> Set.add var accSet) varsSet
+
+            let addNodesToVisit nodes nodesToVisit =
+                nodes
+                |> List.map (fun op -> (getCorespondingCfgNode op).Value.Id)
+                |> List.fold (fun accSet id -> Set.add id accSet ) nodesToVisit
 
             let processEntries (entries: list<IControlFlowRib>) (varsSet: Set<string>) (state: BuildState) =
                 let curConnectionNode = state.GraphInfo.ConnectionNode
@@ -232,22 +257,10 @@ module DDGraphFuncs =
                             let varName = (assignExpr.Dest :?> IReferenceExpression).NameIdentifier.Name
                             let label = assingnType + "(" + varName + ")"
                             addNodeAsConnectionNode assignExpr label state
-                        let varsSet' =
-                            operands
-                            |> List.choose 
-                                (
-                                    function 
-                                    | :? IReferenceExpression as re -> 
-                                        Some(re.NameIdentifier.Name) 
-                                    | _ -> None
-                                )
-                            |> List.fold (fun accSet var -> Set.add var accSet) varsSet
-                        let refExprsToVisit = 
-                            operands 
-                            |> List.map (fun op -> (getCorespondingCfgNode op).Value.Id)
-                            |> List.fold (fun accSet id -> Set.add id accSet ) state'.RefExprsToVisit
+                        let varsSet' = addNewVars operands varsSet
+                        let nodesToVisit = addNodesToVisit operands state'.NodesToVisit
                         let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with RefExprsToVisit = refExprsToVisit }, varsSet'
+                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
                     | :? ILocalVariableDeclaration as locVarDecl
                         when Set.contains locVarDecl.NameIdentifier.Name varsSet
                         -> 
@@ -258,12 +271,12 @@ module DDGraphFuncs =
                             match locVarDecl.Initializer with
                             | :? IExpressionInitializer as re ->
                                 let initializerId = (getCorespondingCfgNode re.Value).Value.Id
-                                Set.add initializerId state'.RefExprsToVisit
+                                Set.add initializerId state'.NodesToVisit
                             | _ -> failwith unexpectedInitializerTypeMsg
                         let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with RefExprsToVisit = refExprsToVisit' }, varsSet
+                        entries, { state' with NodesToVisit = refExprsToVisit' }, varsSet
                     | :? ICSharpLiteralExpression as literalExpr 
-                        when Set.contains cfe.Id state.RefExprsToVisit 
+                        when Set.contains cfe.Id state.NodesToVisit 
                         ->
                         let label = 
                             let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
@@ -271,11 +284,31 @@ module DDGraphFuncs =
                         let state' = addNodeAsConnectionNode literalExpr label state
                         let entries = cfe.Entries |> List.ofSeq
                         entries, state', varsSet
-                    // not implemented (but must precede IReferenceExpression case)
-                    | :? IInvocationExpression as invocExpr -> 
-                        cfe.Entries |> List.ofSeq, state, varsSet
+                    | :? IInvocationExpression as invocExpr
+                        when Set.contains cfe.Id state.NodesToVisit 
+                        -> 
+                        let state' = 
+                            let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
+                            let methodName = invokedExpr.NameIdentifier.Name
+                            let callTarget = 
+                                let casted = castToIRefExpr invokedExpr.QualifierExpression
+                                casted.NameIdentifier.Name 
+                            let label = "methodCall(target=" + callTarget + " name=" + methodName + ")"
+                            addNodeAsConnectionNode invocExpr label state
+                        let args = invocExpr.Arguments |> List.ofSeq
+                        let varsSet' = addNewVars args varsSet
+                        let nodesToVisit = addNodesToVisit args state.NodesToVisit
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
+                    // todo: consider remove this, it is never met in tests
+                    | :? ICSharpArgument as arg ->
+                        let state' = addNodeAsConnectionNode arg "argument"
+                        let varsSet' = addNewVars [arg.Value] varsSet
+                        let nodesToVisit = addNodesToVisit [arg.Value] state.NodesToVisit
+                        let entries = cfe.Entries |> List.ofSeq
+                        entries, { state with NodesToVisit = nodesToVisit }, varsSet'
                     | :? IReferenceExpression as refExpr 
-                        when Set.contains cfe.Id state.RefExprsToVisit 
+                        when Set.contains cfe.Id state.NodesToVisit 
                         ->
                         let label = 
                             let curVarName = refExpr.NameIdentifier.Name
@@ -298,7 +331,7 @@ module DDGraphFuncs =
             GraphInfo = graphInfo; 
             Provider = provider;
             VisitedForks = Map.empty;
-            RefExprsToVisit = Set.empty }
+            NodesToVisit = Set.empty }
         let resState = build cfgNode varsSet initState
         let ddGraph: DDGraph = { 
             Graph = resState.GraphInfo.Graph

@@ -5,7 +5,7 @@
         static void Main(string[] args)
         {
             string query = "select";
-            for (int i = 0; i < 10 && i > 0 || query.IsEmpty(); i++)
+            for (int i = 0; i < 10 && i > 0 || query.IsNormalized(); i++)
             {
                 string localQ = "from ";
                 if (args.Length != 0)

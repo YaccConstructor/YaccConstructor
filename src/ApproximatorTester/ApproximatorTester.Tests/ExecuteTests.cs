@@ -75,5 +75,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("MethodWithMethodCallArg.cs");
         }
+
+        [Test]
+        public void TestIfWithoutElse()
+        {
+            DoTestFiles("IfWithoutElse.cs");
+        }
     }
 }

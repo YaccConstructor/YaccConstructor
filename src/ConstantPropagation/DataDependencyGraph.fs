@@ -25,6 +25,8 @@ type DDGraph = {
     NodeIdInfoDict: Dictionary<int, DDNode> }
 
 module DDGraphFuncs =
+    open JetBrains.ReSharper.Psi
+
     // exception messages 
     let private multipleCfgNodesForAstNodeMsg = 
         "ast node maps to multiple cfg nodes where single mapping expected"
@@ -191,26 +193,37 @@ module DDGraphFuncs =
                 | Some(lnInfo) as i -> i
                 | _ -> None
 
-            let tryCastToIRefExpr (n: ITreeNode) =
-                if n :? IReferenceExpression
-                then Some(n :?> IReferenceExpression)
-                else None
-
             let castToIRefExpr (n: ITreeNode) =
                 if n :? IReferenceExpression
                 then n :?> IReferenceExpression
                 else failwith badIRefExprCastMsg
 
-            let addNewVars (nodes: list<#ITreeNode>) varsSet =
+            let addNewVars (nodes: list<'a>) chooser varsSet =
                 nodes
-                |> List.choose tryCastToIRefExpr
-                |> List.map (fun re -> re.NameIdentifier.Name)
+                |> List.choose chooser
                 |> List.fold (fun accSet var -> Set.add var accSet) varsSet
+
+            let addNewVarsFromExprs (args: list<ICSharpExpression>) varsSet =
+                let f (a: ICSharpExpression) =
+                    match a with
+                    | :? IReferenceExpression as re -> (Some(re.NameIdentifier.Name))
+                    | _ -> None
+                addNewVars args f varsSet
+
+            let addNewVarsFromArgs (args: list<ICSharpArgument>) varsSet =
+                let f (a: ICSharpArgument) =
+                    match a with
+                    | :? IReferenceExpression as re -> (Some(re.NameIdentifier.Name))
+                    | _ -> None
+                addNewVars args f varsSet
 
             let addNodesToVisit nodes nodesToVisit =
                 nodes
                 |> List.map (fun op -> (getCorespondingCfgNode op).Value.Id)
                 |> List.fold (fun accSet id -> Set.add id accSet ) nodesToVisit
+
+            let isUpdateMethod (name: string) (callTargetType: IType) =
+                name = "Replace" && callTargetType.IsString()
 
             let processEntries (entries: list<IControlFlowRib>) (varsSet: Set<string>) (state: BuildState) =
                 let curConnectionNode = state.GraphInfo.ConnectionNode
@@ -257,7 +270,7 @@ module DDGraphFuncs =
                             let varName = (assignExpr.Dest :?> IReferenceExpression).NameIdentifier.Name
                             let label = assingnType + "(" + varName + ")"
                             addNodeAsConnectionNode assignExpr label state
-                        let varsSet' = addNewVars operands varsSet
+                        let varsSet' = addNewVarsFromExprs operands varsSet
                         let nodesToVisit = addNodesToVisit operands state'.NodesToVisit
                         let entries = cfe.Entries |> List.ofSeq
                         entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
@@ -286,24 +299,29 @@ module DDGraphFuncs =
                         entries, state', varsSet
                     | :? IInvocationExpression as invocExpr
                         when Set.contains cfe.Id state.NodesToVisit 
-                        -> 
+                        ->
+                        let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
+                        let methodName = invokedExpr.NameIdentifier.Name
+                        let callTargetRefExpr = castToIRefExpr invokedExpr.QualifierExpression
                         let state' = 
-                            let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
-                            let methodName = invokedExpr.NameIdentifier.Name
-                            let callTarget = 
-                                let casted = castToIRefExpr invokedExpr.QualifierExpression
-                                casted.NameIdentifier.Name 
+                            let callTarget = callTargetRefExpr.NameIdentifier.Name
                             let label = "methodCall(target=" + callTarget + " name=" + methodName + ")"
                             addNodeAsConnectionNode invocExpr label state
                         let args = invocExpr.Arguments |> List.ofSeq
-                        let varsSet' = addNewVars args varsSet
+                        let varsSet' = 
+                            let vs = addNewVarsFromArgs args varsSet
+                            if isUpdateMethod methodName (callTargetRefExpr.Type())
+                            then
+                                addNewVarsFromExprs [callTargetRefExpr] vs
+                            else
+                                vs 
                         let nodesToVisit = addNodesToVisit args state.NodesToVisit
                         let entries = cfe.Entries |> List.ofSeq
                         entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
                     // todo: consider remove this, it is never met in tests
                     | :? ICSharpArgument as arg ->
                         let state' = addNodeAsConnectionNode arg "argument"
-                        let varsSet' = addNewVars [arg.Value] varsSet
+                        let varsSet' = addNewVarsFromExprs [arg.Value] varsSet
                         let nodesToVisit = addNodesToVisit [arg.Value] state.NodesToVisit
                         let entries = cfe.Entries |> List.ofSeq
                         entries, { state with NodesToVisit = nodesToVisit }, varsSet'

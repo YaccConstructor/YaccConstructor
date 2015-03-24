@@ -59,9 +59,21 @@ namespace ApproximatorTester.Tests
         }
 
         [Test]
-        public void TestSimpleReplace()
+        public void TestSimpleMethodCall()
         {
-            DoTestFiles("SimpleReplace.cs");
+            DoTestFiles("SimpleMethodCall.cs");
+        }
+
+        [Test]
+        public void TestMethodWithRefArg()
+        {
+            DoTestFiles("MethodWithRefArg.cs");
+        }
+
+        [Test]
+        public void TestMethodWithMethodCallArg()
+        {
+            DoTestFiles("MethodWithMethodCallArg.cs");
         }
     }
 }

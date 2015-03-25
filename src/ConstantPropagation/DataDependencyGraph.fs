@@ -284,8 +284,7 @@ module DDGraphFuncs =
                                 match locVarDecl.Initializer with
                                 | :? IExpressionInitializer as re -> [re.Value]
                                 | _ -> failwith unexpectedInitializerTypeMsg
-                            // todo: consider change [], it may be a bug
-                            Some(label, [], initializerExprAsList)
+                            Some(label, initializerExprAsList, initializerExprAsList)
                         | :? ICSharpLiteralExpression as literalExpr 
                             when Set.contains cfe.Id state.NodesToVisit 
                             ->

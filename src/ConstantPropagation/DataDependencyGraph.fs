@@ -43,7 +43,6 @@ module DDGraphFuncs =
     let private badIRefExprCastMsg = 
         "unable to perform cast to IReferenceExpression"
 
-
     let private emptyListPopMsg = "pop on empty list"
     let private emptyListVisitMsg = "visit on empty list"
 
@@ -101,33 +100,6 @@ module DDGraphFuncs =
             let ddg' = addNodeAndEdge ddGraph srcNodeId srcNodeInfo
             { ddg' with ConnectionNode = srcNodeId }
 
-        let addMarkedNodeAndEdge (ddg: DDGraphBuildInfo) srcNodeId srcNodeInfo =
-            let ddg' = addNodeAndEdge ddg srcNodeId srcNodeInfo
-            { ddg' with MarkedNodes = srcNodeId :: ddg'.MarkedNodes }
-
-        let addEdgeFromExistingNode (ddg: DDGraphBuildInfo) existingNodeId =
-            addEdge ddg existingNodeId ddg.ConnectionNode
-
-        let markConnectionNode (ddg: DDGraphBuildInfo) =
-            { ddg with MarkedNodes = ddg.ConnectionNode :: ddg.MarkedNodes }
-
-        let foldMarkedOnExisting (ddg: DDGraphBuildInfo) existingId =
-            failIfNoSuchKey ddg.NodeIdInfoDict existingId
-            ddg.MarkedNodes
-            |> List.fold (fun accDdg id -> addEdge accDdg existingId id) ddg
-            |> fun ddg -> { ddg with MarkedNodes = [] }
-
-        let foldMarkedOnNew (ddg: DDGraphBuildInfo) newNodeId newNodeInfo =
-            let ddg' = addNode ddg newNodeId newNodeInfo
-            foldMarkedOnExisting ddg' newNodeId
-
-        let merge (dstGraph: DDGraphBuildInfo) (srcGraph: DDGraphBuildInfo) =
-            srcGraph.NodeIdInfoDict 
-            |> List.ofSeq
-            |> List.iter (fun entry -> dstGraph.NodeIdInfoDict.Add (entry.Key, entry.Value))
-            dstGraph.Graph.AddEdgeRange srcGraph.Graph.Edges |> ignore
-            addEdge dstGraph srcGraph.FinalNodeId dstGraph.ConnectionNode
-
     type private NodeIdProvider = {   
         NextId: int
         GeneratedIds: Dictionary<ITreeNode, int> } 
@@ -155,15 +127,11 @@ module DDGraphFuncs =
         NodesToVisit: Set<int> }
 
     let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
-        let addNodeUsingFun treeNode label addFunc (state: BuildState) =
+        let addNodeAsConnectionNode treeNode label (state: BuildState) =
             let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
             let nodeInfo = { Label = label; AstElem = treeNode }
-            let graph' = addFunc state.GraphInfo nodeId (InnerNode(nodeInfo))
+            let graph' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo nodeId (InnerNode(nodeInfo))
             { state with GraphInfo = graph'; Provider = provider' }
-
-        let addNodeAsConnectionNode treeNode label (state: BuildState) =
-            let addFun = DDGBuildFuncs.addConnectionNodeAndEdge
-            addNodeUsingFun treeNode label addFun state
 
         let setGraphConnectionNode nodeId (state: BuildState) =
             let graph' = { state.GraphInfo with ConnectionNode = nodeId }

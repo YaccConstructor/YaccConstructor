@@ -152,7 +152,7 @@ module DDGraphFuncs =
         GraphInfo: DDGraphBuildInfo
         Provider: NodeIdProvider
         VisitedForks: Map<int, Set<string>>
-        NodesToVisit: Set<int> } 
+        NodesToVisit: Set<int> }
 
     let rec buildForVar (varRef: IReferenceExpression) (cfgInfo: CSharpCFGInfo) = 
         let addNodeUsingFun treeNode label addFunc (state: BuildState) =
@@ -225,6 +225,12 @@ module DDGraphFuncs =
             let isUpdateMethod (name: string) (callTargetType: IType) =
                 name = "Replace" && callTargetType.IsString()
 
+            let processNode astNode label newVars newNodes trackedVars state  =
+                let state' = addNodeAsConnectionNode astNode label state
+                let trackedVars' = addNewVarsFromExprs newVars trackedVars
+                let nodesToVisit' = addNodesToVisit newNodes state'.NodesToVisit
+                trackedVars', { state' with NodesToVisit = nodesToVisit' }
+
             let processEntries (entries: list<IControlFlowRib>) (varsSet: Set<string>) (state: BuildState) =
                 let curConnectionNode = state.GraphInfo.ConnectionNode
                 entries
@@ -256,98 +262,74 @@ module DDGraphFuncs =
                         [bodyExitEdge], { state' with VisitedForks = visitedForks' }, varsSet
                 | _ ->
                     let astNode = cfe.SourceElement
-                    match astNode with
-                    | TrackedVarAssignExpr(assignExpr) -> 
-                        let assingnType, operands = 
-                            if assignExpr.AssignmentType = AssignmentType.EQ
-                            then 
-                                let ops = assignExpr.OperatorOperands |> List.ofSeq |> List.tail
-                                "assignment", ops
-                            else 
-                                let ops = assignExpr.OperatorOperands |> List.ofSeq
-                                "plusAssignment", ops
-                        let state' = 
+                    let optData = 
+                        match astNode with
+                        | TrackedVarAssignExpr(assignExpr) -> 
+                            let assingnType, operands = 
+                                if assignExpr.AssignmentType = AssignmentType.EQ
+                                then 
+                                    let ops = assignExpr.OperatorOperands |> List.ofSeq |> List.tail
+                                    "assignment", ops
+                                else 
+                                    let ops = assignExpr.OperatorOperands |> List.ofSeq
+                                    "plusAssignment", ops                        
                             let varName = (assignExpr.Dest :?> IReferenceExpression).NameIdentifier.Name
                             let label = assingnType + "(" + varName + ")"
-                            addNodeAsConnectionNode assignExpr label state
-                        let varsSet' = addNewVarsFromExprs operands varsSet
-                        let nodesToVisit = addNodesToVisit operands state'.NodesToVisit
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
-                    | :? ILocalVariableDeclaration as locVarDecl
-                        when Set.contains locVarDecl.NameIdentifier.Name varsSet
-                        -> 
-                        let state' = 
+                            Some(label, operands, operands)
+                        | :? ILocalVariableDeclaration as locVarDecl
+                            when Set.contains locVarDecl.NameIdentifier.Name varsSet
+                            ->
                             let label = "varDecl(" + locVarDecl.NameIdentifier.Name + ")"
-                            addNodeAsConnectionNode locVarDecl label state
-                        let refExprsToVisit' = 
-                            match locVarDecl.Initializer with
-                            | :? IExpressionInitializer as re ->
-                                let initializerId = (getCorespondingCfgNode re.Value).Value.Id
-                                Set.add initializerId state'.NodesToVisit
-                            | _ -> failwith unexpectedInitializerTypeMsg
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with NodesToVisit = refExprsToVisit' }, varsSet
-                    | :? ICSharpLiteralExpression as literalExpr 
-                        when Set.contains cfe.Id state.NodesToVisit 
-                        ->
-                        let label = 
+                            let initializerExprAsList = 
+                                match locVarDecl.Initializer with
+                                | :? IExpressionInitializer as re -> [re.Value]
+                                | _ -> failwith unexpectedInitializerTypeMsg
+                            // todo: consider change [], it may be a bug
+                            Some(label, [], initializerExprAsList)
+                        | :? ICSharpLiteralExpression as literalExpr 
+                            when Set.contains cfe.Id state.NodesToVisit 
+                            ->
                             let literalVal = literalExpr.Literal.GetText().Trim[|'\"'|]
-                            "literal(" + literalVal + ")"
-                        let state' = addNodeAsConnectionNode literalExpr label state
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, state', varsSet
-                    | :? IInvocationExpression as invocExpr
-                        when Set.contains cfe.Id state.NodesToVisit 
-                        ->
-                        let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
-                        let methodName = invokedExpr.NameIdentifier.Name
-                        let callTargetRefExpr = castToIRefExpr invokedExpr.QualifierExpression
-                        let state' = 
+                            let label = "literal(" + literalVal + ")"
+                            Some(label, [], [])
+                        | :? IInvocationExpression as invocExpr
+                            when Set.contains cfe.Id state.NodesToVisit 
+                            ->
+                            let invokedExpr = castToIRefExpr invocExpr.InvokedExpression
+                            let methodName = invokedExpr.NameIdentifier.Name
+                            let callTargetRefExpr = castToIRefExpr invokedExpr.QualifierExpression
                             let callTarget = callTargetRefExpr.NameIdentifier.Name
                             let label = "methodCall(target=" + callTarget + " name=" + methodName + ")"
-                            addNodeAsConnectionNode invocExpr label state
-                        let args = 
-                            invocExpr.Arguments 
-                            |> List.ofSeq
-                            |> List.map (fun a -> a.Value)
-                        let varsSet' = 
-                            let vs = addNewVarsFromExprs args varsSet
-                            if isUpdateMethod methodName (callTargetRefExpr.Type())
-                            then
-                                addNewVarsFromExprs [callTargetRefExpr] vs
-                            else
-                                vs 
-                        let nodesToVisit = addNodesToVisit args state.NodesToVisit
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
-                    // todo: consider remove this, it is never met in tests
-//                    | :? ICSharpArgument as arg ->
-//                        let varsSet' = addNewVarsFromExprs [arg.Value] varsSet
-//                        let nodesToVisit = addNodesToVisit [arg.Value] state.NodesToVisit
-//                        let entries = cfe.Entries |> List.ofSeq
-//                        entries, { state with NodesToVisit = nodesToVisit }, varsSet'
-                    | :? IReferenceExpression as refExpr 
-                        when Set.contains cfe.Id state.NodesToVisit 
-                        ->
-                        let label = 
+                            let args = 
+                                invocExpr.Arguments 
+                                |> List.ofSeq
+                                |> List.map (fun a -> a.Value)
+                            let dependencies =
+                                if isUpdateMethod methodName (callTargetRefExpr.Type())
+                                then
+                                    callTargetRefExpr :> ICSharpExpression :: args
+                                else
+                                    args
+                            Some(label, dependencies, args)
+                        | :? IReferenceExpression as refExpr 
+                            when Set.contains cfe.Id state.NodesToVisit 
+                            ->
                             let curVarName = refExpr.NameIdentifier.Name
-                            "refExpr(" + curVarName + ")"
-                        let state' = addNodeAsConnectionNode refExpr label state
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, state', varsSet
-                    | :? IAdditiveExpression as addExpr 
-                        when Set.contains cfe.Id state.NodesToVisit  
-                        ->
-                        let state' = addNodeAsConnectionNode addExpr "concat" state
-                        let operands = addExpr.OperatorOperands |> List.ofSeq
-                        let varsSet' = addNewVarsFromExprs operands varsSet
-                        let nodesToVisit = addNodesToVisit operands state'.NodesToVisit
-                        let entries = cfe.Entries |> List.ofSeq
-                        entries, { state' with NodesToVisit = nodesToVisit }, varsSet'
-                    // todo: replace with failwith when all cases will be covered
-                    | _ -> cfe.Entries |> List.ofSeq, state, varsSet
-
+                            let label = "refExpr(" + curVarName + ")"
+                            Some(label, [], [])
+                        | :? IAdditiveExpression as addExpr 
+                            when Set.contains cfe.Id state.NodesToVisit  
+                            ->
+                            let operands = addExpr.OperatorOperands |> List.ofSeq
+                            Some("concat", operands, operands)
+                        | _ -> None
+                    let trackedVars', state' =
+                        match optData with
+                        | Some(label, newVars, newNodes) ->
+                            processNode astNode label newVars newNodes varsSet state
+                        | None -> varsSet, state
+                    let entries = cfe.Entries |> List.ofSeq
+                    entries, state', trackedVars'
             processEntries entries updVarsSet updState 
 
         let provider = NodeIdProviderFuncs.create

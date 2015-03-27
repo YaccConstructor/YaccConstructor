@@ -277,7 +277,7 @@ module DDGraphFuncs =
                                     callTargetRefExpr :> ICSharpExpression :: args
                                 else
                                     args
-                            Some(label, dependencies, args)
+                            Some(label, dependencies, dependencies)
                         | :? IReferenceExpression as refExpr 
                             when Set.contains cfe.Id state.NodesToVisit 
                             ->

@@ -16,13 +16,9 @@ type NodeInfo = {
     Label: string
     AstElem: ITreeNode }
 
-type DDNode =
-| RootNode
-| InnerNode of NodeInfo
-
 type DDGraph = {
     Graph: AdjacencyGraph<int, Edge<int>>
-    NodeIdInfoDict: Dictionary<int, DDNode> }
+    NodeIdInfoDict: Dictionary<int, NodeInfo> }
 
 module DDGraphFuncs =
     open JetBrains.ReSharper.Psi
@@ -48,11 +44,8 @@ module DDGraphFuncs =
 
     type private DDGraphBuildInfo = {   
         Graph: AdjacencyGraph<int, Edge<int>>
-        NodeIdInfoDict: Dictionary<int, DDNode>
-        ConnectionNode: int
-        FinalNodeId: int
-        MarkedNodes: list<int>
-        RootId: option<int> }
+        NodeIdInfoDict: Dictionary<int, NodeInfo>
+        ConnectionNode: int }
 
     module private DDGBuildFuncs =
         // exception messages
@@ -82,14 +75,11 @@ module DDGraphFuncs =
             then graph.AddEdge (new Edge<int>(src, dst)) |> ignore
             ddGraph
 
-        let create(finalNodeId: int, finalNodeInfo: DDNode) =
+        let create(finalNodeId: int, finalNodeInfo: NodeInfo) =
             let ddGraph = {
                 Graph = new AdjacencyGraph<int, Edge<int>>()
-                NodeIdInfoDict = new Dictionary<int, DDNode>()
-                ConnectionNode = finalNodeId
-                FinalNodeId = finalNodeId
-                MarkedNodes = []
-                RootId = None }
+                NodeIdInfoDict = new Dictionary<int, NodeInfo>()
+                ConnectionNode = finalNodeId }
             addNode ddGraph finalNodeId finalNodeInfo
 
         let private addNodeAndEdge (ddGraph: DDGraphBuildInfo) srcNodeId srcNodeInfo =
@@ -130,7 +120,7 @@ module DDGraphFuncs =
         let addNodeAsConnectionNode treeNode label (state: BuildState) =
             let nodeId, provider' = NodeIdProviderFuncs.getId state.Provider treeNode
             let nodeInfo = { Label = label; AstElem = treeNode }
-            let graph' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo nodeId (InnerNode(nodeInfo))
+            let graph' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo nodeId nodeInfo
             { state with GraphInfo = graph'; Provider = provider' }
 
         let setGraphConnectionNode nodeId (state: BuildState) =
@@ -303,7 +293,7 @@ module DDGraphFuncs =
         let finalNodeId, provider = NodeIdProviderFuncs.getId provider varRef
         let varName = varRef.NameIdentifier.Name
         let finalNodeInfo = { Label = "varRef(" + varName + ")"; AstElem = varRef }
-        let graphInfo = DDGBuildFuncs.create(finalNodeId, InnerNode(finalNodeInfo))
+        let graphInfo = DDGBuildFuncs.create(finalNodeId, finalNodeInfo)
         let varsSet = Set.ofList [varName]
         let cfgNode = getCorespondingCfgNode varRef |> fun w -> w.Value
         let initState = { 
@@ -325,10 +315,7 @@ module DDGraphFuncs =
         |> List.map 
             (
                 fun kvp ->
-                    let text = 
-                        match kvp.Value with
-                        | RootNode -> "root"
-                        | InnerNode(nodeInfo) -> nodeInfo.Label
+                    let text = kvp.Value.Label
                     kvp.Key.ToString() + " [label=\"" + text + "\"]"
             )
         |> List.iter file.WriteLine

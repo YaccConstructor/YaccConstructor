@@ -156,6 +156,18 @@ type ``Control Flow Graph: If`` () =
     let parserSource = new ParserSource<RNGLR.ParseIf.Token>(tokenToNumber, indToString, leftSides, tokenData)
     let langSource = new LanguageSource(nodeToType, typeToDelimiters, elseNumber, endIfNumber)
 
+    let runTest graph astName cfgName = 
+        let parseResult = (new Parser<_>()).Parse buildAbstractAst graph
+        
+        match parseResult with 
+        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
+        | Parser.Success (mAst, _, _) ->
+            RNGLR.ParseIf.defaultAstToDot mAst astName
+            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
+            
+            cfg.PrintToDot cfgName
+            printfn "%s" <| cfg.ToString()
+
     [<Test>]
     member test.``Simple If test``() =
         let qGraph = new ParserInputGraph<_>(0, 11)
@@ -176,16 +188,7 @@ type ``Control Flow Graph: If`` () =
                 createEdge 10 11 (RNGLR.ParseIf.SEMICOLON 10)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "tree simple if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
-            
-            cfg.PrintToDot "cfg simple if.dot"
-            printfn "%s" <| cfg.ToString()
+        runTest qGraph "ast simple if (cfg construction).dot" "cfg simple if (cfg construction).dot"
 
     [<Test>]
     member test.``Big If test``() =
@@ -211,16 +214,7 @@ type ``Control Flow Graph: If`` () =
                 createEdge 14 15 (RNGLR.ParseIf.SEMICOLON 14)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "tree big if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
-            
-            cfg.PrintToDot "cfg big if.dot"
-            printfn "%s" <| cfg.ToString()
+        runTest qGraph "ast big if (cfg construction).dot" "cfg big if (cfg construction).dot"
 
     [<Test>]
     member test.``If without else test``() =
@@ -243,16 +237,7 @@ type ``Control Flow Graph: If`` () =
                 createEdge 9 10 (RNGLR.ParseIf.SEMICOLON 9)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "tree if-without-else.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
-            
-            cfg.PrintToDot "cfg if-without-else.dot"
-            printfn "%s" <| cfg.ToString()
+        runTest qGraph "ast if-without-else (cfg construction).dot" "cfg if-without-else (cfg construction).dot"
             
     [<Test>]
     member test.``Inner if``() =
@@ -286,16 +271,7 @@ type ``Control Flow Graph: If`` () =
                 createEdge 22 23(RNGLR.ParseIf.ENDIF 22)
             ] |> ignore
 
-        let parseResult = (new Parser<_>()).Parse buildAbstractAst qGraph
-        
-        match parseResult with 
-        | Parser.Error (num, tok, err, _, _) -> printErr (num, tok, err)
-        | Parser.Success (mAst, _, _) ->
-            RNGLR.ParseIf.defaultAstToDot mAst "Tree inner if.dot"
-            let cfg = ControlFlow (mAst, parserSource, langSource, mAst.Tokens, tokToRealString)
-            
-            cfg.PrintToDot "cfg inner if.dot"
-            printfn "%s" <| cfg.ToString()
+        runTest qGraph "ast inner if (cfg construction).dot" "cfg inner if (cfg construction).dot"
 
 
 [<TestFixture>]
@@ -339,7 +315,7 @@ type ``Find undefined variables`` () =
             let errorList = cfg.FindUndefVariable()
             
             printfn "%A" errorList
-            printfn "Expected: %d. Actual: %d." errorList.Length expected
+            printfn "Expected: %d. Actual: %d." expected errorList.Length 
             
             Assert.AreEqual(expected, errorList.Length)
 
@@ -361,7 +337,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        runTest qGraph expected "ast elementary.dot" "cfg elementary.dot"
+        runTest qGraph expected "ast elementary (undefined variables).dot" "cfg elementary (undefined variables).dot"
 
     [<Test>]
     member test.``X = X``() = 
@@ -377,7 +353,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 1
-        runTest qGraph expected "ast X = X.dot" "cfg X = X.dot"
+        runTest qGraph expected "ast X = X (undefined variables).dot" "cfg X = X (undefined variables).dot"
 
     [<Test>]
     member test.``Undef: ambiguous``() =
@@ -411,7 +387,7 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        runTest qGraph expected "ast ambiguous1.dot" "cfg ambiguous1.dot"
+        runTest qGraph expected "ast ambiguous1 (undefined variables).dot" "cfg ambiguous1 (undefined variables).dot"
             
     [<Test>]
     member test.``Undef: ambiguous 2``() =
@@ -441,11 +417,12 @@ type ``Find undefined variables`` () =
             ] |> ignore
 
         let expected = 2
-        runTest qGraph expected "ast ambiguous2.dot" "cfg ambiguous2.dot"
+        runTest qGraph expected "ast ambiguous2 (undefined variables).dot" "cfg ambiguous2 (undefined variables).dot"
 
 [<EntryPoint>]
 let f x = 
     let cfgBuilding = new ``Control Flow Graph Building``()
+//    cfgBuilding.``Elementary test``()
     cfgBuilding.``Ambiguous2 test``()
 //    let ifBuilding = new ``Control Flow Graph: If``()
 //    ifBuilding.``If without else test``()

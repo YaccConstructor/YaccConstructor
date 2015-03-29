@@ -44,6 +44,8 @@
     <Compile Include="DataDependencyGraph.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
     <Compile Include="Approximator.fs" />
+    <Compile Include="GenericCFG.fs" />
+    <Compile Include="GenericDDG.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

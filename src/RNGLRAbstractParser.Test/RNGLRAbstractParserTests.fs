@@ -102,7 +102,7 @@ type ``RNGLR abstract parser tests`` () =
         Assert.AreEqual(qGraph.Vertices |> Seq.length, 25)
 
     [<Test>]
-    member this.``01_PrettySimpleCalc.SequenceInput.`` () =
+    member this._01_PrettySimpleCalc_SequenceInput () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
@@ -114,7 +114,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
 
     [<Test>]
-    member this.``02_PrettySimpleCalc.SimpleBranchedInput.`` () =
+    member this._02_PrettySimpleCalcSimple_BranchedInput () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
@@ -127,7 +127,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
 
     [<Test>]
-    member this.``03_PrettySimpleCalc.BranchedInput.`` () =
+    member this._03_PrettySimpleCalc_BranchedInput () =
         let qGraph = new ParserInputGraph<_>(2, 9)
         qGraph.AddVerticesAndEdgeRange
             [
@@ -144,7 +144,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 34 40 0 11 2
 
     [<Test>]
-    member this.``04_PrettySimpleCalc.LotsOfVariants.`` () =
+    member this._04_PrettySimpleCalc_LotsOfVariants () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
@@ -162,7 +162,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 56 74 0 20 4
 
     [<Test>]
-    member this.``05_NotAmbigousSimpleCalc.LotsOfVariants.`` () =
+    member this._05_NotAmbigousSimpleCalc_LotsOfVariants () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -180,7 +180,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 22 22 0 9 1
 
     [<Test>]
-    member this.``06_NotAmbigousSimpleCalc.Loop.`` () =
+    member this._06_NotAmbigousSimpleCalc_Loop () =
         let qGraph = new ParserInputGraph<_>(0 , 7)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -196,7 +196,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 22 22 0 9 1
 
     [<Test>]
-    member this.``07_NotAmbigousSimpleCalc.Loop2.`` () =
+    member this._07_NotAmbigousSimpleCalc_Loop2 () =
         let qGraph = new ParserInputGraph<_>(0, 7)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -212,7 +212,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 18 18 0 7 1
 
     [<Test>]
-    member this.``08_NotAmbigousSimpleCalc.Loop3.`` () =
+    member this._08_NotAmbigousSimpleCalc_Loop3 () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -229,7 +229,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 22 22 0 9 1
         
     [<Test>]
-    member this.``09_NotAmbigousSimpleCalc.Loop4.`` () =
+    member this._09_NotAmbigousSimpleCalc_Loop4 () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -245,7 +245,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 18 18 0 7 1
 
     [<Test>]
-    member this.``10_NotAmbigousSimpleCalc.Loop5.`` () =
+    member this._10_NotAmbigousSimpleCalc_Loop5 () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -264,7 +264,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 21 22 0 9 1
 
     [<Test>]
-    member this.``11_NotAmbigousSimpleCalc.Loop6.`` () =
+    member this._11_NotAmbigousSimpleCalc_Loop6 () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -283,7 +283,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 25 26 0 11 2
 
     [<Test>]
-    member this.``12_NotAmbigousSimpleCalc.Loop7.`` () =
+    member this._12_NotAmbigousSimpleCalc_Loop7 () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -302,7 +302,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 25 26 0 11 2
 
     [<Test>]
-    member this.``13_NotAmbigousSimpleCalc.Loop8.`` () =
+    member this._13_NotAmbigousSimpleCalc_Loop8 () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalc.NUM  1)
@@ -322,7 +322,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalc.buildAstAbstract qGraph 28 30 0 13 3
 
     [<Test>]
-    member this.``14_NotAmbigousSimpleCalcWith2Ops.Loop.`` () =
+    member this._14_NotAmbigousSimpleCalcWith2Ops_Loop () =
         let qGraph = new ParserInputGraph<_>(0, 7)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM  1)
@@ -338,7 +338,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalcWith2Ops.buildAstAbstract qGraph 22 22 0 9 1
 
     [<Test>]
-    member this.``15_NotAmbigousSimpleCalcWith2Ops.Loops.`` () =
+    member this._15_NotAmbigousSimpleCalcWith2Ops_Loops () =
         let qGraph = new ParserInputGraph<_>(0, 8)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 1 (RNGLR.NotAmbigousSimpleCalcWith2Ops.NUM  1)
@@ -356,7 +356,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.NotAmbigousSimpleCalcWith2Ops.buildAstAbstract qGraph 22 22 0 9 1
 
     [<Test>]
-    member this.``16_Stars.Loop.`` () =
+    member this._16_Stars_Loop () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 0 (RNGLR.Stars.STAR 1)
@@ -367,7 +367,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Stars.buildAstAbstract qGraph 15 14 0 6 1
 
     [<Test>]
-    member this.``17_Stars2.Loop.`` () =
+    member this._17_Stars2_Loop () =
         let qGraph = new ParserInputGraph<_>(0, 1)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 0 (RNGLR.Stars2.STAR 1)
@@ -377,7 +377,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Stars2.buildAstAbstract qGraph 34 36 0 10 4
 
     [<Test>]
-    member this.``18_Stars2.Loop2.`` () =
+    member this._18_Stars2_Loop2 () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
             [edg 0 0 (RNGLR.Stars2.STAR 1)
@@ -388,7 +388,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Stars2.buildAstAbstract qGraph 42 42 0 14 4
 
     [<Test>]
-    member this.``19_FirstEps`` () =
+    member this._19_FirstEps () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.FirstEps.Z 1)
@@ -399,7 +399,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.FirstEps.buildAstAbstract qGraph 14 13 2 2 0
     
     [<Test>]
-    member this.``20_CroppedBrackets`` () =
+    member this._20_CroppedBrackets () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (RNGLR.CroppedBrackets.LBR 1)
@@ -411,7 +411,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.CroppedBrackets.buildAstAbstract qGraph 20 20 0 9 3
 
     [<Test>]
-    member this.``21_Brackets`` () =
+    member this._21_Brackets () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (RNGLR.Brackets.LBR 1)
@@ -423,7 +423,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
     [<Test>]
-    member this.``22_Brackets.BackEdge`` () =
+    member this._22_Brackets_BackEdge () =
         let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (RNGLR.Brackets.LBR 1)
@@ -436,7 +436,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.Brackets.buildAstAbstract qGraph 20 20 0 9 3
 
     [<Test>]
-    member this.``23_StrangeBrackets`` () =
+    member this._23_UnambiguousBrackets () =
         let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.StrangeBrackets.LBR 1)
@@ -449,7 +449,7 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 29 29 3 12 3
 
     [<Test>]
-    member this.``24_StrangeBrackets.Circle`` () =
+    member this._24_UnambiguousBrackets_Circle () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
@@ -460,20 +460,20 @@ type ``RNGLR abstract parser tests`` () =
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
     [<Test>]
-    member this.``25_StrangeBrackets.BiggerCircle`` () =
+    member this._25_UnambiguousBrackets_BiggerCircle () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
             edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
-            edg 2 3 (RNGLR.StrangeBrackets.LBR 0)
-            edg 3 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 2)
+            edg 3 0 (RNGLR.StrangeBrackets.RBR 3)
             edg 0 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 25 4 8 1
 
     [<Test>]
-    member this.``26_StrangeBrackets.Inf`` () =
+    member this._26_UnambiguousBrackets_Inf () =
         let qGraph = new ParserInputGraph<_>(0, 9)
         qGraph.AddVerticesAndEdgeRange
            [edg 0 0 (RNGLR.StrangeBrackets.LBR 0)
@@ -483,6 +483,17 @@ type ``RNGLR abstract parser tests`` () =
 
         test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 
+    [<Test>]
+    member this._27_UnambiguousBrackets_WithoutEmptyString () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 0 (RNGLR.StrangeBrackets.RBR 1)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 2)
+            edg 2 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
 [<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
@@ -491,31 +502,32 @@ let f x =
     else System.IO.Directory.CreateDirectory "dot" |> ignore
     let t = new ``RNGLR abstract parser tests`` () 
 
-//    t.``01_PrettySimpleCalc.SequenceInput.`` ()
-//    t.``02_PrettySimpleCalc.SimpleBranchedInput.`` ()
-//    t.``03_PrettySimpleCalc.BranchedInput.`` ()
-//    t.``04_PrettySimpleCalc.LotsOfVariants.``() 
-//    t.``05_NotAmbigousSimpleCalc.LotsOfVariants.``()
-//    t.``06_NotAmbigousSimpleCalc.Loop.`` ()
-//    t.``07_NotAmbigousSimpleCalc.Loop2.`` ()
-//    t.``08_NotAmbigousSimpleCalc.Loop3.`` ()
-//    t.``09_NotAmbigousSimpleCalc.Loop4.`` ()
-//    t.``10_NotAmbigousSimpleCalc.Loop5.`` ()
-//    t.``11_NotAmbigousSimpleCalc.Loop6.`` ()
-//    t.``12_NotAmbigousSimpleCalc.Loop7.`` ()
-//    t.``13_NotAmbigousSimpleCalc.Loop8.`` ()
-//    t.``14_NotAmbigousSimpleCalcWith2Ops.Loop.`` ()
-//    t.``15_NotAmbigousSimpleCalcWith2Ops.Loops.`` ()
-//    t.``16_Stars.Loop.`` () 
-//    t.``17_Stars2.Loop.`` () 
-//    t.``18_Stars2.Loop2.`` () 
-//    t.``19_FirstEps`` ()
-//    t.``20_CroppedBrackets`` ()
-//    t.``21_Brackets`` ()
-//    t.``22_Brackets.BackEdge`` ()
-//    t.``23_StrangeBrackets`` ()
-//    t.``24_StrangeBrackets.Circle``()
-//    t.``25_StrangeBrackets.BiggerCircle`` ()
-    t.``26_StrangeBrackets.Inf``()
+//    t._01_PrettySimpleCalc_SequenceInput ()
+//    t._02_PrettySimpleCalc_SimpleBranchedInput ()
+//    t._03_PrettySimpleCalc_BranchedInput ()
+//    t._04_PrettySimpleCalc_LotsOfVariants() 
+//    t._05_NotAmbigousSimpleCalc_LotsOfVariants()
+//    t._06_NotAmbigousSimpleCalc_Loop. ()
+//    t._07_NotAmbigousSimpleCalc_Loop2. ()
+//    t._08_NotAmbigousSimpleCalc_Loop3. ()
+//    t._09_NotAmbigousSimpleCalc_Loop4. ()
+//    t._10_NotAmbigousSimpleCalc_Loop5. ()
+//    t._11_NotAmbigousSimpleCalc_Loop6. ()
+//    t._12_NotAmbigousSimpleCalc_Loop7. ()
+//    t._13_NotAmbigousSimpleCalc_Loop8. ()
+//    t._14_NotAmbigousSimpleCalcWith2Ops_Loop. ()
+//    t._15_NotAmbigousSimpleCalcWith2Ops_Loops. ()
+//    t._16_Stars_Loop. () 
+//    t._17_Stars2_Loop. () 
+//    t._18_Stars2_Loop2. () 
+//    t._19_FirstEps ()
+//    t._20_CroppedBrackets ()
+//    t._21_Brackets ()
+//    t._22_Brackets_BackEdge ()
+//    t._23_UnambiguousBrackets ()
+    t._24_UnambiguousBrackets_Circle()
+//    t._25_UnambiguousBrackets_BiggerCircle ()
+//    t._26_UnambiguousBrackets_Inf()
+//    t._27_UnambiguousBrackets_WithoutEmptyString()
     0
     

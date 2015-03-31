@@ -114,3 +114,5 @@ let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFaildFunc =
     match arg2 with
     | :? 'a as arg2Typed-> f (mapper arg1) (mapper arg2Typed)
     | _ -> typingFaildFunc ()
+
+let (===) = LanguagePrimitives.PhysicalEquality

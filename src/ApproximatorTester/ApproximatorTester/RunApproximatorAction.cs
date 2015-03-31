@@ -64,7 +64,7 @@ namespace ApproximatorTester
             });
         }
 
-        private string ResultToString(DataDependencyGraph.DDGraph ddGraph)
+        private string ResultToString(GenericCFG.GenericCFG ddGraph)
         {
             var edgesList = ddGraph.Graph.Edges
                 .Select(edge => edge.Source.ToString() + " -> " + edge.Target.ToString())

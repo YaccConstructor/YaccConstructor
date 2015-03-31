@@ -13,6 +13,9 @@ open XMLParser
 open CSharpCFGInfo
 open DataDependencyGraph
 open Utils
+open CSharpCFGConversion
+open GenericCFG
+open GenericCFG.GenericCFGFuncs
 
 open System.Collections.Generic
 open System.IO
@@ -144,6 +147,26 @@ let collectAdditionalInfo (cfg: ICSharpControlFlowGraf) =
     let visited = new HashSet<int>()
     dfs cfg.EntryElement extractCSharpCfgInfo visited emptyCSharpCfgInfo
 
+//let build (file: ICSharpFile) =
+//    let hotspots = getHotspots file
+//    let ddGraphs = 
+//        hotspots 
+//        |> List.ofSeq 
+//        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
+//        |> List.map
+//            (
+//                fun (cfg, hotspot) ->
+//                    let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
+//                    let additionalInfo = collectAdditionalInfo cfg
+//                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef additionalInfo
+//
+//                    let cfgName = "ddg_" + cfg.GetHashCode().ToString()
+//                    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
+//                    DDGraphFuncs.toDot ddGraph cfgName path
+//                    ddGraph
+//            )
+//    ddGraphs
+
 let build (file: ICSharpFile) =
     let hotspots = getHotspots file
     let ddGraphs = 
@@ -152,14 +175,16 @@ let build (file: ICSharpFile) =
         |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
         |> List.map
             (
-                fun (cfg, hotspot) ->
-                    let queryVarRef = hotspot.Arguments.[0].Value :?> IReferenceExpression
-                    let additionalInfo = collectAdditionalInfo cfg
-                    let ddGraph = DDGraphFuncs.buildForVar queryVarRef additionalInfo
+                fun (csharpCFG, hotspot) ->
+                    let additionalInfo = collectAdditionalInfo csharpCFG
+                    let genericCFG = convert csharpCFG additionalInfo
+                    let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
+                    let cfgForVar = subgraphForVar hotVarRef genericCFG
 
-                    let cfgName = "ddg_" + cfg.GetHashCode().ToString()
+                    let cfgName = "cfg_" + csharpCFG.GetHashCode().ToString() + "_forvar"
                     let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
-                    DDGraphFuncs.toDot ddGraph cfgName path
-                    ddGraph
+                    toDot cfgForVar cfgName path
+
+                    cfgForVar
             )
     ddGraphs

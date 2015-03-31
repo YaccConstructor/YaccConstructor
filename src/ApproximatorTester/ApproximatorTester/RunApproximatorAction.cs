@@ -67,7 +67,7 @@ namespace ApproximatorTester
         private string ResultToString(GenericCFG.GenericCFG ddGraph)
         {
             var edgesList = ddGraph.Graph.Edges
-                .Select(edge => edge.Source.ToString() + " -> " + edge.Target.ToString())
+                .Select(edge => edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString())
                 .ToList();
             return String.Join("\n", edgesList);
         }

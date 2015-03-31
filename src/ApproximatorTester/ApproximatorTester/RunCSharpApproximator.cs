@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Application;
 using JetBrains.Application.Progress;
@@ -16,12 +15,12 @@ using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
 namespace ApproximatorTester
 {
-    [ContextAction(Name = "RunApproximator", Description = "Run Approximator", Group = "C#")]
-    public class RunApproximatorAction : ContextActionBase
+    [ContextAction(Name = "RunCSharpApproximator", Description = "Run Approximator for C#", Group = "C#")]
+    public class RunCSharpApproximator : ContextActionBase
     {
         private readonly ICSharpContextActionDataProvider _provider;
 
-        public RunApproximatorAction(ICSharpContextActionDataProvider provider)
+        public RunCSharpApproximator(ICSharpContextActionDataProvider provider)
         {
             _provider = provider;
         }
@@ -41,7 +40,7 @@ namespace ApproximatorTester
 
         public override string Text
         {
-            get { return "Run Approximator"; }
+            get { return "Run Approximator for CSharp"; }
         }
 
         private void OutputResult(string result)

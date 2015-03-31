@@ -6,6 +6,7 @@ using JetBrains.ReSharper.Feature.Services.JavaScript.Bulbs;
 using JetBrains.ReSharper.Intentions.Extensibility;
 using JetBrains.TextControl;
 using JetBrains.Util;
+using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
 namespace ApproximatorTester
 {
@@ -27,6 +28,7 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var jsCfg = _provider.GetControlFlowGraf();
+            ApproximationBuilderJs.BuildApproximation(jsCfg);
             return null;
         }
 

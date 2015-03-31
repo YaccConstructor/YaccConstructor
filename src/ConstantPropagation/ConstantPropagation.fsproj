@@ -45,6 +45,7 @@
     <Compile Include="GenericCFG.fs" />
     <Compile Include="CSharpCFGConversion.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
+    <Compile Include="ApproximationBuilderJs.fs" />
     <Compile Include="Approximator.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,9 @@
     <Reference Include="JetBrains.ReSharper.Psi.CSharp">
       <HintPath>..\packages\JetBrains.ReSharper.SDK.8.1.555\bin\JetBrains.ReSharper.Psi.CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.JavaScript">
+      <HintPath>..\packages\JetBrains.ReSharper.SDK.8.2.1158\bin\JetBrains.ReSharper.Psi.JavaScript.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Addins">
       <HintPath>..\packages\Mono.Addins.1.1\lib\Mono.Addins.dll</HintPath>

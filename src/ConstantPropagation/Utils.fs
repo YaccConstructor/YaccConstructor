@@ -10,7 +10,7 @@ module DotUtils =
     open System.IO
     open System.Collections.Generic
 
-    let private toDot (cfg: ICSharpControlFlowGraf) (outStream: StreamWriter) =
+    let private toDot (cfg: IControlFlowGraf) (outStream: StreamWriter) =
         let getNodeInfo (node: IControlFlowElement) =
             if node <> null
             then 
@@ -62,7 +62,7 @@ module DotUtils =
 
     /// Converts passed cfg "cfg" to DOT's digraph with name "name" 
     /// and stores it in the file specified by "outPath"
-    let cfgToDot (cfg: ICSharpControlFlowGraf) outPath name =
+    let cfgToDot (cfg: IControlFlowGraf) outPath name =
         use outStream = FileInfo(outPath).CreateText()
         outStream.WriteLine("digraph " + name + " {")
         toDot cfg outStream

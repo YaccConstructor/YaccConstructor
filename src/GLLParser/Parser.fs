@@ -75,7 +75,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) (inputLength + 1)
         let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (inputLength + 1) (inputLength + 1)
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (inputLength + 1) (inputLength + 1) 
-        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count inputLength
+        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (inputLength + 1)
         let terminalNodes = new BlockResizeArray<int<nodeMeasure>>()
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
         let epsilon = 1<nodeMeasure>
@@ -87,7 +87,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentIndex, !currentLabel, !currentGSSNode, dummy)
         
-        let finalExtension = packExtension 0 (inputLength - 1)
+        let finalExtension = packExtension 0 (inputLength)
 
         let containsContext index (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             if index <= inputLength
@@ -366,11 +366,11 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
             else
                 if Array.length parser.rules.[rule] <> position
                 then
-                    
+                    let curSymbol = parser.rules.[rule].[position]
                     if !currentIndex < inputLength 
                     then
                         let curToken = parser.TokenToNumber tokens.[!currentIndex]
-                        let curSymbol = parser.rules.[rule].[position]
+                        
                         if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                         then
                             if curSymbol = curToken 
@@ -398,8 +398,24 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (tokens : seq<'Tok
                                 let a rule = 
                                     let newLabel = packLabel rule 0
                                     addContext !currentIndex newLabel !currentGSSNode dummy 
-                                table.[index] |> Array.iter a
-                    else 
+                                table.[index] |>  Array.iter a
+                    else
+                        if parser.CanInferEpsilon.[curSymbol]
+                        then
+                            let curToken = parser.IndexEOF
+                            let getIndex nTerm term = 
+                                let mutable index = nTerm
+                                index <- (index * (parser.IndexatorFullCount - parser.NonTermCount))
+                                index <- index + term - parser.NonTermCount
+                                index
+                            let index = getIndex curSymbol curToken
+                            currentGSSNode := create !currentIndex (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+                            if Array.length table.[index] <> 0 
+                            then
+                                let a rule = 
+                                    let newLabel = packLabel rule 0
+                                    addContext !currentIndex newLabel !currentGSSNode dummy 
+                                table.[index] |>  Array.iter a
                         condition := true
                                     
                 else

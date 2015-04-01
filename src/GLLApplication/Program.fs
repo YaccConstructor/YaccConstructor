@@ -36,10 +36,10 @@ let run () =
 
 run () |> printfn "%A"
 
-let run1 astBuilder =
-    let lb = LexBuffer<_>.FromString "1 - 2"
-    let tokens = seq{while not lb.IsPastEndOfStream do yield Calc.Lexer.token lb}
-    astBuilder tokens, tokens
+//let run1 astBuilder =
+//    let lb = LexBuffer<_>.FromString "1 - 2"
+//    let tokens = seq{while not lb.IsPastEndOfStream do yield Calc.Lexer.token lb}
+//    astBuilder tokens, tokens
 
 
 let parser1 = GLL.Parse.SimpleAmb.buildAst
@@ -52,14 +52,14 @@ let parser1 = GLL.Parse.SimpleAmb.buildAst
 //    printfn "%A" t.TotalSeconds
 
 //////////////////////////////////////
-//let run2 path astBuilder =
-//    let tokens = Lexer2.tokens2(path)
-//    astBuilder tokens, tokens
+let run2 path astBuilder =
+    let tokens = Lexer2.tokens1(path)
+    astBuilder tokens, tokens
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
-//let str = String.init 100 (fun i -> "B ") + "B"
-//let str = "A B"
-let r = run1 parser1
+//let str = String.init 1 (fun i -> "B ") + "B"
+let str = "A B"
+let r = run2 str parser1
 //printfn "simple amb"
 
 match r with

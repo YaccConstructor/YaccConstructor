@@ -11,7 +11,8 @@ open GLL.Mixed
 let tokens1(str : string) = 
     let toLexerTag (name:string) =
             match name with
-            | "B" -> GLL.BadLeftRecursion.B (2)
+            | "A" -> GLL.Parse.SimpleAmb.A (2)
+            | "B" -> GLL.Parse.SimpleAmb.B (2)
             | x -> failwithf "Unexpected token %s" x
 
     str.Split([|' '|])

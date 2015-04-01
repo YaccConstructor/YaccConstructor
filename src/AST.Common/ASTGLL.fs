@@ -126,7 +126,11 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                     used.Add(currentPair.Node, !num)
                     match currentPair.Node with 
                     | :? NonTerminalNode as a -> 
-                        createNode !num false NonTerminal (indToString a.Name)
+                        if a.Others <> Unchecked.defaultof<_>
+                        then
+                            createNode !num true NonTerminal (indToString a.Name)
+                        else    
+                            createNode !num false NonTerminal (indToString a.Name)
                         createEdge currentPair.Num !num false ""
                         nodeQueue.Enqueue(new NumNode(!num, a.First))
                         if a.Others <> Unchecked.defaultof<_>
@@ -137,8 +141,7 @@ type Tree<'TokenType> (tokens : array<'TokenType>, root : obj, rules : int[][]) 
                         createNode !num false Packed ""
                         createEdge currentPair.Num !num false ""
                         nodeQueue.Enqueue(new NumNode(!num, p.Left))
-                        if p.Right <> null
-                        then nodeQueue.Enqueue(new NumNode(!num, p.Right))
+                        nodeQueue.Enqueue(new NumNode(!num, p.Right))
                     | :? IntermidiateNode as i ->
                         createNode !num false Intermidiate ((getRule i.Slot).ToString() + " " + (getPosition i.Slot).ToString())
                         createEdge currentPair.Num !num false ""

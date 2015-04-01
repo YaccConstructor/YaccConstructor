@@ -6,6 +6,10 @@ open Utils
 
 open System.IO
 
-let BuildApproximation (cfg: IJsControlFlowGraf) =
-    let outFile = Path.Combine (myDebugFolderPath, "JsCfg_" + cfg.GetHashCode().ToString() + ".dot")
+let serializeJsCfg (cfg: IJsControlFlowGraf) = 
+    let name = "JsCfg_" + cfg.GetHashCode().ToString() + ".dot"
+    let outFile = Path.Combine (myDebugFolderPath, name)
     DotUtils.cfgToDot cfg outFile "JsCfg"
+
+let BuildApproximation (cfg: IJsControlFlowGraf) =
+    serializeJsCfg cfg

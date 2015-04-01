@@ -15,9 +15,9 @@ namespace RShT1
             {
                 query0 += "y = 2;";
             }
-            query0 += "z = x + y";
+            query0 += "z = x + y;";
             Program.ExtEval(query0);
-            
+
 
             string query = "x = 1;";
             if (cond)

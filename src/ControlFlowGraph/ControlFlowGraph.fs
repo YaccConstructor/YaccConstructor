@@ -30,14 +30,14 @@ type ParserSource<'TokenType> =
             tokenData = tokenData;
         }
 
-type Edge(source, target, tag) = 
+type TokensEdge(source, target, tag) = 
     inherit TaggedEdge<int, int option>(source, target, tag)
 
-type CfgInnerGraph() =
-    inherit AdjacencyGraph<int, Edge>()
+type CfgTokensGraph() =
+    inherit AdjacencyGraph<int, TokensEdge>()
     static member StartVertex = 0
 
-    member this.AddEdgeForced (e : Edge) =
+    member this.AddEdgeForced (e : TokensEdge) =
         this.AddVertex e.Source |> ignore
         this.AddVertex e.Target |> ignore
         this.AddEdge e |> ignore
@@ -46,11 +46,11 @@ type CfgInnerGraph() =
         
         let vertexToTokens = Dictionary<int, int list list>()
         let expected = Queue<int>()
-        expected.Enqueue CfgInnerGraph.StartVertex
+        expected.Enqueue CfgTokensGraph.StartVertex
 
         let endVertex = this.VertexCount - 1
 
-        let handleEdge (edge : Edge) data = 
+        let handleEdge (edge : TokensEdge) data = 
             let newData = 
                 data
                 |> List.map 
@@ -90,7 +90,6 @@ type CfgInnerGraph() =
         vertexToTokens.[endVertex]
         |> List.map (fun set -> set |> List.rev)
         
-
 type LanguageSource = 
     val nodeToType : IDictionary<string, BlockType>
     val typeToDelimiters: IDictionary<BlockType, int list>
@@ -205,17 +204,23 @@ and InterNode<'TokenType> =
 
     /// replace finish node on some other node
     member this.ReplaceMeForParents (node : InterNode<_>) = 
-        node.parents <- node.parents @ this.parents
         
-        this.parents
-        |> List.iter (fun block -> block.ReplaceChild this [node])
+        if node <> this
+        then
+            node.parents <- node.parents @ this.parents
+        
+            this.parents
+            |> List.iter (fun block -> block.ReplaceChild this [node])
 
     /// replace start node on some other node
     member this.ReplaceMeForChildren (node : InterNode<_>) = 
-        node.children <- node.children @ this.children
+
+        if node <> this
+        then
+            node.children <- node.children @ this.children
         
-        this.children
-        |> List.iter (fun block -> block.ReplaceParent node)
+            this.children
+            |> List.iter (fun block -> block.ReplaceParent node)
 
     member this.IsEmpty = this.parents.IsEmpty && this.children.IsEmpty 
 
@@ -228,6 +233,19 @@ and InterNode<'TokenType> =
             elif this.children.IsEmpty
             then "Finish Node"
             else "Node"
+
+type BlockEdge<'TokenType>(source, target, tag) = 
+    inherit TaggedEdge<int, (InterNode<'TokenType> * InterNode<'TokenType>) option>(source, target, tag)
+
+type CfgBlocksGraph<'TokenType>() = 
+    inherit AdjacencyGraph<int, BlockEdge<'TokenType>>()
+
+    static member StartVertex = 0
+
+    member this.AddEdgeForced (e : BlockEdge<'TokenType>) =
+        this.AddVertex e.Source |> ignore
+        this.AddVertex e.Target |> ignore
+        this.AddEdge e |> ignore
 
 type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                             , parserSource : ParserSource<'TokenType>
@@ -256,9 +274,92 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
         sprintf "%s\n tokens: %s\n" typeStr strValues
     
+    let graphToCfg (graph : CfgBlocksGraph<'TokenType>) = 
+        
+        let vertexToInterNode = Dictionary<int, (InterNode<'TokenType> * InterNode<'TokenType>) list>()
+        let visited = Queue<int>()
+        let endVertex = graph.VertexCount - 1
+
+        let addToDictionary key value = 
+            if vertexToInterNode.ContainsKey key 
+            then
+                let oldData = vertexToInterNode.[key]
+                vertexToInterNode.Remove(key)|> ignore
+                vertexToInterNode.Add(key, oldData @ [value])
+            else
+                vertexToInterNode.Add(key, [value])
+        
+        let processEdge (edge : BlockEdge<_>) = 
+            let target = edge.Target
+            if not <| visited.Contains target
+            then visited.Enqueue target
+                            
+            if edge.Tag.IsSome
+            then addToDictionary edge.Target edge.Tag.Value
+
+        let processFirst() = 
+            graph.OutEdges(CfgBlocksGraph<_>.StartVertex)
+            |> Seq.iter(fun edge -> processEdge edge)
+            
+        let concatNodes (from : InterNode<_> * InterNode<_>) (_to : InterNode<_> * InterNode<_>) = 
+            let start, oldFinish = from
+            let oldStart, finish = _to
+
+            oldStart.ReplaceMeForChildren oldFinish
+
+            start, finish
+
+        let mergeNodes (nodes : (InterNode<_> * InterNode<_>) list) = 
+            let commonStart, commonEnd = nodes.Head
+
+            nodes
+            |> List.tail
+            |> List.iter 
+                    (
+                        fun block -> 
+                            let oldStart, oldEnd = block
+                            oldStart.ReplaceMeForChildren commonStart
+                            oldEnd.ReplaceMeForParents commonEnd
+                    )
+
+            commonStart, commonEnd
+
+        processFirst()
+        while visited.Count > 0 do
+            let vertex = visited.Dequeue()
+
+            let data = vertexToInterNode.[vertex]
+            if data.Length > 1
+            then 
+                let newData = mergeNodes data
+                vertexToInterNode.Remove(vertex) |> ignore
+                vertexToInterNode.Add(vertex, [newData])
+
+            //At this point length of vertexToInterNode.[vertex] always is equal to 1.
+            let oldValue = vertexToInterNode.[vertex].Head
+
+            graph.OutEdges(vertex)
+            |> Seq.iter
+                (
+                    fun edge -> 
+                        let target = edge.Target
+                        if not <| visited.Contains target
+                        then
+                            visited.Enqueue target
+
+                        if edge.Tag.IsSome
+                        then
+                            let newData = concatNodes oldValue edge.Tag.Value
+                            addToDictionary edge.Target newData
+                        else
+                            addToDictionary edge.Target oldValue
+                )
+
+        vertexToInterNode.[endVertex].Head
+
     let start, finish = 
         let treeRoot = 
-            match tree.Root with
+            match tree.Root with 
             | :? AST as ast -> ast
             | _ -> null
 
@@ -320,27 +421,35 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
 
             startNode, outNode
 
+        
         let stack = Stack<_>()
         let blockType = ref Start
-        let blocks = ref []
+        let blocksGraph = new CfgBlocksGraph<'TokenType>()
+        let bStartVertex = ref CfgBlocksGraph<_>.StartVertex
+        let bEndVertex = ref <| CfgBlocksGraph<_>.StartVertex + 1
+
         let tokens = ref []
         let wasElse = ref false
 
+        let updateVertices() = 
+            bStartVertex := !bEndVertex
+            incr bEndVertex
+
+
         let restoreContext() = 
-            let oldType, oldBlocks, oldTokens, oldWasElse = stack.Pop()
+            let oldType, oldTokens, oldWasElse = stack.Pop()
                         
             blockType := oldType
-            blocks := oldBlocks
             tokens := oldTokens
             wasElse := oldWasElse
 
-        let rec collectTokens (node : obj) (graph : CfgInnerGraph) startVertex endVertex = 
+        let rec collectTokens (node : obj) (tokensGraph : CfgTokensGraph) startVertex endVertex = 
             
             match node with 
             | :? int as t -> 
                 let tagOpt = if t >= 0 then Some t else None
-                let edge = new Edge(!startVertex, !endVertex, tagOpt)
-                graph.AddEdgeForced edge 
+                let edge = new TokensEdge(!startVertex, !endVertex, tagOpt)
+                tokensGraph.AddEdgeForced edge 
 
                 startVertex := !endVertex
                 incr endVertex
@@ -348,14 +457,13 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             | :? AST as ast -> 
 
                 let commonStartVertex = !startVertex
-                
-                let newEndVertex = extractTokensFromFamily ast.first graph (ref commonStartVertex) endVertex
+                let newEndVertex = extractTokensFromFamily ast.first tokensGraph (ref commonStartVertex) endVertex
                         
                 if ast.other <> null 
                 then 
                     let allEndVertex = 
                         ast.other
-                        |> Array.map (fun fam -> extractTokensFromFamily fam graph (ref commonStartVertex) endVertex)
+                        |> Array.map (fun fam -> extractTokensFromFamily fam tokensGraph (ref commonStartVertex) endVertex)
                         |> List.ofArray
                         |> List.append [newEndVertex]
 
@@ -365,8 +473,8 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
                     |> List.iter 
                             (
                                 fun num -> 
-                                    let edge = Edge(num, commonEndVertex, None)
-                                    graph.AddEdgeForced edge
+                                    let edge = TokensEdge(num, commonEndVertex, None)
+                                    tokensGraph.AddEdgeForced edge
                             )
                     startVertex := !endVertex
                     incr endVertex
@@ -381,161 +489,145 @@ type ControlFlow<'TokenType> (tree : Tree<'TokenType>
             !endVertex - 1 //current it because of algorithm realization. Ideally, it should be !endVertex
         
 
-        let rec handleAst (ast : AST) : (InterNode<_> * InterNode<_>) = 
+        let rec handleAst (ast : AST) = 
         
-            let handleFamily (family : Family) : (InterNode<_> * InterNode<_>) = 
+            let handleFamily (family : Family) = 
                 let familyName = parserSource.leftSides.[family.prod] |> parserSource.numToString
 
                 let handle (node : obj) = 
                     match node with 
                     | :? int as t when t < 0 -> () 
-                    | :? int as t -> 
-                        let delimiters = langSource.typeToDelimiters.[!blockType]
-                        let tokNumber = parserSource.tokenToNumber input.[t]
+                    | :? int as t -> ()
+//                        let delimiters = langSource.typeToDelimiters.[!blockType]
+//                        let tokNumber = parserSource.tokenToNumber input.[t]
+//
+//                        if List.exists (fun num -> num = tokNumber) delimiters
+//                        then
+//                            if not <| tokens.Value.IsEmpty 
+//                            then
+//                                let nodeIn, nodeOut = createNewBlock <| List.rev !tokens <| !blockType
+//                                tokens := []
+//                                blocks := (nodeIn, nodeOut) :: !blocks
+//                        else
+//                            tokens := t :: !tokens
 
-                        if List.exists (fun num -> num = tokNumber) delimiters
-                        then
-                            if not <| tokens.Value.IsEmpty 
-                            then
-                                let nodeIn, nodeOut = createNewBlock <| List.rev !tokens <| !blockType
-                                tokens := []
-                                blocks := (nodeIn, nodeOut) :: !blocks
-                        else
-                            tokens := t :: !tokens
+//                        if tokNumber = langSource.elseNumber || (tokNumber = langSource.endIfNumber && not <| !wasElse)
+//                        then
+//                            blocks := List.rev <| !blocks
+//                            let head = blocks.Value.Head
+//                            let thenBranch = concatBlocks blocks.Value.Tail
+//                            blocks := [thenBranch; head;]
+//                            wasElse := true
+//                        
+//                        elif tokNumber = langSource.endIfNumber
+//                        then
+//                            blocks := List.rev <| !blocks
+//                            let head = blocks.Value.Head
+//                            let thenBranch = blocks.Value.Tail.Head
+//                            let elseBranch = concatBlocks blocks.Value.Tail.Tail
+//
+//                            blocks := [elseBranch; thenBranch; head; ]
 
-                        if tokNumber = langSource.elseNumber || (tokNumber = langSource.endIfNumber && not <| !wasElse)
-                        then
-                            blocks := List.rev <| !blocks
-                            let head = blocks.Value.Head
-                            let thenBranch = concatBlocks blocks.Value.Tail
-                            blocks := [thenBranch; head;]
-                            wasElse := true
-                        
-                        elif tokNumber = langSource.endIfNumber
-                        then
-                            blocks := List.rev <| !blocks
-                            let head = blocks.Value.Head
-                            let thenBranch = blocks.Value.Tail.Head
-                            let elseBranch = concatBlocks blocks.Value.Tail.Tail
-
-                            blocks := [elseBranch; thenBranch; head; ]
-
-                    | :? AST as ast ->  
-                        let pairBlocks = handleAst ast
-                        let fstBlock = fst pairBlocks
-                        if not <| fstBlock.IsEmpty
-                        then
-                            blocks := pairBlocks :: !blocks
+                    | :? AST as ast -> handleAst ast
                     | _ -> failwithf "Unexpected AST node type in Control-Flow construction"
 
                 if langSource.nodeToType.ContainsKey familyName 
                 then 
                     match langSource.nodeToType.[familyName] with
-                    | IfStatement -> 
-                        stack.Push (!blockType, !blocks, !tokens, !wasElse)
-                        blockType := IfStatement
-                        blocks := []
-                        tokens := []
-                        wasElse := false
-
-                        family.nodes.doForAll(fun node -> handle node)
-
-                        blocks := List.rev !blocks
-                        // only for debug
-//                        let temp = Array.ofList !blocks
-
-                        let ifStart, ifEnd = createIfBlock !blocks
-                        restoreContext()
-                        
-                        ifStart, ifEnd
+//                    | IfStatement -> 
+//                        stack.Push (!blockType, (*!blocks,*) !tokens, !wasElse)
+//                        blockType := IfStatement
+////                        blocks := []
+//                        tokens := []
+//                        wasElse := false
+//
+//                        family.nodes.doForAll(fun node -> handle node)
+//
+//                        blocks := List.rev !blocks
+//                        // only for debug
+////                        let temp = Array.ofList !blocks
+//
+//                        let ifStart, ifEnd = createIfBlock !blocks
+//                        restoreContext()
+//                        
+//                        ifStart, ifEnd
 
                     | Assignment -> 
-                        stack.Push (!blockType, !blocks, !tokens, !wasElse)
+                        stack.Push (!blockType, !tokens, !wasElse)
                         blockType := Assignment
-                        blocks := []
                         tokens := []
                         wasElse := false
 
-                        let toksGraph = new CfgInnerGraph()
-                        let startVertex = ref CfgInnerGraph.StartVertex
-                        let endVertex = ref 1
-                        family.nodes.doForAll(fun node -> collectTokens node toksGraph startVertex endVertex)
+                        let toksGraph = new CfgTokensGraph()
+                        let tStartVertex = ref CfgTokensGraph.StartVertex
+                        let tEndVertex = ref <| CfgTokensGraph.StartVertex + 1
+                        family.nodes.doForAll(fun node -> collectTokens node toksGraph tStartVertex tEndVertex)
                         
-                        let mutable newBlocks = 
-                            toksGraph.CollectAllTokens()
-                            |> List.map 
-                                    (
-                                        fun set -> 
-                                            let toksFromBlock = 
-                                                set 
-                                                |> List.map (fun tok -> tree.Tokens.[tok])
-                                                |> Array.ofList
-                                            Block.CreateSimpleBlock Assignment toksFromBlock
-                                    )
+                        let commonStart = !bStartVertex
+                        let commonEnd = !bEndVertex
 
+                        toksGraph.CollectAllTokens()
+                        |> List.map 
+                                (
+                                    fun set -> 
+                                        let toksFromBlock = 
+                                            set 
+                                            |> List.map (fun tok -> tree.Tokens.[tok])
+                                            |> Array.ofList
+                                        Block.CreateSimpleBlock Assignment toksFromBlock
+                                )
+                        |> List.iter 
+                                (
+                                    fun block -> 
+                                        let pair = block.parent, block.children.Head
+                                        let edge = new BlockEdge<'TokenType>(commonStart, commonEnd, Some <| pair)
+                                        blocksGraph.AddEdgeForced edge
+                                )
                         
-                        let commonParent = newBlocks.Head.parent
-                        let commonChildren = newBlocks.Head.children.Head
-
-                        
-                        newBlocks <- 
-                            newBlocks 
-                            |> List.tail
-                            |> List.map
-                                    (
-                                        fun block -> 
-                                            block.parent.ReplaceMeForChildren commonParent
-                                            block.children.Head.ReplaceMeForParents commonChildren
-                                            block
-                                    )
-
-//                        let assignBlock = concatBlocks !blocks
-                        
+                        updateVertices()
                         restoreContext()
 
-                        commonParent, commonChildren
-
+                        commonEnd
                     | _ -> 
-                        InterNode<_>(), InterNode<_>()
+                        !bEndVertex - 1
 
                 else 
                     family.nodes.doForAll (fun node -> handle node)
-                    InterNode<_>(), InterNode<_>()
-            
-            let blocksList = ref []
+                    !bEndVertex - 1
+
+            let family = ast.first
+
+            let commonStart = !bStartVertex
+            let finishNumber = handleFamily family
 
             if ast.other <> null 
             then
-                ast.other
+                let newEndNumbers = 
+                    ast.other
+                    |> Array.map
+                            (
+                                fun family -> 
+                                    bStartVertex := commonStart
+                                    let oldEnd = handleFamily family
+                                    oldEnd
+                            )
+
+                let commonFinish = !bEndVertex
+                let newEdge = new BlockEdge<'TokenType>(finishNumber, commonFinish, None)
+                blocksGraph.AddEdgeForced(newEdge)
+
+                newEndNumbers
                 |> Array.iter 
                         (
-                            fun family -> 
-                                let res = handleFamily family
-                                blocksList := res :: !blocksList
+                            fun num -> 
+                                let newEdge = new BlockEdge<'TokenType>(num, commonFinish, None)
+                                blocksGraph.AddEdgeForced(newEdge)
                         )
-            
-            let family = ast.first
-            let startNode, finishNode = handleFamily family
+                updateVertices()
 
-            blocksList.Value
-            |> List.rev
-            |> List.iter 
-                    (
-                        fun block -> 
-                            let startBlock = fst block
-                            startBlock.ReplaceMeForChildren startNode
-
-                            let endBlock = snd block
-                            endBlock.ReplaceMeForParents finishNode
-                     )
-
-            startNode, finishNode
-
-        handleAst treeRoot |> ignore
+        handleAst treeRoot
         
-        let result = concatBlocks <| List.rev blocks.Value
-        
-        result
+        graphToCfg blocksGraph
 
     let findUndefVariable() = 
         

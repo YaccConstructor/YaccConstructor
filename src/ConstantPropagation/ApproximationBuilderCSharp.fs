@@ -12,7 +12,7 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open XMLParser
 open CSharpCFGInfo
 open Utils
-open CSharpCFGConversion
+open CFGConversionCSharp
 open GenericCFG
 open GenericCFG.GenericCFGFuncs
 

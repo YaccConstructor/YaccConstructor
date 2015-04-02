@@ -21,8 +21,9 @@
 
 
 {
-open AbstractLexer.Core
 open Yard.Utils.SourceText
+open YC.FSA.GraphBasedFsa
+open YC.FSA.FsaApproximation
 }
 
 include "../../GrammarTemplates/Common.yrd"
@@ -40,14 +41,14 @@ include "create_table.yrd"
 include "transaction.yrd"
 
 tokens {
-    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
 }
 
 options {
     translate = false
     module = "Yard.Examples.MSParser"
     infEpsPath = epsilons
-    pos = "array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>"
+    pos = "FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>"
 }
 
 module Main

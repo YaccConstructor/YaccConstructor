@@ -43,7 +43,7 @@
     <None Include="Lexer.fsl" />
     <FsYard Include="Calc.yrd" />
     <Compile Include="Calc.yrd.fs" />
-    <Compile Include="Lexer.fs" />
+    <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="Calc.fs" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -121,14 +121,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FST\FST\FSA\FSA.fsproj">
+      <Name>FSA</Name>
+      <Project>{b48cfdcc-86f7-4c3a-a5a2-8170950dd2ab}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
+      <Name>FST</Name>
+      <Project>{bcf4793c-e8b4-4fd5-9723-3c08859066c5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">
       <Name>AbstractAnalysis.Common</Name>
       <Project>{4049cf0a-8f86-48b7-98ba-d062625ba281}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
-      <Name>AbstractLexer.Core</Name>
-      <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+    <ProjectReference Include="..\AbstractLexer.Interpreter\AbstractLexer.Interpreter.fsproj">
+      <Name>AbstractLexer.Interpreter</Name>
+      <Project>{0a44967a-f233-4d77-8abb-d165af90075a}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

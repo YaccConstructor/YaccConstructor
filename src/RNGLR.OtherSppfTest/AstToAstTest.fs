@@ -34,7 +34,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Elementary test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVertexRange[0; 1; 2; 3; 4;] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -56,7 +56,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Epsilon test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVertexRange[0; 1; 2] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -76,7 +76,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Ambiguous test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVertexRange[0; 1; 2; 3] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -97,7 +97,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Parents test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 2)
         qGraph.AddVertexRange[0; 1; 2] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -116,7 +116,7 @@ type ``RNGLR ast to otherSPPF translation test`` () =
 
     [<Test>]
     member test.``Cycles test``() =
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 1)
         qGraph.AddVertexRange[0; 1] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -147,9 +147,8 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Simple test``() =
-        printfn "[caret](1 + 2)"
+        let qGraph = new ParserInputGraph<_>(0, 5)
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -184,9 +183,8 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Many brackets 1``() =
-        printfn "[caret] ( ( 2 ) )"
+        let qGraph = new ParserInputGraph<_>(0, 5)
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -222,9 +220,8 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Many brackets 2``() =
-        printfn " ( [caret] ( 2 ) )"
+        let qGraph = new ParserInputGraph<_>(0, 5)
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; 5] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -261,9 +258,8 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Right to left 1``() =
-        printfn " ( ( 2 ) [caret] )"
+        let qGraph = new ParserInputGraph<_>(0, 3)
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4;] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -298,9 +294,8 @@ type ``Classic case: matching brackets``() =
 
     [<Test>]
     member test.``Classic case. Right to left 2``() =
-        printfn "( ( 2 ) ) [caret]"
+        let qGraph = new ParserInputGraph<_>(0, 5)
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -352,10 +347,9 @@ type ``Abstract case: matching brackets``() =
 
     [<Test>]
     member test.``Abstract case. Left to right. Two parentheses 1``() =
-        printfn "[caret]'(' -> '1' -> ')'"
+        let qGraph = new ParserInputGraph<_>(0, 3)
         printfn "                  -> ')'"
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -392,10 +386,9 @@ type ``Abstract case: matching brackets``() =
 
     [<Test>]
     member test.``Abstract case. Left to right. Two parentheses 2``() =
-        printfn "[caret] '(' -> '1' -> ')'"
+        let qGraph = new ParserInputGraph<_>(0, 7)
         printfn "            -> '2' -> ')'"
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; 4; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -437,7 +430,7 @@ type ``Abstract case: matching brackets``() =
         printfn "        '2' -> ')'[caret]"
         printfn " '(' -> "
         
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 3)
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -476,11 +469,10 @@ type ``Abstract case: matching brackets``() =
 
     [<Test>]
     member test.``Abstract case. Right to left. Two parentheses 2``() =
-        printfn " '(' -> '2' ->"
+        let qGraph = new ParserInputGraph<_>(0, 5)
         printfn "               ')'[caret]"
         printfn " '(' -> '3' ->"
         
-        let qGraph = new ParserInputGraph<_>()
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [
@@ -524,7 +516,7 @@ type ``Abstract case: matching brackets``() =
         printfn " '(' ->        '3' -> ')' -> ')'[caret]"
         printfn "        '(' -> "
         
-        let qGraph = new ParserInputGraph<_>()
+        let qGraph = new ParserInputGraph<_>(0, 5)
         qGraph.AddVertexRange[0; 1; 2; 3; ] |> ignore
         qGraph.AddVerticesAndEdgeRange
             [

@@ -20,15 +20,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lexer
-//open Microsoft.FSharp.Text.Lexing
-//open Microsoft.FSharp.Text
-open Microsoft.FSharp.Reflection
+module YC.TSQLLexer
+
+open Microsoft.FSharp.Collections
+open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
+open YC.FST.AbstractLexing.Interpreter
+open AbstractAnalysis.Common
 open Yard.Examples.MSParser
-open LexerHelper
 open System
+open LexerHelper
+open Microsoft.FSharp.Reflection
 open Yard.Utils.StructClass
 open YC.SDK.CommonInterfaces
+open System.Collections.Generic
 
 let mutable id = 0<id>
 
@@ -39,8 +44,8 @@ let lparen = '('
 let rparen = ')'
 let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
 let whitespaces = [' '  '\t']+
-let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'а'-'я' 'А'-'Я' ] 
-let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'а'-'я' 'А'-'Я' ] 
+let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%'  ] 
+let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$'  ] 
 // Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
 //let with_dot = '.' | idenbody_char
 let ident = idenstarchar idenbody_char*
@@ -53,30 +58,32 @@ let label = ident ':'
 rule tokens = parse
 (* | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
  | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } *)
- | decnumber    { DEC_NUMBER((defaultSourceText id brs lexeme),brs )|> Some }
+ | decnumber    { DEC_NUMBER(gr)|> Some }
  | whitespaces  { None }
- | "."        //  { getLiteral id brs "." }
- | ","        //  { getLiteral id brs "," }
- | "="        //  { getLiteral id brs "=" }
- | ">"        //  { getLiteral id brs ">"}
- | "<"        //  { getLiteral id brs "<"}
- | ";"        //  { getLiteral id brs ";"}
- | "("     // { getLiteral id brs "(" }
- | ")"     // { getLiteral id brs ")" }
- | "["     // { getLiteral id brs "[" }
- | "]"     // { getLiteral id brs "]" }
- | "+"     // { getLiteral id brs "+" }
- | "-"     // { getLiteral id brs "-" }
- | "~"     // { getLiteral id brs "~" }
- | "*"     // { getLiteral id brs "*" }*)
+// | '.'       //  { getLiteral id brs "." }
+ | ','      { L_comma_(gr) |> Some }  //  { getLiteral id brs "," }
+ | '='      { L_equal_(gr) |> Some }  //  { getLiteral id brs "=" }
+ | '>'      { L_more_(gr) |> Some }  //  { getLiteral id brs ">"}
+ | '<'      { L_less_(gr) |> Some }  //  { getLiteral id brs "<"}
+ | ';'      { L_colon_(gr) |> Some}  //  { getLiteral id brs ";"}
+ | '('      { L_left_bracket_(gr) |> Some} // { getLiteral id brs "(" }
+ | ')'      { L_right_bracket_(gr) |> Some} // { getLiteral id brs ")" }
+// | '['     // { getLiteral id brs "[" }
+// | ']'     // { getLiteral id brs "]" }
+ | '+'     { L_plus_(gr) |> Some }// { getLiteral id brs "+" }
+ | '-'     { L_minus_(gr) |> Some }// { getLiteral id brs "-" }
+// | '~'     // { getLiteral id brs "~" }
+ | '*'     { L_star_(gr) |> Some }// { getLiteral id brs "*" }*)
  //| "$"      { getLiteral brs "$" } 
- | ident {  let tok = makeIdent false lexeme (brs, brs)
-            Some tok }
- | "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
+ | "select" { L_select(gr) |> Some }
+ | "from" { L_from(gr)|> Some }
+ | "where" { L_where(gr)|> Some }
+ | "and" { L_and_(gr) |> Some }
+ | "or" { L_or_(gr) |> Some }
+ | ident { IDENT(gr) |> Some }
+//| "--" [^'\r' '\n']*  { None (* parser knows nothing about comments *) }  
  (*| "/*" { commendepth := 1; clearBuf(); multiline_comment brs }*)
- | eof  {RNGLR_EOF((defaultSourceText id brs  ""),brs) |> Some }
- | _  { raise (LexerError(lexeme,box brs)) }   //{ failwith (sprintf "fucking shit received %s\n" lexeme ) }
-(* and literal = parse
+ (* and literal = parse
   | "''" { appendBuf("'"); literal brs }
   | '\'' { STRING_CONST(defaultSourceText id  brs (string str_buf)) }
   | eol { appendBuf(lexeme brs); brs.EndPos <- brs.EndPos.NextLine; literal brs }

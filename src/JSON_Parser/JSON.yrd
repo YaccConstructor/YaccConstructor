@@ -1,11 +1,12 @@
 ﻿{
-open AbstractLexer.Core
+open YC.FST.AbstractLexing.Interpreter
+open YC.FSA.FsaApproximation
 }
 
 include "../../GrammarTemplates/Common.yrd"
 
 tokens {
-    _ of string*array<Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
+    _ of FSA<char*Position<JetBrains.ReSharper.Psi.CSharp.Tree.ICSharpLiteralExpression>>
 }
 
 options {

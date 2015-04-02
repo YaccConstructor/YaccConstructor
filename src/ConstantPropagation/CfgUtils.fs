@@ -8,6 +8,7 @@ open System.Collections.Generic
 
 open CSharpCFGInfo
 open GenericCFG
+open JetBrains.ReSharper.Psi.Tree
 
 let collectAdditionalInfo (cfg: IControlFlowGraf) infoExtractor initInfo =
     let rec dfs (cfgElem: IControlFlowElement) (extractInfo: IControlFlowElement -> 'Info -> 'Info) 
@@ -58,3 +59,12 @@ let convert (csharpCFG: IControlFlowGraf) toGenericNode =
     let genericCFG = GenericCFGFuncs.create()
     dfs csharpCFG.EntryElement Set.empty genericCFG
     genericCFG
+
+let correspondingCfe (treeNode: ITreeNode) (cfgInfo: CSharpCFGInfo) =
+    let cfgNodes = cfgInfo.AstCfgMap.[treeNode.GetHashCode()]
+    if cfgNodes.Count > 1
+    then
+        let multipleCfgNodesForAstNodeMsg = 
+            "ast node maps to multiple cfg nodes where single mapping expected" 
+        failwith multipleCfgNodesForAstNodeMsg
+    else cfgNodes |> List.ofSeq |> List.head

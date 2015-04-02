@@ -14,6 +14,7 @@ open GenericCFGFuncs
 open XMLParser
 open Utils
 open CSharpCFGInfo
+open CfgUtils
 
 open System.Collections.Generic
 
@@ -64,15 +65,6 @@ let private extractCSharpCfgInfo (cfgElem: IControlFlowElement) (info: CSharpCFG
             
 let collectAdditionalInfo (cfg: ICSharpControlFlowGraf) =
     CfgUtils.collectAdditionalInfo cfg extractCSharpCfgInfo emptyCSharpCfgInfo
-
-let private multipleCfgNodesForAstNodeMsg = 
-    "ast node maps to multiple cfg nodes where single mapping expected"
-
-let private correspondingCfe (treeNode: ITreeNode) (cfgInfo: CSharpCFGInfo) =
-    let cfgNodes = cfgInfo.AstCfgMap.[treeNode.GetHashCode()]
-    if cfgNodes.Count > 1
-    then failwith multipleCfgNodesForAstNodeMsg
-    else cfgNodes |> List.ofSeq |> List.head
 
 let convert (csharpCFG: ICSharpControlFlowGraf) (cfgInfo: CSharpCFGInfo) =
     // exception messages 

@@ -1,6 +1,9 @@
-﻿{caret}function main(cond)
-{
-    var query = "Select field From Table1";
-    query = query.replace("Table1", "Table2");
-    execScript(query);
-}
+﻿{caret}/*
+18 -> 23
+17 -> 18
+16 -> 17
+15 -> 16
+13 -> 15
+6 -> 13
+5 -> 6
+*/

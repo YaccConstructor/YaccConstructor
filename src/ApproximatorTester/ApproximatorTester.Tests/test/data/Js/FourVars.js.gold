@@ -1,19 +1,23 @@
-﻿{caret}function main(cond)
-{
-    var query1 = "Select";
-    var field = " fieldName ";
-    query1 += "from";
-    var tableName = "Table1";
-    if (cond)
-    {
-        query1 += tableName;
-    }
-    else
-    {
-        tableName = "Table2";
-        query1 += tableName;
-    }
-    var filter = "where field is numeric";
-    query1 += filter;
-    execScript(query1);
-}
+﻿{caret}/*
+53 -> 58
+52 -> 53
+51 -> 52
+47 -> 51
+46 -> 47
+30 -> 46
+29 -> 30
+28 -> 29
+20 -> 28
+20 -> 36
+19 -> 20
+16 -> 19
+15 -> 16
+14 -> 15
+6 -> 14
+5 -> 6
+43 -> 46
+42 -> 43
+41 -> 42
+37 -> 41
+36 -> 37
+*/

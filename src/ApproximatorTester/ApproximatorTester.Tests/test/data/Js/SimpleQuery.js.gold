@@ -1,14 +1,16 @@
-﻿{caret}function main(cond) {
-    var query1 = "Select field From ";
-    if (cond)
-    {
-        query1 += "Table1";
-    }
-    else
-    {
-        query1 += "Table2";
-    }
-    var filter = "where field is numeric";
-    query1 += filter;
-    execScript(query1);
-}
+﻿{caret}/*
+33 -> 38
+32 -> 33
+31 -> 32
+27 -> 31
+26 -> 27
+16 -> 26
+15 -> 16
+14 -> 15
+6 -> 14
+6 -> 21
+5 -> 6
+23 -> 26
+22 -> 23
+21 -> 22
+*/

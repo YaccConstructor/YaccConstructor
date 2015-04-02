@@ -6,6 +6,8 @@ open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.Tree
 
 open Utils
+open CFGConversionJs
+open GenericCFG.GenericCFGFuncs
 
 open System.IO
 
@@ -35,7 +37,17 @@ let getHotspots (cfg: IJsControlFlowGraf) =
 
 let build (cfg: IJsControlFlowGraf) =
     let fstHotspot = getHotspots cfg |> List.head
-    ()
+
+    let additionalInfo = collectAdditionalInfo cfg
+    let genericCFG = convert cfg additionalInfo
+    let hotVarRef = extractVarRefFromHotspot fstHotspot additionalInfo genericCFG
+    let cfgForVar = subgraphForVar hotVarRef genericCFG
+
+    let cfgName = "cfg_" + cfg.GetHashCode().ToString() + "_forvar"
+    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
+    toDot cfgForVar cfgName path
+
+    cfgForVar
 
 let BuildApproximation (cfg: IJsControlFlowGraf) =
     serializeJsCfg cfg

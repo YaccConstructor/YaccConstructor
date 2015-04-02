@@ -34,7 +34,7 @@ namespace ApproximatorTester
         {
             var inputFile = _provider.PsiFile;
             var ddGraphs = Approximator.BuildApproximation(inputFile);
-            OutputResult(ResultToString(ddGraphs.First()));
+            OutputResult(Utils.GenericCfgStructureToDot(ddGraphs.First()));
             return null;
         }
 
@@ -61,14 +61,6 @@ namespace ApproximatorTester
             {
                 ModificationUtil.ReplaceChild(namespaceDecl, commentWithResult);
             });
-        }
-
-        private string ResultToString(GenericCFG.GenericCFG ddGraph)
-        {
-            var edgesList = ddGraph.Graph.Edges
-                .Select(edge => edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString())
-                .ToList();
-            return String.Join("\n", edgesList);
         }
     }
 }

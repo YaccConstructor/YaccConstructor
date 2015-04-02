@@ -1,8 +1,16 @@
-﻿{caret}function main(cond)
-{
-    var innerQuery = "Select field From Table1";
-    var tableName = "Table1";
-    var query = "Do smth";
-    query = query.replace("smth", innerQuery.replace(tableName, "Table2"));
-    execScript(query);
-}
+﻿{caret}/*
+32 -> 37
+31 -> 32
+30 -> 31
+29 -> 30
+28 -> 29
+26 -> 28
+23 -> 26
+21 -> 23
+14 -> 21
+13 -> 14
+10 -> 13
+9 -> 10
+6 -> 9
+5 -> 6
+*/

@@ -1,6 +1,8 @@
-﻿{caret}function main()
-{
-    var query1 = "Select field From ";
-    var query2 = query1 + "Table";
-    execScript(query2);
-}
+﻿{caret}/*
+13 -> 18
+12 -> 13
+11 -> 12
+10 -> 11
+6 -> 10
+5 -> 6
+*/

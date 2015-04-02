@@ -1,8 +1,13 @@
 ﻿module CfgUtils
 
+open QuickGraph
+
 open JetBrains.ReSharper.Psi.ControlFlow
+
 open System.Collections.Generic
+
 open CSharpCFGInfo
+open GenericCFG
 
 let collectAdditionalInfo (cfg: IControlFlowGraf) infoExtractor initInfo =
     let rec dfs (cfgElem: IControlFlowElement) (extractInfo: IControlFlowElement -> 'Info -> 'Info) 
@@ -34,3 +39,22 @@ let addAstCfgMapping (cfgElem: IControlFlowElement) (map': Map<int, Set<ControlF
         Map.add nodeHash updSet map'
     else
         map'
+
+let convert (csharpCFG: IControlFlowGraf) toGenericNode =
+    let rec dfs (cfe: IControlFlowElement) (visited: Set<int>) (genCFG: GenericCFG) =
+        if Set.contains cfe.Id visited |> not
+        then
+            let visited' = Set.add cfe.Id visited
+            let cur = toGenericNode cfe
+            let children =
+                cfe.Exits
+                |> List.ofSeq
+                |> List.choose (fun rib -> if rib.Target <> null then Some(rib.Target) else None) 
+            children
+            |> List.map (fun t -> toGenericNode t)
+            |> List.iter(fun node -> genCFG.Graph.AddVerticesAndEdge(new Edge<CFGNode>(cur, node)) |> ignore)
+            List.iter (fun ch -> dfs ch visited' genCFG) children
+
+    let genericCFG = GenericCFGFuncs.create()
+    dfs csharpCFG.EntryElement Set.empty genericCFG
+    genericCFG

@@ -41,9 +41,9 @@
     </Content>
     <Compile Include="Utils.fs" />
     <Compile Include="CSharpCFGInfo.fs" />
-    <Compile Include="CfgUtils.fs" />
     <Compile Include="DataDependencyGraph.fs" />
     <Compile Include="GenericCFG.fs" />
+    <Compile Include="CfgUtils.fs" />
     <Compile Include="CFGConversionCSharp.fs" />
     <Compile Include="ApproximationBuilderCSharp.fs" />
     <Compile Include="CFGConversionJs.fs" />

@@ -1,0 +1,100 @@
+{
+//  UserLexer.fs contains simple lexer for testing.
+//
+//  for build:  fslex Lexer.fsl --unicode -o Lexer.fs
+//
+//  Copyright 2011, 2012 Semen Grigorev <rsdpisuy@gmail.com>
+//
+//  This file is part of YaccConctructor.
+//
+//  YaccConstructor is free software:you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+module Lexer
+open Microsoft.FSharp.Text.Lexing
+open Microsoft.FSharp.Text
+open Microsoft.FSharp.Reflection
+open Yard.Examples.MSParser
+open LexerHelper
+open System
+open Yard.Utils.StructClass
+
+let mutable id = 0<id>
+
+}
+
+let anything = ['a'-'z' 'A'-'Z' '0'-'9' '\n' '\r' ' ' ] + 
+let lparen = '('
+let rparen = ')'
+let eol = '\r' | '\n' | '\r' '\n' (* See script.sql position (4560,27) *)
+let whitespaces = [' '  '\t']+
+let idenstarchar  = ['A'-'Z' 'a'-'z' '_' '@' '#' '%' 'а'-'я' 'А'-'Я' ] 
+let idenbody_char  = ['A'-'Z' 'a'-'z' '_' '0'-'9' '@' '%' '#' '$' 'а'-'я' 'А'-'Я' ] 
+// Разобраться с идентификаторами cyrillic с,а (885574,_) (1004524)
+//let with_dot = '.' | idenbody_char
+let ident = idenstarchar idenbody_char*
+let decnumber = ['0'-'9']+ 
+let hexnumber = "0x" ['0'-'9' 'a'-'f' 'A'-'F']+
+let floae = 'e' | 'E'
+let floatnumber = decnumber ('.' decnumber)? ( floae decnumber) ? (* what with 100.   ?? *)
+let label = ident ':'
+
+rule tokens = parse
+ | eol          { lexbuf.EndPos <- lexbuf.EndPos.NextLine;tokens lexbuf }
+ | '\'' | "N'" { clearBuf(); startPos := lexbuf.StartPos; literal lexbuf } 
+ | decnumber    { (*Printf.printf "decnumber %s\n" ( LexBuffer<_>.LexemeString(lexbuf) )*)
+                  DEC_NUMBER(defaultSourceText id lexbuf <| LexBuffer<_>.LexemeString(lexbuf)) }
+ | whitespaces  { tokens lexbuf }
+ | "."          { getLiteral id lexbuf "." }
+ | ","          { getLiteral id lexbuf "," }
+ | "="          { getLiteral id lexbuf "=" }
+ | ">"          { getLiteral id lexbuf ">" }
+ | "<"          { getLiteral id lexbuf "<" }
+ | ";"          { getLiteral id lexbuf ";" }
+ | "("      { getLiteral id lexbuf "(" }
+ | ")"      { getLiteral id lexbuf ")" }
+ | "["      { getLiteral id lexbuf "[" }
+ | "]"      { getLiteral id lexbuf "]" }
+ | "+"      { getLiteral id lexbuf "+" }
+ | "-"      { getLiteral id lexbuf "-" }
+ | "~"      { getLiteral id lexbuf "~" }
+ | "*"      { getLiteral id lexbuf "*" }
+ //| "$"      { getLiteral lexbuf "$" } 
+ | ident {  let l = LexBuffer<_>.LexemeString(lexbuf)
+            makeIdent false l (new Pair(id, int64 lexbuf.StartPos.AbsoluteOffset * _symbolL), 
+                                     new Pair(id, int64 lexbuf.EndPos.AbsoluteOffset * _symbolL))
+         }
+ | "--" [^'\r' '\n']*  { tokens lexbuf (* parser knows nothing about comments *) }  
+ | "/*" { commendepth := 1; clearBuf(); multiline_comment lexbuf }
+ | eof  {RNGLR_EOF(defaultSourceText id lexbuf  "")}
+ | _    { failwith (sprintf "fucking shit received %s\n" (LexBuffer<_>.LexemeString(lexbuf)) ) }
+and literal = parse
+  | "''" { appendBuf("'"); literal lexbuf }
+  | '\'' { STRING_CONST(defaultSourceText id  lexbuf (string str_buf)) }
+  | eol { appendBuf(lexeme lexbuf); lexbuf.EndPos <- lexbuf.EndPos.NextLine; literal lexbuf }
+  | eof { failwith "unclosed literal at the end of file" }
+  | _ { appendBuf(lexeme lexbuf); literal lexbuf }
+and multiline_comment = parse
+  | "/*" 
+    { incr commendepth; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf}
+  | "*/"
+    { decr commendepth; 
+      if !commendepth = 0 then 
+        tokens lexbuf
+      else 
+        appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf 
+    }
+  | eol {lexbuf.EndPos <- lexbuf.EndPos.NextLine; appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf }
+  | eof { failwith "unclosed comment in the end of file" }
+  | [^ '\r' '\n' '*' '/']+ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf } 
+  | _ { appendBuf(LexBuffer<_>.LexemeString(lexbuf)); multiline_comment lexbuf }

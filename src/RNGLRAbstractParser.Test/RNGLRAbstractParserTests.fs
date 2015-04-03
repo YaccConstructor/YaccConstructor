@@ -493,7 +493,21 @@ type ``RNGLR abstract parser tests`` () =
             edg 2 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
             ] |> ignore
 
-        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 24 24 4 8 2
+    [<Test>]
+    member this._28_UnambiguousBrackets_DifferentPathLengths () =
+        let qGraph = new ParserInputGraph<_>(0, 9)
+        qGraph.AddVerticesAndEdgeRange
+           [edg 0 1 (RNGLR.StrangeBrackets.LBR 0)
+            edg 1 2 (RNGLR.StrangeBrackets.RBR 1)
+            edg 2 3 (RNGLR.StrangeBrackets.LBR 2)
+            edg 3 4 (RNGLR.StrangeBrackets.RBR 3)
+            edg 2 5 (RNGLR.StrangeBrackets.LBR 4)
+            edg 5 6 (RNGLR.StrangeBrackets.RBR 5)
+            edg 6 3 (RNGLR.StrangeBrackets.LBR 6)
+            edg 4 9 (RNGLR.StrangeBrackets.RNGLR_EOF 0)
+            ] |> ignore
+
+        test RNGLR.StrangeBrackets.buildAstAbstract qGraph 25 24 4 8 1
 [<EntryPoint>]
 let f x =
     if System.IO.Directory.Exists "dot" 
@@ -525,9 +539,10 @@ let f x =
 //    t._21_Brackets ()
 //    t._22_Brackets_BackEdge ()
 //    t._23_UnambiguousBrackets ()
-    t._24_UnambiguousBrackets_Circle()
+//    t._24_UnambiguousBrackets_Circle()
 //    t._25_UnambiguousBrackets_BiggerCircle ()
 //    t._26_UnambiguousBrackets_Inf()
 //    t._27_UnambiguousBrackets_WithoutEmptyString()
+    t._28_UnambiguousBrackets_DifferentPathLengths ()
     0
     

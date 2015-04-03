@@ -348,7 +348,7 @@ type ``RNGLR abstract parser tests`` () =
     member this.``Errors 1`` () =
         errorTest "errors1.dot" true 1
     
-    [<Test>]
+//    [<Test>]
     member this.``Errors 2`` () =
         errorTest "errors2.dot" true 1
 

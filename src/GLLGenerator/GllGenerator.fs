@@ -45,6 +45,7 @@ type GLL() =
             let mutable needTranslate = getBoolOption "translate" true
             let mutable light = getBoolOption "light" true
             let mutable printInfiniteEpsilonPath = getOption "infEpsPath" "" id
+            let mutable isAbstract = getOption "abstract" "" id
             let mutable caseSensitive = getBoolOption "caseSensitive" false
             let mutable output =
                 let fstVal = getOption "output" (definition.info.fileName + ".fs") id
@@ -66,6 +67,7 @@ type GLL() =
                 | "-translate" -> needTranslate <- getBoolValue "translate" value
                 | "-light" -> light <- getBoolValue "light" value
                 | "-infEpsPath" -> printInfiniteEpsilonPath <- value
+                | "-abstract" -> isAbstract <- value
                 | value -> failwithf "Unexpected %s option" value
                  
             let newDefinition = initialConvert definition

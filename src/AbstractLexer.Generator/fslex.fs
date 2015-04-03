@@ -14,6 +14,7 @@ open System.IO
 open YC.FST.GraphBasedFst
 open Microsoft.FSharp.Collections 
 open QuickGraph
+open YC.FSA.GraphBasedFsa
 
 //------------------------------------------------------------------
 // This code is duplicated from Microsoft.FSharp.Compiler.UnicodeLexing
@@ -250,7 +251,7 @@ let main() =
         resFST.InitState.Add((fst perRuleData.[0]).Id) //we SUGGEST that we have one init state
         
         let stEOF = tableTransitions.[0].[(sizeTable - 1)] 
-        new TaggedEdge<_,_>(0, stEOF, new EdgeLbl<_,_>(Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
+        new EdgeFST<_,_>(0, stEOF, ( Smbl (char Eof), Eps)) |> resFST.AddVerticesAndEdge |> ignore
         resFST.FinalState.Add(stEOF)
                          
         for state in dfaNodes do
@@ -258,20 +259,19 @@ let main() =
                 let st = tableTransitions.[state.Id].[i]
                 if st <> sentinel 
                 then 
-                    new TaggedEdge<_,_>(state.Id, st, new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
+                    new EdgeFST<_,_>(state.Id, st, (Smbl (char (if i = sizeTable - 1 then int Eof else i)), Eps)) |> resFST.AddVerticesAndEdge |> ignore                       
                 else 
                     if state.Id <> 0
                     then 
                         let action = if actionFunc.[state.Id].Count > 0 then Smbl (actionFunc.[state.Id].[0]) else Eps
                         if tableTransitions.[0].[i] <> sentinel || i = sizeTable - 1
                         then  
-                            new TaggedEdge<_,_>(state.Id, tableTransitions.[0].[i], new EdgeLbl<_,_>(Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
+                            new EdgeFST<_,_>(state.Id, tableTransitions.[0].[i], (Smbl (char (if i = sizeTable - 1 then int Eof else i)), action)) |> resFST.AddVerticesAndEdge |> ignore
                             
         let getVal printV s = 
             match s with
             | Smbl y -> "Smbl " + printV y
             | Eps -> "Eps"
-            | _ -> ""
 
         let filePathFst = 
             match !out with 
@@ -291,17 +291,15 @@ let main() =
         fstStream.WriteLine(sprintf "   let startState = ResizeArray.singleton %i" resFST.InitState.[0]) // one init state...
         fstStream.WriteLine(sprintf "   let finishState = ResizeArray.singleton %i" resFST.FinalState.[0]) //one final state...
         fstStream.WriteLine("   let transitions = new ResizeArray<_>()")
-        //let alphabet = new ResizeArray<_>()
         let alphabet = new HashSet<_>()
         for edge in resFST.Edges do         
-            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)) |> ignore
+            alphabet.Add((getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'" | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))) |> ignore
             fstStream.WriteLine(
                 sprintf  
-                    "   transitions.Add(%i, new EdgeLbl<_,_>(%s, %s), %i)"
+                    "   transitions.Add(%i, (%s, %s), %i)"
                     edge.Source
-                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") edge.Tag.InSymb)
-                    //(getVal (fun y -> if y = char Eof then "(char 65535)" else ( "'" + y.ToString().Replace("\"","\\\"") + "'")) edge.Tag.InSymb)
-                    (getVal (string) edge.Tag.OutSymb) edge.Target)            
+                    (getVal (fun y -> match y with |'\n' -> "'\\n'" |'\r' -> "'\\r'" |'\t' -> "'\\t'"| '\\' -> "'\\\\'"  | x when x = char Eof -> "(char 65535)" | x -> "'" + y.ToString().Replace("\"","\\\"") + "'") (fst edge.Tag))
+                    (getVal (string) (snd edge.Tag)) edge.Target)            
                                                  
         fstStream.WriteLine("   new FST<_,_>(startState, finishState, transitions)")
 
@@ -311,7 +309,7 @@ let main() =
         let strs = ref ""
         for ((startNode, actions),(ident,args,_)) in List.zip perRuleData spec.Rules do
                 actions |> Seq.iteri (fun i (code,pos) -> 
-                    strs := !strs + "\n      (fun (gr : GraphTokenValue<_>) ->\n"  
+                    strs := !strs + "\n      (fun (gr : FSA<_>) ->\n"  
 
                     let lines = code.Split([| '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
                     for line in lines do

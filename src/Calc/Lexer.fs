@@ -4,13 +4,14 @@ module YC.CalcLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open Calc.AbstractParser
 open System.Collections.Generic
 open YC.SDK.CommonInterfaces
 
-# 13 "Lexer.fs"
+# 14 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -57,49 +58,49 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 17 "Lexer.fsl"
+# 18 "Lexer.fsl"
                               None 
-# 62 "Lexer.fs"
+# 63 "Lexer.fs"
           )
   | 1 -> ( 
-# 18 "Lexer.fsl"
+# 19 "Lexer.fsl"
                                                                   NUMBER(gr) |> Some 
-# 67 "Lexer.fs"
+# 68 "Lexer.fs"
           )
   | 2 -> ( 
-# 19 "Lexer.fsl"
+# 20 "Lexer.fsl"
                        MINUS(gr) |> Some 
-# 72 "Lexer.fs"
+# 73 "Lexer.fs"
           )
   | 3 -> ( 
-# 20 "Lexer.fsl"
+# 21 "Lexer.fsl"
                        LBRACE(gr) |> Some 
-# 77 "Lexer.fs"
+# 78 "Lexer.fs"
           )
   | 4 -> ( 
-# 21 "Lexer.fsl"
+# 22 "Lexer.fsl"
                        RBRACE(gr) |> Some 
-# 82 "Lexer.fs"
+# 83 "Lexer.fs"
           )
   | 5 -> ( 
-# 22 "Lexer.fsl"
+# 23 "Lexer.fsl"
                        DIV(gr) |> Some 
-# 87 "Lexer.fs"
+# 88 "Lexer.fs"
           )
   | 6 -> ( 
-# 23 "Lexer.fsl"
+# 24 "Lexer.fsl"
                        PLUS(gr) |> Some 
-# 92 "Lexer.fs"
+# 93 "Lexer.fs"
           )
   | 7 -> ( 
-# 24 "Lexer.fsl"
+# 25 "Lexer.fsl"
                         POW(gr) |> Some 
-# 97 "Lexer.fs"
+# 98 "Lexer.fs"
           )
   | 8 -> ( 
-# 25 "Lexer.fsl"
+# 26 "Lexer.fsl"
                        MULT(gr) |> Some 
-# 102 "Lexer.fs"
+# 103 "Lexer.fs"
           )
   | _ -> failwith "token"
 

@@ -4,13 +4,14 @@ module YC.JSONLexer
 
 open Microsoft.FSharp.Collections
 open YC.FST.GraphBasedFst
+open YC.FSA.GraphBasedFsa
 open YC.FST.AbstractLexing.Interpreter
 open AbstractAnalysis.Common
 open JSON.Parser
 open System
 
 
-# 13 "Lexer.fs"
+# 14 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -91,19 +92,19 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 28 "Lexer.fsl"
+# 29 "Lexer.fsl"
                                None 
-# 96 "Lexer.fs"
+# 97 "Lexer.fs"
           )
   | 1 -> ( 
-# 29 "Lexer.fsl"
+# 30 "Lexer.fsl"
                           NUMBER(gr) |> Some 
-# 101 "Lexer.fs"
+# 102 "Lexer.fs"
           )
   | 2 -> ( 
-# 30 "Lexer.fsl"
+# 31 "Lexer.fsl"
                            STRING1(gr) |> Some 
-# 106 "Lexer.fs"
+# 107 "Lexer.fs"
           )
   | _ -> failwith "token"
 

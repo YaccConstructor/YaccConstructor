@@ -124,9 +124,12 @@ and [<AllowNullLiteral>]
     new (edge) = new Path (edge, null, 1)
 
 let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (tokens : ParserInputGraph<'TokenType>) =
+    //printfn "\n__________________________________________________________"
     let statesCount = parserSource.Gotos.Length
     let startV, finalV, innerGraph =
-        let verticesMap = tokens.Vertices |> Seq.map (fun i -> (i, new VInfo<_> (i, statesCount))) |> dict
+        let verticesMap = Array.zeroCreate (Seq.max tokens.Vertices + 1)            
+        for i in tokens.Vertices do
+             verticesMap.[i] <- new VInfo<_> (i, statesCount)
         let g = new QuickGraph.AdjacencyGraph<_,_>()
         let added = 
             tokens.Edges |> Seq.map (fun e -> new QuickGraph.TaggedEdge<_,_>(verticesMap.[e.Source], verticesMap.[e.Target], e.Tag))
@@ -145,18 +148,24 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let verticesToProcess = new Queue<_>()
     verticesToProcess.Enqueue (startV)
     let mutable errorIndex = -1
-    let verticesSeenBefore = new Dictionary<_,_>()
+    let verticesSeenBefore = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> false)
+    let outEdgesInnerGraph = Array.init (Seq.max tokens.Vertices + 1) (fun _ -> [||])
     for v in innerGraph.Vertices do
-        verticesSeenBefore.Add(v, false)
+        outEdgesInnerGraph.[v.vNum] <- innerGraph.OutEdges v |> Array.ofSeq
     
-    let customEnqueue (elem : VInfo<_>) = 
-        verticesToProcess.Enqueue(elem)
+    let customEnqueue (elem : VInfo<_>) =
+        //printf "%A" elem.vNum
+        if verticesToProcess.Count = 0 || (verticesToProcess.ElementAt (verticesToProcess.Count - 1) = elem |> not)
+        then
+            //printfn " +"
+            verticesToProcess.Enqueue(elem)
+        //else printfn " -"
 
     let edgesToTerms = new Dictionary<_,_>()
-    let push currentGraphV gssVertex state =
+    let push (currentGraphV:VInfo<_>) gssVertex state =
         let reductions = new ResizeArray<_>(10)
         let newUnprocessedGssVs = new ResizeArray<_>(2)
-        for e in innerGraph.OutEdges currentGraphV do
+        for e in outEdgesInnerGraph.[currentGraphV.vNum] do
         //printfn "v(%d,%d)" state num
             let push = parserSource.Gotos.[state].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
@@ -171,7 +180,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                         | Some v -> v, false
                         | None -> 
                             let v = new Vertex(push, target.vNum)
-                            if currentGraphV = target
+                            if currentGraphV.vNum = target.vNum
                             then newUnprocessedGssVs.Add v
                             else target.unprocessedGssVertices.Add v
                             v, true
@@ -189,11 +198,11 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
                 if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
                 then
-                    if not isNew
+                    if not isNew && targetGssV.PassingReductions.Count > 0
                     then e.Target.passingReductions.Add((targetGssV, edge))
                     targetGssV.addEdge edge
 
-                for e2 in innerGraph.OutEdges e.Target do
+                for e2 in outEdgesInnerGraph.[e.Target.vNum] do
                     let arr = parserSource.ZeroReduces.[push].[parserSource.TokenToNumber e2.Tag]
                     if arr <> null then
                         for prod in arr do
@@ -270,12 +279,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | -1 -> 
                 let edge = new Edge(final, nodes.Count)
                 nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-                if not isNew
+                if not isNew && newVertex.PassingReductions.Count > 0
                 then startV.passingReductions.Add((newVertex, edge))
                 newVertex.addEdge edge
                 if (pos > 0)
                 then
-                    for e in innerGraph.OutEdges startV do
+                    for e in outEdgesInnerGraph.[startV.vNum] do
                         let arr = parserSource.Reduces.[state].[parserSource.TokenToNumber e.Tag]
                         if arr <> null then
                             for (prod, pos) in arr do
@@ -287,12 +296,12 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         else 
             let edge = new Edge(final, nodes.Count)
             nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-            if not isNew
+            if not isNew && newVertex.PassingReductions.Count > 0
             then startV.passingReductions.Add((newVertex, edge))
             newVertex.addEdge edge
             if (pos > 0)
             then
-                for e in innerGraph.OutEdges startV do
+                for e in outEdgesInnerGraph.[startV.vNum] do
                     let arr = parserSource.Reduces.[state].[parserSource.TokenToNumber e.Tag]
                     if arr <> null then
                         for (prod, pos) in arr do
@@ -327,7 +336,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let newVertex, isNew = addVertex currentGraphV state
             if newVertex.FindIndex reduction.gssVertex.State reduction.gssVertex.Level = -1 then
                 let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
-                if not isNew
+                if not isNew && newVertex.PassingReductions.Count > 0
                 then currentGraphV.passingReductions.Add((newVertex, edge))
                 newVertex.addEdge edge
         else 
@@ -345,7 +354,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         for (v, e) in copyPR do
             let passingReductions = v.PassingReductions
             for prod, remainLength, path, nonTerm, pos, startV in passingReductions do
-                walk remainLength v path startV nonTerm pos prod true
+                let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true
             graphV.passingReductions.Remove((v, e)) |> ignore
 
     let processVertex v = 
@@ -360,14 +370,14 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             v.unprocessedGssVertices.AddRange(newGssVs)
             customEnqueue v
 
-        for e in innerGraph.OutEdges(v) do
+        if verticesSeenBefore.[v.vNum] && v.passingReductions.Count > 0
+        then
+            handlePassingReductions v
+
+        for e in (*innerGraph.OutEdges(v)*)outEdgesInnerGraph.[v.vNum] do
             if e.Target.reductions.Count > 0 || e.Target.unprocessedGssVertices.Count > 0 || e.Target.passingReductions.Count > 0
             then
                 customEnqueue e.Target
-
-        if verticesSeenBefore.[v] && v.passingReductions.Count > 0
-        then
-            handlePassingReductions v
 
     if tokens.EdgeCount = 0
     then
@@ -379,7 +389,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         while errorIndex = -1 && verticesToProcess.Count > 0 do
             let curV = verticesToProcess.Dequeue()
             processVertex curV
-            verticesSeenBefore.[curV] <- true
+            verticesSeenBefore.[curV.vNum] <- true
 
         if errorIndex <> -1 then
             Error (errorIndex - 1, Unchecked.defaultof<'TokenType>, "Parse error")
@@ -404,5 +414,5 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
                 let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
                 Success <| tree

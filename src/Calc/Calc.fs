@@ -1,8 +1,7 @@
 ﻿namespace YC.ReSharper.AbstractAnalysis.Languages.Calc
 
 open Calc.AbstractParser
-open Yard.Generators.Common.ARNGLR.AST
-open YC.SDK.CommonInterfaces
+open Yard.Generators.Common.AST
 open YC.SDK.CommonInterfaces
 open Mono.Addins
 open YC.SDK.ReSharper.Helper

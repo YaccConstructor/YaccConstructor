@@ -40,3 +40,12 @@
 
 ..\..\Bin\Release\v40\YC.YaccConstructor.exe -i FirstEps.yrd -c ExpandEbnf -c ExpandMeta ^
         -g "RNGLRGenerator -pos int -token int -module RNGLR.FirstEps -translate false -table LR -o FirstEps.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i CroppedBrackets.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.CroppedBrackets -translate false -table LR -o CroppedBrackets.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i Brackets.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.Brackets -translate false -table LR -o Brackets.yrd.fs -abstract true" >> log.txt
+
+..\..\Bin\Release\v40\YC.YaccConstructor.exe -i StrangeBrackets.yrd -c ExpandEbnf -c ExpandMeta ^
+        -g "RNGLRGenerator -pos int -token int -module RNGLR.StrangeBrackets -translate false -table LR -o StrangeBrackets.yrd.fs -abstract true" >> log.txt

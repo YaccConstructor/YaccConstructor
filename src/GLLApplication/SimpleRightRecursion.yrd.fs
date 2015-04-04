@@ -78,7 +78,7 @@ let table = [| [||];[||];[||];[||];[|0|];[||];[|3; 2|];[||];[||];[||];[|1|];[||]
 let private rules = [|5; 2; 5; 1; 4; 2; 4|]
 let private canInferEpsilon = [|true; false; false; false; false; false; false|]
 let defaultAstToDot =
-    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber leftSide)
+    (fun (tree : Yard.Generators.Common.AST.Tree<Token>) -> tree.AstToDot numToString tokenToNumber None leftSide)
 
 let private rulesStart = [|0; 3; 4; 6; 7|]
 let startRule = 1

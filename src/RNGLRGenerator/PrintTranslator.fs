@@ -19,6 +19,7 @@ open Yard.Generators.Common.FinalGrammar
 open System.Collections.Generic
 open Yard.Generators.Common
 open Yard.Generators.Common.AST
+open Yard.Generators.Common.AstNode
 open Yard.Core.IL
 open Yard.Core.IL.Production
 open Microsoft.FSharp.Text.StructuredFormat
@@ -121,10 +122,11 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
 
     let toStr (x : int) = x.ToString()
     let defineEpsilonTrees =
-        let rec printAst : (obj -> _) =
+        let rec printAst : (AstNode -> _) =
             function
             | :? AST as arr ->
-                (if isAbstractParsingMode then "" else "box ") + "(new AST(" + printChild arr.first
+                //(if isAbstractParsingMode then "" else "box ") + 
+                "(new AST(" + printChild arr.first
                         + ", " + printArr arr.other printChild + "))"
             | _ -> failwith "SingleNode was not expected in epsilon tree"
         and printChild (family : Family) = "new Family(" + toStr family.prod + ", new Nodes("
@@ -150,7 +152,7 @@ let printTranslator (grammar : FinalGrammar) (srcGrammar : Rule.t<Source.t,Sourc
             let value = 
                 if name <> "error" || highlightingOpt.IsSome
                 then sprintf "((unbox %s.[%d]) : '_rnglr_type_%s) " childrenName !num name
-                else sprintf "((unbox %s.[%d]) : list<ErrorNode>)" childrenName !num
+                else sprintf "((unbox %s.[%d]) : list<ErrorNode<'TokenType>>)" childrenName !num
             value + (printArgsCallOpt args)
             |> wordL
         | PToken name -> 

@@ -124,7 +124,6 @@
     <Compile Include="Lexer_Abstract.fs" />
     <Compile Include="TSQLTests.fs" />
     <None Include="packages.config" />
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FST\FST\FST\FST.fsproj">
@@ -201,7 +200,7 @@ del JetBrains*</PostBuildEvent>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\sbt\ready\idv_XAnyPayGBK_151str.dot     -p</StartArguments>
   </PropertyGroup>
-    <StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\3.dot  -p</StartArguments>
+  <!--StartArguments>-f C:\gsv\projects\YC\YaccConstructor\Tests\AbstractPerformance\TSQL\8\3.dot  -p</StartArguments-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

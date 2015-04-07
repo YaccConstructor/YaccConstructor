@@ -155,22 +155,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if verticesToProcess.Count = 0 || ((verticesToProcess.ElementAt (verticesToProcess.Count - 1)).vNum = elem.vNum |> not)
         then
             verticesToProcess.Enqueue(elem)
-    
-    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
-        let mutable v = null
-        let mutable isNew = false
-        let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
-        match vOpt with
-        | Some x -> v <- x
-        | None ->
-            let vOpt = currentGraphV.unprocessedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
-            match vOpt with
-            | Some x -> v <- x
-            | None ->
-                v <- new Vertex(state, currentGraphV.vNum)
-                isNew <- true
-                listToAddUnprocessedGssV.Add v
-        v, isNew
 
     let addNonZeroReduction gssVertex state token gssEdge (innerGraphV : VInfo<_>)=
         let arr = parserSource.Reduces.[state].[parserSource.TokenToNumber token]
@@ -186,6 +170,24 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             for prod in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
             if shouldEnqueue then customEnqueue innerGraphV
+    
+    let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
+        let mutable v = null
+        let mutable isNew = false
+        let vOpt = currentGraphV.processedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+        match vOpt with
+        | Some x -> v <- x
+        | None ->
+            let vOpt = currentGraphV.unprocessedGssVertices |> ResizeArray.tryFind (fun v -> v.State = state)
+            match vOpt with
+            | Some x -> v <- x
+            | None ->
+                v <- new Vertex(state, currentGraphV.vNum)
+                isNew <- true
+                listToAddUnprocessedGssV.Add v
+                for e in outEdgesInnerGraph.[currentGraphV.vNum] do
+                    addZeroReduction v state e.Tag currentGraphV false
+        v, isNew
 
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) gssVertex state =
@@ -204,18 +206,17 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
+
                 if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
                 then
                     if not isNew && targetGssV.PassingReductions.Count > 0
                     then e.Target.passingReductions.Add((targetGssV, edge))
+
                     targetGssV.addEdge edge
 
-                for e2 in outEdgesInnerGraph.[e.Target.vNum] do
-                    addZeroReduction targetGssV push e2.Tag e.Target false
-                    addNonZeroReduction gssVertex push e2.Tag edge e.Target
+                    for e2 in outEdgesInnerGraph.[e.Target.vNum] do
+                        addNonZeroReduction gssVertex push e2.Tag edge e.Target
 
-            addZeroReduction gssVertex state e.Tag currentGraphV true
-        
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
             currentGraphV.processedGssVertices.Add(gssVertex)

@@ -189,6 +189,15 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                     addZeroReduction v state e.Tag currentGraphV false
         v, isNew
 
+    let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps =
+        if not isNew && newVertex.PassingReductions.Count > 0
+        then startV.passingReductions.Add((newVertex, edge))
+        newVertex.addEdge edge
+        if isNotEps
+        then
+            for e in outEdgesInnerGraph.[startV.vNum] do
+                addNonZeroReduction newVertex newVertex.State e.Tag edge startV
+
     let edgesToTerms = new Dictionary<_,_>()
     let push (currentGraphV:VInfo<_>) gssVertex state =
         let newUnprocessedGssVs = new ResizeArray<_>(2)
@@ -206,16 +215,8 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
                 let edge = new Edge(gssVertex, edgesToTerms.[e])
 
-
                 if targetGssV.FindIndex gssVertex.State gssVertex.Level = -1
-                then
-                    if not isNew && targetGssV.PassingReductions.Count > 0
-                    then e.Target.passingReductions.Add((targetGssV, edge))
-
-                    targetGssV.addEdge edge
-
-                    for e2 in outEdgesInnerGraph.[e.Target.vNum] do
-                        addNonZeroReduction gssVertex push e2.Tag edge e.Target
+                then addEdge e.Target isNew targetGssV edge true
 
         if not <| currentGraphV.processedGssVertices.Contains(gssVertex)
         then 
@@ -224,8 +225,16 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
     let verticesToRecalc = new ResizeArray<_> (10)
 
-    let (*inline*) addChildren node (path : Path) prod =
-        let ast = getFamily node
+    let (*inline*) addChildren index (path : Path) prod =
+        let ast = 
+            match nodes.[index] with
+            | :? Epsilon as eps -> let wrappedEps = new AST (new Family(-eps.EpsilonNonTerm-1, new Nodes([|eps|])), null)
+                                   nodes.Set index wrappedEps
+                                   wrappedEps
+            | :? AST as ast -> ast
+            | _ -> failwith "чо"
+        
+        //let ast = getFamily node
         let familyOpt = 
             ast.findFamily (function family -> family.prod = prod && path.IsEqual(family.nodes))
         match familyOpt with 
@@ -250,29 +259,27 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | -1 -> 
                 let edge = new Edge(final, nodes.Count)
                 nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-                if not isNew && newVertex.PassingReductions.Count > 0
-                then startV.passingReductions.Add((newVertex, edge))
-                newVertex.addEdge edge
-                if (pos > 0)
-                then
-                    for e in outEdgesInnerGraph.[startV.vNum] do
-                        addNonZeroReduction newVertex state e.Tag edge startV
+                addEdge  startV isNew newVertex edge (pos > 0)
                 edge.Ast
-            | x -> (newVertex.Edge x).Ast 
-        if ast >= 0 
-        then addChildren nodes.[ast] path prod
-        else 
-            let edge = new Edge(final, nodes.Count)
-            nodes.Add <| new AST (Unchecked.defaultof<_>, null)
-            if not isNew && newVertex.PassingReductions.Count > 0
-            then startV.passingReductions.Add((newVertex, edge))
-            newVertex.addEdge edge
-            if (pos > 0)
-            then
-                for e in outEdgesInnerGraph.[startV.vNum] do
-                    addNonZeroReduction newVertex state e.Tag edge startV
-                if startV.reductions.Count > 0 then customEnqueue startV
-            addChildren nodes.[nodes.Count - 1] path prod
+            | x -> 
+                let edge = newVertex.Edge x
+                match nodes.[edge.Ast] with
+                | :? Epsilon as eps -> for e in outEdgesInnerGraph.[startV.vNum] do
+                                           addNonZeroReduction newVertex newVertex.State e.Tag edge startV
+                | _ -> ()
+                edge.Ast
+
+        addChildren ast path prod
+
+
+//        if ast >= 0 
+//        then addChildren ast path prod
+//        else 
+//            let edge = new Edge(final, nodes.Count)
+//            nodes.Add <| new AST (Unchecked.defaultof<_>, null)
+//            addEdge  startV isNew newVertex edge (pos > 0)
+//            if startV.reductions.Count > 0 then customEnqueue startV
+//            addChildren (nodes.Count - 1) path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
         if remainLength = 0 
@@ -290,7 +297,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             then vertex.PassingReductions.Add (prod, remainLength, path, nonTerm, pos, startV)
             vertex.OutEdges |> ResizeArray.iter
                 (fun e ->
-                    let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                    let newPath = path.AddEdge(nodes.[e.Ast])
                     walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod shouldEnqueueVertex)
 
     let makeSingleReduction currentGraphV (reduction : Reduction) =
@@ -301,10 +308,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let newVertex, isNew = addVertex currentGraphV state currentGraphV.unprocessedGssVertices
             if newVertex.FindIndex reduction.gssVertex.State reduction.gssVertex.Level = -1 
             then
-                let edge = new Edge(reduction.gssVertex, -parserSource.LeftSide.[reduction.prod]-1)
-                if not isNew && newVertex.PassingReductions.Count > 0
-                then currentGraphV.passingReductions.Add((newVertex, edge))
-                newVertex.addEdge edge
+                let eps = new Epsilon(-parserSource.LeftSide.[reduction.prod]-1)
+                nodes.Add(eps)
+                let edge = new Edge(reduction.gssVertex, nodes.Count - 1)
+                addEdge currentGraphV isNew newVertex edge false
         else 
             let path = new Path(nodes.[reduction.edge.Value.Ast])
             walk (reduction.pos - 1) (reduction.edge.Value : Edge).Dest path currentGraphV nonTerm reduction.pos reduction.prod false
@@ -320,7 +327,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         for (v, e) in copyPR do
             let passingReductions = v.PassingReductions
             for prod, remainLength, path, nonTerm, pos, startV in passingReductions do
-                let newPath = path.AddEdge(if e.Ast < 0 then new Epsilon(e.Ast) :> AstNode else nodes.[e.Ast])
+                let newPath = path.AddEdge(nodes.[e.Ast])
                 walk (remainLength - 1) e.Dest newPath startV nonTerm pos prod true
             graphV.passingReductions.Remove((v, e)) |> ignore
 
@@ -377,5 +384,5 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             | None -> Error (-1, Unchecked.defaultof<'TokenType>, "There is no accepting state")
             | Some res -> 
                 let tree = new Tree<_>(terminals.ToArray(), nodes.[res], parserSource.Rules)
-                //tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
+                tree.AstToDot parserSource.NumToString parserSource.TokenToNumber parserSource.TokenData parserSource.LeftSide "../../../Tests/AbstractRNGLR/DOT/sppf.dot"
                 Success <| tree

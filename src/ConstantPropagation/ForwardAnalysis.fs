@@ -16,19 +16,40 @@ let buildAutomaton (cfg: GenericCFG) =
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
     let emptyAutomataMapsListMsg = "empty automataMaps list is passed to union function"
+    let fixpointComputationProblemMsg = "old fsa map contains more variables than the new one in fixpoint computation"
 
     let unionTwoFsaMaps (a1: FSAMap) (a2: FSAMap) =
         let rec go (a1: list<string * FSA<State>>) (a2: FSAMap) (acc: FSAMap) =
             match a1 with
-            | [] -> acc
+            | [] -> Map.fold (fun acc k v -> Map.add k v acc) acc a2
             | (varName, fsa1) :: tl ->
                 let unionFsa =
                     match Map.tryFind varName a2 with
                     | Some(fsa2) -> FSA.Union (fsa1, fsa2)
                     | None -> fsa1
                 let acc' = Map.add varName unionFsa acc
-                go tl a2 acc'
+                let a2' = Map.remove varName a2
+                go tl a2' acc'
         go (Map.toList a1) a2 Map.empty
+
+    let fixpointAchieved (oldFsaMap: FSAMap) (widenedFsaMap: FSAMap) =
+        let rec go (oldFsaList: list<string * FSA<State>>) (widenedFsaMap: FSAMap) =
+            match oldFsaList with
+            | [] -> true
+            | (varName, oldFsa) :: tl ->
+                match Map.tryFind varName widenedFsaMap with
+                | Some(widenedFsa) -> 
+                    if FsaHelper.isSubAutomaton widenedFsa oldFsa
+                    then go tl widenedFsaMap
+                    else false
+                | None -> failwith fixpointComputationProblemMsg
+        let oldIsEmpty = Map.isEmpty oldFsaMap
+        let widenedIsEmpty = Map.isEmpty widenedFsaMap
+        if oldIsEmpty && widenedIsEmpty
+        then true
+        elif not oldIsEmpty && not widenedIsEmpty
+        then go (Map.toList oldFsaMap) widenedFsaMap
+        else false
 
     let rec unionFsaMaps (automataMaps: list<FSAMap>) =
         match automataMaps with
@@ -103,37 +124,52 @@ let buildAutomaton (cfg: GenericCFG) =
             (operands: list<FSA<State>>) 
             (automata: FSAMap) 
             (unionNodes: Map<CFGNode, list<FSAMap>>) =
-        let processNodeAndSuccessors 
-                (node: CFGNode) 
-                (operands: list<FSA<State>>) 
-                (automata: FSAMap) 
-                (unionNodes: Map<CFGNode, list<FSAMap>>) =
-            let operands', automata' = processNodeByType node.Type operands automata
+        let processSuccessors node operands automata unionNodes =
             cfg.Graph.OutEdges(node)
             |> List.ofSeq
             |> List.map (fun e -> e.Target)
-            |> List.fold (fun (_, un) succ -> build succ operands' automata' un) (automata', unionNodes)
+            |> List.fold (fun (_, un) succ -> build succ operands automata un) (automata, unionNodes)
+
+        let processNodeAndSuccessors (node: CFGNode) operands automata unionNodes =
+            let operands', automata' = processNodeByType node.Type operands automata
+            processSuccessors node operands' automata' unionNodes
 
         let entriesNum = cfg.Graph.InEdges(node) |> List.ofSeq |> List.length
         if entriesNum > 1
-        // union or loop node processing
+        // union node processing (loop, if-block end, etc.)
         then
+            let optAutomataMaps = Map.tryFind node unionNodes
             match node.Type with
-            | LoopNode(_, _) -> failwith unsupportedCaseMsg
+            | LoopNode(_, bodyNodeIndex) ->
+//                match optAutomataMaps with
+//                | Some(fsaMaps) -> 
+//                    // we have already been in current loop node
+//                    let oldFsaMap = List.head fsaMaps
+//                    let unionFsaMap = unionTwoFsaMaps oldFsaMap automata
+//                    // todo: next line is stub, widening operator required
+//                    let widenedFsaMap = unionFsaMap
+//                    if fixpointAchieved oldFsaMap widenedFsaMap 
+//                    then
+//                        let unionNodes' = Map.add node [] unionNodes
+//                        processSuccessors node operands widenedFsaMap unionNodes'
+//                        // exit loop processing
+//                    else  
+//                        let unionNodes' = Map.add node [widenedFsaMap] unionNodes
+//                        // continue processing body
+//                | None -> 
+//                    // just start processing body
+                failwith unsupportedCaseMsg
             | _ ->
-                let automataMaps = 
-                    let optMaps = Map.tryFind node unionNodes
-                    Option.getOrElse optMaps []
-                let automataMaps' = automata :: automataMaps
-                if List.length automataMaps' < entriesNum
+                let automataMaps = automata :: (Option.getOrElse optAutomataMaps [])
+                if List.length automataMaps < entriesNum
                 then
                     // not all entry paths are traversed yet
-                    let unionNodes' = Map.add node automataMaps' unionNodes
+                    let unionNodes' = Map.add node automataMaps unionNodes
                     automata, unionNodes'
                 else
                     // all paths leading to this node are traversed, we can union automata
                     // and continue processing its successors
-                    let unionMap = unionFsaMaps automataMaps'
+                    let unionMap = unionFsaMaps automataMaps
                     let unionNodes' = Map.add node [] unionNodes
                     processNodeAndSuccessors node operands unionMap unionNodes'
         else

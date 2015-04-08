@@ -4,12 +4,12 @@
     {
         static void Main(string[] args)
         {
-            string query1 = "Select field From ";
+            string query1 = "a";
             if (args.Length != 0)
             {
-                query1 += "Table1";
+                query1 += "b";
             }
-            string filter = "where field is numeric";
+            string filter = "c";
             query1 += filter;
             Program.ExecuteImmediate(query1);
         }

@@ -4,20 +4,20 @@
     {
         static void Main(string[] args)
         {
-            string query1 = "Select";
-            const string field = " fieldName ";
-            query1 += "from";
-            var tableName = "Table1";
+            string query1 = "a";
+            const string field = " not used ";
+            query1 += "b";
+            var tableName = "c";
             if (args.Length != 0)
             {
                 query1 += tableName;
             }
             else
             {
-                tableName = "Table2";
+                tableName = "d";
                 query1 += tableName;
             }
-            string filter = "where field is numeric";
+            string filter = "e";
             query1 += filter;
             Program.ExecuteImmediate(query1);
         }

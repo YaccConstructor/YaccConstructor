@@ -4,8 +4,8 @@
     {
         static void Main(string[] args)
         {
-            string query = "Select field From Table1";
-            query = query.Replace("Table1", "Table2");
+            string query = "aba";
+            query = query.Replace("a", "c");
             Program.ExecuteImmediate(query);
         }
 

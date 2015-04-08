@@ -4,8 +4,8 @@
     {
         static void Main(string[] args)
         {
-            string query1 = "Select field From ";
-            string query2 = query1 + "Table";
+            string query1 = "a";
+            string query2 = query1 + "b";
             Program.ExecuteImmediate(query2);
         }
 

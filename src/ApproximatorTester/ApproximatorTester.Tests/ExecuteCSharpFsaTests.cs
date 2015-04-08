@@ -4,16 +4,16 @@ using NUnit.Framework;
 namespace ApproximatorTester.Tests
 {
     [TestFixture]
-    public class ExecuteCSharpTests : CSharpContextActionExecuteTestBase<RunCSharpApproximator>
+    public class ExecuteCSharpFsaTests : CSharpContextActionExecuteTestBase<BuildFsaForCSharp>
     {
         protected override string ExtraPath
         {
-            get { return "CSharp"; }
+            get { return "CSharpFsa"; }
         }
 
         protected override string RelativeTestDataPath
         {
-            get { return "CSharp"; }
+            get { return "CSharpFsa"; }
         }
 
         [Test]
@@ -26,36 +26,6 @@ namespace ApproximatorTester.Tests
         public void TestFourVars()
         {
             DoTestFiles("FourVars.cs");
-        }
-
-        [Test]
-        public void TestSimpleFor()
-        {
-            DoTestFiles("SimpleFor.cs");
-        }
-
-        [Test]
-        public void TestForWithLocalVar()
-        {
-            DoTestFiles("ForWithLocalVar.cs");
-        }
-
-        [Test]
-        public void TestComplexConditionFor()
-        {
-            DoTestFiles("ComplexConditionFor.cs");
-        }
-
-        [Test]
-        public void TestNestedFor()
-        {
-            DoTestFiles("NestedFor.cs");
-        }
-
-        [Test]
-        public void TestForWithIf()
-        {
-            DoTestFiles("ForWithIf.cs");
         }
 
         [Test]

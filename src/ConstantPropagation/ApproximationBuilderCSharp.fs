@@ -71,29 +71,31 @@ let private createControlFlowGraph (hotspot: IInvocationExpression) =
     let methodDeclaration = getEnclosingMethod hotspot
     CSharpControlFlowBuilder.Build methodDeclaration
 
-let build (file: ICSharpFile) =
-    let hotspots = getHotspots file
-    let ddGraphs = 
-        hotspots 
-        |> List.ofSeq 
-        |> List.map (fun (lang, hotspot) -> createControlFlowGraph hotspot, hotspot)
-        |> List.map
-            (
-                fun (csharpCFG, hotspot) ->
-                    let additionalInfo = collectAdditionalInfo csharpCFG
-                    let genericCFG = convert csharpCFG additionalInfo
-                    let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
-                    let cfgForVar = subgraphForVar hotVarRef genericCFG
-                    let fsaForVar = buildAutomaton cfgForVar
+let buildDdg (file: ICSharpFile) =
+    // process the first hotspot
+    let lang, hotspot = (getHotspots file).[0]
+    let csharpCFG = createControlFlowGraph hotspot
+    let additionalInfo = collectAdditionalInfo csharpCFG
+    let genericCFG = convert csharpCFG additionalInfo
+    let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
+    subgraphForVar hotVarRef genericCFG
 
-                    let cfgName = "cfg_" + csharpCFG.GetHashCode().ToString()
-                    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
-                    toDot cfgForVar cfgName path
+let buildFsa (file: ICSharpFile) =
+    let cfgForVar = buildDdg file
+    let fsaForVar = buildAutomaton cfgForVar
 
-                    let fsaName = "fsa_" + csharpCFG.GetHashCode().ToString()
-                    let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")
-                    FsaHelper.toDot fsaForVar path
+    // for debug
+    let cfgName = "cfg_" + file.GetHashCode().ToString()
+    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
+    toDot cfgForVar cfgName path
 
-                    cfgForVar
-            )
-    ddGraphs
+    let fsaName = "fsa_" + file.GetHashCode().ToString()
+    let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")
+    FsaHelper.toDot fsaForVar path
+
+    fsaForVar
+
+let BuildApproximation (file: ICSharpFile) = 
+    // the next line is for debug purposes
+    DotUtils.allMethodsCFGToDot file myDebugFolderPath
+    buildFsa file

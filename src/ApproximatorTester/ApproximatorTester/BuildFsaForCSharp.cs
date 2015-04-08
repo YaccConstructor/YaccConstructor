@@ -10,12 +10,12 @@ using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 
 namespace ApproximatorTester
 {
-    [ContextAction(Name = "RunCSharpApproximator", Description = "Run Approximator for C#", Group = "C#")]
-    public class RunCSharpApproximator : ContextActionBase
+    [ContextAction(Name = "BuildFSAForCSharp", Description = "BuildFSAForCSharp", Group = "C#")]
+    public class BuildFsaForCSharp : ContextActionBase
     {
         private readonly ICSharpContextActionDataProvider _provider;
 
-        public RunCSharpApproximator(ICSharpContextActionDataProvider provider)
+        public BuildFsaForCSharp(ICSharpContextActionDataProvider provider)
         {
             _provider = provider;
         }
@@ -28,14 +28,14 @@ namespace ApproximatorTester
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var inputFile = _provider.PsiFile;
-            var ddg = ApproximationBuilderCSharp.buildDdg(inputFile);
-            Utils.OutputCSharpResult(Utils.GenericCfgStructureToDot(ddg), _provider);
+            var fsa = ApproximationBuilderCSharp.BuildApproximation(inputFile);
+            Utils.OutputCSharpResult(Utils.FsaToTestDot(fsa), _provider);
             return null;
         }
 
         public override string Text
         {
-            get { return "Run Approximator for CSharp"; }
+            get { return "BuildFSAForCSharp"; }
         }
     }
 }

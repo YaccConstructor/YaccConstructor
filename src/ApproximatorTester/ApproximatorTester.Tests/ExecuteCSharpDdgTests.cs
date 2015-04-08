@@ -4,16 +4,16 @@ using NUnit.Framework;
 namespace ApproximatorTester.Tests
 {
     [TestFixture]
-    public class ExecuteCSharpTests : CSharpContextActionExecuteTestBase<RunCSharpApproximator>
+    public class ExecuteCSharpDdgTests : CSharpContextActionExecuteTestBase<BuildDdgForCSharp>
     {
         protected override string ExtraPath
         {
-            get { return "CSharp"; }
+            get { return "CSharpDdg"; }
         }
 
         protected override string RelativeTestDataPath
         {
-            get { return "CSharp"; }
+            get { return "CSharpDdg"; }
         }
 
         [Test]

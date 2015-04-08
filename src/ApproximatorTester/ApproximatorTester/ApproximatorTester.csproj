@@ -67,8 +67,8 @@
   <ItemGroup>
     <Compile Include="BuildFsaForCSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunCSharpApproximator.cs" />
-    <Compile Include="RunJsApproximator.cs" />
+    <Compile Include="BuildDdgForCSharp.cs" />
+    <Compile Include="BuildDdgForJs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

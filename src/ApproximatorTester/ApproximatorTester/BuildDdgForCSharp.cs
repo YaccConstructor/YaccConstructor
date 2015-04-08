@@ -11,11 +11,11 @@ using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 namespace ApproximatorTester
 {
     [ContextAction(Name = "RunCSharpApproximator", Description = "Run Approximator for C#", Group = "C#")]
-    public class RunCSharpApproximator : ContextActionBase
+    public class BuildDdgForCSharp : ContextActionBase
     {
         private readonly ICSharpContextActionDataProvider _provider;
 
-        public RunCSharpApproximator(ICSharpContextActionDataProvider provider)
+        public BuildDdgForCSharp(ICSharpContextActionDataProvider provider)
         {
             _provider = provider;
         }

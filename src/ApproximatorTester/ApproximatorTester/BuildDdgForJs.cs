@@ -14,11 +14,11 @@ using YC.ReSharper.AbstractAnalysis.LanguageApproximation;
 namespace ApproximatorTester
 {
     [ContextAction(Name = "RunApproximatorJs", Description = "Run Approximator for Js", Group = "JS")]
-    public class RunJsApproximator : ContextActionBase
+    public class BuildDdgForJs : ContextActionBase
     {
         private readonly IJavaScriptContextActionDataProvider _provider;
 
-        public RunJsApproximator(IJavaScriptContextActionDataProvider provider)
+        public BuildDdgForJs(IJavaScriptContextActionDataProvider provider)
         {
             _provider = provider;
         }

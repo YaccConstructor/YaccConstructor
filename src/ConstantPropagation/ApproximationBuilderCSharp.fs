@@ -15,6 +15,7 @@ open Utils
 open CFGConversionCSharp
 open GenericCFG
 open GenericCFG.GenericCFGFuncs
+open ForwardAnalysis
 
 open System.Collections.Generic
 open System.IO
@@ -83,10 +84,15 @@ let build (file: ICSharpFile) =
                     let genericCFG = convert csharpCFG additionalInfo
                     let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
                     let cfgForVar = subgraphForVar hotVarRef genericCFG
+                    let fsaForVar = buildAutomaton cfgForVar
 
-                    let cfgName = "cfg_" + csharpCFG.GetHashCode().ToString() + "_forvar"
+                    let cfgName = "cfg_" + csharpCFG.GetHashCode().ToString()
                     let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
                     toDot cfgForVar cfgName path
+
+                    let fsaName = "fsa_" + csharpCFG.GetHashCode().ToString()
+                    let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")
+                    FsaHelper.toDot fsaForVar path
 
                     cfgForVar
             )

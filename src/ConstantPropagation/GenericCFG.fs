@@ -55,6 +55,8 @@ module CFGNodeFuncs =
 
 type GenericCFG = {
     Graph: BidirectionalGraph<CFGNode, Edge<CFGNode>>
+    Root: CFGNode
+    Final: CFGNode
 }
 
 module GenericCFGFuncs =
@@ -203,8 +205,16 @@ module GenericCFGFuncs =
             VisitedForks = Map.empty
             NodesToVisit = Set.empty }
         let resState = build varRef cfg varsSet initState
+        let root = 
+            // bad algo
+            // todo: improve
+            resState.GraphInfo.Graph.Vertices
+            |> List.ofSeq
+            |> List.find (fun n -> resState.GraphInfo.Graph.InDegree(n) = 0)
         let subCFG: GenericCFG = { 
-            Graph = resState.GraphInfo.Graph }
+            Graph = resState.GraphInfo.Graph
+            Root = root
+            Final = varRef }
         subCFG
 
     let toDot (ddGraph: GenericCFG) name path =
@@ -229,4 +239,7 @@ module GenericCFGFuncs =
         file.WriteLine("}")
 
     let create(): GenericCFG = { 
-        Graph = new BidirectionalGraph<CFGNode, Edge<CFGNode>>(allowParallelEdges = false) }
+        Graph = new BidirectionalGraph<CFGNode, Edge<CFGNode>>(allowParallelEdges = false)
+        // todo: redesign this (root and final nodes are fake here because graph is empty)
+        Root = { Id = 0; Type = OtherNode }
+        Final = { Id = 0; Type = OtherNode } }

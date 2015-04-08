@@ -116,3 +116,30 @@ let applyToMappedTypedArgs f mapper (arg1: 'a) (arg2: obj) typingFaildFunc =
     | _ -> typingFaildFunc ()
 
 let (===) = LanguagePrimitives.PhysicalEquality
+
+module Option =
+    let getOrElse opt defaultVal =
+        match opt with
+        | Some(value) -> value
+        | None -> defaultVal
+
+module FsaHelper =
+    open YC.FSA.GraphBasedFsa
+    open YC.FSA.FsaApproximation
+    open System.IO
+
+    let replace origFsa matchFsa replaceFsa =
+        let equalSmbl x y = (fst x) = (fst y)
+        let getChar x = 
+            match x with
+            | Smbl(y, _) -> y
+            | _ -> failwith "Unexpected symb in alphabet of FSA!"
+        let newSmb x =  Smbl(x, Unchecked.defaultof<_>)
+        FSA.Replace (origFsa, matchFsa, replaceFsa, '~', '^', getChar, newSmb, equalSmbl)
+
+    let toDot (fsa: FSA<char * Position<int>>) path =
+        fsa.PrintToDOT (path, (fun p -> sprintf "%c" (fst p)))
+
+    let toDebugDot (fsa: FSA<char * Position<int>>) name =
+        let path = Path.Combine (myDebugFolderPath, name + ".dot")
+        toDot fsa path

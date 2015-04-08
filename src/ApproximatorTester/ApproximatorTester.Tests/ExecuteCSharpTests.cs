@@ -28,35 +28,35 @@ namespace ApproximatorTester.Tests
             DoTestFiles("FourVars.cs");
         }
 
-        [Test]
-        public void TestSimpleFor()
-        {
-            DoTestFiles("SimpleFor.cs");
-        }
+        //[Test]
+        //public void TestSimpleFor()
+        //{
+        //    DoTestFiles("SimpleFor.cs");
+        //}
 
-        [Test]
-        public void TestForWithLocalVar()
-        {
-            DoTestFiles("ForWithLocalVar.cs");
-        }
+        //[Test]
+        //public void TestForWithLocalVar()
+        //{
+        //    DoTestFiles("ForWithLocalVar.cs");
+        //}
 
-        [Test]
-        public void TestComplexConditionFor()
-        {
-            DoTestFiles("ComplexConditionFor.cs");
-        }
+        //[Test]
+        //public void TestComplexConditionFor()
+        //{
+        //    DoTestFiles("ComplexConditionFor.cs");
+        //}
 
-        [Test]
-        public void TestNestedFor()
-        {
-            DoTestFiles("NestedFor.cs");
-        }
+        //[Test]
+        //public void TestNestedFor()
+        //{
+        //    DoTestFiles("NestedFor.cs");
+        //}
 
-        [Test]
-        public void TestForWithIf()
-        {
-            DoTestFiles("ForWithIf.cs");
-        }
+        //[Test]
+        //public void TestForWithIf()
+        //{
+        //    DoTestFiles("ForWithIf.cs");
+        //}
 
         [Test]
         public void TestSimpleMethodCall()

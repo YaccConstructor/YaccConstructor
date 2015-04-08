@@ -199,10 +199,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
                 addNonZeroReduction newVertex e.Tag edge startV
 
     let edgesToTerms = new Dictionary<_,_>()
-    let push (currentGraphV:VInfo<_>) gssVertex state =
+    let push (currentGraphV:VInfo<_>) (gssVertex : Vertex) =
         let newUnprocessedGssVs = new ResizeArray<_>(2)
         for e in outEdgesInnerGraph.[currentGraphV.vNum] do
-            let push = parserSource.Gotos.[state].[parserSource.TokenToNumber e.Tag]
+            let push = parserSource.Gotos.[gssVertex.State].[parserSource.TokenToNumber e.Tag]
             if push <> 0 
             then
                 let targetGssV, isNew = addVertex e.Target push (if currentGraphV.vNum = e.Target.vNum then newUnprocessedGssVs else e.Target.unprocessedGssVertices)
@@ -316,7 +316,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
 
         let newGssVs = new ResizeArray<_>(2)
         for gssVertex in v.unprocessedGssVertices do 
-            newGssVs.AddRange(push v gssVertex gssVertex.State)
+            newGssVs.AddRange(push v gssVertex)
         v.unprocessedGssVertices.Clear()
         if newGssVs.Count > 0 
         then

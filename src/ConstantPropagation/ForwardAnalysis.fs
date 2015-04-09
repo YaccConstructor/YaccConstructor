@@ -16,7 +16,7 @@ let collectLoopNodesInfo (ddg: DDG) =
     let wrongNodeTypeMsg = "wrong node type in collectLoopBodyNodes"
         
     let collectLoopBodyNodes (loopNode: GraphNode) =     
-        let rec go (node: GraphNode) finalNodeId visited =         
+        let rec go (node: GraphNode) finalNodeId visited =
             if not <| Set.contains node visited
             then 
                 let visited' = Set.add node visited
@@ -65,6 +65,51 @@ let collectLoopNodesInfo (ddg: DDG) =
             
 type State = char * Position<int>
 type FSAMap = Map<string, FSA<State>>
+
+type DirectionChecker = GraphNode -> LoopInfo -> bool
+type LoopsDirectionHelper = {
+    LoopsInfo: Map<int, LoopInfo>
+    Stack: list<LoopInfo * DirectionChecker> }
+
+module LoopsDirectionHelperFuncs =
+    let private wrongNodeTypeMsg = "node type is wrong, LoopNode type expected"
+
+    let private isLoopBodyNode (node: GraphNode) (loopInfo: LoopInfo) =
+        Set.contains node.Id loopInfo.BodyNodes
+    let private isLoopExitOrOuterNode (node: GraphNode) (loopInfo: LoopInfo) =
+        let id = node.Id
+        (not <| Set.contains id loopInfo.BodyNodes) || Set.contains id loopInfo.ExitNodes
+
+    let private setDirection (node: GraphNode) (dirHelper: LoopsDirectionHelper) checker =
+        match Map.tryFind node.Id dirHelper.LoopsInfo with
+        | Some(loopInfo) -> 
+            { dirHelper with Stack = (loopInfo, checker) :: dirHelper.Stack }
+        | None -> failwith wrongNodeTypeMsg
+
+    let create ddg = { 
+        LoopsInfo = collectLoopNodesInfo ddg;
+        Stack = [] }
+
+    let setLoopBodyDirection node dirHelper = 
+        setDirection node dirHelper isLoopBodyNode
+
+    let setLoopExitDirection node dirHelper = 
+        setDirection node dirHelper isLoopExitOrOuterNode
+
+    let isRightDirection node (dirHelper: LoopsDirectionHelper) =
+        if not <| List.isEmpty dirHelper.Stack
+        then
+            let loopInfo, checker = List.head dirHelper.Stack
+            let isRightDir = checker node loopInfo
+            let loopInfo' = { 
+                BodyNodes = Set.remove node.Id loopInfo.BodyNodes;
+                ExitNodes = Set.remove node.Id loopInfo.ExitNodes }
+            let dirStack' =
+                if Set.isEmpty loopInfo'.BodyNodes && Set.isEmpty loopInfo'.ExitNodes
+                then { dirHelper with Stack = List.tail dirHelper.Stack }
+                else { dirHelper with Stack = (loopInfo', checker) :: dirHelper.Stack }
+            isRightDir, dirStack'
+        else true, dirHelper
 
 let buildAutomaton (ddg: DDG) =
     // exception messages

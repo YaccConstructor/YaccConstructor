@@ -8,6 +8,61 @@ open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open Utils
 
+type LoopInfo = {
+    BodyNodes: Set<int>
+    ExitNodes: Set<int> }
+
+let collectLoopNodesInfo (ddg: DDG) =
+    let wrongNodeTypeMsg = "wrong node type in collectLoopBodyNodes"
+        
+    let collectLoopBodyNodes (loopNode: GraphNode) =     
+        let rec go (node: GraphNode) finalNodeId visited =         
+            if not <| Set.contains node visited
+            then 
+                let visited' = Set.add node visited
+                match node.Type with
+                | LoopNode(enterEdgeIndex, _) when node.Id <> finalNodeId ->
+                    let loopEnterNode = ddg.Graph.InEdge(node, enterEdgeIndex).Source
+                    go loopEnterNode finalNodeId visited'
+                | LoopNode(_, _) -> visited'
+                | _ -> 
+                    ddg.Graph.InEdges(node) 
+                    |> Seq.fold (fun v e -> go e.Source finalNodeId v) visited'
+            else visited
+        match loopNode.Type with 
+        | LoopNode(_, bodyEdgeIndex) ->
+            let bodyLastNode = ddg.Graph.InEdge(loopNode, bodyEdgeIndex).Source
+            go bodyLastNode loopNode.Id Set.empty
+        | _ -> failwith wrongNodeTypeMsg
+
+    let collectLoopExitNodes (loopNode: GraphNode) (loopBodyNodes: Set<GraphNode>) = 
+        let hasNonLoopSuccessors (node: GraphNode) =
+            ddg.Graph.OutEdges(node)
+            |> Seq.exists (fun e -> not <| Set.contains e.Target loopBodyNodes)
+        let directExitNodes = Set.filter hasNonLoopSuccessors loopBodyNodes 
+        let rec dfsUntilLoopNode (node: GraphNode) visited =         
+            if not <| Set.contains node.Id visited
+            then 
+                let visited' = Set.add node.Id visited
+                if node.Id <> loopNode.Id
+                then 
+                    ddg.Graph.InEdges(node) 
+                    |> Seq.fold (fun acc e -> dfsUntilLoopNode e.Source acc) visited'
+                else visited'
+            else visited
+        directExitNodes |> Seq.fold (fun v n -> dfsUntilLoopNode n v) Set.empty
+
+    let collectInfo (loopNode: GraphNode) =
+        let loopBodyNodes = collectLoopBodyNodes loopNode
+        let loopExitNodesIds = collectLoopExitNodes loopNode loopBodyNodes
+        let loopBodyNodesIds = loopBodyNodes |> Set.map (fun n -> n.Id)
+        { BodyNodes = loopBodyNodesIds; ExitNodes = loopExitNodesIds }
+ 
+    ddg.Graph.Vertices 
+    |> Seq.filter (fun n -> match n.Type with LoopNode(_,_) -> true | _ -> false)
+    |> Seq.map (fun n -> n.Id, collectInfo n)
+    |> Map.ofSeq
+            
 type State = char * Position<int>
 type FSAMap = Map<string, FSA<State>>
 

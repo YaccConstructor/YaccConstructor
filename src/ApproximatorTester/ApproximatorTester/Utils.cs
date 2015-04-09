@@ -10,9 +10,9 @@ namespace ApproximatorTester
 {
     public class Utils
     {
-        public static string GenericCfgStructureToDot(GenericCFG.GenericCFG cfg)
+        public static string DdgToTestDot(GenericGraphs.DDG ddg)
         {
-            var edgesList = cfg.Graph.Edges
+            var edgesList = ddg.Graph.Edges
                 .Select(edge => edge.Source.Id.ToString() + " -> " + edge.Target.Id.ToString())
                 .ToList();
             return String.Join("\n", edgesList);

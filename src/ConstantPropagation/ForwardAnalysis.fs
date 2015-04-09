@@ -3,7 +3,7 @@ module ForwardAnalysis
 
 open Microsoft.FSharp.Collections
 
-open GenericCFG
+open GenericGraphs
 open YC.FSA.GraphBasedFsa
 open YC.FSA.FsaApproximation
 open Utils
@@ -11,7 +11,7 @@ open Utils
 type State = char * Position<int>
 type FSAMap = Map<string, FSA<State>>
 
-let buildAutomaton (cfg: GenericCFG) =
+let buildAutomaton (ddg: DDG) =
     // exception messages
     let unsupportedCaseMsg = "unsupported case encountered"
     let unexpectedNodeMsg = "unexpected node type is encountered in automaton building"
@@ -82,7 +82,7 @@ let buildAutomaton (cfg: GenericCFG) =
         concatResFsa :: operands'
 
     let processNodeByType
-            (nodeType: CFGNodeType) 
+            (nodeType: GraphNodeType) 
             (operands: list<FSA<State>>) 
             (automata: FSAMap) =
         match nodeType with
@@ -120,21 +120,21 @@ let buildAutomaton (cfg: GenericCFG) =
         | _ -> failwith unexpectedNodeMsg
 
     let rec build 
-            (node: CFGNode) 
+            (node: GraphNode) 
             (operands: list<FSA<State>>) 
             (automata: FSAMap) 
-            (unionNodes: Map<CFGNode, list<FSAMap>>) =
+            (unionNodes: Map<GraphNode, list<FSAMap>>) =
         let processSuccessors node operands automata unionNodes =
-            cfg.Graph.OutEdges(node)
+            ddg.Graph.OutEdges(node)
             |> List.ofSeq
             |> List.map (fun e -> e.Target)
             |> List.fold (fun (_, un) succ -> build succ operands automata un) (automata, unionNodes)
 
-        let processNodeAndSuccessors (node: CFGNode) operands automata unionNodes =
+        let processNodeAndSuccessors (node: GraphNode) operands automata unionNodes =
             let operands', automata' = processNodeByType node.Type operands automata
             processSuccessors node operands' automata' unionNodes
 
-        let entriesNum = cfg.Graph.InEdges(node) |> List.ofSeq |> List.length
+        let entriesNum = ddg.Graph.InEdges(node) |> List.ofSeq |> List.length
         if entriesNum > 1
         // union node processing (loop, if-block end, etc.)
         then
@@ -176,10 +176,6 @@ let buildAutomaton (cfg: GenericCFG) =
             // sequential node processing
             processNodeAndSuccessors node operands automata unionNodes
     
-    let varFsaMap, _ = build cfg.Root [] Map.empty Map.empty
-    let finalVarName = 
-        match cfg.Final.Type with 
-        | VarRef(name) -> name
-        | _ -> failwith "CFG has wrong typed final node"
-    let nfsa = Map.find finalVarName varFsaMap
+    let varFsaMap, _ = build ddg.Root [] Map.empty Map.empty
+    let nfsa = Map.find ddg.VarName varFsaMap
     nfsa.NfaToDfa

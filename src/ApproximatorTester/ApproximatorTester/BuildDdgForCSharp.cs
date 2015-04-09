@@ -29,7 +29,7 @@ namespace ApproximatorTester
         {
             var inputFile = _provider.PsiFile;
             var ddg = ApproximationBuilderCSharp.buildDdg(inputFile);
-            Utils.OutputCSharpResult(Utils.GenericCfgStructureToDot(ddg), _provider);
+            Utils.OutputCSharpResult(Utils.DdgToTestDot(ddg), _provider);
             return null;
         }
 

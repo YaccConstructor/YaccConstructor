@@ -1,4 +1,4 @@
-﻿module GenericCFG
+﻿module GenericGraphs
 
 open QuickGraph
 
@@ -15,7 +15,7 @@ type UpdaterType =
 | PlusAssign of int * int
 // function with updatable arg passing
 
-type CFGNodeType = 
+type GraphNodeType = 
 // declared name and initializer node ID
 | Declaration of string * int
 // update target and updater type
@@ -28,13 +28,12 @@ type CFGNodeType =
 | LoopNode of int * int
 | OtherNode
 
-type CFGNode = {
+type GraphNode = {
     Id: int
-    Type: CFGNodeType
-}
+    Type: GraphNodeType }
 
-module CFGNodeFuncs =
-    let toString (node: CFGNode) =
+module GraphNodeFuncs =
+    let toString (node: GraphNode) =
         match node.Type with
         | Declaration(name, _) -> sprintf "decl(%s)" name
         | Updater(target, aType) -> 
@@ -53,15 +52,15 @@ module CFGNodeFuncs =
         | LoopNode(_,_) -> "loopNode"
         | OtherNode -> "otherNode"
 
-type GenericCFG = {
-    Graph: BidirectionalGraph<CFGNode, Edge<CFGNode>>
-    Root: CFGNode
-    Final: CFGNode
-}
+type GenericCFG = BidirectionalGraph<GraphNode, Edge<GraphNode>>
+
+type DDG = {
+    Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
+    Root: GraphNode
+    VarName: string }
 
 module GenericCFGFuncs =
-    open System.IO
-    open CFGNodeFuncs
+    open GraphNodeFuncs
 
     // exception messages 
     let private wrongCFGNodeTypeMsg = 
@@ -72,8 +71,8 @@ module GenericCFGFuncs =
     let private updaterAssumptionMsg = "updated assumption failed"
 
     type private DDGraphBuildInfo = {   
-        Graph: BidirectionalGraph<CFGNode, Edge<CFGNode>>
-        ConnectionNode: CFGNode }
+        Graph: BidirectionalGraph<GraphNode, Edge<GraphNode>>
+        ConnectionNode: GraphNode }
 
     module private DDGBuildFuncs =
         // exception messages
@@ -93,13 +92,13 @@ module GenericCFGFuncs =
             let graph = ddGraph.Graph
             failIfNoSuchKey ddGraph src
             failIfNoSuchKey ddGraph dst
-            if (not << (graph.ContainsEdge : CFGNode * CFGNode -> bool)) (src, dst)
-            then graph.AddEdge (new Edge<CFGNode>(src, dst)) |> ignore
+            if (not << (graph.ContainsEdge : GraphNode * GraphNode -> bool)) (src, dst)
+            then graph.AddEdge (new Edge<GraphNode>(src, dst)) |> ignore
             ddGraph
 
-        let create(finalNode: CFGNode) =
+        let create(finalNode: GraphNode) =
             let ddGraph = {
-                Graph = new BidirectionalGraph<CFGNode, Edge<CFGNode>>()
+                Graph = new BidirectionalGraph<GraphNode, Edge<GraphNode>>()
                 ConnectionNode = finalNode }
             addNode ddGraph finalNode
 
@@ -116,7 +115,7 @@ module GenericCFGFuncs =
         VisitedForks: Map<int, Set<string>>
         NodesToVisit: Set<int> }
 
-    let rec subgraphForVar (varRef: CFGNode) (cfg: GenericCFG) = 
+    let rec ddgForVar (varRef: GraphNode) (cfg: GenericCFG) = 
         let varRefName = function
         | VarRef(name) -> name
         | _ -> failwith wrongCFGNodeTypeMsg
@@ -125,8 +124,8 @@ module GenericCFGFuncs =
             let graph' = { state.GraphInfo with ConnectionNode = nodeId }
             { state with GraphInfo = graph' }
 
-        let rec build (cfNode: CFGNode) (cfg: GenericCFG) (varsSet: Set<string>) (state: BuildState) =
-            let processEntries (entries: list<Edge<CFGNode>>) (varsSet: Set<string>) (state: BuildState) =
+        let rec build (cfNode: GraphNode) (cfg: GenericCFG) (varsSet: Set<string>) (state: BuildState) =
+            let processEntries (entries: list<Edge<GraphNode>>) (varsSet: Set<string>) (state: BuildState) =
                 let curConnectionNode = state.GraphInfo.ConnectionNode
                 entries
                 |> List.map (fun e -> e.Source) 
@@ -144,7 +143,7 @@ module GenericCFGFuncs =
                     let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
                     let nodesToVisit = Set.add initializerId state.NodesToVisit
                     let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state', varsSet
                 // todo: updater can be an operand is some languages
                 | Updater(target, aType) when Set.contains target varsSet ->
@@ -157,7 +156,7 @@ module GenericCFGFuncs =
                         operandsIDs 
                         |> List.fold (fun acc op -> Set.add op acc) state.NodesToVisit
                     let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state', varsSet
                 | Operation(tType, operands) when Set.contains cfNode.Id state.NodesToVisit ->
                     let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
@@ -165,18 +164,18 @@ module GenericCFGFuncs =
                         operands 
                         |> List.fold (fun acc op -> Set.add op acc) state.NodesToVisit
                     let state' = { state with GraphInfo = gInfo'; NodesToVisit = nodesToVisit }
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state', varsSet
                 | Literal(value) when Set.contains cfNode.Id state.NodesToVisit ->
                     let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
                     let state' = { state with GraphInfo = gInfo' }
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state', varsSet
                 | VarRef(name) when Set.contains cfNode.Id state.NodesToVisit ->
                     let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
                     let state' = { state with GraphInfo = gInfo' }
                     let varsSet' = Set.add name varsSet
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state', varsSet'
                 | LoopNode(enterIndex, bodyIndex) ->
                     let gInfo' = DDGBuildFuncs.addConnectionNodeAndEdge state.GraphInfo cfNode
@@ -187,19 +186,20 @@ module GenericCFGFuncs =
                     let newVarsSet = Set.difference varsSet forkVarsSet
                     if Set.isEmpty newVarsSet
                     then
-                        let enterEdge = cfg.Graph.InEdge(cfNode, enterIndex)
+                        let enterEdge = cfg.InEdge(cfNode, enterIndex)
                         [enterEdge], { state with GraphInfo = gInfo' }, varsSet
                     else 
                         let visitedForks' = Map.add cfNode.Id varsSet state.VisitedForks
-                        let bodyExitEdge = cfg.Graph.InEdge(cfNode, bodyIndex)
+                        let bodyExitEdge = cfg.InEdge(cfNode, bodyIndex)
                         [bodyExitEdge], { state with GraphInfo = gInfo'; VisitedForks = visitedForks' }, varsSet
                 | _ -> 
-                    let entries = cfg.Graph.InEdges(cfNode) |> List.ofSeq
+                    let entries = cfg.InEdges(cfNode) |> List.ofSeq
                     entries, state, varsSet
             processEntries entries updVarsSet updState 
 
         let graphInfo = DDGBuildFuncs.create(varRef)
-        let varsSet = Set.ofList [(varRefName varRef.Type)]
+        let varName = varRefName varRef.Type
+        let varsSet = Set.ofList [varName]
         let initState = { 
             GraphInfo = graphInfo;
             VisitedForks = Map.empty
@@ -211,13 +211,16 @@ module GenericCFGFuncs =
             resState.GraphInfo.Graph.Vertices
             |> List.ofSeq
             |> List.find (fun n -> resState.GraphInfo.Graph.InDegree(n) = 0)
-        let subCFG: GenericCFG = { 
-            Graph = resState.GraphInfo.Graph
-            Root = root
-            Final = varRef }
-        subCFG
+        { Graph = resState.GraphInfo.Graph; Root = root; VarName = varName }
 
-    let toDot (ddGraph: GenericCFG) name path =
+    let create(): GenericCFG = 
+        new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)
+
+module DDGFuncs =
+    open System.IO
+    open GraphNodeFuncs
+
+    let toDot (ddGraph: DDG) name path =
         use file = FileInfo(path).CreateText()
         file.WriteLine("digraph " + name + " {")
         ddGraph.Graph.Vertices
@@ -237,9 +240,3 @@ module GenericCFGFuncs =
             )
         |> List.iter file.WriteLine
         file.WriteLine("}")
-
-    let create(): GenericCFG = { 
-        Graph = new BidirectionalGraph<CFGNode, Edge<CFGNode>>(allowParallelEdges = false)
-        // todo: redesign this (root and final nodes are fake here because graph is empty)
-        Root = { Id = 0; Type = OtherNode }
-        Final = { Id = 0; Type = OtherNode } }

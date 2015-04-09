@@ -2,7 +2,7 @@
 
 open CSharpCFGInfo
 open Utils
-open GenericCFG
+open GenericGraphs
 open CfgUtils
 
 open JetBrains.ReSharper.Psi.Tree
@@ -83,6 +83,6 @@ let convert (csharpCFG: IJsControlFlowGraf) (cfgInfo: CSharpCFGInfo) =
 
 let extractVarRefFromHotspot (hotVarRef: IJavaScriptExpression) (info: CSharpCFGInfo) (cfg: GenericCFG) =
     let cfe = correspondingCfe hotVarRef info
-    cfg.Graph.Vertices
+    cfg.Vertices
     |> List.ofSeq
     |> List.find (fun n -> n.Id = cfe.Value.Id)

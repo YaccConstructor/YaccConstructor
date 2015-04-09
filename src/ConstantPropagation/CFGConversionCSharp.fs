@@ -9,8 +9,8 @@ open JetBrains.ReSharper.Psi
 open JetBrains.ReSharper.Psi.CSharp
 open JetBrains.ReSharper.Psi.Tree
 
-open GenericCFG
-open GenericCFGFuncs
+open GenericGraphs
+open GenericGraphs.GenericCFGFuncs
 open XMLParser
 open Utils
 open CSharpCFGInfo
@@ -166,6 +166,6 @@ let extractVarRefFromHotspot (hotInvocation: IInvocationExpression) (info: CShar
     // info from hotspot must be used
     let hotVarRef = hotInvocation.Arguments.[0].Value
     let cfe = correspondingCfe hotVarRef info
-    cfg.Graph.Vertices
+    cfg.Vertices
     |> List.ofSeq
     |> List.find (fun n -> n.Id = cfe.Value.Id)

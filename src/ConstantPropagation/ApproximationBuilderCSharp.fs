@@ -13,8 +13,8 @@ open XMLParser
 open CSharpCFGInfo
 open Utils
 open CFGConversionCSharp
-open GenericCFG
-open GenericCFG.GenericCFGFuncs
+open GenericGraphs
+open GenericGraphs.GenericCFGFuncs
 open ForwardAnalysis
 
 open System.Collections.Generic
@@ -78,16 +78,16 @@ let buildDdg (file: ICSharpFile) =
     let additionalInfo = collectAdditionalInfo csharpCFG
     let genericCFG = convert csharpCFG additionalInfo
     let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
-    subgraphForVar hotVarRef genericCFG
+    ddgForVar hotVarRef genericCFG
 
 let buildFsa (file: ICSharpFile) =
-    let cfgForVar = buildDdg file
-    let fsaForVar = buildAutomaton cfgForVar
+    let ddg = buildDdg file
+    let fsaForVar = buildAutomaton ddg
 
     // for debug
-    let cfgName = "cfg_" + file.GetHashCode().ToString()
-    let path = Path.Combine (myDebugFolderPath, cfgName + ".dot")
-    toDot cfgForVar cfgName path
+    let ddgName = "ddg_" + file.GetHashCode().ToString()
+    let path = Path.Combine (myDebugFolderPath, ddgName + ".dot")
+    DDGFuncs.toDot ddg ddgName path
 
     let fsaName = "fsa_" + file.GetHashCode().ToString()
     let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")

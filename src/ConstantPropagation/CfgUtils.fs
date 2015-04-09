@@ -7,7 +7,7 @@ open JetBrains.ReSharper.Psi.ControlFlow
 open System.Collections.Generic
 
 open CSharpCFGInfo
-open GenericCFG
+open GenericGraphs
 open JetBrains.ReSharper.Psi.Tree
 
 let collectAdditionalInfo (cfg: IControlFlowGraf) infoExtractor initInfo =
@@ -53,7 +53,7 @@ let convert (csharpCFG: IControlFlowGraf) toGenericNode =
                 |> List.choose (fun rib -> if rib.Target <> null then Some(rib.Target) else None) 
             children
             |> List.map (fun t -> toGenericNode t)
-            |> List.iter(fun node -> genCFG.Graph.AddVerticesAndEdge(new Edge<CFGNode>(cur, node)) |> ignore)
+            |> List.iter(fun node -> genCFG.AddVerticesAndEdge(new Edge<GraphNode>(cur, node)) |> ignore)
             List.iter (fun ch -> dfs ch visited' genCFG) children
 
     let genericCFG = GenericCFGFuncs.create()

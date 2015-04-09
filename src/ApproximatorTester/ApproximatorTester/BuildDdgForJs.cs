@@ -32,7 +32,7 @@ namespace ApproximatorTester
         {
             var jsCfg = _provider.GetControlFlowGraf();
             var cfg = ApproximationBuilderJs.BuildApproximation(jsCfg);
-            OutputResult(Utils.GenericCfgStructureToDot(cfg));
+            OutputResult(Utils.DdgToTestDot(cfg));
             return null;
         }
 

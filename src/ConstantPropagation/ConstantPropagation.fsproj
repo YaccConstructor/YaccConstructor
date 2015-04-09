@@ -43,7 +43,7 @@
     <Compile Include="FsaHelper.fs" />
     <Compile Include="CSharpCFGInfo.fs" />
     <Compile Include="DataDependencyGraph.fs" />
-    <Compile Include="GenericCFG.fs" />
+    <Compile Include="GenericGraphs.fs" />
     <Compile Include="CfgUtils.fs" />
     <Compile Include="ForwardAnalysis.fs" />
     <Compile Include="CFGConversionCSharp.fs" />

@@ -78,17 +78,20 @@ let buildDdg (file: ICSharpFile) =
     let additionalInfo = collectAdditionalInfo csharpCFG
     let genericCFG = convert csharpCFG additionalInfo
     let hotVarRef = extractVarRefFromHotspot hotspot additionalInfo genericCFG
-    ddgForVar hotVarRef genericCFG
-
-let buildFsa (file: ICSharpFile) =
-    let ddg = buildDdg file
-    let fsaForVar = buildAutomaton ddg
+    let ddg = ddgForVar hotVarRef genericCFG
 
     // for debug
     let ddgName = "ddg_" + file.GetHashCode().ToString()
     let path = Path.Combine (myDebugFolderPath, ddgName + ".dot")
     DDGFuncs.toDot ddg ddgName path
 
+    ddg
+
+let buildFsa (file: ICSharpFile) =
+    let ddg = buildDdg file
+    let fsaForVar = buildAutomaton ddg
+
+    // for debug
     let fsaName = "fsa_" + file.GetHashCode().ToString()
     let path = Path.Combine (myDebugFolderPath, fsaName + ".dot")
     FsaHelper.toDot fsaForVar path

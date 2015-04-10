@@ -57,5 +57,11 @@ namespace ApproximatorTester.Tests
         {
             DoTestFiles("SimpleConcat.cs");
         }
+
+        [Test]
+        public void TestSimpleFor()
+        {
+            DoTestFiles("SimpleFor.cs");
+        }
     }
 }

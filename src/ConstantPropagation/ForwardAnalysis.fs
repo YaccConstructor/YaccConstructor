@@ -285,12 +285,16 @@ let buildAutomaton (ddg: DDG) =
             else
                 match node.Type with
                 | LoopNode(_, _) -> 
+                    let processLoopBody node state =
+                        let state = 
+                            { state with 
+                                LoopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap;
+                                DirHelper = setLoopBodyDirection node state.DirHelper }
+                        processSuccessors node state
                     let optLoopNodeFsa = Map.tryFind node state.LoopNodesFsaMap
                     match optLoopNodeFsa with
-                    | None -> 
-                        // just start processing body
-                        let state = { state with DirHelper = setLoopBodyDirection node state.DirHelper }
-                        processSuccessors node state
+                    // just start processing body
+                    | None -> processLoopBody node state 
                     | Some(oldFsaMap) -> 
                         // we have already been in current loop node
                         let unionFsaMap = unionTwoFsaMaps oldFsaMap state.Automata
@@ -305,13 +309,8 @@ let buildAutomaton (ddg: DDG) =
                                     LoopNodesFsaMap = Map.remove node state.LoopNodesFsaMap;
                                     DirHelper = setLoopExitDirection node state.DirHelper }
                             processSuccessors node state
-                        else  
-                            // continue processing body
-                            let state = 
-                                { state with 
-                                    LoopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap;
-                                    DirHelper = setLoopBodyDirection node state.DirHelper }
-                            processSuccessors node state
+                        // continue processing body
+                        else processLoopBody node state 
                 | _ -> processNodeAndSuccessors node state
     
     let initState = BuildStateFuncs.create ddg

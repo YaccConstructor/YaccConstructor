@@ -111,8 +111,18 @@ module LoopsDirectionHelperFuncs =
             isRightDir, dirStack'
         else true, dirHelper
 
-type State = char * Position<int>
-type FSAMap = Map<string, FSA<State>>
+type FsaState = char * Position<int>
+type FSAMap = Map<string, FSA<FsaState>>
+
+type BuildState = {
+    Operands: list<FSA<FsaState>>;
+    Automata: FSAMap;
+    UnionNodes: Map<GraphNode, list<FSAMap>> }
+
+module BuildStateFuncs =
+    let empty = { Operands = []; Automata = Map.empty; UnionNodes = Map.empty }
+
+open BuildStateFuncs
 
 let buildAutomaton (ddg: DDG) =
     // exception messages
@@ -122,7 +132,7 @@ let buildAutomaton (ddg: DDG) =
     let fixpointComputationProblemMsg = "old fsa map contains more variables than the new one in fixpoint computation"
 
     let unionTwoFsaMaps (a1: FSAMap) (a2: FSAMap) =
-        let rec go (a1: list<string * FSA<State>>) (a2: FSAMap) (acc: FSAMap) =
+        let rec go (a1: list<string * FSA<FsaState>>) (a2: FSAMap) (acc: FSAMap) =
             match a1 with
             | [] -> Map.fold (fun acc k v -> Map.add k v acc) acc a2
             | (varName, fsa1) :: tl ->
@@ -136,7 +146,7 @@ let buildAutomaton (ddg: DDG) =
         go (Map.toList a1) a2 Map.empty
 
     let fixpointAchieved (oldFsaMap: FSAMap) (widenedFsaMap: FSAMap) =
-        let rec go (oldFsaList: list<string * FSA<State>>) (widenedFsaMap: FSAMap) =
+        let rec go (oldFsaList: list<string * FSA<FsaState>>) (widenedFsaMap: FSAMap) =
             match oldFsaList with
             | [] -> true
             | (varName, oldFsa) :: tl ->
@@ -186,7 +196,7 @@ let buildAutomaton (ddg: DDG) =
 
     let processNodeByType
             (nodeType: GraphNodeType) 
-            (operands: list<FSA<State>>) 
+            (operands: list<FSA<FsaState>>) 
             (automata: FSAMap) =
         match nodeType with
         | Literal(value) ->
@@ -222,24 +232,21 @@ let buildAutomaton (ddg: DDG) =
             | Arbitrary(name) -> failwith unsupportedCaseMsg
         | _ -> failwith unexpectedNodeMsg
 
-    let rec build 
-            (node: GraphNode) 
-            (operands: list<FSA<State>>) 
-            (automata: FSAMap) 
-            (unionNodes: Map<GraphNode, list<FSAMap>>) =
-        let processSuccessors node operands automata unionNodes =
+    let rec build (node: GraphNode) (state: BuildState) =
+        let processSuccessors node (state: BuildState) =
             ddg.Graph.OutEdges(node)
             |> List.ofSeq
             |> List.map (fun e -> e.Target)
-            |> List.fold (fun (_, un) succ -> build succ operands automata un) (automata, unionNodes)
+            |> List.fold (fun st succ -> build succ { state with UnionNodes = st.UnionNodes }) state
 
-        let processNodeAndSuccessors (node: GraphNode) operands automata unionNodes =
-            let operands', automata' = processNodeByType node.Type operands automata
-            processSuccessors node operands' automata' unionNodes
+        let processNodeAndSuccessors (node: GraphNode) (state: BuildState) =
+            let operands', automata' = processNodeByType node.Type state.Operands state.Automata
+            let state' = { state with Operands = operands'; Automata = automata' }
+            processSuccessors node state'
 
         let entriesNum = ddg.Graph.InEdges(node) |> List.ofSeq |> List.length
-        let optTraversedEntries = Map.tryFind node unionNodes
-        let traversedEntries = automata :: Option.getOrElse optTraversedEntries []
+        let optTraversedEntries = Map.tryFind node state.UnionNodes
+        let traversedEntries = state.Automata :: Option.getOrElse optTraversedEntries []
         let traversedNum = List.length traversedEntries
         let allEntriesTraversed =
             entriesNum = 0 ||
@@ -248,13 +255,15 @@ let buildAutomaton (ddg: DDG) =
             | _ -> entriesNum = traversedNum
         if not allEntriesTraversed
         then
-            let unionNodes' = Map.add node traversedEntries unionNodes
-            automata, unionNodes'
+            let unionNodes' = Map.add node traversedEntries state.UnionNodes
+            { state with UnionNodes = unionNodes' }
         else
             // all paths leading to this node are traversed, we can union automata
-            // and continue processing its successors
-            let unionFsaMap = unionFsaMaps traversedEntries
-            let unionNodes' = Map.remove node unionNodes
+            // and continue processing
+            let state = 
+                { state with 
+                    Automata = unionFsaMaps traversedEntries; 
+                    UnionNodes = Map.remove node state.UnionNodes }
             match node.Type with
             | LoopNode(_, _) -> 
 //                let loopFsa = Map.tryFind node loopsFsa
@@ -276,8 +285,8 @@ let buildAutomaton (ddg: DDG) =
 //                | None -> 
 //                    // just start processing body
                 failwith unsupportedCaseMsg
-            | _ -> processNodeAndSuccessors node operands unionFsaMap unionNodes'
+            | _ -> processNodeAndSuccessors node state
     
-    let varFsaMap, _ = build ddg.Root [] Map.empty Map.empty
-    let nfsa = Map.find ddg.VarName varFsaMap
+    let finalState = build ddg.Root BuildStateFuncs.empty
+    let nfsa = Map.find ddg.VarName finalState.Automata
     nfsa.NfaToDfa

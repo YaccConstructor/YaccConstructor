@@ -169,7 +169,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         then
             for prod in arr do
                 innerGraphV.AddReduction(new Reduction(gssVertex, prod, 0, None))
-            if shouldEnqueue then customEnqueue innerGraphV
     
     let (*inline*) addVertex (currentGraphV:VInfo<_>) state (listToAddUnprocessedGssV : ResizeArray<_>) =
         let mutable v = null
@@ -192,6 +191,7 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
     let addEdge (startV:VInfo<_>) isNew (newVertex:Vertex) edge isNotEps =
         if not isNew && newVertex.PassingReductions.Count > 0
         then startV.passingReductions.Add((newVertex, edge))
+        customEnqueue(startV)
         newVertex.addEdge edge
         if isNotEps
         then
@@ -260,7 +260,6 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
             let edge = new Edge(final, nodes.Count)
             nodes.Add <| new AST (Unchecked.defaultof<_>, null)
             addEdge  startV isNew newVertex edge (pos > 0)
-            if startV.reductions.Count > 0 then customEnqueue startV
             addChildren nodes.[nodes.Count - 1] path prod
 
     let rec walk remainLength (vertex : Vertex) path startV nonTerm pos prod shouldEnqueueVertex = 
@@ -321,16 +320,10 @@ let buildAstAbstract<'TokenType> (parserSource : ParserSource<'TokenType>) (toke
         if newGssVs.Count > 0 
         then
             v.unprocessedGssVertices.AddRange(newGssVs)
-            customEnqueue v
 
         if v.passingReductions.Count > 0
         then
             handlePassingReductions v
-
-        for e in outEdgesInnerGraph.[v.vNum] do
-            if e.Target.reductions.Count > 0 || e.Target.unprocessedGssVertices.Count > 0 || e.Target.passingReductions.Count > 0
-            then
-                customEnqueue e.Target
 
     if tokens.EdgeCount = 0
     then

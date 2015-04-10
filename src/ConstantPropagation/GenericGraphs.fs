@@ -205,13 +205,30 @@ module GenericCFGFuncs =
             VisitedForks = Map.empty
             NodesToVisit = Set.empty }
         let resState = build varRef cfg varsSet initState
+        // hack 1
         let root = 
             // bad algo
             // todo: improve
             resState.GraphInfo.Graph.Vertices
             |> List.ofSeq
             |> List.find (fun n -> resState.GraphInfo.Graph.InDegree(n) = 0)
-        { Graph = resState.GraphInfo.Graph; Root = root; VarName = varName }
+        // hack 2
+        let g = resState.GraphInfo.Graph
+        let loopNodesInEdges =
+            g.Vertices
+            |> Seq.filter(fun n -> match n.Type with LoopNode(_, _) -> true | _ -> false)
+            |> Seq.map (fun n -> g.InEdges(n))
+            |> Seq.concat
+            |> List.ofSeq
+            |> List.rev
+        do loopNodesInEdges
+        |> List.iter(fun e -> g.RemoveEdge(e) |> ignore)
+        // the main hack is here - we add edges in reversed order so 
+        // enter edge index and body exit index are valid now
+        do loopNodesInEdges
+        |> List.iter(fun e -> g.AddEdge(e) |> ignore)
+        // end hacks
+        { Graph = g; Root = root; VarName = varName }
 
     let create(): GenericCFG = 
         new BidirectionalGraph<GraphNode, Edge<GraphNode>>(allowParallelEdges = false)

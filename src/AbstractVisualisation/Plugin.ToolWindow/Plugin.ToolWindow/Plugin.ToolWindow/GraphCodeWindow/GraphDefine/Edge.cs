@@ -1,4 +1,5 @@
-﻿using GraphX;
+﻿using System.Windows.Media;
+using GraphX;
 
 namespace Plugin.ToolWindow
 {
@@ -23,21 +24,35 @@ namespace Plugin.ToolWindow
         /// <param name="source">Source vertex data</param>
         /// <param name="target">Target vertex data</param>
         /// <param name="weight">Optional edge weight</param>
-        public Edge(Vertex source, Vertex target, double weight = 1)
+        public Edge(object info, Vertex source, Vertex target, Brush br, double weight = 1)
             : base(source, target, weight)
         {
+            thisobject = info;
+            b = br;
         }
         /// <summary>
         /// Default parameterless constructor (for serialization compatibility)
         /// </summary>
+
         public Edge()
             : base(null, null, 1)
         {
         }
+        public Brush GetBrush()
+        {
+            return b;
+        }
+
 
         /// <summary>
-        /// Custom string property for example
+        /// Custom string p
+        /// roperty for example
         /// </summary>
+        private Brush b;
+
+        public object thisobject;
+        public int codeline;
+        private int codecolumn;
         public string Text { get; set; }
 
         #region GET members
@@ -45,7 +60,10 @@ namespace Plugin.ToolWindow
         {
             return Text;
         }
-
+        public object thisObj()
+        {
+            return thisobject;
+        }
         #endregion
     }
 }

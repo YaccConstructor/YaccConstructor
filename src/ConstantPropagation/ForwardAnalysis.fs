@@ -63,9 +63,6 @@ let collectLoopNodesInfo (ddg: DDG) =
     |> Seq.map (fun n -> n.Id, collectInfo n)
     |> Map.ofSeq
             
-type State = char * Position<int>
-type FSAMap = Map<string, FSA<State>>
-
 type DirectionChecker = GraphNode -> LoopInfo -> bool
 type LoopsDirectionHelper = {
     LoopsInfo: Map<int, LoopInfo>
@@ -96,8 +93,11 @@ module LoopsDirectionHelperFuncs =
     let setLoopExitDirection node dirHelper = 
         setDirection node dirHelper isLoopExitOrOuterNode
 
+    let hasRestrictions (dirHelper: LoopsDirectionHelper) =
+        not <| List.isEmpty dirHelper.Stack
+
     let isRightDirection node (dirHelper: LoopsDirectionHelper) =
-        if not <| List.isEmpty dirHelper.Stack
+        if hasRestrictions dirHelper
         then
             let loopInfo, checker = List.head dirHelper.Stack
             let isRightDir = checker node loopInfo
@@ -110,6 +110,9 @@ module LoopsDirectionHelperFuncs =
                 else { dirHelper with Stack = (loopInfo', checker) :: dirHelper.Stack }
             isRightDir, dirStack'
         else true, dirHelper
+
+type State = char * Position<int>
+type FSAMap = Map<string, FSA<State>>
 
 let buildAutomaton (ddg: DDG) =
     // exception messages
@@ -235,13 +238,27 @@ let buildAutomaton (ddg: DDG) =
             processSuccessors node operands' automata' unionNodes
 
         let entriesNum = ddg.Graph.InEdges(node) |> List.ofSeq |> List.length
-        if entriesNum > 1
-        // union node processing (loop, if-block end, etc.)
-        then
-            let optAutomataMaps = Map.tryFind node unionNodes
+        let optTraversedEntries = Map.tryFind node unionNodes
+        let traversedEntries = automata :: Option.getOrElse optTraversedEntries []
+        let traversedNum = List.length traversedEntries
+        let allEntriesTraversed =
+            entriesNum = 0 ||
             match node.Type with
-            | LoopNode(_, bodyNodeIndex) ->
-//                match optAutomataMaps with
+            | LoopNode(_, _) -> entriesNum - 1 = traversedNum // todo: support more than 2 entries
+            | _ -> entriesNum = traversedNum
+        if not allEntriesTraversed
+        then
+            let unionNodes' = Map.add node traversedEntries unionNodes
+            automata, unionNodes'
+        else
+            // all paths leading to this node are traversed, we can union automata
+            // and continue processing its successors
+            let unionFsaMap = unionFsaMaps traversedEntries
+            let unionNodes' = Map.remove node unionNodes
+            match node.Type with
+            | LoopNode(_, _) -> 
+//                let loopFsa = Map.tryFind node loopsFsa
+//                match loopFsa with
 //                | Some(fsaMaps) -> 
 //                    // we have already been in current loop node
 //                    let oldFsaMap = List.head fsaMaps
@@ -259,22 +276,7 @@ let buildAutomaton (ddg: DDG) =
 //                | None -> 
 //                    // just start processing body
                 failwith unsupportedCaseMsg
-            | _ ->
-                let automataMaps = automata :: (Option.getOrElse optAutomataMaps [])
-                if List.length automataMaps < entriesNum
-                then
-                    // not all entry paths are traversed yet
-                    let unionNodes' = Map.add node automataMaps unionNodes
-                    automata, unionNodes'
-                else
-                    // all paths leading to this node are traversed, we can union automata
-                    // and continue processing its successors
-                    let unionMap = unionFsaMaps automataMaps
-                    let unionNodes' = Map.add node [] unionNodes
-                    processNodeAndSuccessors node operands unionMap unionNodes'
-        else
-            // sequential node processing
-            processNodeAndSuccessors node operands automata unionNodes
+            | _ -> processNodeAndSuccessors node operands unionFsaMap unionNodes'
     
     let varFsaMap, _ = build ddg.Root [] Map.empty Map.empty
     let nfsa = Map.find ddg.VarName varFsaMap

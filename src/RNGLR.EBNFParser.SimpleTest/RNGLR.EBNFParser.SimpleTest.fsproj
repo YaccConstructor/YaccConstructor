@@ -31,6 +31,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LexCommon.fs" />
+    <None Include="CalcEBNF.yrd" />
+    <None Include="ComplexRightNull.yrd" />
+    <None Include="EpsilonCycle.yrd" />
+    <None Include="ManyAndOne.yrd" />
+    <None Include="ManyAndOpt.yrd" />
+    <None Include="RightNull.yrd" />
+    <None Include="SimpleEpsilon.yrd" />
+    <None Include="SimpleRightNull.yrd" />
+    <None Include="SimpleSome.yrd" />
+    <None Include="StackingConflict.yrd" />
+    <None Include="TwoEpsilonsMiddle.yrd" />
     <Compile Include="CalcEBNF.yrd.fs" />
     <Compile Include="ComplexRightNull.yrd.fs" />
     <Compile Include="EpsilonCycle.yrd.fs" />
@@ -44,17 +55,6 @@
     <Compile Include="StackingConflict.yrd.fs" />
     <Compile Include="TwoEpsilonsMiddle.yrd.fs" />
     <Compile Include="Program.fs" />
-    <None Include="CalcEBNF.yrd" />
-    <None Include="ComplexRightNull.yrd" />
-    <None Include="EpsilonCycle.yrd" />
-    <None Include="ManyAndOne.yrd" />
-    <None Include="ManyAndOpt.yrd" />
-    <None Include="RightNull.yrd" />
-    <None Include="SimpleEpsilon.yrd" />
-    <None Include="SimpleRightNull.yrd" />
-    <None Include="SimpleSome.yrd" />
-    <None Include="StackingConflict.yrd" />
-    <None Include="TwoEpsilonsMiddle.yrd" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

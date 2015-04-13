@@ -40,7 +40,8 @@ let collectLoopNodesInfo (ddg: DDG) =
             ddg.Graph.OutEdges(node)
             |> Seq.exists (fun e -> not <| Set.contains e.Target loopBodyNodes)
         let directExitNodes = 
-            Set.filter hasNonLoopSuccessors loopBodyNodes 
+            let isNotLoopNode (n: GraphNode) = match n.Type with LoopNode(_) -> false | _ -> true
+            Set.filter (fun n -> isNotLoopNode n && hasNonLoopSuccessors n) loopBodyNodes 
             // loop node is not considered ad exit node (exception of the rule)
             |> Set.remove loopNode
         let rec dfsUntilLoopNode (node: GraphNode) visited =         
@@ -90,29 +91,21 @@ module LoopsDirectionHelperFuncs =
         LoopsInfo = collectLoopNodesInfo ddg;
         Stack = [] }
 
-    let setLoopBodyDirection node dirHelper = 
+    let pushLoopBodyDirection node dirHelper = 
         setDirection node dirHelper isLoopBodyNode
 
-    let setLoopExitDirection node dirHelper = 
+    let pushLoopExitDirection node dirHelper = 
         setDirection node dirHelper isLoopExitOrOuterNode
 
-    let hasRestrictions (dirHelper: LoopsDirectionHelper) =
-        not <| List.isEmpty dirHelper.Stack
+    let popDirection (dirHelper: LoopsDirectionHelper) =
+        { dirHelper with Stack = List.tail dirHelper.Stack }
 
     let isRightDirection node (dirHelper: LoopsDirectionHelper) =
-        if hasRestrictions dirHelper
-        then
+        if List.isEmpty dirHelper.Stack
+        then true
+        else
             let loopInfo, checker = List.head dirHelper.Stack
-            let isRightDir = checker node loopInfo
-            let loopInfo' = { 
-                BodyNodes = Set.remove node.Id loopInfo.BodyNodes;
-                ExitNodes = Set.remove node.Id loopInfo.ExitNodes }
-            let dirStack' =
-                if Set.isEmpty loopInfo'.BodyNodes && Set.isEmpty loopInfo'.ExitNodes
-                then { dirHelper with Stack = List.tail dirHelper.Stack }
-                else { dirHelper with Stack = (loopInfo', checker) :: dirHelper.Stack }
-            isRightDir, dirStack'
-        else true, dirHelper
+            checker node loopInfo
 
 type FsaState = char * Position<int>
 type FSAMap = Map<string, FSA<FsaState>>
@@ -243,20 +236,32 @@ let buildAutomaton (ddg: DDG) =
     let rec build (node: GraphNode) (state: BuildState) =
         let processSuccessors node (state: BuildState) =
             ddg.Graph.OutEdges(node)
-            |> List.ofSeq
-            |> List.map (fun e -> e.Target)
-            |> List.fold 
-                (
-                    fun st succ -> 
-                        { state with UnionNodes = st.UnionNodes; DirHelper = st.DirHelper }
-                        |> build succ
-                ) 
+            |> Seq.map (fun e -> e.Target)
+            |> Seq.fold 
+                (fun st succ -> build succ { state with UnionNodes = st.UnionNodes }) 
                 state
 
         let processNodeAndSuccessors (node: GraphNode) (state: BuildState) =
             let operands', automata' = processNodeByType node.Type state.Operands state.Automata
             let state' = { state with Operands = operands'; Automata = automata' }
             processSuccessors node state'
+
+        let processLoopSuccessors loopNode (state: BuildState) =
+            ddg.Graph.OutEdges(node)
+            |> Seq.map (fun e -> e.Target)
+            |> Seq.fold 
+                (
+                    fun st succ ->
+                        let optLoopNodeFsaMap = Map.tryFind loopNode st.LoopNodesFsaMap
+                        let loopNodeFsaMap = Option.getOrElse optLoopNodeFsaMap Map.empty
+                        let stateToPass = { 
+                            state with
+                                Automata = loopNodeFsaMap;
+                                LoopNodesFsaMap = st.LoopNodesFsaMap;
+                                UnionNodes = st.UnionNodes }
+                        build succ stateToPass
+                ) 
+                state
 
         let entriesNum = ddg.Graph.InEdges(node) |> List.ofSeq |> List.length
         let optTraversedEntries = Map.tryFind node state.UnionNodes
@@ -278,39 +283,39 @@ let buildAutomaton (ddg: DDG) =
                 { state with 
                     Automata = unionFsaMaps traversedEntries; 
                     UnionNodes = Map.remove node state.UnionNodes }
-            let isRightDir, dirHelper = isRightDirection node state.DirHelper
-            let state = { state with DirHelper = dirHelper }
-            if not isRightDir
+            if not <| isRightDirection node state.DirHelper
             then state
             else
                 match node.Type with
-                | LoopNode(_, _) -> 
-                    let processLoopBody node state =
+                | LoopNode(_, _) ->
+                    let optLoopNodeFsa = Map.tryFind node state.LoopNodesFsaMap
+                    match optLoopNodeFsa with
+                    | None -> 
+                        // start processing loop body
                         let state = 
                             { state with 
                                 LoopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap;
-                                DirHelper = setLoopBodyDirection node state.DirHelper }
-                        processSuccessors node state
-                    let optLoopNodeFsa = Map.tryFind node state.LoopNodesFsaMap
-                    match optLoopNodeFsa with
-                    // just start processing body
-                    | None -> processLoopBody node state 
+                                DirHelper = pushLoopBodyDirection node state.DirHelper }
+                        let state = processLoopSuccessors node state
+                        // exit loop processing
+                        let dirHelper = pushLoopExitDirection node <| popDirection state.DirHelper
+                        processLoopSuccessors node { state with DirHelper = dirHelper }
                     | Some(oldFsaMap) -> 
                         // we have already been in current loop node
                         let unionFsaMap = unionTwoFsaMaps oldFsaMap state.Automata
                         // todo: next line is stub, widening operator required
                         let widenedFsaMap = unionFsaMap
                         let state = { state with Automata = widenedFsaMap }
-                        if true // fixpointAchieved oldFsaMap state.Automata 
-                        then
-                            // exit loop processing
-                            let state =
-                                { state with 
-                                    LoopNodesFsaMap = Map.remove node state.LoopNodesFsaMap;
-                                    DirHelper = setLoopExitDirection node state.DirHelper }
-                            processSuccessors node state
-                        // continue processing body
-                        else processLoopBody node state 
+                        // todo: the next two lines must be uncommented when widening operator will be available
+//                        if fixpointAchieved oldFsaMap state.Automata 
+//                        then state
+                        if true
+                        then { state with LoopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap }
+                        else
+                            // continue processing loop body
+                            let loopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap
+                            let state = { state with LoopNodesFsaMap = loopNodesFsaMap }
+                            processLoopSuccessors node state
                 | _ -> processNodeAndSuccessors node state
     
     let initState = BuildStateFuncs.create ddg

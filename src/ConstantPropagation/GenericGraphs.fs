@@ -245,7 +245,7 @@ module DDGFuncs =
         |> List.map 
             (
                 fun node ->
-                    let text = toString node
+                    let text = sprintf "%d_%s" node.Id (toString node)
                     node.Id.ToString() + " [label=\"" + text + "\"]"
             )
         |> List.iter file.WriteLine

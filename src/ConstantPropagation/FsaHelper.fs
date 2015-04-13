@@ -17,10 +17,8 @@ let replace origFsa matchFsa replaceFsa =
 
 /// Checks if the language accepted by fsa a1 is a sublanguage of the language accepted by fsa a2
 let isSubAutomaton (a1: FSA<char * Position<int>>) (a2: FSA<char * Position<int>>) =
-    let a2Complement = a2.Complementation
     let equalSmbl x y = (fst x) = (fst y)
-    let intersection = FSA.Intersection (a1, a2Complement, equalSmbl)
-    intersection.IsEdgesEmpty && intersection.IsVerticesEmpty
+    FSA.isSubFsa a1 a2 equalSmbl
 
 let toDot (fsa: FSA<char * Position<int>>) path =
     fsa.PrintToDOT (path, (fun p -> sprintf "%c" (fst p)))

@@ -7,8 +7,8 @@ open Yard.Core.IL
 
 let printTableGLL 
     (grammar : FinalGrammar )(table : Table) (moduleName : string) 
-    (tokenType : Map<_,_>) (res : System.Text.StringBuilder) 
-    _class positionType caseSensitive : string =
+    (tokenType : Map<_,_>) (res : System.Text.StringBuilder)  
+    _class positionType caseSensitive (isAbstract : bool) : string =
 
     let inline packRulePosition rule position = (int rule <<< 16) ||| int position
 
@@ -265,9 +265,14 @@ let printTableGLL
         printBr ""
 
         printBrInd 0 "let private parserSource = new ParserSource2<Token> (tokenToNumber, genLiteral, numToString, tokenData, isLiteral, isTerminal, isNonTerminal, getLiteralNames, table, rules, rulesStart, leftSide, startRule, literalEnd, literalStart, termEnd, termStart, termCount, nonTermCount, literalsCount, indexEOF, rulesCount, indexatorFullCount, acceptEmptyInput,numIsTerminal, numIsNonTerminal, numIsLiteral, canInferEpsilon, slots)"
-                       
-        printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
-        printBrInd 1 "buildAst<Token> parserSource"
+        
+        if not isAbstract
+        then               
+            printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
+            printBrInd 1 "buildAst<Token> parserSource"
+        else
+            printBr "let buildAst : (ParserInputGraph<'token> -> ParseResult<_>) ="
+            printBrInd 1 "buildAst<Token> parserSource"
         printBr ""
         res.ToString()
     printTable ()

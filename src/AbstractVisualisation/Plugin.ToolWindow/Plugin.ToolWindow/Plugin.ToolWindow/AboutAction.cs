@@ -5,6 +5,9 @@ using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 using GraphX.GraphSharp.Algorithms.OverlapRemoval;
 using JetBrains.ActionManagement;
 using JetBrains.Application.DataContext;
+using JetBrains.DocumentModel;
+using JetBrains.ProjectModel;
+using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.UI.Application;
 using JetBrains.UI.CrossFramework;
@@ -25,53 +28,82 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Plugin.ToolWindow
 {
+    #region Descriptor
     [ToolWindowDescriptor(
     ProductNeutralId = "ClassName",
-    Text = "Show graph of code",
+    Text = "Graph of code",
     VisibilityPersistenceScope = ToolWindowVisibilityPersistenceScope.Solution,
     Icon = typeof(AlteringFeatuThemedIcons.GeneratedMembers),
     Type = ToolWindowType.SingleInstance,
     InitialDocking = ToolWindowInitialDocking.NotSpecified)]
-    public class GraphCodeToolWindow : ToolWindowDescriptor
+    public class WindowDescriptor : ToolWindowDescriptor
     {
-        public GraphCodeToolWindow(IApplicationDescriptor applicationDescriptor)
+        public WindowDescriptor(IApplicationDescriptor applicationDescriptor)
             : base(applicationDescriptor)
         {
         }
     }
-
+    #endregion
     [ActionHandler("Plugin.ToolWindow.About")]
-    public class GraphCodeToolWindowAction : IActionHandler
+    public class WindowAction : IActionHandler
     {
-        private GraphCodeToolWindow descriptor;
+        private WindowDescriptor descriptor;
         private ToolWindowManager manager;
         private Lifetime lifetime;
         private UIApplication uiApplication;
         private IVsUIShell shell;
-        private ToolWindowRegistrar registrar;
-        private ITextControl textControl;
+        private WindowRegistrar registrar;
+        private ISolution solution;
+        private ITextControl codefile;
+        public IDocument document;
+        public static ITextControl textControl;
+        public static IDeclaredElement element;
+        
         public bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate)
         {
             return true;
         }
+        public static void GoToCode(ITextControl t, Edge e)
+        {
+            var p = t.Caret.PositionValue;
+            t.Caret.MoveTo(new DocOffsetAndVirtual(736), new CaretVisualPlacement());
+        }
+
+        public static void GoToGraph(object sender, EventArgs args)
+        {
+            MessageBox.Show("asdf");
+        }
 
         public void Execute(IDataContext context, DelegateExecute nextExecute)
         {
-            if (descriptor == null || manager == null || lifetime == null || uiApplication == null || shell == null ||
-                registrar == null)
+            //TODO same method
+            try
             {
-                descriptor = DataConstantsExtensions.GetComponent<GraphCodeToolWindow>(context);
-                manager = DataConstantsExtensions.GetComponent<ToolWindowManager>(context);
-                lifetime = DataConstantsExtensions.GetComponent<Lifetime>(context);
-                uiApplication = DataConstantsExtensions.GetComponent<UIApplication>(context);
-                shell = DataConstantsExtensions.GetComponent<IVsUIShell>(context);
-                registrar = new ToolWindowRegistrar(lifetime, manager, shell, descriptor, uiApplication);
+                solution = DataConstantsExtensions.GetComponent<ISolution>(context);
+                textControl = context.GetData(JetBrains.TextControl.DataContext.DataConstants.TEXT_CONTROL);
+                //TODO mere beayty analiser
+                //TextControl.Caret.CaretMoved += GoToGraph;
+                if (descriptor == null || manager == null || lifetime == null || uiApplication == null || shell == null ||
+                registrar == null)
+                {
+                    descriptor = DataConstantsExtensions.GetComponent<WindowDescriptor>(context);
+                    manager = DataConstantsExtensions.GetComponent<ToolWindowManager>(context);
+                    lifetime = DataConstantsExtensions.GetComponent<Lifetime>(context);
+                    uiApplication = DataConstantsExtensions.GetComponent<UIApplication>(context);
+                    shell = DataConstantsExtensions.GetComponent<IVsUIShell>(context);
+                    registrar = new WindowRegistrar(lifetime, manager, shell, descriptor, uiApplication);
+                }
+
+                registrar.Show();
             }
-            registrar.Show();
+            catch (Exception)
+            {
+                MessageBox.Show("Please, open project");
+            }
         }
     }
 
-    public class ToolWindowRegistrar
+    public class WindowRegistrar
     {
         private AreaControl arcont;
         private readonly Lifetime lifetime;
@@ -79,8 +111,8 @@ namespace Plugin.ToolWindow
         private readonly UIApplication environment;
         private ToolWindowInstance instance;
 
-        public ToolWindowRegistrar(Lifetime lifetime, ToolWindowManager toolWindowManager, IVsUIShell shell,
-            GraphCodeToolWindow descriptor, UIApplication environment)
+        public WindowRegistrar(Lifetime lifetime, ToolWindowManager toolWindowManager, IVsUIShell shell,
+            WindowDescriptor descriptor, UIApplication environment)
         {
             this.environment = environment;
             this.lifetime = lifetime;
@@ -93,7 +125,7 @@ namespace Plugin.ToolWindow
             {
                 arcont = new AreaControl();
                 arcont.GraphArea_Setup();
-                arcont.Graph_Setup();
+                //arcont.Graph_Setup();
                 arcont.Loaded += arcont.MainWindow_Loaded;
                 return arcont;
             });

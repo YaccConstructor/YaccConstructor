@@ -31,19 +31,14 @@ let run () =
 
 run () |> printfn "%A"
 
-let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
+let inputGraph =
+    let qGraph = new ParserInputGraph<_>(0, 3)
+    qGraph.AddVerticesAndEdgeRange
+    [edg 0 1 (GLL.AbstractParse.SimpleAmb.A 1)
+    edg 1 2 (GLL.AbstractParse.SimpleAmb.B 2)
+    edg 2 3 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
+    ] |> ignore
 
-let path name = path baseInputGraphsPath name
-
-let lbl tokenId = tokenId
-let edg f t l = new ParserEdge<_>(f,t,lbl l)
-let loadLexerInputGraph gFile =
-    let qGraph = loadDotToQG baseInputGraphsPath gFile
-    let lexerInputG = new LexerInputGraph<_>()
-    lexerInputG.StartVertex <- 0
-    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
-    lexerInputG
-let inputGraph = loadLexerInputGraph "input.dot"
 
 let parser = GLL.AbstractParse.SimpleAmb.buildAbstractAst
 let run2 astBuilder = astBuilder inputGraph

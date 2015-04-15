@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -79,16 +79,6 @@
   <ItemGroup>
     <Compile Include="AbstractAnalysisDaemonStage.cs" />
     <Compile Include="AbstractAnalysisDaemonStageProcess.cs" />
-    <Compile Include="GraphCodeWindow\GoToCode.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataGraph.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataEdge.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\DataVertex.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\EmptyGraphArea.cs" />
-    <Compile Include="GraphCodeWindow\GraphClasses\LogicCore.cs" />
-    <Compile Include="GraphCodeWindow\GraphCodeToolWindow.cs" />
-    <Compile Include="GraphCodeWindow\GraphCodeToolWindowAction.cs" />
-    <Compile Include="GraphCodeWindow\GraphLoader.cs" />
-    <Compile Include="GraphCodeWindow\InitializeGraphArea.cs" />
     <Compile Include="Highlighting\ColorHelper.cs" />
     <Compile Include="Highlighting\Dynamic\ExistingTreeNodes.cs" />
     <Compile Include="Highlighting\Dynamic\MatchingBraceContextHighlighter.cs" />
@@ -152,16 +142,6 @@
     </None>
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Page Include="GraphCodeWindow\XAML_Templates\GraphAreaTemplates.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="GraphCodeWindow\XAML_Templates\ReadyGraphArea.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets" Condition="Exists('..\packages\JetBrains.ReSharper.SDK.8.1.555\build\JetBrains.ReSharper.SDK.Targets')" />

@@ -8,7 +8,7 @@ open Yard.Generators.Common.DataStructures
 open Microsoft.FSharp.Collections
 open AbstractAnalysis.Common
 
-[<Measure>] type vertexMeasure
+//[<Measure>] type vertexMeasure
 [<Measure>] type nodeMeasure
 [<Measure>] type labelMeasure
 
@@ -39,7 +39,7 @@ type ParseResult<'TokenType> =
     | Error of string
 
 
-let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParseResult<_> = 
+let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInputGraph<'TokenType>) : ParseResult<_> = 
     
     if input.EdgeCount = 0 then
       //  if parser.AcceptEmptyInput then
@@ -67,7 +67,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInp
         let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount + 1) (input.VertexCount + 1)
         let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount + 1) (input.VertexCount + 1) 
         let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (input.VertexCount + 1)
-        let terminalNodes = Array2D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount  
+        let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
         let epsilon = 1<nodeMeasure>
         let sppfNodes = new BlockResizeArray<INode>()
@@ -78,7 +78,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInp
         let currentGSSNode = ref <| dummyGSSNode
         let currentContext = ref <| new Context(!currentVertexInInput, !currentLabel, !currentGSSNode, dummy)
         
-        let finalExtension = packExtension input.InitState input.FinalState
+        let finalExtension = packExtension input.InitState (input.FinalState - 1)
 
         let containsContext (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             let index = (int) inputVertex
@@ -134,7 +134,7 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInp
             let lExt = int lExt
             let rExt = int rExt
             let nTerm = parser.LeftSide.[getRule label]
-            let rule = getRule label
+            
             if isEnd
             then
                 if nonTerminalNodes.[nTerm, lExt, rExt] = Unchecked.defaultof<int<nodeMeasure>>
@@ -234,15 +234,16 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInp
             let beginVertix = edge.Source
             let endVertix = edge.Target
             let tag = edge.Tag
-            if terminalNodes.[beginVertix, endVertix] <> Unchecked.defaultof<int<nodeMeasure>>
+            let i = (parser.TokenToNumber tag) - parser.NonTermCount
+            if terminalNodes.[beginVertix, endVertix, i] <> Unchecked.defaultof<int<nodeMeasure>>
             then
-                terminalNodes.[beginVertix, endVertix]
+                terminalNodes.[beginVertix, endVertix, i]
             else
                 
                 let t = new TerminalNode(parser.TokenToNumber tag, packExtension beginVertix endVertix)
                 sppfNodes.Add t
                 let res = sppfNodes.Count - 1
-                terminalNodes.[beginVertix, endVertix] <- ((sppfNodes.Count - 1)*1<nodeMeasure>)
+                terminalNodes.[beginVertix, endVertix, i] <- ((sppfNodes.Count - 1)*1<nodeMeasure>)
                 res * 1<nodeMeasure>
             
                      
@@ -396,11 +397,12 @@ let buildAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : ParserInp
                                 index
 
                             ///так
+                            currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
                             for edge in input.OutEdges !currentVertexInInput do
                                 let curToken = parser.TokenToNumber edge.Tag
 
                                 let index = getIndex curSymbol curToken
-                                currentGSSNode := create !currentVertexInInput (packLabel (rule) (position + 1)) !currentGSSNode  !currentN
+                                
                                 if Array.length table.[index] <> 0 
                                 then
                                     let a rule = 

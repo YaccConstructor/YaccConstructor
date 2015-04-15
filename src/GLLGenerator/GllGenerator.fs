@@ -139,6 +139,7 @@ type GLL() =
                     if isAbstract
                     then
                         println "open Yard.Generators.GLL.AbstractParser"
+                        println "open AbstractAnalysis.Common"
                     else 
                         println "open Yard.Generators.GLL.Parser"
                     println "open Yard.Generators.GLL"

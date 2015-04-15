@@ -268,7 +268,7 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAbstractAst : (ParserInputGraph<'token> -> ParseResult<_>) ="
+            printBr "let buildAbstractAst : (AbstractAnalysis.Common.ParserInputGraph<'token> -> ParseResult<_>) ="
             printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()

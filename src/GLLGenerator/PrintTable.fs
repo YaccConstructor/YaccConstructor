@@ -91,9 +91,6 @@ let printTableGLL
                     let key = packRulePosition i (j + 1)
                     slots.Add(key, slots.Count)
         slots
-        
-                
-            
 
     let printTable () =
         let indexator = grammar.indexator
@@ -271,8 +268,8 @@ let printTableGLL
             printBr "let buildAst : (seq<Token> -> ParseResult<_>) ="
             printBrInd 1 "buildAst<Token> parserSource"
         else
-            printBr "let buildAst : (ParserInputGraph<'token> -> ParseResult<_>) ="
-            printBrInd 1 "buildAst<Token> parserSource"
+            printBr "let buildAbstractAst : (ParserInputGraph<'token> -> ParseResult<_>) ="
+            printBrInd 1 "buildAbstractAst<Token> parserSource"
         printBr ""
         res.ToString()
     printTable ()

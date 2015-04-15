@@ -115,7 +115,7 @@ type GLL() =
                 Printf.kprintf (fun s -> res.Append(s) |> ignore) x
             let package, _class  =
                         match moduleName with
-                        | "" -> "GLL","Parse"
+                        | "" -> if isAbstract then "GLL","AbstractParse" else "GLL","Parse"
                         | s when s.Contains "." -> s.Split '.' |> Array.rev |> (fun a -> a.[0], String.concat "." a.[1..])
                         | s -> "GLL",s
   

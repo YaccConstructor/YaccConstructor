@@ -3,31 +3,65 @@ open System.IO
 open System
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Reflection
-//packages/yc.tools/lib/net40/fslex.exe file.fsl --unicode
-
+open Graphviz4Net.Dot.AntlrParser
+open System.IO
+open Graphviz4Net.Dot
+open QuickGraph
+open NUnit.Framework
+open AbstractAnalysis.Common
+open YC.Tests.Helper
 open Yard.Generators.GLL
-
 open Yard.Generators.GLL.AbstractParser 
-//open Microsoft.FSharp.Text.Lexing
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
-open Yard.Generators
-//open Lexer2
-
+open GLL.AbstractParse.SimpleAmb
 
 let run () =
     let fe = new Yard.Frontends.YardFrontend.YardFrontend()
     let gen = new Yard.Generators.GLL.GLL()
-    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLApplication\SimpleAmb.yrd")
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLLAbstractApplication\SimpleAmb.yrd")
     for constr in gen.Constraints do
         let grammar = il.Value.grammar
         if not <| constr.Check grammar then
             eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
             il := {!il with grammar = constr.Fix grammar}
 
-    gen.Generate(!il,"-pos int -token int -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
 
 run () |> printfn "%A"
+
+let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
+
+let path name = path baseInputGraphsPath name
+
+let lbl tokenId = tokenId
+let edg f t l = new ParserEdge<_>(f,t,lbl l)
+let loadLexerInputGraph gFile =
+    let qGraph = loadDotToQG baseInputGraphsPath gFile
+    let lexerInputG = new LexerInputGraph<_>()
+    lexerInputG.StartVertex <- 0
+    for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
+    lexerInputG
+
+let parser = GLL.AbstractParse.SimpleAmb.buildAbstractAst
+let run = 
+printfn "%A" r
+match r with
+| Error (num, tok, message) ->
+    printfn "Error in position %d on Token %A: %s" num tok message
+    Assert.Fail "!!!!!!"
+| Success(tree) ->
+    tree.PrintAst()
+    
+let qGraph = new ParserInputGraph<_>(0, 4)
+    qGraph.AddVerticesAndEdgeRange
+        [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
+            edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
+            edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
+            edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+            ] |> ignore
+
+RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
 
 //let run1 astBuilder =
 //    let lb = LexBuffer<_>.FromString "1 - 2"

@@ -51,7 +51,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
         let slots = parser.Slots
         let setR = new Queue<Context>()   
         let setP = new Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>> ()
-        let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>> (input.VertexCount + 1)
+        let setU = Array.zeroCreate<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>> (input.VertexCount )///1
 
         let currentVertexInInput = ref 0
         let currentrule = parser.StartRule
@@ -63,10 +63,10 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
         let currentR = ref <| dummy
         let tokens = Array.zeroCreate<'TokenType> (input.EdgeCount + 1)
         let resultAST = ref None
-        let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount + 1) (input.VertexCount + 1) (input.VertexCount + 1)
-        let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount + 1) (input.VertexCount + 1)
-        let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount + 1) (input.VertexCount + 1) 
-        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (input.VertexCount + 1)
+        let packedNodes = Array3D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) (input.VertexCount)
+        let nonTerminalNodes = Array3D.zeroCreate<int<nodeMeasure>> parser.NonTermCount (input.VertexCount) (input.VertexCount)
+        let intermidiateNodes = Array2D.zeroCreate<Dictionary<int<labelMeasure>, int<nodeMeasure>>> (input.VertexCount) (input.VertexCount) //убрала +1
+        let edges = Array2D.zeroCreate<Dictionary<int<nodeMeasure>, Dictionary<int<labelMeasure>, ResizeArray<int>>>> slots.Count (input.VertexCount )
         let terminalNodes = Array3D.zeroCreate<int<nodeMeasure>> input.VertexCount input.VertexCount parser.TermCount  
         let epsilonNode = new TerminalNode(-1, packExtension 0 0)
         let epsilon = 1<nodeMeasure>
@@ -82,7 +82,7 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
 
         let containsContext (inputVertex : int) (label : int<labelMeasure>) (vertex : Vertex) (ast : int<nodeMeasure>) =
             let index = (int) inputVertex
-            if inputVertex <> input.FinalState
+            if inputVertex <> input.FinalState - 1 
             then
                 let vertexKey = (vertex.Level, vertex.Label)
                 if setU.[index] <> Unchecked.defaultof<Dictionary<int<labelMeasure>, Dictionary<(int*int<labelMeasure>), ResizeArray<int<nodeMeasure>>>>>
@@ -368,11 +368,9 @@ let buildAbstractAst<'TokenType> (parser : ParserSource2<'TokenType>) (input : P
                 if Array.length parser.rules.[rule] <> position
                 then
                     let curSymbol = parser.rules.[rule].[position]
-                    if !currentVertexInInput <> input.FinalState 
+                    if !currentVertexInInput <> input.FinalState - 1
                     then
-                        
-                        
-                        if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
+                       if (parser.NumIsTerminal curSymbol || parser.NumIsLiteral curSymbol)
                         then
                             let isEq (sym : int) (elem : ParserEdge<'TokenType>) = sym = parser.TokenToNumber elem.Tag
                             let curEdge = Seq.find (isEq curSymbol) (input.OutEdges !currentVertexInInput)

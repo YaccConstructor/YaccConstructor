@@ -32,7 +32,7 @@ let run () =
             eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
             il := {!il with grammar = constr.Fix grammar}
 
-    gen.Generate(!il,"-pos int -token int -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
+    gen.Generate(!il,"-pos int -token int -abstract false -module GLL.Parse.SimpleAmb -o SimpleAmb.yrd.fs")
 
 run () |> printfn "%A"
 
@@ -58,7 +58,7 @@ let run2 path astBuilder =
 //
 //let parser2 = GLL.Parse.SimpleAmb.buildAst
 //let str = String.init 1 (fun i -> "B ") + "B"
-let str = "A B"
+let str = "B"
 let r = run2 str parser1
 //printfn "simple amb"
 

@@ -59,11 +59,11 @@
   </Target>
   <ItemGroup>
     <None Include="Lexer.fsl" />
-    <Compile Include="Lexer.fs" />
     <Compile Include="RNGLREBNF.sql.yrd.fs" />
+    <Compile Include="LexerHelper.fs" />
+    <Compile Include="Lexer.fs" />
     <Compile Include="MsSqlGrammar.fs" />
     <None Include="packages.config" />
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharpx.Core">
@@ -107,6 +107,11 @@
     <ProjectReference Include="..\AbstractLexer.Core\AbstractLexer.Core.fsproj">
       <Name>AbstractLexer.Core</Name>
       <Project>{bf113c47-3763-4940-9746-bbe53d58458b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\AbstractLexer.Generator\AbstractLexer.Generator.fsproj">
+      <Name>AbstractLexer.Generator</Name>
+      <Project>{bd2284a5-aa4d-442d-b4fb-e43b2fe7dd2a}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\AST.Common\Common.AST.fsproj">

@@ -31,6 +31,62 @@ let run () =
 
 run () |> printfn "%A"
 
+let run () =
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let gen = new Yard.Generators.GLL.GLL()
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLL.AbstractParser.SimpleTest\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
+
+run () |> printfn "%A"
+
+let run () =
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let gen = new Yard.Generators.GLL.GLL()
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLL.AbstractParser.SimpleTest\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
+
+run () |> printfn "%A"
+
+let run () =
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let gen = new Yard.Generators.GLL.GLL()
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLL.AbstractParser.SimpleTest\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
+
+run () |> printfn "%A"
+
+let run () =
+    let fe = new Yard.Frontends.YardFrontend.YardFrontend()
+    let gen = new Yard.Generators.GLL.GLL()
+    let il = ref <| fe.ParseGrammar(@"C:\Users\User\recursive-ascent\src\GLL.AbstractParser.SimpleTest\SimpleAmb.yrd")
+    for constr in gen.Constraints do
+        let grammar = il.Value.grammar
+        if not <| constr.Check grammar then
+            eprintfn "Constraint %s: applying %s..." constr.Name constr.Conversion.Name
+            il := {!il with grammar = constr.Fix grammar}
+
+    gen.Generate(!il,"-pos int -token int -abstract true -o SimpleAmb.yrd.fs")
+     
+run () |> printfn "%A"
+
 
 let lbl tokenId = tokenId
 let edg f t l = new ParserEdge<_>(f,t,lbl l)

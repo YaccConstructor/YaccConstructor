@@ -11,7 +11,6 @@ type INode =
     interface
     end
 
-
 [<AllowNullLiteral>]
 type NonTerminalNode =
     interface INode

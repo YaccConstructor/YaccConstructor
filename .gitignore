@@ -86,6 +86,7 @@ src/RNGLRParser.SimpleTest/*.yrd.fs
 src/RNGLRParser.SimpleTest/log.txt
 src/RNGLR.EBNFParser.SimpleTest/*.yrd.fs
 src/RNGLR.EBNFParser.SimpleTest/log.txt
+src/RNGLR.EBNFParser.Test/*.yrd.fs
 Examples/RNGLR/PLSql/*.svg
 Examples/RNGLR/PLSql/FsYard.log
 Examples/AbstractAnalysis/AbstractAnalysis/log.txt

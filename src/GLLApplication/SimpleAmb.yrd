@@ -1,3 +1,2 @@
 [<Start>]
-s : A expr
-expr: (B)*
+s : s s | B

@@ -65,22 +65,32 @@ module FullFsaFuns =
     let private getChar = function Smbl(ch, p) -> ch | Eps -> failwith getCharMetEpsMsg
     let private newSymbol x =  Smbl(x, Unchecked.defaultof<_>)
 
-    let create initial final transitions =
-        let notFull = CharFSA.Create (initial, final, transitions)
+    let private createFromNotFull (notFull: CharFSA) = 
         let full = CharFSA.DfaToFullDfa (notFull, alphabet, newSymbol, getChar)
         FullFSA(full)
 
-    let replace origFsa matchFsa replaceFsa =
-        FSA.Replace (origFsa, matchFsa, replaceFsa, '~', '^', getChar, newSymbol, symbolsAreEqual)
+    let create initial final transitions =
+        createFromNotFull (CharFSA.Create (initial, final, transitions))
 
-    let isSubAutomaton (a1: CharFSA) (a2: CharFSA) = FSA.IsSubFsa a1 a2 symbolsAreEqual
+    let union (FullFSA(fsa1)) (FullFSA(fsa2)) = 
+        createFromNotFull(FSA.Union (fsa1, fsa2))
 
-    let toDot (fsa: CharFSA) path =
+    let replace (FullFSA(origFsa)) (FullFSA(matchFsa)) (FullFSA(replaceFsa)) =
+        let notFull = 
+            FSA.Replace (origFsa, matchFsa, replaceFsa, '~', '^', getChar, newSymbol, symbolsAreEqual)
+        createFromNotFull notFull
+
+    let toDfa (FullFSA(fsa)) = createFromNotFull fsa.NfaToDfa
+
+    let isSubAutomaton (FullFSA(a1)) (FullFSA(a2)) = 
+        FSA.IsSubFsa a1 a2 symbolsAreEqual
+
+    let toDot (FullFSA(fsa)) path =
         fsa.PrintToDOT (path, (fun p -> sprintf "%c" (fst p)))
 
-    let toDebugDot (fsa: CharFSA) name =
+    let toDebugDot ffsa name =
         let path = Path.Combine (myDebugFolderPath, name + ".dot")
-        toDot fsa path
+        toDot ffsa path
 
     // Widening operator implementation
     let private initsOrFinalsProblemMsg = 

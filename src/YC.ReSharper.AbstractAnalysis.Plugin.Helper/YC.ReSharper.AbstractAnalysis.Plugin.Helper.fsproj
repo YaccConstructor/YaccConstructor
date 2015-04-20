@@ -9,9 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>YC.ReSharper.AbstractAnalysis.Plugin.Helper</RootNamespace>
     <AssemblyName>YC.ReSharper.AbstractAnalysis.Plugin.Helper</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>YC.ReSharper.AbstractAnalysis.Plugin.Helper</Name>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>

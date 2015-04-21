@@ -135,19 +135,25 @@ let buildAutomaton (ddg: DDG) =
     let emptyAutomataMapsListMsg = "empty automataMaps list is passed to union function"
     let fixpointComputationProblemMsg = "old fsa map contains more variables than the new one in fixpoint computation"
 
-    let unionTwoFsaMaps (a1: FSAMap) (a2: FSAMap) =
+    let mergeTwoFsaMasp merger (a1: FSAMap) (a2: FSAMap) =
         let rec go (a1: list<string * FSA<FsaState>>) (a2: FSAMap) (acc: FSAMap) =
             match a1 with
             | [] -> Map.fold (fun acc k v -> Map.add k v acc) acc a2
             | (varName, fsa1) :: tl ->
                 let unionFsa =
                     match Map.tryFind varName a2 with
-                    | Some(fsa2) -> FSA.Union (fsa1, fsa2)
+                    | Some(fsa2) -> merger fsa1 fsa2
                     | None -> fsa1
                 let acc' = Map.add varName unionFsa acc
                 let a2' = Map.remove varName a2
                 go tl a2' acc'
         go (Map.toList a1) a2 Map.empty
+
+    let unionTwoFsaMaps (a1: FSAMap) (a2: FSAMap) =
+        mergeTwoFsaMasp FsaHelper.union a1 a2
+
+    let widenTwoFsaMaps (a1: FSAMap) (a2: FSAMap) =
+        mergeTwoFsaMasp FsaHelper.widen a1 a2
 
     let fixpointAchieved (oldFsaMap: FSAMap) (widenedFsaMap: FSAMap) =
         let rec go (oldFsaList: list<string * FSA<FsaState>>) (widenedFsaMap: FSAMap) =
@@ -156,7 +162,7 @@ let buildAutomaton (ddg: DDG) =
             | (varName, oldFsa) :: tl ->
                 match Map.tryFind varName widenedFsaMap with
                 | Some(widenedFsa) -> 
-                    if FsaHelper.isSubAutomaton widenedFsa oldFsa
+                    if FsaHelper.isSubFsa widenedFsa oldFsa
                     then go tl widenedFsaMap
                     else false
                 | None -> failwith fixpointComputationProblemMsg
@@ -303,18 +309,16 @@ let buildAutomaton (ddg: DDG) =
                     | Some(oldFsaMap) -> 
                         // we have already been in current loop node
                         let unionFsaMap = unionTwoFsaMaps oldFsaMap state.Automata
-                        // todo: next line is stub, widening operator required
-                        let widenedFsaMap = unionFsaMap
-                        let state = { state with Automata = widenedFsaMap }
-                        // todo: the next two lines must be uncommented when widening operator will be available
-//                        if fixpointAchieved oldFsaMap state.Automata 
-//                        then state
-                        if true
-                        then { state with LoopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap }
+                        let widenedFsaMap = widenTwoFsaMaps unionFsaMap oldFsaMap
+                        let loopNodesFsaMap = Map.add node widenedFsaMap state.LoopNodesFsaMap
+                        let state = 
+                            { state with 
+                                Automata = widenedFsaMap
+                                LoopNodesFsaMap = loopNodesFsaMap }
+                        if fixpointAchieved oldFsaMap state.Automata 
+                        then state
                         else
                             // continue processing loop body
-                            let loopNodesFsaMap = Map.add node state.Automata state.LoopNodesFsaMap
-                            let state = { state with LoopNodesFsaMap = loopNodesFsaMap }
                             processLoopSuccessors node state
                 | _ -> processNodeAndSuccessors node state
     

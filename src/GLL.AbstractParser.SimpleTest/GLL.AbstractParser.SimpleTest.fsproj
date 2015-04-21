@@ -66,9 +66,14 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="BadLeftRecursion.yrd.fs" />
+    <Compile Include="SimpleAmb.yrd.fs" />
+    <Compile Include="SimpleleftRecursion.yrd.fs" />
+    <Compile Include="SimpleRightNull.yrd.fs" />
+    <Compile Include="SimpleRightRecursion.yrd.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AbstractAnalysis.Common\AbstractAnalysis.Common.fsproj">

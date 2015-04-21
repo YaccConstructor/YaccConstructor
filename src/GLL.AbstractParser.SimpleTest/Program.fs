@@ -22,7 +22,11 @@ open AbstractAnalysis.Common
 open Yard.Generators.GLL.AbstractParser
 open YC.Tests.Helper
 open Yard.Generators.Common.AST3
-
+open GLL.AbstractParse.SimpleRightRecursion
+open GLL.AbstractParse.BadLeftRecursion
+open GLL.AbstractParse.SimpleAmb
+open GLL.AbstractParse.SimpleRightNull
+open GLL.AbstractParse.SimpleleftRecursion
 
 let baseInputGraphsPath = "../../../Tests/AbstractRNGLR/DOT"
 
@@ -37,7 +41,7 @@ let loadLexerInputGraph gFile =
     for e in qGraph.Edges do lexerInputG.AddEdgeForsed (new LexerEdge<_,_>(e.Source,e.Target,Some (e.Tag, e.Tag)))
     lexerInputG
 
-let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount ambiguityCount = 
+let test buildAstAbstract qGraph = 
     let r = buildAstAbstract qGraph
     printfn "%A" r
     match r with
@@ -56,27 +60,62 @@ let test buildAstAbstract qGraph nodesCount edgesCount epsilonsCount termsCount 
 
 [<TestFixture>]
 type ``GLL abstract parser tests`` () =
-    [<Test>]
-    member this._01_PrettySimpleCalc_SequenceInput () =
-        let qGraph = new ParserInputGraph<_>(0, 4)
-        qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
-             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
-             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
-             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
-             ] |> ignore
-
-        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 13 12 0 3 0
 
     [<Test>]
-    member this._02_PrettySimpleCalcSimple_BranchedInput () =
+    member this.SimpleRightRecursion () =
         let qGraph = new ParserInputGraph<_>(0, 4)
         qGraph.AddVerticesAndEdgeRange
-            [edg 0 1 (RNGLR.PrettySimpleCalc.NUM 1)
-             edg 1 2 (RNGLR.PrettySimpleCalc.PLUS 2)
-             edg 2 3 (RNGLR.PrettySimpleCalc.NUM 3)
-             edg 0 3 (RNGLR.PrettySimpleCalc.NUM 4)
-             edg 3 4 (RNGLR.PrettySimpleCalc.RNGLR_EOF 0)
+            [edg 0 1 (GLL.AbstractParse.SimpleRightRecursion.B 1)
+             edg 1 2 (GLL.AbstractParse.SimpleRightRecursion.A 2)
+             edg 2 3 (GLL.AbstractParse.SimpleRightRecursion.A 3)
+             edg 3 4 (GLL.AbstractParse.SimpleRightRecursion.B 4)
+             edg 4 5 (GLL.AbstractParse.SimpleRightRecursion.RNGLR_EOF 0)
              ] |> ignore
 
-        test RNGLR.PrettySimpleCalc.buildAstAbstract qGraph 15 14 0 4 1
+        test GLL.AbstractParse.SimpleRightRecursion qGraph 
+
+    [<Test>]
+    member this.BadLeftRecursion () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.AbstractParse.BadLeftRecursion.B 1)
+             edg 1 2 (GLL.AbstractParse.BadLeftRecursion.B 2)
+             edg 2 3 (GLL.AbstractParse.BadLeftRecursion.B 3)
+             edg 3 4 (GLL.AbstractParse.BadLeftRecursion.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.AbstractParse.BadLeftRecursion.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.SimpleAmb () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.AbstractParse.SimpleAmb.A 1)
+             edg 1 2 (GLL.AbstractParse.SimpleAmb.D 2)
+             edg 2 3 (GLL.AbstractParse.SimpleAmb.B 3)
+             edg 3 4 (GLL.AbstractParse.SimpleAmb.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.AbstractParse.SimpleAmb.buildAstAbstract qGraph
+    
+    [<Test>]
+    member this.SimpleRightNull () =
+        let qGraph = new ParserInputGraph<_>(0, 1)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.AbstractParse.SimpleRightNull.A 1)
+             edg 1 2 (GLL.AbstractParse.SimpleRightNull.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.AbstractParse.SimpleRightNull.buildAstAbstract qGraph
+
+    [<Test>]
+    member this.SimpleLeftRecursion () =
+        let qGraph = new ParserInputGraph<_>(0, 4)
+        qGraph.AddVerticesAndEdgeRange
+            [edg 0 1 (GLL.AbstractParse.SimpleleftRecursion.B 1)
+             edg 1 2 (GLL.AbstractParse.SimpleleftRecursion.B 2)
+             edg 2 3 (GLL.AbstractParse.SimpleleftRecursion.B 3)
+             edg 3 4 (GLL.AbstractParse.SimpleleftRecursion.RNGLR_EOF 0)
+             ] |> ignore
+
+        test GLL.AbstractParse.SimpleleftRecursion.buildAstAbstract qGraph

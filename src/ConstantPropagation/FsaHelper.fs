@@ -70,7 +70,11 @@ let replace origFsa matchFsa replaceFsa =
     CharFSA.Replace (origFsa, matchFsa, replaceFsa, '~', '^', getChar, newSymbol, symbolsAreEqual)
 
 let toDot (fsa: CharFSA) path =
-    fsa.PrintToDOT (path, (fun p -> sprintf "%c" (fst p)))
+    let stateToString (st: FsaState) =
+        let ch = fst st
+        let p = snd st
+        sprintf "%c, (%d, %d, %d)" ch p.start_offset p.end_offset p.back_ref
+    fsa.PrintToDOT (path, stateToString)
 
 let toDebugDot fsa name =
     let path = Path.Combine (myDebugFolderPath, name + ".dot")
@@ -96,6 +100,7 @@ let private stateMultipleTransitionsMsg =
     "Current automaton is NFA, is must be converted to DFA before widening"
 let private eqClassMultipleTransitionsMsg =
     "Widened FSA under construction is NFA"
+let private epsTransitionInWideningMsg = stateMultipleTransitionsMsg
 
 let private dfsCollectingEdges (state: int) (getNextEdges: int -> list<EdgeFSA<FsaState>>) getNextState =
     let rec dfs state visited (edges: list<EdgeFSA<FsaState>>) =
@@ -167,28 +172,31 @@ let private isEquivalent q1 (fsa1: CharFSA) q2 (fsa2: CharFSA) =
         not <| intersFsa.IsEmpty
 
 let private findRelations (fsa1: CharFSA) (fsa2: CharFSA) =
+    let createLoop1 st = 
+        let sf = StateFromFsaFuns.fromFsa1 st
+        Edge(sf, sf)
+    let createLoop2 st = 
+        let sf = StateFromFsaFuns.fromFsa2 st
+        Edge(sf, sf)
+    let tryCreateEdge12 src dst =
+        if isEquivalent src fsa1 dst fsa2
+        then
+            let sf1 = StateFromFsaFuns.fromFsa1 src
+            let sf2 = StateFromFsaFuns.fromFsa2 dst
+            Some(Edge(sf1, sf2))
+        else None 
     let fsa1States = fsa1.Vertices
     let fsa2States = fsa2.Vertices
+    let trivialRelations = 
+        Seq.append (fsa1States |> Seq.map createLoop1) (fsa2States |> Seq.map createLoop2)
     let relations =
         fsa1States
         |> Seq.map
-            (
-                fun st1 ->
-                    fsa2States
-                    |> Seq.choose 
-                        (
-                            fun st2 -> 
-                                if isEquivalent st1 fsa1 st2 fsa2
-                                then
-                                    let sf1 = StateFromFsaFuns.fromFsa1 st1
-                                    let sf2 = StateFromFsaFuns.fromFsa2 st2
-                                    Some(Edge(sf1, sf2))
-                                else None
-                        )
-            )
+            (fun st1 -> fsa2States |> Seq.choose (fun st2 -> tryCreateEdge12 st1 st2))
         |> Seq.concat
-    let inverseRelations = relations |> Seq.map (fun e -> Edge(e.Target, e.Source))
-    relations, inverseRelations
+    let allRelations = Seq.append trivialRelations relations
+    let inverseRelations = allRelations |> Seq.map (fun e -> Edge(e.Target, e.Source))
+    allRelations, inverseRelations
 
 /// Builds equivalence classees using FSA.isEquivalent function
 let private buildEquivalenceClasses (fsa1: CharFSA) (fsa2: CharFSA) =
@@ -221,14 +229,21 @@ let private symbolsToCheck (eqClass: EqClass) (fsa1: CharFSA) (fsa2: CharFSA) =
         let e1 = getOutEdges (EqClassFuns.fsa1States eqClass) fsa1
         let e2 = getOutEdges (EqClassFuns.fsa2States eqClass) fsa2
         List.append e1 e2
-    outEdges |> List.map (fun e -> getChar e.Tag) |> Set.ofList |> List.ofSeq
+    outEdges 
+    |> List.map (fun e -> e.Tag) 
+    |> Seq.distinctBy 
+        (
+            function 
+                | Smbl(ch, pos) -> (ch, pos.start_offset, pos.end_offset, pos.back_ref)
+                | _ -> failwith epsTransitionInWideningMsg
+        )
 
 let private filterByContainsWithQuantifier quantifier elems (eqClasses: Map<int, EqClass>) =
     eqClasses
     |> Map.filter 
         (fun _ ec -> quantifier (fun e -> EqClassFuns.contains e ec) elems)
 
-let private createTransition eqClassId (ch: char) (eqClasses: Map<int, EqClass>) fsa1 fsa2 =
+let private createTransition eqClassId sym (eqClasses: Map<int, EqClass>) fsa1 fsa2 =
     let isSink state (fsa: CharFSA) =
         let isNotFinal = ResizeArray.tryFind ((=) state) fsa.FinalState |> Option.isNone
         isNotFinal && (fsa.OutEdges(state) |> Seq.forall (fun e -> e.Target = e.Source))
@@ -236,7 +251,7 @@ let private createTransition eqClassId (ch: char) (eqClasses: Map<int, EqClass>)
         srcStates
         |> Set.toList
         |> List.map
-            (fun st ->  fsa.OutEdges(st) |> Seq.filter (fun e -> getChar e.Tag = ch) |> List.ofSeq)
+            (fun st ->  fsa.OutEdges(st) |> Seq.filter (fun e -> e.Tag = sym) |> List.ofSeq)
         |> List.choose 
             (
                 function 
@@ -276,30 +291,26 @@ let private createTransition eqClassId (ch: char) (eqClasses: Map<int, EqClass>)
     | _ -> None
 
 let private createTransitions (eqClasses: Map<int, EqClass>) (fsa1: CharFSA) (fsa2: CharFSA) =
-    let charsMap = Map.map (fun _ v -> symbolsToCheck v fsa1 fsa2) eqClasses
+    let symbolsMap = Map.map (fun _ v -> symbolsToCheck v fsa1 fsa2) eqClasses
     eqClasses
     |> Map.toList
     |> List.map
         (   
             fun (classId, eqClass) ->
-                Map.find classId charsMap
-                |> List.choose 
+                Map.find classId symbolsMap
+                |> Seq.choose 
                     (
-                        fun ch -> 
-                            createTransition classId ch eqClasses fsa1 fsa2 
-                            |> Option.map (fun dst -> classId, newSymbol ch, dst)
+                        fun sym -> 
+                            createTransition classId sym eqClasses fsa1 fsa2 
+                            |> Option.map (fun dst -> classId, sym, dst)
                     )
         )
-    |> List.concat
-    |> ResizeArray.ofList
+    |> Seq.concat
+    |> ResizeArray.ofSeq
         
 let widen (fsa1: CharFSA) (fsa2: CharFSA) =
-    toDebugDot fsa1 "fsa1"
-    toDebugDot fsa2 "fsa2"
     let dfa1 = fsa1.NfaToDfa
     let dfa2 = fsa2.NfaToDfa
-    toDebugDot dfa1 "dfa1"
-    toDebugDot dfa2 "dfa2"
     let eqClasses = buildEquivalenceClasses dfa1 dfa2
     let wTransitions = createTransitions eqClasses dfa1 dfa2
     let wInits = 

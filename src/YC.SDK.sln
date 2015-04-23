@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{020587D2-50BA-4E6D-9BD5-1059EBCC13D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RNGLR", "RNGLR", "{319C1C63-44C0-4A68-A028-222D72029FE8}"
@@ -138,6 +138,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApproximatorTester.Tests", "ApproximatorTester\ApproximatorTester.Tests\ApproximatorTester.Tests.csproj", "{D92E08CC-6E81-4EA3-B01E-8AB0CC2C042F}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSA", "..\FST\FST\FSA\FSA.fsproj", "{B48CFDCC-86F7-4C3A-A5A2-8170950DD2AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApproximatorTester.Tests", "ApproximatorTester\ApproximatorTester.Tests\ApproximatorTester.Tests.csproj", "{D92E08CC-6E81-4EA3-B01E-8AB0CC2C042F}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSA.Tests", "..\FST\FST\FSA.Tests\FSA.Tests.fsproj", "{968F28D8-1C01-4C68-8921-5A5B12D1E945}"
 EndProject
